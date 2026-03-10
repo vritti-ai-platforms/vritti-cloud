@@ -28,6 +28,14 @@
       },
       "cache": false
     },
+    "dev:ssl:w": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm run dev:ssl:w",
+        "cwd": "{projectRoot}"
+      },
+      "cache": false
+    },
     "start": {
       "executor": "nx:run-commands",
       "options": {
