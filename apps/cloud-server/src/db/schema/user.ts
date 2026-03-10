@@ -1,0 +1,34 @@
+import { boolean, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { cloudSchema } from './cloud-schema';
+import { accountStatusEnum, onboardingStepEnum, signupMethodEnum } from './enums';
+
+// User account - core user entity
+export const users = cloudSchema.table('users', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  email: varchar('email', { length: 255 }).notNull().unique(),
+  fullName: varchar('full_name', { length: 255 }).notNull(),
+  displayName: varchar('display_name', { length: 100 }).notNull(),
+  passwordHash: varchar('password_hash', { length: 255 }),
+  signupMethod: signupMethodEnum('signup_method').notNull().default('email'),
+  accountStatus: accountStatusEnum('account_status').notNull().default('PENDING_VERIFICATION'),
+  emailVerified: boolean('email_verified').notNull().default(false),
+  phoneVerified: boolean('phone_verified').notNull().default(false),
+  onboardingStep: onboardingStepEnum('onboarding_step').notNull().default('EMAIL_VERIFICATION'),
+  phone: varchar('phone', { length: 20 }),
+  phoneCountry: varchar('phone_country', { length: 5 }),
+  profilePictureUrl: text('profile_picture_url'),
+  locale: varchar('locale', { length: 10 }).notNull().default('en'),
+  timezone: varchar('timezone', { length: 50 }).notNull().default('UTC'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+  lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+  emailVerifiedAt: timestamp('email_verified_at', { withTimezone: true }),
+  phoneVerifiedAt: timestamp('phone_verified_at', { withTimezone: true }),
+});
+
+// Type exports
+export type User = typeof users.$inferSelect;
+export type NewUser = typeof users.$inferInsert;

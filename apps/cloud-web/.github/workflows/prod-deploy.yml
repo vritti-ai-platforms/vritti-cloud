@@ -1,0 +1,36 @@
+name: Deploy vritti-auth to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Microfrontend
+    uses: vritti-ai-platforms/infrastructure/.github/workflows/reusable-build-web.yml@main
+    with:
+      app_type: microfrontend
+      app_name: auth-microfrontend
+      deploy_path: /vritti-auth
+      node_version: '20'
+      build_command: pnpm build
+      output_dir: dist
+      # ZERO ENVIRONMENT VARIABLES:
+      # No production_domain needed - microfrontend uses relative /api paths
+      # Build is environment-agnostic and works on any domain
+
+  deploy:
+    name: Deploy to Production
+    needs: build
+    uses: vritti-ai-platforms/infrastructure/.github/workflows/reusable-deploy-web-build.yml@main
+    with:
+      artifact_name: ${{ needs.build.outputs.artifact_name }}
+      deploy_path: /opt/vritti/www/auth-microfrontend
+      backup_existing: true
+      health_check_url: https://${{ vars.APP_DOMAIN }}/auth-microfrontend/mf-manifest.json
+    secrets:
+      SERVER_VM_HOST: ${{ secrets.SERVER_VM_HOST }}
+      SERVER_VM_USER: ${{ secrets.SERVER_VM_USER }}
+      SERVER_VM_SSH_KEY: ${{ secrets.SERVER_VM_SSH_KEY }}

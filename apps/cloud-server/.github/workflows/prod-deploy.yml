@@ -1,0 +1,37 @@
+name: Deploy vritti-cloud-server Image (Pipeline 1)
+
+on:
+  workflow_dispatch:  # Manual trigger only
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  deploy:
+    name: Deploy to Production
+    uses: vritti-ai-platforms/infrastructure/.github/workflows/reusable-deploy-backend-image.yml@main
+    with:
+      service_name: cloud-server
+      image_tag: ghcr.io/${{ github.repository_owner }}/cloud-server:latest
+      health_check_url: https://${{ vars.APP_DOMAIN }}/api/
+      run_migrations: ${{ vars.RUN_MIGRATIONS == 'true' }}
+    secrets:
+      SERVER_VM_HOST: ${{ secrets.SERVER_VM_HOST }}
+      SERVER_VM_USER: ${{ secrets.SERVER_VM_USER }}
+      SERVER_VM_SSH_KEY: ${{ secrets.SERVER_VM_SSH_KEY }}
+      GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+      PRIMARY_DB_DATABASE_DIRECT_URL: ${{ secrets.PRIMARY_DB_DATABASE_DIRECT_URL }}
+      # Database Configuration
+      PRIMARY_DB_HOST: ${{ secrets.PRIMARY_DB_HOST }}
+      PRIMARY_DB_USERNAME: ${{ secrets.PRIMARY_DB_USERNAME }}
+      PRIMARY_DB_PASSWORD: ${{ secrets.PRIMARY_DB_PASSWORD }}
+      PRIMARY_DB_SSL_MODE: ${{ secrets.PRIMARY_DB_SSL_MODE }}
+      # Security Secrets
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      COOKIE_SECRET: ${{ secrets.COOKIE_SECRET }}
+      CSRF_HMAC_KEY: ${{ secrets.CSRF_HMAC_KEY }}
+      ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+      # External Services
+      BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+      SMS_PROVIDER_API_KEY: ${{ secrets.SMS_PROVIDER_API_KEY }}
