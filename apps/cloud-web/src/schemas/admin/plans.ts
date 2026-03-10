@@ -4,6 +4,7 @@ export interface Plan {
   id: string;
   name: string;
   code: string;
+  content: string | null;
   priceCount: number;
   canDelete: boolean;
   createdAt: string;
@@ -13,6 +14,7 @@ export interface Plan {
 export const createPlanSchema = z.object({
   name: z.string().min(1, 'Plan name is required').max(100, 'Name must be 100 characters or less'),
   code: z.string().min(1, 'Plan code is required').max(100, 'Code must be 100 characters or less'),
+  content: z.string().optional(),
 });
 
 export const updatePlanSchema = createPlanSchema.partial();

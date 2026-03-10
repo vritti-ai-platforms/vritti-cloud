@@ -1,6 +1,7 @@
 import { useDeploymentPlans } from '@hooks/cloud/infrastructure';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
+import { RichTextEditor } from '@vritti/quantum-ui/RichTextEditor';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { ArrowLeft, ArrowRight, Check, CreditCard } from 'lucide-react';
@@ -8,6 +9,12 @@ import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CreateOrgFormData } from '@/schemas/cloud/organizations';
 import type { PlanOption } from '@/services/cloud/infrastructure.service';
+
+// Returns undefined if value is falsy or not valid JSON
+function safeParse(value: string | null | undefined) {
+  if (!value) return undefined;
+  try { return JSON.parse(value); } catch { return undefined; }
+}
 
 interface ChoosePlanStepProps {
   form: UseFormReturn<CreateOrgFormData>;
@@ -49,23 +56,18 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {plans.map((plan) => {
               const isSelected = selectedPlanId === plan.id;
               return (
-                <Button
+                <div
                   key={plan.id}
-                  type="button"
-                  variant="ghost"
-                  className="group relative h-auto w-full cursor-pointer text-left rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:bg-card focus-visible:ring-2 focus-visible:ring-primary"
                   onClick={() => onSelect(plan)}
+                  className={`group relative cursor-pointer rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:bg-card/80 ${
+                    isSelected ? 'ring-2 ring-primary border-primary' : ''
+                  }`}
                 >
-                  {/* Selected ring */}
-                  {isSelected && (
-                    <div className="pointer-events-none absolute inset-0 rounded-xl ring-2 ring-primary" />
-                  )}
-
-                  {/* Check mark */}
+                  {/* Header row */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
                       <CreditCard className="h-5 w-5 text-primary-foreground" />
@@ -94,7 +96,18 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
                       <span className="text-sm text-muted-foreground">Pricing not configured</span>
                     )}
                   </div>
-                </Button>
+
+                  {/* Rich content */}
+                  {safeParse(plan.content) && (
+                    <div className="mt-4 border-t pt-4">
+                      <RichTextEditor
+                        editorSerializedState={safeParse(plan.content)}
+                        readOnly
+                        editorClassName="text-sm text-foreground"
+                      />
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>

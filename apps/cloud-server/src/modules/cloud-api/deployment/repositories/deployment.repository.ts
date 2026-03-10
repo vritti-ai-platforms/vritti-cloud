@@ -55,6 +55,7 @@ export class CloudDeploymentRepository {
         id: plans.id,
         name: plans.name,
         code: plans.code,
+        content: plans.content,
         price: prices.price,
         currency: prices.currency,
       })
@@ -80,6 +81,7 @@ export class CloudDeploymentRepository {
       id: r.id,
       name: r.name,
       code: r.code,
+      content: r.content ?? null,
       price: r.price ?? null,
       currency: r.currency ?? null,
     }));

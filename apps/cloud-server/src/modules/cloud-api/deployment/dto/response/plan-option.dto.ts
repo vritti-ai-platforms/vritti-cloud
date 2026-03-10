@@ -15,4 +15,7 @@ export class PlanOptionDto {
 
   @ApiPropertyOptional({ example: 'INR', nullable: true })
   currency: string | null;
+
+  @ApiPropertyOptional({ description: 'Rich content stored as Lexical JSON', nullable: true })
+  content: string | null;
 }
