@@ -1,5 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, DataTableStateService, type FieldMap, FilterProcessor, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
+import {
+  ConflictException,
+  DataTableStateService,
+  type FieldMap,
+  FilterProcessor,
+  NotFoundException,
+  SuccessResponseDto,
+} from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { cloudProviders, prices, regions } from '@/db/schema';
 import { PriceDto } from '../dto/entity/price.dto';
@@ -14,8 +21,8 @@ export class PriceService {
   private readonly logger = new Logger(PriceService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
-    regionId: { column: prices.regionId, type: 'uuid' },
-    providerId: { column: prices.providerId, type: 'uuid' },
+    regionId: { column: prices.regionId, type: 'string' },
+    providerId: { column: prices.providerId, type: 'string' },
     currency: { column: prices.currency, type: 'string' },
     regionName: { column: regions.name, type: 'string' },
     providerName: { column: cloudProviders.name, type: 'string' },
@@ -28,7 +35,12 @@ export class PriceService {
 
   // Creates a new price, rejecting duplicate plan+industry+region+provider combinations
   async create(dto: CreatePriceDto): Promise<SuccessResponseDto> {
-    const existing = await this.priceRepository.findByComposite(dto.planId, dto.industryId, dto.regionId, dto.providerId);
+    const existing = await this.priceRepository.findByComposite(
+      dto.planId,
+      dto.industryId,
+      dto.regionId,
+      dto.providerId,
+    );
     if (existing) {
       throw new ConflictException({
         label: 'Price Already Exists',
