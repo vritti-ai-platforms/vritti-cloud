@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "nx run-many --target=dev --projects=vritti-cloud-server,vritti-cloud-web --parallel",
-    "dev:ssl": "nx run-many --target=dev:ssl --projects=vritti-cloud-server,vritti-cloud-web --parallel",
+    "dev": "nx run-many --target=dev --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
+    "dev:ssl": "nx run-many --target=dev:ssl --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
     "dev:ssl:cloud": "nx run vritti-cloud-server:dev:ssl & nx run vritti-cloud-web:dev:ssl:cloud",
     "dev:ssl:admin": "nx run vritti-cloud-server:dev:ssl & nx run vritti-cloud-web:dev:ssl:admin",
     "build": "nx run-many --target=build --all",
