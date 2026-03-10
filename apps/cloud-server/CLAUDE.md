@@ -275,8 +275,8 @@ const port = this.configService.get<number>('PORT', 3000);
    ```
 
 4. **SSL certificates** (if using HTTPS):
-   - Place certificates in `./certs/` directory
-   - Files: `local.vrittiai.com+4-key.pem` and `local.vrittiai.com+4.pem`
+   - Place certificates in `../../certs/` (monorepo root `certs/` directory)
+   - Files: `_wildcard.local.vrittiai.com+4-key.pem` and `_wildcard.local.vrittiai.com+4.pem`
 
 **Available npm scripts**:
 ```bash

@@ -27,45 +27,40 @@ Write-Host "Installing local CA into trust store..." -ForegroundColor Yellow
 mkcert -install
 Write-Host "Local CA installed." -ForegroundColor Green
 
-# 3. Generate certs
-$certsTemp = Join-Path $PSScriptRoot "certs-temp"
-New-Item -ItemType Directory -Force -Path $certsTemp | Out-Null
+# 3. Generate certs directly into certs/ directory
+$dest = Join-Path $PSScriptRoot "certs"
+New-Item -ItemType Directory -Force -Path $dest | Out-Null
 
 Write-Host ""
 Write-Host "Generating certificates..." -ForegroundColor Yellow
 
-Push-Location $certsTemp
-$mkcertArgs = @(
-    "-key-file", "local.vrittiai.com+4-key.pem",
-    "-cert-file", "local.vrittiai.com+4.pem",
-    "local.vrittiai.com",
-    "cloud.local.vrittiai.com",
-    "localhost",
-    "127.0.0.1",
+Push-Location $dest
+
+# Wildcard cert (used by cloud-server and cloud-web)
+& mkcert `
+    -key-file "_wildcard.local.vrittiai.com+4-key.pem" `
+    -cert-file "_wildcard.local.vrittiai.com+4.pem" `
+    "*.local.vrittiai.com" `
+    "local.vrittiai.com" `
+    "localhost" `
+    "127.0.0.1" `
     "::1"
-)
-& mkcert @mkcertArgs
+
+# Explicit-domain cert (alternative without wildcard)
+& mkcert `
+    -key-file "local.vrittiai.com+4-key.pem" `
+    -cert-file "local.vrittiai.com+4.pem" `
+    "local.vrittiai.com" `
+    "cloud.local.vrittiai.com" `
+    "localhost" `
+    "127.0.0.1" `
+    "::1"
+
 Pop-Location
 
-Write-Host "Certificates generated." -ForegroundColor Green
+Write-Host "Certificates generated in certs/." -ForegroundColor Green
 
-# 4. Copy certs to each service
-Write-Host ""
-Write-Host "Copying certificates to services..." -ForegroundColor Yellow
-$services = @("cloud-server", "cloud-web", "web-nexus", "cloud-microfrontend", "api-nexus")
-foreach ($svc in $services) {
-    $svcPath = Join-Path $PSScriptRoot $svc
-    if (Test-Path $svcPath) {
-        $dest = Join-Path $svcPath "certs"
-        New-Item -ItemType Directory -Force -Path $dest | Out-Null
-        Copy-Item "$certsTemp\*" -Destination $dest -Force
-        Write-Host "  Copied to $svc\certs\" -ForegroundColor Green
-    } else {
-        Write-Host "  Skipped $svc (folder not found)" -ForegroundColor DarkGray
-    }
-}
-
-# 5. Add hosts entries (requires admin)
+# 4. Add hosts entries (requires admin)
 Write-Host ""
 Write-Host "Checking hosts file entries..." -ForegroundColor Yellow
 $hostsFile = "C:\Windows\System32\drivers\etc\hosts"
@@ -95,14 +90,11 @@ if ($isAdmin) {
     }
 }
 
-# Cleanup temp folder
-Remove-Item -Recurse -Force $certsTemp
-
 Write-Host ""
 Write-Host "=== Done! ===" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor White
 Write-Host "  1. Set USE_HTTPS=true in the .env of each service you want to run over HTTPS"
 Write-Host "  2. All services must use the same protocol (all HTTP or all HTTPS)"
-Write-Host "  3. Start services normally - they will pick up the certs from their certs/ folder"
+Write-Host "  3. Start services normally - they will pick up the certs from the root certs/ folder"
 Write-Host ""

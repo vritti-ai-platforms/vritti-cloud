@@ -236,7 +236,7 @@ export const MyIcon: React.FC<{ className?: string }> = ({ className }) => (
 ## Starting the Application
 
 **Prerequisites**:
-- If using HTTPS mode, SSL certificates must be in `./certs/` directory
+- If using HTTPS mode, SSL certificates must be in monorepo root `certs/` directory
 - API backend should be running on `http://local.vrittiai.com:3000` or `https://local.vrittiai.com:3000`
 
 **Available npm scripts**:

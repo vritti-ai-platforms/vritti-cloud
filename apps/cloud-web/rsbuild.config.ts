@@ -28,8 +28,8 @@ export default defineConfig({
     host: devHost,
     ...(useHttps && {
       https: {
-        key: readFileSync('./certs/_wildcard.local.vrittiai.com+4-key.pem'),
-        cert: readFileSync('./certs/_wildcard.local.vrittiai.com+4.pem'),
+        key: readFileSync('../../certs/_wildcard.local.vrittiai.com+4-key.pem'),
+        cert: readFileSync('../../certs/_wildcard.local.vrittiai.com+4.pem'),
       },
     }),
     proxy: {
