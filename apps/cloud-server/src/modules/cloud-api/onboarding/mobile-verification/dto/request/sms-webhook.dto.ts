@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class TwilioSmsWebhookDto {
   @ApiProperty({
@@ -28,7 +28,7 @@ export class TwilioSmsWebhookDto {
 
   @ApiProperty({
     description: 'Twilio unique identifier for the message',
-    example: 'SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    example: 'SMXXXXXXXXXXXXXXXXXXXXXXXXX',
   })
   @IsString()
   @IsNotEmpty()
@@ -36,7 +36,7 @@ export class TwilioSmsWebhookDto {
 
   @ApiProperty({
     description: 'Twilio Account SID',
-    example: 'ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    example: 'ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
   })
   @IsString()
   @IsNotEmpty()
@@ -68,7 +68,7 @@ export class TwilioSmsWebhookDto {
 
   @ApiPropertyOptional({
     description: 'Unique identifier for the SMS (same as MessageSid)',
-    example: 'SMxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+    example: 'SM1234567890abcdef1234567890abcdef',
   })
   @IsString()
   @IsOptional()

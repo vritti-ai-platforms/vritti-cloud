@@ -250,8 +250,19 @@ interface PriceActionsProps {
 }
 
 const PriceActions = ({ price, planId }: PriceActionsProps) => {
+  const confirm = useConfirm();
   const deleteMutation = useDeletePrice();
   const isDeleting = deleteMutation.isPending && deleteMutation.variables?.id === price.id;
+
+  async function handleDelete() {
+    const confirmed = await confirm({
+      title: 'Delete price?',
+      description: 'This price entry will be permanently removed. This action cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+    });
+    if (confirmed) deleteMutation.mutate({ id: price.id, planId });
+  }
 
   return (
     <div className="flex gap-1 justify-end">
@@ -271,8 +282,9 @@ const PriceActions = ({ price, planId }: PriceActionsProps) => {
       <Button
         variant="ghost"
         size="icon"
+        className="text-destructive hover:text-destructive"
         disabled={isDeleting}
-        onClick={() => deleteMutation.mutate({ id: price.id, planId })}
+        onClick={handleDelete}
         aria-label="Delete price"
       >
         {isDeleting ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}

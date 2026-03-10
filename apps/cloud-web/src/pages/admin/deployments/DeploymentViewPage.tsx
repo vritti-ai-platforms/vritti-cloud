@@ -2,8 +2,7 @@ import {
   useAssignDeploymentPlan,
   useDeleteDeployment,
   useDeployment,
-  useDeploymentPlanPrices,
-  useDeploymentPlans,
+  useDeploymentPlanAssignments,
   useRemoveDeploymentPlan,
 } from '@hooks/admin/deployments';
 import { cn } from '@vritti/quantum-ui';
@@ -17,7 +16,7 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { DeploymentPlanIndustryPrice, DeploymentPlanPrice } from '@/schemas/admin/deployments';
+import type { DeploymentPlanAssignment, DeploymentPlanAssignmentIndustry } from '@/schemas/admin/deployments';
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
 
 export const DeploymentViewPage = () => {
@@ -28,8 +27,7 @@ export const DeploymentViewPage = () => {
   const confirm = useConfirm();
 
   const { data: deployment, isLoading } = useDeployment(id ?? '');
-  const { data: planPrices = [], isLoading: plansLoading } = useDeploymentPlanPrices(id ?? '');
-  const { data: assignedPlans = [] } = useDeploymentPlans(id ?? '');
+  const { data: planAssignments = [], isLoading: plansLoading } = useDeploymentPlanAssignments(id ?? '');
 
   const assignMutation = useAssignDeploymentPlan();
   const removeMutation = useRemoveDeploymentPlan();
@@ -38,11 +36,9 @@ export const DeploymentViewPage = () => {
     onSuccess: () => navigate('/deployments'),
   });
 
-  // O(1) lookup of assigned plan+industry combos
-  const assignedSet = new Set(assignedPlans.map((p) => `${p.planId}:${p.industryId}`));
-
   const handleChipToggle = (planId: string, industryId: string) => {
-    const isAssigned = assignedSet.has(`${planId}:${industryId}`);
+    const plan = planAssignments.find((p) => p.planId === planId);
+    const isAssigned = plan?.industries.find((i) => i.industryId === industryId)?.isAssigned ?? false;
     if (isAssigned) {
       removeMutation.mutate({ id: id ?? '', data: { planId, industryId } });
     } else {
@@ -88,9 +84,9 @@ export const DeploymentViewPage = () => {
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-semibold text-foreground">Plans &amp; Prices</h2>
-          {planPrices.length > 0 && (
+          {planAssignments.length > 0 && (
             <span className="text-xs text-muted-foreground">
-              {planPrices.length} plan{planPrices.length !== 1 ? 's' : ''} available
+              {planAssignments.length} plan{planAssignments.length !== 1 ? 's' : ''} available
             </span>
           )}
         </div>
@@ -101,7 +97,7 @@ export const DeploymentViewPage = () => {
           </div>
         )}
 
-        {!plansLoading && planPrices.length === 0 && (
+        {!plansLoading && planAssignments.length === 0 && (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <Tag className="size-8 text-muted-foreground mb-3" />
@@ -113,10 +109,10 @@ export const DeploymentViewPage = () => {
           </Card>
         )}
 
-        {!plansLoading && planPrices.length > 0 && (
+        {!plansLoading && planAssignments.length > 0 && (
           <div className="flex flex-col gap-4">
-            {planPrices.map((plan: DeploymentPlanPrice) => (
-              <PlanCard key={plan.planId} plan={plan} assignedSet={assignedSet} onToggle={handleChipToggle} />
+            {planAssignments.map((plan: DeploymentPlanAssignment) => (
+              <PlanCard key={plan.planId} plan={plan} onToggle={handleChipToggle} />
             ))}
           </div>
         )}
@@ -127,6 +123,12 @@ export const DeploymentViewPage = () => {
         description="This action cannot be undone. All associated plan assignments will be removed."
         buttonText="Delete Deployment"
         onClick={handleDelete}
+        disabled={!!deployment.organizationCount}
+        warning={
+          deployment.organizationCount
+            ? `This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`
+            : undefined
+        }
       />
 
       {/* Edit dialog */}
@@ -144,12 +146,11 @@ export const DeploymentViewPage = () => {
 };
 
 interface PlanCardProps {
-  plan: DeploymentPlanPrice;
-  assignedSet: Set<string>;
+  plan: DeploymentPlanAssignment;
   onToggle: (planId: string, industryId: string) => void;
 }
 
-const PlanCard = ({ plan, assignedSet, onToggle }: PlanCardProps) => (
+const PlanCard = ({ plan, onToggle }: PlanCardProps) => (
   <Card className="flex flex-col">
     <CardHeader className="pb-3">
       <div className="flex items-start justify-between gap-2">
@@ -164,32 +165,29 @@ const PlanCard = ({ plan, assignedSet, onToggle }: PlanCardProps) => (
     </CardHeader>
     <CardContent className="pt-0">
       <div className="flex flex-wrap gap-2">
-        {plan.industries.map((industry: DeploymentPlanIndustryPrice) => {
-          const isAssigned = assignedSet.has(`${plan.planId}:${industry.industryId}`);
-          return (
-            <Button
-              key={industry.industryId}
-              variant="ghost"
-              size="sm"
-              onClick={() => onToggle(plan.planId, industry.industryId)}
-              className={cn(
-                'h-auto rounded-full border px-3 py-1.5 text-sm transition-colors',
-                isAssigned
-                  ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
-                  : 'border-border bg-muted/30 text-foreground hover:bg-muted hover:border-primary/40',
-              )}
-            >
-              <span>{industry.industryName}</span>
-              {industry.price ? (
-                <span className={cn('font-semibold', isAssigned ? 'text-primary-foreground/80' : 'text-primary')}>
-                  · {industry.currency} {industry.price}
-                </span>
-              ) : (
-                <span className={isAssigned ? 'text-primary-foreground/60' : 'text-muted-foreground'}>· No price</span>
-              )}
-            </Button>
-          );
-        })}
+        {plan.industries.map((industry: DeploymentPlanAssignmentIndustry) => (
+          <Button
+            key={industry.industryId}
+            variant="ghost"
+            size="sm"
+            onClick={() => onToggle(plan.planId, industry.industryId)}
+            className={cn(
+              'h-auto rounded-full border px-3 py-1.5 text-sm transition-colors',
+              industry.isAssigned
+                ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
+                : 'border-border bg-muted/30 text-foreground hover:bg-muted hover:border-primary/40',
+            )}
+          >
+            <span>{industry.industryName}</span>
+            {industry.price ? (
+              <span className={cn('font-semibold', industry.isAssigned ? 'text-primary-foreground/80' : 'text-primary')}>
+                · {industry.currency} {industry.price}
+              </span>
+            ) : (
+              <span className={industry.isAssigned ? 'text-primary-foreground/60' : 'text-muted-foreground'}>· No price</span>
+            )}
+          </Button>
+        ))}
       </div>
     </CardContent>
   </Card>

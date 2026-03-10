@@ -43,8 +43,11 @@ export class DeploymentDto {
   @ApiPropertyOptional({ example: 'aws' })
   cloudProviderCode?: string;
 
+  @ApiProperty({ example: 0 })
+  organizationCount: number;
+
   // Strips webhookSecret from the response for security
-  static from(deployment: Deployment | DeploymentWithNames): DeploymentDto {
+  static from(deployment: Deployment | DeploymentWithNames, organizationCount = 0): DeploymentDto {
     const dto = new DeploymentDto();
     dto.id = deployment.id;
     dto.name = deployment.name;
@@ -55,11 +58,13 @@ export class DeploymentDto {
     dto.type = deployment.type;
     dto.createdAt = deployment.createdAt;
     dto.updatedAt = deployment.updatedAt;
-    if ('regionName' in deployment) {
-      dto.regionName = deployment.regionName;
-      dto.regionCode = deployment.regionCode;
-      dto.cloudProviderName = deployment.cloudProviderName;
-      dto.cloudProviderCode = deployment.cloudProviderCode;
+    dto.organizationCount = organizationCount;
+    if ('region' in deployment && deployment.region) {
+      const withNames = deployment as DeploymentWithNames;
+      dto.regionName = withNames.region.name;
+      dto.regionCode = withNames.region.code;
+      dto.cloudProviderName = withNames.cloudProvider.name;
+      dto.cloudProviderCode = withNames.cloudProvider.code;
     }
     return dto;
   }

@@ -22,6 +22,8 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
     defaultValues: { name: '', nexusUrl: '', webhookSecret: '', type: 'shared' },
   });
 
+  const regionId = form.watch('regionId');
+
   const createMutation = useCreateDeployment({
     onSuccess: () => {
       form.reset();
@@ -45,7 +47,13 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
         placeholder="Select region"
         onOptionSelect={() => form.setValue('cloudProviderId', '')}
       />
-      <CloudProviderSelector name="cloudProviderId" label="Cloud Provider" placeholder="Select provider" />
+      <CloudProviderSelector
+        name="cloudProviderId"
+        label="Cloud Provider"
+        placeholder="Select provider"
+        disabled={!regionId}
+        params={regionId ? { regionId: String(regionId) } : undefined}
+      />
       <Select
         name="type"
         label="Deployment Type"

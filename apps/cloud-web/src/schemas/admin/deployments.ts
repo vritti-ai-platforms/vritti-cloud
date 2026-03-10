@@ -17,14 +17,7 @@ export interface Deployment {
   cloudProviderCode?: string;
   createdAt: string;
   updatedAt: string | null;
-}
-
-export interface DeploymentPlanListItem {
-  planId: string;
-  planName: string;
-  planCode: string;
-  industryId: string;
-  industryName: string;
+  organizationCount?: number;
 }
 
 export const createDeploymentSchema = z.object({
@@ -46,20 +39,6 @@ export const updateDeploymentSchema = z.object({
   status: z.enum(['active', 'stopped', 'provisioning']).optional(),
 });
 
-export interface DeploymentPlanIndustryPrice {
-  industryId: string;
-  industryName: string;
-  price: string | null;
-  currency: string | null;
-}
-
-export interface DeploymentPlanPrice {
-  planId: string;
-  planName: string;
-  planCode: string;
-  industries: DeploymentPlanIndustryPrice[];
-}
-
 export const assignPlanSchema = z.object({
   planId: z.string().uuid('Please select a plan'),
   industryId: z.string().uuid('Please select an industry'),
@@ -68,3 +47,18 @@ export const assignPlanSchema = z.object({
 export type CreateDeploymentData = z.infer<typeof createDeploymentSchema>;
 export type UpdateDeploymentData = z.infer<typeof updateDeploymentSchema>;
 export type AssignPlanData = z.infer<typeof assignPlanSchema>;
+
+export interface DeploymentPlanAssignmentIndustry {
+  industryId: string;
+  industryName: string;
+  price: string | null;
+  currency: string | null;
+  isAssigned: boolean;
+}
+
+export interface DeploymentPlanAssignment {
+  planId: string;
+  planName: string;
+  planCode: string;
+  industries: DeploymentPlanAssignmentIndustry[];
+}

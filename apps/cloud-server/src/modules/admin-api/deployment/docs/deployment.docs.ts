@@ -1,12 +1,11 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { SuccessResponseDto } from '@vritti/api-sdk';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
-import { DeploymentPlanListItemDto } from '../dto/entity/deployment-plan-list-item.dto';
-import { DeploymentPlanPriceDto } from '../dto/entity/deployment-plan-price.dto';
+import { DeploymentPlanAssignmentDto } from '../dto/entity/deployment-plan-assignment.dto';
 import { AssignDeploymentPlanDto } from '../dto/request/assign-deployment-plan.dto';
 import { CreateDeploymentDto } from '../dto/request/create-deployment.dto';
 import { UpdateDeploymentDto } from '../dto/request/update-deployment.dto';
-import { AssignDeploymentPlanResponseDto } from '../dto/response/assign-deployment-plan-response.dto';
 import { DeploymentSelectResponseDto } from '../dto/response/deployment-select-response.dto';
 import { DeploymentsResponseDto } from '../dto/response/deployments-response.dto';
 
@@ -89,22 +88,14 @@ export function ApiRemoveDeploymentPlan() {
   );
 }
 
-export function ApiGetDeploymentPlans() {
+export function ApiGetDeploymentPlanAssignments() {
   return applyDecorators(
-    ApiOperation({ summary: 'Get all plan+industry assignments for a deployment' }),
-    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Assignments retrieved successfully.', type: DeploymentPlanListItemDto, isArray: true }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Deployment not found.' }),
-  );
-}
-
-export function ApiGetDeploymentPlanPrices() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get plan+industry assignments with prices for a deployment' }),
-    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Plan prices retrieved successfully.', type: DeploymentPlanPriceDto, isArray: true }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiOperation({
+      summary: 'Get deployment plan assignments',
+      description: 'Returns all available plans with pricing and assignment status for the deployment.',
+    }),
+    ApiParam({ name: 'id', type: 'string', format: 'uuid' }),
+    ApiResponse({ status: 200, description: 'Plan assignments retrieved.', type: DeploymentPlanAssignmentDto, isArray: true }),
     ApiResponse({ status: 404, description: 'Deployment not found.' }),
   );
 }
@@ -114,7 +105,7 @@ export function ApiAssignDeploymentPlan() {
     ApiOperation({ summary: 'Assign a plan and industry to a deployment' }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiBody({ type: AssignDeploymentPlanDto }),
-    ApiResponse({ status: 201, description: 'Assignment created successfully.', type: AssignDeploymentPlanResponseDto }),
+    ApiResponse({ status: 201, description: 'Assignment created successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Deployment not found.' }),

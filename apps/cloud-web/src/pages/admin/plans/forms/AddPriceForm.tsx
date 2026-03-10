@@ -23,6 +23,8 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
     defaultValues: { planId, currency: 'INR' },
   });
 
+  const regionId = form.watch('regionId');
+
   const createMutation = useCreatePrice({
     onSuccess: () => {
       form.reset({ planId, currency: 'INR' });
@@ -44,7 +46,13 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
         placeholder="Select region"
         onChange={() => form.setValue('providerId', '')}
       />
-      <CloudProviderSelector name="providerId" label="Cloud Provider" placeholder="Select provider" />
+      <CloudProviderSelector
+        name="providerId"
+        label="Cloud Provider"
+        placeholder="Select provider"
+        disabled={!regionId}
+        params={regionId ? { regionId: String(regionId) } : undefined}
+      />
       <TextField name="price" label="Price" placeholder="e.g. 2999.00" />
       <CurrencySelector name="currency" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">

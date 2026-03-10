@@ -1,14 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { asc, eq, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { Deployment } from '@/db/schema';
-import { cloudProviders, deployments, regions } from '@/db/schema';
+import { eq, sql } from '@vritti/api-sdk/drizzle-orm';
+import type { CloudProvider, Deployment, Region } from '@/db/schema';
+import { deployments, organizations } from '@/db/schema';
 
 export type DeploymentWithNames = Deployment & {
-  regionName: string;
-  regionCode: string;
-  cloudProviderName: string;
-  cloudProviderCode: string;
+  region: Region;
+  cloudProvider: CloudProvider;
 };
 
 @Injectable()
@@ -19,27 +17,10 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
 
   // Returns all deployments with region and cloud provider names joined
   async findAll(): Promise<DeploymentWithNames[]> {
-    return this.db
-      .select({
-        id: deployments.id,
-        name: deployments.name,
-        nexusUrl: deployments.nexusUrl,
-        webhookSecret: deployments.webhookSecret,
-        regionId: deployments.regionId,
-        cloudProviderId: deployments.cloudProviderId,
-        status: deployments.status,
-        type: deployments.type,
-        createdAt: deployments.createdAt,
-        updatedAt: deployments.updatedAt,
-        regionName: regions.name,
-        regionCode: regions.code,
-        cloudProviderName: cloudProviders.name,
-        cloudProviderCode: cloudProviders.code,
-      })
-      .from(deployments)
-      .innerJoin(regions, eq(deployments.regionId, regions.id))
-      .innerJoin(cloudProviders, eq(deployments.cloudProviderId, cloudProviders.id))
-      .orderBy(asc(deployments.name)) as Promise<DeploymentWithNames[]>;
+    return (await this.model.findMany({
+      with: { region: true, cloudProvider: true },
+      orderBy: { name: 'asc' },
+    })) as unknown as DeploymentWithNames[];
   }
 
   // Finds a deployment by its unique identifier
@@ -53,6 +34,15 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
       .select({ count: sql<number>`count(*)` })
       .from(deployments)
       .where(eq(deployments.regionId, regionId));
+    return Number(result[0]?.count ?? 0);
+  }
+
+  // Returns the number of organizations associated with the given deployment
+  async countOrganizationsByDeploymentId(deploymentId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(organizations)
+      .where(eq(organizations.deploymentId, deploymentId));
     return Number(result[0]?.count ?? 0);
   }
 
