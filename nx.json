@@ -24,7 +24,9 @@
       "cache": false
     },
     "dev": { "cache": false },
-    "dev:ssl": { "cache": false }
+    "dev:ssl": { "cache": false },
+    "dev:ssl:cloud": { "cache": false },
+    "dev:ssl:admin": { "cache": false }
   },
   "release": {
     "projects": ["vritti-cloud-server", "vritti-cloud-web"],
