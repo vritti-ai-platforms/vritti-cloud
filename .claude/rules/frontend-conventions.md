@@ -5,6 +5,18 @@ globs: auth-microfrontend/src/**/*.{ts,tsx}, cloud-microfrontend/src/**/*.{ts,ts
 
 # Frontend Conventions
 
+## React Import
+
+Always use `import type React from 'react'` — never `import * as React from 'react'`.
+
+```tsx
+// WRONG
+import * as React from 'react';
+
+// CORRECT
+import type React from 'react';
+```
+
 ## Component Library
 - Use components from `@vritti/quantum-ui` (shadcn-based, Tailwind v4)
 - Do NOT install shadcn directly in microfrontends — use quantum-ui exports
@@ -76,6 +88,95 @@ import quantumUIConfig from '../quantum-ui.config';
 configureQuantumUI(quantumUIConfig);
 ```
 Without this, quantum-ui falls back to defaults (wrong endpoints, wrong baseURL).
+
+## Dialog State — use `useDialog`, never bare `useState(false)`
+- ALWAYS use `useDialog()` from `@vritti/quantum-ui/hooks` to control dialog open/close state
+- Never write `const [open, setOpen] = useState(false)` for a dialog
+
+```tsx
+// WRONG
+const [editOpen, setEditOpen] = useState(false);
+<Button onClick={() => setEditOpen(true)}>Edit</Button>
+<Dialog open={editOpen} onOpenChange={setEditOpen} ... />
+
+// CORRECT
+import { useDialog } from '@vritti/quantum-ui/hooks';
+const editDialog = useDialog();
+<Button onClick={editDialog.open}>Edit</Button>
+<Dialog
+  open={editDialog.isOpen}
+  onOpenChange={(v) => { if (!v) editDialog.close(); }}
+  ...
+/>
+```
+
+For dialogs triggered from a `DropdownMenu` item, use the `dialog` item type instead — no hook or state needed:
+```tsx
+// CORRECT — dialog lives inside the dropdown item definition
+{
+  type: 'dialog' as const,
+  id: 'edit',
+  label: 'Edit',
+  icon: Pencil,
+  dialog: {
+    title: 'Edit Item',
+    description: '...',
+    content: (close) => <EditForm data={row.original} onSuccess={close} onCancel={close} />,
+  },
+}
+```
+The DropdownMenu renders the Dialog outside its content so it survives the dropdown unmount.
+
+## Destructive Actions — use `useConfirm`, never inline confirm
+- ALWAYS use `useConfirm()` from `@vritti/quantum-ui/hooks` before destructive mutations (delete, revoke, reset)
+- Never use `window.confirm()` or roll a custom state-based confirm dialog
+- Make the message specific: include the resource name and what will be lost
+
+```tsx
+// WRONG — no confirmation
+onClick: () => deleteMutation.mutate(id)
+
+// WRONG — generic message
+description: 'Are you sure you want to delete this item? This action cannot be undone.'
+
+// CORRECT
+import { useConfirm } from '@vritti/quantum-ui/hooks';
+
+const confirm = useConfirm();
+
+async function handleDelete(id: string, name: string) {
+  const confirmed = await confirm({
+    title: `Delete ${name}?`,
+    description: `${name} and all its associated data will be permanently removed. This action cannot be undone.`,
+    confirmLabel: 'Delete',
+    variant: 'destructive',
+  });
+  if (confirmed) deleteMutation.mutate(id);
+}
+```
+
+Pass the resource name (and relevant context) into `handleDelete` so the description is specific, not generic.
+
+## Slug-based Routes — use `buildSlug` + `useSlugParams`
+- For detail page URLs that should show a readable name, use `buildSlug(name, id)` from `@vritti/quantum-ui/utils/slug`
+- The slug format is `name-slug~uuid` — the Breadcrumb auto-humanizes the name part
+- In the detail page, use `useSlugParams()` from `@vritti/quantum-ui/hooks` to extract `{ name, id }`
+
+```tsx
+// Navigating to detail page
+import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+navigate(`/regions/${buildSlug(region.name, region.id)}`);
+// → URL: /regions/us-east~bdfc838c-...
+
+// In the detail page (route param must be named :slug)
+import { useSlugParams } from '@vritti/quantum-ui/hooks';
+const { id } = useSlugParams(); // UUID for API calls
+```
+
+Route param must be named `:slug`, not `:id`:
+```typescript
+{ path: 'regions/:slug', element: <RegionViewPage /> }
+```
 
 ## Forms
 - React Hook Form + Zod for validation

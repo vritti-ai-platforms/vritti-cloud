@@ -31,28 +31,6 @@ npm-debug.log*
 # pnpm
 .pnpm-store/
 
-# Separate repos (not part of this monorepo)
-quantum-ui/
-api-nexus/
-api-sdk/
-auth-microfrontend/
-cloud-microfrontend/
-developer-docs/
-docs/
-infisical-secret-manager/
-infrastructure/
-landing/
-logos/
-memorybank/
-reports/
-slicingpie/
-web-nexus/
-vritti-web-nexus/
-vritti-landing/
-vritti-auth/
-agents/
-infisical/
-
 # Local/personal files
 .claude/settings.local.json
 .playwright-mcp/
