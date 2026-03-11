@@ -124,6 +124,7 @@ const PlanContentCard = ({ plan }: PlanContentCardProps) => {
   const [mounted, setMounted] = useState(false);
   const contentRef = useRef<string | undefined>(plan.content ?? undefined);
   const contentInitialized = useRef(false);
+  const [savedContent, setSavedContent] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     setMounted(true);
@@ -131,17 +132,32 @@ const PlanContentCard = ({ plan }: PlanContentCardProps) => {
 
   const updateMutation = useUpdatePlan();
 
+  // Use savedContent (optimistic) until query cache catches up
+  const displayContent = savedContent ?? plan.content;
+
+  // Clear optimistic override once query cache syncs
+  useEffect(() => {
+    if (savedContent && plan.content === savedContent) {
+      setSavedContent(undefined);
+    }
+  }, [plan.content, savedContent]);
+
   // Save the current editor state
   const handleSave = () => {
     updateMutation.mutate(
       { id: plan.id, data: { content: contentRef.current } },
-      { onSuccess: () => setIsEditing(false) },
+      {
+        onSuccess: () => {
+          setSavedContent(contentRef.current);
+          setIsEditing(false);
+        },
+      },
     );
   };
 
   // Discard changes and return to view mode
   const handleCancel = () => {
-    contentRef.current = plan.content ?? undefined;
+    contentRef.current = displayContent ?? undefined;
     contentInitialized.current = false;
     setIsEditing(false);
   };
@@ -172,7 +188,7 @@ const PlanContentCard = ({ plan }: PlanContentCardProps) => {
         {mounted ? (
           <RichTextEditor
             key={isEditing ? 'edit' : 'view'}
-            editorSerializedState={safeParse(plan.content)}
+            editorSerializedState={safeParse(displayContent)}
             onSerializedChange={(state) => {
               if (!contentInitialized.current) {
                 contentInitialized.current = true;
@@ -185,7 +201,7 @@ const PlanContentCard = ({ plan }: PlanContentCardProps) => {
             className="border-0 shadow-none bg-muted/30 min-h-[150px]"
           />
         ) : (
-          !plan.content && (
+          !displayContent && (
             <p className="text-sm text-muted-foreground">No content yet. Click Edit to add plan features.</p>
           )
         )}

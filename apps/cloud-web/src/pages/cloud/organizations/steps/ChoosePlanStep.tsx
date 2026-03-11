@@ -101,6 +101,7 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
                   {safeParse(plan.content) && (
                     <div className="mt-4 border-t pt-4">
                       <RichTextEditor
+                        key={plan.content}
                         editorSerializedState={safeParse(plan.content)}
                         contentOnly
                         editorClassName="text-sm text-foreground"
