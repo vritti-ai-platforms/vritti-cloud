@@ -102,8 +102,9 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
                     <div className="mt-4 border-t pt-4">
                       <RichTextEditor
                         editorSerializedState={safeParse(plan.content)}
-                        readOnly
+                        contentOnly
                         editorClassName="text-sm text-foreground"
+                        className="border-0 shadow-none bg-transparent"
                       />
                     </div>
                   )}
