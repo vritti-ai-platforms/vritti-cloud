@@ -1,5 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, ConflictException, type SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
+import {
+  BadRequestException,
+  ConflictException,
+  type SelectOptionsQueryDto,
+  type SelectQueryResult,
+  ServiceUnavailableException,
+} from '@vritti/api-sdk';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
@@ -64,13 +70,22 @@ export class OrganizationService {
     }
 
     // Create the organization in api-nexus first to get the nexus org ID
-    const nexusOrg = await this.nexusApiService.createOrganization(deployment.nexusUrl, deployment.webhookSecret, {
-      name: dto.name,
-      subdomain: dto.subdomain,
-      size: dto.size,
-      planId: dto.planId,
-      mediaId: dto.mediaId,
-    });
+    let nexusOrg: { id: string };
+    try {
+      nexusOrg = await this.nexusApiService.createOrganization(deployment.nexusUrl, deployment.webhookSecret, {
+        name: dto.name,
+        subdomain: dto.subdomain,
+        size: dto.size,
+        planId: dto.planId,
+        mediaId: dto.mediaId,
+      });
+    } catch (error) {
+      this.logger.error(`Failed to reach deployment ${deployment.nexusUrl}: ${error}`);
+      throw new ServiceUnavailableException({
+        label: 'Deployment Unreachable',
+        detail: 'Unable to reach the selected deployment. Please try again later.',
+      });
+    }
 
     const org = await this.orgRepository.create({
       ...dto,
