@@ -76,11 +76,13 @@ export class OrganizationService {
         name: dto.name,
         subdomain: dto.subdomain,
         size: dto.size,
-        planId: dto.planId,
-        mediaId: dto.mediaId,
       });
-    } catch (error) {
-      this.logger.error(`Failed to reach deployment ${deployment.nexusUrl}: ${error}`);
+    } catch (error: any) {
+      const responseData = error?.response?.data;
+      this.logger.error(
+        `Failed to reach deployment ${deployment.nexusUrl}: ${error}`,
+        responseData ? JSON.stringify(responseData) : undefined,
+      );
       throw new ServiceUnavailableException({
         label: 'Deployment Unreachable',
         detail: 'Unable to reach the selected deployment. Please try again later.',

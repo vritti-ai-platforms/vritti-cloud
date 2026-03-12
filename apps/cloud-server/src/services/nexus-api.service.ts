@@ -17,8 +17,6 @@ export class NexusApiService {
       name: string;
       subdomain: string;
       size: string;
-      planId?: string;
-      mediaId?: string;
     },
   ): Promise<{ id: string }> {
     const response = await axios.post<{ id: string }>(`${nexusUrl}/organizations/webhook`, data, {
