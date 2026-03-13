@@ -3303,6 +3303,102 @@
         ]
       }
     },
+    "/cloud-api/organizations/{orgId}/users": {
+      "get": {
+        "description": "Returns all nexus portal users for the specified organization.",
+        "operationId": "OrganizationUsersController_getUsers",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of organization users.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/NexusUserResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organization users",
+        "tags": [
+          "Organization Users"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/users/invite": {
+      "post": {
+        "description": "Invites a user to the organization in the nexus portal.",
+        "operationId": "OrganizationUsersController_inviteUser",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InviteUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User invited successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NexusUserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invite a user to the organization",
+        "tags": [
+          "Organization Users"
+        ]
+      }
+    },
     "/admin-api/cloud-providers": {
       "post": {
         "operationId": "CloudProviderController_create",
@@ -8147,6 +8243,90 @@
         "required": [
           "options",
           "hasMore"
+        ]
+      },
+      "NexusUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "User ID",
+            "example": "usr_abc123"
+          },
+          "organizationId": {
+            "type": "string",
+            "description": "Organization ID",
+            "example": "org_abc123"
+          },
+          "email": {
+            "type": "string",
+            "description": "User email address",
+            "example": "user@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "User full name",
+            "example": "Jane Smith"
+          },
+          "role": {
+            "type": "string",
+            "description": "User role",
+            "example": "SUPPORT"
+          },
+          "status": {
+            "type": "string",
+            "description": "User status",
+            "example": "ACTIVE"
+          },
+          "hasPassword": {
+            "type": "boolean",
+            "description": "Whether the user has set a password",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "Account creation timestamp",
+            "example": "2026-01-15T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "organizationId",
+          "email",
+          "fullName",
+          "role",
+          "status",
+          "hasPassword",
+          "createdAt"
+        ]
+      },
+      "InviteUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User email address",
+            "example": "user@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "User full name",
+            "example": "Jane Smith"
+          },
+          "role": {
+            "type": "string",
+            "description": "User role in nexus",
+            "example": "SUPPORT",
+            "enum": [
+              "SUPER_ADMIN",
+              "ADMIN",
+              "SUPPORT"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "fullName"
         ]
       },
       "CreateCloudProviderDto": {

@@ -68,3 +68,21 @@ export type CreateOrgFormData = z.output<typeof createOrganizationSchema>;
 export interface SubdomainAvailability {
   available: boolean;
 }
+
+export interface NexusUser {
+  id: string;
+  organizationId: string;
+  email: string;
+  fullName: string;
+  role: string;
+  status: string;
+  hasPassword: boolean;
+  createdAt: string;
+}
+
+export const inviteUserSchema = z.object({
+  email: z.string().email('Valid email is required'),
+  fullName: z.string().min(1, 'Full name is required'),
+  role: z.enum(['SUPER_ADMIN', 'ADMIN', 'SUPPORT']).optional(),
+});
+export type InviteUserFormData = z.infer<typeof inviteUserSchema>;

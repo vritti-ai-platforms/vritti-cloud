@@ -26,6 +26,7 @@ import { HomePage } from './pages/cloud/home/HomePage';
 import { InvitationsPage } from './pages/cloud/invitations/InvitationsPage';
 import { OverviewPage } from './pages/cloud/organization/OverviewPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
+import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
 import { ProfilePage } from './pages/cloud/settings/ProfilePage';
@@ -188,7 +189,7 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'users',
-        element: <PlaceholderPage />,
+        element: <UsersPage />,
       },
       {
         path: 'roles',
