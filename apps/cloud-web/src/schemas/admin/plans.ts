@@ -8,6 +8,7 @@ export interface Plan {
   priceCount: number;
   regionCount: number;
   providerCount: number;
+  orgCount: number;
   canDelete: boolean;
   createdAt: string;
   updatedAt: string | null;

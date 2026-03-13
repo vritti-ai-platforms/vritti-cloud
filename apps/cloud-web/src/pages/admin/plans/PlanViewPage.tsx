@@ -11,7 +11,7 @@ import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { RichTextEditor } from '@vritti/quantum-ui/RichTextEditor';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
-import { BadgeDollarSign, Cloud, Globe, Pencil, Plus, Trash2 } from 'lucide-react';
+import { BadgeDollarSign, Building2, Cloud, Globe, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { Plan } from '@/schemas/admin/plans';
@@ -19,6 +19,15 @@ import type { Price } from '@/schemas/admin/prices';
 import { AddPriceForm } from './forms/AddPriceForm';
 import { EditPlanForm } from './forms/EditPlanForm';
 import { EditPriceForm } from './forms/EditPriceForm';
+
+// Builds a specific warning listing what blocks deletion
+function buildDeleteWarning(plan: Plan): string {
+  const parts: string[] = [];
+  if (plan.priceCount > 0) parts.push(`${plan.priceCount} price(s)`);
+  if (plan.orgCount > 0) parts.push(`${plan.orgCount} organization(s)`);
+  const summary = parts.length > 0 ? parts.join(' and ') : 'associated data';
+  return `This plan has ${summary}. Remove all associations before deleting.`;
+}
 
 // Returns undefined if value is falsy or not valid JSON
 function safeParse(value: string | null | undefined) {
@@ -93,11 +102,7 @@ export const PlanViewPage = () => {
         buttonText="Delete Plan"
         onClick={handleDelete}
         disabled={!plan.canDelete}
-        warning={
-          !plan.canDelete
-            ? `This plan has ${plan.priceCount} price(s) or other associated data. Remove all associated data before deleting.`
-            : undefined
-        }
+        warning={!plan.canDelete ? buildDeleteWarning(plan) : undefined}
       />
 
       {/* Edit dialog */}
@@ -216,7 +221,7 @@ interface PricingStatsProps {
 
 // Stat cards — counts come from the plan API response
 const PricingStats = ({ plan }: PricingStatsProps) => (
-  <div className="grid grid-cols-3 gap-4">
+  <div className="grid grid-cols-4 gap-4">
     <Card>
       <CardContent className="flex items-center gap-4 p-6">
         <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
@@ -247,6 +252,17 @@ const PricingStats = ({ plan }: PricingStatsProps) => (
         <div>
           <p className="text-sm text-muted-foreground">Providers</p>
           <p className="text-2xl font-semibold">{plan.providerCount}</p>
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+          <Building2 className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Organizations</p>
+          <p className="text-2xl font-semibold">{plan.orgCount}</p>
         </div>
       </CardContent>
     </Card>

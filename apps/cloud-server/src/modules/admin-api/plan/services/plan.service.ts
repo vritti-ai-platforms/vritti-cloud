@@ -102,7 +102,7 @@ export class PlanService {
     const { deploymentCount, orgCount } = refCounts;
     const canDelete = priceCount === 0 && deploymentCount === 0 && orgCount === 0;
     this.logger.log(`Fetched plan: ${id}`);
-    return PlanDto.from(plan, { priceCount, regionCount, providerCount }, canDelete);
+    return PlanDto.from(plan, { priceCount, regionCount, providerCount, orgCount }, canDelete);
   }
 
   // Updates a plan by ID; throws NotFoundException if not found, ConflictException on duplicate code

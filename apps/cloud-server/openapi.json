@@ -9324,6 +9324,10 @@
             "type": "number",
             "example": 2
           },
+          "orgCount": {
+            "type": "number",
+            "example": 1
+          },
           "canDelete": {
             "type": "boolean",
             "example": true
@@ -9341,6 +9345,7 @@
           "priceCount",
           "regionCount",
           "providerCount",
+          "orgCount",
           "canDelete"
         ]
       },
