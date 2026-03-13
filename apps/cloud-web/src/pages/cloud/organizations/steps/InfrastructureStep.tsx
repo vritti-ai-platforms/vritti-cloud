@@ -47,6 +47,7 @@ export const InfrastructureStep: React.FC<InfrastructureStepProps> = ({ form, on
             label="Cloud Provider"
             placeholder={regionId ? 'Select a cloud provider' : 'Select a region first'}
             disabled={!regionId}
+            params={regionId ? { regionId: String(regionId) } : undefined}
             onOptionSelect={(opt) => {
               form.setValue('cloudProviderName', opt?.label ?? '');
               form.setValue('deploymentId', '');
@@ -62,6 +63,11 @@ export const InfrastructureStep: React.FC<InfrastructureStepProps> = ({ form, on
             label="Deployment"
             placeholder={cloudProviderId ? 'Select a deployment' : 'Select a cloud provider first'}
             disabled={!cloudProviderId}
+            params={
+              regionId && cloudProviderId
+                ? { regionId: String(regionId), cloudProviderId: String(cloudProviderId) }
+                : undefined
+            }
             onOptionSelect={(opt) => {
               form.setValue('deploymentName', opt?.label ?? '');
               form.setValue('planId', '');
