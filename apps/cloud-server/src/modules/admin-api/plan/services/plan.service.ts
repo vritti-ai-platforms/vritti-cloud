@@ -1,22 +1,41 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  DataTableStateService,
+  type FieldMap,
+  FilterProcessor,
   NotFoundException,
   SelectOptionsQueryDto,
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
+import { type Column, and, sql } from '@vritti/api-sdk/drizzle-orm';
+import { plans, prices } from '@/db/schema';
+import { PriceService } from '../../price/services/price.service';
 import { PlanDto } from '../dto/entity/plan.dto';
 import type { CreatePlanDto } from '../dto/request/create-plan.dto';
 import type { UpdatePlanDto } from '../dto/request/update-plan.dto';
-import { PlansResponseDto } from '../dto/response/plans-response.dto';
+import { PlansTableResponseDto } from '../dto/response/plans-table-response.dto';
 import { PlanRepository } from '../repositories/plan.repository';
 
 @Injectable()
 export class PlanService {
   private readonly logger = new Logger(PlanService.name);
 
-  constructor(private readonly planRepository: PlanRepository) {}
+  private static readonly FIELD_MAP: FieldMap = {
+    name: { column: plans.name, type: 'string' },
+    code: { column: plans.code, type: 'string' },
+    priceCount: {
+      column: sql<number>`count(${prices.id})` as unknown as Column,
+      type: 'number',
+    },
+  };
+
+  constructor(
+    private readonly planRepository: PlanRepository,
+    private readonly priceService: PriceService,
+    private readonly dataTableStateService: DataTableStateService,
+  ) {}
 
   // Returns paginated plan options for the select component
   findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
@@ -50,12 +69,23 @@ export class PlanService {
     return { success: true, message: 'Plan created successfully.' };
   }
 
-  // Returns all plans mapped to DTOs with price counts
-  async findAll(): Promise<PlansResponseDto> {
-    const plans = await this.planRepository.findAllWithCounts();
-    const result = plans.map((plan) => PlanDto.from(plan, plan.priceCount));
-    this.logger.log(`Fetched all plans (${result.length})`);
-    return { result, count: result.length };
+  // Returns plans for the data table with server-stored filter/sort/search/pagination state
+  async findForTable(userId: string): Promise<PlansTableResponseDto> {
+    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'plans');
+    const where = and(
+      FilterProcessor.buildWhere(state.filters, PlanService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, PlanService.FIELD_MAP),
+    );
+    const { limit = 20, offset = 0 } = state.pagination ?? {};
+    const { rows, total } = await this.planRepository.findAllWithCounts({
+      where,
+      orderBy: FilterProcessor.buildOrderBy(state.sort, PlanService.FIELD_MAP),
+      limit,
+      offset,
+    });
+    const result = rows.map((plan) => PlanDto.from(plan, { priceCount: plan.priceCount }));
+    this.logger.log(`Fetched plans table (${total} results, limit: ${limit}, offset: ${offset})`);
+    return { result, count: total, state, activeViewId };
   }
 
   // Finds a plan by ID with canDelete flag; throws NotFoundException if not found
@@ -64,10 +94,15 @@ export class PlanService {
     if (!plan) {
       throw new NotFoundException('Plan not found.');
     }
-    const { priceCount, deploymentCount, orgCount } = await this.planRepository.getReferenceCounts(id);
+    const [priceCounts, refCounts] = await Promise.all([
+      this.priceService.getCountsForPlan(id),
+      this.planRepository.getReferenceCountsWithoutPrices(id),
+    ]);
+    const { priceCount, regionCount, providerCount } = priceCounts;
+    const { deploymentCount, orgCount } = refCounts;
     const canDelete = priceCount === 0 && deploymentCount === 0 && orgCount === 0;
     this.logger.log(`Fetched plan: ${id}`);
-    return PlanDto.from(plan, priceCount, canDelete);
+    return PlanDto.from(plan, { priceCount, regionCount, providerCount }, canDelete);
   }
 
   // Updates a plan by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -97,8 +132,11 @@ export class PlanService {
     if (!existing) {
       throw new NotFoundException('Plan not found.');
     }
-    const referenced = await this.planRepository.isReferenced(id);
-    if (referenced) {
+    const [priceCounts, refCounts] = await Promise.all([
+      this.priceService.getCountsForPlan(id),
+      this.planRepository.getReferenceCountsWithoutPrices(id),
+    ]);
+    if (priceCounts.priceCount > 0 || refCounts.deploymentCount > 0 || refCounts.orgCount > 0) {
       throw new ConflictException({
         label: 'Plan In Use',
         detail: `Cannot delete "${existing.name}" — it has prices or deployment assignments. Remove those first.`,

@@ -3,10 +3,14 @@ import type { AxiosError } from 'axios';
 import type { Plan } from '../../../schemas/admin/plans';
 import { getPlan } from '../../../services/admin/plans.service';
 
+export function planQueryKey(id: string) {
+  return ['admin', 'plans', id] as const;
+}
+
 // Fetches a single plan by ID
 export function usePlan(id: string, options?: Omit<UseQueryOptions<Plan, AxiosError>, 'queryKey' | 'queryFn'>) {
   return useQuery<Plan, AxiosError>({
-    queryKey: ['admin', 'plans', id],
+    queryKey: planQueryKey(id),
     queryFn: () => getPlan(id),
     ...options,
   });

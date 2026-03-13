@@ -5033,9 +5033,11 @@
         "tags": [
           "Admin - Plans"
         ]
-      },
+      }
+    },
+    "/admin-api/plans/table": {
       "get": {
-        "operationId": "PlanController_findAll",
+        "operationId": "PlanController_findForTable",
         "parameters": [],
         "responses": {
           "200": {
@@ -5043,7 +5045,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PlansResponseDto"
+                  "$ref": "#/components/schemas/PlansTableResponseDto"
                 }
               }
             }
@@ -5057,7 +5059,7 @@
             "bearer": []
           }
         ],
-        "summary": "List all plans",
+        "summary": "List plans for data table (server-stored state)",
         "tags": [
           "Admin - Plans"
         ]
@@ -9314,6 +9316,14 @@
             "type": "number",
             "example": 2
           },
+          "regionCount": {
+            "type": "number",
+            "example": 3
+          },
+          "providerCount": {
+            "type": "number",
+            "example": 2
+          },
           "canDelete": {
             "type": "boolean",
             "example": true
@@ -9329,10 +9339,12 @@
           "code",
           "createdAt",
           "priceCount",
+          "regionCount",
+          "providerCount",
           "canDelete"
         ]
       },
-      "PlansResponseDto": {
+      "PlansTableResponseDto": {
         "type": "object",
         "properties": {
           "result": {
@@ -9343,11 +9355,20 @@
           },
           "count": {
             "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
           }
         },
         "required": [
           "result",
-          "count"
+          "count",
+          "state"
         ]
       },
       "PlanSelectOptionDto": {

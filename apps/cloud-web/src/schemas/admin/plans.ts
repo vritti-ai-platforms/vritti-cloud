@@ -6,6 +6,8 @@ export interface Plan {
   code: string;
   content: string | null;
   priceCount: number;
+  regionCount: number;
+  providerCount: number;
   canDelete: boolean;
   createdAt: string;
   updatedAt: string | null;

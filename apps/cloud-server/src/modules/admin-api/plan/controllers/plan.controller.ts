@@ -1,11 +1,18 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SelectOptionsQueryDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk';
-import { ApiCreatePlan, ApiDeletePlan, ApiFindAllPlans, ApiFindPlansSelect, ApiFindPlanById, ApiUpdatePlan } from '../docs/plan.docs';
+import { SelectOptionsQueryDto, type SelectQueryResult, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import {
+  ApiCreatePlan,
+  ApiDeletePlan,
+  ApiFindForTablePlans,
+  ApiFindPlanById,
+  ApiFindPlansSelect,
+  ApiUpdatePlan,
+} from '../docs/plan.docs';
 import { PlanDto } from '../dto/entity/plan.dto';
-import { PlansResponseDto } from '../dto/response/plans-response.dto';
 import { CreatePlanDto } from '../dto/request/create-plan.dto';
 import { UpdatePlanDto } from '../dto/request/update-plan.dto';
+import { PlansTableResponseDto } from '../dto/response/plans-table-response.dto';
 import { PlanService } from '../services/plan.service';
 
 @ApiTags('Admin - Plans')
@@ -25,12 +32,12 @@ export class PlanController {
     return this.planService.create(dto);
   }
 
-  // Returns all plans
-  @Get()
-  @ApiFindAllPlans()
-  findAll(): Promise<PlansResponseDto> {
-    this.logger.log('GET /admin-api/plans');
-    return this.planService.findAll();
+  // Returns plans for the data table with server-stored filter/sort/search/pagination state
+  @Get('table')
+  @ApiFindForTablePlans()
+  findForTable(@UserId() userId: string): Promise<PlansTableResponseDto> {
+    this.logger.log('GET /admin-api/plans/table');
+    return this.planService.findForTable(userId);
   }
 
   // Returns paginated plan options for the select component

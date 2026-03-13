@@ -1,15 +1,18 @@
 import { axios } from '@vritti/quantum-ui/axios';
 import type { MutationResponse } from '@vritti/quantum-ui/api-response';
+import type { TableViewState } from '@vritti/quantum-ui/table-filter';
 import type { CreatePlanData, Plan, UpdatePlanData } from '@/schemas/admin/plans';
 
 export interface PlansResponse {
   result: Plan[];
   count: number;
+  state: TableViewState;
+  activeViewId: string | null;
 }
 
-// Fetches all plans
+// Fetches plans for the data table — server applies filter/sort state
 export function getPlans(): Promise<PlansResponse> {
-  return axios.get<PlansResponse>('admin-api/plans').then((r) => r.data);
+  return axios.get<PlansResponse>('admin-api/plans/table').then((r) => r.data);
 }
 
 // Fetches a single plan by ID

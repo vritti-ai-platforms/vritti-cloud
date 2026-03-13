@@ -20,13 +20,23 @@ export class PlanDto {
   @ApiProperty({ example: 2 })
   priceCount: number;
 
+  @ApiProperty({ example: 3 })
+  regionCount: number;
+
+  @ApiProperty({ example: 2 })
+  providerCount: number;
+
   @ApiProperty({ example: true })
   canDelete: boolean;
 
   @ApiPropertyOptional({ nullable: true })
   content: string | null;
 
-  static from(plan: Plan, priceCount = 0, canDelete = true): PlanDto {
+  static from(
+    plan: Plan,
+    counts: { priceCount?: number; regionCount?: number; providerCount?: number } = {},
+    canDelete = true,
+  ): PlanDto {
     const dto = new PlanDto();
     dto.id = plan.id;
     dto.name = plan.name;
@@ -34,7 +44,9 @@ export class PlanDto {
     dto.content = plan.content ?? null;
     dto.createdAt = plan.createdAt;
     dto.updatedAt = plan.updatedAt;
-    dto.priceCount = priceCount;
+    dto.priceCount = counts.priceCount ?? 0;
+    dto.regionCount = counts.regionCount ?? 0;
+    dto.providerCount = counts.providerCount ?? 0;
     dto.canDelete = canDelete;
     return dto;
   }

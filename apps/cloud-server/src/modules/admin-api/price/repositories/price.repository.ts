@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, asc, count, eq, SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, asc, count, countDistinct, eq, SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import { cloudProviders, Price, prices, regions } from '@/db/schema';
 import { PriceWithRelations } from '../dto/entity/price-detail.dto';
 
@@ -68,6 +68,23 @@ export class PriceRepository extends PrimaryBaseRepository<typeof prices> {
   // Finds a price matching the exact plan + industry + region + provider combination
   async findByComposite(planId: string, industryId: string, regionId: string, providerId: string) {
     return this.model.findFirst({ where: { planId, industryId, regionId, providerId } });
+  }
+
+  // Returns price, region, and provider counts for a given plan
+  async getCountsForPlan(planId: string): Promise<{ priceCount: number; regionCount: number; providerCount: number }> {
+    const result = await this.db
+      .select({
+        priceCount: count(prices.id),
+        regionCount: countDistinct(prices.regionId),
+        providerCount: countDistinct(prices.providerId),
+      })
+      .from(prices)
+      .where(eq(prices.planId, planId));
+    return {
+      priceCount: Number(result[0]?.priceCount ?? 0),
+      regionCount: Number(result[0]?.regionCount ?? 0),
+      providerCount: Number(result[0]?.providerCount ?? 0),
+    };
   }
 
   // Returns the number of prices referencing the given region

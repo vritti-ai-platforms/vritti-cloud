@@ -79,7 +79,7 @@ export const PlanViewPage = () => {
       />
 
       {/* Stat cards */}
-      <PricingStats />
+      <PricingStats plan={plan} />
 
       {/* Plan content inline editor */}
       <PlanContentCard plan={plan} />
@@ -210,52 +210,48 @@ const PlanContentCard = ({ plan }: PlanContentCardProps) => {
   );
 };
 
-// Stat cards — self-contained, shares query cache with PricingDataTable
-const PricingStats = () => {
-  const { id: planId } = useSlugParams();
-  const { data: response } = usePricesTable(planId ?? '');
-  const prices = response?.result ?? [];
-  const regionCount = new Set(prices.map((p) => p.regionId)).size;
-  const providerCount = new Set(prices.map((p) => p.providerId)).size;
+interface PricingStatsProps {
+  plan: Plan;
+}
 
-  return (
-    <div className="grid grid-cols-3 gap-4">
-      <Card>
-        <CardContent className="flex items-center gap-4 p-6">
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
-            <BadgeDollarSign className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Pricing Entries</p>
-            <p className="text-2xl font-semibold">{response?.count ?? 0}</p>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="flex items-center gap-4 p-6">
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
-            <Globe className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Regions Covered</p>
-            <p className="text-2xl font-semibold">{regionCount}</p>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardContent className="flex items-center gap-4 p-6">
-          <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
-            <Cloud className="h-6 w-6 text-primary" />
-          </div>
-          <div>
-            <p className="text-sm text-muted-foreground">Providers</p>
-            <p className="text-2xl font-semibold">{providerCount}</p>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-};
+// Stat cards — counts come from the plan API response
+const PricingStats = ({ plan }: PricingStatsProps) => (
+  <div className="grid grid-cols-3 gap-4">
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+          <BadgeDollarSign className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Pricing Entries</p>
+          <p className="text-2xl font-semibold">{plan.priceCount}</p>
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+          <Globe className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Regions Covered</p>
+          <p className="text-2xl font-semibold">{plan.regionCount}</p>
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+          <Cloud className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Providers</p>
+          <p className="text-2xl font-semibold">{plan.providerCount}</p>
+        </div>
+      </CardContent>
+    </Card>
+  </div>
+);
 
 // DataTable only — self-contained with its own data fetching
 const PricingDataTable = () => {

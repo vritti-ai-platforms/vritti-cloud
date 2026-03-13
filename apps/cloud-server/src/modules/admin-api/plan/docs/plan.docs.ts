@@ -4,7 +4,7 @@ import { PlanDto } from '../dto/entity/plan.dto';
 import { CreatePlanDto } from '../dto/request/create-plan.dto';
 import { UpdatePlanDto } from '../dto/request/update-plan.dto';
 import { PlanSelectResponseDto } from '../dto/response/plan-select-response.dto';
-import { PlansResponseDto } from '../dto/response/plans-response.dto';
+import { PlansTableResponseDto } from '../dto/response/plans-table-response.dto';
 
 export function ApiCreatePlan() {
   return applyDecorators(
@@ -32,10 +32,10 @@ export function ApiFindPlansSelect() {
   );
 }
 
-export function ApiFindAllPlans() {
+export function ApiFindForTablePlans() {
   return applyDecorators(
-    ApiOperation({ summary: 'List all plans' }),
-    ApiResponse({ status: 200, description: 'Plans retrieved successfully.', type: PlansResponseDto }),
+    ApiOperation({ summary: 'List plans for data table (server-stored state)' }),
+    ApiResponse({ status: 200, description: 'Plans retrieved successfully.', type: PlansTableResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }

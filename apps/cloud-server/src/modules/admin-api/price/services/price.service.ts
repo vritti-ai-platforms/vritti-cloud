@@ -76,6 +76,11 @@ export class PriceService {
     return { success: true, message: 'Price updated successfully.' };
   }
 
+  // Returns price, region, and provider counts for a given plan
+  async getCountsForPlan(planId: string): Promise<{ priceCount: number; regionCount: number; providerCount: number }> {
+    return this.priceRepository.getCountsForPlan(planId);
+  }
+
   // Deletes a price by ID; throws NotFoundException if not found
   async delete(id: string): Promise<SuccessResponseDto> {
     const existing = await this.priceRepository.findById(id);
