@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, MaxLength, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreatePlanDto {
   @ApiProperty({ description: 'Display name of the plan', example: 'Pro' })
@@ -13,4 +13,9 @@ export class CreatePlanDto {
   @MinLength(1)
   @MaxLength(100)
   code: string;
+
+  @ApiPropertyOptional({ description: 'Rich content stored as Lexical JSON', nullable: true })
+  @IsOptional()
+  @IsString()
+  content?: string;
 }

@@ -23,11 +23,15 @@ export class PlanDto {
   @ApiProperty({ example: true })
   canDelete: boolean;
 
+  @ApiPropertyOptional({ nullable: true })
+  content: string | null;
+
   static from(plan: Plan, priceCount = 0, canDelete = true): PlanDto {
     const dto = new PlanDto();
     dto.id = plan.id;
     dto.name = plan.name;
     dto.code = plan.code;
+    dto.content = plan.content ?? null;
     dto.createdAt = plan.createdAt;
     dto.updatedAt = plan.updatedAt;
     dto.priceCount = priceCount;

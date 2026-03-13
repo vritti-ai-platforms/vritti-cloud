@@ -9691,6 +9691,11 @@
             "type": "string",
             "description": "Unique code identifier for the plan",
             "example": "pro"
+          },
+          "content": {
+            "type": "string",
+            "description": "Rich content stored as Lexical JSON",
+            "nullable": true
           }
         },
         "required": [
@@ -9729,6 +9734,10 @@
           "canDelete": {
             "type": "boolean",
             "example": true
+          },
+          "content": {
+            "type": "object",
+            "nullable": true
           }
         },
         "required": [
@@ -9806,6 +9815,11 @@
             "type": "string",
             "description": "Unique code identifier for the plan",
             "example": "pro"
+          },
+          "content": {
+            "type": "string",
+            "description": "Rich content stored as Lexical JSON",
+            "nullable": true
           }
         }
       },
@@ -10279,6 +10293,11 @@
           "currency": {
             "type": "object",
             "example": "INR",
+            "nullable": true
+          },
+          "content": {
+            "type": "object",
+            "description": "Rich content stored as Lexical JSON",
             "nullable": true
           }
         },

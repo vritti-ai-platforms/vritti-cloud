@@ -64,6 +64,7 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
         id: plans.id,
         name: plans.name,
         code: plans.code,
+        content: plans.content,
         createdAt: plans.createdAt,
         updatedAt: plans.updatedAt,
         priceCount: count(prices.id),

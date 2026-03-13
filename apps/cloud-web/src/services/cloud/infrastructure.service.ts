@@ -24,6 +24,7 @@ export interface PlanOption {
   id: string;
   name: string;
   code: string;
+  content: string | null;
   price: string | null;
   currency: string | null;
 }
