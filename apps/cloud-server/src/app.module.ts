@@ -25,7 +25,7 @@ import { MediaModule } from './modules/cloud-api/media/media.module';
 import { OnboardingModule } from './modules/cloud-api/onboarding/onboarding.module';
 import { OrganizationModule } from './modules/cloud-api/organization/organization.module';
 import { RegionModule } from './modules/cloud-api/region/region.module';
-import { TenantModule } from './modules/cloud-api/tenant/tenant.module';
+
 import { UserModule } from './modules/cloud-api/user/user.module';
 
 @Module({
@@ -97,7 +97,7 @@ import { UserModule } from './modules/cloud-api/user/user.module';
     // Root module (health + CSRF controllers)
     RootModule,
     // Cloud API modules
-    TenantModule,
+
     UserModule,
     OnboardingModule,
     AuthModule,
@@ -114,7 +114,6 @@ import { UserModule } from './modules/cloud-api/user/user.module';
       {
         path: 'cloud-api',
         children: [
-          TenantModule,
           UserModule,
           OnboardingModule,
           AuthModule,

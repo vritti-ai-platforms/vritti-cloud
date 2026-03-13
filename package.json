@@ -14,7 +14,20 @@
     "test:e2e": "nx run-many --target=e2e --all",
     "check": "nx run-many --target=check --all",
     "graph": "nx graph",
-    "release": "nx release"
+    "release": "nx release",
+    "db:generate": "nx run vritti-cloud-server:db:generate",
+    "db:push": "nx run vritti-cloud-server:db:push",
+    "db:migrate": "nx run vritti-cloud-server:db:migrate",
+    "db:studio": "nx run vritti-cloud-server:db:studio",
+    "db:reset": "nx run vritti-cloud-server:db:reset",
+    "db:drop": "nx run vritti-cloud-server:db:drop",
+    "db:start": "nx run vritti-cloud-server:db:start",
+    "db:stop": "nx run vritti-cloud-server:db:stop",
+    "db:generate:w": "nx run vritti-cloud-server:db:generate:w",
+    "db:push:w": "nx run vritti-cloud-server:db:push:w",
+    "db:migrate:w": "nx run vritti-cloud-server:db:migrate:w",
+    "db:studio:w": "nx run vritti-cloud-server:db:studio:w",
+    "db:reset:w": "nx run vritti-cloud-server:db:reset:w"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",

@@ -14,7 +14,6 @@ export * from './price';
 export * from './cloud-provider';
 export * from './region';
 export * from './region-provider';
-export * from './tenant';
 export * from './user';
 export * from './verification';
 export * from './media';
