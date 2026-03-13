@@ -9,7 +9,6 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { cloudProviders, prices, regions } from '@/db/schema';
-import { PriceDto } from '../dto/entity/price.dto';
 import { PriceDetailDto } from '../dto/entity/price-detail.dto';
 import type { CreatePriceDto } from '../dto/request/create-price.dto';
 import type { UpdatePriceDto } from '../dto/request/update-price.dto';
@@ -52,27 +51,6 @@ export class PriceService {
     return { success: true, message: 'Price created successfully.' };
   }
 
-  // Returns all prices mapped to DTOs
-  async findAll(): Promise<PriceDto[]> {
-    const prices = await this.priceRepository.findAll();
-    return prices.map((price) => PriceDto.from(price));
-  }
-
-  // Finds a price by ID; throws NotFoundException if not found
-  async findById(id: string): Promise<PriceDto> {
-    const price = await this.priceRepository.findById(id);
-    if (!price) {
-      throw new NotFoundException('Price not found.');
-    }
-    return PriceDto.from(price);
-  }
-
-  // Returns all prices for a given plan with joined region and provider names
-  async findByPlanId(planId: string): Promise<PriceDetailDto[]> {
-    const prices = await this.priceRepository.findByPlanIdWithRelations(planId);
-    return prices.map((row) => PriceDetailDto.fromWithRelations(row));
-  }
-
   // Returns paginated prices for a plan applying stored filter/sort/search/pagination state
   async findForTable(userId: string, planId: string): Promise<PricesTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, `prices-${planId}`);
@@ -83,6 +61,7 @@ export class PriceService {
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.priceRepository.findByPlanIdWithFilters(planId, where, orderBy, limit, offset);
     const result = rows.map((row) => PriceDetailDto.fromWithRelations(row));
+    this.logger.log(`Fetched prices table for plan: ${planId} (${total} results, limit: ${limit}, offset: ${offset})`);
     return { result, count: total, state, activeViewId };
   }
 

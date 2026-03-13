@@ -3,9 +3,9 @@ import { useUpdateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
-import { TextField } from '@vritti/quantum-ui/TextField';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { TextField } from '@vritti/quantum-ui/TextField';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import type { Deployment } from '@/schemas/admin/deployments';
@@ -22,7 +22,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
     resolver: zodResolver(updateDeploymentSchema),
     defaultValues: {
       name: deployment.name,
-      nexusUrl: deployment.nexusUrl,
+      url: deployment.url,
       regionId: deployment.regionId,
       cloudProviderId: deployment.cloudProviderId,
       type: deployment.type,
@@ -37,7 +37,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
   return (
     <Form form={form} mutation={updateMutation} showRootError transformSubmit={(data) => ({ id: deployment.id, data })}>
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
-      <TextField name="nexusUrl" label="Nexus URL" placeholder="https://nexus-us-east.vritti.io" />
+      <TextField name="url" label="URL" placeholder="https://nexus-us-east.vrittiai.com" />
       <RegionSelector
         name="regionId"
         label="Region"

@@ -49,6 +49,7 @@ export class RegionService {
 
   // Returns paginated region options for the select component
   findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched region select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.regionRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
@@ -89,6 +90,7 @@ export class RegionService {
       offset,
     });
     const result = rows.map((region) => RegionDto.from(region, region.providerCount, region.providers ?? []));
+    this.logger.log(`Fetched regions table (${total} results, limit: ${limit}, offset: ${offset})`);
     return { result, count: total, state, activeViewId };
   }
 
@@ -115,6 +117,7 @@ export class RegionService {
       isAssigned: assignedIds.has(p.id),
       deploymentCount: providerDeploymentCounts.get(p.id) ?? 0,
     }));
+    this.logger.log(`Fetched region: ${id}`);
     return RegionDto.from(region, assignedIds.size, providerItems, deploymentCount, priceCount);
   }
 

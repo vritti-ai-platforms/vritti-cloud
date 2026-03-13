@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."deployments" RENAME COLUMN "nexus_url" TO "url";

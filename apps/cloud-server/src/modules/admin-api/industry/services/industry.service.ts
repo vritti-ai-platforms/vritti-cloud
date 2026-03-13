@@ -33,6 +33,7 @@ export class IndustryService {
 
   // Returns paginated industry options for the select component
   findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched industry select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.industryRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
@@ -74,16 +75,8 @@ export class IndustryService {
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.industryRepository.findAllAndCount({ where, orderBy, limit, offset });
     const referencedIds = await this.industryRepository.findReferencedIds(result.map((r) => r.id));
+    this.logger.log(`Fetched industries table (${count} results, limit: ${limit}, offset: ${offset})`);
     return { result: result.map((r) => IndustryDto.from(r, !referencedIds.has(r.id))), count, state, activeViewId };
-  }
-
-  // Finds an industry by ID; throws NotFoundException if not found
-  async findById(id: string): Promise<IndustryDto> {
-    const industry = await this.industryRepository.findById(id);
-    if (!industry) {
-      throw new NotFoundException('Industry not found.');
-    }
-    return IndustryDto.from(industry);
   }
 
   // Updates an industry by ID; throws NotFoundException if not found, ConflictException on duplicate code

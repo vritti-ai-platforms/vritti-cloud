@@ -1,7 +1,7 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import { FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
-import { IndustrySelector } from '@vritti/quantum-ui/selects/IndustrySelect';
+import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { UploadFile } from '@vritti/quantum-ui/UploadFile';
 import { ArrowRight } from 'lucide-react';

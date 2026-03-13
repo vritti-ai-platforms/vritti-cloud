@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
 import type { OrgSize } from '@/db/schema';
 import { OrgSizeValues } from '@/db/schema';
 
@@ -26,20 +26,20 @@ export class CreateOrganizationDto {
   @IsEnum(OrgSizeValues)
   size: OrgSize;
 
-  @ApiPropertyOptional({ description: 'Plan ID for the organization', example: '550e8400-e29b-41d4-a716-446655440000' })
-  @IsOptional()
+  @ApiProperty({ description: 'Plan ID for the organization', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @IsNotEmpty()
   @IsUUID()
-  planId?: string;
+  planId: string;
 
-  @ApiPropertyOptional({ description: 'Industry ID for the organization', example: '550e8400-e29b-41d4-a716-446655440001' })
-  @IsOptional()
+  @ApiProperty({ description: 'Industry ID for the organization', example: '550e8400-e29b-41d4-a716-446655440001' })
+  @IsNotEmpty()
   @IsUUID()
-  industryId?: string;
+  industryId: string;
 
-  @ApiPropertyOptional({ description: 'Deployment ID for the organization', example: '550e8400-e29b-41d4-a716-446655440002' })
-  @IsOptional()
+  @ApiProperty({ description: 'Deployment ID for the organization', example: '550e8400-e29b-41d4-a716-446655440002' })
+  @IsNotEmpty()
   @IsUUID()
-  deploymentId?: string;
+  deploymentId: string;
 
   @ApiPropertyOptional({ description: 'Media asset ID for the organization logo', example: 'media-uuid-here' })
   @IsOptional()

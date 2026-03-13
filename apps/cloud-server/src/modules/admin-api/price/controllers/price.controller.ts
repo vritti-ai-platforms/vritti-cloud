@@ -4,14 +4,9 @@ import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import {
   ApiCreatePrice,
   ApiDeletePrice,
-  ApiFindAllPrices,
-  ApiFindPriceById,
-  ApiFindPricesByPlan,
   ApiFindPricesForTable,
   ApiUpdatePrice,
 } from '../docs/price.docs';
-import { PriceDetailDto } from '../dto/entity/price-detail.dto';
-import { PriceDto } from '../dto/entity/price.dto';
 import { CreatePriceDto } from '../dto/request/create-price.dto';
 import { UpdatePriceDto } from '../dto/request/update-price.dto';
 import { PricesTableResponseDto } from '../dto/response/prices-table-response.dto';
@@ -34,36 +29,12 @@ export class PriceController {
     return this.priceService.create(dto);
   }
 
-  // Returns all prices
-  @Get()
-  @ApiFindAllPrices()
-  findAll(): Promise<PriceDto[]> {
-    this.logger.log('GET /admin-api/prices');
-    return this.priceService.findAll();
-  }
-
   // Returns prices for a plan for the data table
   @Get('plan/:planId/table')
   @ApiFindPricesForTable()
   findForTable(@UserId() userId: string, @Param('planId') planId: string): Promise<PricesTableResponseDto> {
     this.logger.log(`GET /admin-api/prices/plan/${planId}/table`);
     return this.priceService.findForTable(userId, planId);
-  }
-
-  // Returns all prices for a given plan
-  @Get('plan/:planId')
-  @ApiFindPricesByPlan()
-  findByPlanId(@Param('planId') planId: string): Promise<PriceDetailDto[]> {
-    this.logger.log(`GET /admin-api/prices/plan/${planId}`);
-    return this.priceService.findByPlanId(planId);
-  }
-
-  // Returns a single price by ID
-  @Get(':id')
-  @ApiFindPriceById()
-  findById(@Param('id') id: string): Promise<PriceDto> {
-    this.logger.log(`GET /admin-api/prices/${id}`);
-    return this.priceService.findById(id);
   }
 
   // Updates a price by ID

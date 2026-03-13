@@ -18,7 +18,7 @@ export class CreateDeploymentDto {
   @IsString()
   @IsUrl({ require_tld: false })
   @MaxLength(500)
-  nexusUrl: string;
+  url: string;
 
   @ApiProperty({ description: 'Shared secret for webhook authentication', example: 'whsec_abc123...' })
   @IsString()

@@ -23,6 +23,7 @@ export class DeploymentService {
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
   findForSelect(query: DeploymentSelectQueryDto): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched deployment select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.deploymentRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
@@ -52,6 +53,7 @@ export class DeploymentService {
   async findAll(): Promise<DeploymentsResponseDto> {
     const deployments = await this.deploymentRepository.findAll();
     const result = deployments.map((deployment) => DeploymentDto.from(deployment));
+    this.logger.log(`Fetched all deployments (${result.length})`);
     return { result, count: result.length };
   }
 
@@ -64,6 +66,7 @@ export class DeploymentService {
     if (!deployment) {
       throw new NotFoundException('Deployment not found.');
     }
+    this.logger.log(`Fetched deployment: ${id}`);
     return DeploymentDto.from(deployment, organizationCount);
   }
 
@@ -126,6 +129,7 @@ export class DeploymentService {
 
   // Returns all available plans with prices and assignment status for the deployment
   getPlanAssignments(deploymentId: string): Promise<DeploymentPlanAssignmentDto[]> {
+    this.logger.log(`Fetched plan assignments for deployment: ${deploymentId}`);
     return this.deploymentIndustryPlanRepository.findPlanAssignmentsForDeployment(deploymentId);
   }
 }

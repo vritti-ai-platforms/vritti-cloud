@@ -7,7 +7,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog, useTheme } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { SelectFilter } from '@vritti/quantum-ui/Select';
-import { CloudProviderFilter } from '@vritti/quantum-ui/selects/CloudProviderFilter';
+import { CloudProviderFilter } from '@vritti/quantum-ui/selects/cloud-provider';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
 import { CheckCircle2, Eye, Globe, Plus, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';

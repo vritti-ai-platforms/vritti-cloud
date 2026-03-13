@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException } from '@vritti/api-sdk';
 import { RegionRepository } from '@/modules/admin-api/region/repositories/region.repository';
 import { RegionProviderRepository } from '@/modules/admin-api/region/repositories/region-provider.repository';
@@ -7,6 +7,8 @@ import type { RegionOptionDto } from '../dto/response/region-option.dto';
 
 @Injectable()
 export class RegionService {
+  private readonly logger = new Logger(RegionService.name);
+
   constructor(
     private readonly regionRepository: RegionRepository,
     private readonly regionProviderRepository: RegionProviderRepository,
@@ -15,6 +17,7 @@ export class RegionService {
   // Returns all regions as lightweight option DTOs
   async findAll(): Promise<RegionOptionDto[]> {
     const regions = await this.regionRepository.findAll();
+    this.logger.log(`Fetched all regions (${regions.length})`);
     return regions.map((r) => ({
       id: r.id,
       name: r.name,
@@ -29,6 +32,7 @@ export class RegionService {
     const region = await this.regionRepository.findById(regionId);
     if (!region) throw new NotFoundException('Region not found.');
     const providers = await this.regionProviderRepository.findProvidersByRegionId(regionId);
+    this.logger.log(`Fetched cloud providers for region: ${regionId}`);
     return providers.map((p) => ({ id: p.id, name: p.name, code: p.code }));
   }
 }

@@ -1,7 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
-import { IndustryDto } from '../dto/entity/industry.dto';
 import { CreateIndustryDto } from '../dto/request/create-industry.dto';
 import { UpdateIndustryDto } from '../dto/request/update-industry.dto';
 import { IndustrySelectResponseDto } from '../dto/response/industry-select-response.dto';
@@ -38,16 +37,6 @@ export function ApiFindForTableIndustries() {
     ApiOperation({ summary: 'List industries for data table (server-stored state)' }),
     ApiResponse({ status: 200, description: 'Industries retrieved successfully.', type: IndustryTableResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-export function ApiFindIndustryById() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get an industry by ID' }),
-    ApiParam({ name: 'id', description: 'Industry UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Industry retrieved successfully.', type: IndustryDto }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Industry not found.' }),
   );
 }
 

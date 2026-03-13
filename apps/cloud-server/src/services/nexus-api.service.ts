@@ -11,7 +11,7 @@ export class NexusApiService {
 
   // Creates an organization in api-nexus and returns the nexus org ID
   async createOrganization(
-    nexusUrl: string,
+    url: string,
     webhookSecret: string,
     data: {
       name: string;
@@ -19,7 +19,7 @@ export class NexusApiService {
       size: string;
     },
   ): Promise<{ id: string }> {
-    const response = await axios.post<{ id: string }>(`${nexusUrl}/organizations/webhook`, data, {
+    const response = await axios.post<{ id: string }>(`${url}/organizations/webhook`, data, {
       headers: {
         'Content-Type': 'application/json',
         'X-Webhook-Secret': webhookSecret,

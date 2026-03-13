@@ -1,15 +1,13 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto, UserId, type SelectQueryResult } from '@vritti/api-sdk';
+import { type SelectQueryResult, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import {
   ApiCreateCloudProvider,
   ApiDeleteCloudProvider,
-  ApiFindCloudProviderById,
   ApiFindCloudProvidersSelect,
   ApiFindForTableCloudProviders,
   ApiUpdateCloudProvider,
 } from '../docs/cloud-provider.docs';
-import { CloudProviderDto } from '../dto/entity/cloud-provider.dto';
 import { CloudProviderSelectQueryDto } from '../dto/request/cloud-provider-select-query.dto';
 import { CreateCloudProviderDto } from '../dto/request/create-cloud-provider.dto';
 import { UpdateCloudProviderDto } from '../dto/request/update-cloud-provider.dto';
@@ -47,14 +45,6 @@ export class CloudProviderController {
   findForTable(@UserId() userId: string): Promise<CloudProviderTableResponseDto> {
     this.logger.log('GET /admin-api/cloud-providers/table');
     return this.cloudProviderService.findForTable(userId);
-  }
-
-  // Returns a single cloud provider by ID
-  @Get(':id')
-  @ApiFindCloudProviderById()
-  findById(@Param('id') id: string): Promise<CloudProviderDto> {
-    this.logger.log(`GET /admin-api/cloud-providers/${id}`);
-    return this.cloudProviderService.findById(id);
   }
 
   // Updates a cloud provider by ID

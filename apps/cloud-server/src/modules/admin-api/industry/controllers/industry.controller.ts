@@ -6,10 +6,8 @@ import {
   ApiDeleteIndustry,
   ApiFindForTableIndustries,
   ApiFindIndustriesSelect,
-  ApiFindIndustryById,
   ApiUpdateIndustry,
 } from '../docs/industry.docs';
-import { IndustryDto } from '../dto/entity/industry.dto';
 import { CreateIndustryDto } from '../dto/request/create-industry.dto';
 import { UpdateIndustryDto } from '../dto/request/update-industry.dto';
 import { IndustryTableResponseDto } from '../dto/response/industries-response.dto';
@@ -50,14 +48,6 @@ export class IndustryController {
   findForSelect(@Query() query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
     this.logger.log('GET /admin-api/industries/select');
     return this.industryService.findForSelect(query);
-  }
-
-  // Returns a single industry by ID
-  @Get(':id')
-  @ApiFindIndustryById()
-  findById(@Param('id') id: string): Promise<IndustryDto> {
-    this.logger.log(`GET /admin-api/industries/${id}`);
-    return this.industryService.findById(id);
   }
 
   // Updates an industry by ID

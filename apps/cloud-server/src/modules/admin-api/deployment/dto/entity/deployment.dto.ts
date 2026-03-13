@@ -11,7 +11,7 @@ export class DeploymentDto {
   name: string;
 
   @ApiProperty({ example: 'https://nexus-us-east.vritti.io' })
-  nexusUrl: string;
+  url: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   regionId: string;
@@ -51,7 +51,7 @@ export class DeploymentDto {
     const dto = new DeploymentDto();
     dto.id = deployment.id;
     dto.name = deployment.name;
-    dto.nexusUrl = deployment.nexusUrl;
+    dto.url = deployment.url;
     dto.regionId = deployment.regionId;
     dto.cloudProviderId = deployment.cloudProviderId;
     dto.status = deployment.status;

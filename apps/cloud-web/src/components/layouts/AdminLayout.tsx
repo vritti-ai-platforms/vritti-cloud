@@ -1,6 +1,6 @@
 import { QueryErrorBoundary } from '@vritti/quantum-ui/ErrorBoundary';
 import { Sidebar, SidebarInset, type SidebarNavGroup, SidebarProvider } from '@vritti/quantum-ui/Sidebar';
-import { Building2, Cloud, CreditCard, MapPin, Server } from 'lucide-react';
+import { Building2, Cloud, CreditCard, Landmark, MapPin, Server } from 'lucide-react';
 import { Outlet } from 'react-router-dom';
 import { TopBar } from './TopBar';
 
@@ -13,6 +13,7 @@ const navGroups: SidebarNavGroup[] = [
       { title: 'Industries', icon: Building2, path: '/industries' },
       { title: 'Plans', icon: CreditCard, path: '/plans' },
       { title: 'Deployments', icon: Server, path: '/deployments' },
+      { title: 'Organizations', icon: Landmark, path: '/organizations' },
     ],
   },
 ];

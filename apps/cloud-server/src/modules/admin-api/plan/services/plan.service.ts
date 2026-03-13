@@ -20,6 +20,7 @@ export class PlanService {
 
   // Returns paginated plan options for the select component
   findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched plan select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.planRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
@@ -53,6 +54,7 @@ export class PlanService {
   async findAll(): Promise<PlansResponseDto> {
     const plans = await this.planRepository.findAllWithCounts();
     const result = plans.map((plan) => PlanDto.from(plan, plan.priceCount));
+    this.logger.log(`Fetched all plans (${result.length})`);
     return { result, count: result.length };
   }
 
@@ -64,6 +66,7 @@ export class PlanService {
     }
     const { priceCount, deploymentCount, orgCount } = await this.planRepository.getReferenceCounts(id);
     const canDelete = priceCount === 0 && deploymentCount === 0 && orgCount === 0;
+    this.logger.log(`Fetched plan: ${id}`);
     return PlanDto.from(plan, priceCount, canDelete);
   }
 

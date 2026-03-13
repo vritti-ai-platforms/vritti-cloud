@@ -33,6 +33,7 @@ export class CloudProviderService {
 
   // Returns paginated cloud provider options for the select component, optionally filtered by region
   findForSelect(query: CloudProviderSelectQueryDto): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched provider select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.cloudProviderRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
@@ -76,16 +77,8 @@ export class CloudProviderService {
     const result = rows.map((provider) =>
       CloudProviderDto.from(provider, provider.regionCount, provider.deploymentCount),
     );
+    this.logger.log(`Fetched providers table (${total} results, limit: ${limit}, offset: ${offset})`);
     return { result, count: total, state, activeViewId };
-  }
-
-  // Finds a cloud provider by ID; throws NotFoundException if not found
-  async findById(id: string): Promise<CloudProviderDto> {
-    const provider = await this.cloudProviderRepository.findById(id);
-    if (!provider) {
-      throw new NotFoundException('Provider not found.');
-    }
-    return CloudProviderDto.from(provider);
   }
 
   // Updates a cloud provider by ID; throws NotFoundException if not found

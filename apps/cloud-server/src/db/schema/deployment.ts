@@ -7,7 +7,7 @@ import { regions } from './region';
 export const deployments = cloudSchema.table('deployments', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 255 }).notNull(),
-  nexusUrl: varchar('nexus_url', { length: 500 }).notNull(),
+  url: varchar('url', { length: 500 }).notNull(),
   webhookSecret: varchar('webhook_secret', { length: 500 }).notNull(),
   regionId: uuid('region_id')
     .notNull()

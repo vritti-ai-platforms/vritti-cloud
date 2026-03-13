@@ -1,7 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
-import { CloudProviderDto } from '../dto/entity/cloud-provider.dto';
 import { CreateCloudProviderDto } from '../dto/request/create-cloud-provider.dto';
 import { UpdateCloudProviderDto } from '../dto/request/update-cloud-provider.dto';
 import { CloudProviderSelectResponseDto } from '../dto/response/cloud-provider-select-response.dto';
@@ -43,16 +42,6 @@ export function ApiFindForTableCloudProviders() {
       type: CloudProviderTableResponseDto,
     }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-export function ApiFindCloudProviderById() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get a cloud provider by ID' }),
-    ApiParam({ name: 'id', description: 'Cloud provider UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Cloud provider retrieved successfully.', type: CloudProviderDto }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Cloud provider not found.' }),
   );
 }
 

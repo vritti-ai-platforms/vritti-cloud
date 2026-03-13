@@ -10,27 +10,9 @@ export class PriceRepository extends PrimaryBaseRepository<typeof prices> {
     super(database, prices);
   }
 
-  // Returns all prices ordered by creation date descending
-  async findAll(): Promise<Price[]> {
-    return this.model.findMany({ orderBy: { createdAt: 'desc' } });
-  }
-
   // Finds a price by its unique identifier
   async findById(id: string): Promise<Price | undefined> {
     return this.model.findFirst({ where: { id } });
-  }
-
-  // Returns all prices for a given plan
-  async findByPlanId(planId: string): Promise<Price[]> {
-    return this.model.findMany({ where: { planId } });
-  }
-
-  // Returns all prices for a plan joined with region and provider names
-  async findByPlanIdWithRelations(planId: string): Promise<PriceWithRelations[]> {
-    return (await this.model.findMany({
-      where: { planId },
-      with: { region: true, cloudProvider: true },
-    })) as unknown as PriceWithRelations[];
   }
 
   // Returns paginated prices for a plan with JOINs, applying where/orderBy/limit/offset

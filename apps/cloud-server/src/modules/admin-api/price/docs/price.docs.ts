@@ -1,6 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { PriceDetailDto } from '../dto/entity/price-detail.dto';
 import { PriceDto } from '../dto/entity/price.dto';
 import { CreatePriceDto } from '../dto/request/create-price.dto';
 import { UpdatePriceDto } from '../dto/request/update-price.dto';
@@ -17,39 +16,12 @@ export function ApiCreatePrice() {
   );
 }
 
-export function ApiFindAllPrices() {
-  return applyDecorators(
-    ApiOperation({ summary: 'List all prices' }),
-    ApiResponse({ status: 200, description: 'Prices retrieved successfully.', type: PriceDto, isArray: true }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
 export function ApiFindPricesForTable() {
   return applyDecorators(
     ApiOperation({ summary: 'List prices for a plan in data table format' }),
     ApiParam({ name: 'planId', description: 'Plan UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiResponse({ status: 200, description: 'Prices retrieved.', type: PricesTableResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-export function ApiFindPricesByPlan() {
-  return applyDecorators(
-    ApiOperation({ summary: 'List all prices for a plan' }),
-    ApiParam({ name: 'planId', description: 'Plan UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Prices retrieved successfully.', type: PriceDetailDto, isArray: true }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-export function ApiFindPriceById() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get a price by ID' }),
-    ApiParam({ name: 'id', description: 'Price UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Price retrieved successfully.', type: PriceDto }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Price not found.' }),
   );
 }
 

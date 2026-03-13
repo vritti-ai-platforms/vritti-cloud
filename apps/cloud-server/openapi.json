@@ -3514,48 +3514,6 @@
       }
     },
     "/admin-api/cloud-providers/{id}": {
-      "get": {
-        "operationId": "CloudProviderController_findById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Cloud provider UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Cloud provider retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/CloudProviderDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Cloud provider not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a cloud provider by ID",
-        "tags": [
-          "Admin - Cloud Providers"
-        ]
-      },
       "patch": {
         "operationId": "CloudProviderController_update",
         "parameters": [
@@ -4815,48 +4773,6 @@
       }
     },
     "/admin-api/industries/{id}": {
-      "get": {
-        "operationId": "IndustryController_findById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Industry UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Industry retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/IndustryDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Industry not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get an industry by ID",
-        "tags": [
-          "Admin - Industries"
-        ]
-      },
       "patch": {
         "operationId": "IndustryController_update",
         "parameters": [
@@ -4955,6 +4871,121 @@
         "summary": "Delete an industry",
         "tags": [
           "Admin - Industries"
+        ]
+      }
+    },
+    "/admin-api/organizations/table": {
+      "get": {
+        "operationId": "OrganizationController_findForTable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Organizations retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organizations for data table (server-stored state)",
+        "tags": [
+          "Admin - Organizations"
+        ]
+      }
+    },
+    "/admin-api/organizations/{id}": {
+      "get": {
+        "operationId": "OrganizationController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Organization UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationDetailDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Organization not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get an organization by ID",
+        "tags": [
+          "Admin - Organizations"
+        ]
+      }
+    },
+    "/admin-api/organizations/{id}/members": {
+      "get": {
+        "operationId": "OrganizationController_findMembers",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Organization UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization members retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationMemberTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organization members for data table (server-stored state)",
+        "tags": [
+          "Admin - Organizations"
         ]
       }
     },
@@ -5345,37 +5376,6 @@
         "tags": [
           "Admin - Prices"
         ]
-      },
-      "get": {
-        "operationId": "PriceController_findAll",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Prices retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PriceDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List all prices",
-        "tags": [
-          "Admin - Prices"
-        ]
       }
     },
     "/admin-api/prices/plan/{planId}/table": {
@@ -5419,93 +5419,7 @@
         ]
       }
     },
-    "/admin-api/prices/plan/{planId}": {
-      "get": {
-        "operationId": "PriceController_findByPlanId",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "description": "Plan UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Prices retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PriceDetailDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List all prices for a plan",
-        "tags": [
-          "Admin - Prices"
-        ]
-      }
-    },
     "/admin-api/prices/{id}": {
-      "get": {
-        "operationId": "PriceController_findById",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Price UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Price retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PriceDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Price not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a price by ID",
-        "tags": [
-          "Admin - Prices"
-        ]
-      },
       "patch": {
         "operationId": "PriceController_update",
         "parameters": [
@@ -8433,7 +8347,7 @@
             "description": "Display name of the deployment",
             "example": "US East Production"
           },
-          "nexusUrl": {
+          "url": {
             "type": "string",
             "description": "Base URL of the api-nexus instance",
             "example": "https://nexus-us-east.vritti.io"
@@ -8474,7 +8388,7 @@
         },
         "required": [
           "name",
-          "nexusUrl",
+          "url",
           "webhookSecret",
           "regionId",
           "cloudProviderId",
@@ -8492,7 +8406,7 @@
             "type": "string",
             "example": "US East Production"
           },
-          "nexusUrl": {
+          "url": {
             "type": "string",
             "example": "https://nexus-us-east.vritti.io"
           },
@@ -8552,7 +8466,7 @@
         "required": [
           "id",
           "name",
-          "nexusUrl",
+          "url",
           "regionId",
           "cloudProviderId",
           "status",
@@ -8623,7 +8537,7 @@
             "description": "Display name of the deployment",
             "example": "US East Production"
           },
-          "nexusUrl": {
+          "url": {
             "type": "string",
             "description": "Base URL of the api-nexus instance",
             "example": "https://nexus-us-east.vritti.io"
@@ -9063,6 +8977,290 @@
             "example": "Healthcare and medical services"
           }
         }
+      },
+      "OrganizationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Acme Corp"
+          },
+          "subdomain": {
+            "type": "string",
+            "example": "acme-corp"
+          },
+          "orgIdentifier": {
+            "type": "string",
+            "example": "ACME"
+          },
+          "size": {
+            "type": "string",
+            "example": "10-20"
+          },
+          "planName": {
+            "type": "string",
+            "example": "Starter"
+          },
+          "planCode": {
+            "type": "string",
+            "example": "starter"
+          },
+          "deploymentName": {
+            "type": "string",
+            "example": "US East Production"
+          },
+          "deploymentUrl": {
+            "type": "string",
+            "example": "https://nexus-us-east.vritti.io"
+          },
+          "industryName": {
+            "type": "string",
+            "example": "Technology"
+          },
+          "memberCount": {
+            "type": "number",
+            "example": 3
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "subdomain",
+          "orgIdentifier",
+          "size",
+          "planName",
+          "planCode",
+          "deploymentName",
+          "deploymentUrl",
+          "industryName",
+          "memberCount",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "OrganizationTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "OrganizationDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Acme Corp"
+          },
+          "subdomain": {
+            "type": "string",
+            "example": "acme-corp"
+          },
+          "orgIdentifier": {
+            "type": "string",
+            "example": "ACME"
+          },
+          "size": {
+            "type": "string",
+            "example": "10-20"
+          },
+          "planName": {
+            "type": "string",
+            "example": "Starter"
+          },
+          "planCode": {
+            "type": "string",
+            "example": "starter"
+          },
+          "planId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "deploymentName": {
+            "type": "string",
+            "example": "US East Production"
+          },
+          "deploymentUrl": {
+            "type": "string",
+            "example": "https://nexus-us-east.vritti.io"
+          },
+          "deploymentId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "deploymentType": {
+            "type": "string",
+            "enum": [
+              "shared",
+              "dedicated"
+            ]
+          },
+          "industryName": {
+            "type": "string",
+            "example": "Technology"
+          },
+          "industryId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "regionName": {
+            "type": "string",
+            "example": "US East"
+          },
+          "regionCode": {
+            "type": "string",
+            "example": "us-east"
+          },
+          "cloudProviderName": {
+            "type": "string",
+            "example": "Amazon Web Services"
+          },
+          "cloudProviderCode": {
+            "type": "string",
+            "example": "aws"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "subdomain",
+          "orgIdentifier",
+          "size",
+          "planName",
+          "planCode",
+          "planId",
+          "deploymentName",
+          "deploymentUrl",
+          "deploymentId",
+          "deploymentType",
+          "industryName",
+          "industryId",
+          "regionName",
+          "regionCode",
+          "cloudProviderName",
+          "cloudProviderCode",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "OrganizationMemberDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "userId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "role": {
+            "type": "string",
+            "example": "Owner"
+          },
+          "fullName": {
+            "type": "string",
+            "example": "John Doe"
+          },
+          "displayName": {
+            "type": "string",
+            "example": "johndoe"
+          },
+          "email": {
+            "type": "string",
+            "example": "john@example.com"
+          },
+          "profilePictureUrl": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "role",
+          "fullName",
+          "displayName",
+          "email",
+          "createdAt"
+        ]
+      },
+      "OrganizationMemberTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrganizationMemberDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
       },
       "CreatePlanDto": {
         "type": "object",

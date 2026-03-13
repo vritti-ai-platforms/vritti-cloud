@@ -9,6 +9,9 @@ import { DeploymentService } from './deployment/services/deployment.service';
 import { IndustryController } from './industry/controllers/industry.controller';
 import { IndustryRepository } from './industry/repositories/industry.repository';
 import { IndustryService } from './industry/services/industry.service';
+import { OrganizationController } from './organization/controllers/organization.controller';
+import { OrganizationRepository } from './organization/repositories/organization.repository';
+import { OrganizationService } from './organization/services/organization.service';
 import { PlanController } from './plan/controllers/plan.controller';
 import { PlanRepository } from './plan/repositories/plan.repository';
 import { PlanService } from './plan/services/plan.service';
@@ -19,6 +22,8 @@ import { RegionController } from './region/controllers/region.controller';
 import { RegionRepository } from './region/repositories/region.repository';
 import { RegionProviderRepository } from './region/repositories/region-provider.repository';
 import { RegionService } from './region/services/region.service';
+import { OrganizationMemberRepository } from './organization-member/repositories/organization-member.repository';
+import { OrganizationMemberService } from './organization-member/services/organization-member.service';
 
 @Module({
   controllers: [
@@ -26,6 +31,7 @@ import { RegionService } from './region/services/region.service';
     DeploymentController,
     RegionController,
     IndustryController,
+    OrganizationController,
     PlanController,
     PriceController,
   ],
@@ -44,6 +50,12 @@ import { RegionService } from './region/services/region.service';
     // Industry
     IndustryService,
     IndustryRepository,
+    // Organization
+    OrganizationService,
+    OrganizationRepository,
+    // Organization Member
+    OrganizationMemberService,
+    OrganizationMemberRepository,
     // Plan
     PlanService,
     PlanRepository,
@@ -51,6 +63,13 @@ import { RegionService } from './region/services/region.service';
     PriceService,
     PriceRepository,
   ],
-  exports: [DeploymentRepository, DeploymentIndustryPlanRepository, RegionRepository, RegionProviderRepository, PlanRepository, PriceRepository],
+  exports: [
+    DeploymentRepository,
+    DeploymentIndustryPlanRepository,
+    RegionRepository,
+    RegionProviderRepository,
+    PlanRepository,
+    PriceRepository,
+  ],
 })
 export class AdminApiModule {}

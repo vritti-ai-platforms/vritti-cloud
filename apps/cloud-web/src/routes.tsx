@@ -10,6 +10,8 @@ import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProviders
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
 import { IndustriesPage } from './pages/admin/industries/IndustriesPage';
+import { OrganizationsPage as AdminOrganizationsPage } from './pages/admin/organizations/OrganizationsPage';
+import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/organizations/OrganizationViewPage';
 import { PlansPage } from './pages/admin/plans/PlansPage';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
@@ -133,6 +135,14 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'deployments/:slug',
         element: <DeploymentViewPage />,
+      },
+      {
+        path: 'organizations',
+        element: <AdminOrganizationsPage />,
+      },
+      {
+        path: 'organizations/:slug',
+        element: <AdminOrganizationViewPage />,
       },
     ],
   },

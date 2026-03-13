@@ -19,7 +19,7 @@ interface AddDeploymentFormProps {
 export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess, onCancel }) => {
   const form = useForm<CreateDeploymentData>({
     resolver: zodResolver(createDeploymentSchema),
-    defaultValues: { name: '', nexusUrl: '', webhookSecret: '', type: 'shared' },
+    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared' },
   });
 
   const regionId = form.watch('regionId');
@@ -39,7 +39,7 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
   return (
     <Form form={form} mutation={createMutation} showRootError>
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
-      <TextField name="nexusUrl" label="Nexus URL" placeholder="https://nexus-us-east.vritti.io" />
+      <TextField name="url" label="URL" placeholder="https://nexus-us-east.vritti.io" />
       <PasswordField name="webhookSecret" label="Webhook Secret" placeholder="whsec_..." />
       <RegionSelector
         name="regionId"

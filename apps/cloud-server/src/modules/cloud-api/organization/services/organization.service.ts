@@ -44,6 +44,7 @@ export class OrganizationService {
         errors: [{ field: 'subdomain', message: 'Already taken' }],
       });
     }
+    this.logger.log(`Checked subdomain availability: ${subdomain}`);
     return { available: true };
   }
 
@@ -72,7 +73,7 @@ export class OrganizationService {
     // Create the organization in api-nexus first to get the nexus org ID
     let nexusOrg: { id: string };
     try {
-      nexusOrg = await this.nexusApiService.createOrganization(deployment.nexusUrl, deployment.webhookSecret, {
+      nexusOrg = await this.nexusApiService.createOrganization(deployment.url, deployment.webhookSecret, {
         name: dto.name,
         subdomain: dto.subdomain,
         size: dto.size,
@@ -80,7 +81,7 @@ export class OrganizationService {
     } catch (error: any) {
       const responseData = error?.response?.data;
       this.logger.error(
-        `Failed to reach deployment ${deployment.nexusUrl}: ${error}`,
+        `Failed to reach deployment ${deployment.url}: ${error}`,
         responseData ? JSON.stringify(responseData) : undefined,
       );
       throw new ServiceUnavailableException({
@@ -122,6 +123,7 @@ export class OrganizationService {
     const offset = dto.offset ?? 0;
 
     const { result: members, count } = await this.orgMemberRepository.findByUserId(userId, { limit, offset });
+    this.logger.log(`Fetched organizations for user: ${userId} (limit: ${limit}, offset: ${offset})`);
     return {
       result: members.map((m) => OrgListItemDto.from(m.organization, m.role)),
       total: count,
@@ -133,6 +135,7 @@ export class OrganizationService {
 
   // Returns user's organizations as select options with plan group data
   findForSelect(userId: string, query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched organization select options for user: ${userId} (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.orgRepository.findForSelectByUser(userId, {
       value: query.valueKey || 'subdomain',
       label: query.labelKey || 'name',
