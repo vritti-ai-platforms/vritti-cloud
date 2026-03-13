@@ -90,15 +90,18 @@ export class OrganizationService {
       });
     }
 
-    const org = await this.orgRepository.create({
-      ...dto,
-      orgIdentifier: nexusOrg.id,
-    });
-
-    await this.orgMemberRepository.create({
-      organizationId: org.id,
-      userId,
-      role: OrgMemberRoleValues.Owner,
+    // Insert organization and owner membership atomically
+    const org = await this.orgRepository.transaction(async (tx) => {
+      const createdOrg = await this.orgRepository.create({ ...dto, orgIdentifier: nexusOrg.id }, tx);
+      await this.orgMemberRepository.create(
+        {
+          organizationId: createdOrg.id,
+          userId,
+          role: OrgMemberRoleValues.Owner,
+        },
+        tx,
+      );
+      return createdOrg;
     });
 
     if (file) {
@@ -135,7 +138,9 @@ export class OrganizationService {
 
   // Returns user's organizations as select options with plan group data
   findForSelect(userId: string, query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched organization select options for user: ${userId} (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched organization select options for user: ${userId} (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.orgRepository.findForSelectByUser(userId, {
       value: query.valueKey || 'subdomain',
       label: query.labelKey || 'name',
