@@ -2,9 +2,9 @@ import { Body, Controller, Delete, Get, Logger, Param, Put } from '@nestjs/commo
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserId } from '@vritti/api-sdk';
 import { SessionService } from '../../auth/root/services/session.service';
-import { ApiFindAllUsers, ApiFindUserById, ApiUpdateProfile, ApiDeleteAccount } from '../docs/user.docs';
-import { UpdateUserDto } from '../dto/request/update-user.dto';
+import { ApiDeleteAccount, ApiFindAllUsers, ApiFindUserById, ApiUpdateProfile } from '../docs/user.docs';
 import { UserDto } from '../dto/entity/user.dto';
+import { UpdateUserDto } from '../dto/request/update-user.dto';
 import { UserService } from '../services/user.service';
 
 @ApiTags('Users')

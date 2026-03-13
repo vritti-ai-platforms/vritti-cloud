@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { eq } from '@vritti/api-sdk/drizzle-orm';
-import { AccountStatusValues, OnboardingStepValues, type SignupMethod, SignupMethodValues, oauthProviders, type User, users } from '@/db/schema';
+import {
+  AccountStatusValues,
+  OnboardingStepValues,
+  oauthProviders,
+  type SignupMethod,
+  SignupMethodValues,
+  type User,
+  users,
+} from '@/db/schema';
 
 @Injectable()
 export class UserRepository extends PrimaryBaseRepository<typeof users> {
@@ -26,10 +34,9 @@ export class UserRepository extends PrimaryBaseRepository<typeof users> {
   }
 
   // Finds a user by ID with their active OAuth profile picture URL
-  async findByIdWithProfilePicture(id: string): Promise<
-    | (User & { oauthProfilePictureUrl: string | null })
-    | undefined
-  > {
+  async findByIdWithProfilePicture(
+    id: string,
+  ): Promise<(User & { oauthProfilePictureUrl: string | null }) | undefined> {
     this.logger.debug(`Finding user with profile picture: ${id}`);
 
     const result = await this.db
@@ -38,10 +45,7 @@ export class UserRepository extends PrimaryBaseRepository<typeof users> {
         oauthProfilePictureUrl: oauthProviders.profilePictureUrl,
       })
       .from(users)
-      .leftJoin(
-        oauthProviders,
-        eq(oauthProviders.userId, users.id) && eq(oauthProviders.useProfilePictureUrl, true),
-      )
+      .leftJoin(oauthProviders, eq(oauthProviders.userId, users.id) && eq(oauthProviders.useProfilePictureUrl, true))
       .where(eq(users.id, id))
       .limit(1);
 
