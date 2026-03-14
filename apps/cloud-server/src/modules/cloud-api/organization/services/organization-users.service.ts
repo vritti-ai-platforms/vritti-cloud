@@ -1,15 +1,13 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { NotFoundException } from '@vritti/api-sdk';
+import { Injectable } from '@nestjs/common';
+import { NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
 import { DeploymentRepository } from '@/modules/admin-api/deployment/repositories/deployment.repository';
 import { NexusApiService } from '@/services/nexus-api.service';
-import { OrganizationRepository } from '../repositories/organization.repository';
 import type { InviteUserDto } from '../dto/request/invite-user.dto';
 import type { NexusUserResponseDto } from '../dto/response/nexus-user-response.dto';
+import { OrganizationRepository } from '../repositories/organization.repository';
 
 @Injectable()
 export class OrganizationUsersService {
-  private readonly logger = new Logger(OrganizationUsersService.name);
-
   constructor(
     private readonly orgRepository: OrganizationRepository,
     private readonly deploymentRepository: DeploymentRepository,
@@ -23,7 +21,7 @@ export class OrganizationUsersService {
   }
 
   // Invites a user to the organization in nexus
-  async inviteUser(orgId: string, dto: InviteUserDto): Promise<NexusUserResponseDto> {
+  async inviteUser(orgId: string, dto: InviteUserDto): Promise<SuccessResponseDto> {
     const { url, webhookSecret, orgIdentifier } = await this.resolveDeployment(orgId);
     return this.nexusApiService.inviteUser(url, webhookSecret, {
       orgId: orgIdentifier,
@@ -31,6 +29,12 @@ export class OrganizationUsersService {
       fullName: dto.fullName,
       role: dto.role,
     });
+  }
+
+  // Resends invitation email to a pending user in nexus
+  async resendInvite(orgId: string, userId: string): Promise<SuccessResponseDto> {
+    const { url, webhookSecret } = await this.resolveDeployment(orgId);
+    return this.nexusApiService.resendInvite(url, webhookSecret, userId);
   }
 
   // Resolves org deployment URL and webhook secret

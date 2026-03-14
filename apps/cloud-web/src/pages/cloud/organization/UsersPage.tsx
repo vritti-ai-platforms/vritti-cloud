@@ -1,11 +1,13 @@
 import { useOrgUsers } from '@hooks/cloud/organizations/useOrgUsers';
+import { useResendInvite } from '@hooks/cloud/organizations/useResendInvite';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useDialog } from '@vritti/quantum-ui/hooks';
+import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
+import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { UserPlus, Users } from 'lucide-react';
+import { Mail, MoreVertical, UserPlus, Users } from 'lucide-react';
 import { useParams } from 'react-router-dom';
 import type { NexusUser } from '@/schemas/cloud/organizations';
 import { InviteUserForm } from './forms/InviteUserForm';
@@ -18,9 +20,22 @@ export const UsersPage = () => {
 
   const { data: response, isLoading } = useOrgUsers(orgId);
   const inviteDialog = useDialog();
+  const confirm = useConfirm();
+  const resendMutation = useResendInvite(orgId);
+
+  // Confirms and resends invitation email to a pending user
+  async function handleResendInvite(user: NexusUser) {
+    const confirmed = await confirm({
+      title: `Resend invitation to ${user.email}?`,
+      description:
+        'A new invitation email will be sent with a fresh link to set their password. The previous invitation link will be invalidated.',
+      confirmLabel: 'Resend',
+    });
+    if (confirmed) resendMutation.mutate(user.id);
+  }
 
   const { table } = useDataTable({
-    columns: getColumns(),
+    columns: getColumns({ onResendInvite: handleResendInvite }),
     slug: TABLE_SLUG,
     label: 'user',
     serverState: response,
@@ -104,8 +119,12 @@ function formatDate(dateStr: string) {
   });
 }
 
+interface GetColumnsOptions {
+  onResendInvite: (user: NexusUser) => void;
+}
+
 // Builds column definitions for the users DataTable
-function getColumns(): ColumnDef<NexusUser, unknown>[] {
+function getColumns({ onResendInvite }: GetColumnsOptions): ColumnDef<NexusUser, unknown>[] {
   return [
     {
       accessorKey: 'fullName',
@@ -140,6 +159,34 @@ function getColumns(): ColumnDef<NexusUser, unknown>[] {
       accessorKey: 'createdAt',
       header: 'Joined',
       cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatDate(row.original.createdAt)}</span>,
+    },
+    {
+      id: 'actions',
+      header: '',
+      cell: ({ row }) => {
+        if (row.original.status !== 'PENDING') return null;
+        return (
+          <DropdownMenu
+            trigger={{
+              children: (
+                <Button variant="ghost" size="icon" className="size-8">
+                  <MoreVertical className="size-4" />
+                </Button>
+              ),
+            }}
+            items={[
+              {
+                type: 'item' as const,
+                id: 'resend',
+                label: 'Resend Invite',
+                icon: Mail,
+                onClick: () => onResendInvite(row.original),
+              },
+            ]}
+          />
+        );
+      },
+      enableSorting: false,
     },
   ];
 }

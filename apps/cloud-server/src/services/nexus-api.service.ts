@@ -1,6 +1,12 @@
 import https from 'node:https';
 import { Injectable, Logger } from '@nestjs/common';
+import { SuccessResponseDto } from '@vritti/api-sdk';
 import axios from 'axios';
+
+interface NexusSuccessDto {
+  success: boolean;
+  message: string;
+}
 
 interface NexusUserDto {
   id: string;
@@ -47,8 +53,8 @@ export class NexusApiService {
     url: string,
     webhookSecret: string,
     data: { orgId: string; email: string; fullName: string; role?: string },
-  ): Promise<NexusUserDto> {
-    const response = await axios.post<NexusUserDto>(`${url}/users/webhook`, data, {
+  ): Promise<NexusSuccessDto> {
+    const response = await axios.post<NexusSuccessDto>(`${url}/users/webhook`, data, {
       headers: {
         'Content-Type': 'application/json',
         'X-Webhook-Secret': webhookSecret,
@@ -56,7 +62,7 @@ export class NexusApiService {
       timeout: 10000,
       httpsAgent: this.httpsAgent,
     });
-    this.logger.log(`Invited user in nexus: ${data.email} (${response.data.id})`);
+    this.logger.log(`Invited user in nexus: ${data.email}`);
     return response.data;
   }
 
@@ -80,8 +86,8 @@ export class NexusApiService {
     webhookSecret: string,
     userId: string,
     data: { fullName?: string; role?: string; status?: string },
-  ): Promise<NexusUserDto> {
-    const response = await axios.patch<NexusUserDto>(`${url}/users/webhook/${userId}`, data, {
+  ): Promise<NexusSuccessDto> {
+    const response = await axios.patch<NexusSuccessDto>(`${url}/users/webhook/${userId}`, data, {
       headers: {
         'Content-Type': 'application/json',
         'X-Webhook-Secret': webhookSecret,
@@ -90,6 +96,24 @@ export class NexusApiService {
       httpsAgent: this.httpsAgent,
     });
     this.logger.log(`Updated user in nexus: ${userId}`);
+    return response.data;
+  }
+
+  // Resends invitation email to a pending user in api-nexus
+  async resendInvite(url: string, webhookSecret: string, userId: string): Promise<SuccessResponseDto> {
+    const response = await axios.post<SuccessResponseDto>(
+      `${url}/users/webhook/${userId}/resend-invite`,
+      {},
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Secret': webhookSecret,
+        },
+        timeout: 10000,
+        httpsAgent: this.httpsAgent,
+      },
+    );
+    this.logger.log(`Resent invite in nexus for user: ${userId}`);
     return response.data;
   }
 }

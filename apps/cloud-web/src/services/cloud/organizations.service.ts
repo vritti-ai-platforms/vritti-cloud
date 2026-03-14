@@ -1,5 +1,11 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { InviteUserFormData, NexusUser, OrgListItem, PaginatedResponse, SubdomainAvailability } from '@/schemas/cloud/organizations';
+import type {
+  InviteUserFormData,
+  NexusUser,
+  OrgListItem,
+  PaginatedResponse,
+  SubdomainAvailability,
+} from '@/schemas/cloud/organizations';
 
 // Fetches paginated organizations the current user belongs to
 export function getMyOrgs(params?: { offset?: number; limit?: number }): Promise<PaginatedResponse<OrgListItem>> {
@@ -28,6 +34,18 @@ export function getOrgUsers(orgId: string): Promise<NexusUser[]> {
 }
 
 // Invites a user to the organization in nexus
-export function inviteOrgUser(orgId: string, data: InviteUserFormData): Promise<NexusUser> {
-  return axios.post<NexusUser>(`cloud-api/organizations/${orgId}/users/invite`, data).then((r) => r.data);
+export function inviteOrgUser(orgId: string, data: InviteUserFormData): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>(`cloud-api/organizations/${orgId}/users/invite`, data).then((r) => r.data);
+}
+
+export interface SuccessResponse {
+  success: boolean;
+  message: string;
+}
+
+// Resends invitation email to a pending user in nexus
+export function resendUserInvite(orgId: string, userId: string): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(`cloud-api/organizations/${orgId}/users/${userId}/resend-invite`)
+    .then((r) => r.data);
 }

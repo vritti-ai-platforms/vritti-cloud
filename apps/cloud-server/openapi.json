@@ -3376,7 +3376,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/NexusUserResponseDto"
+                  "$ref": "#/components/schemas/SuccessResponseDto"
                 }
               }
             }
@@ -3394,6 +3394,57 @@
           }
         ],
         "summary": "Invite a user to the organization",
+        "tags": [
+          "Organization Users"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/users/{userId}/resend-invite": {
+      "post": {
+        "description": "Resends the invitation email to a PENDING user, generating a fresh token.",
+        "operationId": "OrganizationUsersController_resendInvite",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Invitation resent successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "User is not in PENDING status."
+          },
+          "404": {
+            "description": "Organization, deployment, or user not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resend invitation email",
         "tags": [
           "Organization Users"
         ]
@@ -8329,6 +8380,23 @@
           "fullName"
         ]
       },
+      "SuccessResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation completed successfully"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
       "CreateCloudProviderDto": {
         "type": "object",
         "properties": {
@@ -8356,23 +8424,6 @@
         "required": [
           "name",
           "code"
-        ]
-      },
-      "SuccessResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "message": {
-            "type": "string",
-            "example": "Operation completed successfully"
-          }
-        },
-        "required": [
-          "success",
-          "message"
         ]
       },
       "CloudProviderSelectOptionDto": {
