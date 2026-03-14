@@ -1,4 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
+import type { DataTableServerState } from '@vritti/quantum-ui/DataTable';
 import type {
   InviteUserFormData,
   NexusUser,
@@ -31,6 +32,13 @@ export function checkSubdomain(subdomain: string): Promise<SubdomainAvailability
 // Fetches all nexus portal users for an organization
 export function getOrgUsers(orgId: string): Promise<NexusUser[]> {
   return axios.get<NexusUser[]>(`cloud-api/organizations/${orgId}/users`).then((r) => r.data);
+}
+
+// Fetches org users with server-side table state (sort, filter, search, pagination)
+export function getOrgUsersTable(orgId: string): Promise<DataTableServerState<NexusUser>> {
+  return axios
+    .get<DataTableServerState<NexusUser>>(`cloud-api/organizations/${orgId}/users/table`)
+    .then((r) => r.data);
 }
 
 // Invites a user to the organization in nexus

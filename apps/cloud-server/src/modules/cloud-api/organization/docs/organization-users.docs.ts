@@ -3,6 +3,16 @@ import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { InviteUserDto } from '../dto/request/invite-user.dto';
 import { NexusUserResponseDto } from '../dto/response/nexus-user-response.dto';
+import { UsersTableResponseDto } from '../dto/response/users-table-response.dto';
+
+export function ApiGetOrgUsersTable() {
+  return applyDecorators(
+    ApiOperation({ summary: 'List organization users for data table (server-stored state)' }),
+    ApiResponse({ status: 200, description: 'Users retrieved successfully.', type: UsersTableResponseDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Organization or deployment not found.' }),
+  );
+}
 
 export function ApiGetOrgUsers() {
   return applyDecorators(

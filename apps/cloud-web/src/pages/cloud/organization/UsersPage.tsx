@@ -1,5 +1,6 @@
-import { useOrgUsers } from '@hooks/cloud/organizations/useOrgUsers';
+import { ORG_USERS_QUERY_KEY, useOrgUsers } from '@hooks/cloud/organizations/useOrgUsers';
 import { useResendInvite } from '@hooks/cloud/organizations/useResendInvite';
+import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
@@ -12,12 +13,11 @@ import { useParams } from 'react-router-dom';
 import type { NexusUser } from '@/schemas/cloud/organizations';
 import { InviteUserForm } from './forms/InviteUserForm';
 
-const TABLE_SLUG = 'org-users';
-
 export const UsersPage = () => {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   const orgId = orgSlug?.replace(/^org-/, '').split('~').pop() || '';
 
+  const queryClient = useQueryClient();
   const { data: response, isLoading } = useOrgUsers(orgId);
   const inviteDialog = useDialog();
   const confirm = useConfirm();
@@ -36,12 +36,13 @@ export const UsersPage = () => {
 
   const { table } = useDataTable({
     columns: getColumns({ onResendInvite: handleResendInvite }),
-    slug: TABLE_SLUG,
+    slug: `org-users-${orgId}`,
     label: 'user',
     serverState: response,
     enableRowSelection: false,
     enableSorting: true,
     enableMultiSort: false,
+    onStatePush: () => queryClient.invalidateQueries({ queryKey: ORG_USERS_QUERY_KEY(orgId) }),
   });
 
   return (
@@ -60,6 +61,7 @@ export const UsersPage = () => {
           ],
           searchAll: true,
         }}
+        onStatePush={() => queryClient.invalidateQueries({ queryKey: ORG_USERS_QUERY_KEY(orgId) })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<UserPlus className="size-4" />} size="sm" onClick={inviteDialog.open}>

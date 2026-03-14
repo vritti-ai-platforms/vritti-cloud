@@ -1,9 +1,10 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import type { SuccessResponseDto } from '@vritti/api-sdk';
-import { ApiGetOrgUsers, ApiInviteUser, ApiResendInvite } from '../docs/organization-users.docs';
+import { type SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { ApiGetOrgUsers, ApiGetOrgUsersTable, ApiInviteUser, ApiResendInvite } from '../docs/organization-users.docs';
 import type { InviteUserDto } from '../dto/request/invite-user.dto';
 import type { NexusUserResponseDto } from '../dto/response/nexus-user-response.dto';
+import type { UsersTableResponseDto } from '../dto/response/users-table-response.dto';
 import { OrganizationUsersService } from '../services/organization-users.service';
 
 @ApiTags('Organization Users')
@@ -13,6 +14,14 @@ export class OrganizationUsersController {
   private readonly logger = new Logger(OrganizationUsersController.name);
 
   constructor(private readonly orgUsersService: OrganizationUsersService) {}
+
+  // Returns paginated users for the data table with server-stored state
+  @Get('table')
+  @ApiGetOrgUsersTable()
+  getUsersTable(@Param('orgId') orgId: string, @UserId() userId: string): Promise<UsersTableResponseDto> {
+    this.logger.log(`GET /organizations/${orgId}/users/table`);
+    return this.orgUsersService.getUsersForTable(orgId, userId);
+  }
 
   // Returns all nexus portal users for the organization
   @Get()

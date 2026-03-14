@@ -99,6 +99,32 @@ export class NexusApiService {
     return response.data;
   }
 
+  // Fetches paginated and filtered portal users for an organization from api-nexus
+  async getUsersTable(
+    url: string,
+    webhookSecret: string,
+    params: {
+      orgId: string;
+      search?: string;
+      sortField?: string;
+      sortOrder?: string;
+      filterStatus?: string;
+      limit?: number;
+      offset?: number;
+    },
+  ): Promise<{ result: NexusUserDto[]; count: number }> {
+    const response = await axios.get<{ result: NexusUserDto[]; count: number }>(`${url}/users/webhook`, {
+      params,
+      headers: {
+        'X-Webhook-Secret': webhookSecret,
+      },
+      timeout: 10000,
+      httpsAgent: this.httpsAgent,
+    });
+    this.logger.log(`Fetched ${response.data.result.length}/${response.data.count} users from nexus for org: ${params.orgId}`);
+    return response.data;
+  }
+
   // Resends invitation email to a pending user in api-nexus
   async resendInvite(url: string, webhookSecret: string, userId: string): Promise<SuccessResponseDto> {
     const response = await axios.post<SuccessResponseDto>(

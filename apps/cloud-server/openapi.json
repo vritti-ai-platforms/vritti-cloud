@@ -3303,6 +3303,48 @@
         ]
       }
     },
+    "/cloud-api/organizations/{orgId}/users/table": {
+      "get": {
+        "operationId": "OrganizationUsersController_getUsersTable",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsersTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organization users for data table (server-stored state)",
+        "tags": [
+          "Organization Users"
+        ]
+      }
+    },
     "/cloud-api/organizations/{orgId}/users": {
       "get": {
         "description": "Returns all nexus portal users for the specified organization.",
@@ -8349,6 +8391,33 @@
           "status",
           "hasPassword",
           "createdAt"
+        ]
+      },
+      "UsersTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NexusUserResponseDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
         ]
       },
       "InviteUserDto": {
