@@ -105,22 +105,22 @@ export class NexusApiService {
     webhookSecret: string,
     params: {
       orgId: string;
+      filters?: string;
       search?: string;
-      sortField?: string;
-      sortOrder?: string;
-      filterStatus?: string;
+      sort?: string;
       limit?: number;
       offset?: number;
     },
   ): Promise<{ result: NexusUserDto[]; count: number }> {
-    const response = await axios.get<{ result: NexusUserDto[]; count: number }>(`${url}/users/webhook`, {
-      params,
-      headers: {
-        'X-Webhook-Secret': webhookSecret,
+    const response = await axios.get<{ result: NexusUserDto[]; count: number }>(
+      `${url}/users/webhook`,
+      {
+        params,
+        headers: { 'X-Webhook-Secret': webhookSecret },
+        timeout: 10000,
+        httpsAgent: this.httpsAgent,
       },
-      timeout: 10000,
-      httpsAgent: this.httpsAgent,
-    });
+    );
     this.logger.log(`Fetched ${response.data.result.length}/${response.data.count} users from nexus for org: ${params.orgId}`);
     return response.data;
   }
