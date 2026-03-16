@@ -60,6 +60,7 @@ export class OrganizationUsersService {
   // Resolves org deployment URL and webhook secret
   private async resolveDeployment(orgId: string) {
     const org = await this.orgRepository.findById(orgId);
+
     if (!org) throw new NotFoundException('Organization not found.');
     const deployment = await this.deploymentRepository.findById(org.deploymentId);
     if (!deployment) throw new NotFoundException('Deployment not found.');
