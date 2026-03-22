@@ -11,10 +11,14 @@ export class R2StorageProvider implements StorageProvider {
   private readonly logger = new Logger(R2StorageProvider.name);
   private readonly client: S3Client;
   private readonly defaultBucket: string;
+  private readonly publicBucket: string;
+  private readonly publicUrl: string;
 
   constructor(private readonly configService: ConfigService) {
     const accountId = this.configService.getOrThrow<string>('R2_ACCOUNT_ID');
     this.defaultBucket = this.configService.getOrThrow<string>('R2_BUCKET_NAME');
+    this.publicBucket = this.configService.getOrThrow<string>('R2_PUBLIC_BUCKET');
+    this.publicUrl = this.configService.getOrThrow<string>('R2_PUBLIC_URL');
 
     this.client = new S3Client({
       region: 'auto',
@@ -41,6 +45,27 @@ export class R2StorageProvider implements StorageProvider {
 
     this.logger.log(`Uploaded file to R2: ${params.key}`);
     return params.key;
+  }
+
+  // Uploads a file to the public R2 bucket and returns the permanent public URL
+  async uploadPublic(key: string, body: Buffer, contentType: string): Promise<string> {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.publicBucket,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+      }),
+    );
+
+    const url = this.getPublicUrl(key);
+    this.logger.log(`Uploaded public file to R2: ${key} → ${url}`);
+    return url;
+  }
+
+  // Returns the permanent public URL for a key in the public bucket
+  getPublicUrl(key: string): string {
+    return `${this.publicUrl}/${key}`;
   }
 
   // Deletes a file from R2

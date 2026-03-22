@@ -18,6 +18,7 @@ import {
 } from '@vritti/api-sdk';
 import { validate } from './config/env.validation';
 import { AdminApiModule } from './modules/admin-api/admin-api.module';
+import { AppVersionModule } from './modules/admin-api/app-version/app-version.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
 import { CloudDeploymentModule } from './modules/cloud-api/deployment/deployment.module';
 import { IndustryModule } from './modules/cloud-api/industry/industry.module';
@@ -126,7 +127,7 @@ import { UserModule } from './modules/cloud-api/user/user.module';
       },
       {
         path: 'admin-api',
-        children: [AdminApiModule],
+        children: [AdminApiModule, AppVersionModule],
       },
       // Top-level: /table-states and /table-views (no prefix)
       {

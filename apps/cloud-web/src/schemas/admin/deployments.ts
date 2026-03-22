@@ -11,6 +11,8 @@ export interface Deployment {
   cloudProviderId: string;
   status: DeploymentStatus;
   type: DeploymentType;
+  appVersionId: string;
+  appVersionName: string;
   regionName?: string;
   regionCode?: string;
   cloudProviderName?: string;
@@ -28,6 +30,7 @@ export const createDeploymentSchema = z.object({
   cloudProviderId: z.string().uuid('Please select a cloud provider'),
   type: z.enum(['shared', 'dedicated'], { message: 'Please select a type' }),
   status: z.enum(['active', 'stopped', 'provisioning']).optional(),
+  appVersionId: z.string().uuid('Please select an app version'),
 });
 
 export const updateDeploymentSchema = z.object({
@@ -37,6 +40,7 @@ export const updateDeploymentSchema = z.object({
   cloudProviderId: z.string().uuid().optional(),
   type: z.enum(['shared', 'dedicated']).optional(),
   status: z.enum(['active', 'stopped', 'provisioning']).optional(),
+  appVersionId: z.string().uuid().optional().or(z.literal('')),
 });
 
 export const assignPlanSchema = z.object({

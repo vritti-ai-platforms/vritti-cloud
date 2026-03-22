@@ -126,13 +126,17 @@ The quantum-ui `Form` component automatically maps API errors to form fields usi
 >
 ```
 
-### 5. Authentication Flow
+### 5. Service Response Types
+
+See `apps/cloud-web/.claude/rules/frontend-service-responses.md` -- No `MutationResponse`; create returns entity, update/delete returns `SuccessResponse`.
+
+### 6. Authentication Flow
 
 - Auth tokens are managed via `@vritti/quantum-ui/axios`
 - Use `setToken`, `scheduleTokenRefresh` for token management
 - Navigate based on onboarding status after login/signup
 
-### 6. Rsbuild Configuration Patterns
+### 7. Rsbuild Configuration Patterns
 
 **CRITICAL: Follow these optimization patterns in `rsbuild.config.ts`.**
 

@@ -7,6 +7,7 @@ import {
   ApiFindPricesForTable,
   ApiUpdatePrice,
 } from '../docs/price.docs';
+import { PriceDetailDto } from '../dto/entity/price-detail.dto';
 import { CreatePriceDto } from '../dto/request/create-price.dto';
 import { UpdatePriceDto } from '../dto/request/update-price.dto';
 import { PricesTableResponseDto } from '../dto/response/prices-table-response.dto';
@@ -24,7 +25,7 @@ export class PriceController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatePrice()
-  create(@Body() dto: CreatePriceDto): Promise<SuccessResponseDto> {
+  create(@Body() dto: CreatePriceDto): Promise<PriceDetailDto> {
     this.logger.log('POST /admin-api/prices');
     return this.priceService.create(dto);
   }

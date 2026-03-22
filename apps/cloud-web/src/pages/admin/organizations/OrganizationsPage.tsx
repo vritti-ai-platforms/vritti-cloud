@@ -66,7 +66,6 @@ export const OrganizationsPage = () => {
           />,
           <ValueFilter key="memberCount" name="memberCount" label="Members" fieldType="number" />,
         ]}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: ORGANIZATIONS_QUERY_KEY })}
         emptyStateConfig={{
           icon: Building2,
           title: 'No organizations found',

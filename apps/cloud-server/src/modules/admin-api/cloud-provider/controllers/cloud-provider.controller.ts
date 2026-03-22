@@ -8,6 +8,7 @@ import {
   ApiFindForTableCloudProviders,
   ApiUpdateCloudProvider,
 } from '../docs/cloud-provider.docs';
+import { CloudProviderDto } from '../dto/entity/cloud-provider.dto';
 import { CloudProviderSelectQueryDto } from '../dto/request/cloud-provider-select-query.dto';
 import { CreateCloudProviderDto } from '../dto/request/create-cloud-provider.dto';
 import { UpdateCloudProviderDto } from '../dto/request/update-cloud-provider.dto';
@@ -26,7 +27,7 @@ export class CloudProviderController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateCloudProvider()
-  create(@Body() dto: CreateCloudProviderDto): Promise<SuccessResponseDto> {
+  create(@Body() dto: CreateCloudProviderDto): Promise<CloudProviderDto> {
     this.logger.log('POST /admin-api/cloud-providers');
     return this.cloudProviderService.create(dto);
   }

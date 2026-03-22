@@ -450,6 +450,10 @@ export class UsersService {
 }
 ```
 
+### Service Response Pattern
+
+See `apps/cloud-server/.claude/rules/backend-service-responses.md` -- `create()` returns entity DTO, `update()`/`delete()` returns `SuccessResponseDto`.
+
 ### Error Handling
 
 The project uses RFC 9457 Problem Details format for all error responses. All exceptions are automatically transformed by `HttpExceptionFilter` from `@vritti/api-sdk`.

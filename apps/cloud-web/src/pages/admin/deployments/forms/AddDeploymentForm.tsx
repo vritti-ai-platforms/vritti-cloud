@@ -19,25 +19,15 @@ interface AddDeploymentFormProps {
 export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess, onCancel }) => {
   const form = useForm<CreateDeploymentData>({
     resolver: zodResolver(createDeploymentSchema),
-    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared' },
+    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared', appVersionId: '' },
   });
 
   const regionId = form.watch('regionId');
 
-  const createMutation = useCreateDeployment({
-    onSuccess: () => {
-      form.reset();
-      onSuccess();
-    },
-  });
-
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const createMutation = useCreateDeployment({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError>
+    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vritti.io" />
       <PasswordField name="webhookSecret" label="Webhook Secret" placeholder="whsec_..." />
@@ -63,8 +53,16 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
           { value: 'dedicated', label: 'Dedicated' },
         ]}
       />
+      <Select
+        name="appVersionId"
+        label="App Version"
+        placeholder="Select version (optional)"
+        optionsEndpoint="admin-api/app-versions/select"
+        fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'version' }}
+        searchable
+      />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">

@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
 import { EncryptionService } from './encryption.service';
-import { NexusApiService } from './nexus-api.service';
 import { SmsService } from './sms.service';
 import { WhatsAppService } from './whatsapp.service';
 
-// Provides cloud-server-specific services for encryption, SMS, WhatsApp, and Nexus API
+// Provides cloud-server-specific services for encryption, SMS, and WhatsApp
 @Module({
-  providers: [EncryptionService, NexusApiService, SmsService, WhatsAppService],
-  exports: [EncryptionService, NexusApiService, SmsService, WhatsAppService],
+  providers: [EncryptionService, SmsService, WhatsAppService],
+  exports: [EncryptionService, SmsService, WhatsAppService],
 })
 export class ServicesModule {}

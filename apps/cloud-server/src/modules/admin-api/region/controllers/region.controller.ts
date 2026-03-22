@@ -29,7 +29,7 @@ export class RegionController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateRegion()
-  create(@Body() dto: CreateRegionDto): Promise<SuccessResponseDto> {
+  create(@Body() dto: CreateRegionDto): Promise<RegionDto> {
     this.logger.log('POST /admin-api/regions');
     return this.regionService.create(dto);
   }

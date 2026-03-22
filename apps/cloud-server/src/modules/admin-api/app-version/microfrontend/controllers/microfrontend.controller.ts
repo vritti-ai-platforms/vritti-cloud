@@ -1,0 +1,85 @@
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import {
+  ApiCreateMicrofrontend,
+  ApiDeleteMicrofrontend,
+  ApiFindForTableMicrofrontends,
+  ApiFindMicrofrontendsSelect,
+  ApiGetMicrofrontendById,
+  ApiUpdateMicrofrontend,
+} from '../docs/microfrontend.docs';
+import { MicrofrontendDto } from '../dto/entity/microfrontend.dto';
+import { CreateMicrofrontendDto } from '../dto/request/create-microfrontend.dto';
+import { UpdateMicrofrontendDto } from '../dto/request/update-microfrontend.dto';
+import { MicrofrontendTableResponseDto } from '../dto/response/microfrontend-table-response.dto';
+import { MicrofrontendService } from '../services/microfrontend.service';
+
+@ApiTags('Admin - Microfrontends')
+@ApiBearerAuth()
+@Controller('app-versions/:versionId/microfrontends')
+export class MicrofrontendController {
+  private readonly logger = new Logger(MicrofrontendController.name);
+
+  constructor(private readonly microfrontendService: MicrofrontendService) {}
+
+  // Creates a new microfrontend within a version
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreateMicrofrontend()
+  create(@Param('versionId') versionId: string, @Body() dto: CreateMicrofrontendDto): Promise<MicrofrontendDto> {
+    this.logger.log(`POST /admin-api/app-versions/${versionId}/microfrontends`);
+    return this.microfrontendService.create({ ...dto, appVersionId: versionId });
+  }
+
+  // Returns microfrontends for the data table filtered by version
+  @Get('table')
+  @ApiFindForTableMicrofrontends()
+  findForTable(
+    @UserId() userId: string,
+    @Param('versionId') versionId: string,
+  ): Promise<MicrofrontendTableResponseDto> {
+    this.logger.log(`GET /admin-api/app-versions/${versionId}/microfrontends/table`);
+    return this.microfrontendService.findForTable(userId, versionId);
+  }
+
+  // Returns microfrontend options for a select component within a version
+  @Get('select')
+  @ApiFindMicrofrontendsSelect()
+  findForSelect(
+    @Param('versionId') versionId: string,
+    @Query('search') search?: string,
+  ): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
+    this.logger.log(`GET /admin-api/app-versions/${versionId}/microfrontends/select`);
+    return this.microfrontendService.findForSelect(versionId, search);
+  }
+
+  // Returns a single microfrontend by ID
+  @Get(':id')
+  @ApiGetMicrofrontendById()
+  findById(@Param('versionId') _versionId: string, @Param('id') id: string): Promise<MicrofrontendDto> {
+    this.logger.log(`GET /admin-api/app-versions/${_versionId}/microfrontends/${id}`);
+    return this.microfrontendService.findById(id);
+  }
+
+  // Updates a microfrontend by ID
+  @Patch(':id')
+  @ApiUpdateMicrofrontend()
+  update(
+    @Param('versionId') _versionId: string,
+    @Param('id') id: string,
+    @Body() dto: UpdateMicrofrontendDto,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /admin-api/app-versions/${_versionId}/microfrontends/${id}`);
+    return this.microfrontendService.update(id, dto);
+  }
+
+  // Deletes a microfrontend by ID
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiDeleteMicrofrontend()
+  delete(@Param('versionId') _versionId: string, @Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /admin-api/app-versions/${_versionId}/microfrontends/${id}`);
+    return this.microfrontendService.delete(id);
+  }
+}

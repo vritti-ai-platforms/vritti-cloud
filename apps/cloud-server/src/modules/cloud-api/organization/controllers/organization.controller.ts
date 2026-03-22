@@ -1,8 +1,16 @@
-import { Controller, Get, HttpCode, HttpStatus, Logger, Post, Query, Req } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SelectOptionsQueryDto, UserId } from '@vritti/api-sdk';
+import { SelectOptionsQueryDto, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import type { FastifyRequest } from 'fastify';
-import { ApiCheckSubdomain, ApiCreateOrganization, ApiGetMyOrgs, ApiGetOrganizationsSelect } from '../docs/organization.docs';
+import {
+  ApiCheckSubdomain,
+  ApiCreateOrganization,
+  ApiGetMyOrgs,
+  ApiGetOrganization,
+  ApiGetOrganizationsSelect,
+  ApiUpdateOrganization,
+} from '../docs/organization.docs';
+import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CheckSubdomainDto } from '../dto/request/check-subdomain.dto';
 import { GetMyOrgsDto } from '../dto/request/get-my-orgs.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
@@ -50,5 +58,33 @@ export class OrganizationController {
   findForSelect(@UserId() userId: string, @Query() query: SelectOptionsQueryDto): Promise<OrganizationSelectResponseDto> {
     this.logger.log('GET /organizations/select');
     return this.organizationService.findForSelect(userId, query);
+  }
+
+  // Returns a single organization's details for the authenticated user
+  @Get(':id')
+  @ApiGetOrganization()
+  async findById(@UserId() userId: string, @Param('id') id: string): Promise<OrgListItemDto> {
+    this.logger.log(`GET /organizations/${id}`);
+    return this.organizationService.findById(userId, id);
+  }
+
+  // Updates organization details for the authenticated user
+  @Patch(':id')
+  @ApiUpdateOrganization()
+  async update(
+    @UserId() userId: string,
+    @Param('id') id: string,
+    @Req() request: FastifyRequest,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /organizations/${id} - Updating organization for user: ${userId}`);
+    return this.organizationService.update(userId, id, request);
+  }
+
+  // Deletes an organization and its core-server counterpart
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  async delete(@UserId() userId: string, @Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /organizations/${id} - User: ${userId}`);
+    return this.organizationService.delete(userId, id);
   }
 }

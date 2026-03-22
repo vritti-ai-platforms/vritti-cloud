@@ -67,7 +67,6 @@ export const RegionsPage = () => {
             ]}
           />,
         ]}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: REGIONS_QUERY_KEY })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>

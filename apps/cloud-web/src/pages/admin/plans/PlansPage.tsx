@@ -54,7 +54,6 @@ export const PlansPage = () => {
           <ValueFilter key="name" name="name" label="Name" fieldType="string" />,
           <ValueFilter key="code" name="code" label="Code" fieldType="string" />,
         ]}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>

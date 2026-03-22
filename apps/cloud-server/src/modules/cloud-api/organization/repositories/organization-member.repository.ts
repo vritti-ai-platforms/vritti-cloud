@@ -10,6 +10,11 @@ export class OrganizationMemberRepository extends PrimaryBaseRepository<typeof o
     super(database, organizationMembers);
   }
 
+  // Returns a single membership row for a given organization and user
+  async findByOrgAndUser(organizationId: string, userId: string): Promise<OrganizationMember | undefined> {
+    return this.model.findFirst({ where: { organizationId, userId } });
+  }
+
   // Returns paginated member rows with org data and total membership count
   async findByUserId(
     userId: string,

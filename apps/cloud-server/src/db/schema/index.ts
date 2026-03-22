@@ -18,5 +18,18 @@ export * from './user';
 export * from './verification';
 export * from './media';
 export * from './table-view';
+// RBAC tables
+export * from './app-version';
+export * from './microfrontend';
+export * from './feature';
+export * from './feature-microfrontend';
+export * from './feature-permission';
+export * from './app';
+export * from './app-feature';
+export * from './app-price';
+export * from './plan-app';
+export * from './industry-app';
+export * from './role';
+export * from './role-feature-permission';
 // Export relations last (depends on tables above)
 export * from './relations';

@@ -23,7 +23,7 @@ export class DeploymentController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateDeployment()
-  create(@Body() dto: CreateDeploymentDto): Promise<SuccessResponseDto> {
+  create(@Body() dto: CreateDeploymentDto): Promise<DeploymentDto> {
     this.logger.log('POST /admin-api/deployments');
     return this.deploymentService.create(dto);
   }

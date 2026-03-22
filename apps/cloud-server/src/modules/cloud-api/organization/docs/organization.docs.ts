@@ -1,5 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { SuccessResponseDto } from '@vritti/api-sdk';
+import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
 import { OrganizationSelectResponseDto } from '../dto/response/organization-select-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
@@ -78,5 +80,47 @@ export function ApiGetOrganizationsSelect() {
     }),
     ApiResponse({ status: 200, description: 'Organization select options retrieved.', type: OrganizationSelectResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
+export function ApiGetOrganization() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get organization details' }),
+    ApiParam({ name: 'id', type: String, description: 'Organization ID' }),
+    ApiResponse({ status: 200, description: 'Organization details retrieved.', type: OrgListItemDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 403, description: 'User does not have access to this organization.' }),
+    ApiResponse({ status: 404, description: 'Organization not found.' }),
+  );
+}
+
+export function ApiUpdateOrganization() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Update organization details',
+      description:
+        'Updates an organization name, size, and/or logo. Accepts multipart/form-data with optional file upload.',
+    }),
+    ApiConsumes('multipart/form-data'),
+    ApiParam({ name: 'id', type: String, description: 'Organization ID' }),
+    ApiBody({
+      schema: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', example: 'Acme Corp' },
+          size: {
+            type: 'string',
+            enum: ['0-10', '10-20', '20-50', '50-100', '100-500', '500+'],
+            example: '0-10',
+          },
+          file: { type: 'string', format: 'binary', description: 'Optional logo file' },
+        },
+      },
+    }),
+    ApiResponse({ status: 200, description: 'Organization updated successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 403, description: 'User does not have access to this organization.' }),
+    ApiResponse({ status: 404, description: 'Organization not found.' }),
   );
 }

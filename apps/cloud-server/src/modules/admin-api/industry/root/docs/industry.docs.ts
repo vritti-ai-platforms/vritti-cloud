@@ -1,0 +1,65 @@
+import { applyDecorators } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { SuccessResponseDto } from '@vritti/api-sdk';
+import { IndustryDto } from '../dto/entity/industry.dto';
+import { CreateIndustryDto } from '../dto/request/create-industry.dto';
+import { UpdateIndustryDto } from '../dto/request/update-industry.dto';
+import { IndustrySelectResponseDto } from '../dto/response/industry-select-response.dto';
+import { IndustryTableResponseDto } from '../dto/response/industries-response.dto';
+
+export function ApiCreateIndustry() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Create a new industry' }),
+    ApiBody({ type: CreateIndustryDto }),
+    ApiResponse({ status: 201, description: 'Industry created successfully.', type: IndustryDto }),
+    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 409, description: 'Industry with this code or slug already exists.' }),
+  );
+}
+
+export function ApiFindIndustriesSelect() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Get industries for select component' }),
+    ApiQuery({ name: 'search', required: false }),
+    ApiQuery({ name: 'limit', required: false, type: Number }),
+    ApiQuery({ name: 'offset', required: false, type: Number }),
+    ApiResponse({
+      status: 200,
+      description: 'Industry options retrieved.',
+      type: IndustrySelectResponseDto,
+    }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
+export function ApiFindForTableIndustries() {
+  return applyDecorators(
+    ApiOperation({ summary: 'List industries for data table (server-stored state)' }),
+    ApiResponse({ status: 200, description: 'Industries retrieved successfully.', type: IndustryTableResponseDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
+export function ApiUpdateIndustry() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Update an industry' }),
+    ApiParam({ name: 'id', description: 'Industry UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiBody({ type: UpdateIndustryDto }),
+    ApiResponse({ status: 200, description: 'Industry updated successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Industry not found.' }),
+    ApiResponse({ status: 409, description: 'Industry with this code or slug already exists.' }),
+  );
+}
+
+export function ApiDeleteIndustry() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Delete an industry' }),
+    ApiParam({ name: 'id', description: 'Industry UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'Industry deleted successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Industry not found.' }),
+  );
+}

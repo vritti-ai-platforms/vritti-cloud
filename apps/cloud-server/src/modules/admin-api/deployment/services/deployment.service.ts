@@ -43,10 +43,10 @@ export class DeploymentService {
   }
 
   // Creates a new deployment
-  async create(dto: CreateDeploymentDto): Promise<SuccessResponseDto> {
+  async create(dto: CreateDeploymentDto): Promise<DeploymentDto> {
     const deployment = await this.deploymentRepository.create(dto);
     this.logger.log(`Created deployment: ${deployment.name} (${deployment.id})`);
-    return { success: true, message: 'Deployment created successfully.' };
+    return DeploymentDto.from(deployment);
   }
 
   // Returns all deployments mapped to DTOs

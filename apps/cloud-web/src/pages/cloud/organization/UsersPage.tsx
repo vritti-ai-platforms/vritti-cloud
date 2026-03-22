@@ -8,9 +8,11 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Mail, MoreVertical, UserPlus, Users } from 'lucide-react';
+import { Mail, MoreVertical, Pencil, UserPlus, Users } from 'lucide-react';
+import { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { NexusUser } from '@/schemas/cloud/organizations';
+import { EditUserForm } from './forms/EditUserForm';
 import { InviteUserForm } from './forms/InviteUserForm';
 
 export const UsersPage = () => {
@@ -20,8 +22,16 @@ export const UsersPage = () => {
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useOrgUsers(orgId);
   const inviteDialog = useDialog();
+  const editDialog = useDialog();
+  const editUserRef = useRef<NexusUser | null>(null);
   const confirm = useConfirm();
   const resendMutation = useResendInvite(orgId);
+
+  // Opens the edit dialog for a pending user
+  function handleEdit(user: NexusUser) {
+    editUserRef.current = user;
+    editDialog.open();
+  }
 
   // Confirms and resends invitation email to a pending user
   async function handleResendInvite(user: NexusUser) {
@@ -35,7 +45,7 @@ export const UsersPage = () => {
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ onResendInvite: handleResendInvite }),
+    columns: getColumns({ onResendInvite: handleResendInvite, onEdit: handleEdit }),
     slug: `org-users-${orgId}`,
     label: 'user',
     serverState: response,
@@ -61,7 +71,6 @@ export const UsersPage = () => {
           ],
           searchAll: true,
         }}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: ORG_USERS_QUERY_KEY(orgId) })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<UserPlus className="size-4" />} size="sm" onClick={inviteDialog.open}>
@@ -90,6 +99,21 @@ export const UsersPage = () => {
         title="Invite User"
         description="Send an invitation to join this organization's portal."
         content={(close) => <InviteUserForm orgId={orgId} onSuccess={close} onCancel={close} />}
+      />
+
+      {/* Edit user dialog */}
+      <Dialog
+        open={editDialog.isOpen}
+        onOpenChange={(v) => {
+          if (!v) editDialog.close();
+        }}
+        title="Edit User"
+        description="Update user details. If the email has changed, resend the invitation to the new address."
+        content={(close) =>
+          editUserRef.current ? (
+            <EditUserForm orgId={orgId} user={editUserRef.current} onSuccess={close} onCancel={close} />
+          ) : null
+        }
       />
     </div>
   );
@@ -123,10 +147,11 @@ function formatDate(dateStr: string) {
 
 interface GetColumnsOptions {
   onResendInvite: (user: NexusUser) => void;
+  onEdit: (user: NexusUser) => void;
 }
 
 // Builds column definitions for the users DataTable
-function getColumns({ onResendInvite }: GetColumnsOptions): ColumnDef<NexusUser, unknown>[] {
+function getColumns({ onResendInvite, onEdit }: GetColumnsOptions): ColumnDef<NexusUser, unknown>[] {
   return [
     {
       accessorKey: 'fullName',
@@ -135,15 +160,6 @@ function getColumns({ onResendInvite }: GetColumnsOptions): ColumnDef<NexusUser,
     {
       accessorKey: 'email',
       header: 'Email',
-    },
-    {
-      accessorKey: 'role',
-      header: 'Role',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="text-xs font-medium">
-          {row.original.role.replace(/_/g, ' ')}
-        </Badge>
-      ),
     },
     {
       accessorKey: 'status',
@@ -177,6 +193,13 @@ function getColumns({ onResendInvite }: GetColumnsOptions): ColumnDef<NexusUser,
               ),
             }}
             items={[
+              {
+                type: 'item' as const,
+                id: 'edit',
+                label: 'Edit',
+                icon: Pencil,
+                onClick: () => onEdit(row.original),
+              },
               {
                 type: 'item' as const,
                 id: 'resend',

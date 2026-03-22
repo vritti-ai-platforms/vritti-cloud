@@ -56,6 +56,15 @@ export class MediaService {
     this.defaultProvider = this.configService.getOrThrow<string>('MEDIA_STORAGE_PROVIDER');
   }
 
+  // Uploads a file to the public bucket and returns the permanent public URL
+  async uploadPublic(file: FilePayload, key: string): Promise<string> {
+    this.validateFile(file);
+    const provider = this.storageFactory.resolve(this.defaultProvider);
+    const url = await provider.uploadPublic(key, file.buffer, file.mimetype);
+    this.logger.log(`Uploaded public file: ${key}`);
+    return url;
+  }
+
   // Extracts and uploads a single file from a Fastify multipart request
   async uploadFromRequest(request: FastifyRequest, uploadedBy: string, query: UploadQueryDto): Promise<MediaDto> {
     const file = await request.file();

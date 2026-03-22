@@ -61,7 +61,6 @@ export const CloudProvidersPage = () => {
           ],
           searchAll: true,
         }}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: CLOUD_PROVIDERS_QUERY_KEY })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>

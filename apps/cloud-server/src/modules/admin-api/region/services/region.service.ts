@@ -65,14 +65,14 @@ export class RegionService {
   }
 
   // Creates a new region; throws ConflictException on duplicate code
-  async create(dto: CreateRegionDto): Promise<SuccessResponseDto> {
+  async create(dto: CreateRegionDto): Promise<RegionDto> {
     const existing = await this.regionRepository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException('Region with this code already exists.');
     }
     const region = await this.regionRepository.create(dto);
     this.logger.log(`Created region: ${region.name} (${region.id})`);
-    return { success: true, message: 'Region created successfully.' };
+    return RegionDto.from(region);
   }
 
   // Returns all regions with provider counts, applying server-stored filter/sort/search/pagination state

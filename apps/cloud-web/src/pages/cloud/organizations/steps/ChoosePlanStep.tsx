@@ -31,13 +31,13 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
   onBack,
   onContinue,
 }) => {
-  const deploymentId = form.getValues('deploymentId') ?? '';
-  const industryId = form.getValues('industryId') ?? '';
+  const deploymentId = form.watch('deploymentId') ?? '';
+  const industryId = form.watch('industryId') ?? '';
 
   const { data: plans = [], isLoading } = useDeploymentPlans(deploymentId, industryId);
 
   return (
-    <Form form={form} onSubmit={onContinue}>
+    <Form form={form} onSubmit={onContinue} resetOnSuccess={false}>
       {isLoading ? (
         <div className="flex items-center justify-center py-16 gap-3 text-muted-foreground">
           <Spinner className="size-6 text-primary" />

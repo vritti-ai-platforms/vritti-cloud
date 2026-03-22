@@ -2,15 +2,22 @@ import { Breadcrumb } from '@vritti/quantum-ui/Breadcrumb';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Bell, ChevronRight, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import logoImg from '../../assets/vritti-cloud.png';
+import { useLogo } from '../../hooks/useLogo';
+import { BUSwitcher } from '../bu-switcher/BUSwitcher';
 import { CompanySwitcher } from '../company-switcher';
+import { VersionSwitcher } from '../version-switcher';
 import { UserMenu } from './UserMenu';
 
 // Org slugs use the `org-` prefix (e.g., org-healthfirst~uuid)
 const ORG_SLUG_PREFIX = 'org-';
+// Version slugs use the `ver-` prefix (e.g., ver-restaurant-suite~uuid)
+const VERSION_SLUG_PREFIX = 'ver-';
+// BU slugs use the `bu-` prefix (e.g., bu-north-america~uuid)
+const BU_SLUG_PREFIX = 'bu-';
 
 export const TopBar = () => {
   const { pathname } = useLocation();
+  const logoImg = useLogo();
   const showBreadcrumb = pathname !== '/';
 
   return (
@@ -18,7 +25,7 @@ export const TopBar = () => {
       <div className="h-14 px-6 flex items-center justify-between">
         {/* Logo */}
         <Link to="/">
-          <img src={logoImg} alt="Vritti Logo" className="h-8" />
+          <img src={logoImg} alt="Vritti Logo" className="h-7 w-auto" />
         </Link>
 
         {showBreadcrumb && <ChevronRight className="size-4 text-muted-foreground shrink-0 mx-2" />}
@@ -38,6 +45,33 @@ export const TopBar = () => {
                     />
                   );
                 }
+
+                // Any segment with ver- prefix = version slug (under /app-versions/)
+                if (segment.raw.startsWith(VERSION_SLUG_PREFIX)) {
+                  return (
+                    <VersionSwitcher
+                      key={segment.raw}
+                      currentVersionId={segment.id ?? segment.raw}
+                      currentVersionName={segment.slug ? segment.label : undefined}
+                    />
+                  );
+                }
+
+                // Any segment with bu- prefix = BU slug (under /:orgSlug/business-units/)
+                if (segment.raw.startsWith(BU_SLUG_PREFIX)) {
+                  const orgSegment = segment.path.split('/')[1] ?? '';
+                  const orgId = orgSegment.split('~').pop() ?? '';
+                  return (
+                    <BUSwitcher
+                      key={segment.raw}
+                      orgId={orgId}
+                      orgSlug={orgSegment}
+                      currentBuId={segment.id ?? segment.raw}
+                      currentBuName={segment.slug ? segment.label : undefined}
+                    />
+                  );
+                }
+
                 return undefined;
               }}
             />

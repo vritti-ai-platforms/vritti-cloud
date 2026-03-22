@@ -55,14 +55,14 @@ export class CloudProviderService {
   }
 
   // Creates a new cloud provider; throws ConflictException on duplicate code
-  async create(dto: CreateCloudProviderDto): Promise<SuccessResponseDto> {
+  async create(dto: CreateCloudProviderDto): Promise<CloudProviderDto> {
     const existing = await this.cloudProviderRepository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException('Provider with this code already exists.');
     }
     const provider = await this.cloudProviderRepository.create(dto);
     this.logger.log(`Created provider: ${provider.name} (${provider.id})`);
-    return { success: true, message: 'Cloud provider created successfully.' };
+    return CloudProviderDto.from(provider);
   }
 
   // Returns paginated cloud providers with region counts, applying server-stored filter/sort/search/pagination state

@@ -151,3 +151,52 @@ export const DeploymentTypeValues = {
   shared: 'shared' as const,
   dedicated: 'dedicated' as const,
 };
+
+// Feature permission type — what kind of access a permission grants
+export const featureTypeEnum = cloudSchema.enum('FeatureType', [
+  'VIEW',
+  'CREATE',
+  'EDIT',
+  'DELETE',
+  'EXPORT',
+  'IMPORT',
+  'APPROVE',
+  'MANAGE',
+]);
+export type FeatureType = (typeof featureTypeEnum.enumValues)[number];
+export const FeatureTypeValues = {
+  VIEW: 'VIEW' as const,
+  CREATE: 'CREATE' as const,
+  EDIT: 'EDIT' as const,
+  DELETE: 'DELETE' as const,
+  EXPORT: 'EXPORT' as const,
+  IMPORT: 'IMPORT' as const,
+  APPROVE: 'APPROVE' as const,
+  MANAGE: 'MANAGE' as const,
+};
+
+// App version lifecycle status
+export const appVersionStatusEnum = cloudSchema.enum('AppVersionStatus', ['DRAFT', 'READY', 'PUBLISHED']);
+export type AppVersionStatus = (typeof appVersionStatusEnum.enumValues)[number];
+export const AppVersionStatusValues = {
+  DRAFT: 'DRAFT' as const,
+  READY: 'READY' as const,
+  PUBLISHED: 'PUBLISHED' as const,
+};
+
+// App microfrontend platform
+export const appPlatformEnum = cloudSchema.enum('AppPlatform', ['WEB', 'MOBILE']);
+export type AppPlatform = (typeof appPlatformEnum.enumValues)[number];
+export const AppPlatformValues = {
+  WEB: 'WEB' as const,
+  MOBILE: 'MOBILE' as const,
+};
+
+// Role scope — how far a role's access extends in the BU tree
+export const roleScopeEnum = cloudSchema.enum('RoleScope', ['GLOBAL', 'SUBTREE', 'SINGLE_BU']);
+export type RoleScope = (typeof roleScopeEnum.enumValues)[number];
+export const RoleScopeValues = {
+  GLOBAL: 'GLOBAL' as const,
+  SUBTREE: 'SUBTREE' as const,
+  SINGLE_BU: 'SINGLE_BU' as const,
+};

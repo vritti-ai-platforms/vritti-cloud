@@ -32,13 +32,8 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
     },
   });
 
-  const handleCancel = () => {
-    form.reset({ planId, currency: 'INR' });
-    onCancel();
-  };
-
   return (
-    <Form form={form} mutation={createMutation} showRootError>
+    <Form form={form} mutation={createMutation} showRootError resetOnSuccess={false} onCancel={onCancel}>
       <IndustrySelector name="industryId" label="Industry" placeholder="Select industry" />
       <RegionSelector
         name="regionId"
@@ -56,7 +51,7 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
       <TextField name="price" label="Price" placeholder="e.g. 2999.00" />
       <CurrencySelector name="currency" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">

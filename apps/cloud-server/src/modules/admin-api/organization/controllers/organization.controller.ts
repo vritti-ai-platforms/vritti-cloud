@@ -1,4 +1,5 @@
-import { Controller, Get, Logger, Param } from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
+import type { SuccessResponseDto } from '@vritti/api-sdk';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserId } from '@vritti/api-sdk';
 import { ApiFindOrganizationMembers } from '../../organization-member/docs/organization-member.docs';
@@ -42,5 +43,13 @@ export class OrganizationController {
   findMembers(@Param('id') id: string, @UserId() userId: string): Promise<OrganizationMemberTableResponseDto> {
     this.logger.log(`GET /admin-api/organizations/${id}/members`);
     return this.organizationMemberService.findForTable(userId, id);
+  }
+
+  // Syncs feature catalog from deployment snapshot to core-server for this org
+  @Post(':id/sync-features')
+  @HttpCode(HttpStatus.OK)
+  async syncFeatureCatalog(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/organizations/${id}/sync-features`);
+    return this.organizationService.syncFeatureCatalog(id);
   }
 }

@@ -174,6 +174,12 @@ class EnvironmentVariables {
   @IsString()
   R2_BUCKET_NAME: string;
 
+  @IsString()
+  R2_PUBLIC_BUCKET: string;
+
+  @IsString()
+  R2_PUBLIC_URL: string;
+
   // Media upload
   @IsNumber()
   @Min(1)

@@ -8,7 +8,9 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Building2, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
+import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { Building2, Eye, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { Industry } from '@/schemas/admin/industries';
 import { AddIndustryForm } from './forms/AddIndustryForm';
 import { EditIndustryForm } from './forms/EditIndustryForm';
@@ -16,6 +18,7 @@ import { EditIndustryForm } from './forms/EditIndustryForm';
 const TABLE_SLUG = 'industries';
 
 export const IndustriesPage = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useIndustries();
   const confirm = useConfirm();
@@ -34,7 +37,10 @@ export const IndustriesPage = () => {
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ onDelete: handleDelete }),
+    columns: getColumns({
+      onDelete: handleDelete,
+      onView: (industry) => navigate(`/industries/${buildSlug(industry.name, industry.id)}`),
+    }),
     slug: TABLE_SLUG,
     label: 'industry',
     serverState: response,
@@ -53,7 +59,6 @@ export const IndustriesPage = () => {
       <DataTable
         table={table}
         isLoading={isLoading}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: INDUSTRIES_QUERY_KEY })}
         searchConfig={{
           columns: [
             { id: 'name', label: 'Name' },
@@ -94,9 +99,10 @@ export const IndustriesPage = () => {
 
 interface ColumnActions {
   onDelete: (industry: Industry) => void;
+  onView: (industry: Industry) => void;
 }
 
-function getColumns({ onDelete }: ColumnActions): ColumnDef<Industry, unknown>[] {
+function getColumns({ onDelete, onView }: ColumnActions): ColumnDef<Industry, unknown>[] {
   return [
     {
       accessorKey: 'name',
@@ -125,6 +131,13 @@ function getColumns({ onDelete }: ColumnActions): ColumnDef<Industry, unknown>[]
           }}
           align="end"
           items={[
+            {
+              type: 'item' as const,
+              id: 'view',
+              label: 'View',
+              icon: Eye,
+              onClick: () => onView(row.original),
+            },
             {
               type: 'dialog' as const,
               id: 'edit',

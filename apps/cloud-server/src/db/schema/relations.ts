@@ -72,10 +72,24 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 
+  // App version relations
+  appVersions: {
+    features: r.many.features(),
+    microfrontends: r.many.microfrontends(),
+    featureMicrofrontends: r.many.featureMicrofrontends(),
+    apps: r.many.apps(),
+    roles: r.many.roles(),
+    featurePermissions: r.many.featurePermissions(),
+    roleFeaturePermissions: r.many.roleFeaturePermissions(),
+    appFeatures: r.many.appFeatures(),
+    deployments: r.many.deployments(),
+  },
+
   // Plan relations
   plans: {
     organizations: r.many.organizations(),
     prices: r.many.prices(),
+    planApps: r.many.planApps(),
     industries: r.many.industries({
       from: r.plans.id.through(r.prices.planId),
       to: r.industries.id.through(r.prices.industryId),
@@ -98,6 +112,8 @@ export const relations = defineRelations(schema, (r) => ({
   industries: {
     organizations: r.many.organizations(),
     prices: r.many.prices(),
+    industryApps: r.many.industryApps(),
+    roles: r.many.roles(),
     plans: r.many.plans({
       from: r.industries.id.through(r.prices.industryId),
       to: r.plans.id.through(r.prices.planId),
@@ -112,6 +128,10 @@ export const relations = defineRelations(schema, (r) => ({
   deployments: {
     organizations: r.many.organizations(),
     industryPlans: r.many.deploymentIndustryPlans(),
+    appVersion: r.one.appVersions({
+      from: r.deployments.appVersionId,
+      to: r.appVersions.id,
+    }),
     plans: r.many.plans({
       from: r.deployments.id.through(r.deploymentIndustryPlans.deploymentId),
       to: r.plans.id.through(r.deploymentIndustryPlans.planId),
@@ -132,6 +152,7 @@ export const relations = defineRelations(schema, (r) => ({
 
   // Region relations
   regions: {
+    appPrices: r.many.appPrices(),
     cloudProviders: r.many.cloudProviders({
       from: r.regions.id.through(r.regionCloudProviders.regionId),
       to: r.cloudProviders.id.through(r.regionCloudProviders.providerId),
@@ -145,6 +166,7 @@ export const relations = defineRelations(schema, (r) => ({
 
   // Cloud provider relations
   cloudProviders: {
+    appPrices: r.many.appPrices(),
     regions: r.many.regions({
       from: r.cloudProviders.id.through(r.regionCloudProviders.providerId),
       to: r.regions.id.through(r.regionCloudProviders.regionId),
@@ -201,6 +223,120 @@ export const relations = defineRelations(schema, (r) => ({
     cloudProvider: r.one.cloudProviders({
       from: r.regionCloudProviders.providerId,
       to: r.cloudProviders.id,
+    }),
+  },
+
+  // Feature relations
+  features: {
+    appVersion: r.one.appVersions({
+      from: r.features.appVersionId,
+      to: r.appVersions.id,
+    }),
+    featureMicrofrontends: r.many.featureMicrofrontends(),
+    featurePermissions: r.many.featurePermissions(),
+    appFeatures: r.many.appFeatures(),
+    roleFeaturePermissions: r.many.roleFeaturePermissions(),
+  },
+
+  // Microfrontend relations
+  microfrontends: {
+    appVersion: r.one.appVersions({
+      from: r.microfrontends.appVersionId,
+      to: r.appVersions.id,
+    }),
+    featureMicrofrontends: r.many.featureMicrofrontends(),
+  },
+
+  // Feature-Microfrontend junction relations
+  featureMicrofrontends: {
+    appVersion: r.one.appVersions({
+      from: r.featureMicrofrontends.appVersionId,
+      to: r.appVersions.id,
+    }),
+    feature: r.one.features({
+      from: r.featureMicrofrontends.featureId,
+      to: r.features.id,
+    }),
+    microfrontend: r.one.microfrontends({
+      from: r.featureMicrofrontends.microfrontendId,
+      to: r.microfrontends.id,
+    }),
+  },
+
+  // App relations
+  apps: {
+    appVersion: r.one.appVersions({
+      from: r.apps.appVersionId,
+      to: r.appVersions.id,
+    }),
+    appFeatures: r.many.appFeatures(),
+    appPrices: r.many.appPrices(),
+    industryApps: r.many.industryApps(),
+  },
+
+  // App-Feature junction relations
+  appFeatures: {
+    appVersion: r.one.appVersions({
+      from: r.appFeatures.appVersionId,
+      to: r.appVersions.id,
+    }),
+    app: r.one.apps({ from: r.appFeatures.appId, to: r.apps.id }),
+    feature: r.one.features({ from: r.appFeatures.featureId, to: r.features.id }),
+  },
+
+  // Feature permission relations
+  featurePermissions: {
+    appVersion: r.one.appVersions({
+      from: r.featurePermissions.appVersionId,
+      to: r.appVersions.id,
+    }),
+    feature: r.one.features({
+      from: r.featurePermissions.featureId,
+      to: r.features.id,
+    }),
+  },
+
+  // App-Price relations
+  appPrices: {
+    app: r.one.apps({ from: r.appPrices.appId, to: r.apps.id }),
+    region: r.one.regions({ from: r.appPrices.regionId, to: r.regions.id }),
+    cloudProvider: r.one.cloudProviders({ from: r.appPrices.cloudProviderId, to: r.cloudProviders.id }),
+  },
+
+  // Plan-App junction relations
+  planApps: {
+    plan: r.one.plans({ from: r.planApps.planId, to: r.plans.id }),
+  },
+
+  // Industry-App junction relations
+  industryApps: {
+    industry: r.one.industries({ from: r.industryApps.industryId, to: r.industries.id }),
+    app: r.one.apps({ from: r.industryApps.appId, to: r.apps.id }),
+  },
+
+  // Role relations
+  roles: {
+    appVersion: r.one.appVersions({
+      from: r.roles.appVersionId,
+      to: r.appVersions.id,
+    }),
+    industry: r.one.industries({ from: r.roles.industryId, to: r.industries.id }),
+    roleFeaturePermissions: r.many.roleFeaturePermissions(),
+  },
+
+  // Role-Feature-Permission junction relations
+  roleFeaturePermissions: {
+    appVersion: r.one.appVersions({
+      from: r.roleFeaturePermissions.appVersionId,
+      to: r.appVersions.id,
+    }),
+    role: r.one.roles({
+      from: r.roleFeaturePermissions.roleId,
+      to: r.roles.id,
+    }),
+    feature: r.one.features({
+      from: r.roleFeaturePermissions.featureId,
+      to: r.features.id,
     }),
   },
 }));

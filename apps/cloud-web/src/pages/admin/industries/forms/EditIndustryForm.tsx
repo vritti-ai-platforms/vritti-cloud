@@ -24,20 +24,10 @@ export const EditIndustryForm: React.FC<EditIndustryFormProps> = ({ industry, on
     },
   });
 
-  const updateMutation = useUpdateIndustry({
-    onSuccess: () => {
-      onSuccess();
-    },
-  });
-
-  // Cancel resets the form then notifies the parent
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const updateMutation = useUpdateIndustry({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError transformSubmit={(data) => ({ id: industry.id, data })}>
+    <Form form={form} mutation={updateMutation} showRootError resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: industry.id, data })}>
       <TextField name="name" label="Industry Name" placeholder="e.g. Healthcare" />
       <TextField
         name="code"
@@ -51,7 +41,7 @@ export const EditIndustryForm: React.FC<EditIndustryFormProps> = ({ industry, on
         placeholder="e.g. Hospitals, clinics, and medical services"
       />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">

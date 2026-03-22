@@ -42,4 +42,8 @@ export class CreateDeploymentDto {
   @ApiProperty({ enum: DeploymentTypeValues, description: 'Deployment type' })
   @IsEnum(DeploymentTypeValues)
   type: DeploymentType;
+
+  @ApiProperty({ description: 'App version UUID this deployment runs', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @IsUUID()
+  appVersionId: string;
 }

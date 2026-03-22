@@ -9,7 +9,7 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { cloudProviders, prices, regions } from '@/db/schema';
-import { PriceDetailDto } from '../dto/entity/price-detail.dto';
+import { PriceDetailDto, type PriceWithRelations } from '../dto/entity/price-detail.dto';
 import type { CreatePriceDto } from '../dto/request/create-price.dto';
 import type { UpdatePriceDto } from '../dto/request/update-price.dto';
 import { PricesTableResponseDto } from '../dto/response/prices-table-response.dto';
@@ -33,7 +33,7 @@ export class PriceService {
   ) {}
 
   // Creates a new price, rejecting duplicate plan+industry+region+provider combinations
-  async create(dto: CreatePriceDto): Promise<SuccessResponseDto> {
+  async create(dto: CreatePriceDto): Promise<PriceDetailDto> {
     const existing = await this.priceRepository.findByComposite(
       dto.planId,
       dto.industryId,
@@ -48,7 +48,7 @@ export class PriceService {
     }
     const price = await this.priceRepository.create(dto);
     this.logger.log(`Created price: ${price.id}`);
-    return { success: true, message: 'Price created successfully.' };
+    return PriceDetailDto.fromWithRelations(price as PriceWithRelations);
   }
 
   // Returns paginated prices for a plan applying stored filter/sort/search/pagination state

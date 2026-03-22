@@ -18,21 +18,10 @@ export const AddIndustryForm: React.FC<AddIndustryFormProps> = ({ onSuccess, onC
     defaultValues: { name: '', code: '', description: '' },
   });
 
-  const createMutation = useCreateIndustry({
-    onSuccess: () => {
-      form.reset();
-      onSuccess();
-    },
-  });
-
-  // Cancel resets the form then notifies the parent
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const createMutation = useCreateIndustry({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError>
+    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Industry Name" placeholder="e.g. Healthcare" />
       <TextField
         name="code"
@@ -47,7 +36,7 @@ export const AddIndustryForm: React.FC<AddIndustryFormProps> = ({ onSuccess, onC
         description="Optional"
       />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">

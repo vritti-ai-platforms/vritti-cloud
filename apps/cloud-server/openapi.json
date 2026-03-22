@@ -3303,6 +3303,159 @@
         ]
       }
     },
+    "/cloud-api/organizations/{id}": {
+      "get": {
+        "operationId": "OrganizationController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Organization details retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgListItemDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "User does not have access to this organization."
+          },
+          "404": {
+            "description": "Organization not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get organization details",
+        "tags": [
+          "Organizations"
+        ]
+      },
+      "patch": {
+        "description": "Updates an organization name, size, and/or logo. Accepts multipart/form-data with optional file upload.",
+        "operationId": "OrganizationController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "Acme Corp"
+                  },
+                  "size": {
+                    "type": "string",
+                    "enum": [
+                      "0-10",
+                      "10-20",
+                      "20-50",
+                      "50-100",
+                      "100-500",
+                      "500+"
+                    ],
+                    "example": "0-10"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Optional logo file"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organization updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "403": {
+            "description": "User does not have access to this organization."
+          },
+          "404": {
+            "description": "Organization not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update organization details",
+        "tags": [
+          "Organizations"
+        ]
+      },
+      "delete": {
+        "operationId": "OrganizationController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Organizations"
+        ]
+      }
+    },
     "/cloud-api/organizations/{orgId}/users/table": {
       "get": {
         "operationId": "OrganizationUsersController_getUsersTable",
@@ -3441,6 +3594,67 @@
         ]
       }
     },
+    "/cloud-api/organizations/{orgId}/users/{userId}": {
+      "patch": {
+        "description": "Updates a portal user's email or name in the nexus deployment.",
+        "operationId": "OrganizationUsersController_updateUser",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateOrgUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "409": {
+            "description": "Email already in use."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a user",
+        "tags": [
+          "Organization Users"
+        ]
+      }
+    },
     "/cloud-api/organizations/{orgId}/users/{userId}/resend-invite": {
       "post": {
         "description": "Resends the invitation email to a PENDING user, generating a fresh token.",
@@ -3492,6 +3706,1132 @@
         ]
       }
     },
+    "/cloud-api/organizations/{orgId}/apps": {
+      "get": {
+        "description": "Returns all catalog apps with status: included, addon, unavailable, or enabled.",
+        "operationId": "OrganizationAppsController_listApps",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App list retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgAppListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organization apps",
+        "tags": [
+          "Organization Apps"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/apps/{appId}/enable": {
+      "post": {
+        "description": "Enables a plan-included app for the organization by pushing configuration to core.",
+        "operationId": "OrganizationAppsController_enableApp",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App ID to enable",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App enabled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App not included in the organization plan."
+          },
+          "404": {
+            "description": "Organization, deployment, or app not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Enable a plan-included app",
+        "tags": [
+          "Organization Apps"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/apps/{appId}/disable": {
+      "post": {
+        "description": "Disables an app for the organization by notifying core.",
+        "operationId": "OrganizationAppsController_disableApp",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App ID to disable",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App disabled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization, deployment, or app not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disable an app",
+        "tags": [
+          "Organization Apps"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/apps/{appId}/addon": {
+      "post": {
+        "description": "Purchases an addon app for specific business units and provisions it in core.",
+        "operationId": "OrganizationAppsController_purchaseAddon",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "Addon app ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PurchaseAddonDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Addon purchased successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "App is plan-included or addon not available in region."
+          },
+          "404": {
+            "description": "Organization, deployment, or app not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Purchase an addon app",
+        "tags": [
+          "Organization Apps"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/apps/{appId}/addon/{businessUnitId}": {
+      "delete": {
+        "description": "Cancels an addon app for a specific business unit in core.",
+        "operationId": "OrganizationAppsController_cancelAddon",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "Addon app ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessUnitId",
+            "required": true,
+            "in": "path",
+            "description": "Business unit ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Addon cancelled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization, deployment, or app not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancel an addon for a business unit",
+        "tags": [
+          "Organization Apps"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/apps/permissions": {
+      "get": {
+        "description": "Returns all features grouped by app for the organization, used for building role permission forms.",
+        "operationId": "OrganizationAppsController_getPermissions",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permissions retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrgPermissionsResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organization permissions",
+        "tags": [
+          "Organization Apps"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/roles": {
+      "get": {
+        "description": "Proxies to core to return all roles for the organization.",
+        "operationId": "OrganizationRolesController_listRoles",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles retrieved successfully."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organization roles",
+        "tags": [
+          "Organization Roles"
+        ]
+      },
+      "post": {
+        "description": "Proxies to core to create a new role for the organization.",
+        "operationId": "OrganizationRolesController_createRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Role created successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create an organization role",
+        "tags": [
+          "Organization Roles"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/roles/templates": {
+      "get": {
+        "description": "Returns role templates from the app version snapshot for the organization deployment.",
+        "operationId": "OrganizationRolesController_getTemplates",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role templates retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleTemplateListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Organization, deployment, or snapshot not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get role templates",
+        "tags": [
+          "Organization Roles"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/roles/{roleId}": {
+      "patch": {
+        "description": "Proxies to core to update a role for the organization.",
+        "operationId": "OrganizationRolesController_updateRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "description": "Role ID to update",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role updated successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, or role not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an organization role",
+        "tags": [
+          "Organization Roles"
+        ]
+      },
+      "delete": {
+        "description": "Proxies to core to delete a role for the organization.",
+        "operationId": "OrganizationRolesController_deleteRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "description": "Role ID to delete",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role deleted successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or role not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an organization role",
+        "tags": [
+          "Organization Roles"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/business-units": {
+      "get": {
+        "description": "Proxies to core to return all business units for the organization.",
+        "operationId": "OrganizationBusinessUnitsController_listBusinessUnits",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business units retrieved successfully."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List organization business units",
+        "tags": [
+          "Organization Business Units"
+        ]
+      },
+      "post": {
+        "description": "Proxies to core to create a new business unit. Checks plan limits before creating.",
+        "operationId": "OrganizationBusinessUnitsController_createBusinessUnit",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Business unit created successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "403": {
+            "description": "Business unit limit reached for the plan."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a business unit",
+        "tags": [
+          "Organization Business Units"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/business-units/{buId}": {
+      "get": {
+        "description": "Proxies to core to return a single business unit by ID.",
+        "operationId": "OrganizationBusinessUnitsController_getBusinessUnit",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "description": "Business unit ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business unit retrieved successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or business unit not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a business unit",
+        "tags": [
+          "Organization Business Units"
+        ]
+      },
+      "patch": {
+        "description": "Proxies to core to update a business unit.",
+        "operationId": "OrganizationBusinessUnitsController_updateBusinessUnit",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "description": "Business unit ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business unit updated successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, or business unit not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a business unit",
+        "tags": [
+          "Organization Business Units"
+        ]
+      },
+      "delete": {
+        "description": "Proxies to core to delete a business unit.",
+        "operationId": "OrganizationBusinessUnitsController_deleteBusinessUnit",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "description": "Business unit ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business unit deleted successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or business unit not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a business unit",
+        "tags": [
+          "Organization Business Units"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/business-units/{buId}/role-assignments": {
+      "get": {
+        "operationId": "OrganizationBusinessUnitsController_getRoleAssignments",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Organization Business Units"
+        ]
+      },
+      "post": {
+        "operationId": "OrganizationBusinessUnitsController_assignRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Organization Business Units"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/business-units/{buId}/role-assignments/{assignmentId}": {
+      "delete": {
+        "operationId": "OrganizationBusinessUnitsController_removeRoleAssignment",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignmentId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Organization Business Units"
+        ]
+      }
+    },
+    "/admin-api/apps/codes/select": {
+      "get": {
+        "operationId": "AppCodeController_findForSelect",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin - App Codes"
+        ]
+      }
+    },
+    "/admin-api/apps/codes/{appCode}/features/select": {
+      "get": {
+        "operationId": "AppCodeController_findFeatureCodesForSelect",
+        "parameters": [
+          {
+            "name": "appCode",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin - App Codes"
+        ]
+      }
+    },
+    "/admin-api/enums/permission-types": {
+      "get": {
+        "description": "Returns all available feature permission types from the enum.",
+        "operationId": "EnumController_getPermissionTypes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Permission types retrieved successfully."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get permission types",
+        "tags": [
+          "Admin - Enums"
+        ]
+      }
+    },
     "/admin-api/cloud-providers": {
       "post": {
         "operationId": "CloudProviderController_create",
@@ -3512,7 +4852,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
+                  "$ref": "#/components/schemas/CloudProviderDto"
                 }
               }
             }
@@ -4328,7 +5668,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
+                  "$ref": "#/components/schemas/RegionDto"
                 }
               }
             }
@@ -4763,7 +6103,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
+                  "$ref": "#/components/schemas/IndustryDto"
                 }
               }
             }
@@ -5063,6 +6403,230 @@
         ]
       }
     },
+    "/admin-api/industries/{industryId}/apps": {
+      "get": {
+        "operationId": "IndustryAppController_findByIndustry",
+        "parameters": [
+          {
+            "name": "industryId",
+            "required": true,
+            "in": "path",
+            "description": "Industry UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Industry apps retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/IndustryAppDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Industry not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List apps assigned to an industry",
+        "tags": [
+          "Admin - Industry Apps"
+        ]
+      },
+      "post": {
+        "operationId": "IndustryAppController_assign",
+        "parameters": [
+          {
+            "name": "industryId",
+            "required": true,
+            "in": "path",
+            "description": "Industry UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignIndustryAppDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "App assigned to industry successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IndustryAppDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Industry or app not found."
+          },
+          "409": {
+            "description": "App already assigned to this industry."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign an app to an industry",
+        "tags": [
+          "Admin - Industry Apps"
+        ]
+      }
+    },
+    "/admin-api/industries/{industryId}/apps/{appId}": {
+      "patch": {
+        "operationId": "IndustryAppController_update",
+        "parameters": [
+          {
+            "name": "industryId",
+            "required": true,
+            "in": "path",
+            "description": "Industry UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateIndustryAppDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Industry app updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Industry or industry-app assignment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an industry-app assignment",
+        "tags": [
+          "Admin - Industry Apps"
+        ]
+      },
+      "delete": {
+        "operationId": "IndustryAppController_remove",
+        "parameters": [
+          {
+            "name": "industryId",
+            "required": true,
+            "in": "path",
+            "description": "Industry UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App removed from industry successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Industry or industry-app assignment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an app from an industry",
+        "tags": [
+          "Admin - Industry Apps"
+        ]
+      }
+    },
     "/admin-api/organizations/table": {
       "get": {
         "operationId": "OrganizationController_findForTable",
@@ -5173,6 +6737,34 @@
           }
         ],
         "summary": "List organization members for data table (server-stored state)",
+        "tags": [
+          "Admin - Organizations"
+        ]
+      }
+    },
+    "/admin-api/organizations/{id}/sync-features": {
+      "post": {
+        "operationId": "OrganizationController_syncFeatureCatalog",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
         "tags": [
           "Admin - Organizations"
         ]
@@ -5523,6 +7115,274 @@
         ]
       }
     },
+    "/admin-api/plans/{planId}/apps/table": {
+      "get": {
+        "operationId": "PlanAppController_findForTable",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan apps table data retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanAppTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get plan apps for data table with server-stored state",
+        "tags": [
+          "Admin - Plan Apps"
+        ]
+      }
+    },
+    "/admin-api/plans/{planId}/apps": {
+      "get": {
+        "operationId": "PlanAppController_findByPlan",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan apps retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanAppDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List apps assigned to a plan",
+        "tags": [
+          "Admin - Plan Apps"
+        ]
+      },
+      "post": {
+        "operationId": "PlanAppController_assign",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignPlanAppDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "App assigned to plan successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanAppDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan or app not found."
+          },
+          "409": {
+            "description": "App already assigned to this plan."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign an app to a plan",
+        "tags": [
+          "Admin - Plan Apps"
+        ]
+      }
+    },
+    "/admin-api/plans/{planId}/apps/{appCode}": {
+      "patch": {
+        "operationId": "PlanAppController_update",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "appCode",
+            "required": true,
+            "in": "path",
+            "description": "App code string",
+            "schema": {
+              "example": "crm",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanAppDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Plan app updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan or plan-app assignment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update included feature codes for a plan-app assignment",
+        "tags": [
+          "Admin - Plan Apps"
+        ]
+      },
+      "delete": {
+        "operationId": "PlanAppController_remove",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "appCode",
+            "required": true,
+            "in": "path",
+            "description": "App code string",
+            "schema": {
+              "example": "crm",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App removed from plan successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan or plan-app assignment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an app from a plan",
+        "tags": [
+          "Admin - Plan Apps"
+        ]
+      }
+    },
     "/admin-api/prices": {
       "post": {
         "operationId": "PriceController_create",
@@ -5706,6 +7566,2646 @@
         "summary": "Delete a price",
         "tags": [
           "Admin - Prices"
+        ]
+      }
+    },
+    "/admin-api/app-versions": {
+      "post": {
+        "operationId": "AppVersionController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppVersionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "App version created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVersionDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "409": {
+            "description": "Version string already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new app version (DRAFT)",
+        "tags": [
+          "Admin - App Versions"
+        ]
+      }
+    },
+    "/admin-api/app-versions/table": {
+      "get": {
+        "operationId": "AppVersionController_findForTable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "App versions retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVersionTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List app versions for data table (server-stored state)",
+        "tags": [
+          "Admin - App Versions"
+        ]
+      }
+    },
+    "/admin-api/app-versions/select": {
+      "get": {
+        "operationId": "AppVersionController_findForSelect",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App version options retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVersionSelectResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get app versions for select component",
+        "tags": [
+          "Admin - App Versions"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{id}": {
+      "get": {
+        "operationId": "AppVersionController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App version retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppVersionDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App version not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get an app version by ID",
+        "tags": [
+          "Admin - App Versions"
+        ]
+      },
+      "patch": {
+        "operationId": "AppVersionController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppVersionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Admin - App Versions"
+        ]
+      },
+      "delete": {
+        "operationId": "AppVersionController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App version deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Only DRAFT versions can be deleted."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App version not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a DRAFT app version",
+        "tags": [
+          "Admin - App Versions"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{id}/finalize": {
+      "post": {
+        "operationId": "AppVersionController_finalize",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App version finalized successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Version is not in DRAFT status."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App version not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Finalize a DRAFT version (build snapshot)",
+        "tags": [
+          "Admin - App Versions"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{id}/artifacts": {
+      "post": {
+        "operationId": "AppVersionController_pushArtifacts",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushArtifactsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Artifacts pushed and version marked as READY.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Version must be finalized first."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App version not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Push CI artifacts (transitions to READY)",
+        "tags": [
+          "Admin - App Versions"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/microfrontends": {
+      "post": {
+        "operationId": "MicrofrontendController_create",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMicrofrontendDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Microfrontend created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MicrofrontendDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "409": {
+            "description": "Microfrontend with this code and platform already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new microfrontend",
+        "tags": [
+          "Admin - Microfrontends"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/microfrontends/table": {
+      "get": {
+        "operationId": "MicrofrontendController_findForTable",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Microfrontends retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MicrofrontendTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List microfrontends for data table (server-stored state)",
+        "tags": [
+          "Admin - Microfrontends"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/microfrontends/select": {
+      "get": {
+        "operationId": "MicrofrontendController_findForSelect",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Microfrontend options retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MicrofrontendSelectResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get microfrontends for select component",
+        "tags": [
+          "Admin - Microfrontends"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/microfrontends/{id}": {
+      "get": {
+        "operationId": "MicrofrontendController_findById",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Microfrontend UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Microfrontend retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MicrofrontendDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Microfrontend not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a microfrontend by ID",
+        "tags": [
+          "Admin - Microfrontends"
+        ]
+      },
+      "patch": {
+        "operationId": "MicrofrontendController_update",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Microfrontend UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMicrofrontendDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Microfrontend updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Microfrontend not found."
+          },
+          "409": {
+            "description": "Microfrontend with this code and platform already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a microfrontend",
+        "tags": [
+          "Admin - Microfrontends"
+        ]
+      },
+      "delete": {
+        "operationId": "MicrofrontendController_delete",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Microfrontend UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Microfrontend deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Microfrontend not found."
+          },
+          "409": {
+            "description": "Microfrontend is referenced by features."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a microfrontend",
+        "tags": [
+          "Admin - Microfrontends"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features": {
+      "post": {
+        "operationId": "FeatureController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeatureDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Feature created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "409": {
+            "description": "Feature with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new feature",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/table": {
+      "get": {
+        "operationId": "FeatureController_findForTable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Features retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List features for data table (server-stored state)",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/select": {
+      "get": {
+        "operationId": "FeatureController_findForSelect",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature options retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureSelectResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get features for select component",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/with-permissions": {
+      "get": {
+        "operationId": "FeatureController_findWithPermissions",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Features with permissions retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeatureWithPermissionsResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List features with permission types and app codes for a version",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/{id}": {
+      "get": {
+        "operationId": "FeatureController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a feature by ID",
+        "tags": [
+          "Admin - Features"
+        ]
+      },
+      "patch": {
+        "operationId": "FeatureController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateFeatureDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feature updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature not found."
+          },
+          "409": {
+            "description": "Feature with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a feature",
+        "tags": [
+          "Admin - Features"
+        ]
+      },
+      "delete": {
+        "operationId": "FeatureController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature not found."
+          },
+          "409": {
+            "description": "Feature is referenced by app features."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a feature",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/bulk": {
+      "post": {
+        "operationId": "FeatureController_bulkCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateFeaturesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Features created (some may have been skipped)."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bulk create features for seeding",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/{featureId}/permissions": {
+      "get": {
+        "operationId": "FeaturePermissionController_getPermissions",
+        "parameters": [
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permission types retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeaturePermissionTypesResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get permission types for a feature",
+        "tags": [
+          "Admin - Feature Permissions"
+        ]
+      },
+      "put": {
+        "operationId": "FeaturePermissionController_setPermissions",
+        "parameters": [
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetFeaturePermissionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feature permissions updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set permission types for a feature (full replace)",
+        "tags": [
+          "Admin - Feature Permissions"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/{featureId}/microfrontends": {
+      "get": {
+        "operationId": "FeatureMicrofrontendController_list",
+        "parameters": [
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature microfrontend links retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FeatureMicrofrontendDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List microfrontend links for a feature",
+        "tags": [
+          "Admin - Feature Microfrontends"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/features/{featureId}/microfrontends/{microfrontendId}": {
+      "put": {
+        "operationId": "FeatureMicrofrontendController_set",
+        "parameters": [
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "microfrontendId",
+            "required": true,
+            "in": "path",
+            "description": "Microfrontend UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetFeatureMicrofrontendDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Feature microfrontend link set successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeatureMicrofrontendDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature or microfrontend not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set or update a microfrontend link for a feature",
+        "tags": [
+          "Admin - Feature Microfrontends"
+        ]
+      },
+      "delete": {
+        "operationId": "FeatureMicrofrontendController_remove",
+        "parameters": [
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "microfrontendId",
+            "required": true,
+            "in": "path",
+            "description": "Microfrontend UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature microfrontend link removed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Feature or microfrontend link not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a microfrontend link from a feature",
+        "tags": [
+          "Admin - Feature Microfrontends"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps": {
+      "post": {
+        "operationId": "AppController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "App created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "409": {
+            "description": "App with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new app",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/table": {
+      "get": {
+        "operationId": "AppController_findForTable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Apps retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List apps for data table (server-stored state)",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/select": {
+      "get": {
+        "operationId": "AppController_findForSelect",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App options retrieved."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get apps for select component",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/{id}": {
+      "get": {
+        "operationId": "AppController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get an app by ID with counts",
+        "tags": [
+          "Admin - Apps"
+        ]
+      },
+      "patch": {
+        "operationId": "AppController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAppDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "App updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App not found."
+          },
+          "409": {
+            "description": "App with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an app",
+        "tags": [
+          "Admin - Apps"
+        ]
+      },
+      "delete": {
+        "operationId": "AppController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App not found."
+          },
+          "409": {
+            "description": "App is referenced by plans or industries."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an app",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/{appId}/features/table": {
+      "get": {
+        "operationId": "AppFeatureController_findForTable",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App features retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppFeatureTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List app features for data table (server-stored state)",
+        "tags": [
+          "Admin - App Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/{appId}/features": {
+      "get": {
+        "operationId": "AppFeatureController_findByApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Features retrieved successfully."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List features assigned to an app",
+        "tags": [
+          "Admin - App Features"
+        ]
+      },
+      "post": {
+        "operationId": "AppFeatureController_assignFeatures",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignFeaturesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Features assigned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App or features not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign features to an app (bulk upsert)",
+        "tags": [
+          "Admin - App Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/{appId}/features/{featureId}": {
+      "delete": {
+        "operationId": "AppFeatureController_removeFeature",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature removed from app successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App or feature assignment not found."
+          },
+          "409": {
+            "description": "Feature is referenced by roles."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a feature from an app",
+        "tags": [
+          "Admin - App Features"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/{appId}/prices": {
+      "get": {
+        "operationId": "AppPriceController_findByApp",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Prices retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AppPriceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List addon prices for an app",
+        "tags": [
+          "Admin - App Prices"
+        ]
+      },
+      "post": {
+        "operationId": "AppPriceController_create",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppPriceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "App price created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AppPriceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App not found."
+          },
+          "409": {
+            "description": "Price for this region and provider already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create addon price for region + provider",
+        "tags": [
+          "Admin - App Prices"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/apps/{appId}/prices/{priceId}": {
+      "patch": {
+        "operationId": "AppPriceController_update",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceId",
+            "required": true,
+            "in": "path",
+            "description": "Price UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAppPriceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "App price updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App price not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update an addon price",
+        "tags": [
+          "Admin - App Prices"
+        ]
+      },
+      "delete": {
+        "operationId": "AppPriceController_delete",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceId",
+            "required": true,
+            "in": "path",
+            "description": "Price UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App price deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App price not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete an addon price",
+        "tags": [
+          "Admin - App Prices"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/roles": {
+      "post": {
+        "operationId": "RoleController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new role template",
+        "tags": [
+          "Admin - Roles"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/roles/table": {
+      "get": {
+        "operationId": "RoleController_findForTable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Roles retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List roles for data table (server-stored state)",
+        "tags": [
+          "Admin - Roles"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/roles/select": {
+      "get": {
+        "operationId": "RoleController_findForSelect",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          },
+          {
+            "name": "industryId",
+            "required": false,
+            "in": "query",
+            "description": "Filter roles by industry UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role options retrieved."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get roles for select component",
+        "tags": [
+          "Admin - Roles"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/roles/{id}": {
+      "get": {
+        "operationId": "RoleController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a role by ID with permissions grouped by app",
+        "tags": [
+          "Admin - Roles"
+        ]
+      },
+      "patch": {
+        "operationId": "RoleController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Role updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a role template",
+        "tags": [
+          "Admin - Roles"
+        ]
+      },
+      "delete": {
+        "operationId": "RoleController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role not found."
+          },
+          "409": {
+            "description": "Cannot delete system role."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a role template",
+        "tags": [
+          "Admin - Roles"
+        ]
+      }
+    },
+    "/admin-api/app-versions/{versionId}/roles/{roleId}/permissions": {
+      "get": {
+        "operationId": "RolePermissionController_findByRole",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Permissions retrieved successfully."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List permissions for a role grouped by app",
+        "tags": [
+          "Admin - Roles"
+        ]
+      },
+      "put": {
+        "operationId": "RolePermissionController_setPermissions",
+        "parameters": [
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "description": "Role UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRolePermissionsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Permissions updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed or missing feature dependencies."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Set permissions for a role (full replace)",
+        "tags": [
+          "Admin - Roles"
         ]
       }
     },
@@ -8338,6 +12838,23 @@
           "hasMore"
         ]
       },
+      "SuccessResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Operation completed successfully"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ]
+      },
       "NexusUserResponseDto": {
         "type": "object",
         "properties": {
@@ -8361,11 +12878,6 @@
             "description": "User full name",
             "example": "Jane Smith"
           },
-          "role": {
-            "type": "string",
-            "description": "User role",
-            "example": "SUPPORT"
-          },
           "status": {
             "type": "string",
             "description": "User status",
@@ -8387,7 +12899,6 @@
           "organizationId",
           "email",
           "fullName",
-          "role",
           "status",
           "hasPassword",
           "createdAt"
@@ -8432,16 +12943,6 @@
             "type": "string",
             "description": "User full name",
             "example": "Jane Smith"
-          },
-          "role": {
-            "type": "string",
-            "description": "User role in nexus",
-            "example": "SUPPORT",
-            "enum": [
-              "SUPER_ADMIN",
-              "ADMIN",
-              "SUPPORT"
-            ]
           }
         },
         "required": [
@@ -8449,21 +12950,257 @@
           "fullName"
         ]
       },
-      "SuccessResponseDto": {
+      "UpdateOrgUserDto": {
         "type": "object",
         "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "message": {
+          "email": {
             "type": "string",
-            "example": "Operation completed successfully"
+            "description": "Updated email address",
+            "example": "jane@example.com"
+          },
+          "fullName": {
+            "type": "string",
+            "description": "Updated full name",
+            "example": "Jane Smith"
+          }
+        }
+      },
+      "OrgAppPriceDto": {
+        "type": "object",
+        "properties": {
+          "monthlyPrice": {
+            "type": "string",
+            "example": "499.00"
+          },
+          "currency": {
+            "type": "string",
+            "example": "INR"
           }
         },
         "required": [
-          "success",
-          "message"
+          "monthlyPrice",
+          "currency"
+        ]
+      },
+      "OrgAppFeatureDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "crm.leads"
+          },
+          "name": {
+            "type": "string",
+            "example": "Leads"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "OrgAppItemResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "crm"
+          },
+          "name": {
+            "type": "string",
+            "example": "CRM"
+          },
+          "description": {
+            "type": "object",
+            "example": "Customer Relationship Management"
+          },
+          "icon": {
+            "type": "object",
+            "example": "briefcase"
+          },
+          "status": {
+            "type": "string",
+            "example": "included",
+            "enum": [
+              "included",
+              "addon",
+              "unavailable",
+              "enabled"
+            ]
+          },
+          "price": {
+            "$ref": "#/components/schemas/OrgAppPriceDto"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgAppFeatureDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "status",
+          "features"
+        ]
+      },
+      "OrgAppListResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgAppItemResponseDto"
+            }
+          }
+        },
+        "required": [
+          "result"
+        ]
+      },
+      "PurchaseAddonDto": {
+        "type": "object",
+        "properties": {
+          "businessUnitIds": {
+            "description": "Business unit IDs to enable the addon for",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "businessUnitIds"
+        ]
+      },
+      "OrgPermissionFeatureDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "crm.leads"
+          },
+          "name": {
+            "type": "string",
+            "example": "Leads"
+          },
+          "permissions": {
+            "example": [
+              "VIEW",
+              "CREATE",
+              "EDIT",
+              "DELETE"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "permissions"
+        ]
+      },
+      "OrgPermissionAppResponseDto": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appCode": {
+            "type": "string",
+            "example": "crm"
+          },
+          "appName": {
+            "type": "string",
+            "example": "CRM"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgPermissionFeatureDto"
+            }
+          }
+        },
+        "required": [
+          "appId",
+          "appCode",
+          "appName",
+          "features"
+        ]
+      },
+      "OrgPermissionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "apps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OrgPermissionAppResponseDto"
+            }
+          }
+        },
+        "required": [
+          "apps"
+        ]
+      },
+      "RoleTemplateResponseDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Admin"
+          },
+          "scope": {
+            "type": "string",
+            "example": "ORG",
+            "enum": [
+              "ORG",
+              "BU"
+            ]
+          },
+          "features": {
+            "type": "object",
+            "example": {
+              "crm.leads": [
+                "VIEW",
+                "CREATE",
+                "EDIT",
+                "DELETE"
+              ]
+            },
+            "description": "Feature code to permission types mapping"
+          }
+        },
+        "required": [
+          "name",
+          "scope",
+          "features"
+        ]
+      },
+      "RoleTemplateListResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleTemplateResponseDto"
+            }
+          }
+        },
+        "required": [
+          "result"
         ]
       },
       "CreateCloudProviderDto": {
@@ -8493,42 +13230,6 @@
         "required": [
           "name",
           "code"
-        ]
-      },
-      "CloudProviderSelectOptionDto": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "label": {
-            "type": "string",
-            "example": "AWS"
-          }
-        },
-        "required": [
-          "value",
-          "label"
-        ]
-      },
-      "CloudProviderSelectResponseDto": {
-        "type": "object",
-        "properties": {
-          "options": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CloudProviderSelectOptionDto"
-            }
-          },
-          "hasMore": {
-            "type": "boolean",
-            "example": false
-          }
-        },
-        "required": [
-          "options",
-          "hasMore"
         ]
       },
       "CloudProviderDto": {
@@ -8587,6 +13288,42 @@
           "regionCount",
           "deploymentCount",
           "canDelete"
+        ]
+      },
+      "CloudProviderSelectOptionDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "label": {
+            "type": "string",
+            "example": "AWS"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ]
+      },
+      "CloudProviderSelectResponseDto": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CloudProviderSelectOptionDto"
+            }
+          },
+          "hasMore": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "options",
+          "hasMore"
         ]
       },
       "CloudProviderTableResponseDto": {
@@ -8686,6 +13423,11 @@
               "dedicated"
             ],
             "description": "Deployment type"
+          },
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this deployment runs",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           }
         },
         "required": [
@@ -8694,7 +13436,8 @@
           "webhookSecret",
           "regionId",
           "cloudProviderId",
-          "type"
+          "type",
+          "appVersionId"
         ]
       },
       "DeploymentDto": {
@@ -8876,6 +13619,11 @@
               "dedicated"
             ],
             "description": "Deployment type"
+          },
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this deployment runs",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           }
         }
       },
@@ -9277,6 +14025,87 @@
             "type": "string",
             "description": "Optional description of the industry",
             "example": "Healthcare and medical services"
+          }
+        }
+      },
+      "IndustryAppDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "industryId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appCode": {
+            "type": "string",
+            "example": "crm"
+          },
+          "appName": {
+            "type": "string",
+            "example": "CRM"
+          },
+          "isRecommended": {
+            "type": "boolean",
+            "example": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "industryId",
+          "appId",
+          "appCode",
+          "appName",
+          "isRecommended",
+          "sortOrder"
+        ]
+      },
+      "AssignIndustryAppDto": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "App UUID to assign to this industry",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "isRecommended": {
+            "type": "boolean",
+            "description": "Whether this app is recommended for the industry",
+            "example": true,
+            "default": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Display order within the industry",
+            "example": 0
+          }
+        },
+        "required": [
+          "appId"
+        ]
+      },
+      "UpdateIndustryAppDto": {
+        "type": "object",
+        "properties": {
+          "isRecommended": {
+            "type": "boolean",
+            "description": "Whether this app is recommended for the industry",
+            "example": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Display order within the industry",
+            "example": 0
           }
         }
       },
@@ -9732,6 +14561,151 @@
           }
         }
       },
+      "PlanAppTableRowDto": {
+        "type": "object",
+        "properties": {
+          "appCode": {
+            "type": "string",
+            "example": "crm"
+          },
+          "includedFeatureCodes": {
+            "nullable": true,
+            "example": [
+              "contacts.view",
+              "contacts.edit"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "appCode",
+          "sortOrder"
+        ]
+      },
+      "PlanAppTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanAppTableRowDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "PlanAppDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "planId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appCode": {
+            "type": "string",
+            "example": "crm"
+          },
+          "includedFeatureCodes": {
+            "nullable": true,
+            "example": [
+              "contacts.view",
+              "contacts.edit"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "planId",
+          "appCode",
+          "sortOrder"
+        ]
+      },
+      "AssignPlanAppDto": {
+        "type": "object",
+        "properties": {
+          "appCode": {
+            "type": "string",
+            "description": "App code to assign to this plan",
+            "example": "crm"
+          },
+          "includedFeatureCodes": {
+            "description": "Feature codes included in this plan for the app — null means all features",
+            "example": [
+              "contacts.view",
+              "contacts.edit"
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Display order within the plan",
+            "example": 0
+          }
+        },
+        "required": [
+          "appCode"
+        ]
+      },
+      "UpdatePlanAppDto": {
+        "type": "object",
+        "properties": {
+          "includedFeatureCodes": {
+            "description": "Feature codes included in this plan for the app — set to null to include all features",
+            "example": [
+              "contacts.view",
+              "contacts.edit"
+            ],
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Display order within the plan",
+            "example": 0
+          }
+        }
+      },
       "CreatePriceDto": {
         "type": "object",
         "properties": {
@@ -9960,6 +14934,1272 @@
             "example": "INR"
           }
         }
+      },
+      "CreateAppVersionDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Semantic version string",
+            "example": "1.0.0"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name for this version",
+            "example": "Initial Release"
+          }
+        },
+        "required": [
+          "version",
+          "name"
+        ]
+      },
+      "AppVersionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "version": {
+            "type": "string",
+            "example": "1.0.0"
+          },
+          "name": {
+            "type": "string",
+            "example": "Initial Release"
+          },
+          "status": {
+            "type": "string",
+            "example": "DRAFT"
+          },
+          "parentVersionId": {
+            "type": "object",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "nullable": true
+          },
+          "snapshot": {
+            "type": "object",
+            "nullable": true
+          },
+          "artifacts": {
+            "type": "object",
+            "nullable": true
+          },
+          "finalizedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "readyAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "publishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "version",
+          "name",
+          "status",
+          "createdAt"
+        ]
+      },
+      "AppVersionTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppVersionDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "AppVersionSelectOptionDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "label": {
+            "type": "string",
+            "example": "Production Release"
+          },
+          "description": {
+            "type": "string",
+            "example": "1.0.0"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ]
+      },
+      "AppVersionSelectResponseDto": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppVersionSelectOptionDto"
+            }
+          },
+          "hasMore": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "options",
+          "hasMore"
+        ]
+      },
+      "UpdateAppVersionDto": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "Semver version string",
+            "example": "1.0.0"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name",
+            "example": "Restaurant Suite v1"
+          }
+        }
+      },
+      "PushArtifactsDto": {
+        "type": "object",
+        "properties": {
+          "artifacts": {
+            "type": "object",
+            "description": "CI-generated artifact metadata (free-form JSON)"
+          }
+        },
+        "required": [
+          "artifacts"
+        ]
+      },
+      "CreateMicrofrontendDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Unique code (lowercase alphanumeric with hyphens)",
+            "example": "order-mf"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name",
+            "example": "Order Microfrontend"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Target platform",
+            "enum": [
+              "WEB",
+              "MOBILE"
+            ],
+            "example": "WEB"
+          },
+          "remoteEntry": {
+            "type": "string",
+            "description": "Remote entry URL for module federation",
+            "example": "/order-mf/remoteEntry.js"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "platform",
+          "remoteEntry"
+        ]
+      },
+      "MicrofrontendDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appVersionId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "order-mf"
+          },
+          "name": {
+            "type": "string",
+            "example": "Order Microfrontend"
+          },
+          "platform": {
+            "type": "string",
+            "example": "WEB"
+          },
+          "remoteEntry": {
+            "type": "string",
+            "example": "/order-mf/remoteEntry.js"
+          }
+        },
+        "required": [
+          "id",
+          "appVersionId",
+          "code",
+          "name",
+          "platform",
+          "remoteEntry"
+        ]
+      },
+      "MicrofrontendTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MicrofrontendDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "MicrofrontendSelectOptionDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "label": {
+            "type": "string",
+            "example": "Order Microfrontend"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ]
+      },
+      "MicrofrontendSelectResponseDto": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MicrofrontendSelectOptionDto"
+            }
+          },
+          "hasMore": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "options",
+          "hasMore"
+        ]
+      },
+      "UpdateMicrofrontendDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Unique code (lowercase alphanumeric with hyphens)",
+            "example": "order-mf"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name",
+            "example": "Order Microfrontend"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Target platform",
+            "enum": [
+              "WEB",
+              "MOBILE"
+            ],
+            "example": "WEB"
+          },
+          "remoteEntry": {
+            "type": "string",
+            "description": "Remote entry URL for module federation",
+            "example": "/order-mf/remoteEntry.js"
+          }
+        }
+      },
+      "CreateFeatureDto": {
+        "type": "object",
+        "properties": {
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this feature belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "description": "Dot-separated feature code (lowercase, alphanumeric segments)",
+            "example": "orders.dine-in.create"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the feature",
+            "example": "Create Dine-In Order"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the feature",
+            "example": "Allows creating a new dine-in order"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon identifier for the feature",
+            "example": "receipt"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Sort order for display",
+            "example": 0
+          }
+        },
+        "required": [
+          "appVersionId",
+          "code",
+          "name"
+        ]
+      },
+      "FeatureDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appVersionId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "orders.dine-in.create"
+          },
+          "name": {
+            "type": "string",
+            "example": "Create Dine-In Order"
+          },
+          "description": {
+            "type": "object",
+            "example": "Allows creating a new dine-in order",
+            "nullable": true
+          },
+          "icon": {
+            "type": "object",
+            "example": "receipt",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "canDelete": {
+            "type": "boolean",
+            "example": true,
+            "description": "False when the feature is referenced by app_features"
+          }
+        },
+        "required": [
+          "id",
+          "appVersionId",
+          "code",
+          "name",
+          "isActive",
+          "sortOrder",
+          "createdAt",
+          "canDelete"
+        ]
+      },
+      "FeatureTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeatureDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "FeatureSelectOptionDto": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "label": {
+            "type": "string",
+            "example": "Create Dine-In Order"
+          }
+        },
+        "required": [
+          "value",
+          "label"
+        ]
+      },
+      "FeatureSelectResponseDto": {
+        "type": "object",
+        "properties": {
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeatureSelectOptionDto"
+            }
+          },
+          "hasMore": {
+            "type": "boolean",
+            "example": false
+          }
+        },
+        "required": [
+          "options",
+          "hasMore"
+        ]
+      },
+      "FeatureWithPermissionsResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "orders"
+          },
+          "name": {
+            "type": "string",
+            "example": "Orders"
+          },
+          "icon": {
+            "type": "object",
+            "example": "clipboard-list",
+            "nullable": true
+          },
+          "permissions": {
+            "example": [
+              "VIEW",
+              "CREATE",
+              "EDIT",
+              "DELETE",
+              "EXPORT"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appCodes": {
+            "example": [
+              "order-management"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "permissions",
+          "appCodes"
+        ]
+      },
+      "UpdateFeatureDto": {
+        "type": "object",
+        "properties": {
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this feature belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "description": "Dot-separated feature code (lowercase, alphanumeric segments)",
+            "example": "orders.dine-in.create"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the feature",
+            "example": "Create Dine-In Order"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the feature",
+            "example": "Allows creating a new dine-in order"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon identifier for the feature",
+            "example": "receipt"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Sort order for display",
+            "example": 0
+          }
+        }
+      },
+      "BulkCreateFeaturesDto": {
+        "type": "object",
+        "properties": {
+          "features": {
+            "description": "Array of features to create",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateFeatureDto"
+            }
+          }
+        },
+        "required": [
+          "features"
+        ]
+      },
+      "FeaturePermissionTypesResponseDto": {
+        "type": "object",
+        "properties": {
+          "types": {
+            "example": [
+              "VIEW",
+              "CREATE",
+              "EDIT"
+            ],
+            "description": "Permission type strings assigned to this feature",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "types"
+        ]
+      },
+      "SetFeaturePermissionsDto": {
+        "type": "object",
+        "properties": {
+          "types": {
+            "type": "array",
+            "description": "Permission types to assign to this feature",
+            "example": [
+              "VIEW",
+              "CREATE",
+              "EDIT"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "VIEW",
+                "CREATE",
+                "EDIT",
+                "DELETE",
+                "EXPORT",
+                "IMPORT",
+                "APPROVE",
+                "MANAGE"
+              ]
+            }
+          }
+        },
+        "required": [
+          "types"
+        ]
+      },
+      "FeatureMicrofrontendDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "featureId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "microfrontendId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "microfrontendCode": {
+            "type": "string",
+            "example": "order-mf"
+          },
+          "microfrontendName": {
+            "type": "string",
+            "example": "Order Microfrontend"
+          },
+          "platform": {
+            "type": "string",
+            "example": "WEB"
+          },
+          "remoteEntry": {
+            "type": "string",
+            "example": "/order-mf/remoteEntry.js"
+          },
+          "exposedModule": {
+            "type": "string",
+            "example": "./Orders"
+          },
+          "routePrefix": {
+            "type": "string",
+            "example": "/orders"
+          }
+        },
+        "required": [
+          "id",
+          "featureId",
+          "microfrontendId",
+          "microfrontendCode",
+          "microfrontendName",
+          "platform",
+          "remoteEntry",
+          "exposedModule",
+          "routePrefix"
+        ]
+      },
+      "SetFeatureMicrofrontendDto": {
+        "type": "object",
+        "properties": {
+          "exposedModule": {
+            "type": "string",
+            "description": "Module federation exposed module name",
+            "example": "./Orders"
+          },
+          "routePrefix": {
+            "type": "string",
+            "description": "Route prefix for this microfrontend link",
+            "example": "/orders"
+          }
+        },
+        "required": [
+          "exposedModule",
+          "routePrefix"
+        ]
+      },
+      "CreateAppDto": {
+        "type": "object",
+        "properties": {
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this app belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique app code (lowercase, alphanumeric with hyphens)",
+            "example": "pos"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the app",
+            "example": "Point of Sale"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the app",
+            "example": "Core POS module for order management"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon identifier for the app",
+            "example": "shopping-cart"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Sort order for display",
+            "example": 0
+          }
+        },
+        "required": [
+          "appVersionId",
+          "code",
+          "name"
+        ]
+      },
+      "AppDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appVersionId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "pos"
+          },
+          "name": {
+            "type": "string",
+            "example": "Point of Sale"
+          },
+          "description": {
+            "type": "object",
+            "example": "Core POS module for order management",
+            "nullable": true
+          },
+          "icon": {
+            "type": "object",
+            "example": "shopping-cart",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "featureCount": {
+            "type": "number",
+            "example": 5
+          },
+          "planCount": {
+            "type": "number",
+            "example": 2
+          },
+          "canDelete": {
+            "type": "boolean",
+            "example": true,
+            "description": "False when the app is referenced by plans or industries"
+          }
+        },
+        "required": [
+          "id",
+          "appVersionId",
+          "code",
+          "name",
+          "isActive",
+          "sortOrder",
+          "createdAt",
+          "featureCount",
+          "planCount",
+          "canDelete"
+        ]
+      },
+      "AppTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "UpdateAppDto": {
+        "type": "object",
+        "properties": {
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this app belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "description": "Unique app code (lowercase, alphanumeric with hyphens)",
+            "example": "pos"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the app",
+            "example": "Point of Sale"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the app",
+            "example": "Core POS module for order management"
+          },
+          "icon": {
+            "type": "string",
+            "description": "Icon identifier for the app",
+            "example": "shopping-cart"
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Sort order for display",
+            "example": 0
+          }
+        }
+      },
+      "AppFeatureTableRowDto": {
+        "type": "object",
+        "properties": {
+          "featureId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "orders.dine-in.create"
+          },
+          "name": {
+            "type": "string",
+            "example": "Create Dine-In Order"
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "featureId",
+          "code",
+          "name",
+          "sortOrder"
+        ]
+      },
+      "AppFeatureTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AppFeatureTableRowDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "AssignFeaturesDto": {
+        "type": "object",
+        "properties": {
+          "featureIds": {
+            "description": "Feature UUIDs to assign to the app",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "featureIds"
+        ]
+      },
+      "AppPriceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "appId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "regionId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "regionName": {
+            "type": "string",
+            "example": "Mumbai"
+          },
+          "cloudProviderId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "providerName": {
+            "type": "string",
+            "example": "AWS"
+          },
+          "monthlyPrice": {
+            "type": "string",
+            "example": "499.00"
+          },
+          "currency": {
+            "type": "string",
+            "example": "INR"
+          }
+        },
+        "required": [
+          "id",
+          "appId",
+          "regionId",
+          "regionName",
+          "cloudProviderId",
+          "providerName",
+          "monthlyPrice",
+          "currency"
+        ]
+      },
+      "CreateAppPriceDto": {
+        "type": "object",
+        "properties": {
+          "regionId": {
+            "type": "string",
+            "description": "Region UUID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "cloudProviderId": {
+            "type": "string",
+            "description": "Cloud provider UUID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "monthlyPrice": {
+            "type": "number",
+            "description": "Monthly addon price",
+            "example": 499
+          },
+          "currency": {
+            "type": "string",
+            "description": "ISO 4217 currency code",
+            "example": "INR"
+          }
+        },
+        "required": [
+          "regionId",
+          "cloudProviderId",
+          "monthlyPrice"
+        ]
+      },
+      "CreateRoleDto": {
+        "type": "object",
+        "properties": {
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this role belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the role",
+            "example": "Chef"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the role",
+            "example": "Kitchen staff responsible for food preparation"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "SUBTREE",
+              "SINGLE_BU"
+            ],
+            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
+          },
+          "industryId": {
+            "type": "string",
+            "description": "Industry this role belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "isSystem": {
+            "type": "boolean",
+            "description": "Whether this role is a system-defined role",
+            "example": false
+          }
+        },
+        "required": [
+          "appVersionId",
+          "name",
+          "scope"
+        ]
+      },
+      "RoleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Chef"
+          },
+          "description": {
+            "type": "object",
+            "example": "Kitchen staff responsible for food preparation",
+            "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "example": "GLOBAL",
+            "enum": [
+              "GLOBAL",
+              "SUBTREE",
+              "SINGLE_BU"
+            ]
+          },
+          "industryId": {
+            "type": "object",
+            "example": "550e8400-e29b-41d4-a716-446655440000",
+            "nullable": true
+          },
+          "industryName": {
+            "type": "object",
+            "example": "Restaurant",
+            "nullable": true
+          },
+          "isSystem": {
+            "type": "boolean",
+            "example": false
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "permissionCount": {
+            "type": "number",
+            "example": 12
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "scope",
+          "isSystem",
+          "isActive",
+          "permissionCount",
+          "createdAt"
+        ]
+      },
+      "RoleTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "UpdateRoleDto": {
+        "type": "object",
+        "properties": {
+          "appVersionId": {
+            "type": "string",
+            "description": "App version UUID this role belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the role",
+            "example": "Chef"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the role",
+            "example": "Kitchen staff responsible for food preparation"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "SUBTREE",
+              "SINGLE_BU"
+            ],
+            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
+          },
+          "industryId": {
+            "type": "string",
+            "description": "Industry this role belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "isSystem": {
+            "type": "boolean",
+            "description": "Whether this role is a system-defined role",
+            "example": false
+          }
+        }
+      },
+      "FeaturePermissionEntry": {
+        "type": "object",
+        "properties": {
+          "featureId": {
+            "type": "string",
+            "description": "Feature UUID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "VIEW",
+              "CREATE",
+              "EDIT",
+              "DELETE",
+              "EXPORT",
+              "IMPORT",
+              "APPROVE",
+              "MANAGE"
+            ],
+            "description": "Permission type (VIEW, CREATE, EDIT, DELETE, etc.)"
+          }
+        },
+        "required": [
+          "featureId",
+          "type"
+        ]
+      },
+      "AssignRolePermissionsDto": {
+        "type": "object",
+        "properties": {
+          "permissions": {
+            "description": "Feature permissions to assign to the role",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeaturePermissionEntry"
+            }
+          }
+        },
+        "required": [
+          "permissions"
+        ]
       },
       "UpsertDataTableStateDto": {
         "type": "object",

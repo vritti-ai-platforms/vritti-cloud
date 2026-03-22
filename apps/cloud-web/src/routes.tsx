@@ -5,17 +5,28 @@ import { AdminLayout } from './components/layouts/AdminLayout';
 import { AppLayout } from './components/layouts/AppLayout';
 import { AuthLayout } from './components/layouts/AuthLayout';
 import { OrgLayout } from './components/layouts/OrgLayout';
+import { VersionLayout } from './components/layouts/VersionLayout';
 import './index.css';
+import { AppVersionsPage } from './pages/admin/app-versions/AppVersionsPage';
+import { OverviewPage as VersionOverviewPage } from './pages/admin/app-versions/OverviewPage';
+import { MicrofrontendsPage } from './pages/admin/app-versions/microfrontends/MicrofrontendsPage';
+import { AdminAppsPage } from './pages/admin/app-versions/apps/AdminAppsPage';
+import { AppViewPage } from './pages/admin/app-versions/apps/AppViewPage';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
+import { FeaturesPage } from './pages/admin/app-versions/features/FeaturesPage';
+import { FeatureViewPage } from './pages/admin/app-versions/features/FeatureViewPage';
 import { IndustriesPage } from './pages/admin/industries/IndustriesPage';
+import { IndustryViewPage } from './pages/admin/industries/IndustryViewPage';
 import { OrganizationsPage as AdminOrganizationsPage } from './pages/admin/organizations/OrganizationsPage';
 import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/organizations/OrganizationViewPage';
 import { PlansPage } from './pages/admin/plans/PlansPage';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
+import { AdminRolesPage } from './pages/admin/app-versions/roles/AdminRolesPage';
+import { RoleViewPage } from './pages/admin/app-versions/roles/RoleViewPage';
 import { AuthErrorPage } from './pages/auth/AuthErrorPage';
 import { AuthSuccessPage } from './pages/auth/AuthSuccessPage';
 import { ForgotPasswordPage } from './pages/auth/forgot-password';
@@ -24,11 +35,18 @@ import { MFAVerificationPage } from './pages/auth/MFAVerificationPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { HomePage } from './pages/cloud/home/HomePage';
 import { InvitationsPage } from './pages/cloud/invitations/InvitationsPage';
+import { OrgAppsPage } from './pages/cloud/organization/apps/OrgAppsPage';
+import { BUViewPage } from './pages/cloud/organization/business-units/BUViewPage';
+import { OrgBusinessUnitsPage } from './pages/cloud/organization/business-units/OrgBusinessUnitsPage';
 import { OverviewPage } from './pages/cloud/organization/OverviewPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
+import { CreateOrgRolePage } from './pages/cloud/organization/roles/CreateOrgRolePage';
+import { EditOrgRolePage } from './pages/cloud/organization/roles/EditOrgRolePage';
+import { OrgRolesPage } from './pages/cloud/organization/roles/OrgRolesPage';
 import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
+import { OrganizationSettingsPage } from './pages/cloud/organization/settings/OrganizationSettingsPage';
 import { ProfilePage } from './pages/cloud/settings/ProfilePage';
 import { SecurityPage } from './pages/cloud/settings/SecurityPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
@@ -103,7 +121,11 @@ export const adminRoutes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Navigate to="cloud-providers" replace />,
+        element: <Navigate to="app-versions" replace />,
+      },
+      {
+        path: 'app-versions',
+        element: <AppVersionsPage />,
       },
       {
         path: 'cloud-providers',
@@ -112,6 +134,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'industries',
         element: <IndustriesPage />,
+      },
+      {
+        path: 'industries/:slug',
+        element: <IndustryViewPage />,
       },
       {
         path: 'plans',
@@ -144,6 +170,49 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'organizations/:slug',
         element: <AdminOrganizationViewPage />,
+      },
+    ],
+  },
+  // Version-scoped routes with their own sidebar layout
+  {
+    path: '/app-versions/:versionSlug',
+    element: <VersionLayout />,
+    children: [
+      {
+        index: true,
+        element: <Navigate to="overview" replace />,
+      },
+      {
+        path: 'overview',
+        element: <VersionOverviewPage />,
+      },
+      {
+        path: 'microfrontends',
+        element: <MicrofrontendsPage />,
+      },
+      {
+        path: 'features',
+        element: <FeaturesPage />,
+      },
+      {
+        path: 'features/:slug',
+        element: <FeatureViewPage />,
+      },
+      {
+        path: 'apps',
+        element: <AdminAppsPage />,
+      },
+      {
+        path: 'apps/:slug',
+        element: <AppViewPage />,
+      },
+      {
+        path: 'roles',
+        element: <AdminRolesPage />,
+      },
+      {
+        path: 'roles/:slug',
+        element: <RoleViewPage />,
       },
     ],
   },
@@ -193,15 +262,27 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'roles',
-        element: <PlaceholderPage />,
+        element: <OrgRolesPage />,
+      },
+      {
+        path: 'roles/create',
+        element: <CreateOrgRolePage />,
+      },
+      {
+        path: 'roles/:roleId/edit',
+        element: <EditOrgRolePage />,
       },
       {
         path: 'business-units',
-        element: <PlaceholderPage />,
+        element: <OrgBusinessUnitsPage />,
+      },
+      {
+        path: 'business-units/:buSlug',
+        element: <BUViewPage />,
       },
       {
         path: 'applications',
-        element: <PlaceholderPage />,
+        element: <OrgAppsPage />,
       },
       {
         path: 'billing',
@@ -209,7 +290,7 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'settings',
-        element: <PlaceholderPage />,
+        element: <OrganizationSettingsPage />,
       },
     ],
   },
