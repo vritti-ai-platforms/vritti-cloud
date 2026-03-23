@@ -1,6 +1,13 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
-import { type MfaAuth, MfaMethodValues, type SessionType, SessionTypeValues, type User, VerificationChannelValues } from '@/db/schema';
+import {
+  type MfaAuth,
+  MfaMethodValues,
+  type SessionType,
+  SessionTypeValues,
+  type User,
+  VerificationChannelValues,
+} from '@/db/schema';
 import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
 import { BackupCodeService } from '../../../mfa/services/backup-code.service';
 import { TotpService } from '../../../mfa/services/totp.service';
@@ -220,7 +227,7 @@ export class MfaVerificationService {
     // This avoids QR code prompt when 'hybrid' transport is stored for synced passkeys
     const allowCredentials = passkeys
       .filter((pk) => pk.passkeyCredentialId)
-      .map((pk) => ({ id: pk.passkeyCredentialId! }));
+      .map((pk) => ({ id: pk.passkeyCredentialId as string }));
 
     const options = await this.webAuthnService.generateAuthenticationOptions(allowCredentials);
 
@@ -346,7 +353,8 @@ export class MfaVerificationService {
     const user = await this.userService.findById(challenge.userId);
 
     // Determine session type based on subdomain
-    const sessionType: SessionType = challenge.subdomain === 'admin' ? SessionTypeValues.ADMIN : SessionTypeValues.CLOUD;
+    const sessionType: SessionType =
+      challenge.subdomain === 'admin' ? SessionTypeValues.ADMIN : SessionTypeValues.CLOUD;
 
     // Create session - capture refreshToken for cookie
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
