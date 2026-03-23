@@ -52,7 +52,6 @@ export const OrganizationsPage = () => {
           <IndustryFilter key="industryId" name="industryId" />,
           <SelectFilter
             key="size"
-            field="size"
             name="size"
             label="Size"
             options={[

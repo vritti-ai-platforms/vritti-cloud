@@ -58,7 +58,6 @@ export const RegionsPage = () => {
           <CloudProviderFilter key="cloudProviderId" name="cloudProviderId" />,
           <SelectFilter
             key="isActive"
-            field="isActive"
             name="isActive"
             label="Status"
             options={[
