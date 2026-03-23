@@ -1,11 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateApp,
   ApiDeleteApp,
-  ApiFindAppsSelect,
   ApiFindForTableApps,
   ApiGetAppById,
   ApiUpdateApp,
@@ -14,7 +13,7 @@ import { AppDto } from '../dto/entity/app.dto';
 import { CreateAppDto } from '../dto/request/create-app.dto';
 import { UpdateAppDto } from '../dto/request/update-app.dto';
 import { AppTableResponseDto } from '../dto/response/app-table-response.dto';
-import { AppService } from '../services/app.service';
+import { AppService } from '@domain/app-version/app/root/services/app.service';
 
 @ApiTags('Admin - Apps')
 @ApiBearerAuth()
@@ -40,14 +39,6 @@ export class AppController {
   findForTable(@UserId() userId: string): Promise<AppTableResponseDto> {
     this.logger.log('GET /admin-api/apps/table');
     return this.appService.findForTable(userId);
-  }
-
-  // Returns paginated app options for the select component
-  @Get('select')
-  @ApiFindAppsSelect()
-  findForSelect(@Query() query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
-    this.logger.log('GET /admin-api/apps/select');
-    return this.appService.findForSelect(query);
   }
 
   // Returns a single app by ID with counts

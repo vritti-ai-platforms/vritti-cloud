@@ -1,0 +1,98 @@
+import { Injectable } from '@nestjs/common';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { and, asc, count, countDistinct, eq, SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import { cloudProviders, Price, prices, regions } from '@/db/schema';
+import { PriceWithRelations } from '@/modules/admin-api/price/dto/entity/price-detail.dto';
+
+@Injectable()
+export class PriceRepository extends PrimaryBaseRepository<typeof prices> {
+  constructor(database: PrimaryDatabaseService) {
+    super(database, prices);
+  }
+
+  // Finds a price by its unique identifier
+  async findById(id: string): Promise<Price | undefined> {
+    return this.model.findFirst({ where: { id } });
+  }
+
+  // Returns paginated prices for a plan with JOINs, applying where/orderBy/limit/offset
+  async findByPlanIdWithFilters(
+    planId: string,
+    where?: SQL,
+    orderBy?: SQL[],
+    limit?: number,
+    offset?: number,
+  ): Promise<{ rows: PriceWithRelations[]; total: number }> {
+    const planCondition = eq(prices.planId, planId);
+    const fullWhere = where ? and(planCondition, where) : planCondition;
+
+    const [countResult, rows] = await Promise.all([
+      this.db
+        .select({ total: count() })
+        .from(prices)
+        .leftJoin(regions, eq(prices.regionId, regions.id))
+        .leftJoin(cloudProviders, eq(prices.providerId, cloudProviders.id))
+        .where(fullWhere)
+        .then((r) => r[0]?.total ?? 0),
+      this.db
+        .select({
+          id: prices.id,
+          planId: prices.planId,
+          industryId: prices.industryId,
+          regionId: prices.regionId,
+          region: {
+            name: regions.name,
+            code: regions.code,
+          },
+          providerId: prices.providerId,
+          cloudProvider: {
+            name: cloudProviders.name,
+            code: cloudProviders.code,
+          },
+          price: prices.price,
+          currency: prices.currency,
+          createdAt: prices.createdAt,
+          updatedAt: prices.updatedAt,
+        })
+        .from(prices)
+        .leftJoin(regions, eq(prices.regionId, regions.id))
+        .leftJoin(cloudProviders, eq(prices.providerId, cloudProviders.id))
+        .where(fullWhere)
+        .orderBy(...(orderBy && orderBy.length > 0 ? orderBy : [asc(prices.createdAt)]))
+        .limit(limit ?? 20)
+        .offset(offset ?? 0),
+    ]);
+    return { rows: rows as PriceWithRelations[], total: Number(countResult) };
+  }
+
+  // Finds a price matching the exact plan + industry + region + provider combination
+  async findByComposite(planId: string, industryId: string, regionId: string, providerId: string) {
+    return this.model.findFirst({ where: { planId, industryId, regionId, providerId } });
+  }
+
+  // Returns price, region, and provider counts for a given plan
+  async getCountsForPlan(planId: string): Promise<{ priceCount: number; regionCount: number; providerCount: number }> {
+    const result = await this.db
+      .select({
+        priceCount: count(prices.id),
+        regionCount: countDistinct(prices.regionId),
+        providerCount: countDistinct(prices.providerId),
+      })
+      .from(prices)
+      .where(eq(prices.planId, planId));
+    return {
+      priceCount: Number(result[0]?.priceCount ?? 0),
+      regionCount: Number(result[0]?.regionCount ?? 0),
+      providerCount: Number(result[0]?.providerCount ?? 0),
+    };
+  }
+
+  // Returns the number of prices referencing the given region
+  async countByRegionId(regionId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(prices)
+      .where(eq(prices.regionId, regionId));
+    return Number(result[0]?.count ?? 0);
+  }
+}

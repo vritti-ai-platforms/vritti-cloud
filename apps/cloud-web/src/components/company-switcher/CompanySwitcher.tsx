@@ -16,7 +16,7 @@ export const CompanySwitcher = ({ currentOrgId, currentOrgName }: CompanySwitche
 
   return (
     <Select
-      optionsEndpoint="cloud-api/organizations/select"
+      optionsEndpoint="select-api/organizations"
       fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'code' }}
       value={currentOrgId}
       searchable

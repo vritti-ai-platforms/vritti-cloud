@@ -2,7 +2,7 @@ import { Controller, Get, Logger, Param, Query, Redirect, Res } from '@nestjs/co
 import { ApiTags } from '@nestjs/swagger';
 import { type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
 import type { FastifyReply } from 'fastify';
-import { getRefreshCookieName } from '../../root/services/session.service';
+import { getRefreshCookieName } from '@domain/session/services/session.service';
 import { ApiHandleOAuthCallback, ApiInitiateOAuth } from '../docs/oauth.docs';
 import { OAuthCallbackQueryDto } from '../dto/request/oauth-callback-query.dto';
 import { OAuthService } from '../services/oauth.service';

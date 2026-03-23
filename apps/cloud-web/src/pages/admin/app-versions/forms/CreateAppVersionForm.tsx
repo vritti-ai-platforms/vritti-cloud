@@ -22,12 +22,7 @@ export const CreateAppVersionForm: React.FC<CreateAppVersionFormProps> = ({ onSu
 
   return (
     <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
-      <TextField
-        name="version"
-        label="Version"
-        placeholder="e.g. 1.0.0"
-        description="Semantic version number"
-      />
+      <TextField name="version" label="Version" placeholder="e.g. 1.0.0" description="Semantic version number" />
       <TextField name="name" label="Name" placeholder="e.g. Initial Release" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>

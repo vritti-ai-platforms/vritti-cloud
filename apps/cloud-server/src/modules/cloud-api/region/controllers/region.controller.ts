@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ApiGetRegionProviders, ApiGetRegions } from '../docs/region.docs';
 import type { ProviderOptionDto } from '../dto/response/provider-option.dto';
 import type { RegionOptionDto } from '../dto/response/region-option.dto';
-import { RegionService } from '../services/region.service';
+import { RegionService } from '@domain/region/services/region.service';
 
 @ApiTags('Regions')
 @ApiBearerAuth()
@@ -18,7 +18,7 @@ export class RegionController {
   @ApiGetRegions()
   findAll(): Promise<RegionOptionDto[]> {
     this.logger.log('GET /cloud-api/regions');
-    return this.regionService.findAll();
+    return this.regionService.findAllForCloud();
   }
 
   // Returns cloud providers available in a specific region

@@ -62,7 +62,7 @@ const QRVerificationInner: React.FC<QRVerificationStepProps & { onRetry: () => v
   onRetry,
 }) => {
   const { eventType, data, eventTypes, isConnected } = useSSE<VerificationEventMap>({
-    path: `/cloud-api/onboarding/mobile-verification/events/${method}`,
+    path: `/onboarding/mobile-verification/events/${method}`,
     events: SSE_EVENTS,
     autoReconnect: false,
   });

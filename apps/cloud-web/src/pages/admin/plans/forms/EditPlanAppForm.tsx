@@ -62,7 +62,7 @@ export const EditPlanAppForm: React.FC<EditPlanAppFormProps> = ({
           label="Included Features"
           placeholder="Select features to include..."
           multiple
-          optionsEndpoint={`admin-api/apps/codes/${appCode}/features/select`}
+          params={{ appCode }}
           fieldKeys={{ valueKey: 'code', labelKey: 'name', descriptionKey: 'code' }}
         />
       )}

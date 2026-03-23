@@ -5,11 +5,11 @@ import { RequireSession, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiFindOrganizationMembers } from '../../organization-member/docs/organization-member.docs';
 import { OrganizationMemberTableResponseDto } from '../../organization-member/dto/response/organization-members-response.dto';
-import { OrganizationMemberService } from '../../organization-member/services/organization-member.service';
+import { OrganizationMemberService } from '@domain/organization-member/services/organization-member.service';
 import { ApiFindForTableOrganizations, ApiFindOrganizationById } from '../docs/organization.docs';
 import { OrganizationDetailDto } from '../dto/entity/organization-detail.dto';
 import { OrganizationTableResponseDto } from '../dto/response/organizations-response.dto';
-import { OrganizationService } from '../services/organization.service';
+import { OrganizationService } from '@domain/organization/services/organization.service';
 
 @ApiTags('Admin - Organizations')
 @ApiBearerAuth()

@@ -4,7 +4,7 @@ import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiGetFeaturePermissions, ApiSetFeaturePermissions } from '../docs/feature-permission.docs';
 import { SetFeaturePermissionsDto } from '../dto/request/set-feature-permissions.dto';
-import { FeaturePermissionService } from '../services/feature-permission.service';
+import { FeaturePermissionService } from '@domain/app-version/feature/feature-permission/services/feature-permission.service';
 
 @ApiTags('Admin - Feature Permissions')
 @ApiBearerAuth()

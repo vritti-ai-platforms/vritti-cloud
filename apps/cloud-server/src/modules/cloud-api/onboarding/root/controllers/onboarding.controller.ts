@@ -4,7 +4,7 @@ import { type CookieSerializeOptions, RefreshCookieOptions, RefreshTokenCookie, 
 import { SessionTypeValues } from '@/db/schema';
 import type { FastifyReply } from 'fastify';
 import { TokenResponse } from '../../../auth/root/dto/response/token-response.dto';
-import { getRefreshCookieName } from '../../../auth/root/services/session.service';
+import { getRefreshCookieName } from '@domain/session/services/session.service';
 import { ApiCompleteOnboarding, ApiGetStatus, ApiSetPassword } from '../docs/onboarding.docs';
 import { OnboardingStatusResponseDto } from '../dto/entity/onboarding-status-response.dto';
 import { SetPasswordDto } from '../dto/request/set-password.dto';

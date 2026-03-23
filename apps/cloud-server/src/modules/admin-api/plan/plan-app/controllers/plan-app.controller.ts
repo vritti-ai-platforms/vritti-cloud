@@ -13,7 +13,7 @@ import { PlanAppDto } from '../dto/entity/plan-app.dto';
 import { AssignPlanAppDto } from '../dto/request/assign-plan-app.dto';
 import { UpdatePlanAppDto } from '../dto/request/update-plan-app.dto';
 import { PlanAppTableResponseDto } from '../dto/response/plan-app-table-response.dto';
-import { PlanAppService } from '../services/plan-app.service';
+import { PlanAppService } from '@domain/plan/services/plan-app.service';
 
 @ApiTags('Admin - Plan Apps')
 @ApiBearerAuth()

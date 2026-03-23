@@ -8,14 +8,14 @@ import {
   type User,
   VerificationChannelValues,
 } from '@/db/schema';
-import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
-import { BackupCodeService } from '../../../mfa/services/backup-code.service';
-import { TotpService } from '../../../mfa/services/totp.service';
-import { WebAuthnService } from '../../../mfa/services/webauthn.service';
-import type { AuthenticationResponseJSON } from '../../../mfa/types/webauthn.types';
-import { UserService } from '../../../user/services/user.service';
-import { VerificationService } from '../../../verification/services/verification.service';
-import { SessionService } from '../../root/services/session.service';
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
+import { TotpService } from '@domain/mfa/services/totp.service';
+import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import type { AuthenticationResponseJSON } from '@domain/mfa/types/webauthn.types';
+import { UserService } from '@domain/user/services/user.service';
+import { VerificationService } from '@domain/verification/services/verification.service';
+import { SessionService } from '@domain/session/services/session.service';
 import { MfaVerificationResponseDto, PasskeyMfaOptionsDto, SmsOtpSentResponseDto } from '../dto';
 import { type MfaChallenge, MfaChallengeStore, type MfaMethod } from './mfa-challenge.store';
 

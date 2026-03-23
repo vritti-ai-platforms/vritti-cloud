@@ -2,7 +2,7 @@ import { Body, Controller, Headers, HttpCode, HttpStatus, Ip, Logger, Post, Res 
 import { ApiTags } from '@nestjs/swagger';
 import { type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
 import type { FastifyReply } from 'fastify';
-import { getRefreshCookieName } from '../../root/services/session.service';
+import { getRefreshCookieName } from '@domain/session/services/session.service';
 import { ApiStartPasskeyAuth, ApiVerifyPasskeyAuth } from '../docs/passkey-auth.docs';
 import { StartPasskeyAuthDto, VerifyPasskeyAuthDto } from '../dto/request/verify-passkey-auth.dto';
 import { PasskeyAuthOptionsDto } from '../dto/response/passkey-auth-options.dto';

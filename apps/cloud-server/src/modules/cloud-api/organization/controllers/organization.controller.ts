@@ -1,20 +1,18 @@
 import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SelectOptionsQueryDto, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import type { FastifyRequest } from 'fastify';
 import {
   ApiCheckSubdomain,
   ApiCreateOrganization,
   ApiGetMyOrgs,
   ApiGetOrganization,
-  ApiGetOrganizationsSelect,
   ApiUpdateOrganization,
 } from '../docs/organization.docs';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CheckSubdomainDto } from '../dto/request/check-subdomain.dto';
 import { GetMyOrgsDto } from '../dto/request/get-my-orgs.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
-import { OrganizationSelectResponseDto } from '../dto/response/organization-select-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
 import { SubdomainAvailabilityResponseDto } from '../dto/response/subdomain-availability-response.dto';
 import { OrganizationService } from '../services/organization.service';
@@ -50,14 +48,6 @@ export class OrganizationController {
   async getMyOrgs(@UserId() userId: string, @Query() dto: GetMyOrgsDto): Promise<PaginatedOrgsResponseDto> {
     this.logger.log(`GET /organizations/me - Fetching organizations for user: ${userId}`);
     return this.organizationService.getMyOrgs(userId, dto);
-  }
-
-  // Returns user's organizations as select options grouped by plan
-  @Get('select')
-  @ApiGetOrganizationsSelect()
-  findForSelect(@UserId() userId: string, @Query() query: SelectOptionsQueryDto): Promise<OrganizationSelectResponseDto> {
-    this.logger.log('GET /organizations/select');
-    return this.organizationService.findForSelect(userId, query);
   }
 
   // Returns a single organization's details for the authenticated user

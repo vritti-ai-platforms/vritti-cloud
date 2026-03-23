@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
-import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
-import { BackupCodeService } from '../../../mfa/services/backup-code.service';
-import { WebAuthnService } from '../../../mfa/services/webauthn.service';
-import type { RegistrationResponseJSON } from '../../../mfa/types/webauthn.types';
-import { UserService } from '../../../user/services/user.service';
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
+import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import type { RegistrationResponseJSON } from '@domain/mfa/types/webauthn.types';
+import { UserService } from '@domain/user/services/user.service';
 import { BackupCodesResponseDto } from '../../totp/dto/response/backup-codes-response.dto';
 import { PasskeyRegistrationOptionsDto } from '../dto/response/passkey-registration-options.dto';
 

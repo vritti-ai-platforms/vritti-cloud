@@ -1,16 +1,15 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { ApiAssignDeploymentPlan, ApiCreateDeployment, ApiDeleteDeployment, ApiFindAllDeployments, ApiFindDeploymentById, ApiFindDeploymentsSelect, ApiGetDeploymentPlanAssignments, ApiRemoveDeploymentPlan, ApiUpdateDeployment } from '../docs/deployment.docs';
+import { ApiAssignDeploymentPlan, ApiCreateDeployment, ApiDeleteDeployment, ApiFindAllDeployments, ApiFindDeploymentById, ApiGetDeploymentPlanAssignments, ApiRemoveDeploymentPlan, ApiUpdateDeployment } from '../docs/deployment.docs';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
 import { DeploymentsResponseDto } from '../dto/response/deployments-response.dto';
 import type { DeploymentPlanAssignmentDto } from '../dto/entity/deployment-plan-assignment.dto';
 import { AssignDeploymentPlanDto } from '../dto/request/assign-deployment-plan.dto';
 import { CreateDeploymentDto } from '../dto/request/create-deployment.dto';
-import { DeploymentSelectQueryDto } from '../dto/request/deployment-select-query.dto';
 import { UpdateDeploymentDto } from '../dto/request/update-deployment.dto';
-import { DeploymentService } from '../services/deployment.service';
+import { DeploymentService } from '@domain/deployment/services/deployment.service';
 
 @ApiTags('Admin - Deployments')
 @ApiBearerAuth()
@@ -36,14 +35,6 @@ export class DeploymentController {
   findAll(): Promise<DeploymentsResponseDto> {
     this.logger.log('GET /admin-api/deployments');
     return this.deploymentService.findAll();
-  }
-
-  // Returns paginated deployment options for the select component
-  @Get('select')
-  @ApiFindDeploymentsSelect()
-  findForSelect(@Query() query: DeploymentSelectQueryDto): Promise<SelectQueryResult> {
-    this.logger.log('GET /admin-api/deployments/select');
-    return this.deploymentService.findForSelect(query);
   }
 
   // Returns a single deployment by ID

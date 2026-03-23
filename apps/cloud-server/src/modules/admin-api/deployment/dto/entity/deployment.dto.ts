@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Deployment } from '@/db/schema';
 import { type DeploymentStatus, DeploymentStatusValues, type DeploymentType, DeploymentTypeValues } from '@/db/schema';
-import type { DeploymentWithNames } from '../../repositories/deployment.repository';
+import type { DeploymentWithNames } from '@domain/deployment/repositories/deployment.repository';
 
 export class DeploymentDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })

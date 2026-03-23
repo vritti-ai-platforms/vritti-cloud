@@ -12,7 +12,7 @@ import { PriceDetailDto } from '../dto/entity/price-detail.dto';
 import { CreatePriceDto } from '../dto/request/create-price.dto';
 import { UpdatePriceDto } from '../dto/request/update-price.dto';
 import { PricesTableResponseDto } from '../dto/response/prices-table-response.dto';
-import { PriceService } from '../services/price.service';
+import { PriceService } from '@domain/price/services/price.service';
 
 @ApiTags('Admin - Prices')
 @ApiBearerAuth()

@@ -57,7 +57,7 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
         name="appVersionId"
         label="App Version"
         placeholder="Select version (optional)"
-        optionsEndpoint="admin-api/app-versions/select"
+        optionsEndpoint="select-api/app-versions"
         fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'version' }}
         searchable
       />

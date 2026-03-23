@@ -3,6 +3,7 @@ import { useUpdateRole } from '@hooks/admin/roles';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
+import { AppSelector } from '@vritti/quantum-ui/selects/app';
 import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import type React from 'react';
@@ -27,6 +28,7 @@ export const EditRoleForm: React.FC<EditRoleFormProps> = ({ role, onSuccess, onC
       description: role.description ?? '',
       scope: role.scope,
       industryId: role.industryId ?? '',
+      appIds: role.appIds,
     },
   });
 
@@ -53,6 +55,7 @@ export const EditRoleForm: React.FC<EditRoleFormProps> = ({ role, onSuccess, onC
           { value: 'SINGLE_BU', label: 'Single Business Unit' },
         ]}
       />
+      <AppSelector name="appIds" multiple label="Apps" placeholder="Select apps this role covers" />
       <IndustrySelector name="industryId" label="Industry" placeholder="All industries (optional)" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>

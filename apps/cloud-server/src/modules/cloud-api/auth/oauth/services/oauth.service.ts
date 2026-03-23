@@ -10,8 +10,8 @@ import {
   SignupMethodValues,
   type User,
 } from '@/db/schema';
-import { UserRepository } from '../../../user/repositories/user.repository';
-import { SessionService } from '../../root/services/session.service';
+import { UserRepository } from '@domain/user/repositories/user.repository';
+import { SessionService } from '@domain/session/services/session.service';
 import type { IOAuthProvider } from '../interfaces/oauth-provider.interface';
 import type { OAuthUserProfile } from '../interfaces/oauth-user-profile.interface';
 import { AppleOAuthProvider } from '../providers/apple-oauth.provider';
@@ -19,7 +19,7 @@ import { FacebookOAuthProvider } from '../providers/facebook-oauth.provider';
 import { GoogleOAuthProvider } from '../providers/google-oauth.provider';
 import { MicrosoftOAuthProvider } from '../providers/microsoft-oauth.provider';
 import { TwitterOAuthProvider } from '../providers/twitter-oauth.provider';
-import { OAuthProviderRepository } from '../repositories/oauth-provider.repository';
+import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
 import { OAuthCryptoService } from './oauth-crypto.service';
 import { OAuthStateService } from './oauth-state.service';
 

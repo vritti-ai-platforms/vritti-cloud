@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AdminApiModule } from '@/modules/admin-api/admin-api.module';
+import { RegionDomainModule } from '@domain/region/region.module';
 import { RegionController } from './controllers/region.controller';
-import { RegionService } from './services/region.service';
 
 @Module({
-  imports: [AdminApiModule],
+  imports: [RegionDomainModule],
   controllers: [RegionController],
-  providers: [RegionService],
 })
 export class RegionModule {}

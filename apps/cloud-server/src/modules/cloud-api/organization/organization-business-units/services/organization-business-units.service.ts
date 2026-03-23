@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ForbiddenException, NotFoundException, ServiceUnavailableException } from '@vritti/api-sdk';
 import type { Deployment, Organization } from '@/db/schema';
-import { PlanRepository } from '@/modules/admin-api/plan/root/repositories/plan.repository';
+import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 

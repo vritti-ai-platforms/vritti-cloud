@@ -6,7 +6,7 @@ import { ApiAssignIndustryApp, ApiGetIndustryApps, ApiRemoveIndustryApp, ApiUpda
 import { IndustryAppDto } from '../dto/entity/industry-app.dto';
 import { AssignIndustryAppDto } from '../dto/request/assign-industry-app.dto';
 import { UpdateIndustryAppDto } from '../dto/request/update-industry-app.dto';
-import { IndustryAppService } from '../services/industry-app.service';
+import { IndustryAppService } from '@domain/industry/services/industry-app.service';
 
 @ApiTags('Admin - Industry Apps')
 @ApiBearerAuth()

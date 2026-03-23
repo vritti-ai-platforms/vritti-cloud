@@ -42,7 +42,7 @@ function mapAccountStatus(backendStatus: string): AccountStatus {
 
 // Gets the current user profile
 export function getProfile(): Promise<ProfileData> {
-  return axios.get<AuthStatusResponse>('cloud-api/auth/status', { showSuccessToast: false }).then((r) => {
+  return axios.get<AuthStatusResponse>('auth/status', { showSuccessToast: false }).then((r) => {
     if (!r.data.isAuthenticated || !r.data.user) {
       throw new Error('User is not authenticated');
     }
@@ -77,7 +77,7 @@ export function updateProfile(data: UpdateProfileDto): Promise<ProfileData> {
 // Changes the user password
 export function changePassword(data: ChangePasswordDto): Promise<void> {
   return axios
-    .post('cloud-api/auth/password/change', data, {
+    .post('auth/password/change', data, {
       loadingMessage: 'Changing password...',
       successMessage: 'Password changed successfully',
     })
@@ -86,13 +86,13 @@ export function changePassword(data: ChangePasswordDto): Promise<void> {
 
 // Gets the list of active sessions
 export function getSessions(): Promise<Session[]> {
-  return axios.get<Session[]>('cloud-api/auth/sessions', { showSuccessToast: false }).then((r) => r.data);
+  return axios.get<Session[]>('auth/sessions', { showSuccessToast: false }).then((r) => r.data);
 }
 
 // Revokes a specific session
 export function revokeSession(sessionId: string): Promise<void> {
   return axios
-    .delete(`cloud-api/auth/sessions/${sessionId}`, {
+    .delete(`auth/sessions/${sessionId}`, {
       loadingMessage: 'Revoking session...',
       successMessage: 'Session revoked successfully',
     })
@@ -102,7 +102,7 @@ export function revokeSession(sessionId: string): Promise<void> {
 // Revokes all sessions except the current one
 export function revokeAllOtherSessions(): Promise<void> {
   return axios
-    .post('cloud-api/auth/logout-all', null, {
+    .post('auth/logout-all', null, {
       loadingMessage: 'Signing out all devices...',
       successMessage: 'Signed out from all other devices',
     })

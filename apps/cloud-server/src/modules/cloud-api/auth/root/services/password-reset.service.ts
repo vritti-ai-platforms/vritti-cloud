@@ -3,9 +3,9 @@ import { BadRequestException } from '@vritti/api-sdk';
 import { OnboardingStepValues, SessionTypeValues, VerificationChannelValues } from '@/db/schema';
 import { EmailService } from '@vritti/api-sdk';
 import { EncryptionService } from '../../../../../services';
-import { UserService } from '../../../user/services/user.service';
-import { VerificationService } from '../../../verification/services/verification.service';
-import { SessionService } from './session.service';
+import { UserService } from '@domain/user/services/user.service';
+import { VerificationService } from '@domain/verification/services/verification.service';
+import { SessionService } from '@domain/session/services/session.service';
 
 @Injectable()
 export class PasswordResetService {

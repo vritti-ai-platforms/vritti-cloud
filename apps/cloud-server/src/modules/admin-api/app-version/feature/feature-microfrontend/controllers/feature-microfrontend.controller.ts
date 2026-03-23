@@ -9,7 +9,7 @@ import {
 } from '../docs/feature-microfrontend.docs';
 import { FeatureMicrofrontendDto } from '../dto/entity/feature-microfrontend.dto';
 import { SetFeatureMicrofrontendDto } from '../dto/request/set-feature-microfrontend.dto';
-import { FeatureMicrofrontendService } from '../services/feature-microfrontend.service';
+import { FeatureMicrofrontendService } from '@domain/app-version/feature/feature-microfrontend/services/feature-microfrontend.service';
 
 @ApiTags('Admin - Feature Microfrontends')
 @ApiBearerAuth()

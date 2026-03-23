@@ -16,7 +16,7 @@ export const VersionSwitcher = ({ currentVersionId, currentVersionName }: Versio
 
   return (
     <Select
-      optionsEndpoint="admin-api/app-versions/select"
+      optionsEndpoint="select-api/app-versions"
       fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'version' }}
       value={currentVersionId}
       searchable

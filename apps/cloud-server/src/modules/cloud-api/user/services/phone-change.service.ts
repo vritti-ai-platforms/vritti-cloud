@@ -3,8 +3,8 @@ import { BadRequestException, NotFoundException, normalizePhoneNumber } from '@v
 import * as crypto from 'crypto';
 import { VerificationChannelValues } from '@/db/schema';
 import { SmsService } from '@/services';
-import { VerificationService } from '../../verification/services/verification.service';
-import { UserService } from './user.service';
+import { VerificationService } from '@domain/verification/services/verification.service';
+import { UserService } from '@domain/user/services/user.service';
 import { PhoneChangeRequestRepository } from '../repositories/phone-change-request.repository';
 import { RateLimitService } from './rate-limit.service';
 

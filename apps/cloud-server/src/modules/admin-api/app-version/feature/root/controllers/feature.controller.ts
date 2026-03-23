@@ -1,12 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiBulkCreateFeatures,
   ApiCreateFeature,
   ApiDeleteFeature,
-  ApiFindFeaturesSelect,
   ApiFindFeaturesWithPermissions,
   ApiFindForTableFeatures,
   ApiGetFeatureById,
@@ -18,7 +17,7 @@ import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '../dto/response/feature-table-response.dto';
 import type { FeatureWithPermissionsResponseDto } from '../dto/response/feature-with-permissions-response.dto';
-import { FeatureService } from '../services/feature.service';
+import { FeatureService } from '@domain/app-version/feature/root/services/feature.service';
 
 @ApiTags('Admin - Features')
 @ApiBearerAuth()
@@ -44,14 +43,6 @@ export class FeatureController {
   findForTable(@UserId() userId: string): Promise<FeatureTableResponseDto> {
     this.logger.log('GET /admin-api/features/table');
     return this.featureService.findForTable(userId);
-  }
-
-  // Returns paginated feature options for the select component
-  @Get('select')
-  @ApiFindFeaturesSelect()
-  findForSelect(@Query() query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
-    this.logger.log('GET /admin-api/features/select');
-    return this.featureService.findForSelect(query);
   }
 
   // Returns all features for a version with their permission types and app codes

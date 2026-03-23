@@ -32,17 +32,17 @@ export interface AuthStatusResponse {
 
 // Fetches the current user's authentication status
 export function getAuthStatus(): Promise<AuthStatusResponse> {
-  return axios.get<AuthStatusResponse>('cloud-api/auth/status', { public: true }).then((r) => r.data);
+  return axios.get<AuthStatusResponse>('auth/status', { public: true }).then((r) => r.data);
 }
 
 // Logs out the current user from the current device
 export function logout(): Promise<void> {
-  return axios.post('cloud-api/auth/logout', {}, { successMessage: 'Logged out successfully' }).then(() => undefined);
+  return axios.post('auth/logout', {}, { successMessage: 'Logged out successfully' }).then(() => undefined);
 }
 
 // Logs out the current user from all devices
 export function logoutAll(): Promise<void> {
   return axios
-    .post('cloud-api/auth/logout-all', {}, { successMessage: 'Logged out from all devices' })
+    .post('auth/logout-all', {}, { successMessage: 'Logged out from all devices' })
     .then(() => undefined);
 }

@@ -4,7 +4,7 @@ import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiGetRolePermissions, ApiSetRolePermissions } from '../docs/role-permission.docs';
 import { AssignRolePermissionsDto } from '../dto/request/assign-role-permissions.dto';
-import { type GroupedPermission, RolePermissionService } from '../services/role-permission.service';
+import { type GroupedPermission, RolePermissionService } from '@domain/app-version/role/role-permission/services/role-permission.service';
 
 @ApiTags('Admin - Roles')
 @ApiBearerAuth()

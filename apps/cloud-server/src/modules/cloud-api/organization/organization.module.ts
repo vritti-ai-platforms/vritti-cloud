@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { MediaModule } from '../media/media.module';
-import { AdminApiModule } from '@/modules/admin-api/admin-api.module';
+import { AppVersionDomainModule } from '@domain/app-version/app-version.module';
+import { CloudOrganizationDomainModule } from '@domain/cloud-organization/cloud-organization.module';
+import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
+import { MediaDomainModule } from '@domain/media/media.module';
+import { PlanDomainModule } from '@domain/plan/plan.module';
 import { CoreServerModule } from '@/modules/core-server/core-server.module';
 // Root controllers and services
 import { OrganizationController } from './controllers/organization.controller';
 import { OrganizationUsersController } from './controllers/organization-users.controller';
-import { OrganizationMemberRepository } from './repositories/organization-member.repository';
-import { OrganizationRepository } from './repositories/organization.repository';
 import { OrganizationService } from './services/organization.service';
 import { OrganizationUsersService } from './services/organization-users.service';
 // Organization Apps submodule
@@ -20,7 +21,7 @@ import { OrganizationBusinessUnitsController } from './organization-business-uni
 import { OrganizationBusinessUnitsService } from './organization-business-units/services/organization-business-units.service';
 
 @Module({
-  imports: [CoreServerModule, AdminApiModule, MediaModule],
+  imports: [CoreServerModule, AppVersionDomainModule, DeploymentDomainModule, PlanDomainModule, MediaDomainModule, CloudOrganizationDomainModule],
   controllers: [
     OrganizationController,
     OrganizationUsersController,
@@ -31,8 +32,6 @@ import { OrganizationBusinessUnitsService } from './organization-business-units/
   providers: [
     // Root
     OrganizationService,
-    OrganizationRepository,
-    OrganizationMemberRepository,
     OrganizationUsersService,
     // Organization Apps
     OrganizationAppsService,

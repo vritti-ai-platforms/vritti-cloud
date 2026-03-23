@@ -49,8 +49,8 @@ export const OverviewPage = () => {
         queryKey: appVersionQueryKey(versionId),
         queryFn: () => getAppVersion(versionId),
       }),
-      queryClient.invalidateQueries({ queryKey: ['select-resolve', 'admin-api/app-versions/select'] }),
-      queryClient.invalidateQueries({ queryKey: ['select-search', 'admin-api/app-versions/select'] }),
+      queryClient.invalidateQueries({ queryKey: ['select-resolve', 'select-api/app-versions'] }),
+      queryClient.invalidateQueries({ queryKey: ['select-search', 'select-api/app-versions'] }),
     ]);
     navigate(`/app-versions/ver-${buildSlug(updated.name, updated.id)}/overview`, { replace: true });
   }

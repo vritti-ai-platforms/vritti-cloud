@@ -17,8 +17,15 @@ import {
   RootModule,
 } from '@vritti/api-sdk';
 import { validate } from './config/env.validation';
-import { AdminApiModule } from './modules/admin-api/admin-api.module';
-import { AppVersionModule } from './modules/admin-api/app-version/app-version.module';
+import { AdminAppVersionModule } from './modules/admin-api/app-version/app-version.module';
+import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
+import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
+import { AdminEnumModule } from './modules/admin-api/enum/enum.module';
+import { AdminIndustryModule } from './modules/admin-api/industry/industry.module';
+import { AdminOrganizationModule } from './modules/admin-api/organization/organization.module';
+import { AdminPlanModule } from './modules/admin-api/plan/plan.module';
+import { AdminPriceModule } from './modules/admin-api/price/price.module';
+import { AdminRegionModule } from './modules/admin-api/region/region.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
 import { CloudDeploymentModule } from './modules/cloud-api/deployment/deployment.module';
 import { IndustryModule } from './modules/cloud-api/industry/industry.module';
@@ -28,6 +35,8 @@ import { OrganizationModule } from './modules/cloud-api/organization/organizatio
 import { RegionModule } from './modules/cloud-api/region/region.module';
 
 import { UserModule } from './modules/cloud-api/user/user.module';
+import { SelectModule } from './modules/select-api/select.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -36,6 +45,8 @@ import { UserModule } from './modules/cloud-api/user/user.module';
       envFilePath: '.env',
       validate,
     }),
+    // Global services (encryption, SMS, WhatsApp)
+    ServicesModule,
     // Event emitter for SSE real-time updates
     EventEmitterModule.forRoot(),
     // Logger module
@@ -108,16 +119,24 @@ import { UserModule } from './modules/cloud-api/user/user.module';
     DataTableModule.forRoot({ tableViews: schema.tableViews }),
     RegionModule,
     CloudDeploymentModule,
-    // Admin API module
-    AdminApiModule,
+    // Admin API modules
+    AdminAppVersionModule,
+    AdminPlanModule,
+    AdminDeploymentModule,
+    AdminRegionModule,
+    AdminCloudProviderModule,
+    AdminIndustryModule,
+    AdminOrganizationModule,
+    AdminPriceModule,
+    AdminEnumModule,
+    // Select API module
+    SelectModule,
     // Route prefixes
     RouterModule.register([
       {
         path: 'cloud-api',
         children: [
           UserModule,
-          OnboardingModule,
-          AuthModule,
           MediaModule,
           OrganizationModule,
           IndustryModule,
@@ -126,8 +145,26 @@ import { UserModule } from './modules/cloud-api/user/user.module';
         ],
       },
       {
+        path: '',
+        children: [AuthModule, OnboardingModule],
+      },
+      {
         path: 'admin-api',
-        children: [AdminApiModule, AppVersionModule],
+        children: [
+          AdminAppVersionModule,
+          AdminPlanModule,
+          AdminDeploymentModule,
+          AdminRegionModule,
+          AdminCloudProviderModule,
+          AdminIndustryModule,
+          AdminOrganizationModule,
+          AdminPriceModule,
+          AdminEnumModule,
+        ],
+      },
+      {
+        path: 'select-api',
+        children: [SelectModule],
       },
       // Top-level: /table-states and /table-views (no prefix)
       {

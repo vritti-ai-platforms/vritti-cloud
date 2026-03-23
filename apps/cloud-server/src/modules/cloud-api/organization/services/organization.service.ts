@@ -13,10 +13,10 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
 import { OrgMemberRoleValues } from '@/db/schema';
-import { DeploymentRepository } from '@/modules/admin-api/deployment/repositories/deployment.repository';
+import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
 import { CoreAppVersionRepository } from '@/modules/core-server/repositories/core-app-version.repository';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
-import { MediaService } from '../../media/services/media.service';
+import { MediaService } from '@domain/media/services/media.service';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CreateOrganizationDto } from '../dto/request/create-organization.dto';
 import type { GetMyOrgsDto } from '../dto/request/get-my-orgs.dto';
@@ -24,8 +24,8 @@ import { UpdateOrganizationDto } from '../dto/request/update-organization.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
 import { SubdomainAvailabilityResponseDto } from '../dto/response/subdomain-availability-response.dto';
-import { OrganizationRepository } from '../repositories/organization.repository';
-import { OrganizationMemberRepository } from '../repositories/organization-member.repository';
+import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
+import { OrganizationMemberRepository } from '@domain/cloud-organization/repositories/organization-member.repository';
 
 @Injectable()
 export class OrganizationService {

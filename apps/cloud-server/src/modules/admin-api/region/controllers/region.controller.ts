@@ -1,6 +1,6 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SelectOptionsQueryDto, SuccessResponseDto, UserId, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiAddRegionCloudProvider,
@@ -8,7 +8,6 @@ import {
   ApiDeleteRegion,
   ApiFindForTableRegions,
   ApiFindRegionById,
-  ApiFindRegionsSelect,
   ApiRemoveRegionCloudProvider,
   ApiUpdateRegion,
 } from '../docs/region.docs';
@@ -16,7 +15,7 @@ import { RegionDto } from '../dto/entity/region.dto';
 import { CreateRegionDto } from '../dto/request/create-region.dto';
 import { UpdateRegionDto } from '../dto/request/update-region.dto';
 import { RegionTableResponseDto } from '../dto/response/regions-response.dto';
-import { RegionService } from '../services/region.service';
+import { RegionService } from '@domain/region/services/region.service';
 
 @ApiTags('Admin - Regions')
 @ApiBearerAuth()
@@ -42,14 +41,6 @@ export class RegionController {
   findForTable(@UserId() userId: string): Promise<RegionTableResponseDto> {
     this.logger.log('GET /admin-api/regions/table');
     return this.regionService.findForTable(userId);
-  }
-
-  // Returns paginated region options for the select component
-  @Get('select')
-  @ApiFindRegionsSelect()
-  findForSelect(@Query() query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
-    this.logger.log('GET /admin-api/regions/select');
-    return this.regionService.findForSelect(query);
   }
 
   // Returns a single region by ID

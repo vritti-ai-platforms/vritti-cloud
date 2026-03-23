@@ -79,6 +79,7 @@ export const relations = defineRelations(schema, (r) => ({
     featureMicrofrontends: r.many.featureMicrofrontends(),
     apps: r.many.apps(),
     roles: r.many.roles(),
+    roleApps: r.many.roleApps(),
     featurePermissions: r.many.featurePermissions(),
     roleFeaturePermissions: r.many.roleFeaturePermissions(),
     appFeatures: r.many.appFeatures(),
@@ -272,6 +273,7 @@ export const relations = defineRelations(schema, (r) => ({
     appFeatures: r.many.appFeatures(),
     appPrices: r.many.appPrices(),
     industryApps: r.many.industryApps(),
+    roleApps: r.many.roleApps(),
   },
 
   // App-Feature junction relations
@@ -322,6 +324,14 @@ export const relations = defineRelations(schema, (r) => ({
     }),
     industry: r.one.industries({ from: r.roles.industryId, to: r.industries.id }),
     roleFeaturePermissions: r.many.roleFeaturePermissions(),
+    roleApps: r.many.roleApps(),
+  },
+
+  // Role-App junction relations
+  roleApps: {
+    appVersion: r.one.appVersions({ from: r.roleApps.appVersionId, to: r.appVersions.id }),
+    role: r.one.roles({ from: r.roleApps.roleId, to: r.roles.id }),
+    app: r.one.apps({ from: r.roleApps.appId, to: r.apps.id }),
   },
 
   // Role-Feature-Permission junction relations

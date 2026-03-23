@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
@@ -6,7 +6,6 @@ import {
   ApiCreateMicrofrontend,
   ApiDeleteMicrofrontend,
   ApiFindForTableMicrofrontends,
-  ApiFindMicrofrontendsSelect,
   ApiGetMicrofrontendById,
   ApiUpdateMicrofrontend,
 } from '../docs/microfrontend.docs';
@@ -14,7 +13,7 @@ import { MicrofrontendDto } from '../dto/entity/microfrontend.dto';
 import { CreateMicrofrontendDto } from '../dto/request/create-microfrontend.dto';
 import { UpdateMicrofrontendDto } from '../dto/request/update-microfrontend.dto';
 import { MicrofrontendTableResponseDto } from '../dto/response/microfrontend-table-response.dto';
-import { MicrofrontendService } from '../services/microfrontend.service';
+import { MicrofrontendService } from '@domain/app-version/microfrontend/services/microfrontend.service';
 
 @ApiTags('Admin - Microfrontends')
 @ApiBearerAuth()
@@ -43,17 +42,6 @@ export class MicrofrontendController {
   ): Promise<MicrofrontendTableResponseDto> {
     this.logger.log(`GET /admin-api/app-versions/${versionId}/microfrontends/table`);
     return this.microfrontendService.findForTable(userId, versionId);
-  }
-
-  // Returns microfrontend options for a select component within a version
-  @Get('select')
-  @ApiFindMicrofrontendsSelect()
-  findForSelect(
-    @Param('versionId') versionId: string,
-    @Query('search') search?: string,
-  ): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
-    this.logger.log(`GET /admin-api/app-versions/${versionId}/microfrontends/select`);
-    return this.microfrontendService.findForSelect(versionId, search);
   }
 
   // Returns a single microfrontend by ID

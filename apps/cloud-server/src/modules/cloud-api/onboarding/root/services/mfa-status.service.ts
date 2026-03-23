@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
-import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
-import { UserService } from '../../../user/services/user.service';
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { UserService } from '@domain/user/services/user.service';
 import { MfaStatusResponseDto } from '../../totp/dto/response/mfa-status-response.dto';
 
 @Injectable()

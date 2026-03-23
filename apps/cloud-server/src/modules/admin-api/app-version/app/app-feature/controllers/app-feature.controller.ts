@@ -1,3 +1,4 @@
+import { AppFeatureService } from '@domain/app-version/app/app-feature/services/app-feature.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
@@ -10,7 +11,6 @@ import {
 } from '../docs/app-feature.docs';
 import { AssignFeaturesDto } from '../dto/request/assign-features.dto';
 import { AppFeatureTableResponseDto } from '../dto/response/app-feature-table-response.dto';
-import { AppFeatureService } from '../services/app-feature.service';
 
 @ApiTags('Admin - App Features')
 @ApiBearerAuth()
@@ -24,10 +24,7 @@ export class AppFeatureController {
   // Returns app features for the data table with server-stored state
   @Get('table')
   @ApiFindForTableAppFeatures()
-  findForTable(
-    @UserId() userId: string,
-    @Param('appId') appId: string,
-  ): Promise<AppFeatureTableResponseDto> {
+  findForTable(@UserId() userId: string, @Param('appId') appId: string): Promise<AppFeatureTableResponseDto> {
     this.logger.log(`GET /admin-api/apps/${appId}/features/table`);
     return this.appFeatureService.findForTable(userId, appId);
   }

@@ -1,11 +1,11 @@
-import { forwardRef, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfigFactory } from '@vritti/api-sdk';
-import { ServicesModule } from '../../../services/services.module';
-import { MfaModule } from '../mfa/mfa.module';
-import { UserModule } from '../user/user.module';
-import { VerificationModule } from '../verification/verification.module';
+import { UserDomainModule } from '@domain/user/user.module';
+import { MfaModule } from '@domain/mfa/mfa.module';
+import { OAuthDomainModule } from '@domain/oauth/oauth.module';
+import { VerificationModule } from '@domain/verification/verification.module';
 // MFA verification submodule
 import { MfaVerificationController } from './mfa-verification/controllers/mfa-verification.controller';
 import { MfaChallengeStore } from './mfa-verification/services/mfa-challenge.store';
@@ -17,35 +17,31 @@ import { FacebookOAuthProvider } from './oauth/providers/facebook-oauth.provider
 import { GoogleOAuthProvider } from './oauth/providers/google-oauth.provider';
 import { MicrosoftOAuthProvider } from './oauth/providers/microsoft-oauth.provider';
 import { TwitterOAuthProvider } from './oauth/providers/twitter-oauth.provider';
-import { OAuthProviderRepository } from './oauth/repositories/oauth-provider.repository';
-import { OAuthStateRepository } from './oauth/repositories/oauth-state.repository';
 import { OAuthService } from './oauth/services/oauth.service';
 import { OAuthCryptoService } from './oauth/services/oauth-crypto.service';
 import { OAuthStateService } from './oauth/services/oauth-state.service';
 // Passkey submodule
 import { PasskeyAuthController } from './passkey/controllers/passkey-auth.controller';
 import { PasskeyAuthService } from './passkey/services/passkey-auth.service';
+import { SessionModule } from '@domain/session/session.module';
 // Root submodule
 import { AuthController } from './root/controllers/auth.controller';
-import { SessionRepository } from './root/repositories/session.repository';
 import { AuthService } from './root/services/auth.service';
 import { PasswordResetService } from './root/services/password-reset.service';
-import { SessionService } from './root/services/session.service';
 
 @Module({
   imports: [
     JwtModule.registerAsync({ inject: [ConfigService], useFactory: jwtConfigFactory }),
-    ServicesModule,
+    SessionModule,
+    UserDomainModule,
     VerificationModule,
-    forwardRef(() => UserModule),
     MfaModule,
+    OAuthDomainModule,
   ],
   controllers: [AuthController, OAuthController, PasskeyAuthController, MfaVerificationController],
   providers: [
     // Root
     AuthService,
-    SessionService,
-    SessionRepository,
     PasswordResetService,
     // Passkey
     PasskeyAuthService,
@@ -53,8 +49,6 @@ import { SessionService } from './root/services/session.service';
     OAuthCryptoService,
     OAuthService,
     OAuthStateService,
-    OAuthProviderRepository,
-    OAuthStateRepository,
     GoogleOAuthProvider,
     MicrosoftOAuthProvider,
     AppleOAuthProvider,
@@ -64,6 +58,6 @@ import { SessionService } from './root/services/session.service';
     MfaVerificationService,
     MfaChallengeStore,
   ],
-  exports: [AuthService, SessionService, MfaVerificationService, MfaChallengeStore],
+  exports: [AuthService, SessionModule, MfaVerificationService, MfaChallengeStore],
 })
 export class AuthModule {}

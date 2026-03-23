@@ -30,7 +30,7 @@ export const AssignFeatureForm: React.FC<AssignFeatureFormProps> = ({
   const { versionId } = useVersionContext();
   const { data: allFeatures = [], isLoading: isLoadingAll } = useQuery<SelectOption[]>({
     queryKey: ['admin', 'versions', versionId, 'features', 'select'],
-    queryFn: () => axios.get(`admin-api/app-versions/${versionId}/features/select`).then((r) => r.data.options ?? r.data),
+    queryFn: () => axios.get('select-api/features', { params: { versionId } }).then((r) => r.data.options ?? r.data),
   });
   const { data: existingFeatures = [], isLoading: isLoadingExisting } = useQuery({
     queryKey: ['admin', 'versions', versionId, 'apps', appId, 'features'],

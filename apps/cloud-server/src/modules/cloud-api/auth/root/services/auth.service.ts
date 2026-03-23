@@ -4,7 +4,7 @@ import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/
 import { JwtAuthService, TokenType } from '@vritti/api-sdk';
 import { EncryptionService } from '../../../../../services';
 import { UserDto } from '../../../user/dto/entity/user.dto';
-import { UserService } from '../../../user/services/user.service';
+import { UserService } from '@domain/user/services/user.service';
 import { MfaVerificationService } from '../../mfa-verification/services/mfa-verification.service';
 import { SessionResponse } from '../dto/entity/session-response.dto';
 import { LoginDto } from '../dto/request/login.dto';
@@ -12,7 +12,7 @@ import { SignupDto } from '../dto/request/signup.dto';
 import { AuthStatusResponse } from '../dto/response/auth-status-response.dto';
 import { LoginResponse } from '../dto/response/login-response.dto';
 import { SignupResponseDto } from '../dto/response/signup-response.dto';
-import { SessionService } from './session.service';
+import { SessionService } from '@domain/session/services/session.service';
 
 @Injectable()
 export class AuthService {

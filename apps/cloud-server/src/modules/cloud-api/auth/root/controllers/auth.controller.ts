@@ -57,7 +57,7 @@ import type { SuccessResponse } from '../dto/response/success-response.dto';
 import type { TokenResponse } from '../dto/response/token-response.dto';
 import { AuthService } from '../services/auth.service';
 import { PasswordResetService } from '../services/password-reset.service';
-import { getRefreshCookieName } from '../services/session.service';
+import { getRefreshCookieName } from '@domain/session/services/session.service';
 
 @ApiTags('Auth')
 @Controller('auth')
