@@ -7,9 +7,11 @@ const getSubdomain = (): string => {
   const subdomain = hostname.split('.')[0];
   return subdomain;
 };
+const AllowedSubdomains = ['admin', 'cloud'];
 
 const getRoutes = (isAuthenticated: boolean) => {
   const subdomain = getSubdomain();
+  if (!AllowedSubdomains.includes(subdomain)) return [];
   if (!isAuthenticated) return publicRoutes;
   switch (subdomain) {
     case 'admin':
@@ -17,7 +19,7 @@ const getRoutes = (isAuthenticated: boolean) => {
     case 'cloud':
       return cloudRoutes;
     default:
-      return cloudRoutes;
+      return [];
   }
 };
 
