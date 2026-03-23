@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Onboarding, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiChangeEmail, ApiSendEmailOtp, ApiVerifyEmail } from '../docs/email-verification.docs';
 import { type ChangeEmailDto } from '../dto/request/change-email.dto';
 import { VerifyEmailDto } from '../dto/request/verify-email.dto';
@@ -20,7 +21,7 @@ export class EmailVerificationController {
 
   // Creates a verification record and sends the initial email OTP
   @Post('send-otp')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiSendEmailOtp()
   async sendEmailOtp(@UserId() userId: string): Promise<ResendEmailOtpResponseDto> {
@@ -30,7 +31,7 @@ export class EmailVerificationController {
 
   // Validates the email OTP and marks the user's email as verified
   @Post('verify-otp')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiVerifyEmail()
   async verifyEmail(@UserId() userId: string, @Body() dto: VerifyEmailDto): Promise<VerifyEmailResponseDto> {
@@ -40,7 +41,7 @@ export class EmailVerificationController {
 
   // Updates the user's email and sends a new OTP to it
   @Post('change-email')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiChangeEmail()
   async changeEmail(@UserId() userId: string, @Body() dto: ChangeEmailDto): Promise<ResendEmailOtpResponseDto> {

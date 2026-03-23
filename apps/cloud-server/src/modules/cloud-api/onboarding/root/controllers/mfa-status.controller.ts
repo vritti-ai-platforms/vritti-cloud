@@ -1,6 +1,7 @@
 import { Controller, Get, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Onboarding, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiGetMfaStatus, ApiSkipMfaSetup } from '../docs/mfa-status.docs';
 import type { MfaStatusResponseDto } from '../../totp/dto/response/mfa-status-response.dto';
 import { MfaStatusService } from '../services/mfa-status.service';
@@ -15,7 +16,7 @@ export class MfaStatusController {
 
   // Skips MFA setup and completes onboarding without enabling multi-factor auth
   @Post('skip')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiSkipMfaSetup()
   async skipMfaSetup(@UserId() userId: string): Promise<{ success: boolean; message: string }> {
@@ -25,7 +26,7 @@ export class MfaStatusController {
 
   // Retrieves the user's current MFA configuration and backup code count
   @Get('status')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @ApiGetMfaStatus()
   async getMfaStatus(@UserId() userId: string): Promise<MfaStatusResponseDto> {
     this.logger.log(`GET /onboarding/mfa/status - User: ${userId}`);

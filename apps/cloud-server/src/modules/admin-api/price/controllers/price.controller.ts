@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreatePrice,
   ApiDeletePrice,
@@ -15,6 +16,7 @@ import { PriceService } from '../services/price.service';
 
 @ApiTags('Admin - Prices')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('prices')
 export class PriceController {
   private readonly logger = new Logger(PriceController.name);

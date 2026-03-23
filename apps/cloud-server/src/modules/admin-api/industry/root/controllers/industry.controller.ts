@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SelectOptionsQueryDto, SuccessResponseDto, UserId, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession, SelectOptionsQueryDto, SuccessResponseDto, UserId, type SelectQueryResult } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateIndustry,
   ApiDeleteIndustry,
@@ -16,6 +17,7 @@ import { IndustryService } from '../services/industry.service';
 
 @ApiTags('Admin - Industries')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('industries')
 export class IndustryController {
   private readonly logger = new Logger(IndustryController.name);

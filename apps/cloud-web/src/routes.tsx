@@ -1,6 +1,7 @@
 import { OnboardingProvider } from '@context/onboarding';
+import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
 import type { RouteObject } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { AdminLayout } from './components/layouts/AdminLayout';
 import { AppLayout } from './components/layouts/AppLayout';
 import { AuthLayout } from './components/layouts/AuthLayout';
@@ -8,15 +9,17 @@ import { OrgLayout } from './components/layouts/OrgLayout';
 import { VersionLayout } from './components/layouts/VersionLayout';
 import './index.css';
 import { AppVersionsPage } from './pages/admin/app-versions/AppVersionsPage';
-import { OverviewPage as VersionOverviewPage } from './pages/admin/app-versions/OverviewPage';
-import { MicrofrontendsPage } from './pages/admin/app-versions/microfrontends/MicrofrontendsPage';
 import { AdminAppsPage } from './pages/admin/app-versions/apps/AdminAppsPage';
 import { AppViewPage } from './pages/admin/app-versions/apps/AppViewPage';
+import { FeaturesPage } from './pages/admin/app-versions/features/FeaturesPage';
+import { FeatureViewPage } from './pages/admin/app-versions/features/FeatureViewPage';
+import { MicrofrontendsPage } from './pages/admin/app-versions/microfrontends/MicrofrontendsPage';
+import { OverviewPage as VersionOverviewPage } from './pages/admin/app-versions/OverviewPage';
+import { AdminRolesPage } from './pages/admin/app-versions/roles/AdminRolesPage';
+import { RoleViewPage } from './pages/admin/app-versions/roles/RoleViewPage';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
-import { FeaturesPage } from './pages/admin/app-versions/features/FeaturesPage';
-import { FeatureViewPage } from './pages/admin/app-versions/features/FeatureViewPage';
 import { IndustriesPage } from './pages/admin/industries/IndustriesPage';
 import { IndustryViewPage } from './pages/admin/industries/IndustryViewPage';
 import { OrganizationsPage as AdminOrganizationsPage } from './pages/admin/organizations/OrganizationsPage';
@@ -25,8 +28,6 @@ import { PlansPage } from './pages/admin/plans/PlansPage';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
-import { AdminRolesPage } from './pages/admin/app-versions/roles/AdminRolesPage';
-import { RoleViewPage } from './pages/admin/app-versions/roles/RoleViewPage';
 import { AuthErrorPage } from './pages/auth/AuthErrorPage';
 import { AuthSuccessPage } from './pages/auth/AuthSuccessPage';
 import { ForgotPasswordPage } from './pages/auth/forgot-password';
@@ -43,13 +44,19 @@ import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
 import { CreateOrgRolePage } from './pages/cloud/organization/roles/CreateOrgRolePage';
 import { EditOrgRolePage } from './pages/cloud/organization/roles/EditOrgRolePage';
 import { OrgRolesPage } from './pages/cloud/organization/roles/OrgRolesPage';
+import { OrganizationSettingsPage } from './pages/cloud/organization/settings/OrganizationSettingsPage';
 import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
-import { OrganizationSettingsPage } from './pages/cloud/organization/settings/OrganizationSettingsPage';
 import { ProfilePage } from './pages/cloud/settings/ProfilePage';
 import { SecurityPage } from './pages/cloud/settings/SecurityPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
+
+// Catch-all 404 page using quantum-ui's NotFoundErrorPage
+const NotFoundRoute = () => {
+  const navigate = useNavigate();
+  return <NotFoundErrorPage onGoBack={() => navigate('/', { replace: true })} goBackLabel="Go Home" />;
+};
 
 // Shared account routes — rendered under AppLayout (no sidebar) for both admin and cloud
 const accountRoutes: RouteObject[] = [
@@ -112,6 +119,7 @@ export const publicRoutes: RouteObject[] = [
       },
     ],
   },
+  { path: '*', element: <NotFoundRoute /> },
 ];
 
 export const adminRoutes: RouteObject[] = [
@@ -217,6 +225,7 @@ export const adminRoutes: RouteObject[] = [
     ],
   },
   ...accountRoutes,
+  { path: '*', element: <NotFoundRoute /> },
 ];
 
 // Routes shown when the user is authenticated
@@ -294,4 +303,5 @@ export const cloudRoutes: RouteObject[] = [
       },
     ],
   },
+  { path: '*', element: <NotFoundRoute /> },
 ];

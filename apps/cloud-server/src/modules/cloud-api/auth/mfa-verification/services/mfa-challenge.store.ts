@@ -13,6 +13,7 @@ export interface MfaChallenge {
   expiresAt: Date;
   ipAddress?: string;
   userAgent?: string;
+  subdomain?: string;
 }
 
 @Injectable()
@@ -34,6 +35,7 @@ export class MfaChallengeStore {
       maskedPhone?: string;
       ipAddress?: string;
       userAgent?: string;
+      subdomain?: string;
     } = {},
   ): MfaChallenge {
     const sessionId = crypto.randomUUID();
@@ -59,6 +61,7 @@ export class MfaChallengeStore {
       expiresAt,
       ipAddress: options.ipAddress,
       userAgent: options.userAgent,
+      subdomain: options.subdomain,
     };
 
     this.challenges.set(sessionId, challenge);

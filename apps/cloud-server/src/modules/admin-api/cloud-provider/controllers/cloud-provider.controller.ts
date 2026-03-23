@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { type SelectQueryResult, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, type SelectQueryResult, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateCloudProvider,
   ApiDeleteCloudProvider,
@@ -17,6 +18,7 @@ import { CloudProviderService } from '../services/cloud-provider.service';
 
 @ApiTags('Admin - Cloud Providers')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('cloud-providers')
 export class CloudProviderController {
   private readonly logger = new Logger(CloudProviderController.name);

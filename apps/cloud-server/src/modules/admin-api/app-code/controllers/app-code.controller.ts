@@ -1,10 +1,12 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { AppCodeService } from '../services/app-code.service';
 
 @ApiTags('Admin - App Codes')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('apps/codes')
 export class AppCodeController {
   constructor(private readonly appCodeService: AppCodeService) {}

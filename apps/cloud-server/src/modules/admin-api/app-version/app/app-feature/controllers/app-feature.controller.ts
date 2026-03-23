@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import {
   ApiAssignFeatures,
   ApiFindForTableAppFeatures,
@@ -13,6 +14,7 @@ import { AppFeatureService } from '../services/app-feature.service';
 
 @ApiTags('Admin - App Features')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('app-versions/:versionId/apps/:appId/features')
 export class AppFeatureController {
   private readonly logger = new Logger(AppFeatureController.name);

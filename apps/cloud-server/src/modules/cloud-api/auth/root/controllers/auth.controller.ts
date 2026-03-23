@@ -13,7 +13,18 @@ import {
   Res,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { AccessToken, CookieDomain, type CookieSerializeOptions, Public, RefreshCookieOptions, RefreshTokenCookie, Reset, UserId } from '@vritti/api-sdk';
+import {
+  AccessToken,
+  CookieDomain,
+  type CookieSerializeOptions,
+  Public,
+  RefreshCookieOptions,
+  RefreshTokenCookie,
+  RequireSession,
+  Subdomain,
+  UserId,
+} from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import type { FastifyReply } from 'fastify';
 import {
   ApiChangePassword,
@@ -85,6 +96,7 @@ export class AuthController {
   @ApiLogin()
   async login(
     @Body() loginDto: LoginDto,
+    @Subdomain() subdomain: string | undefined,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
     @Ip() ipAddress: string,
@@ -92,7 +104,7 @@ export class AuthController {
   ): Promise<LoginResponse> {
     this.logger.log(`Login attempt for email: ${loginDto.email}`);
 
-    const { refreshToken, ...response } = await this.authService.login(loginDto, ipAddress, userAgent);
+    const { refreshToken, ...response } = await this.authService.login(loginDto, subdomain, ipAddress, userAgent);
 
     if (refreshToken) {
       reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
@@ -224,7 +236,7 @@ export class AuthController {
 
   // Resends OTP using the RESET session
   @Post('resend-reset-otp')
-  @Reset()
+  @RequireSession(SessionTypeValues.RESET)
   @HttpCode(HttpStatus.OK)
   @ApiResendResetOtp()
   async resendResetOtp(@UserId() userId: string): Promise<SuccessResponse> {
@@ -234,7 +246,7 @@ export class AuthController {
 
   // Verifies OTP using the RESET session
   @Post('verify-reset-otp')
-  @Reset()
+  @RequireSession(SessionTypeValues.RESET)
   @HttpCode(HttpStatus.OK)
   @ApiVerifyResetOtp()
   async verifyResetOtp(@UserId() userId: string, @Body() dto: VerifyResetOtpDto): Promise<SuccessResponse> {
@@ -244,7 +256,7 @@ export class AuthController {
 
   // Resets password and creates a new session
   @Post('reset-password')
-  @Reset()
+  @RequireSession(SessionTypeValues.RESET)
   @HttpCode(HttpStatus.OK)
   @ApiResetPassword()
   async resetPassword(

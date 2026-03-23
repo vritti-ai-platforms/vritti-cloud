@@ -1,12 +1,14 @@
 import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiGetRolePermissions, ApiSetRolePermissions } from '../docs/role-permission.docs';
 import { AssignRolePermissionsDto } from '../dto/request/assign-role-permissions.dto';
 import { type GroupedPermission, RolePermissionService } from '../services/role-permission.service';
 
 @ApiTags('Admin - Roles')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('app-versions/:versionId/roles/:roleId/permissions')
 export class RolePermissionController {
   private readonly logger = new Logger(RolePermissionController.name);

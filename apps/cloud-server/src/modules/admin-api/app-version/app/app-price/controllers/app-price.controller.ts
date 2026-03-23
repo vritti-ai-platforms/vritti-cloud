@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiCreateAppPrice, ApiDeleteAppPrice, ApiListAppPrices, ApiUpdateAppPrice } from '../docs/app-price.docs';
 import { AppPriceDto } from '../dto/entity/app-price.dto';
 import { CreateAppPriceDto } from '../dto/request/create-app-price.dto';
@@ -8,6 +9,7 @@ import { AppPriceService } from '../services/app-price.service';
 
 @ApiTags('Admin - App Prices')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('app-versions/:versionId/apps/:appId/prices')
 export class AppPriceController {
   private readonly logger = new Logger(AppPriceController.name);

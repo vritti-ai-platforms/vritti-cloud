@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SelectOptionsQueryDto, SuccessResponseDto, UserId, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession, SelectOptionsQueryDto, SuccessResponseDto, UserId, type SelectQueryResult } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiCreateRole, ApiDeleteRole, ApiFindForTableRoles, ApiFindRolesSelect, ApiGetRoleById, ApiUpdateRole } from '../docs/role.docs';
 import { RoleDto } from '../dto/entity/role.dto';
 import { CreateRoleDto } from '../dto/request/create-role.dto';
@@ -11,6 +12,7 @@ import type { GroupedPermission } from '../../role-permission/services/role-perm
 
 @ApiTags('Admin - Roles')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('app-versions/:versionId/roles')
 export class RoleController {
   private readonly logger = new Logger(RoleController.name);

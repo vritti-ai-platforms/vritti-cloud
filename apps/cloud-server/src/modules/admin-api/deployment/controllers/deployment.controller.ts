@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiAssignDeploymentPlan, ApiCreateDeployment, ApiDeleteDeployment, ApiFindAllDeployments, ApiFindDeploymentById, ApiFindDeploymentsSelect, ApiGetDeploymentPlanAssignments, ApiRemoveDeploymentPlan, ApiUpdateDeployment } from '../docs/deployment.docs';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
 import { DeploymentsResponseDto } from '../dto/response/deployments-response.dto';
@@ -13,6 +14,7 @@ import { DeploymentService } from '../services/deployment.service';
 
 @ApiTags('Admin - Deployments')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('deployments')
 export class DeploymentController {
   private readonly logger = new Logger(DeploymentController.name);

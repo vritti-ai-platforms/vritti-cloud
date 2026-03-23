@@ -76,6 +76,7 @@ export class AuthService {
   // Validates credentials and creates session, or returns MFA challenge if MFA is enabled
   async login(
     dto: LoginDto,
+    subdomain?: string,
     ipAddress?: string,
     userAgent?: string,
   ): Promise<LoginResponse & { refreshToken?: string }> {
@@ -131,10 +132,20 @@ export class AuthService {
       });
     }
 
+    // Admin subdomain requires admin privileges
+    const isAdminLogin = subdomain === 'admin';
+    if (isAdminLogin && !user.isAdmin) {
+      throw new UnauthorizedException({
+        label: 'Access Denied',
+        detail: 'You do not have permission to access the admin portal.',
+      });
+    }
+
     // Check if user has MFA enabled
     const mfaChallenge = await this.mfaVerificationService.createMfaChallenge(user, {
       ipAddress,
       userAgent,
+      subdomain,
     });
 
     if (mfaChallenge) {
@@ -151,10 +162,11 @@ export class AuthService {
       });
     }
 
-    // No MFA — create CLOUD session
+    // No MFA — create session based on subdomain
+    const sessionType = isAdminLogin ? SessionTypeValues.ADMIN : SessionTypeValues.CLOUD;
     const { accessToken, refreshToken } = await this.sessionService.createSession(
       user.id,
-      SessionTypeValues.CLOUD,
+      sessionType,
       ipAddress,
       userAgent,
     );

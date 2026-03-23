@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
-import { type MfaAuth, MfaMethodValues, SessionTypeValues, type User, VerificationChannelValues } from '@/db/schema';
+import { type MfaAuth, MfaMethodValues, type SessionType, SessionTypeValues, type User, VerificationChannelValues } from '@/db/schema';
 import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
 import { BackupCodeService } from '../../../mfa/services/backup-code.service';
 import { TotpService } from '../../../mfa/services/totp.service';
@@ -31,7 +31,7 @@ export class MfaVerificationService {
   // Creates an MFA challenge if the user has MFA enabled, returning null otherwise
   async createMfaChallenge(
     user: User,
-    options: { ipAddress?: string; userAgent?: string } = {},
+    options: { ipAddress?: string; userAgent?: string; subdomain?: string } = {},
   ): Promise<MfaChallenge | null> {
     // Get user's MFA settings
     const mfaRecord = await this.mfaRepo.findActiveByUserId(user.id);
@@ -70,6 +70,7 @@ export class MfaVerificationService {
       maskedPhone,
       ipAddress: options.ipAddress,
       userAgent: options.userAgent,
+      subdomain: options.subdomain,
     });
 
     this.logger.log(`Created MFA challenge for user: ${user.id}, methods: ${availableMethods.join(', ')}`);
@@ -344,10 +345,13 @@ export class MfaVerificationService {
     // Get user
     const user = await this.userService.findById(challenge.userId);
 
+    // Determine session type based on subdomain
+    const sessionType: SessionType = challenge.subdomain === 'admin' ? SessionTypeValues.ADMIN : SessionTypeValues.CLOUD;
+
     // Create session - capture refreshToken for cookie
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
       challenge.userId,
-      SessionTypeValues.CLOUD,
+      sessionType,
       challenge.ipAddress,
       challenge.userAgent,
     );

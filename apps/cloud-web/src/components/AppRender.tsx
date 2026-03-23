@@ -1,3 +1,4 @@
+import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
 import { useRoutes } from 'react-router-dom';
 import { useAuth } from '../providers/AuthProvider';
 import { adminRoutes, cloudRoutes, publicRoutes } from '../routes';
@@ -11,7 +12,6 @@ const AllowedSubdomains = ['admin', 'cloud'];
 
 const getRoutes = (isAuthenticated: boolean) => {
   const subdomain = getSubdomain();
-  if (!AllowedSubdomains.includes(subdomain)) return [];
   if (!isAuthenticated) return publicRoutes;
   switch (subdomain) {
     case 'admin':
@@ -19,17 +19,19 @@ const getRoutes = (isAuthenticated: boolean) => {
     case 'cloud':
       return cloudRoutes;
     default:
-      return [];
+      return cloudRoutes;
   }
 };
 
 // Renders auth routes when unauthenticated, app routes when authenticated
 export const AppRender: React.FC = () => {
+  const subdomain = getSubdomain();
   const { isAuthenticated, isLoading } = useAuth();
   const routes = getRoutes(isAuthenticated);
   const routeElement = useRoutes(routes);
 
   if (isLoading) return null;
+  if (!AllowedSubdomains.includes(subdomain)) return <NotFoundErrorPage />;
 
   return routeElement;
 };

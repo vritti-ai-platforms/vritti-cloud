@@ -1,7 +1,8 @@
 import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiFindOrganizationMembers } from '../../organization-member/docs/organization-member.docs';
 import { OrganizationMemberTableResponseDto } from '../../organization-member/dto/response/organization-members-response.dto';
 import { OrganizationMemberService } from '../../organization-member/services/organization-member.service';
@@ -12,6 +13,7 @@ import { OrganizationService } from '../services/organization.service';
 
 @ApiTags('Admin - Organizations')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('organizations')
 export class OrganizationController {
   private readonly logger = new Logger(OrganizationController.name);

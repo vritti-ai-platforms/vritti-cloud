@@ -19,6 +19,7 @@ export const users = cloudSchema.table('users', {
   profilePictureUrl: text('profile_picture_url'),
   locale: varchar('locale', { length: 10 }).notNull().default('en'),
   timezone: varchar('timezone', { length: 50 }).notNull().default('UTC'),
+  isAdmin: boolean('is_admin').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true })
     .notNull()

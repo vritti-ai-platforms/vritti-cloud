@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateMicrofrontend,
   ApiDeleteMicrofrontend,
@@ -17,6 +18,7 @@ import { MicrofrontendService } from '../services/microfrontend.service';
 
 @ApiTags('Admin - Microfrontends')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('app-versions/:versionId/microfrontends')
 export class MicrofrontendController {
   private readonly logger = new Logger(MicrofrontendController.name);

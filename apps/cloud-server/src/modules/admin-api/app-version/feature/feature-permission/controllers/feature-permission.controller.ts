@@ -1,12 +1,14 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiGetFeaturePermissions, ApiSetFeaturePermissions } from '../docs/feature-permission.docs';
 import { SetFeaturePermissionsDto } from '../dto/request/set-feature-permissions.dto';
 import { FeaturePermissionService } from '../services/feature-permission.service';
 
 @ApiTags('Admin - Feature Permissions')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('app-versions/:versionId/features/:featureId/permissions')
 export class FeaturePermissionController {
   private readonly logger = new Logger(FeaturePermissionController.name);

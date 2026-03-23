@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import {
   ApiAssignPlanApp,
   ApiFindForTablePlanApps,
@@ -16,6 +17,7 @@ import { PlanAppService } from '../services/plan-app.service';
 
 @ApiTags('Admin - Plan Apps')
 @ApiBearerAuth()
+@RequireSession(SessionTypeValues.ADMIN)
 @Controller('plans/:planId/apps')
 export class PlanAppController {
   private readonly logger = new Logger(PlanAppController.name);

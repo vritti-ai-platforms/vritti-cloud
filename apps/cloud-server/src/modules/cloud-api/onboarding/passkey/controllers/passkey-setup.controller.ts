@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Onboarding, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import type { BackupCodesResponseDto } from '../../totp/dto/response/backup-codes-response.dto';
 import { ApiInitiatePasskeySetup, ApiVerifyPasskeySetup } from '../docs/passkey-setup.docs';
 import { VerifyPasskeyDto } from '../dto/request/verify-passkey.dto';
@@ -17,7 +18,7 @@ export class PasskeySetupController {
 
   // Generates WebAuthn registration options for passkey setup
   @Post('setup')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiInitiatePasskeySetup()
   async initiatePasskeySetup(@UserId() userId: string): Promise<PasskeyRegistrationOptionsDto> {
@@ -27,7 +28,7 @@ export class PasskeySetupController {
 
   // Verifies the passkey credential and completes MFA setup with backup codes
   @Post('verify')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiVerifyPasskeySetup()
   async verifyPasskeySetup(@UserId() userId: string, @Body() dto: VerifyPasskeyDto): Promise<BackupCodesResponseDto> {
