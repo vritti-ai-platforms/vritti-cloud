@@ -1,24 +1,16 @@
-import { getLocaleCodes } from '@utils/locales';
-import { getTimezoneValues } from '@utils/timezones';
 import { z } from 'zod';
 
-/**
- * Validation schema for profile update form
- */
+// Validation schema for profile update form
 export const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   displayName: z.string().optional(),
   phone: z.string().optional(),
-  locale: z.string().refine((val) => getLocaleCodes().includes(val), {
-    message: 'Invalid locale code',
-  }),
-  timezone: z.string().refine((val) => getTimezoneValues().includes(val), {
-    message: 'Invalid timezone',
-  }),
+  locale: z.string(),
+  timezone: z.string(),
   profilePictureUrl: z
     .string()
     .optional()
-    .refine((val) => !val || val === '' || z.string().url().safeParse(val).success, {
+    .refine((val) => !val || val === '' || z.url().safeParse(val).success, {
       message: 'Please enter a valid URL',
     }),
 });
