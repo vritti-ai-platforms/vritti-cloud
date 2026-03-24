@@ -4,7 +4,7 @@ import { DropdownMenu, type MenuItem } from '@vritti/quantum-ui/DropdownMenu';
 import { ThemeToggle, useTheme } from '@vritti/quantum-ui/theme';
 import { Lock, LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../providers/AuthProvider';
+import { useAuth } from '@/providers/AuthProvider';
 
 export const UserMenu = () => {
   const navigate = useNavigate();

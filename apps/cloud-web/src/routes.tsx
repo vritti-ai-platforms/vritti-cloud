@@ -2,11 +2,11 @@ import { OnboardingProvider } from '@context/onboarding';
 import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
 import type { RouteObject } from 'react-router-dom';
 import { Navigate, useNavigate } from 'react-router-dom';
-import { AdminLayout } from './components/layouts/AdminLayout';
-import { AppLayout } from './components/layouts/AppLayout';
-import { AuthLayout } from './components/layouts/AuthLayout';
-import { OrgLayout } from './components/layouts/OrgLayout';
-import { VersionLayout } from './components/layouts/VersionLayout';
+import { AdminLayout } from '@layouts/AdminLayout';
+import { AppLayout } from '@layouts/AppLayout';
+import { AuthLayout } from '@layouts/AuthLayout';
+import { OrgLayout } from '@layouts/OrgLayout';
+import { VersionLayout } from '@layouts/VersionLayout';
 import './index.css';
 import { AppVersionsPage } from './pages/admin/app-versions/AppVersionsPage';
 import { AdminAppsPage } from './pages/admin/app-versions/apps/AdminAppsPage';
@@ -183,7 +183,7 @@ export const adminRoutes: RouteObject[] = [
   },
   // Version-scoped routes with their own sidebar layout
   {
-    path: '/app-versions/:versionSlug',
+    path: '/app-versions/:slug',
     element: <VersionLayout />,
     children: [
       {

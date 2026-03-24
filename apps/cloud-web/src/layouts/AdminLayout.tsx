@@ -1,8 +1,6 @@
-import { QueryErrorBoundary } from '@vritti/quantum-ui/ErrorBoundary';
-import { Sidebar, SidebarInset, type SidebarNavGroup, SidebarProvider } from '@vritti/quantum-ui/Sidebar';
+import { SidebarLayout } from '@components/sidebar-layout/SidebarLayout';
+import type { SidebarNavGroup } from '@vritti/quantum-ui/Sidebar';
 import { Building2, Cloud, CreditCard, GitBranch, Landmark, MapPin, Server } from 'lucide-react';
-import { Outlet } from 'react-router-dom';
-import { TopBar } from './TopBar';
 
 const navGroups: SidebarNavGroup[] = [
   {
@@ -25,20 +23,4 @@ const navGroups: SidebarNavGroup[] = [
 ];
 
 // Layout with sidebar for admin pages
-export const AdminLayout = () => {
-  return (
-    <SidebarProvider>
-      <TopBar />
-      <Sidebar groups={navGroups} topOffset={14} />
-      <SidebarInset className="pt-14">
-        <main className="flex-1 overflow-auto p-4 sm:p-6">
-          <div className="max-w-7xl mx-auto">
-            <QueryErrorBoundary>
-              <Outlet />
-            </QueryErrorBoundary>
-          </div>
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
-  );
-};
+export const AdminLayout = () => <SidebarLayout groups={navGroups} />;

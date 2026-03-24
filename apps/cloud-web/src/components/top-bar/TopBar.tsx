@@ -2,10 +2,10 @@ import { Breadcrumb } from '@vritti/quantum-ui/Breadcrumb';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Bell, ChevronRight, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useLogo } from '../../hooks/useLogo';
-import { BUSwitcher } from '../bu-switcher/BUSwitcher';
-import { CompanySwitcher } from '../company-switcher';
-import { VersionSwitcher } from '../version-switcher';
+import { useLogo } from '@hooks/useLogo';
+import { BUSwitcher } from './bu-switcher/BUSwitcher';
+import { CompanySwitcher } from './company-switcher';
+import { VersionSwitcher } from './version-switcher';
 import { UserMenu } from './UserMenu';
 
 // Org slugs use the `org-` prefix (e.g., org-healthfirst~uuid)

@@ -1,6 +1,7 @@
+import { TopBar } from '@components/top-bar/TopBar';
 import { QueryErrorBoundary } from '@vritti/quantum-ui/ErrorBoundary';
 import { Outlet } from 'react-router-dom';
-import { TopBar } from './TopBar';
+
 
 export const AppLayout = () => {
   return (

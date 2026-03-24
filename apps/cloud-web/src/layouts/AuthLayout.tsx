@@ -1,8 +1,8 @@
+import { useLogo } from '@hooks/useLogo';
 import { Card, CardContent, CardHeader } from '@vritti/quantum-ui/Card';
 import { ThemeToggle } from '@vritti/quantum-ui/theme';
 import type React from 'react';
 import { Outlet } from 'react-router-dom';
-import { useLogo } from '../../hooks/useLogo';
 
 export const AuthLayout: React.FC = () => {
   const logo = useLogo();
