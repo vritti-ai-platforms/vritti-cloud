@@ -1,9 +1,9 @@
+import { RegionService } from '@domain/region/services/region.service';
 import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ApiGetRegionProviders, ApiGetRegions } from '../docs/region.docs';
 import type { ProviderOptionDto } from '../dto/response/provider-option.dto';
 import type { RegionOptionDto } from '../dto/response/region-option.dto';
-import { RegionService } from '@domain/region/services/region.service';
 
 @ApiTags('Regions')
 @ApiBearerAuth()
