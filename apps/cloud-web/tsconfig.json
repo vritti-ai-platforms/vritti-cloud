@@ -27,7 +27,7 @@
       "@layouts/*": ["./src/layouts/*"],
       "@hooks": ["./src/hooks"],
       "@hooks/*": ["./src/hooks/*"],
-      "@context/*": ["./src/context/*"],
+      "@providers/*": ["./src/providers/*"],
       "@services/*": ["./src/services/*"],
       "@schemas/*": ["./src/schemas/*"],
       "@utils/*": ["./src/utils/*"]

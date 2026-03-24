@@ -1,4 +1,4 @@
-import { useOnboarding } from '@context/onboarding';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useChangeEmail } from '@hooks/onboarding';
 import { Button } from '@vritti/quantum-ui/Button';

@@ -1,4 +1,4 @@
-import { OnboardingProvider } from '@context/onboarding';
+import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
 import type { RouteObject } from 'react-router-dom';
 import { Navigate, useNavigate } from 'react-router-dom';
