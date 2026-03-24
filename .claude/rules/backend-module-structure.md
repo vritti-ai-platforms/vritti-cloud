@@ -128,6 +128,39 @@ A sub-path gets its own folder when it has its own service + repository (complex
 export class AuthModule {}
 ```
 
+## Domain module architecture (cloud-server)
+
+Domain modules live in `src/modules/domain/` and contain **only** services and repositories — NO controllers, NO DTOs.
+
+```
+src/modules/domain/
+├── plan/
+│   ├── services/
+│   │   └── plan.service.ts
+│   └── repositories/
+│       └── plan.repository.ts
+├── tenant/
+│   ├── services/
+│   │   └── tenant.service.ts
+│   └── repositories/
+│       └── tenant.repository.ts
+└── ... (17 total domain modules)
+```
+
+- `@domain/` path alias resolves to `src/modules/domain/*`
+- All domain modules are aggregated into `ServicesModule` which is `@Global()`
+- API layers (`admin-api/`, `cloud-api/`, `select-api/`) are **controllers-only** — they import domain services via `ServicesModule`
+- Zero `forwardRef`, zero duplicate providers
+- No `AdminApiModule` wrapper — individual admin API modules registered directly in AppModule
+
+```
+src/modules/
+├── domain/            # Services + repos (business logic)
+├── admin-api/         # Controllers only (admin endpoints)
+├── cloud-api/         # Controllers only (cloud endpoints)
+└── select-api/        # Controllers only (select/dropdown endpoints)
+```
+
 ## Naming
 
 | File type | Pattern | Example |
