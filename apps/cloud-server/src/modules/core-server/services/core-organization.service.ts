@@ -12,7 +12,7 @@ export class CoreOrganizationService {
   async createOrganization(
     url: string,
     webhookSecret: string,
-    data: { name: string; subdomain: string; size: string; logoUrl?: string; featureCatalog?: object[] },
+    data: { name: string; subdomain: string; size: string; logoUrl?: string },
   ): Promise<{ id: string }> {
     const result = await this.http.post<{ id: string }>(url, webhookSecret, '/organizations/webhook', data);
     this.logger.log(`Created organization in core: ${data.subdomain} (${result.id})`);
