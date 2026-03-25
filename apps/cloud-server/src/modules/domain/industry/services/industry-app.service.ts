@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
+import { ConflictException, CreateResponseDto, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
 import { AppRepository } from '@domain/app-version/app/root/repositories/app.repository';
 import { IndustryRepository } from '../repositories/industry.repository';
 import { IndustryAppDto } from '@/modules/admin-api/industry/industry-app/dto/entity/industry-app.dto';
@@ -30,7 +30,7 @@ export class IndustryAppService {
   }
 
   // Assigns an app to an industry; validates industry and app exist and no duplicate
-  async assign(industryId: string, dto: AssignIndustryAppDto): Promise<IndustryAppDto> {
+  async assign(industryId: string, dto: AssignIndustryAppDto): Promise<CreateResponseDto<IndustryAppDto>> {
     await this.ensureIndustryExists(industryId);
     const app = await this.appRepository.findById(dto.appId);
     if (!app) {
@@ -51,7 +51,7 @@ export class IndustryAppService {
       sortOrder: dto.sortOrder ?? 0,
     });
     this.logger.log(`Assigned app ${dto.appId} to industry ${industryId}`);
-    return IndustryAppDto.from(industryApp, app.code, app.name);
+    return { success: true, message: 'Industry app assigned successfully.', data: IndustryAppDto.from(industryApp, app.code, app.name) };
   }
 
   // Updates isRecommended and sortOrder for an industry-app assignment

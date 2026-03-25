@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -55,7 +56,7 @@ export class PlanService {
   }
 
   // Creates a new plan; throws ConflictException on duplicate code
-  async create(dto: CreatePlanDto): Promise<PlanDto> {
+  async create(dto: CreatePlanDto): Promise<CreateResponseDto<PlanDto>> {
     const existing = await this.planRepository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException({
@@ -66,7 +67,7 @@ export class PlanService {
     }
     const plan = await this.planRepository.create(dto);
     this.logger.log(`Created plan: ${plan.name} (${plan.id})`);
-    return PlanDto.from(plan);
+    return { success: true, message: 'Plan created successfully.', data: PlanDto.from(plan) };
   }
 
   // Returns plans for the data table with server-stored filter/sort/search/pagination state

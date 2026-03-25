@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   BadRequestException,
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -35,7 +36,7 @@ export class AppVersionService {
   ) {}
 
   // Creates a new app version in ALPHA status; throws ConflictException on duplicate version
-  async create(dto: CreateAppVersionDto): Promise<AppVersionDto> {
+  async create(dto: CreateAppVersionDto): Promise<CreateResponseDto<AppVersionDto>> {
     const existing = await this.appVersionRepository.findByVersion(dto.version);
     if (existing) {
       throw new ConflictException({
@@ -49,7 +50,7 @@ export class AppVersionService {
       status: AppVersionStatusValues.ALPHA,
     });
     this.logger.log(`Created app version: ${appVersion.version} (${appVersion.id})`);
-    return AppVersionDto.from(appVersion);
+    return { success: true, message: 'App version created successfully.', data: AppVersionDto.from(appVersion) };
   }
 
   // Returns all app versions with server-stored filter/sort/search/pagination state applied

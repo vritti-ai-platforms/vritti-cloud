@@ -1,4 +1,4 @@
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type {
   AddAppPriceData,
@@ -23,8 +23,8 @@ export function getApp(versionId: string, id: string): Promise<App> {
 }
 
 // Creates a new app
-export function createApp(versionId: string, data: CreateAppData): Promise<App> {
-  return axios.post<App>(`admin-api/app-versions/${versionId}/apps`, data).then((r) => r.data);
+export function createApp(versionId: string, data: CreateAppData): Promise<CreateResponse<App>> {
+  return axios.post<CreateResponse<App>>(`admin-api/app-versions/${versionId}/apps`, data).then((r) => r.data);
 }
 
 // Updates an app by ID
@@ -71,8 +71,8 @@ export function getAppPrices(versionId: string, appId: string): Promise<AppPrice
 }
 
 // Creates a new price for an app
-export function createAppPrice({ versionId, appId, data }: { versionId: string; appId: string; data: AddAppPriceData }): Promise<AppPrice> {
-  return axios.post<AppPrice>(`admin-api/app-versions/${versionId}/apps/${appId}/prices`, data).then((r) => r.data);
+export function createAppPrice({ versionId, appId, data }: { versionId: string; appId: string; data: AddAppPriceData }): Promise<CreateResponse<AppPrice>> {
+  return axios.post<CreateResponse<AppPrice>>(`admin-api/app-versions/${versionId}/apps/${appId}/prices`, data).then((r) => r.data);
 }
 
 // Updates an app price by ID

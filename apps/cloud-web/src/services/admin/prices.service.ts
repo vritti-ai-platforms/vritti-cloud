@@ -1,5 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { CreatePriceData, Price, PricesTableResponse, UpdatePriceData } from '@/schemas/admin/prices';
 
 // Fetches prices for a plan in table format
@@ -8,8 +8,8 @@ export function getPricesTable(planId: string): Promise<PricesTableResponse> {
 }
 
 // Creates a new price entry
-export function createPrice(data: CreatePriceData): Promise<Price> {
-  return axios.post<Price>('admin-api/prices', data).then((r) => r.data);
+export function createPrice(data: CreatePriceData): Promise<CreateResponse<Price>> {
+  return axios.post<CreateResponse<Price>>('admin-api/prices', data).then((r) => r.data);
 }
 
 // Updates an existing price by ID

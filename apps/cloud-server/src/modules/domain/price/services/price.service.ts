@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -33,7 +34,7 @@ export class PriceService {
   ) {}
 
   // Creates a new price, rejecting duplicate plan+industry+region+provider combinations
-  async create(dto: CreatePriceDto): Promise<PriceDetailDto> {
+  async create(dto: CreatePriceDto): Promise<CreateResponseDto<PriceDetailDto>> {
     const existing = await this.priceRepository.findByComposite(
       dto.planId,
       dto.industryId,
@@ -48,7 +49,7 @@ export class PriceService {
     }
     const price = await this.priceRepository.create(dto);
     this.logger.log(`Created price: ${price.id}`);
-    return PriceDetailDto.fromWithRelations(price as PriceWithRelations);
+    return { success: true, message: 'Price created successfully.', data: PriceDetailDto.fromWithRelations(price as PriceWithRelations) };
   }
 
   // Returns paginated prices for a plan applying stored filter/sort/search/pagination state

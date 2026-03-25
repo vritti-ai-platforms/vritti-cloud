@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiCreateRole, ApiDeleteRole, ApiFindForTableRoles, ApiGetRoleById, ApiUpdateRole } from '../docs/role.docs';
 import { RoleDto } from '../dto/entity/role.dto';
@@ -23,7 +23,7 @@ export class RoleController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateRole()
-  create(@Body() dto: CreateRoleDto): Promise<RoleDto> {
+  create(@Body() dto: CreateRoleDto): Promise<CreateResponseDto<RoleDto>> {
     this.logger.log('POST /admin-api/roles');
     return this.roleService.create(dto);
   }

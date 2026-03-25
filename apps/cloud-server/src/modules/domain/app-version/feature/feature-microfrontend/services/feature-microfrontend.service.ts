@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
+import { CreateResponseDto, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
 import { FeatureRepository } from '../../root/repositories/feature.repository';
 import { MicrofrontendRepository } from '../../../microfrontend/repositories/microfrontend.repository';
 import { FeatureMicrofrontendDto } from '@/modules/admin-api/app-version/feature/feature-microfrontend/dto/entity/feature-microfrontend.dto';
@@ -28,7 +28,7 @@ export class FeatureMicrofrontendService {
   }
 
   // Sets or updates a microfrontend link for a feature (idempotent upsert)
-  async set(featureId: string, microfrontendId: string, dto: SetFeatureMicrofrontendDto): Promise<FeatureMicrofrontendDto> {
+  async set(featureId: string, microfrontendId: string, dto: SetFeatureMicrofrontendDto): Promise<CreateResponseDto<FeatureMicrofrontendDto>> {
     const feature = await this.featureRepository.findById(featureId);
     if (!feature) {
       throw new NotFoundException('Feature not found.');
@@ -47,17 +47,21 @@ export class FeatureMicrofrontendService {
     });
 
     this.logger.log(`Set microfrontend link: feature=${featureId}, mf=${microfrontendId}`);
-    return FeatureMicrofrontendDto.from({
-      id: result.id,
-      featureId: result.featureId,
-      microfrontendId: result.microfrontendId,
-      exposedModule: result.exposedModule,
-      routePrefix: result.routePrefix,
-      microfrontendCode: microfrontend.code,
-      microfrontendName: microfrontend.name,
-      platform: microfrontend.platform,
-      remoteEntry: microfrontend.remoteEntry,
-    });
+    return {
+      success: true,
+      message: 'Feature microfrontend link set successfully.',
+      data: FeatureMicrofrontendDto.from({
+        id: result.id,
+        featureId: result.featureId,
+        microfrontendId: result.microfrontendId,
+        exposedModule: result.exposedModule,
+        routePrefix: result.routePrefix,
+        microfrontendCode: microfrontend.code,
+        microfrontendName: microfrontend.name,
+        platform: microfrontend.platform,
+        remoteEntry: microfrontend.remoteEntry,
+      }),
+    };
   }
 
   // Removes a microfrontend link from a feature

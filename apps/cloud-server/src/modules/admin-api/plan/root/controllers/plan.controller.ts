@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreatePlan,
@@ -28,7 +28,7 @@ export class PlanController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatePlan()
-  create(@Body() dto: CreatePlanDto): Promise<PlanDto> {
+  create(@Body() dto: CreatePlanDto): Promise<CreateResponseDto<PlanDto>> {
     this.logger.log('POST /admin-api/plans');
     return this.planService.create(dto);
   }

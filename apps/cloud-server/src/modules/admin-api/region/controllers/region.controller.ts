@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiAddRegionCloudProvider,
@@ -30,7 +30,7 @@ export class RegionController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateRegion()
-  create(@Body() dto: CreateRegionDto): Promise<RegionDto> {
+  create(@Body() dto: CreateRegionDto): Promise<CreateResponseDto<RegionDto>> {
     this.logger.log('POST /admin-api/regions');
     return this.regionService.create(dto);
   }

@@ -4,15 +4,24 @@
 
 Never import `MutationResponse` from `@vritti/quantum-ui/api-response`. Use properly typed responses.
 
-## Create services → return the entity type
+## Create services → return CreateResponse\<Entity\>
+
+The backend wraps created entities in `{ success, message, data }`. Use `CreateResponse<T>` from quantum-ui.
 
 ```typescript
+import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+
 // CORRECT
+export function createFeature(data: CreateFeatureData): Promise<CreateResponse<Feature>> {
+  return axios.post<CreateResponse<Feature>>('admin-api/features', data).then((r) => r.data);
+}
+
+// WRONG — bare entity, missing success/message
 export function createFeature(data: CreateFeatureData): Promise<Feature> {
   return axios.post<Feature>('admin-api/features', data).then((r) => r.data);
 }
 
-// WRONG — generic type, frontend can't access entity fields
+// WRONG — generic type, no entity data
 export function createFeature(data: CreateFeatureData): Promise<MutationResponse> {
   return axios.post<MutationResponse>('admin-api/features', data).then((r) => r.data);
 }
@@ -41,8 +50,8 @@ export type FeaturesTableResponse = TableResponse<Feature>;
 ## Hook types must match service types
 
 ```typescript
-// Create hook — returns entity
-useMutation<Feature, AxiosError, CreateFeatureData>
+// Create hook — returns wrapped entity
+useMutation<CreateResponse<Feature>, AxiosError, CreateFeatureData>
 
 // Update hook — returns SuccessResponse
 useMutation<SuccessResponse, AxiosError, { id: string; data: UpdateFeatureData }>

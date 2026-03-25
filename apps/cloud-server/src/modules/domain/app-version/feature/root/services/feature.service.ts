@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -34,7 +35,7 @@ export class FeatureService {
   ) {}
 
   // Creates a new feature; throws ConflictException on duplicate code
-  async create(dto: CreateFeatureDto): Promise<FeatureDto> {
+  async create(dto: CreateFeatureDto): Promise<CreateResponseDto<FeatureDto>> {
     const existingCode = await this.featureRepository.findByCode(dto.code);
     if (existingCode) {
       throw new ConflictException({
@@ -45,7 +46,7 @@ export class FeatureService {
     }
     const feature = await this.featureRepository.create(dto);
     this.logger.log(`Created feature: ${feature.name} (${feature.id})`);
-    return FeatureDto.from(feature, true);
+    return { success: true, message: 'Feature created successfully.', data: FeatureDto.from(feature, true) };
   }
 
   // Returns all features with server-stored filter/sort/search/pagination state applied

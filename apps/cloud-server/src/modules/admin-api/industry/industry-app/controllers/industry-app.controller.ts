@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiAssignIndustryApp, ApiGetIndustryApps, ApiRemoveIndustryApp, ApiUpdateIndustryApp } from '../docs/industry-app.docs';
 import { IndustryAppDto } from '../dto/entity/industry-app.dto';
@@ -29,7 +29,7 @@ export class IndustryAppController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiAssignIndustryApp()
-  assign(@Param('industryId') industryId: string, @Body() dto: AssignIndustryAppDto): Promise<IndustryAppDto> {
+  assign(@Param('industryId') industryId: string, @Body() dto: AssignIndustryAppDto): Promise<CreateResponseDto<IndustryAppDto>> {
     this.logger.log(`POST /admin-api/industries/${industryId}/apps`);
     return this.industryAppService.assign(industryId, dto);
   }

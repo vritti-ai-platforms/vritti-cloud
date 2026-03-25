@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, NotFoundException, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk';
+import { ConflictException, CreateResponseDto, NotFoundException, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk';
 import { and, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import { deploymentIndustryPlans } from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
@@ -46,10 +46,10 @@ export class DeploymentService {
   }
 
   // Creates a new deployment
-  async create(dto: CreateDeploymentDto): Promise<DeploymentDto> {
+  async create(dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
     const deployment = await this.deploymentRepository.create(dto);
     this.logger.log(`Created deployment: ${deployment.name} (${deployment.id})`);
-    return DeploymentDto.from(deployment);
+    return { success: true, message: 'Deployment created successfully.', data: DeploymentDto.from(deployment) };
   }
 
   // Returns all deployments mapped to DTOs

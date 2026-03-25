@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -38,12 +39,12 @@ export class RoleService {
   ) {}
 
   // Creates a new role template and links it to selected apps
-  async create(dto: CreateRoleDto): Promise<RoleDto> {
+  async create(dto: CreateRoleDto): Promise<CreateResponseDto<RoleDto>> {
     const { appIds, ...roleData } = dto;
     const role = await this.roleRepository.create(roleData);
     await this.roleAppRepository.setApps(role.id, dto.appVersionId, appIds);
     this.logger.log(`Created role: ${role.name} (${role.id}) with ${appIds.length} app(s)`);
-    return RoleDto.from(role, 0);
+    return { success: true, message: 'Role created successfully.', data: RoleDto.from(role, 0) };
   }
 
   // Returns roles for the data table with server-stored filter/sort/search/pagination state

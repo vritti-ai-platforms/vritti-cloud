@@ -1,18 +1,19 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { CreateIndustryData } from '@/schemas/admin/industries';
+import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateIndustryData, Industry } from '@/schemas/admin/industries';
 import { createIndustry } from '../../../services/admin/industries.service';
 import { INDUSTRIES_QUERY_KEY } from './useIndustries';
 
 type UseCreateIndustryOptions = Omit<
-  UseMutationOptions<{ success: boolean; message: string }, AxiosError, CreateIndustryData>,
+  UseMutationOptions<CreateResponse<Industry>, AxiosError, CreateIndustryData>,
   'mutationFn'
 >;
 
 // Creates a new industry and invalidates the industries list
 export function useCreateIndustry(options?: UseCreateIndustryOptions) {
   const queryClient = useQueryClient();
-  return useMutation<{ success: boolean; message: string }, AxiosError, CreateIndustryData>({
+  return useMutation<CreateResponse<Industry>, AxiosError, CreateIndustryData>({
     ...options,
     mutationFn: createIndustry,
     onSuccess: (result, ...args) => {

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -31,7 +32,7 @@ export class MicrofrontendService {
   ) {}
 
   // Creates a new microfrontend; throws ConflictException on duplicate code+platform within version
-  async create(dto: CreateMicrofrontendDto & { appVersionId: string }): Promise<MicrofrontendDto> {
+  async create(dto: CreateMicrofrontendDto & { appVersionId: string }): Promise<CreateResponseDto<MicrofrontendDto>> {
     const existing = await this.microfrontendRepository.findByVersionAndCodeAndPlatform(
       dto.appVersionId,
       dto.code,
@@ -46,7 +47,7 @@ export class MicrofrontendService {
     }
     const microfrontend = await this.microfrontendRepository.create(dto);
     this.logger.log(`Created microfrontend: ${microfrontend.code} (${microfrontend.id})`);
-    return MicrofrontendDto.from(microfrontend);
+    return { success: true, message: 'Microfrontend created successfully.', data: MicrofrontendDto.from(microfrontend) };
   }
 
   // Returns microfrontends for the data table filtered by app version

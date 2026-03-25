@@ -67,6 +67,28 @@ mutationFn: async (sessionId) => {
 type UseLoginOptions = Omit<UseMutationOptions<LoginResponse, AxiosError, LoginDto>, 'mutationFn'>;
 ```
 
+## Create hooks use CreateResponse\<Entity\>
+
+Create mutations return `{ success, message, data }` from the backend. Use `CreateResponse<T>` from quantum-ui.
+
+```typescript
+import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+
+type UseCreateFeatureOptions = Omit<UseMutationOptions<CreateResponse<Feature>, AxiosError, CreateFeatureData>, 'mutationFn'>;
+
+export function useCreateFeature(options?: UseCreateFeatureOptions) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateResponse<Feature>, AxiosError, CreateFeatureData>({
+    ...options,
+    mutationFn: createFeature,
+    onSuccess: (result, ...args) => {
+      queryClient.invalidateQueries({ queryKey: FEATURES_QUERY_KEY });
+      options?.onSuccess?.(result, ...args);
+    },
+  });
+}
+```
+
 ## Query keys — hierarchical arrays
 
 ```typescript

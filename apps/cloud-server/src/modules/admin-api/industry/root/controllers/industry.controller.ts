@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateIndustry,
@@ -27,7 +27,7 @@ export class IndustryController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateIndustry()
-  create(@Body() dto: CreateIndustryDto): Promise<IndustryDto> {
+  create(@Body() dto: CreateIndustryDto): Promise<CreateResponseDto<IndustryDto>> {
     this.logger.log('POST /admin-api/industries');
     return this.industryService.create(dto);
   }

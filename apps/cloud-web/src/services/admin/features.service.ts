@@ -1,4 +1,4 @@
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateFeatureData, Feature, FeaturesTableResponse, UpdateFeatureData } from '@/schemas/admin/features';
 
@@ -13,8 +13,8 @@ export function getFeature(versionId: string, id: string): Promise<Feature> {
 }
 
 // Creates a new feature
-export function createFeature(versionId: string, data: CreateFeatureData): Promise<Feature> {
-  return axios.post<Feature>(`admin-api/app-versions/${versionId}/features`, data).then((r) => r.data);
+export function createFeature(versionId: string, data: CreateFeatureData): Promise<CreateResponse<Feature>> {
+  return axios.post<CreateResponse<Feature>>(`admin-api/app-versions/${versionId}/features`, data).then((r) => r.data);
 }
 
 // Updates a feature by ID

@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -55,14 +56,14 @@ export class CloudProviderService {
   }
 
   // Creates a new cloud provider; throws ConflictException on duplicate code
-  async create(dto: CreateCloudProviderDto): Promise<CloudProviderDto> {
+  async create(dto: CreateCloudProviderDto): Promise<CreateResponseDto<CloudProviderDto>> {
     const existing = await this.cloudProviderRepository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException('Provider with this code already exists.');
     }
     const provider = await this.cloudProviderRepository.create(dto);
     this.logger.log(`Created provider: ${provider.name} (${provider.id})`);
-    return CloudProviderDto.from(provider);
+    return { success: true, message: 'Cloud provider created successfully.', data: CloudProviderDto.from(provider) };
   }
 
   // Returns paginated cloud providers with region counts, applying server-stored filter/sort/search/pagination state

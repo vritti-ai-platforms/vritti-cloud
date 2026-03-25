@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiBulkCreateFeatures,
@@ -32,7 +32,7 @@ export class FeatureController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateFeature()
-  create(@Body() dto: CreateFeatureDto): Promise<FeatureDto> {
+  create(@Body() dto: CreateFeatureDto): Promise<CreateResponseDto<FeatureDto>> {
     this.logger.log('POST /admin-api/features');
     return this.featureService.create(dto);
   }

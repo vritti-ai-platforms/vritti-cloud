@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiAssignDeploymentPlan, ApiCreateDeployment, ApiDeleteDeployment, ApiFindAllDeployments, ApiFindDeploymentById, ApiGetDeploymentPlanAssignments, ApiRemoveDeploymentPlan, ApiUpdateDeployment } from '../docs/deployment.docs';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
@@ -24,7 +24,7 @@ export class DeploymentController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateDeployment()
-  create(@Body() dto: CreateDeploymentDto): Promise<DeploymentDto> {
+  create(@Body() dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
     this.logger.log('POST /admin-api/deployments');
     return this.deploymentService.create(dto);
   }

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiAssignPlanApp,
@@ -47,7 +47,7 @@ export class PlanAppController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiAssignPlanApp()
-  assign(@Param('planId') planId: string, @Body() dto: AssignPlanAppDto): Promise<PlanAppDto> {
+  assign(@Param('planId') planId: string, @Body() dto: AssignPlanAppDto): Promise<CreateResponseDto<PlanAppDto>> {
     this.logger.log(`POST /admin-api/plans/${planId}/apps`);
     return this.planAppService.assign(planId, dto);
   }

@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateAppVersion,
@@ -30,7 +30,7 @@ export class AppVersionController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateAppVersion()
-  create(@Body() dto: CreateAppVersionDto): Promise<AppVersionDto> {
+  create(@Body() dto: CreateAppVersionDto): Promise<CreateResponseDto<AppVersionDto>> {
     this.logger.log('POST /admin-api/app-versions');
     return this.appVersionService.create(dto);
   }

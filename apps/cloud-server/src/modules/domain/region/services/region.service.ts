@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   type FieldMap,
   FilterProcessor,
   NotFoundException,
@@ -89,14 +90,14 @@ export class RegionService {
   }
 
   // Creates a new region; throws ConflictException on duplicate code
-  async create(dto: CreateRegionDto): Promise<RegionDto> {
+  async create(dto: CreateRegionDto): Promise<CreateResponseDto<RegionDto>> {
     const existing = await this.regionRepository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException('Region with this code already exists.');
     }
     const region = await this.regionRepository.create(dto);
     this.logger.log(`Created region: ${region.name} (${region.id})`);
-    return RegionDto.from(region);
+    return { success: true, message: 'Region created successfully.', data: RegionDto.from(region) };
   }
 
   // Returns all regions with provider counts, applying server-stored filter/sort/search/pagination state

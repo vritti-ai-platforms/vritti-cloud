@@ -1,6 +1,7 @@
+import { FeatureMicrofrontendService } from '@domain/app-version/feature/feature-microfrontend/services/feature-microfrontend.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiListFeatureMicrofrontends,
@@ -9,7 +10,6 @@ import {
 } from '../docs/feature-microfrontend.docs';
 import { FeatureMicrofrontendDto } from '../dto/entity/feature-microfrontend.dto';
 import { SetFeatureMicrofrontendDto } from '../dto/request/set-feature-microfrontend.dto';
-import { FeatureMicrofrontendService } from '@domain/app-version/feature/feature-microfrontend/services/feature-microfrontend.service';
 
 @ApiTags('Admin - Feature Microfrontends')
 @ApiBearerAuth()
@@ -36,7 +36,7 @@ export class FeatureMicrofrontendController {
     @Param('featureId') featureId: string,
     @Param('microfrontendId') microfrontendId: string,
     @Body() dto: SetFeatureMicrofrontendDto,
-  ): Promise<FeatureMicrofrontendDto> {
+  ): Promise<CreateResponseDto<FeatureMicrofrontendDto>> {
     this.logger.log(`PUT /features/${featureId}/microfrontends/${microfrontendId}`);
     return this.featureMicrofrontendService.set(featureId, microfrontendId, dto);
   }

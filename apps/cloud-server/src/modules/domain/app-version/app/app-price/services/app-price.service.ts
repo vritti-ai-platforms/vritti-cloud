@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
-import { AppRepository } from '../../root/repositories/app.repository';
+import { ConflictException, CreateResponseDto, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
 import { AppPriceDto } from '@/modules/admin-api/app-version/app/app-price/dto/entity/app-price.dto';
 import type { CreateAppPriceDto } from '@/modules/admin-api/app-version/app/app-price/dto/request/create-app-price.dto';
+import { AppRepository } from '../../root/repositories/app.repository';
 import { AppPriceRepository } from '../repositories/app-price.repository';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class AppPriceService {
   }
 
   // Creates an addon price for an app; validates unique (appId, regionId, cloudProviderId)
-  async create(appId: string, dto: CreateAppPriceDto): Promise<AppPriceDto> {
+  async create(appId: string, dto: CreateAppPriceDto): Promise<CreateResponseDto<AppPriceDto>> {
     await this.ensureAppExists(appId);
     const existing = await this.appPriceRepository.findByUniqueKey(appId, dto.regionId, dto.cloudProviderId);
     if (existing) {
@@ -40,7 +40,7 @@ export class AppPriceService {
       currency: dto.currency,
     });
     this.logger.log(`Created price for app ${appId} (region: ${dto.regionId}, provider: ${dto.cloudProviderId})`);
-    return AppPriceDto.from(price, '', '');
+    return { success: true, message: 'App price created successfully.', data: AppPriceDto.from(price, '', '') };
   }
 
   // Updates an existing addon price

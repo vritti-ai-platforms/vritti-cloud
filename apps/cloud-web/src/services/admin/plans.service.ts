@@ -1,5 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { SuccessResponse, TableResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse, TableResponse } from '@vritti/quantum-ui/api-response';
 import type { CreatePlanData, Plan, UpdatePlanData } from '@/schemas/admin/plans';
 
 export type PlansResponse = TableResponse<Plan>;
@@ -15,8 +15,8 @@ export function getPlan(id: string): Promise<Plan> {
 }
 
 // Creates a new plan
-export function createPlan(data: CreatePlanData): Promise<Plan> {
-  return axios.post<Plan>('admin-api/plans', data).then((r) => r.data);
+export function createPlan(data: CreatePlanData): Promise<CreateResponse<Plan>> {
+  return axios.post<CreateResponse<Plan>>('admin-api/plans', data).then((r) => r.data);
 }
 
 // Updates an existing plan by ID

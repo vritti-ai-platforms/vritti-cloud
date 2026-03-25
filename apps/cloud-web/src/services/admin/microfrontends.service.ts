@@ -1,4 +1,4 @@
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type {
   CreateMicrofrontendData,
@@ -21,9 +21,9 @@ export function createMicrofrontend({
 }: {
   versionId: string;
   data: CreateMicrofrontendData;
-}): Promise<Microfrontend> {
+}): Promise<CreateResponse<Microfrontend>> {
   return axios
-    .post<Microfrontend>(`admin-api/app-versions/${versionId}/microfrontends`, data)
+    .post<CreateResponse<Microfrontend>>(`admin-api/app-versions/${versionId}/microfrontends`, data)
     .then((r) => r.data);
 }
 

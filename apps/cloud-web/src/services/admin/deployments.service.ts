@@ -1,5 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type {
   AssignPlanData,
   CreateDeploymentData,
@@ -24,8 +24,8 @@ export function getDeployment(id: string): Promise<Deployment> {
 }
 
 // Creates a new deployment
-export function createDeployment(data: CreateDeploymentData): Promise<Deployment> {
-  return axios.post<Deployment>('admin-api/deployments', data).then((r) => r.data);
+export function createDeployment(data: CreateDeploymentData): Promise<CreateResponse<Deployment>> {
+  return axios.post<CreateResponse<Deployment>>('admin-api/deployments', data).then((r) => r.data);
 }
 
 // Updates an existing deployment by ID

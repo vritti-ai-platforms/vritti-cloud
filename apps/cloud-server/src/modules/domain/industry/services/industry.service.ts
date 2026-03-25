@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   type FilterCondition,
@@ -57,7 +58,7 @@ export class IndustryService {
   }
 
   // Creates a new industry; throws ConflictException on duplicate code
-  async create(dto: CreateIndustryDto): Promise<IndustryDto> {
+  async create(dto: CreateIndustryDto): Promise<CreateResponseDto<IndustryDto>> {
     const existingCode = await this.industryRepository.findByCode(dto.code);
     if (existingCode) {
       throw new ConflictException({
@@ -68,7 +69,7 @@ export class IndustryService {
     }
     const industry = await this.industryRepository.create(dto);
     this.logger.log(`Created industry: ${industry.name} (${industry.id})`);
-    return IndustryDto.from(industry, true);
+    return { success: true, message: 'Industry created successfully.', data: IndustryDto.from(industry, true) };
   }
 
   // Returns all industries with server-stored filter/sort/pagination state applied, optionally narrowed by a search param

@@ -1,5 +1,5 @@
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type {
   CreateRoleData,
   FeatureWithPermissions,
@@ -22,8 +22,8 @@ export function getRole(versionId: string, id: string): Promise<RoleDetail> {
 }
 
 // Creates a new role
-export function createRole(versionId: string, data: CreateRoleData): Promise<Role> {
-  return axios.post<Role>(`admin-api/app-versions/${versionId}/roles`, data).then((r) => r.data);
+export function createRole(versionId: string, data: CreateRoleData): Promise<CreateResponse<Role>> {
+  return axios.post<CreateResponse<Role>>(`admin-api/app-versions/${versionId}/roles`, data).then((r) => r.data);
 }
 
 // Updates a role by ID

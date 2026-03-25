@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreatePrice,
@@ -27,7 +27,7 @@ export class PriceController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatePrice()
-  create(@Body() dto: CreatePriceDto): Promise<PriceDetailDto> {
+  create(@Body() dto: CreatePriceDto): Promise<CreateResponseDto<PriceDetailDto>> {
     this.logger.log('POST /admin-api/prices');
     return this.priceService.create(dto);
   }

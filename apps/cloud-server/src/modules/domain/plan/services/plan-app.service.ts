@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -57,7 +58,7 @@ export class PlanAppService {
   }
 
   // Assigns an app to a plan by code; validates plan exists and no duplicate
-  async assign(planId: string, dto: AssignPlanAppDto): Promise<PlanAppDto> {
+  async assign(planId: string, dto: AssignPlanAppDto): Promise<CreateResponseDto<PlanAppDto>> {
     await this.ensurePlanExists(planId);
     const existing = await this.planAppRepository.findByPlanAndAppCode(planId, dto.appCode);
     if (existing) {
@@ -74,7 +75,7 @@ export class PlanAppService {
       sortOrder: dto.sortOrder ?? 0,
     });
     this.logger.log(`Assigned app ${dto.appCode} to plan ${planId}`);
-    return PlanAppDto.from(planApp);
+    return { success: true, message: 'Plan app assigned successfully.', data: PlanAppDto.from(planApp) };
   }
 
   // Updates included feature codes for a plan-app assignment

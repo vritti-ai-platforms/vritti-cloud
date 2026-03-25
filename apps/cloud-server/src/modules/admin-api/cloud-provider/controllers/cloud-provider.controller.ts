@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateCloudProvider,
@@ -27,7 +27,7 @@ export class CloudProviderController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateCloudProvider()
-  create(@Body() dto: CreateCloudProviderDto): Promise<CloudProviderDto> {
+  create(@Body() dto: CreateCloudProviderDto): Promise<CreateResponseDto<CloudProviderDto>> {
     this.logger.log('POST /admin-api/cloud-providers');
     return this.cloudProviderService.create(dto);
   }

@@ -1,18 +1,26 @@
 # Backend Service Response Pattern
 
-## create() → returns entity DTO
+## create() / assign() → returns CreateResponseDto\<EntityDto\>
 
-The frontend needs the created entity's ID and data. Always return the full entity DTO from create methods.
+The frontend needs the created entity's ID/data AND success metadata (for toast messages). Wrap the entity in `CreateResponseDto<T>` from `@vritti/api-sdk`.
 
 ```typescript
+import { CreateResponseDto } from '@vritti/api-sdk';
+
 // CORRECT
-async create(dto: CreateFeatureDto): Promise<FeatureDto> {
+async create(dto: CreateFeatureDto): Promise<CreateResponseDto<FeatureDto>> {
   const feature = await this.featureRepository.create(dto);
   this.logger.log(`Created feature: ${feature.code} (${feature.id})`);
+  return { success: true, message: 'Feature created successfully.', data: FeatureDto.from(feature) };
+}
+
+// WRONG — no success/message metadata for toast
+async create(dto: CreateFeatureDto): Promise<FeatureDto> {
+  const feature = await this.featureRepository.create(dto);
   return FeatureDto.from(feature);
 }
 
-// WRONG — frontend can't get the new entity ID
+// WRONG — no entity data for frontend
 async create(dto: CreateFeatureDto): Promise<SuccessResponseDto> {
   await this.featureRepository.create(dto);
   return { success: true, message: 'Feature created successfully.' };
@@ -34,7 +42,7 @@ async update(id: string, dto: UpdateFeatureDto): Promise<SuccessResponseDto> {
 
 | Method | Return Type |
 |--------|------------|
-| `create()` / `assign()` | Entity DTO (`FeatureDto`, `AppDto`, etc.) |
+| `create()` / `assign()` | `CreateResponseDto<EntityDto>` (`{ success, message, data }`) |
 | `update()` | `SuccessResponseDto` |
 | `delete()` / `remove()` | `SuccessResponseDto` |
 | `findById()` | Entity DTO |

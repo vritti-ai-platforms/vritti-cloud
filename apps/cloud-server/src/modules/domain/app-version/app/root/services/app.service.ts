@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
+  CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -32,7 +33,7 @@ export class AppService {
   ) {}
 
   // Creates a new app; throws ConflictException on duplicate code
-  async create(dto: CreateAppDto): Promise<AppDto> {
+  async create(dto: CreateAppDto): Promise<CreateResponseDto<AppDto>> {
     const existing = await this.appRepository.findByCode(dto.code);
     if (existing) {
       throw new ConflictException({
@@ -43,7 +44,7 @@ export class AppService {
     }
     const app = await this.appRepository.create(dto);
     this.logger.log(`Created app: ${app.name} (${app.id})`);
-    return AppDto.from(app);
+    return { success: true, message: 'App created successfully.', data: AppDto.from(app) };
   }
 
   // Returns all apps with counts, applying server-stored filter/sort/search/pagination state
