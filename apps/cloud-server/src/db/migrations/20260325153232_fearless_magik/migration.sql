@@ -2,7 +2,7 @@ CREATE SCHEMA "cloud";
 --> statement-breakpoint
 CREATE TYPE "cloud"."AccountStatus" AS ENUM('PENDING_VERIFICATION', 'ACTIVE', 'INACTIVE');--> statement-breakpoint
 CREATE TYPE "cloud"."AppPlatform" AS ENUM('WEB', 'MOBILE');--> statement-breakpoint
-CREATE TYPE "cloud"."AppVersionStatus" AS ENUM('DRAFT', 'READY', 'PUBLISHED');--> statement-breakpoint
+CREATE TYPE "cloud"."AppVersionStatus" AS ENUM('ALPHA', 'BETA', 'PROD');--> statement-breakpoint
 CREATE TYPE "cloud"."DatabaseType" AS ENUM('SHARED', 'DEDICATED');--> statement-breakpoint
 CREATE TYPE "cloud"."DeploymentStatus" AS ENUM('active', 'stopped', 'Provisioning');--> statement-breakpoint
 CREATE TYPE "cloud"."DeploymentType" AS ENUM('shared', 'dedicated');--> statement-breakpoint
@@ -14,7 +14,7 @@ CREATE TYPE "cloud"."OnboardingStep" AS ENUM('EMAIL_VERIFICATION', 'SET_PASSWORD
 CREATE TYPE "cloud"."OrgMemberRole" AS ENUM('Owner', 'Admin');--> statement-breakpoint
 CREATE TYPE "cloud"."OrgSize" AS ENUM('0-10', '10-20', '20-50', '50-100', '100-500', '500+');--> statement-breakpoint
 CREATE TYPE "cloud"."RoleScope" AS ENUM('GLOBAL', 'SUBTREE', 'SINGLE_BU');--> statement-breakpoint
-CREATE TYPE "cloud"."SessionType" AS ENUM('ONBOARDING', 'CLOUD', 'COMPANY', 'RESET');--> statement-breakpoint
+CREATE TYPE "cloud"."SessionType" AS ENUM('ONBOARDING', 'CLOUD', 'COMPANY', 'RESET', 'ADMIN');--> statement-breakpoint
 CREATE TYPE "cloud"."SignupMethod" AS ENUM('email', 'oauth');--> statement-breakpoint
 CREATE TYPE "cloud"."TenantStatus" AS ENUM('ACTIVE', 'SUSPENDED', 'ARCHIVED');--> statement-breakpoint
 CREATE TYPE "cloud"."verification_channel" AS ENUM('EMAIL', 'SMS_OUT', 'SMS_IN', 'WHATSAPP_IN');--> statement-breakpoint
@@ -62,7 +62,7 @@ CREATE TABLE "cloud"."deployments" (
 	"webhook_secret" varchar(500) NOT NULL,
 	"region_id" uuid NOT NULL,
 	"cloud_provider_id" uuid NOT NULL,
-	"app_version_id" uuid,
+	"version" varchar(50),
 	"status" "cloud"."DeploymentStatus" DEFAULT 'Provisioning'::"cloud"."DeploymentStatus" NOT NULL,
 	"type" "cloud"."DeploymentType" NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -173,6 +173,7 @@ CREATE TABLE "cloud"."users" (
 	"profile_picture_url" text,
 	"locale" varchar(10) DEFAULT 'en' NOT NULL,
 	"timezone" varchar(50) DEFAULT 'UTC' NOT NULL,
+	"is_admin" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"last_login_at" timestamp with time zone,
@@ -287,13 +288,10 @@ CREATE TABLE "cloud"."app_versions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"version" varchar(50) NOT NULL UNIQUE,
 	"name" varchar(255) NOT NULL,
-	"status" "cloud"."AppVersionStatus" DEFAULT 'DRAFT'::"cloud"."AppVersionStatus" NOT NULL,
+	"status" "cloud"."AppVersionStatus" DEFAULT 'ALPHA'::"cloud"."AppVersionStatus" NOT NULL,
 	"parent_version_id" uuid,
 	"snapshot" jsonb,
 	"artifacts" jsonb,
-	"finalized_at" timestamp with time zone,
-	"ready_at" timestamp with time zone,
-	"published_at" timestamp with time zone,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -313,13 +311,19 @@ CREATE TABLE "cloud"."features" (
 	"name" varchar(255) NOT NULL,
 	"description" text,
 	"icon" varchar(255),
-	"microfrontend_id" uuid,
-	"exposed_module" varchar(100),
-	"route_prefix" varchar(100),
 	"is_active" boolean DEFAULT true NOT NULL,
 	"sort_order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "cloud"."feature_microfrontends" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"app_version_id" uuid NOT NULL,
+	"feature_id" uuid NOT NULL,
+	"microfrontend_id" uuid NOT NULL,
+	"exposed_module" varchar(100) NOT NULL,
+	"route_prefix" varchar(100) NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "cloud"."feature_permissions" (
@@ -391,6 +395,14 @@ CREATE TABLE "cloud"."roles" (
 	"updated_at" timestamp with time zone
 );
 --> statement-breakpoint
+CREATE TABLE "cloud"."role_apps" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"app_version_id" uuid NOT NULL,
+	"role_id" uuid NOT NULL,
+	"app_id" uuid NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "cloud"."role_feature_permissions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"app_version_id" uuid NOT NULL,
@@ -425,6 +437,7 @@ CREATE INDEX "table_views_shared_slug_idx" ON "cloud"."table_views" ("table_slug
 CREATE UNIQUE INDEX "table_views_user_table_name_shared_unique" ON "cloud"."table_views" ("user_id","table_slug","name","is_shared");--> statement-breakpoint
 CREATE UNIQUE INDEX "microfrontend_version_code_platform_idx" ON "cloud"."microfrontends" ("app_version_id","code","platform");--> statement-breakpoint
 CREATE UNIQUE INDEX "feature_version_code_idx" ON "cloud"."features" ("app_version_id","code");--> statement-breakpoint
+CREATE UNIQUE INDEX "feature_mf_unique" ON "cloud"."feature_microfrontends" ("feature_id","microfrontend_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "feature_permission_unique_idx" ON "cloud"."feature_permissions" ("feature_id","type");--> statement-breakpoint
 CREATE UNIQUE INDEX "app_version_code_idx" ON "cloud"."apps" ("app_version_id","code");--> statement-breakpoint
 CREATE UNIQUE INDEX "app_feature_unique_idx" ON "cloud"."app_features" ("app_id","feature_id");--> statement-breakpoint
@@ -432,12 +445,12 @@ CREATE UNIQUE INDEX "app_price_unique_idx" ON "cloud"."app_prices" ("app_id","re
 CREATE UNIQUE INDEX "plan_app_unique_idx" ON "cloud"."plan_apps" ("plan_id","app_code");--> statement-breakpoint
 CREATE UNIQUE INDEX "industry_app_unique_idx" ON "cloud"."industry_apps" ("industry_id","app_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "role_version_name_idx" ON "cloud"."roles" ("app_version_id","name");--> statement-breakpoint
+CREATE UNIQUE INDEX "role_app_unique_idx" ON "cloud"."role_apps" ("role_id","app_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "role_feature_permission_unique_idx" ON "cloud"."role_feature_permissions" ("role_id","feature_id","type");--> statement-breakpoint
 ALTER TABLE "cloud"."oauth_providers" ADD CONSTRAINT "oauth_providers_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "cloud"."users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "cloud"."users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."deployments" ADD CONSTRAINT "deployments_region_id_regions_id_fkey" FOREIGN KEY ("region_id") REFERENCES "cloud"."regions"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."deployments" ADD CONSTRAINT "deployments_cloud_provider_id_cloud_providers_id_fkey" FOREIGN KEY ("cloud_provider_id") REFERENCES "cloud"."cloud_providers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "cloud"."deployments" ADD CONSTRAINT "deployments_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE SET NULL;--> statement-breakpoint
 ALTER TABLE "cloud"."deployment_industry_plans" ADD CONSTRAINT "deployment_industry_plans_deployment_id_deployments_id_fkey" FOREIGN KEY ("deployment_id") REFERENCES "cloud"."deployments"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."deployment_industry_plans" ADD CONSTRAINT "deployment_industry_plans_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "cloud"."plans"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."deployment_industry_plans" ADD CONSTRAINT "deployment_industry_plans_industry_id_industries_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "cloud"."industries"("id") ON DELETE RESTRICT;--> statement-breakpoint
@@ -464,7 +477,9 @@ ALTER TABLE "cloud"."verifications" ADD CONSTRAINT "verifications_user_id_users_
 ALTER TABLE "cloud"."table_views" ADD CONSTRAINT "table_views_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "cloud"."users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."microfrontends" ADD CONSTRAINT "microfrontends_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."features" ADD CONSTRAINT "features_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "cloud"."features" ADD CONSTRAINT "features_microfrontend_id_microfrontends_id_fkey" FOREIGN KEY ("microfrontend_id") REFERENCES "cloud"."microfrontends"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "cloud"."feature_microfrontends" ADD CONSTRAINT "feature_microfrontends_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "cloud"."feature_microfrontends" ADD CONSTRAINT "feature_microfrontends_feature_id_features_id_fkey" FOREIGN KEY ("feature_id") REFERENCES "cloud"."features"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "cloud"."feature_microfrontends" ADD CONSTRAINT "feature_microfrontends_microfrontend_id_microfrontends_id_fkey" FOREIGN KEY ("microfrontend_id") REFERENCES "cloud"."microfrontends"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."feature_permissions" ADD CONSTRAINT "feature_permissions_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."feature_permissions" ADD CONSTRAINT "feature_permissions_feature_id_features_id_fkey" FOREIGN KEY ("feature_id") REFERENCES "cloud"."features"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."apps" ADD CONSTRAINT "apps_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
@@ -479,6 +494,9 @@ ALTER TABLE "cloud"."industry_apps" ADD CONSTRAINT "industry_apps_industry_id_in
 ALTER TABLE "cloud"."industry_apps" ADD CONSTRAINT "industry_apps_app_id_apps_id_fkey" FOREIGN KEY ("app_id") REFERENCES "cloud"."apps"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."roles" ADD CONSTRAINT "roles_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."roles" ADD CONSTRAINT "roles_industry_id_industries_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "cloud"."industries"("id") ON DELETE SET NULL;--> statement-breakpoint
+ALTER TABLE "cloud"."role_apps" ADD CONSTRAINT "role_apps_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "cloud"."role_apps" ADD CONSTRAINT "role_apps_role_id_roles_id_fkey" FOREIGN KEY ("role_id") REFERENCES "cloud"."roles"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "cloud"."role_apps" ADD CONSTRAINT "role_apps_app_id_apps_id_fkey" FOREIGN KEY ("app_id") REFERENCES "cloud"."apps"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."role_feature_permissions" ADD CONSTRAINT "role_feature_permissions_app_version_id_app_versions_id_fkey" FOREIGN KEY ("app_version_id") REFERENCES "cloud"."app_versions"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."role_feature_permissions" ADD CONSTRAINT "role_feature_permissions_role_id_roles_id_fkey" FOREIGN KEY ("role_id") REFERENCES "cloud"."roles"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."role_feature_permissions" ADD CONSTRAINT "role_feature_permissions_feature_id_features_id_fkey" FOREIGN KEY ("feature_id") REFERENCES "cloud"."features"("id") ON DELETE CASCADE;
