@@ -109,6 +109,13 @@ function getColumns({ onDelete, onView }: ColumnActions): ColumnDef<Industry, un
       header: 'Industry',
     },
     {
+      accessorKey: 'description',
+      header: 'Description',
+      cell: ({ row }) => (
+        <span className="text-sm text-muted-foreground">{row.original.description || '—'}</span>
+      ),
+    },
+    {
       accessorKey: 'code',
       header: 'Code',
       cell: ({ row }) => (

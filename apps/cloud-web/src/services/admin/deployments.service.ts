@@ -1,5 +1,5 @@
-import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
+import { axios } from '@vritti/quantum-ui/axios';
 import type {
   AssignPlanData,
   CreateDeploymentData,
@@ -39,13 +39,7 @@ export function deleteDeployment(id: string): Promise<void> {
 }
 
 // Assigns a plan+industry combo to a deployment
-export function assignDeploymentPlan({
-  id,
-  data,
-}: {
-  id: string;
-  data: AssignPlanData;
-}): Promise<SuccessResponse> {
+export function assignDeploymentPlan({ id, data }: { id: string; data: AssignPlanData }): Promise<SuccessResponse> {
   return axios.post<SuccessResponse>(`admin-api/deployments/${id}/plans`, data).then((r) => r.data);
 }
 

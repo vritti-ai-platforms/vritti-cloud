@@ -1,5 +1,5 @@
-import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateResponse, SuccessResponse, TableResponse } from '@vritti/quantum-ui/api-response';
+import { axios } from '@vritti/quantum-ui/axios';
 import type { CreatePlanData, Plan, UpdatePlanData } from '@/schemas/admin/plans';
 
 export type PlansResponse = TableResponse<Plan>;

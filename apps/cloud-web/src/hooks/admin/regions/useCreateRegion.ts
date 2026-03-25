@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import type { CreateRegionData, Region } from '@/schemas/admin/regions';
 import { createRegion } from '../../../services/admin/regions.service';
 import { REGIONS_QUERY_KEY } from './useRegions';

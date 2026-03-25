@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import type { CreateIndustryData, Industry } from '@/schemas/admin/industries';
 import { createIndustry } from '../../../services/admin/industries.service';
 import { INDUSTRIES_QUERY_KEY } from './useIndustries';

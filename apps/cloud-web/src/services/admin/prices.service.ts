@@ -1,5 +1,5 @@
-import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
+import { axios } from '@vritti/quantum-ui/axios';
 import type { CreatePriceData, Price, PricesTableResponse, UpdatePriceData } from '@/schemas/admin/prices';
 
 // Fetches prices for a plan in table format
