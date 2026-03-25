@@ -14,4 +14,9 @@ export class CoreAppVersionRepository extends PrimaryBaseRepository<typeof appVe
   async findById(id: string): Promise<AppVersion | undefined> {
     return this.model.findFirst({ where: { id } });
   }
+
+  // Finds an app version by its version string
+  async findByVersion(version: string): Promise<AppVersion | undefined> {
+    return this.model.findFirst({ where: { version } });
+  }
 }

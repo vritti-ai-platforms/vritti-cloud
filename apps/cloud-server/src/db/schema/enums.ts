@@ -177,12 +177,12 @@ export const FeatureTypeValues = {
 };
 
 // App version lifecycle status
-export const appVersionStatusEnum = cloudSchema.enum('AppVersionStatus', ['DRAFT', 'READY', 'PUBLISHED']);
+export const appVersionStatusEnum = cloudSchema.enum('AppVersionStatus', ['ALPHA', 'BETA', 'PROD']);
 export type AppVersionStatus = (typeof appVersionStatusEnum.enumValues)[number];
 export const AppVersionStatusValues = {
-  DRAFT: 'DRAFT' as const,
-  READY: 'READY' as const,
-  PUBLISHED: 'PUBLISHED' as const,
+  ALPHA: 'ALPHA' as const,
+  BETA: 'BETA' as const,
+  PROD: 'PROD' as const,
 };
 
 // App microfrontend platform

@@ -1,7 +1,7 @@
 import type { TableResponse } from '@vritti/quantum-ui/api-response';
 import { z } from 'zod';
 
-export type AppVersionStatus = 'DRAFT' | 'READY' | 'PUBLISHED';
+export type AppVersionStatus = 'ALPHA' | 'BETA' | 'PROD';
 
 export interface AppVersion {
   id: string;
@@ -9,9 +9,8 @@ export interface AppVersion {
   name: string;
   status: AppVersionStatus;
   parentVersionId: string | null;
-  finalizedAt: string | null;
-  readyAt: string | null;
-  publishedAt: string | null;
+  snapshot: Record<string, unknown> | null;
+  artifacts: Record<string, unknown> | null;
   createdAt: string;
 }
 

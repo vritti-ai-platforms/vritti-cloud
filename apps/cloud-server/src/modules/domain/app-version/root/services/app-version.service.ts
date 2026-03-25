@@ -34,7 +34,7 @@ export class AppVersionService {
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
-  // Creates a new app version in DRAFT status; throws ConflictException on duplicate version
+  // Creates a new app version in ALPHA status; throws ConflictException on duplicate version
   async create(dto: CreateAppVersionDto): Promise<AppVersionDto> {
     const existing = await this.appVersionRepository.findByVersion(dto.version);
     if (existing) {
@@ -46,7 +46,7 @@ export class AppVersionService {
     }
     const appVersion = await this.appVersionRepository.create({
       ...dto,
-      status: AppVersionStatusValues.DRAFT,
+      status: AppVersionStatusValues.ALPHA,
     });
     this.logger.log(`Created app version: ${appVersion.version} (${appVersion.id})`);
     return AppVersionDto.from(appVersion);
@@ -92,49 +92,33 @@ export class AppVersionService {
     return AppVersionDto.from(appVersion);
   }
 
-  // Finalizes a DRAFT version by building a snapshot from all versioned tables
-  async finalize(id: string): Promise<SuccessResponseDto> {
+  // Builds a snapshot from all versioned tables and stores it on the version
+  async createSnapshot(id: string): Promise<SuccessResponseDto> {
     const appVersion = await this.appVersionRepository.findById(id);
     if (!appVersion) {
       throw new NotFoundException('App version not found.');
     }
-    if (appVersion.status !== AppVersionStatusValues.DRAFT) {
-      throw new BadRequestException('Only DRAFT versions can be finalized.');
-    }
     const snapshot = await this.appVersionRepository.buildSnapshot(id);
-    await this.appVersionRepository.update(id, {
-      snapshot,
-      finalizedAt: new Date(),
-    });
-    this.logger.log(`Finalized app version: ${appVersion.version} (${id})`);
-    return { success: true, message: 'App version finalized successfully.' };
+    await this.appVersionRepository.update(id, { snapshot });
+    this.logger.log(`Created snapshot for app version: ${appVersion.version} (${id})`);
+    return { success: true, message: 'Snapshot created successfully.' };
   }
 
-  // Stores CI artifacts and transitions a finalized version to READY
+  // Stores CI artifacts on a version
   async pushArtifacts(id: string, dto: PushArtifactsDto): Promise<SuccessResponseDto> {
     const appVersion = await this.appVersionRepository.findById(id);
     if (!appVersion) {
       throw new NotFoundException('App version not found.');
     }
-    if (!appVersion.finalizedAt) {
-      throw new BadRequestException('Version must be finalized before pushing artifacts.');
-    }
-    await this.appVersionRepository.update(id, {
-      artifacts: dto.artifacts,
-      status: AppVersionStatusValues.READY,
-      readyAt: new Date(),
-    });
+    await this.appVersionRepository.update(id, { artifacts: dto.artifacts });
     this.logger.log(`Pushed artifacts for app version: ${appVersion.version} (${id})`);
-    return { success: true, message: 'Artifacts pushed and version marked as READY.' };
+    return { success: true, message: 'Artifacts pushed successfully.' };
   }
 
-  // Updates version name and/or version string; only DRAFT versions can be updated
+  // Updates version name and/or version string
   async update(id: string, dto: UpdateAppVersionDto): Promise<SuccessResponseDto> {
     const appVersion = await this.appVersionRepository.findById(id);
     if (!appVersion) throw new NotFoundException('App version not found.');
-    if (appVersion.status !== AppVersionStatusValues.DRAFT) {
-      throw new BadRequestException('Only DRAFT versions can be updated.');
-    }
     if (dto.version && dto.version !== appVersion.version) {
       const existing = await this.appVersionRepository.findByVersion(dto.version);
       if (existing) {
@@ -150,14 +134,14 @@ export class AppVersionService {
     return { success: true, message: 'App version updated successfully.' };
   }
 
-  // Deletes a DRAFT version; throws BadRequestException if not DRAFT
+  // Deletes a version; PROD versions cannot be deleted
   async delete(id: string): Promise<SuccessResponseDto> {
     const appVersion = await this.appVersionRepository.findById(id);
     if (!appVersion) {
       throw new NotFoundException('App version not found.');
     }
-    if (appVersion.status !== AppVersionStatusValues.DRAFT) {
-      throw new BadRequestException('Only DRAFT versions can be deleted.');
+    if (appVersion.status === AppVersionStatusValues.PROD) {
+      throw new BadRequestException('PROD versions cannot be deleted.');
     }
     await this.appVersionRepository.delete(id);
     this.logger.log(`Deleted app version: ${appVersion.version} (${id})`);

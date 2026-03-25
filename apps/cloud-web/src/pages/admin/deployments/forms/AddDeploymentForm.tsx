@@ -19,7 +19,7 @@ interface AddDeploymentFormProps {
 export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess, onCancel }) => {
   const form = useForm<CreateDeploymentData>({
     resolver: zodResolver(createDeploymentSchema),
-    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared', appVersionId: '' },
+    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared', version: '' },
   });
 
   const regionId = form.watch('regionId');
@@ -53,14 +53,7 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
           { value: 'dedicated', label: 'Dedicated' },
         ]}
       />
-      <Select
-        name="appVersionId"
-        label="App Version"
-        placeholder="Select version (optional)"
-        optionsEndpoint="select-api/app-versions"
-        fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'version' }}
-        searchable
-      />
+      <TextField name="version" label="App Version" placeholder="e.g. 1.0.0 (optional)" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

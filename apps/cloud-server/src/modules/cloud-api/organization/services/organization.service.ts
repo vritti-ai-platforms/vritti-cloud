@@ -220,7 +220,7 @@ export class OrganizationService {
     const deployment = await this.deploymentRepository.findById(org.deploymentId);
     if (!deployment) throw new NotFoundException('Deployment not found.');
 
-    const featureCatalog = await this.extractFeatureCatalog(deployment.appVersionId);
+    const featureCatalog = await this.extractFeatureCatalog(deployment.version);
 
     try {
       await this.coreOrganizationService.updateOrganization(
@@ -242,10 +242,10 @@ export class OrganizationService {
   }
 
   // Extracts feature catalog from the app version snapshot
-  private async extractFeatureCatalog(appVersionId: string | null): Promise<object[] | undefined> {
-    if (!appVersionId) return undefined;
+  private async extractFeatureCatalog(version: string | null): Promise<object[] | undefined> {
+    if (!version) return undefined;
 
-    const appVersion = await this.coreAppVersionRepository.findById(appVersionId);
+    const appVersion = await this.coreAppVersionRepository.findByVersion(version);
     if (!appVersion?.snapshot) return undefined;
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;

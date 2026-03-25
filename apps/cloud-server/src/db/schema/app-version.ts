@@ -7,13 +7,10 @@ export const appVersions = cloudSchema.table('app_versions', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: varchar('version', { length: 50 }).notNull().unique(),
   name: varchar('name', { length: 255 }).notNull(),
-  status: appVersionStatusEnum('status').notNull().default('DRAFT'),
+  status: appVersionStatusEnum('status').notNull().default('ALPHA'),
   parentVersionId: uuid('parent_version_id'),
   snapshot: jsonb('snapshot'),
   artifacts: jsonb('artifacts'),
-  finalizedAt: timestamp('finalized_at', { withTimezone: true }),
-  readyAt: timestamp('ready_at', { withTimezone: true }),
-  publishedAt: timestamp('published_at', { withTimezone: true }),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 

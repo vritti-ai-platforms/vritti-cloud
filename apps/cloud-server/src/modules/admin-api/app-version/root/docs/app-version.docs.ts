@@ -10,7 +10,7 @@ import { AppVersionTableResponseDto } from '../dto/response/app-version-table-re
 // Swagger docs for creating an app version
 export function ApiCreateAppVersion() {
   return applyDecorators(
-    ApiOperation({ summary: 'Create a new app version (DRAFT)' }),
+    ApiOperation({ summary: 'Create a new app version (ALPHA)' }),
     ApiBody({ type: CreateAppVersionDto }),
     ApiResponse({ status: 201, description: 'App version created successfully.', type: AppVersionDto }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
@@ -55,38 +55,36 @@ export function ApiGetAppVersionById() {
   );
 }
 
-// Swagger docs for finalizing an app version
-export function ApiFinalizeAppVersion() {
+// Swagger docs for building a snapshot
+export function ApiCreateSnapshot() {
   return applyDecorators(
-    ApiOperation({ summary: 'Finalize a DRAFT version (build snapshot)' }),
+    ApiOperation({ summary: 'Build a snapshot from all versioned tables' }),
     ApiParam({ name: 'id', description: 'App version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'App version finalized successfully.', type: SuccessResponseDto }),
-    ApiResponse({ status: 400, description: 'Version is not in DRAFT status.' }),
+    ApiResponse({ status: 200, description: 'Snapshot created successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'App version not found.' }),
   );
 }
 
-// Swagger docs for pushing CI artifacts to a finalized version
+// Swagger docs for pushing CI artifacts
 export function ApiPushArtifacts() {
   return applyDecorators(
-    ApiOperation({ summary: 'Push CI artifacts (transitions to READY)' }),
+    ApiOperation({ summary: 'Push CI artifacts' }),
     ApiParam({ name: 'id', description: 'App version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiBody({ type: PushArtifactsDto }),
-    ApiResponse({ status: 200, description: 'Artifacts pushed and version marked as READY.', type: SuccessResponseDto }),
-    ApiResponse({ status: 400, description: 'Version must be finalized first.' }),
+    ApiResponse({ status: 200, description: 'Artifacts pushed successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'App version not found.' }),
   );
 }
 
-// Swagger docs for deleting a DRAFT app version
+// Swagger docs for deleting an app version
 export function ApiDeleteAppVersion() {
   return applyDecorators(
-    ApiOperation({ summary: 'Delete a DRAFT app version' }),
+    ApiOperation({ summary: 'Delete an app version (PROD versions cannot be deleted)' }),
     ApiParam({ name: 'id', description: 'App version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiResponse({ status: 200, description: 'App version deleted successfully.', type: SuccessResponseDto }),
-    ApiResponse({ status: 400, description: 'Only DRAFT versions can be deleted.' }),
+    ApiResponse({ status: 400, description: 'PROD versions cannot be deleted.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'App version not found.' }),
   );

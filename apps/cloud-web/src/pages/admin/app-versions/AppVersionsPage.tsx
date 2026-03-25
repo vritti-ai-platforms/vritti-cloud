@@ -17,11 +17,11 @@ const TABLE_SLUG = 'app-versions';
 // Maps version status to badge variant
 function statusVariant(status: AppVersionStatus): 'secondary' | 'outline' | 'default' {
   switch (status) {
-    case 'DRAFT':
+    case 'ALPHA':
       return 'secondary';
-    case 'READY':
+    case 'BETA':
       return 'outline';
-    case 'PUBLISHED':
+    case 'PROD':
       return 'default';
   }
 }
@@ -114,15 +114,6 @@ function getColumns({ onView }: ColumnActions): ColumnDef<AppVersion, unknown>[]
       accessorKey: 'status',
       header: 'Status',
       cell: ({ row }) => <Badge variant={statusVariant(row.original.status)}>{row.original.status}</Badge>,
-    },
-    {
-      accessorKey: 'publishedAt',
-      header: 'Published',
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">
-          {row.original.publishedAt ? new Date(row.original.publishedAt).toLocaleDateString() : '--'}
-        </span>
-      ),
     },
     {
       accessorKey: 'createdAt',

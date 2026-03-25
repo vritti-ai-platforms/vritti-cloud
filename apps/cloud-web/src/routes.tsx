@@ -14,7 +14,7 @@ import { AppViewPage } from './pages/admin/app-versions/apps/AppViewPage';
 import { FeaturesPage } from './pages/admin/app-versions/features/FeaturesPage';
 import { FeatureViewPage } from './pages/admin/app-versions/features/FeatureViewPage';
 import { MicrofrontendsPage } from './pages/admin/app-versions/microfrontends/MicrofrontendsPage';
-import { OverviewPage as VersionOverviewPage } from './pages/admin/app-versions/OverviewPage';
+import { OverviewPage as VersionOverviewPage } from './pages/admin/app-versions/overview/OverviewPage';
 import { AdminRolesPage } from './pages/admin/app-versions/roles/AdminRolesPage';
 import { RoleViewPage } from './pages/admin/app-versions/roles/RoleViewPage';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';

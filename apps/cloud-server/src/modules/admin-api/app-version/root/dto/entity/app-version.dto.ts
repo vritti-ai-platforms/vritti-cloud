@@ -11,7 +11,7 @@ export class AppVersionDto {
   @ApiProperty({ example: 'Initial Release' })
   name: string;
 
-  @ApiProperty({ example: 'DRAFT' })
+  @ApiProperty({ example: 'ALPHA' })
   status: string;
 
   @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000', nullable: true })
@@ -22,15 +22,6 @@ export class AppVersionDto {
 
   @ApiPropertyOptional({ nullable: true })
   artifacts: unknown | null;
-
-  @ApiPropertyOptional({ type: 'string', format: 'date-time', nullable: true })
-  finalizedAt: string | null;
-
-  @ApiPropertyOptional({ type: 'string', format: 'date-time', nullable: true })
-  readyAt: string | null;
-
-  @ApiPropertyOptional({ type: 'string', format: 'date-time', nullable: true })
-  publishedAt: string | null;
 
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: string;
@@ -45,9 +36,6 @@ export class AppVersionDto {
     dto.parentVersionId = entity.parentVersionId;
     dto.snapshot = entity.snapshot;
     dto.artifacts = entity.artifacts;
-    dto.finalizedAt = entity.finalizedAt?.toISOString() ?? null;
-    dto.readyAt = entity.readyAt?.toISOString() ?? null;
-    dto.publishedAt = entity.publishedAt?.toISOString() ?? null;
     dto.createdAt = entity.createdAt.toISOString();
     return dto;
   }

@@ -83,7 +83,6 @@ export const relations = defineRelations(schema, (r) => ({
     featurePermissions: r.many.featurePermissions(),
     roleFeaturePermissions: r.many.roleFeaturePermissions(),
     appFeatures: r.many.appFeatures(),
-    deployments: r.many.deployments(),
   },
 
   // Plan relations
@@ -129,10 +128,6 @@ export const relations = defineRelations(schema, (r) => ({
   deployments: {
     organizations: r.many.organizations(),
     industryPlans: r.many.deploymentIndustryPlans(),
-    appVersion: r.one.appVersions({
-      from: r.deployments.appVersionId,
-      to: r.appVersions.id,
-    }),
     plans: r.many.plans({
       from: r.deployments.id.through(r.deploymentIndustryPlans.deploymentId),
       to: r.plans.id.through(r.deploymentIndustryPlans.planId),

@@ -79,9 +79,9 @@ export class OrganizationService {
     if (!org) throw new NotFoundException('Organization not found.');
 
     const deployment = await this.deploymentRepository.findById(org.deploymentId);
-    if (!deployment?.appVersionId) throw new NotFoundException('Deployment or app version not found.');
+    if (!deployment?.version) throw new NotFoundException('Deployment or app version not found.');
 
-    const appVersion = await this.coreAppVersionRepository.findById(deployment.appVersionId);
+    const appVersion = await this.coreAppVersionRepository.findByVersion(deployment.version);
     if (!appVersion?.snapshot) throw new NotFoundException('App version snapshot not found.');
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;

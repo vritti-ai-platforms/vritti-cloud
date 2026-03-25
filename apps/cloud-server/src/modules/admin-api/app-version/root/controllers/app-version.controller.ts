@@ -4,8 +4,8 @@ import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreateAppVersion,
+  ApiCreateSnapshot,
   ApiDeleteAppVersion,
-  ApiFinalizeAppVersion,
   ApiFindForTableAppVersions,
   ApiGetAppVersionById,
   ApiPushArtifacts,
@@ -26,7 +26,7 @@ export class AppVersionController {
 
   constructor(private readonly appVersionService: AppVersionService) {}
 
-  // Creates a new app version in DRAFT status
+  // Creates a new app version in ALPHA status
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateAppVersion()
@@ -51,23 +51,23 @@ export class AppVersionController {
     return this.appVersionService.findById(id);
   }
 
-  // Updates a DRAFT version's name and/or version string
+  // Updates a version's name and/or version string
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateAppVersionDto): Promise<SuccessResponseDto> {
     this.logger.log(`PATCH /admin-api/app-versions/${id}`);
     return this.appVersionService.update(id, dto);
   }
 
-  // Finalizes a DRAFT version by building its snapshot
-  @Post(':id/finalize')
+  // Builds a snapshot from all versioned tables
+  @Post(':id/snapshot')
   @HttpCode(HttpStatus.OK)
-  @ApiFinalizeAppVersion()
-  finalize(@Param('id') id: string): Promise<SuccessResponseDto> {
-    this.logger.log(`POST /admin-api/app-versions/${id}/finalize`);
-    return this.appVersionService.finalize(id);
+  @ApiCreateSnapshot()
+  createSnapshot(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/app-versions/${id}/snapshot`);
+    return this.appVersionService.createSnapshot(id);
   }
 
-  // Pushes CI artifacts to a finalized version, transitioning it to READY
+  // Pushes CI artifacts to a version
   @Post(':id/artifacts')
   @HttpCode(HttpStatus.OK)
   @ApiPushArtifacts()
@@ -76,7 +76,7 @@ export class AppVersionController {
     return this.appVersionService.pushArtifacts(id, dto);
   }
 
-  // Deletes a DRAFT app version
+  // Deletes an app version (PROD versions cannot be deleted)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   @ApiDeleteAppVersion()

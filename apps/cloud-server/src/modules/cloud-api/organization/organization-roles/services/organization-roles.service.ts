@@ -19,7 +19,10 @@ export class OrganizationRolesService {
   async getTemplates(orgId: string): Promise<RoleTemplateListResponseDto> {
     const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    const appVersion = await this.coreAppVersionRepository.findById(deployment.appVersionId);
+    if (!deployment.version) {
+      throw new NotFoundException('No app version linked to this deployment.');
+    }
+    const appVersion = await this.coreAppVersionRepository.findByVersion(deployment.version);
     if (!appVersion?.snapshot) {
       throw new NotFoundException('No snapshot available for this deployment.');
     }

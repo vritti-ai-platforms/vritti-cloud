@@ -1,8 +1,8 @@
 import {
   appVersionQueryKey,
   useAppVersion,
+  useCreateSnapshot,
   useDeleteAppVersion,
-  useFinalizeAppVersion,
 } from '@hooks/admin/app-versions';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
@@ -15,21 +15,23 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
-import { Calendar, Check, GitBranch, Lock, Pencil } from 'lucide-react';
+import { Calendar, Camera, GitBranch, Pencil } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/app-versions/useVersionContext';
 import type { AppVersion, AppVersionStatus } from '@/schemas/admin/app-versions';
 import { getAppVersion } from '@/services/admin/app-versions.service';
-import { EditAppVersionForm } from './forms/EditAppVersionForm';
+import { EditAppVersionForm } from '../forms/EditAppVersionForm';
+import { SnapshotView } from './components/SnapshotView';
+import type { Snapshot } from './snapshot-types';
 
 // Maps version status to badge variant
 function statusVariant(status: AppVersionStatus): 'secondary' | 'outline' | 'default' {
   switch (status) {
-    case 'DRAFT':
+    case 'ALPHA':
       return 'secondary';
-    case 'READY':
+    case 'BETA':
       return 'outline';
-    case 'PUBLISHED':
+    case 'PROD':
       return 'default';
   }
 }
@@ -57,20 +59,20 @@ export const OverviewPage = () => {
 
   const { data: version, isLoading } = useAppVersion(versionId);
 
-  const finalizeMutation = useFinalizeAppVersion();
+  const snapshotMutation = useCreateSnapshot();
   const deleteMutation = useDeleteAppVersion({
     onSuccess: () => navigate('/app-versions'),
   });
 
-  // Prompt confirmation then finalize
-  async function handleFinalize() {
+  // Prompt confirmation then create snapshot
+  async function handleCreateSnapshot() {
     const confirmed = await confirm({
-      title: 'Finalize this version?',
+      title: 'Create snapshot?',
       description:
-        'Once finalized, no further changes can be made to features, apps, or microfrontends in this version.',
-      confirmLabel: 'Finalize',
+        'This will build a snapshot from all features, apps, microfrontends, and role templates in this version.',
+      confirmLabel: 'Create Snapshot',
     });
-    if (confirmed) finalizeMutation.mutate(versionId);
+    if (confirmed) snapshotMutation.mutate(versionId);
   }
 
   // Prompt confirmation then delete
@@ -91,8 +93,7 @@ export const OverviewPage = () => {
           <Skeleton className="h-8 w-48" />
           <Skeleton className="h-4 w-96" />
         </div>
-        <div className="grid grid-cols-3 gap-4">
-          <Skeleton className="h-24" />
+        <div className="grid grid-cols-2 gap-4">
           <Skeleton className="h-24" />
           <Skeleton className="h-24" />
         </div>
@@ -110,32 +111,28 @@ export const OverviewPage = () => {
         description={`Version ${version.version}`}
         actions={
           <div className="flex items-center gap-2">
-            {version.status === 'DRAFT' && (
-              <>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  startAdornment={<Pencil className="size-4" />}
-                  onClick={editDialog.open}
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  startAdornment={<Check className="size-4" />}
-                  onClick={handleFinalize}
-                >
-                  Finalize
-                </Button>
-              </>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              startAdornment={<Pencil className="size-4" />}
+              onClick={editDialog.open}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              startAdornment={<Camera className="size-4" />}
+              onClick={handleCreateSnapshot}
+            >
+              Create Snapshot
+            </Button>
           </div>
         }
       />
 
       {/* Info cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
@@ -166,25 +163,13 @@ export const OverviewPage = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
-              <Lock className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <Typography variant="body2" intent="muted">
-                Finalized
-              </Typography>
-              <Typography variant="body1" className="font-semibold">
-                {version.finalizedAt ? new Date(version.finalizedAt).toLocaleDateString() : '—'}
-              </Typography>
-            </div>
-          </CardContent>
-        </Card>
       </div>
 
-      {/* Danger zone — only for DRAFT */}
-      {version.status === 'DRAFT' && (
+      {/* Snapshot visualization */}
+      {version.snapshot && <SnapshotView snapshot={version.snapshot as unknown as Snapshot} />}
+
+      {/* Danger zone — PROD versions cannot be deleted */}
+      {version.status !== 'PROD' && (
         <DangerZone
           title="Delete this version"
           description="This action cannot be undone. All features, apps, and role templates in this version will be permanently removed."

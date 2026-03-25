@@ -22,9 +22,9 @@ export function updateAppVersion({ id, data }: { id: string; data: UpdateAppVers
   return axios.patch<SuccessResponse>(`admin-api/app-versions/${id}`, data).then((r) => r.data);
 }
 
-// Finalizes an app version (transitions from DRAFT to READY)
-export function finalizeAppVersion(id: string): Promise<SuccessResponse> {
-  return axios.post<SuccessResponse>(`admin-api/app-versions/${id}/finalize`).then((r) => r.data);
+// Builds a snapshot from all versioned tables
+export function createSnapshot(id: string): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>(`admin-api/app-versions/${id}/snapshot`).then((r) => r.data);
 }
 
 // Pushes build artifacts for an app version
