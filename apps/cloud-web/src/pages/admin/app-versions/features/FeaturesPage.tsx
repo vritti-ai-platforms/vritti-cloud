@@ -3,7 +3,7 @@ import { FEATURES_QUERY_KEY } from '@hooks/admin/features/useFeatures';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -121,20 +121,19 @@ function getColumns({ onView, onDelete }: ColumnActions): ColumnDef<Feature, unk
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="size-7" onClick={() => onView(row.original)}>
-            <Eye className="size-4" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 text-destructive hover:text-destructive"
-            disabled={!row.original.canDelete}
-            onClick={() => onDelete(row.original)}
-          >
-            <Trash2 className="size-4" />
-          </Button>
-        </div>
+        <RowActions
+          actions={[
+            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
+            {
+              id: 'delete',
+              icon: Trash2,
+              label: 'Delete',
+              variant: 'destructive',
+              disabled: !row.original.canDelete,
+              onClick: () => onDelete(row.original),
+            },
+          ]}
+        />
       ),
       enableSorting: false,
       enableHiding: false,

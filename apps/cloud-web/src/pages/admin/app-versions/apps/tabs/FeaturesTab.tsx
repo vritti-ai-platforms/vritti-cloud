@@ -2,7 +2,7 @@ import { APP_FEATURES_TABLE_KEY, useAppFeaturesTable, useRemoveAppFeature } from
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { Blocks, Plus, Trash2 } from 'lucide-react';
@@ -34,14 +34,11 @@ function getColumns({ onRemove }: ColumnActions): ColumnDef<AppFeatureTableRow, 
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          className="size-7 text-destructive hover:text-destructive"
-          onClick={() => onRemove(row.original)}
-        >
-          <Trash2 className="size-4" />
-        </Button>
+        <RowActions
+          actions={[
+            { id: 'remove', icon: Trash2, label: 'Remove', variant: 'destructive', onClick: () => onRemove(row.original) },
+          ]}
+        />
       ),
       enableSorting: false,
       enableHiding: false,

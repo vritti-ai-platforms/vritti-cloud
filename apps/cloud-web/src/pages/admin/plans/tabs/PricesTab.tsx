@@ -2,11 +2,10 @@ import { pricesTableQueryKey, useDeletePrice, usePricesTable } from '@hooks/admi
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Cloud, Globe, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import type { Price } from '@/schemas/admin/prices';
@@ -136,27 +135,27 @@ const PriceActions = ({ price, planId }: { price: Price; planId: string }) => {
   }
 
   return (
-    <div className="flex gap-1 justify-end">
-      <Dialog
-        title="Edit Price"
-        description="Update the price and currency for this combination."
-        anchor={(open) => (
-          <Button variant="ghost" size="icon" onClick={open} aria-label="Edit price">
-            <Pencil className="size-4" />
-          </Button>
-        )}
-        content={(close) => <EditPriceForm price={price} onSuccess={close} onCancel={close} />}
-      />
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-destructive hover:text-destructive"
-        disabled={isDeleting}
-        onClick={handleDelete}
-        aria-label="Delete price"
-      >
-        {isDeleting ? <Spinner className="size-4" /> : <Trash2 className="size-4" />}
-      </Button>
-    </div>
+    <RowActions
+      actions={[
+        {
+          id: 'edit',
+          icon: Pencil,
+          label: 'Edit',
+          dialog: {
+            title: 'Edit Price',
+            description: 'Update the price and currency for this combination.',
+            content: (close) => <EditPriceForm price={price} onSuccess={close} onCancel={close} />,
+          },
+        },
+        {
+          id: 'delete',
+          icon: Trash2,
+          label: 'Delete',
+          variant: 'destructive',
+          disabled: isDeleting,
+          onClick: handleDelete,
+        },
+      ]}
+    />
   );
 };

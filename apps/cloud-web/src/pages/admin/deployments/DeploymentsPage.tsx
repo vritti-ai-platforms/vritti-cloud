@@ -1,7 +1,7 @@
 import { useDeployments } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
@@ -140,11 +140,11 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Deployment, unknown>[]
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button variant="ghost" size="icon" className="size-7" onClick={() => onView(row.original)}>
-            <Eye className="size-4" />
-          </Button>
-        </div>
+        <RowActions
+          actions={[
+            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
+          ]}
+        />
       ),
       enableSorting: false,
       enableHiding: false,

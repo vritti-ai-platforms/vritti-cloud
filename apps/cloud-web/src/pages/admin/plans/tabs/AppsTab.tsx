@@ -2,11 +2,10 @@ import { PLAN_APPS_TABLE_KEY, usePlanAppsTable, useRemovePlanApp } from '@hooks/
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
-import { AppWindow, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
+import { AppWindow, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { PlanAppTableRow } from '@/schemas/admin/plan-apps';
 import { AssignPlanAppForm } from '../forms/AssignPlanAppForm';
 import { EditPlanAppForm } from '../forms/EditPlanAppForm';
@@ -47,21 +46,12 @@ function getColumns({ planId, onRemove }: ColumnActions): ColumnDef<PlanAppTable
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <DropdownMenu
-          trigger={{
-            children: (
-              <Button variant="ghost" size="icon" className="size-7">
-                <MoreVertical className="size-4" />
-              </Button>
-            ),
-          }}
-          align="end"
-          items={[
+        <RowActions
+          actions={[
             {
-              type: 'dialog' as const,
               id: 'edit',
-              label: 'Configure Features',
               icon: Pencil,
+              label: 'Configure Features',
               dialog: {
                 title: 'Configure Included Features',
                 description: `Choose which features from ${row.original.appCode} are included in this plan.`,
@@ -77,10 +67,9 @@ function getColumns({ planId, onRemove }: ColumnActions): ColumnDef<PlanAppTable
               },
             },
             {
-              type: 'item' as const,
               id: 'remove',
-              label: 'Remove',
               icon: Trash2,
+              label: 'Remove',
               variant: 'destructive',
               onClick: () => onRemove(row.original),
             },

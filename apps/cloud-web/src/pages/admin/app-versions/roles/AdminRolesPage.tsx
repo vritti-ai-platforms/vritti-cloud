@@ -2,7 +2,7 @@ import { ROLES_QUERY_KEY, useRoles } from '@hooks/admin/roles';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -125,9 +125,11 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Role, unknown>[] {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <Button variant="ghost" size="icon" className="size-7" onClick={() => onView(row.original)}>
-          <Eye className="size-4" />
-        </Button>
+        <RowActions
+          actions={[
+            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
+          ]}
+        />
       ),
       enableSorting: false,
       enableHiding: false,

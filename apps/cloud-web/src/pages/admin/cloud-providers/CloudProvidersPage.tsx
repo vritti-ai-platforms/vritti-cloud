@@ -3,12 +3,11 @@ import { CLOUD_PROVIDERS_QUERY_KEY } from '@hooks/admin/cloud-providers/useCloud
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useDialog, useTheme } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Cloud, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Cloud, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { CloudProvider } from '@/schemas/admin/cloud-providers';
 import { AddCloudProviderForm } from './forms/AddCloudProviderForm';
 import { EditCloudProviderForm } from './forms/EditCloudProviderForm';
@@ -134,21 +133,12 @@ function getColumns(onDelete: (id: string, name: string) => Promise<void>): Colu
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <DropdownMenu
-          trigger={{
-            children: (
-              <Button variant="ghost" size="icon" className="size-7">
-                <MoreVertical className="size-4" />
-              </Button>
-            ),
-          }}
-          align="end"
-          items={[
+        <RowActions
+          actions={[
             {
-              type: 'dialog' as const,
               id: 'edit',
-              label: 'Edit',
               icon: Pencil,
+              label: 'Edit',
               dialog: {
                 title: 'Edit Cloud Provider',
                 description: 'Update the details for this cloud provider.',
@@ -158,10 +148,9 @@ function getColumns(onDelete: (id: string, name: string) => Promise<void>): Colu
               },
             },
             {
-              type: 'item',
               id: 'delete',
-              label: 'Delete',
               icon: Trash2,
+              label: 'Delete',
               variant: 'destructive',
               disabled: !row.original.canDelete,
               onClick: () => onDelete(row.original.id, row.original.name),

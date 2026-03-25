@@ -3,12 +3,11 @@ import { useResendInvite } from '@hooks/cloud/organizations/useResendInvite';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Mail, MoreVertical, Pencil, UserPlus, Users } from 'lucide-react';
+import { Mail, Pencil, UserPlus, Users } from 'lucide-react';
 import { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { NexusUser } from '@/schemas/cloud/organizations';
@@ -181,36 +180,26 @@ function getColumns({ onResendInvite, onEdit }: GetColumnsOptions): ColumnDef<Ne
     {
       id: 'actions',
       header: '',
-      cell: ({ row }) => {
-        if (row.original.status !== 'PENDING') return null;
-        return (
-          <DropdownMenu
-            trigger={{
-              children: (
-                <Button variant="ghost" size="icon" className="size-8">
-                  <MoreVertical className="size-4" />
-                </Button>
-              ),
-            }}
-            items={[
-              {
-                type: 'item' as const,
-                id: 'edit',
-                label: 'Edit',
-                icon: Pencil,
-                onClick: () => onEdit(row.original),
-              },
-              {
-                type: 'item' as const,
-                id: 'resend',
-                label: 'Resend Invite',
-                icon: Mail,
-                onClick: () => onResendInvite(row.original),
-              },
-            ]}
-          />
-        );
-      },
+      cell: ({ row }) => (
+        <RowActions
+          actions={[
+            {
+              id: 'edit',
+              icon: Pencil,
+              label: 'Edit',
+              hidden: row.original.status !== 'PENDING',
+              onClick: () => onEdit(row.original),
+            },
+            {
+              id: 'resend',
+              icon: Mail,
+              label: 'Resend Invite',
+              hidden: row.original.status !== 'PENDING',
+              onClick: () => onResendInvite(row.original),
+            },
+          ]}
+        />
+      ),
       enableSorting: false,
     },
   ];

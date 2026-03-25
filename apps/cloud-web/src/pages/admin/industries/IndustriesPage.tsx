@@ -3,13 +3,12 @@ import { INDUSTRIES_QUERY_KEY } from '@hooks/admin/industries/useIndustries';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
-import { Building2, Eye, MoreVertical, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Building2, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Industry } from '@/schemas/admin/industries';
 import { AddIndustryForm } from './forms/AddIndustryForm';
@@ -128,28 +127,13 @@ function getColumns({ onDelete, onView }: ColumnActions): ColumnDef<Industry, un
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <DropdownMenu
-          trigger={{
-            children: (
-              <Button variant="ghost" size="icon" className="size-7">
-                <MoreVertical className="size-4" />
-              </Button>
-            ),
-          }}
-          align="end"
-          items={[
+        <RowActions
+          actions={[
+            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
             {
-              type: 'item' as const,
-              id: 'view',
-              label: 'View',
-              icon: Eye,
-              onClick: () => onView(row.original),
-            },
-            {
-              type: 'dialog' as const,
               id: 'edit',
-              label: 'Edit',
               icon: Pencil,
+              label: 'Edit',
               dialog: {
                 title: 'Edit Industry',
                 description: 'Update the details for this industry classification.',
@@ -159,10 +143,9 @@ function getColumns({ onDelete, onView }: ColumnActions): ColumnDef<Industry, un
               },
             },
             {
-              type: 'item' as const,
               id: 'delete',
-              label: 'Delete',
               icon: Trash2,
+              label: 'Delete',
               variant: 'destructive',
               disabled: !row.original.canDelete,
               onClick: () => onDelete(row.original),
