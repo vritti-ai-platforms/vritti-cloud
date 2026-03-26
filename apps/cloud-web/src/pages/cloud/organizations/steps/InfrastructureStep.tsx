@@ -30,6 +30,7 @@ export const InfrastructureStep: React.FC<InfrastructureStepProps> = ({ form, on
             name="regionId"
             label="Region"
             placeholder="Select a region"
+            params={{ isActive: true }}
             onOptionSelect={(opt) => {
               form.setValue('regionName', opt?.label ?? '');
               form.setValue('cloudProviderId', '');

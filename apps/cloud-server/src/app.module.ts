@@ -32,7 +32,6 @@ import { IndustryModule } from './modules/cloud-api/industry/industry.module';
 import { MediaModule } from './modules/cloud-api/media/media.module';
 import { OnboardingModule } from './modules/cloud-api/onboarding/onboarding.module';
 import { OrganizationModule } from './modules/cloud-api/organization/organization.module';
-import { RegionModule } from './modules/cloud-api/region/region.module';
 
 import { UserModule } from './modules/cloud-api/user/user.module';
 import { SelectModule } from './modules/select-api/select.module';
@@ -119,7 +118,6 @@ import { ServicesModule } from './services/services.module';
     OrganizationModule,
     IndustryModule,
     DataTableModule.forRoot({ tableViews: schema.tableViews }),
-    RegionModule,
     CloudDeploymentModule,
     // Admin API modules
     AdminAppVersionModule,
@@ -142,7 +140,6 @@ import { ServicesModule } from './services/services.module';
           MediaModule,
           OrganizationModule,
           IndustryModule,
-          RegionModule,
           CloudDeploymentModule,
         ],
       },

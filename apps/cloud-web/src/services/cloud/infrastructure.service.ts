@@ -1,19 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
 
-export interface RegionOption {
-  id: string;
-  name: string;
-  code: string;
-  state: string;
-  city: string;
-}
-
-export interface ProviderOption {
-  id: string;
-  name: string;
-  code: string;
-}
-
 export interface DeploymentOption {
   id: string;
   name: string;
@@ -27,16 +13,6 @@ export interface PlanOption {
   content: string | null;
   price: string | null;
   currency: string | null;
-}
-
-// Fetches all available regions
-export function getRegions(): Promise<RegionOption[]> {
-  return axios.get<RegionOption[]>('cloud-api/regions').then((r) => r.data);
-}
-
-// Fetches cloud providers available in a specific region
-export function getRegionProviders(regionId: string): Promise<ProviderOption[]> {
-  return axios.get<ProviderOption[]>(`cloud-api/regions/${regionId}/cloud-providers`).then((r) => r.data);
 }
 
 // Fetches active deployments filtered by region, provider, and industry

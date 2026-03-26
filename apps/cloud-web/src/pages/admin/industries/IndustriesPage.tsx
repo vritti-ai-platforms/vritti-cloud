@@ -83,7 +83,9 @@ export const IndustriesPage = () => {
 
       <Dialog
         open={addDialog.isOpen}
-        onOpenChange={(v) => { if (!v) addDialog.close(); }}
+        onOpenChange={(v) => {
+          if (!v) addDialog.close();
+        }}
         title="Add Industry"
         description="Enter the details for the new industry classification."
         content={(close) => <AddIndustryForm onSuccess={close} onCancel={close} />}
@@ -105,9 +107,7 @@ function getColumns({ onDelete }: ColumnActions): ColumnDef<Industry, unknown>[]
     {
       accessorKey: 'description',
       header: 'Description',
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">{row.original.description || '—'}</span>
-      ),
+      cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.description || '—'}</span>,
     },
     {
       accessorKey: 'code',
@@ -131,9 +131,7 @@ function getColumns({ onDelete }: ColumnActions): ColumnDef<Industry, unknown>[]
               dialog: {
                 title: 'Edit Industry',
                 description: 'Update the details for this industry classification.',
-                content: (close) => (
-                  <EditIndustryForm industry={row.original} onSuccess={close} onCancel={close} />
-                ),
+                content: (close) => <EditIndustryForm industry={row.original} onSuccess={close} onCancel={close} />,
               },
             },
             {

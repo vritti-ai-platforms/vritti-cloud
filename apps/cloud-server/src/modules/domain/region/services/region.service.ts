@@ -16,8 +16,6 @@ import { RegionDto } from '@/modules/admin-api/region/dto/entity/region.dto';
 import type { CreateRegionDto } from '@/modules/admin-api/region/dto/request/create-region.dto';
 import type { UpdateRegionDto } from '@/modules/admin-api/region/dto/request/update-region.dto';
 import { RegionTableResponseDto } from '@/modules/admin-api/region/dto/response/regions-response.dto';
-import type { ProviderOptionDto } from '@/modules/cloud-api/region/dto/response/provider-option.dto';
-import type { RegionOptionDto } from '@/modules/cloud-api/region/dto/response/region-option.dto';
 import { CloudProviderRepository } from '@/modules/domain/cloud-provider/repositories/cloud-provider.repository';
 import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
 import { PriceRepository } from '@/modules/domain/price/repositories/price.repository';
@@ -50,28 +48,6 @@ export class RegionService {
     private readonly priceRepository: PriceRepository,
   ) {}
 
-  // Returns all regions as lightweight option DTOs
-  async findAllForCloud(): Promise<RegionOptionDto[]> {
-    const regions = await this.regionRepository.findAll();
-    this.logger.log(`Fetched all regions (${regions.length})`);
-    return regions.map((r) => ({
-      id: r.id,
-      name: r.name,
-      code: r.code,
-      state: r.state,
-      city: r.city,
-    }));
-  }
-
-  // Returns cloud providers assigned to a region; throws NotFoundException if region missing
-  async getCloudProviders(regionId: string): Promise<ProviderOptionDto[]> {
-    const region = await this.regionRepository.findById(regionId);
-    if (!region) throw new NotFoundException('Region not found.');
-    const providers = await this.regionProviderRepository.findProvidersByRegionId(regionId);
-    this.logger.log(`Fetched cloud providers for region: ${regionId}`);
-    return providers.map((p) => ({ id: p.id, name: p.name, code: p.code }));
-  }
-
   // Returns paginated region options for the select component
   findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
     this.logger.log(`Fetched region select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
@@ -85,6 +61,7 @@ export class RegionService {
       offset: query.offset,
       values: query.values,
       excludeIds: query.excludeIds,
+      where: { isActive: true },
       orderBy: { name: 'asc' },
     });
   }
