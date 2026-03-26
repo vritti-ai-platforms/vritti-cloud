@@ -1,12 +1,12 @@
-import { OnboardingProvider } from '@/providers/OnboardingProvider';
-import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
-import type { RouteObject } from 'react-router-dom';
-import { Navigate, useNavigate } from 'react-router-dom';
 import { AdminLayout } from '@layouts/AdminLayout';
 import { AppLayout } from '@layouts/AppLayout';
 import { AuthLayout } from '@layouts/AuthLayout';
 import { OrgLayout } from '@layouts/OrgLayout';
 import { VersionLayout } from '@layouts/VersionLayout';
+import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
+import type { RouteObject } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
+import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import './index.css';
 import { AppVersionsPage } from './pages/admin/app-versions/AppVersionsPage';
 import { AdminAppsPage } from './pages/admin/app-versions/apps/AdminAppsPage';
@@ -48,9 +48,9 @@ import { OrganizationSettingsPage } from './pages/cloud/organization/settings/Or
 import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
-import { ProfilePage } from './pages/cloud/settings/profile/ProfilePage';
-import { SecurityPage } from './pages/cloud/settings/SecurityPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
+import { ProfilePage } from './pages/settings/profile/ProfilePage';
+import { SecurityPage } from './pages/settings/SecurityPage';
 
 // Catch-all 404 page using quantum-ui's NotFoundErrorPage
 const NotFoundRoute = () => {

@@ -1,11 +1,14 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { SuccessResponse } from '@services/verification.service';
-import { verifyPhoneChange } from '@services/verification.service';
+import type { SuccessResponse } from '@/services/settings/verification.service';
+import { verifyPhoneChange } from '@/services/settings/verification.service';
 import { PROFILE_QUERY_KEY } from './useProfile';
 
-type UseVerifyPhoneChangeOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, { otpCode: string }>, 'mutationFn'>;
+type UseVerifyPhoneChangeOptions = Omit<
+  UseMutationOptions<SuccessResponse, AxiosError, { otpCode: string }>,
+  'mutationFn'
+>;
 
 // Verifies OTP sent to the new phone and invalidates profile
 export function useVerifyPhoneChange(options?: UseVerifyPhoneChangeOptions) {

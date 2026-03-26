@@ -10,7 +10,7 @@ import type { AxiosError } from 'axios';
 import { Clock, Info } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
-import type { SuccessResponse } from '@services/verification.service';
+import type { SuccessResponse } from '@/services/settings/verification.service';
 
 interface OtpVerificationStepProps {
   contactType: 'email' | 'phone';
@@ -37,10 +37,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
   });
 
   const handleSubmit = (data: OTPFormData) => {
-    verifyMutation.mutate(
-      { otpCode: data.otpCode },
-      { onSuccess: () => onSuccess() },
-    );
+    verifyMutation.mutate({ otpCode: data.otpCode }, { onSuccess: () => onSuccess() });
   };
 
   const spamHint = contactType === 'email' ? 'Check your spam folder' : 'Check your messages';
@@ -67,13 +64,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
             />
           </Field>
           <div className="flex items-center justify-center">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onResend}
-              disabled={resendTimer > 0}
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={onResend} disabled={resendTimer > 0}>
               <Clock className="h-4 w-4 mr-2" />
               {resendTimer > 0 ? `Resend code in ${resendTimer}s` : 'Resend code'}
             </Button>

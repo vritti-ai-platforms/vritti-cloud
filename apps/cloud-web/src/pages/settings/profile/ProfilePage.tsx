@@ -11,7 +11,9 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { AccountInformationCard } from '@/components/cloud/settings/profile/AccountInformationCard';
-import { useDeleteAccount, useProfile, useUpdateProfile } from '@/hooks/cloud/settings/useProfile';
+import { useDeleteAccount } from '@/hooks/cloud/settings/useDeleteAccount';
+import { useProfile } from '@/hooks/cloud/settings/useProfile';
+import { useUpdateProfile } from '@/hooks/cloud/settings/useUpdateProfile';
 import type { ProfileFormData } from '@/schemas/cloud/settings';
 import { profileSchema } from '@/schemas/cloud/settings';
 import { EmailVerificationDialog } from './forms/EmailVerificationDialog';
@@ -135,9 +137,7 @@ export const ProfilePage: React.FC = () => {
         disabled={deleteAccountMutation.isPending}
       />
 
-      {emailDialog.isOpen && (
-        <EmailVerificationDialog onClose={emailDialog.close} currentEmail={profile.email} />
-      )}
+      {emailDialog.isOpen && <EmailVerificationDialog onClose={emailDialog.close} currentEmail={profile.email} />}
 
       {phoneDialog.isOpen && (
         <PhoneVerificationDialog onClose={phoneDialog.close} currentPhone={profile.phone} currentCountry="IN" />

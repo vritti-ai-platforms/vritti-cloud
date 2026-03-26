@@ -11,7 +11,7 @@ import { Clock, Info, Send } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { IdentityVerificationResponse, SuccessResponse } from '@services/verification.service';
+import type { IdentityVerificationResponse, SuccessResponse } from '@/services/settings/verification.service';
 
 interface IdentityVerificationStepProps {
   contactType: 'email' | 'phone';
@@ -58,10 +58,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
 
   // Verifies the OTP code
   const handleVerify = (data: OTPFormData) => {
-    verifyMutation.mutate(
-      { otpCode: data.otpCode },
-      { onSuccess: () => onSuccess() },
-    );
+    verifyMutation.mutate({ otpCode: data.otpCode }, { onSuccess: () => onSuccess() });
   };
 
   // Before OTP is sent — show info + send button
@@ -123,13 +120,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
             />
           </Field>
           <div className="flex items-center justify-center">
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={onResend}
-              disabled={resendTimer > 0}
-            >
+            <Button type="button" variant="ghost" size="sm" onClick={onResend} disabled={resendTimer > 0}>
               <Clock className="h-4 w-4 mr-2" />
               {resendTimer > 0 ? `Resend code in ${resendTimer}s` : 'Resend code'}
             </Button>

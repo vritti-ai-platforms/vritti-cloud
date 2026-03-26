@@ -36,6 +36,7 @@ import { RegionModule } from './modules/cloud-api/region/region.module';
 
 import { UserModule } from './modules/cloud-api/user/user.module';
 import { SelectModule } from './modules/select-api/select.module';
+import { SettingsModule } from './modules/settings/settings.module';
 import { ServicesModule } from './services/services.module';
 
 @Module({
@@ -113,6 +114,7 @@ import { ServicesModule } from './services/services.module';
     UserModule,
     OnboardingModule,
     AuthModule,
+    SettingsModule,
     MediaModule,
     OrganizationModule,
     IndustryModule,
@@ -146,7 +148,7 @@ import { ServicesModule } from './services/services.module';
       },
       {
         path: '',
-        children: [AuthModule, OnboardingModule],
+        children: [AuthModule, OnboardingModule, SettingsModule],
       },
       {
         path: 'admin-api',

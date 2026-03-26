@@ -9,7 +9,9 @@ export { useRequestPhoneChange } from './useRequestPhoneChange';
 export { useVerifyPhoneChange } from './useVerifyPhoneChange';
 export { useResendPhoneOtp } from './useResendPhoneOtp';
 export { useResendTimer } from './useResendTimer';
-export { PROFILE_QUERY_KEY, useDeleteAccount, useProfile, useUpdateProfile } from './useProfile';
+export { PROFILE_QUERY_KEY, useProfile } from './useProfile';
+export { useUpdateProfile } from './useUpdateProfile';
+export { useDeleteAccount } from './useDeleteAccount';
 export {
   SESSIONS_QUERY_KEY,
   useChangePassword,

@@ -68,7 +68,7 @@ export function getProfile(): Promise<ProfileData> {
 // Updates the user profile
 export function updateProfile(data: UpdateProfileDto): Promise<ProfileData> {
   return axios
-    .put<ProfileData>('cloud-api/users/profile', data, {
+    .put<ProfileData>('settings/profile', data, {
       loadingMessage: 'Updating profile...',
       successMessage: 'Profile updated successfully',
     })
@@ -113,7 +113,7 @@ export function revokeAllOtherSessions(): Promise<void> {
 // Permanently deletes the user account
 export function deleteAccount(): Promise<void> {
   return axios
-    .delete('cloud-api/users/account', {
+    .delete('settings/account', {
       loadingMessage: 'Deleting account...',
       successMessage: 'Account deleted successfully',
     })

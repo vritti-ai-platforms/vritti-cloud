@@ -1,6 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
+import { EmailChangeService } from '@domain/user/services/email-change.service';
+import { PhoneChangeService } from '@domain/user/services/phone-change.service';
 import {
   ApiRequestEmailIdentityVerification,
   ApiVerifyEmailIdentity,
@@ -20,12 +23,11 @@ import {
   VerifyNewEmailDto,
   VerifyNewPhoneDto,
 } from '../dto/request/contact-change.dto';
-import { EmailChangeService } from '../services/email-change.service';
-import { PhoneChangeService } from '../services/phone-change.service';
 
-@ApiTags('Contact Change')
+@ApiTags('Settings - Contact Change')
 @ApiBearerAuth()
-@Controller('users/contact')
+@RequireSession(SessionTypeValues.CLOUD, SessionTypeValues.ADMIN)
+@Controller('settings/contact')
 export class ContactChangeController {
   constructor(
     private readonly emailChangeService: EmailChangeService,
@@ -101,7 +103,7 @@ export class ContactChangeController {
   @HttpCode(HttpStatus.OK)
   @ApiSubmitNewPhone()
   async submitNewPhone(@UserId() userId: string, @Body() dto: SubmitNewPhoneDto) {
-    return this.phoneChangeService.submitNewPhone(userId, dto.newPhone, dto.newPhoneCountry);
+    return this.phoneChangeService.submitNewPhone(userId, dto.newPhone);
   }
 
   // Verifies the new phone OTP and completes the phone change

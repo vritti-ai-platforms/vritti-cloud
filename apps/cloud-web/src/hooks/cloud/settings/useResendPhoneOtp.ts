@@ -1,8 +1,8 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { SuccessResponse } from '@services/verification.service';
-import { resendPhoneOtp } from '@services/verification.service';
+import type { SuccessResponse } from '@/services/settings/verification.service';
+import { resendPhoneOtp } from '@/services/settings/verification.service';
 
 type UseResendPhoneOtpOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, void>, 'mutationFn'>;
 
