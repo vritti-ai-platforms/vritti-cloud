@@ -1985,7 +1985,7 @@
         ]
       }
     },
-    "/settings/contact/email/request-identity-verification": {
+    "/account/email/request-identity-verification": {
       "post": {
         "description": "Sends a 6-digit OTP to the current email address to verify user identity before allowing email change",
         "operationId": "ContactChangeController_requestEmailIdentityVerification",
@@ -2022,11 +2022,11 @@
         ],
         "summary": "Request identity verification for email change",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/email/verify-identity": {
+    "/account/email/verify-identity": {
       "post": {
         "description": "Verifies the OTP sent to current email and creates an email change request. Checks daily rate limit (max 3 per day)",
         "operationId": "ContactChangeController_verifyEmailIdentity",
@@ -2075,11 +2075,11 @@
         ],
         "summary": "Verify identity for email change",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/email/submit-new-email": {
+    "/account/email/submit-new-email": {
       "post": {
         "description": "Validates the new email address, checks if already in use, and sends a verification OTP to the new email",
         "operationId": "ContactChangeController_submitNewEmail",
@@ -2126,11 +2126,11 @@
         ],
         "summary": "Submit new email address",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/email/verify-new-email": {
+    "/account/email/verify-new-email": {
       "post": {
         "description": "Verifies the OTP sent to new email, updates the user email, and sends a notification to old email with a 72-hour revert link",
         "operationId": "ContactChangeController_verifyNewEmail",
@@ -2187,11 +2187,11 @@
         ],
         "summary": "Verify new email and complete change",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/email/resend-otp": {
+    "/account/email/resend-otp": {
       "post": {
         "description": "Resends the verification OTP to the email address",
         "operationId": "ContactChangeController_resendEmailOtp",
@@ -2227,11 +2227,11 @@
         ],
         "summary": "Resend email verification OTP",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/phone/request-identity-verification": {
+    "/account/phone/request-identity-verification": {
       "post": {
         "description": "Sends a 6-digit OTP to the current phone number to verify user identity before allowing phone change",
         "operationId": "ContactChangeController_requestPhoneIdentityVerification",
@@ -2268,11 +2268,11 @@
         ],
         "summary": "Request identity verification for phone change",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/phone/verify-identity": {
+    "/account/phone/verify-identity": {
       "post": {
         "description": "Verifies the OTP sent to current phone and creates a phone change request. Checks daily rate limit (max 3 per day)",
         "operationId": "ContactChangeController_verifyPhoneIdentity",
@@ -2321,11 +2321,11 @@
         ],
         "summary": "Verify identity for phone change",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/phone/submit-new-phone": {
+    "/account/phone/submit-new-phone": {
       "post": {
         "description": "Validates the new phone number, checks if already in use, and sends a verification OTP to the new phone",
         "operationId": "ContactChangeController_submitNewPhone",
@@ -2372,11 +2372,11 @@
         ],
         "summary": "Submit new phone number",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/phone/verify-new-phone": {
+    "/account/phone/verify-new-phone": {
       "post": {
         "description": "Verifies the OTP sent to new phone, updates the user phone, and sends a notification to old phone with a 72-hour revert token",
         "operationId": "ContactChangeController_verifyNewPhone",
@@ -2432,11 +2432,11 @@
         ],
         "summary": "Verify new phone and complete change",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/contact/phone/resend-otp": {
+    "/account/phone/resend-otp": {
       "post": {
         "description": "Resends the verification OTP to the phone number",
         "operationId": "ContactChangeController_resendPhoneOtp",
@@ -2472,11 +2472,43 @@
         ],
         "summary": "Resend phone verification OTP",
         "tags": [
-          "Settings - Contact Change"
+          "Account - Contact Change"
         ]
       }
     },
-    "/settings/profile": {
+    "/account/profile": {
+      "get": {
+        "description": "Returns the authenticated user profile information.",
+        "operationId": "ProfileController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid or missing authentication"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user profile",
+        "tags": [
+          "Account - Profile"
+        ]
+      },
       "put": {
         "description": "Update the authenticated user's profile information including name, phone, profile picture, locale, and timezone.",
         "operationId": "ProfileController_updateProfile",
@@ -2519,11 +2551,11 @@
         ],
         "summary": "Update user profile",
         "tags": [
-          "Settings - Profile"
+          "Account - Profile"
         ]
       }
     },
-    "/settings/account": {
+    "/account/account": {
       "delete": {
         "description": "Soft delete the authenticated user's account. Sets account status to INACTIVE and invalidates all sessions.",
         "operationId": "ProfileController_deleteAccount",
@@ -2559,7 +2591,7 @@
         ],
         "summary": "Delete user account",
         "tags": [
-          "Settings - Profile"
+          "Account - Profile"
         ]
       }
     },

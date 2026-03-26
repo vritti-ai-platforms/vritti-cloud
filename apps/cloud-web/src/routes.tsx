@@ -49,8 +49,8 @@ import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
-import { ProfilePage } from './pages/settings/profile/ProfilePage';
-import { SecurityPage } from './pages/settings/SecurityPage';
+import { ProfilePage } from './pages/account/profile/ProfilePage';
+import { SecurityPage } from './pages/account/SecurityPage';
 
 // Catch-all 404 page using quantum-ui's NotFoundErrorPage
 const NotFoundRoute = () => {
