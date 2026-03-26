@@ -33,12 +33,12 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
 }) => {
   const form = useForm<OTPFormData>({
     resolver: zodResolver(otpSchema),
-    defaultValues: { code: '' },
+    defaultValues: { otpCode: '' },
   });
 
   const handleSubmit = (data: OTPFormData) => {
     verifyMutation.mutate(
-      { otpCode: data.code },
+      { otpCode: data.otpCode },
       { onSuccess: () => onSuccess() },
     );
   };
@@ -58,7 +58,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
         <div className="space-y-4">
           <Field className="flex justify-center">
             <OTPField
-              name="code"
+              name="otpCode"
               onChange={(value) => {
                 if (value.length === 6 && !verifyMutation.isPending) {
                   form.handleSubmit(handleSubmit)();

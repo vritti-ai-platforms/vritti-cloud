@@ -41,7 +41,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
 
   const form = useForm<OTPFormData>({
     resolver: zodResolver(otpSchema),
-    defaultValues: { code: '' },
+    defaultValues: { otpCode: '' },
   });
 
   const contactLabel = contactType === 'email' ? 'email address' : 'phone number';
@@ -59,7 +59,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
   // Verifies the OTP code
   const handleVerify = (data: OTPFormData) => {
     verifyMutation.mutate(
-      { otpCode: data.code },
+      { otpCode: data.otpCode },
       { onSuccess: () => onSuccess() },
     );
   };
@@ -114,7 +114,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
           <Typography variant="body2">Enter the verification code sent to your {contactType}</Typography>
           <Field className="flex justify-center">
             <OTPField
-              name="code"
+              name="otpCode"
               onChange={(value) => {
                 if (value.length === 6 && !verifyMutation.isPending) {
                   form.handleSubmit(handleVerify)();
