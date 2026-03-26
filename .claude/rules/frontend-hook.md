@@ -89,6 +89,56 @@ export function useCreateFeature(options?: UseCreateFeatureOptions) {
 }
 ```
 
+## One hook per file
+
+Each hook lives in its own file. The filename matches the function name.
+
+```
+hooks/account/useRequestEmailChange.ts → exports useRequestEmailChange()
+hooks/account/useVerifyEmailIdentity.ts → exports useVerifyEmailIdentity()
+hooks/account/useProfile.ts → exports useProfile() + PROFILE_QUERY_KEY
+```
+
+Never bundle multiple hooks in one file.
+
+## Options spread order — `...options` BEFORE `onSuccess`
+
+When a hook has internal `onSuccess` logic (cache invalidation), spread `...options` BEFORE `onSuccess` so the internal handler always runs:
+
+```typescript
+// CORRECT — internal onSuccess always fires
+return useMutation({
+  ...options,
+  mutationFn: updateProfile,
+  onSuccess: (data, ...args) => {
+    queryClient.setQueryData(PROFILE_QUERY_KEY, data);
+    options?.onSuccess?.(data, ...args);
+  },
+});
+
+// WRONG — caller's onSuccess overwrites internal cache update
+return useMutation({
+  mutationFn: updateProfile,
+  onSuccess: (data, ...args) => {
+    queryClient.setQueryData(PROFILE_QUERY_KEY, data);
+    options?.onSuccess?.(data, ...args);
+  },
+  ...options,  // ← overwrites onSuccess above!
+});
+```
+
+## useTimer — countdown timer from quantum-ui
+
+For OTP resend cooldowns or any countdown, use `useTimer` from quantum-ui (not a local hook):
+
+```typescript
+import { useTimer } from '@vritti/quantum-ui/hooks';
+
+const { timer, startTimer } = useTimer();
+// timer: current countdown value (0 = done)
+// startTimer(45): start 45-second countdown
+```
+
 ## Query keys — hierarchical arrays
 
 ```typescript

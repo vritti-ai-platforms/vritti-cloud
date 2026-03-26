@@ -158,8 +158,29 @@ src/modules/
 ├── domain/            # Services + repos (business logic)
 ├── admin-api/         # Controllers only (admin endpoints)
 ├── cloud-api/         # Controllers only (cloud endpoints)
-└── select-api/        # Controllers only (select/dropdown endpoints)
+├── select-api/        # Controllers only (select/dropdown endpoints)
+├── account/           # Top-level — shared across CLOUD + ADMIN sessions
+├── auth/              # Top-level — authentication (no session prefix)
+└── onboarding/        # Top-level — onboarding flow (no session prefix)
 ```
+
+## Top-level modules (shared across session types)
+
+Modules that serve both CLOUD and ADMIN users are registered at the root path, not under `cloud-api/` or `admin-api/`:
+
+```typescript
+// app.module.ts RouterModule
+{ path: '', children: [AuthModule, OnboardingModule, AccountModule] }
+```
+
+The controller uses `@RequireSession` to accept multiple session types:
+```typescript
+@RequireSession(SessionTypeValues.CLOUD, SessionTypeValues.ADMIN)
+@Controller('account')
+export class ProfileController { ... }
+```
+
+Routes: `/account/profile`, `/account/email/*`, `/account/phone/*`
 
 ## Naming
 

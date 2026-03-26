@@ -196,6 +196,41 @@ Route param must be named `:slug`, not `:id`:
 - NEVER use pixels — use Tailwind classes: `p-4`, `gap-8`, `pt-16`
 - Available tokens: primary, secondary, muted, accent, destructive, warning, success, foreground, background, card, border
 
+## Dialog Lifecycle — Conditional Mount Pattern
+
+For dialogs that need initialization on open (API calls, form setup), use conditional rendering instead of `isOpen` prop. The dialog mounts fresh each time and unmounts on close — no `useEffect`/`useRef` cleanup needed.
+
+```tsx
+// CORRECT — dialog mounts fresh, runs init on mount, unmounts = cleanup
+{emailDialog.isOpen && (
+  <EmailVerificationDialog onClose={emailDialog.close} currentEmail={email} />
+)}
+
+// WRONG — dialog always mounted, needs useEffect + useRef to manage lifecycle
+<EmailVerificationDialog
+  isOpen={emailDialog.isOpen}
+  onClose={emailDialog.close}
+  currentEmail={email}
+/>
+```
+
+Inside the dialog: `open={true}` (always open when mounted), no `isOpen` prop needed.
+
+## Form — don't use both mutation and onSubmit
+
+quantum-ui `Form` with `mutation` prop auto-calls `mutation.mutate(data)`, bypassing `onSubmit`. Use one or the other:
+
+```tsx
+// Use mutation prop — Form handles mutate + loading/error automatically
+<Form form={form} mutation={createMutation} showRootError>
+
+// Use onSubmit — you control the mutation call (needed for field mapping)
+<Form form={form} onSubmit={(data) => mutation.mutate({ mapped: data.field })} showRootError>
+
+// WRONG — onSubmit is bypassed, mutation.mutate(rawFormData) is called instead
+<Form form={form} mutation={mutation} onSubmit={handleSubmit} showRootError>
+```
+
 ## State Management
 - AuthProvider in web-nexus for authentication state
 - React Context for shared state within microfrontends
