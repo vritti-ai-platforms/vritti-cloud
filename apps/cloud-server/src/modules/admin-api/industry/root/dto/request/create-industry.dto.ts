@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsArray, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateIndustryDto {
   @ApiProperty({ description: 'Display name of the industry', example: 'Healthcare' })
@@ -18,4 +18,10 @@ export class CreateIndustryDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({ type: [String], example: ['order-management'] })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  recommendedApps?: string[];
 }

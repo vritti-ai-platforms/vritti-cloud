@@ -112,7 +112,6 @@ export const relations = defineRelations(schema, (r) => ({
   industries: {
     organizations: r.many.organizations(),
     prices: r.many.prices(),
-    industryApps: r.many.industryApps(),
     roles: r.many.roles(),
     plans: r.many.plans({
       from: r.industries.id.through(r.prices.industryId),
@@ -267,7 +266,6 @@ export const relations = defineRelations(schema, (r) => ({
     }),
     appFeatures: r.many.appFeatures(),
     appPrices: r.many.appPrices(),
-    industryApps: r.many.industryApps(),
     roleApps: r.many.roleApps(),
   },
 
@@ -303,12 +301,6 @@ export const relations = defineRelations(schema, (r) => ({
   // Plan-App junction relations
   planApps: {
     plan: r.one.plans({ from: r.planApps.planId, to: r.plans.id }),
-  },
-
-  // Industry-App junction relations
-  industryApps: {
-    industry: r.one.industries({ from: r.industryApps.industryId, to: r.industries.id }),
-    app: r.one.apps({ from: r.industryApps.appId, to: r.apps.id }),
   },
 
   // Role relations

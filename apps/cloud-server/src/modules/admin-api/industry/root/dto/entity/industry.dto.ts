@@ -20,6 +20,9 @@ export class IndustryDto {
   @ApiPropertyOptional({ type: 'string', format: 'date-time', nullable: true })
   updatedAt: Date | null;
 
+  @ApiProperty({ type: [String], example: ['order-management', 'kitchen-operations'] })
+  recommendedApps: string[];
+
   @ApiProperty({ example: true, description: 'False when the industry is referenced by organizations, prices, or deployment plans' })
   canDelete: boolean;
 
@@ -31,6 +34,7 @@ export class IndustryDto {
     dto.description = industry.description;
     dto.createdAt = industry.createdAt;
     dto.updatedAt = industry.updatedAt;
+    dto.recommendedApps = (industry.recommendedApps as string[]) ?? [];
     dto.canDelete = canDelete;
     return dto;
   }

@@ -119,7 +119,7 @@ export class AppService {
     }
     const [planRefs, industryRefs] = await Promise.all([
       this.appRepository.countPlanReferences(existing.code),
-      this.appRepository.countIndustryReferences(id),
+      this.appRepository.countIndustryReferences(existing.code),
     ]);
     const parts: string[] = [];
     if (planRefs > 0) parts.push(`${planRefs} plan${planRefs > 1 ? 's' : ''}`);

@@ -28,7 +28,6 @@ export * from './app';
 export * from './app-feature';
 export * from './app-price';
 export * from './plan-app';
-export * from './industry-app';
 export * from './role';
 export * from './role-app';
 export * from './role-feature-permission';

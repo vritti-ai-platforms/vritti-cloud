@@ -7,9 +7,7 @@ import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/qua
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
-import { Building2, Eye, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Building2, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { Industry } from '@/schemas/admin/industries';
 import { AddIndustryForm } from './forms/AddIndustryForm';
 import { EditIndustryForm } from './forms/EditIndustryForm';
@@ -17,7 +15,6 @@ import { EditIndustryForm } from './forms/EditIndustryForm';
 const TABLE_SLUG = 'industries';
 
 export const IndustriesPage = () => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useIndustries();
   const confirm = useConfirm();
@@ -38,7 +35,6 @@ export const IndustriesPage = () => {
   const { table } = useDataTable({
     columns: getColumns({
       onDelete: handleDelete,
-      onView: (industry) => navigate(`/industries/${buildSlug(industry.name, industry.id)}`),
     }),
     slug: TABLE_SLUG,
     label: 'industry',
@@ -98,10 +94,9 @@ export const IndustriesPage = () => {
 
 interface ColumnActions {
   onDelete: (industry: Industry) => void;
-  onView: (industry: Industry) => void;
 }
 
-function getColumns({ onDelete, onView }: ColumnActions): ColumnDef<Industry, unknown>[] {
+function getColumns({ onDelete }: ColumnActions): ColumnDef<Industry, unknown>[] {
   return [
     {
       accessorKey: 'name',
@@ -129,7 +124,6 @@ function getColumns({ onDelete, onView }: ColumnActions): ColumnDef<Industry, un
       cell: ({ row }) => (
         <RowActions
           actions={[
-            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
             {
               id: 'edit',
               icon: Pencil,
