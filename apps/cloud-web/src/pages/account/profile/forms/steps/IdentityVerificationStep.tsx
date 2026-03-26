@@ -98,7 +98,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
 
   // After OTP is sent — show OTP input
   return (
-    <Form form={form} onSubmit={handleVerify} mutation={verifyMutation} showRootError>
+    <Form form={form} onSubmit={handleVerify} showRootError>
       <FieldGroup>
         <div className="space-y-2">
           <Typography variant="body2">Current {contactType === 'email' ? 'Email' : 'Phone'}</Typography>

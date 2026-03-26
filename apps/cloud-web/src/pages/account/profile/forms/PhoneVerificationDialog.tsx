@@ -41,6 +41,7 @@ interface Props {
 // Conditionally mounted by parent — fires identity verification on mount
 export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone, currentCountry }) => {
   const [step, setStep] = useState<PhoneStep>('identity');
+  const [progress, setProgress] = useState(0);
   const [newPhone, setNewPhone] = useState('');
   const [phoneCountry, setPhoneCountry] = useState(currentCountry);
   const { timer: resendTimer, startTimer } = useResendTimer();
@@ -52,6 +53,7 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
     onSuccess: (_result, variables) => {
       setNewPhone(variables.newPhone);
       setStep('verify');
+      setProgress(50);
       startTimer(45);
     },
   });
@@ -94,7 +96,7 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
       description={stepDescription}
     >
       <div className="space-y-6">
-        <ContactChangeProgressIndicator contactType="phone" currentStep={STEP_MAP[step]} />
+        <ContactChangeProgressIndicator contactType="phone" currentStep={STEP_MAP[step]} progress={progress} />
 
         {step === 'identity' && (
           <IdentityVerificationStep
@@ -104,8 +106,8 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
             verifyMutation={verifyIdentityMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onOtpSent={() => startTimer(45)}
-            onSuccess={() => setStep('newPhone')}
+            onOtpSent={() => { startTimer(45); setProgress(50); }}
+            onSuccess={() => { setStep('newPhone'); setProgress(0); }}
             onCancel={onClose}
           />
         )}
@@ -116,7 +118,6 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
             onSubmit={(data) =>
               requestChangeMutation.mutate({ newPhone: data.newPhone, newPhoneCountry: phoneCountry })
             }
-            mutation={requestChangeMutation}
             showRootError
           >
             <FieldGroup>
@@ -161,7 +162,7 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
             verifyMutation={verifyChangeMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onSuccess={() => setStep('success')}
+            onSuccess={() => { setStep('success'); setProgress(0); }}
             onBack={() => setStep('newPhone')}
           />
         )}

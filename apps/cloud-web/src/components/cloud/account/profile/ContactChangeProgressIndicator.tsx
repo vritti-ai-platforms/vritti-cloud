@@ -10,12 +10,14 @@ const STEP_ORDER: ContactChangeStep[] = ['identity', 'newContact', 'verify', 'su
 interface ContactChangeProgressIndicatorProps {
   contactType: 'email' | 'phone';
   currentStep: ContactChangeStep;
+  progress?: number;
 }
 
 // Renders step progress for email or phone change flows
 export const ContactChangeProgressIndicator: React.FC<ContactChangeProgressIndicatorProps> = ({
   contactType,
   currentStep,
+  progress,
 }) => {
   const activeStep = STEP_ORDER.indexOf(currentStep) + 1;
 
@@ -39,7 +41,7 @@ export const ContactChangeProgressIndicator: React.FC<ContactChangeProgressIndic
 
   return (
     <div className="mx-auto w-full max-w-[398px]">
-      <StepProgressIndicator steps={steps} currentStep={activeStep} />
+      <StepProgressIndicator steps={steps} currentStep={activeStep} progress={progress} />
     </div>
   );
 };

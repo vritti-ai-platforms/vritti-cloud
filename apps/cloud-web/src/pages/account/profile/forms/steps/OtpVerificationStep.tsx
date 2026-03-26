@@ -43,7 +43,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
   const spamHint = contactType === 'email' ? 'Check your spam folder' : 'Check your messages';
 
   return (
-    <Form form={form} onSubmit={handleSubmit} mutation={verifyMutation} showRootError>
+    <Form form={form} onSubmit={handleSubmit} showRootError>
       <FieldGroup>
         <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">
           <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />

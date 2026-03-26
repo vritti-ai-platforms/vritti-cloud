@@ -39,6 +39,7 @@ interface Props {
 // Conditionally mounted by parent — fires identity verification on mount
 export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail }) => {
   const [step, setStep] = useState<EmailStep>('identity');
+  const [progress, setProgress] = useState(0);
   const [newEmail, setNewEmail] = useState('');
   const { timer: resendTimer, startTimer } = useResendTimer();
 
@@ -49,6 +50,7 @@ export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail
     onSuccess: (_result, variables) => {
       setNewEmail(variables.newEmail);
       setStep('verify');
+      setProgress(50);
       startTimer(45);
     },
   });
@@ -91,7 +93,7 @@ export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail
       description={stepDescription}
     >
       <div className="space-y-6">
-        <ContactChangeProgressIndicator contactType="email" currentStep={STEP_MAP[step]} />
+        <ContactChangeProgressIndicator contactType="email" currentStep={STEP_MAP[step]} progress={progress} />
 
         {step === 'identity' && (
           <IdentityVerificationStep
@@ -101,8 +103,8 @@ export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail
             verifyMutation={verifyIdentityMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onOtpSent={() => startTimer(45)}
-            onSuccess={() => setStep('newEmail')}
+            onOtpSent={() => { startTimer(45); setProgress(50); }}
+            onSuccess={() => { setStep('newEmail'); setProgress(0); }}
             onCancel={onClose}
           />
         )}
@@ -142,7 +144,7 @@ export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail
             verifyMutation={verifyChangeMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onSuccess={() => setStep('success')}
+            onSuccess={() => { setStep('success'); setProgress(0); }}
             onBack={() => setStep('newEmail')}
           />
         )}
