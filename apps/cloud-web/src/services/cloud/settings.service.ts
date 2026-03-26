@@ -1,4 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
+import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
 import type { ChangePasswordDto, ProfileData, Session, UpdateProfileDto } from '@/schemas/cloud/settings';
 import { AccountStatus } from '@/schemas/cloud/settings';
 
@@ -7,16 +8,16 @@ interface AuthStatusResponse {
   user?: {
     id: string;
     email: string;
-    fullName?: string | null;
-    displayName?: string | null;
-    phone?: string | null;
-    phoneCountry?: string | null;
+    fullName: string;
+    displayName: string;
+    phone: PhoneValue;
+    phoneCountry: string;
     accountStatus: string;
     locale: string;
     timezone: string;
     createdAt: string;
-    lastLoginAt?: string | null;
-    profilePictureUrl?: string | null;
+    lastLoginAt: string | null;
+    profilePictureUrl: string | null;
     emailVerified?: boolean;
     phoneVerified?: boolean;
     onboardingStep?: string;
@@ -52,7 +53,7 @@ export function getProfile(): Promise<ProfileData> {
       email: user.email,
       fullName: user.fullName,
       displayName: user.displayName,
-      phone: user.phone,
+      phone: user.phone as PhoneValue,
       phoneCountry: user.phoneCountry,
       accountStatus: mapAccountStatus(user.accountStatus),
       locale: user.locale,

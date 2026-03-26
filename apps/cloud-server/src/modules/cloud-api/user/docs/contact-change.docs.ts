@@ -92,27 +92,6 @@ export function ApiVerifyNewEmail() {
   );
 }
 
-export function ApiRevertEmailChange() {
-  return applyDecorators(
-    ApiOperation({
-      summary: 'Revert email change',
-      description: 'Reverts the email change using the revert token sent to the old email (valid for 72 hours)',
-    }),
-    ApiResponse({
-      status: 200,
-      description: 'Email change reverted successfully',
-      schema: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean' },
-          revertedEmail: { type: 'string', format: 'email' },
-        },
-      },
-    }),
-    ApiResponse({ status: 400, description: 'Invalid or expired revert token' }),
-  );
-}
-
 export function ApiResendEmailOtp() {
   return applyDecorators(
     ApiOperation({
@@ -222,27 +201,6 @@ export function ApiVerifyNewPhone() {
     }),
     ApiResponse({ status: 400, description: 'Invalid OTP or change request' }),
     ApiResponse({ status: 401, description: 'Incorrect verification code' }),
-  );
-}
-
-export function ApiRevertPhoneChange() {
-  return applyDecorators(
-    ApiOperation({
-      summary: 'Revert phone change',
-      description: 'Reverts the phone change using the revert token sent to the old phone (valid for 72 hours)',
-    }),
-    ApiResponse({
-      status: 200,
-      description: 'Phone change reverted successfully',
-      schema: {
-        type: 'object',
-        properties: {
-          success: { type: 'boolean' },
-          revertedPhone: { type: 'string' },
-        },
-      },
-    }),
-    ApiResponse({ status: 400, description: 'Invalid or expired revert token' }),
   );
 }
 

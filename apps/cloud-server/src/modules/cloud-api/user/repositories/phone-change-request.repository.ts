@@ -22,6 +22,16 @@ export class PhoneChangeRequestRepository extends PrimaryBaseRepository<typeof p
     });
   }
 
+  // Finds the most recent active (incomplete) phone change request for a user
+  async findActiveForUser(userId: string): Promise<PhoneChangeRequest | undefined> {
+    const results = await this.findMany({
+      where: { userId, isCompleted: false },
+      orderBy: { createdAt: 'desc' },
+      limit: 1,
+    });
+    return results[0];
+  }
+
   // Finds a phone change request by its revert token
   async findByRevertToken(revertToken: string): Promise<PhoneChangeRequest | undefined> {
     return this.findOne({ revertToken });

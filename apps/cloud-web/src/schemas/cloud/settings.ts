@@ -1,10 +1,14 @@
+import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
 import { z } from 'zod';
 
 // Validation schema for profile update form
 export const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   displayName: z.string().optional(),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .min(10, 'Please enter a valid phone number')
+    .regex(/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number'),
   locale: z.string(),
   timezone: z.string(),
   profilePictureUrl: z
@@ -17,9 +21,7 @@ export const profileSchema = z.object({
 
 export type ProfileFormData = z.infer<typeof profileSchema>;
 
-/**
- * Validation schema for password change form
- */
+// Validation schema for password change form
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, 'Current password is required'),
@@ -39,9 +41,7 @@ export const changePasswordSchema = z
 
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
-/**
- * Account status enumeration matching backend
- */
+// Account status enumeration matching backend
 export enum AccountStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',
@@ -49,27 +49,22 @@ export enum AccountStatus {
   DEACTIVATED = 'DEACTIVATED',
 }
 
-/**
- * Profile data matching backend response
- */
 export interface ProfileData {
   id: string;
   email: string;
-  fullName?: string | null;
-  displayName?: string | null;
+  fullName: string;
+  displayName: string;
   accountStatus: AccountStatus;
-  phone?: string | null;
-  phoneCountry?: string | null;
-  profilePictureUrl?: string | null;
+  phone: PhoneValue;
+  phoneCountry: string;
+  profilePictureUrl: string | null;
   locale: string;
   timezone: string;
   createdAt: string;
-  lastLoginAt?: string | null;
+  lastLoginAt: string | null;
 }
 
-/**
- * Profile update DTO for API requests
- */
+// Profile update DTO for API requests
 export interface UpdateProfileDto {
   fullName?: string;
   displayName?: string;
@@ -80,17 +75,13 @@ export interface UpdateProfileDto {
   profilePictureUrl?: string;
 }
 
-/**
- * Password change DTO for API requests
- */
+// Password change DTO for API requests
 export interface ChangePasswordDto {
   currentPassword: string;
   newPassword: string;
 }
 
-/**
- * Session data from backend
- */
+// Session data from backend
 export interface Session {
   sessionId: string;
   device: string;

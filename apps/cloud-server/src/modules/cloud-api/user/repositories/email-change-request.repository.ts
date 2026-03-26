@@ -22,6 +22,16 @@ export class EmailChangeRequestRepository extends PrimaryBaseRepository<typeof e
     });
   }
 
+  // Finds the most recent active (incomplete) email change request for a user
+  async findActiveForUser(userId: string): Promise<EmailChangeRequest | undefined> {
+    const results = await this.findMany({
+      where: { userId, isCompleted: false },
+      orderBy: { createdAt: 'desc' },
+      limit: 1,
+    });
+    return results[0];
+  }
+
   // Finds an email change request by its revert token
   async findByRevertToken(revertToken: string): Promise<EmailChangeRequest | undefined> {
     return this.findOne({ revertToken });

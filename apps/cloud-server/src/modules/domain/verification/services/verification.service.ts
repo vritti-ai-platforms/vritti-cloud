@@ -34,7 +34,10 @@ export class VerificationService {
     target: string | null,
   ): Promise<CreateVerificationResult> {
     const isOutboundVerification =
-      channel === VerificationChannelValues.EMAIL || channel === VerificationChannelValues.SMS_OUT;
+      channel === VerificationChannelValues.EMAIL ||
+      channel === VerificationChannelValues.SMS_OUT ||
+      channel === VerificationChannelValues.IDENTITY_EMAIL_OUT ||
+      channel === VerificationChannelValues.IDENTITY_SMS_OUT;
 
     const expiresAt = this.getOtpExpiryTime();
 
@@ -56,7 +59,11 @@ export class VerificationService {
   // Verifies a code for the given channel — throws on any failure, returns the verified record
   async verifyVerification(code: string, channel: VerificationChannel, userId?: string): Promise<Verification> {
     const isOutboundVerification =
-      (channel === VerificationChannelValues.EMAIL || channel === VerificationChannelValues.SMS_OUT) && userId;
+      (channel === VerificationChannelValues.EMAIL ||
+        channel === VerificationChannelValues.SMS_OUT ||
+        channel === VerificationChannelValues.IDENTITY_EMAIL_OUT ||
+        channel === VerificationChannelValues.IDENTITY_SMS_OUT) &&
+      userId;
 
     const verification = isOutboundVerification
       ? await this.verificationRepo.findByUserIdAndChannel(userId, channel)

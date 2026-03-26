@@ -48,7 +48,7 @@ import { OrganizationSettingsPage } from './pages/cloud/organization/settings/Or
 import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
-import { ProfilePage } from './pages/cloud/settings/ProfilePage';
+import { ProfilePage } from './pages/cloud/settings/profile/ProfilePage';
 import { SecurityPage } from './pages/cloud/settings/SecurityPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
 

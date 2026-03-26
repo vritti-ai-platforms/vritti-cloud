@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // OTP verification form validation
 export const otpSchema = z.object({
-  code: z
+  otpCode: z
     .string()
     .length(6, 'Verification code must be 6 digits')
     .regex(/^\d{6}$/, 'Verification code must contain only numbers'),

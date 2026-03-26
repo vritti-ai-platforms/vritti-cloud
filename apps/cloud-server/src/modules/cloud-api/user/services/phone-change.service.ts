@@ -101,23 +101,15 @@ export class PhoneChangeService {
   // Validates new phone and sends verification OTP to it (step 3)
   async submitNewPhone(
     userId: string,
-    changeRequestId: string,
     newPhone: string,
     newPhoneCountry: string,
   ): Promise<{ expiresAt: Date }> {
-    const changeRequest = await this.phoneChangeRequestRepo.findById(changeRequestId);
+    const changeRequest = await this.phoneChangeRequestRepo.findActiveForUser(userId);
 
-    if (!changeRequest || changeRequest.userId !== userId) {
+    if (!changeRequest) {
       throw new BadRequestException({
         label: 'Change Request Not Found',
         detail: 'Your phone change request is invalid or has expired. Please start the process again.',
-      });
-    }
-
-    if (changeRequest.isCompleted) {
-      throw new BadRequestException({
-        label: 'Change Request Already Completed',
-        detail: 'This phone change request has already been completed.',
       });
     }
 
@@ -171,22 +163,14 @@ export class PhoneChangeService {
   // Verifies OTP sent to new phone and completes the change (step 4)
   async verifyNewPhone(
     userId: string,
-    changeRequestId: string,
     otpCode: string,
   ): Promise<{ success: boolean; revertToken: string; revertExpiresAt: Date; newPhone: string }> {
-    const changeRequest = await this.phoneChangeRequestRepo.findById(changeRequestId);
+    const changeRequest = await this.phoneChangeRequestRepo.findActiveForUser(userId);
 
-    if (!changeRequest || changeRequest.userId !== userId) {
+    if (!changeRequest) {
       throw new BadRequestException({
         label: 'Change Request Not Found',
         detail: 'Your phone change request is invalid or has expired. Please start the process again.',
-      });
-    }
-
-    if (changeRequest.isCompleted) {
-      throw new BadRequestException({
-        label: 'Change Request Already Completed',
-        detail: 'This phone change request has already been completed.',
       });
     }
 

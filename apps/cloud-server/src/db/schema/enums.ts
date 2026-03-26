@@ -21,6 +21,8 @@ export const verificationChannelEnum = cloudSchema.enum('verification_channel', 
   'SMS_OUT', // Outbound SMS with OTP (we send to user)
   'SMS_IN', // Inbound SMS with code (user sends to us via QR)
   'WHATSAPP_IN', // Inbound WhatsApp with code (user sends to us via QR)
+  'IDENTITY_EMAIL_OUT', // Identity verification OTP sent to current email (contact change flow)
+  'IDENTITY_SMS_OUT', // Identity verification OTP sent to current phone (contact change flow)
 ]);
 
 export const mfaMethodEnum = cloudSchema.enum('MfaMethod', ['TOTP', 'PASSKEY']);
@@ -82,6 +84,8 @@ export const VerificationChannelValues = {
   SMS_OUT: 'SMS_OUT' as const,
   SMS_IN: 'SMS_IN' as const,
   WHATSAPP_IN: 'WHATSAPP_IN' as const,
+  IDENTITY_EMAIL_OUT: 'IDENTITY_EMAIL_OUT' as const,
+  IDENTITY_SMS_OUT: 'IDENTITY_SMS_OUT' as const,
 };
 
 export const MfaMethodValues = {

@@ -426,56 +426,6 @@
         ]
       }
     },
-    "/cloud-api/users/contact/email/revert": {
-      "post": {
-        "description": "Reverts the email change using the revert token sent to the old email (valid for 72 hours)",
-        "operationId": "ContactChangeController_revertEmailChange",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RevertEmailChangeDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Email change reverted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "revertedEmail": {
-                      "type": "string",
-                      "format": "email"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid or expired revert token"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Revert email change",
-        "tags": [
-          "Contact Change"
-        ]
-      }
-    },
     "/cloud-api/users/contact/email/resend-otp": {
       "post": {
         "description": "Resends the verification OTP to the email address",
@@ -716,55 +666,6 @@
           }
         ],
         "summary": "Verify new phone and complete change",
-        "tags": [
-          "Contact Change"
-        ]
-      }
-    },
-    "/cloud-api/users/contact/phone/revert": {
-      "post": {
-        "description": "Reverts the phone change using the revert token sent to the old phone (valid for 72 hours)",
-        "operationId": "ContactChangeController_revertPhoneChange",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/RevertPhoneChangeDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Phone change reverted successfully",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "success": {
-                      "type": "boolean"
-                    },
-                    "revertedPhone": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid or expired revert token"
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Revert phone change",
         "tags": [
           "Contact Change"
         ]
@@ -10862,30 +10763,19 @@
       "SubmitNewEmailDto": {
         "type": "object",
         "properties": {
-          "changeRequestId": {
-            "type": "string",
-            "description": "Change request ID from step 2",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
           "newEmail": {
             "type": "string",
-            "description": "New email address",
+            "description": "New email address to change to",
             "example": "newemail@example.com"
           }
         },
         "required": [
-          "changeRequestId",
           "newEmail"
         ]
       },
       "VerifyNewEmailDto": {
         "type": "object",
         "properties": {
-          "changeRequestId": {
-            "type": "string",
-            "description": "Change request ID from step 2",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
           "otpCode": {
             "type": "string",
             "description": "6-digit OTP code sent to new email",
@@ -10895,44 +10785,26 @@
           }
         },
         "required": [
-          "changeRequestId",
           "otpCode"
-        ]
-      },
-      "RevertEmailChangeDto": {
-        "type": "object",
-        "properties": {
-          "revertToken": {
-            "type": "string",
-            "description": "Revert token from email notification",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          }
-        },
-        "required": [
-          "revertToken"
         ]
       },
       "SubmitNewPhoneDto": {
         "type": "object",
         "properties": {
-          "changeRequestId": {
-            "type": "string",
-            "description": "Change request ID from step 2",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
           "newPhone": {
             "type": "string",
-            "description": "New phone number",
-            "example": "9876543210"
+            "description": "New phone number with optional country prefix",
+            "example": "+919876543210"
           },
           "newPhoneCountry": {
             "type": "string",
             "description": "Country code for new phone number",
-            "example": "IN"
+            "example": "IN",
+            "minLength": 2,
+            "maxLength": 5
           }
         },
         "required": [
-          "changeRequestId",
           "newPhone",
           "newPhoneCountry"
         ]
@@ -10940,11 +10812,6 @@
       "VerifyNewPhoneDto": {
         "type": "object",
         "properties": {
-          "changeRequestId": {
-            "type": "string",
-            "description": "Change request ID from step 2",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
           "otpCode": {
             "type": "string",
             "description": "6-digit OTP code sent to new phone",
@@ -10954,21 +10821,7 @@
           }
         },
         "required": [
-          "changeRequestId",
           "otpCode"
-        ]
-      },
-      "RevertPhoneChangeDto": {
-        "type": "object",
-        "properties": {
-          "revertToken": {
-            "type": "string",
-            "description": "Revert token from notification",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          }
-        },
-        "required": [
-          "revertToken"
         ]
       },
       "SetPasswordDto": {

@@ -1,107 +1,68 @@
 import { axios } from '@vritti/quantum-ui/axios';
 
 export interface IdentityVerificationResponse {
-  verificationId: string;
   expiresAt: string;
-  maskedEmail?: string;
-  maskedPhone?: string;
 }
 
-export interface VerifyIdentityRequest {
-  verificationId: string;
-  otpCode: string;
-}
-
-export interface VerifyIdentityResponse {
-  changeRequestId: string;
-  changeRequestsToday: number;
-}
-
-export interface RequestChangeRequest {
-  changeRequestId: string;
-  newEmail?: string;
-  newPhone?: string;
-  phoneCountry?: string;
+export interface SuccessResponse {
+  success: boolean;
+  message: string;
 }
 
 export interface RequestChangeResponse {
-  verificationId: string;
   expiresAt: string;
 }
 
-export interface VerifyChangeRequest {
-  changeRequestId: string;
-  verificationId: string;
-  otpCode: string;
+// Requests identity verification OTP for email change
+export function requestEmailIdentityVerification(): Promise<IdentityVerificationResponse> {
+  return axios
+    .post<IdentityVerificationResponse>('/cloud-api/users/contact/email/request-identity-verification')
+    .then((r) => r.data);
 }
 
-export interface VerifyChangeResponse {
-  success: boolean;
-  revertToken: string;
-  revertExpiresAt: string;
-  newEmail?: string;
-  newPhone?: string;
+// Verifies identity OTP for email change
+export function verifyEmailIdentity(data: { otpCode: string }): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>('/cloud-api/users/contact/email/verify-identity', data).then((r) => r.data);
 }
 
-export interface ResendOtpRequest {
-  verificationId: string;
+// Submits a new email address for change
+export function requestEmailChange(data: { newEmail: string }): Promise<RequestChangeResponse> {
+  return axios.post<RequestChangeResponse>('/cloud-api/users/contact/email/submit-new-email', data).then((r) => r.data);
 }
 
-export interface ResendOtpResponse {
-  success: boolean;
-  expiresAt: string;
+// Verifies OTP sent to the new email address
+export function verifyEmailChange(data: { otpCode: string }): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>('/cloud-api/users/contact/email/verify-new-email', data).then((r) => r.data);
 }
 
-export interface RevertChangeRequest {
-  revertToken: string;
+// Resends OTP for email verification
+export function resendEmailOtp(): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>('/cloud-api/users/contact/email/resend-otp').then((r) => r.data);
 }
 
-export interface RevertChangeResponse {
-  success: boolean;
-  revertedEmail?: string;
-  revertedPhone?: string;
+// Requests identity verification OTP for phone change
+export function requestPhoneIdentityVerification(): Promise<IdentityVerificationResponse> {
+  return axios
+    .post<IdentityVerificationResponse>('/cloud-api/users/contact/phone/request-identity-verification')
+    .then((r) => r.data);
 }
 
-export const verificationService = {
-  // Email Flow
-  requestEmailIdentityVerification: (): Promise<IdentityVerificationResponse> =>
-    axios
-      .post<IdentityVerificationResponse>('/cloud-api/users/contact/email/request-identity-verification')
-      .then((r) => r.data),
+// Verifies identity OTP for phone change
+export function verifyPhoneIdentity(data: { otpCode: string }): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>('/cloud-api/users/contact/phone/verify-identity', data).then((r) => r.data);
+}
 
-  verifyEmailIdentity: (data: VerifyIdentityRequest): Promise<VerifyIdentityResponse> =>
-    axios.post<VerifyIdentityResponse>('/cloud-api/users/contact/email/verify-identity', data).then((r) => r.data),
+// Submits a new phone number for change
+export function requestPhoneChange(data: { newPhone: string; newPhoneCountry: string }): Promise<RequestChangeResponse> {
+  return axios.post<RequestChangeResponse>('/cloud-api/users/contact/phone/submit-new-phone', data).then((r) => r.data);
+}
 
-  requestEmailChange: (data: RequestChangeRequest): Promise<RequestChangeResponse> =>
-    axios.post<RequestChangeResponse>('/cloud-api/users/contact/email/submit-new-email', data).then((r) => r.data),
+// Verifies OTP sent to the new phone number
+export function verifyPhoneChange(data: { otpCode: string }): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>('/cloud-api/users/contact/phone/verify-new-phone', data).then((r) => r.data);
+}
 
-  verifyEmailChange: (data: VerifyChangeRequest): Promise<VerifyChangeResponse> =>
-    axios.post<VerifyChangeResponse>('/cloud-api/users/contact/email/verify-new-email', data).then((r) => r.data),
-
-  resendEmailOtp: (data: ResendOtpRequest): Promise<ResendOtpResponse> =>
-    axios.post<ResendOtpResponse>('/cloud-api/users/contact/email/resend-otp', data).then((r) => r.data),
-
-  revertEmailChange: (data: RevertChangeRequest): Promise<RevertChangeResponse> =>
-    axios.post<RevertChangeResponse>('/cloud-api/users/contact/email/revert', data).then((r) => r.data),
-
-  // Phone Flow
-  requestPhoneIdentityVerification: (): Promise<IdentityVerificationResponse> =>
-    axios
-      .post<IdentityVerificationResponse>('/cloud-api/users/contact/phone/request-identity-verification')
-      .then((r) => r.data),
-
-  verifyPhoneIdentity: (data: VerifyIdentityRequest): Promise<VerifyIdentityResponse> =>
-    axios.post<VerifyIdentityResponse>('/cloud-api/users/contact/phone/verify-identity', data).then((r) => r.data),
-
-  requestPhoneChange: (data: RequestChangeRequest): Promise<RequestChangeResponse> =>
-    axios.post<RequestChangeResponse>('/cloud-api/users/contact/phone/submit-new-phone', data).then((r) => r.data),
-
-  verifyPhoneChange: (data: VerifyChangeRequest): Promise<VerifyChangeResponse> =>
-    axios.post<VerifyChangeResponse>('/cloud-api/users/contact/phone/verify-new-phone', data).then((r) => r.data),
-
-  resendPhoneOtp: (data: ResendOtpRequest): Promise<ResendOtpResponse> =>
-    axios.post<ResendOtpResponse>('/cloud-api/users/contact/phone/resend-otp', data).then((r) => r.data),
-
-  revertPhoneChange: (data: RevertChangeRequest): Promise<RevertChangeResponse> =>
-    axios.post<RevertChangeResponse>('/cloud-api/users/contact/phone/revert', data).then((r) => r.data),
-};
+// Resends OTP for phone verification
+export function resendPhoneOtp(): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>('/cloud-api/users/contact/phone/resend-otp').then((r) => r.data);
+}

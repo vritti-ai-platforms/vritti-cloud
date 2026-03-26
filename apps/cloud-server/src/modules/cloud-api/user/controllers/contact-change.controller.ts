@@ -6,18 +6,14 @@ import {
   ApiVerifyEmailIdentity,
   ApiSubmitNewEmail,
   ApiVerifyNewEmail,
-  ApiRevertEmailChange,
   ApiResendEmailOtp,
   ApiRequestPhoneIdentityVerification,
   ApiVerifyPhoneIdentity,
   ApiSubmitNewPhone,
   ApiVerifyNewPhone,
-  ApiRevertPhoneChange,
   ApiResendPhoneOtp,
 } from '../docs/contact-change.docs';
 import {
-  RevertEmailChangeDto,
-  RevertPhoneChangeDto,
   SubmitNewEmailDto,
   SubmitNewPhoneDto,
   VerifyIdentityDto,
@@ -61,7 +57,7 @@ export class ContactChangeController {
   @HttpCode(HttpStatus.OK)
   @ApiSubmitNewEmail()
   async submitNewEmail(@UserId() userId: string, @Body() dto: SubmitNewEmailDto) {
-    return this.emailChangeService.submitNewEmail(userId, dto.changeRequestId, dto.newEmail);
+    return this.emailChangeService.submitNewEmail(userId, dto.newEmail);
   }
 
   // Verifies the new email OTP and completes the email change
@@ -69,15 +65,7 @@ export class ContactChangeController {
   @HttpCode(HttpStatus.OK)
   @ApiVerifyNewEmail()
   async verifyNewEmail(@UserId() userId: string, @Body() dto: VerifyNewEmailDto) {
-    return this.emailChangeService.verifyNewEmail(userId, dto.changeRequestId, dto.otpCode);
-  }
-
-  // Reverts a completed email change using a revert token
-  @Post('email/revert')
-  @HttpCode(HttpStatus.OK)
-  @ApiRevertEmailChange()
-  async revertEmailChange(@Body() dto: RevertEmailChangeDto) {
-    return this.emailChangeService.revertChange(dto.revertToken);
+    return this.emailChangeService.verifyNewEmail(userId, dto.otpCode);
   }
 
   // Resends the email verification OTP for the active verification
@@ -113,7 +101,7 @@ export class ContactChangeController {
   @HttpCode(HttpStatus.OK)
   @ApiSubmitNewPhone()
   async submitNewPhone(@UserId() userId: string, @Body() dto: SubmitNewPhoneDto) {
-    return this.phoneChangeService.submitNewPhone(userId, dto.changeRequestId, dto.newPhone, dto.newPhoneCountry);
+    return this.phoneChangeService.submitNewPhone(userId, dto.newPhone, dto.newPhoneCountry);
   }
 
   // Verifies the new phone OTP and completes the phone change
@@ -121,15 +109,7 @@ export class ContactChangeController {
   @HttpCode(HttpStatus.OK)
   @ApiVerifyNewPhone()
   async verifyNewPhone(@UserId() userId: string, @Body() dto: VerifyNewPhoneDto) {
-    return this.phoneChangeService.verifyNewPhone(userId, dto.changeRequestId, dto.otpCode);
-  }
-
-  // Reverts a completed phone change using a revert token
-  @Post('phone/revert')
-  @HttpCode(HttpStatus.OK)
-  @ApiRevertPhoneChange()
-  async revertPhoneChange(@Body() dto: RevertPhoneChangeDto) {
-    return this.phoneChangeService.revertChange(dto.revertToken);
+    return this.phoneChangeService.verifyNewPhone(userId, dto.otpCode);
   }
 
   // Resends the phone verification OTP for the active verification

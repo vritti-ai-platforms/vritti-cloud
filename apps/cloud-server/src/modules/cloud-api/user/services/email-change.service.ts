@@ -87,20 +87,13 @@ export class EmailChangeService {
   }
 
   // Validates new email and sends verification OTP to it (step 3)
-  async submitNewEmail(userId: string, changeRequestId: string, newEmail: string): Promise<{ expiresAt: Date }> {
-    const changeRequest = await this.emailChangeRequestRepo.findById(changeRequestId);
+  async submitNewEmail(userId: string, newEmail: string): Promise<{ expiresAt: Date }> {
+    const changeRequest = await this.emailChangeRequestRepo.findActiveForUser(userId);
 
-    if (!changeRequest || changeRequest.userId !== userId) {
+    if (!changeRequest) {
       throw new BadRequestException({
         label: 'Change Request Not Found',
         detail: 'Your email change request is invalid or has expired. Please start the process again.',
-      });
-    }
-
-    if (changeRequest.isCompleted) {
-      throw new BadRequestException({
-        label: 'Change Request Already Completed',
-        detail: 'This email change request has already been completed.',
       });
     }
 
@@ -143,22 +136,14 @@ export class EmailChangeService {
   // Verifies OTP sent to new email and completes the change (step 4)
   async verifyNewEmail(
     userId: string,
-    changeRequestId: string,
     otpCode: string,
   ): Promise<{ success: boolean; revertToken: string; revertExpiresAt: Date; newEmail: string }> {
-    const changeRequest = await this.emailChangeRequestRepo.findById(changeRequestId);
+    const changeRequest = await this.emailChangeRequestRepo.findActiveForUser(userId);
 
-    if (!changeRequest || changeRequest.userId !== userId) {
+    if (!changeRequest) {
       throw new BadRequestException({
         label: 'Change Request Not Found',
         detail: 'Your email change request is invalid or has expired. Please start the process again.',
-      });
-    }
-
-    if (changeRequest.isCompleted) {
-      throw new BadRequestException({
-        label: 'Change Request Already Completed',
-        detail: 'This email change request has already been completed.',
       });
     }
 

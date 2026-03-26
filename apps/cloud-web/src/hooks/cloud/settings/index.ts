@@ -1,7 +1,14 @@
-export { type EmailChangeFlowState, type EmailChangeStep, useEmailChangeFlow } from './useEmailChangeFlow';
-export { useEmailVerification } from './useEmailVerification';
-export { type PhoneChangeFlowState, type PhoneChangeStep, usePhoneChangeFlow } from './usePhoneChangeFlow';
-export { usePhoneVerification } from './usePhoneVerification';
+export { useRequestEmailIdentityVerification } from './useRequestEmailIdentityVerification';
+export { useVerifyEmailIdentity } from './useVerifyEmailIdentity';
+export { useRequestEmailChange } from './useRequestEmailChange';
+export { useVerifyEmailChange } from './useVerifyEmailChange';
+export { useResendEmailOtp } from './useResendEmailOtp';
+export { useRequestPhoneIdentityVerification } from './useRequestPhoneIdentityVerification';
+export { useVerifyPhoneIdentity } from './useVerifyPhoneIdentity';
+export { useRequestPhoneChange } from './useRequestPhoneChange';
+export { useVerifyPhoneChange } from './useVerifyPhoneChange';
+export { useResendPhoneOtp } from './useResendPhoneOtp';
+export { useResendTimer } from './useResendTimer';
 export { PROFILE_QUERY_KEY, useDeleteAccount, useProfile, useUpdateProfile } from './useProfile';
 export {
   SESSIONS_QUERY_KEY,
