@@ -1,5 +1,4 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useResendTimer } from '@hooks/cloud/account/useResendTimer';
 import type { NewEmailFormData } from '@schemas/verification';
 import { newEmailSchema } from '@schemas/verification';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -12,11 +11,12 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ContactChangeProgressIndicator } from '@/components/cloud/account/profile/ContactChangeProgressIndicator';
-import { useRequestEmailChange } from '@/hooks/cloud/account/useRequestEmailChange';
-import { useRequestEmailIdentityVerification } from '@/hooks/cloud/account/useRequestEmailIdentityVerification';
-import { useResendEmailOtp } from '@/hooks/cloud/account/useResendEmailOtp';
-import { useVerifyEmailChange } from '@/hooks/cloud/account/useVerifyEmailChange';
-import { useVerifyEmailIdentity } from '@/hooks/cloud/account/useVerifyEmailIdentity';
+import { useRequestEmailChange } from '@/hooks/account/useRequestEmailChange';
+import { useRequestEmailIdentityVerification } from '@/hooks/account/useRequestEmailIdentityVerification';
+import { useResendEmailOtp } from '@/hooks/account/useResendEmailOtp';
+import { useTimer } from '@vritti/quantum-ui/hooks';
+import { useVerifyEmailChange } from '@/hooks/account/useVerifyEmailChange';
+import { useVerifyEmailIdentity } from '@/hooks/account/useVerifyEmailIdentity';
 import { ContactChangeSuccessStep } from './steps/ContactChangeSuccessStep';
 import { IdentityVerificationStep } from './steps/IdentityVerificationStep';
 import { OtpVerificationStep } from './steps/OtpVerificationStep';
@@ -41,7 +41,7 @@ export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail
   const [step, setStep] = useState<EmailStep>('identity');
   const [progress, setProgress] = useState(0);
   const [newEmail, setNewEmail] = useState('');
-  const { timer: resendTimer, startTimer } = useResendTimer();
+  const { timer: resendTimer, startTimer } = useTimer();
 
   // Mutations
   const requestIdentityMutation = useRequestEmailIdentityVerification();
@@ -103,8 +103,14 @@ export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail
             verifyMutation={verifyIdentityMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onOtpSent={() => { startTimer(45); setProgress(50); }}
-            onSuccess={() => { setStep('newEmail'); setProgress(0); }}
+            onOtpSent={() => {
+              startTimer(45);
+              setProgress(50);
+            }}
+            onSuccess={() => {
+              setStep('newEmail');
+              setProgress(0);
+            }}
             onCancel={onClose}
           />
         )}
@@ -144,7 +150,10 @@ export const EmailVerificationDialog: React.FC<Props> = ({ onClose, currentEmail
             verifyMutation={verifyChangeMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onSuccess={() => { setStep('success'); setProgress(0); }}
+            onSuccess={() => {
+              setStep('success');
+              setProgress(0);
+            }}
             onBack={() => setStep('newEmail')}
           />
         )}

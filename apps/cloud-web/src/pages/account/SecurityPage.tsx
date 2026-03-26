@@ -18,7 +18,7 @@ import {
   useRevokeAllOtherSessions,
   useRevokeSession,
   useSessions,
-} from '@/hooks/cloud/account/useSecurity';
+} from '@/hooks/account/useSecurity';
 import type { ChangePasswordFormData } from '@/schemas/cloud/account';
 import { changePasswordSchema } from '@/schemas/cloud/account';
 

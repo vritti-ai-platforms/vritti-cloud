@@ -1,23 +1,23 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useResendTimer } from '@hooks/cloud/account/useResendTimer';
 import type { NewPhoneFormData } from '@schemas/verification';
 import { newPhoneSchema } from '@schemas/verification';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { FieldGroup, Form } from '@vritti/quantum-ui/Form';
-import { PhoneField } from '@vritti/quantum-ui/PhoneField';
 import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
+import { PhoneField } from '@vritti/quantum-ui/PhoneField';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { Info } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { ContactChangeProgressIndicator } from '@/components/cloud/account/profile/ContactChangeProgressIndicator';
-import { useRequestPhoneChange } from '@/hooks/cloud/account/useRequestPhoneChange';
-import { useRequestPhoneIdentityVerification } from '@/hooks/cloud/account/useRequestPhoneIdentityVerification';
-import { useResendPhoneOtp } from '@/hooks/cloud/account/useResendPhoneOtp';
-import { useVerifyPhoneChange } from '@/hooks/cloud/account/useVerifyPhoneChange';
-import { useVerifyPhoneIdentity } from '@/hooks/cloud/account/useVerifyPhoneIdentity';
+import { useRequestPhoneChange } from '@/hooks/account/useRequestPhoneChange';
+import { useRequestPhoneIdentityVerification } from '@/hooks/account/useRequestPhoneIdentityVerification';
+import { useResendPhoneOtp } from '@/hooks/account/useResendPhoneOtp';
+import { useTimer } from '@vritti/quantum-ui/hooks';
+import { useVerifyPhoneChange } from '@/hooks/account/useVerifyPhoneChange';
+import { useVerifyPhoneIdentity } from '@/hooks/account/useVerifyPhoneIdentity';
 import { ContactChangeSuccessStep } from './steps/ContactChangeSuccessStep';
 import { IdentityVerificationStep } from './steps/IdentityVerificationStep';
 import { OtpVerificationStep } from './steps/OtpVerificationStep';
@@ -44,7 +44,7 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
   const [progress, setProgress] = useState(0);
   const [newPhone, setNewPhone] = useState('');
   const [phoneCountry, setPhoneCountry] = useState(currentCountry);
-  const { timer: resendTimer, startTimer } = useResendTimer();
+  const { timer: resendTimer, startTimer } = useTimer();
 
   // Mutations
   const requestIdentityMutation = useRequestPhoneIdentityVerification();
@@ -106,8 +106,14 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
             verifyMutation={verifyIdentityMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onOtpSent={() => { startTimer(45); setProgress(50); }}
-            onSuccess={() => { setStep('newPhone'); setProgress(0); }}
+            onOtpSent={() => {
+              startTimer(45);
+              setProgress(50);
+            }}
+            onSuccess={() => {
+              setStep('newPhone');
+              setProgress(0);
+            }}
             onCancel={onClose}
           />
         )}
@@ -162,17 +168,16 @@ export const PhoneVerificationDialog: React.FC<Props> = ({ onClose, currentPhone
             verifyMutation={verifyChangeMutation}
             onResend={handleResend}
             resendTimer={resendTimer}
-            onSuccess={() => { setStep('success'); setProgress(0); }}
+            onSuccess={() => {
+              setStep('success');
+              setProgress(0);
+            }}
             onBack={() => setStep('newPhone')}
           />
         )}
 
         {step === 'success' && (
-          <ContactChangeSuccessStep
-            contactType="phone"
-            newContactValue={newPhone}
-            onClose={onClose}
-          />
+          <ContactChangeSuccessStep contactType="phone" newContactValue={newPhone} onClose={onClose} />
         )}
       </div>
     </Dialog>
