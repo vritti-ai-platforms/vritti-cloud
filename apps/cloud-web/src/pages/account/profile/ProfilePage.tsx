@@ -11,14 +11,13 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import { AccountInformationCard } from '@/components/cloud/account/profile/AccountInformationCard';
-import { useDeleteAccount } from '@/hooks/account/useDeleteAccount';
-import { useProfile } from '@/hooks/account/useProfile';
-import { useUpdateProfile } from '@/hooks/account/useUpdateProfile';
+import { useDeleteAccount } from '@/hooks/account/profile/useDeleteAccount';
+import { useProfile } from '@/hooks/account/profile/useProfile';
+import { useUpdateProfile } from '@/hooks/account/profile/useUpdateProfile';
 import type { ProfileFormData } from '@/schemas/cloud/account';
 import { profileSchema } from '@/schemas/cloud/account';
-import { EmailVerificationDialog } from './forms/EmailVerificationDialog';
+import { ContactChangeDialog } from './forms/ContactChangeDialog';
 import { PersonalInformationCard } from './forms/PersonalInformationCard';
-import { PhoneVerificationDialog } from './forms/PhoneVerificationDialog';
 import { ProfilePictureCard } from './forms/ProfilePictureCard';
 
 export const ProfilePage: React.FC = () => {
@@ -26,8 +25,8 @@ export const ProfilePage: React.FC = () => {
   const confirm = useConfirm();
   const { data: profile, isLoading } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
-  const emailDialog = useDialog();
-  const phoneDialog = useDialog();
+  const contactDialog = useDialog();
+  const [contactType, setContactType] = useState<'email' | 'phone'>('email');
 
   const updateProfileMutation = useUpdateProfile({
     onSuccess: () => setIsEditing(false),
@@ -119,8 +118,8 @@ export const ProfilePage: React.FC = () => {
         form={form}
         mutation={updateProfileMutation}
         isEditing={isEditing}
-        onChangeEmail={emailDialog.open}
-        onChangePhone={phoneDialog.open}
+        onChangeEmail={() => { setContactType('email'); contactDialog.open(); }}
+        onChangePhone={() => { setContactType('phone'); contactDialog.open(); }}
       />
 
       <AccountInformationCard profile={profile} />
@@ -133,11 +132,12 @@ export const ProfilePage: React.FC = () => {
         disabled={deleteAccountMutation.isPending}
       />
 
-      {emailDialog.isOpen && <EmailVerificationDialog onClose={emailDialog.close} currentEmail={profile.email} />}
-
-      {phoneDialog.isOpen && (
-        <PhoneVerificationDialog onClose={phoneDialog.close} currentPhone={profile.phone} currentCountry="IN" />
-      )}
+      <ContactChangeDialog
+        open={contactDialog.isOpen}
+        contactType={contactType}
+        onClose={contactDialog.close}
+        profile={profile}
+      />
     </div>
   );
 };

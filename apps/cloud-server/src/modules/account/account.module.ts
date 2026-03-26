@@ -1,11 +1,13 @@
 import { SessionModule } from '@domain/session/session.module';
 import { UserDomainModule } from '@domain/user/user.module';
+import { VerificationModule } from '@domain/verification/verification.module';
 import { Module } from '@nestjs/common';
-import { ContactChangeController } from './controllers/email-phone-change.controller';
-import { ProfileController } from './controllers/profile.controller';
+import { ProfileController } from './profile/controllers/profile.controller';
+import { ProfileService } from './profile/services/profile.service';
 
 @Module({
-  imports: [UserDomainModule, SessionModule],
-  controllers: [ContactChangeController, ProfileController],
+  imports: [UserDomainModule, SessionModule, VerificationModule],
+  controllers: [ProfileController],
+  providers: [ProfileService],
 })
 export class AccountModule {}

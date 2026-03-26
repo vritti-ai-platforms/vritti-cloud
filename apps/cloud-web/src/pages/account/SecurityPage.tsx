@@ -51,12 +51,6 @@ export const SecurityPage: React.FC = () => {
 
   const newPassword = passwordForm.watch('newPassword');
 
-  const handlePasswordSubmit = (data: ChangePasswordFormData) => {
-    changePasswordMutation.mutate({
-      currentPassword: data.currentPassword,
-      newPassword: data.newPassword,
-    });
-  };
 
   const handleRevokeSession = (sessionId: string) => {
     revokeSessionMutation.mutate(sessionId, {
@@ -104,7 +98,11 @@ export const SecurityPage: React.FC = () => {
           <CardDescription>Update your password to keep your account secure</CardDescription>
         </CardHeader>
         <CardContent>
-          <Form form={passwordForm} mutation={changePasswordMutation} onSubmit={handlePasswordSubmit}>
+          <Form
+            form={passwordForm}
+            mutation={changePasswordMutation}
+            transformSubmit={(data) => ({ currentPassword: data.currentPassword, newPassword: data.newPassword })}
+          >
             <FieldGroup>
               {/* Current Password */}
               <PasswordField

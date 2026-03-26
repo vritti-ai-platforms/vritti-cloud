@@ -1,43 +1,48 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { OTPFormData } from '@schemas/verification';
 import { otpSchema } from '@schemas/verification';
-import type { UseMutationResult } from '@tanstack/react-query';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
-import type { AxiosError } from 'axios';
-import { Clock, Info, Send } from 'lucide-react';
+import { useTimer } from '@vritti/quantum-ui/hooks';
+import { Clock, Mail, Send, Smartphone } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { IdentityVerificationResponse, SuccessResponse } from '@/services/account/verification.service';
+import { useIdentityVerificationStart } from '@/hooks/account/profile/useIdentityVerificationStart';
+import { useResendTargetOtp } from '@/hooks/account/profile/useResendTargetOtp';
+import { useVerifyIdentity } from '@/hooks/account/profile/useVerifyIdentity';
+import { CHANNELS } from '@/services/account/profile.service';
 
 interface IdentityVerificationStepProps {
   contactType: 'email' | 'phone';
-  contactValue: string;
-  requestMutation: UseMutationResult<IdentityVerificationResponse, AxiosError, void>;
-  verifyMutation: UseMutationResult<SuccessResponse, AxiosError, { otpCode: string }>;
-  onResend: () => void;
-  resendTimer: number;
-  onOtpSent: () => void;
+  email: string;
+  phone: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-// Identity verification step — first sends OTP, then verifies it
+// Step 1 — select method, send OTP, verify identity
 export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> = ({
   contactType,
-  contactValue,
-  requestMutation,
-  verifyMutation,
-  onResend,
-  resendTimer,
-  onOtpSent,
+  email,
+  phone,
   onSuccess,
   onCancel,
 }) => {
+  const defaultChannel = contactType === 'email' ? CHANNELS.IDENTITY_EMAIL : CHANNELS.IDENTITY_PHONE;
+  const [selectedChannel, setSelectedChannel] = useState(defaultChannel);
   const [otpSent, setOtpSent] = useState(false);
+  const { timer: resendTimer, startTimer } = useTimer();
+
+  const requestMutation = useIdentityVerificationStart();
+  const verifyMutation = useVerifyIdentity({
+    onSuccess: () => onSuccess(),
+  });
+  const resendMutation = useResendTargetOtp({
+    onSuccess: () => startTimer(45),
+  });
 
   const form = useForm<OTPFormData>({
     resolver: zodResolver(otpSchema),
@@ -46,42 +51,67 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
 
   const contactLabel = contactType === 'email' ? 'email address' : 'phone number';
 
-  // Sends OTP to current contact
+  // Sends OTP via selected channel
   const handleSendOtp = () => {
-    requestMutation.mutate(undefined, {
+    requestMutation.mutate(selectedChannel, {
       onSuccess: () => {
         setOtpSent(true);
-        onOtpSent();
+        startTimer(45);
       },
     });
   };
 
-  // Verifies the OTP code
-  const handleVerify = (data: OTPFormData) => {
-    verifyMutation.mutate({ otpCode: data.otpCode }, { onSuccess: () => onSuccess() });
-  };
+  const methods = [
+    {
+      id: CHANNELS.IDENTITY_EMAIL,
+      title: 'Verify via Email',
+      description: email,
+      icon: <Mail className="h-5 w-5" />,
+    },
+    {
+      id: CHANNELS.IDENTITY_PHONE,
+      title: 'Verify via SMS',
+      description: phone,
+      icon: <Smartphone className="h-5 w-5" />,
+    },
+  ];
 
-  // Before OTP is sent — show info + send button
+  // Method selection + Send OTP button
   if (!otpSent) {
     return (
-      <div className="space-y-4">
-        <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">
-          <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-          <Typography variant="body2" className="text-primary">
-            For your security, we need to verify your identity before changing your {contactLabel}
-          </Typography>
-        </div>
-
-        <div className="space-y-2">
-          <Typography variant="body2">Current {contactType === 'email' ? 'Email' : 'Phone'}</Typography>
-          <Typography variant="body1" className="font-semibold">
-            {contactValue}
-          </Typography>
-        </div>
-
-        <Typography variant="body2" intent="muted">
-          We'll send a 6-digit verification code to your current {contactType} to confirm your identity.
+      <div className="space-y-6">
+        <Typography variant="body2" align="center" intent="muted">
+          Choose how you'd like to verify your identity before changing your {contactLabel}
         </Typography>
+
+        <div className="space-y-3">
+          {methods.map((method) => {
+            const isSelected = selectedChannel === method.id;
+            return (
+              <button
+                type="button"
+                key={method.id}
+                onClick={() => setSelectedChannel(method.id)}
+                className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-4 text-left ${isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+              >
+                <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${isSelected ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground'}`}>
+                  {method.icon}
+                </div>
+                <div className="flex-1 space-y-1">
+                  <Typography variant="body1" className="font-medium text-foreground">
+                    {method.title}
+                  </Typography>
+                  <Typography variant="body2" intent="muted">
+                    {method.description}
+                  </Typography>
+                </div>
+                <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${isSelected ? 'border-primary' : 'border-muted-foreground'}`}>
+                  {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="outline" onClick={onCancel}>
@@ -89,7 +119,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
           </Button>
           <Button type="button" onClick={handleSendOtp} disabled={requestMutation.isPending}>
             <Send className="h-4 w-4 mr-2" />
-            Send Verification Code
+            Send OTP
           </Button>
         </div>
       </div>
@@ -97,39 +127,52 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
   }
 
   // After OTP is sent — show OTP input
-  return (
-    <Form form={form} onSubmit={handleVerify} showRootError>
-      <FieldGroup>
-        <div className="space-y-2">
-          <Typography variant="body2">Current {contactType === 'email' ? 'Email' : 'Phone'}</Typography>
-          <Typography variant="body1" className="font-semibold">
-            {contactValue}
-          </Typography>
-        </div>
+  const sentTo = selectedChannel === CHANNELS.IDENTITY_EMAIL ? 'email' : 'phone';
 
+  return (
+    <Form
+      form={form}
+      mutation={verifyMutation}
+      transformSubmit={(data) => ({ channel: selectedChannel, otpCode: data.otpCode })}
+      showRootError
+    >
+      <FieldGroup>
         <div className="space-y-4">
-          <Typography variant="body2">Enter the verification code sent to your {contactType}</Typography>
+          <Typography variant="body2">Enter the verification code sent to your {sentTo}</Typography>
           <Field className="flex justify-center">
             <OTPField
               name="otpCode"
               onChange={(value) => {
                 if (value.length === 6 && !verifyMutation.isPending) {
-                  form.handleSubmit(handleVerify)();
+                  verifyMutation.mutate({ channel: selectedChannel, otpCode: value });
                 }
               }}
             />
           </Field>
           <div className="flex items-center justify-center">
-            <Button type="button" variant="ghost" size="sm" onClick={onResend} disabled={resendTimer > 0}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={() => resendMutation.mutate(selectedChannel)}
+              disabled={resendTimer > 0}
+            >
               <Clock className="h-4 w-4 mr-2" />
               {resendTimer > 0 ? `Resend code in ${resendTimer}s` : 'Resend code'}
             </Button>
           </div>
         </div>
 
-        <div className="flex gap-3 justify-end">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+        <div className="flex gap-3 justify-between">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => {
+              setOtpSent(false);
+              form.reset();
+            }}
+          >
+            Change Method
           </Button>
           <Button type="submit">Continue</Button>
         </div>

@@ -216,18 +216,21 @@ For dialogs that need initialization on open (API calls, form setup), use condit
 
 Inside the dialog: `open={true}` (always open when mounted), no `isOpen` prop needed.
 
-## Form — don't use both mutation and onSubmit
+## Form — always use mutation prop, never onSubmit for mutations
 
-quantum-ui `Form` with `mutation` prop auto-calls `mutation.mutate(data)`, bypassing `onSubmit`. Use one or the other:
+Always pass `mutation` to `<Form>`. Use `transformSubmit` when form fields don't match the mutation payload. Never use `onSubmit` to call `mutation.mutate()` manually.
 
 ```tsx
-// Use mutation prop — Form handles mutate + loading/error automatically
+// CORRECT — Form handles mutate + loading/error automatically
 <Form form={form} mutation={createMutation} showRootError>
 
-// Use onSubmit — you control the mutation call (needed for field mapping)
-<Form form={form} onSubmit={(data) => mutation.mutate({ mapped: data.field })} showRootError>
+// CORRECT — transformSubmit maps form data to mutation payload
+<Form form={form} mutation={submitMutation} transformSubmit={(data) => ({ channel, target: data.newEmail })} showRootError>
 
-// WRONG — onSubmit is bypassed, mutation.mutate(rawFormData) is called instead
+// WRONG — never use onSubmit for mutations
+<Form form={form} onSubmit={(data) => mutation.mutate(data)} showRootError>
+
+// WRONG — never use both mutation and onSubmit
 <Form form={form} mutation={mutation} onSubmit={handleSubmit} showRootError>
 ```
 
