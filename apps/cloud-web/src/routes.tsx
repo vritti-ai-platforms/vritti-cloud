@@ -14,18 +14,23 @@ import { SecurityPage } from './pages/account/SecurityPage';
 import { AppVersionsPage } from './pages/admin/app-versions/AppVersionsPage';
 import { AdminAppsPage } from './pages/admin/app-versions/apps/AdminAppsPage';
 import { AppViewPage } from './pages/admin/app-versions/apps/AppViewPage';
+import { AppViewPageSkeleton } from './pages/admin/app-versions/apps/AppViewPageSkeleton';
 import { FeaturesPage } from './pages/admin/app-versions/features/FeaturesPage';
 import { FeatureViewPage } from './pages/admin/app-versions/features/FeatureViewPage';
+import { FeatureViewPageSkeleton } from './pages/admin/app-versions/features/FeatureViewPageSkeleton';
 import { MicrofrontendsPage } from './pages/admin/app-versions/microfrontends/MicrofrontendsPage';
 import { OverviewPage as VersionOverviewPage } from './pages/admin/app-versions/overview/OverviewPage';
 import { AdminRolesPage } from './pages/admin/app-versions/roles/AdminRolesPage';
 import { RoleViewPage } from './pages/admin/app-versions/roles/RoleViewPage';
+import { RoleViewPageSkeleton } from './pages/admin/app-versions/roles/RoleViewPageSkeleton';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
+import { DeploymentViewPageSkeleton } from './pages/admin/deployments/DeploymentViewPageSkeleton';
 import { IndustriesPage } from './pages/admin/industries/IndustriesPage';
 import { OrganizationsPage as AdminOrganizationsPage } from './pages/admin/organizations/OrganizationsPage';
 import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/organizations/OrganizationViewPage';
+import { OrganizationViewPageSkeleton } from './pages/admin/organizations/OrganizationViewPageSkeleton';
 import { PlansPage } from './pages/admin/plans/PlansPage';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
 import { PlanViewPageSkeleton } from './pages/admin/plans/PlanViewPageSkeleton';
@@ -42,6 +47,7 @@ import { HomePage } from './pages/cloud/home/HomePage';
 import { InvitationsPage } from './pages/cloud/invitations/InvitationsPage';
 import { OrgAppsPage } from './pages/cloud/organization/apps/OrgAppsPage';
 import { BUViewPage } from './pages/cloud/organization/business-units/BUViewPage';
+import { BUViewPageSkeleton } from './pages/cloud/organization/business-units/BUViewPageSkeleton';
 import { OrgBusinessUnitsPage } from './pages/cloud/organization/business-units/OrgBusinessUnitsPage';
 import { OverviewPage } from './pages/cloud/organization/OverviewPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
@@ -175,7 +181,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'deployments/:slug',
-        element: <DeploymentViewPage />,
+        element: (
+          <Suspense fallback={<DeploymentViewPageSkeleton />}>
+            <DeploymentViewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'organizations',
@@ -183,7 +193,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'organizations/:slug',
-        element: <AdminOrganizationViewPage />,
+        element: (
+          <Suspense fallback={<OrganizationViewPageSkeleton />}>
+            <AdminOrganizationViewPage />
+          </Suspense>
+        ),
       },
     ],
   },
@@ -210,7 +224,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'features/:slug',
-        element: <FeatureViewPage />,
+        element: (
+          <Suspense fallback={<FeatureViewPageSkeleton />}>
+            <FeatureViewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'apps',
@@ -218,7 +236,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'apps/:slug',
-        element: <AppViewPage />,
+        element: (
+          <Suspense fallback={<AppViewPageSkeleton />}>
+            <AppViewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'roles',
@@ -226,7 +248,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'roles/:slug',
-        element: <RoleViewPage />,
+        element: (
+          <Suspense fallback={<RoleViewPageSkeleton />}>
+            <RoleViewPage />
+          </Suspense>
+        ),
       },
     ],
   },
@@ -293,7 +319,11 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'business-units/:buSlug',
-        element: <BUViewPage />,
+        element: (
+          <Suspense fallback={<BUViewPageSkeleton />}>
+            <BUViewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'applications',

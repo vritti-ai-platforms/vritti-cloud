@@ -6,7 +6,6 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -22,7 +21,7 @@ export const RoleViewPage = () => {
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: role, isLoading } = useRole(versionId, id ?? '');
+  const { data: role } = useRole(versionId, id ?? '');
 
   const deleteMutation = useDeleteRole(versionId, {
     onSuccess: () => navigate('..'),
@@ -32,23 +31,13 @@ export const RoleViewPage = () => {
   const handleDelete = async () => {
     if (!id) return;
     const confirmed = await confirm({
-      title: `Delete ${role?.name}?`,
-      description: `${role?.name} and all its permission assignments will be permanently removed. This action cannot be undone.`,
+      title: `Delete ${role.name}?`,
+      description: `${role.name} and all its permission assignments will be permanently removed. This action cannot be undone.`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
     if (confirmed) deleteMutation.mutate(id);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!role) return null;
 
   return (
     <div className="flex flex-col gap-6">

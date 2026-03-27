@@ -1,9 +1,7 @@
 import { useDeleteBusinessUnit, useOrgBusinessUnit, useOrgBusinessUnits } from '@hooks/cloud/org-business-units';
-import { Button } from '@vritti/quantum-ui/Button';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { useNavigate, useParams } from 'react-router-dom';
 import { OverviewTab } from './tabs/OverviewTab';
@@ -16,7 +14,7 @@ export const BUViewPage = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
 
-  const { data: unit, isLoading } = useOrgBusinessUnit(orgId, buId);
+  const { data: unit } = useOrgBusinessUnit(orgId, buId);
   const { data: allResponse } = useOrgBusinessUnits(orgId);
   const allUnits = allResponse?.result ?? [];
   const deleteMutation = useDeleteBusinessUnit();
@@ -38,25 +36,6 @@ export const BUViewPage = () => {
         { onSuccess: () => navigate('..') },
       );
     }
-  }
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-24">
-        <Spinner className="size-6 text-primary" />
-      </div>
-    );
-  }
-
-  if (!unit) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <p className="text-sm font-medium">Business unit not found</p>
-        <Button variant="outline" size="sm" className="mt-4" onClick={() => navigate('..')}>
-          Back to Business Units
-        </Button>
-      </div>
-    );
   }
 
   return (

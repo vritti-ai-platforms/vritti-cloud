@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@vritti/quantum-ui/Car
 import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -18,7 +17,7 @@ const MEMBERS_TABLE_SLUG = 'organization-members';
 export const OrganizationViewPage = () => {
   const { id } = useSlugParams();
   const queryClient = useQueryClient();
-  const { data: org, isLoading } = useOrganization(id);
+  const { data: org } = useOrganization(id);
 
   const syncMutation = useMutation<unknown, AxiosError>({
     mutationFn: () => syncOrgFeatures(id),
@@ -35,16 +34,6 @@ export const OrganizationViewPage = () => {
     enableMultiSort: false,
     onStatePush: () => queryClient.invalidateQueries({ queryKey: ORGANIZATION_MEMBERS_QUERY_KEY_FN(id) }),
   });
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!org) return null;
 
   return (
     <div className="flex flex-col gap-6">

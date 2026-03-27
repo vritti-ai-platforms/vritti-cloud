@@ -4,7 +4,6 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/app-versions/useVersionContext';
@@ -20,7 +19,7 @@ export const FeatureViewPage = () => {
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: feature, isLoading } = useFeature(versionId, id ?? '');
+  const { data: feature } = useFeature(versionId, id ?? '');
 
   const deleteMutation = useDeleteFeature(versionId, {
     onSuccess: () => navigate('..'),
@@ -30,23 +29,13 @@ export const FeatureViewPage = () => {
   const handleDelete = async () => {
     if (!id) return;
     const confirmed = await confirm({
-      title: `Delete ${feature?.name}?`,
-      description: `${feature?.name} will be permanently removed. This action cannot be undone.`,
+      title: `Delete ${feature.name}?`,
+      description: `${feature.name} will be permanently removed. This action cannot be undone.`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
     if (confirmed) deleteMutation.mutate(id);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!feature) return null;
 
   return (
     <div className="flex flex-col gap-6">

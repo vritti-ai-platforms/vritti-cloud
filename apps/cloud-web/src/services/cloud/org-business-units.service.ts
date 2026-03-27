@@ -1,5 +1,5 @@
-import { axios } from '@vritti/quantum-ui/axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import { axios } from '@vritti/quantum-ui/axios';
 import type {
   BusinessUnit,
   BusinessUnitsResponse,
@@ -25,9 +25,7 @@ export function createOrgBusinessUnit({
   orgId: string;
   data: CreateBusinessUnitData;
 }): Promise<BusinessUnit> {
-  return axios
-    .post<BusinessUnit>(`cloud-api/organizations/${orgId}/business-units`, data)
-    .then((r) => r.data);
+  return axios.post<BusinessUnit>(`cloud-api/organizations/${orgId}/business-units`, data).then((r) => r.data);
 }
 
 // Updates a business unit
