@@ -1,10 +1,19 @@
+import { MediaService } from '@domain/media/services/media.service';
+import { SessionService } from '@domain/session/services/session.service';
+import { UserService } from '@domain/user/services/user.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, ConflictException, hashToken, NotFoundException, UnauthorizedException } from '@vritti/api-sdk';
+import {
+  BadRequestException,
+  ConflictException,
+  hashToken,
+  JwtAuthService,
+  NotFoundException,
+  TokenType,
+  UnauthorizedException,
+} from '@vritti/api-sdk';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
-import { JwtAuthService, TokenType } from '@vritti/api-sdk';
 import { EncryptionService } from '../../../../../services';
 import { UserDto } from '../../../user/dto/entity/user.dto';
-import { UserService } from '@domain/user/services/user.service';
 import { MfaVerificationService } from '../../mfa-verification/services/mfa-verification.service';
 import { SessionResponse } from '../dto/entity/session-response.dto';
 import { LoginDto } from '../dto/request/login.dto';
@@ -12,7 +21,6 @@ import { SignupDto } from '../dto/request/signup.dto';
 import { AuthStatusResponse } from '../dto/response/auth-status-response.dto';
 import { LoginResponse } from '../dto/response/login-response.dto';
 import { SignupResponseDto } from '../dto/response/signup-response.dto';
-import { SessionService } from '@domain/session/services/session.service';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +31,7 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
     private readonly sessionService: SessionService,
     private readonly jwtService: JwtAuthService,
+    private readonly mediaService: MediaService,
     @Inject(forwardRef(() => MfaVerificationService))
     private readonly mfaVerificationService: MfaVerificationService,
   ) {}
@@ -199,6 +208,11 @@ export class AuthService {
         await this.sessionService.generateAccessToken(refreshToken);
 
       const user = await this.userService.findById(userId);
+
+      if (user.mediaId) {
+        const presignedUrl = await this.mediaService.getPresignedUrl(user.mediaId);
+        user.profilePictureUrl = presignedUrl.url;
+      }
 
       // Onboarding sessions return tokens but are not fully authenticated
       if (sessionType === SessionTypeValues.ONBOARDING) {

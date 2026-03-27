@@ -1,11 +1,13 @@
+import { MfaModule } from '@domain/mfa/mfa.module';
+import { OAuthDomainModule } from '@domain/oauth/oauth.module';
+import { SessionModule } from '@domain/session/session.module';
+import { UserDomainModule } from '@domain/user/user.module';
+import { VerificationModule } from '@domain/verification/verification.module';
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConfigFactory } from '@vritti/api-sdk';
-import { UserDomainModule } from '@domain/user/user.module';
-import { MfaModule } from '@domain/mfa/mfa.module';
-import { OAuthDomainModule } from '@domain/oauth/oauth.module';
-import { VerificationModule } from '@domain/verification/verification.module';
+import { MediaDomainModule } from '@domain/media/media.module';
 // MFA verification submodule
 import { MfaVerificationController } from './mfa-verification/controllers/mfa-verification.controller';
 import { MfaChallengeStore } from './mfa-verification/services/mfa-challenge.store';
@@ -23,7 +25,6 @@ import { OAuthStateService } from './oauth/services/oauth-state.service';
 // Passkey submodule
 import { PasskeyAuthController } from './passkey/controllers/passkey-auth.controller';
 import { PasskeyAuthService } from './passkey/services/passkey-auth.service';
-import { SessionModule } from '@domain/session/session.module';
 // Root submodule
 import { AuthController } from './root/controllers/auth.controller';
 import { AuthService } from './root/services/auth.service';
@@ -36,6 +37,7 @@ import { PasswordResetService } from './root/services/password-reset.service';
     UserDomainModule,
     VerificationModule,
     MfaModule,
+    MediaDomainModule,
     OAuthDomainModule,
   ],
   controllers: [AuthController, OAuthController, PasskeyAuthController, MfaVerificationController],

@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConflictException, NotFoundException } from '@vritti/api-sdk';
-import { type SignupMethod, type User, SignupMethodValues } from '@/db/schema';
+import { SignupMet, SignupMet, SignupMet, SignupMet, Sign } from '@/db/schema';
+import { UserDto } from '@/modules/cloud-api/user/dto/entity/user.dto';
 import type { CreateUserDto } from '@/modules/cloud-api/user/dto/request/create-user.dto';
 import type { UpdateUserDto } from '@/modules/cloud-api/user/dto/request/update-user.dto';
-import { UserDto } from '@/modules/cloud-api/user/dto/entity/user.dto';
 import { UserRepository } from '../repositories/user.repository';
 
 @Injectable()
@@ -25,7 +25,8 @@ export class UserService {
       if (existingUser) {
         throw new ConflictException({
           label: 'Email Taken',
-          detail: 'An account with this email address already exists. Please use a different email or log in to your existing account.',
+          detail:
+            'An account with this email address already exists. Please use a different email or log in to your existing account.',
           errors: [{ field: 'email', message: 'Already registered' }],
         });
       }

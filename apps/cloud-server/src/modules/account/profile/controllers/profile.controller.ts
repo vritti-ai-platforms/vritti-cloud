@@ -1,10 +1,10 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Post, Put, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
 import type { VerificationChannel } from '@/db/schema';
 import { SessionTypeValues } from '@/db/schema';
 import { UserDto } from '../../../cloud-api/user/dto/entity/user.dto';
-import { UpdateUserDto } from '../../../cloud-api/user/dto/request/update-user.dto';
 import {
   ApiDeleteAccount,
   ApiGetProfile,
@@ -41,12 +41,12 @@ export class ProfileController {
     return this.profileService.getProfile(userId);
   }
 
-  // Updates the authenticated user's profile information
+  // Updates the authenticated user's profile information (supports JSON and multipart form data)
   @Put()
   @ApiUpdateProfile()
-  async updateProfile(@UserId() userId: string, @Body() dto: UpdateUserDto): Promise<UserDto> {
+  async updateProfile(@UserId() userId: string, @Req() request: FastifyRequest): Promise<SuccessResponseDto> {
     this.logger.log(`PUT /account/profile - userId: ${userId}`);
-    return this.profileService.updateProfile(userId, dto);
+    return this.profileService.updateProfile(userId, request);
   }
 
   // Deactivates the authenticated user's account and invalidates all sessions

@@ -1,6 +1,7 @@
 import { boolean, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { accountStatusEnum, onboardingStepEnum, signupMethodEnum } from './enums';
+import { media } from './media';
 
 // User account - core user entity
 export const users = cloudSchema.table('users', {
@@ -17,6 +18,7 @@ export const users = cloudSchema.table('users', {
   phone: varchar('phone', { length: 20 }),
   phoneCountry: varchar('phone_country', { length: 5 }),
   profilePictureUrl: text('profile_picture_url'),
+  mediaId: uuid('media_id').references(() => media.id, { onDelete: 'set null' }),
   locale: varchar('locale', { length: 10 }).notNull().default('en'),
   timezone: varchar('timezone', { length: 50 }).notNull().default('UTC'),
   isAdmin: boolean('is_admin').notNull().default(false),

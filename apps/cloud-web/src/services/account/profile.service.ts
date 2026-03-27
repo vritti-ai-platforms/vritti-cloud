@@ -1,5 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { ChangePasswordDto, ProfileData, Session, UpdateProfileDto } from '@/schemas/cloud/account';
+import type { ChangePasswordDto, ProfileData, Session } from '@/schemas/cloud/account';
 
 export interface SuccessResponse {
   success: boolean;
@@ -19,11 +19,12 @@ export function getProfile(): Promise<ProfileData> {
   return axios.get<ProfileData>('account/profile', { showSuccessToast: false }).then((r) => r.data);
 }
 
-export function updateProfile(data: UpdateProfileDto): Promise<ProfileData> {
+export function updateProfile(data: FormData): Promise<SuccessResponse> {
   return axios
-    .put<ProfileData>('account/profile', data, {
+    .put<SuccessResponse>('account/profile', data, {
       loadingMessage: 'Updating profile...',
       successMessage: 'Profile updated successfully',
+      headers: { 'Content-Type': undefined },
     })
     .then((r) => r.data);
 }

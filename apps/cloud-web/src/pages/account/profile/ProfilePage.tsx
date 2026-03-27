@@ -18,7 +18,6 @@ import type { ProfileFormData } from '@/schemas/cloud/account';
 import { profileSchema } from '@/schemas/cloud/account';
 import { ContactChangeDialog } from './forms/ContactChangeDialog';
 import { PersonalInformationCard } from './forms/PersonalInformationCard';
-import { ProfilePictureCard } from './forms/ProfilePictureCard';
 
 export const ProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -43,7 +42,6 @@ export const ProfilePage: React.FC = () => {
       phone: profile?.phone ?? '',
       locale: profile?.locale || 'en',
       timezone: profile?.timezone || 'UTC',
-      profilePictureUrl: profile?.profilePictureUrl || '',
     },
   });
 
@@ -110,8 +108,6 @@ export const ProfilePage: React.FC = () => {
           )
         }
       />
-
-      <ProfilePictureCard form={form} isEditing={isEditing} />
 
       <PersonalInformationCard
         profile={profile}

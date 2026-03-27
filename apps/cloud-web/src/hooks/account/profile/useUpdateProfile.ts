@@ -1,21 +1,21 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { ProfileData, UpdateProfileDto } from '@/schemas/cloud/account';
+import type { SuccessResponse } from '@/services/account/profile.service';
 import { updateProfile } from '@/services/account/profile.service';
 import { PROFILE_QUERY_KEY } from './useProfile';
 
-type UseUpdateProfileOptions = Omit<UseMutationOptions<ProfileData, AxiosError, UpdateProfileDto>, 'mutationFn'>;
+type UseUpdateProfileOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, FormData>, 'mutationFn'>;
 
 export function useUpdateProfile(options?: UseUpdateProfileOptions) {
   const queryClient = useQueryClient();
 
-  return useMutation<ProfileData, AxiosError, UpdateProfileDto>({
+  return useMutation<SuccessResponse, AxiosError, FormData>({
     ...options,
     mutationFn: updateProfile,
-    onSuccess: (data, ...args) => {
-      queryClient.setQueryData(PROFILE_QUERY_KEY, data);
-      options?.onSuccess?.(data, ...args);
+    onSuccess: (result, ...args) => {
+      queryClient.invalidateQueries({ queryKey: PROFILE_QUERY_KEY });
+      options?.onSuccess?.(result, ...args);
     },
   });
 }

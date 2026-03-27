@@ -11,12 +11,7 @@ export const profileSchema = z.object({
     .regex(/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number'),
   locale: z.string(),
   timezone: z.string(),
-  profilePictureUrl: z
-    .string()
-    .optional()
-    .refine((val) => !val || val === '' || z.url().safeParse(val).success, {
-      message: 'Please enter a valid URL',
-    }),
+  profilePicture: z.any().optional(),
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;
@@ -58,21 +53,11 @@ export interface ProfileData {
   phone: PhoneValue;
   phoneCountry: string;
   profilePictureUrl: string | null;
+  mediaId: string | null;
   locale: string;
   timezone: string;
   createdAt: string;
   lastLoginAt: string | null;
-}
-
-// Profile update DTO for API requests
-export interface UpdateProfileDto {
-  fullName?: string;
-  displayName?: string;
-  phone?: string;
-  phoneCountry?: string;
-  locale?: string;
-  timezone?: string;
-  profilePictureUrl?: string;
 }
 
 // Password change DTO for API requests

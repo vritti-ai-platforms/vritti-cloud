@@ -2019,15 +2019,75 @@
         ]
       },
       "put": {
-        "description": "Update the authenticated user's profile information including name, phone, profile picture, locale, and timezone.",
+        "description": "Update the authenticated user's profile information including name, profile picture, locale, and timezone. Supports both JSON and multipart/form-data (for file upload).",
         "operationId": "ProfileController_updateProfile",
         "parameters": [],
         "requestBody": {
           "required": true,
+          "description": "Profile fields with optional profile picture file upload",
           "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "locale": {
+                    "type": "string",
+                    "example": "en-US"
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "example": "America/New_York"
+                  },
+                  "profilePictureUrl": {
+                    "type": "string",
+                    "example": "https://cdn.example.com/avatars/user-123.jpg"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Profile picture file (PNG, JPG, WebP)"
+                  }
+                }
+              }
+            },
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateUserDto"
+                "type": "object",
+                "properties": {
+                  "fullName": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "displayName": {
+                    "type": "string",
+                    "example": "John"
+                  },
+                  "locale": {
+                    "type": "string",
+                    "example": "en-US"
+                  },
+                  "timezone": {
+                    "type": "string",
+                    "example": "America/New_York"
+                  },
+                  "profilePictureUrl": {
+                    "type": "string",
+                    "example": "https://cdn.example.com/avatars/user-123.jpg"
+                  },
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Profile picture file (PNG, JPG, WebP)"
+                  }
+                }
               }
             }
           }
@@ -10208,6 +10268,10 @@
             "description": "Profile picture URL",
             "example": "https://example.com/avatar.jpg"
           },
+          "mediaId": {
+            "type": "object",
+            "description": "Media asset identifier for profile picture"
+          },
           "locale": {
             "type": "string",
             "description": "User locale",
@@ -11325,88 +11389,6 @@
           "sessionId",
           "credential"
         ]
-      },
-      "UpdateUserDto": {
-        "type": "object",
-        "properties": {
-          "fullName": {
-            "type": "string",
-            "description": "The full name of the user",
-            "example": "John Doe"
-          },
-          "displayName": {
-            "type": "string",
-            "description": "The display name of the user",
-            "example": "John"
-          },
-          "email": {
-            "type": "string",
-            "description": "The email address of the user",
-            "example": "user@example.com"
-          },
-          "phone": {
-            "type": "string",
-            "description": "The phone number of the user",
-            "example": "+14155552671"
-          },
-          "phoneCountry": {
-            "type": "string",
-            "description": "The ISO country code for the phone number",
-            "example": "US"
-          },
-          "profilePictureUrl": {
-            "type": "string",
-            "description": "URL to the user profile picture",
-            "example": "https://cdn.example.com/avatars/user-123.jpg"
-          },
-          "locale": {
-            "type": "string",
-            "description": "The locale/language preference of the user",
-            "example": "en-US"
-          },
-          "timezone": {
-            "type": "string",
-            "description": "The timezone preference of the user",
-            "example": "America/New_York"
-          },
-          "accountStatus": {
-            "type": "string",
-            "description": "The current account status of the user",
-            "example": "ACTIVE",
-            "enum": [
-              "PENDING_VERIFICATION",
-              "ACTIVE",
-              "INACTIVE"
-            ]
-          },
-          "emailVerified": {
-            "type": "boolean",
-            "description": "Whether the user email has been verified",
-            "example": true
-          },
-          "phoneVerified": {
-            "type": "boolean",
-            "description": "Whether the user phone number has been verified",
-            "example": false
-          },
-          "onboardingStep": {
-            "type": "string",
-            "description": "The current step in the user onboarding process",
-            "example": "COMPLETE",
-            "enum": [
-              "EMAIL_VERIFICATION",
-              "SET_PASSWORD",
-              "MOBILE_VERIFICATION",
-              "TWO_FACTOR_SETUP",
-              "COMPLETE"
-            ]
-          },
-          "passwordHash": {
-            "type": "string",
-            "description": "The hashed password for direct password updates (use with caution)",
-            "example": "$2b$10$..."
-          }
-        }
       },
       "SuccessResponseDto": {
         "type": "object",

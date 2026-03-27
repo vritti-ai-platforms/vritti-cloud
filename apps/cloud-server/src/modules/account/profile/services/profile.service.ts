@@ -1,6 +1,7 @@
-import { VerificationService } from '@domain/verification/services/verification.service';
+import { MediaService } from '@domain/media/services/media.service';
 import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
+import { VerificationService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   BadRequestException,
@@ -9,11 +10,15 @@ import {
   normalizePhoneNumber,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import type { FastifyRequest } from 'fastify';
 import type { VerificationChannel } from '@/db/schema';
 import { VerificationChannelValues } from '@/db/schema';
 import { SmsService } from '@/services';
 import { UserDto } from '../../../cloud-api/user/dto/entity/user.dto';
-import { UpdateUserDto } from '../../../cloud-api/user/dto/request/update-user.dto';
+import type { UpdateUserDto } from '../../../cloud-api/user/dto/request/update-user.dto';
+import { UpdateProfileDto } from '../dto/request/update-profile.dto';
 
 @Injectable()
 export class ProfileService {
@@ -25,16 +30,49 @@ export class ProfileService {
     private readonly smsService: SmsService,
     private readonly userService: UserService,
     private readonly sessionService: SessionService,
+    private readonly mediaService: MediaService,
   ) {}
 
   // Returns the authenticated user's profile
   async getProfile(userId: string): Promise<UserDto> {
-    return this.userService.findById(userId);
+    const user = await this.userService.findById(userId);
+    if (user.mediaId) {
+      const presignedUrl = await this.mediaService.getPresignedUrl(user.mediaId);
+      user.profilePictureUrl = presignedUrl.url;
+    }
+    return user;
   }
 
-  // Updates the authenticated user's profile information
-  async updateProfile(userId: string, dto: UpdateUserDto): Promise<UserDto> {
-    return this.userService.update(userId, dto);
+  // Updates the authenticated user's profile information (supports JSON and multipart)
+  async updateProfile(userId: string, request: FastifyRequest): Promise<SuccessResponseDto> {
+    const contentType = request.headers['content-type'] ?? '';
+    const isMultipart = contentType.includes('multipart/form-data');
+
+    if (!isMultipart) {
+      const dto = request.body as UpdateProfileDto;
+      await this.userService.update(userId, dto as UpdateUserDto);
+      return { success: true, message: 'Profile updated successfully.' };
+    }
+
+    const { dto, file } = await this.parseProfileUpdateRequest(request);
+    const updateData: Record<string, unknown> = {};
+
+    if (dto.fullName !== undefined) updateData.fullName = dto.fullName;
+    if (dto.displayName !== undefined) updateData.displayName = dto.displayName;
+    if (dto.locale !== undefined) updateData.locale = dto.locale;
+    if (dto.timezone !== undefined) updateData.timezone = dto.timezone;
+
+    if (file) {
+      const uploadedMedia = await this.mediaService.upload(file, userId, {
+        entityType: 'user',
+        entityId: userId,
+      });
+      updateData.mediaId = uploadedMedia.id;
+      updateData.profilePictureUrl = uploadedMedia.storageKey;
+    }
+
+    await this.userService.update(userId, updateData as UpdateUserDto);
+    return { success: true, message: 'Profile updated successfully.' };
   }
 
   // Deactivates account and invalidates all sessions
@@ -57,11 +95,7 @@ export class ProfileService {
         });
       }
 
-      const { otp, expiresAt } = await this.verificationService.createVerification(
-        userId,
-        identityChannel,
-        user.email,
-      );
+      const { otp, expiresAt } = await this.verificationService.createVerification(userId, identityChannel, user.email);
 
       this.emailService
         .sendVerificationEmail(user.email, otp, expiresAt, user.displayName || undefined)
@@ -88,11 +122,7 @@ export class ProfileService {
       });
     }
 
-    const { otp, expiresAt } = await this.verificationService.createVerification(
-      userId,
-      identityChannel,
-      user.phone,
-    );
+    const { otp, expiresAt } = await this.verificationService.createVerification(userId, identityChannel, user.phone);
 
     this.smsService.sendVerificationSms(`+${user.phone}`, otp, user.displayName ?? undefined).catch((error) => {
       this.logger.error(`Failed to send SMS to ${user.phone}: ${error.message}`);
@@ -114,11 +144,7 @@ export class ProfileService {
   }
 
   // Validates new target and sends verification OTP to it (step 3)
-  async submitNewTarget(
-    userId: string,
-    channel: VerificationChannel,
-    target: string,
-  ): Promise<{ expiresAt: Date }> {
+  async submitNewTarget(userId: string, channel: VerificationChannel, target: string): Promise<{ expiresAt: Date }> {
     const targetChannel = this.getTargetChannel(channel);
 
     // Check identity was verified via either email or phone
@@ -160,11 +186,9 @@ export class ProfileService {
 
       const { otp, expiresAt } = await this.verificationService.createVerification(userId, targetChannel, target);
 
-      this.emailService
-        .sendVerificationEmail(target, otp, expiresAt, user.displayName || undefined)
-        .catch((error) => {
-          this.logger.error(`Failed to send verification email to ${target}: ${error.message}`);
-        });
+      this.emailService.sendVerificationEmail(target, otp, expiresAt, user.displayName || undefined).catch((error) => {
+        this.logger.error(`Failed to send verification email to ${target}: ${error.message}`);
+      });
 
       this.logger.log(`Verification OTP sent to new email ${target} for user ${userId}`);
       return { expiresAt };
@@ -195,11 +219,9 @@ export class ProfileService {
       normalizedNewPhone,
     );
 
-    this.smsService
-      .sendVerificationSms(`+${normalizedNewPhone}`, otp, user.displayName ?? undefined)
-      .catch((error) => {
-        this.logger.error(`Failed to send SMS to ${normalizedNewPhone}: ${error.message}`);
-      });
+    this.smsService.sendVerificationSms(`+${normalizedNewPhone}`, otp, user.displayName ?? undefined).catch((error) => {
+      this.logger.error(`Failed to send SMS to ${normalizedNewPhone}: ${error.message}`);
+    });
 
     this.logger.log(`Verification OTP sent to new phone ${normalizedNewPhone} for user ${userId}`);
     return { expiresAt };
@@ -274,15 +296,55 @@ export class ProfileService {
           this.logger.error(`Failed to resend verification email: ${error.message}`);
         });
     } else {
-      this.smsService
-        .sendVerificationSms(`+${existing.target}`, otp, user.displayName ?? undefined)
-        .catch((error) => {
-          this.logger.error(`Failed to resend SMS: ${error.message}`);
-        });
+      this.smsService.sendVerificationSms(`+${existing.target}`, otp, user.displayName ?? undefined).catch((error) => {
+        this.logger.error(`Failed to resend SMS: ${error.message}`);
+      });
     }
 
     this.logger.log(`Resent OTP for user ${userId}`);
     return { success: true, message: 'Verification code resent successfully.' };
+  }
+
+  // Parses multipart form data into UpdateProfileDto fields and optional file
+  private async parseProfileUpdateRequest(request: FastifyRequest): Promise<{
+    dto: UpdateProfileDto;
+    file?: { buffer: Buffer; filename: string; mimetype: string };
+  }> {
+    const parts = request.parts();
+    const fields: Record<string, unknown> = {};
+    let file: { buffer: Buffer; filename: string; mimetype: string } | undefined;
+
+    for await (const part of parts) {
+      if (part.type === 'file') {
+        const buffer = await part.toBuffer();
+        file = { buffer, filename: part.filename, mimetype: part.mimetype };
+      } else {
+        fields[part.fieldname] = part.value;
+      }
+    }
+
+    const dto = await this.validateProfileDto(fields);
+    return { dto, file };
+  }
+
+  // Validates raw fields against UpdateProfileDto using class-validator
+  private async validateProfileDto(fields: Record<string, unknown>): Promise<UpdateProfileDto> {
+    const dto = plainToInstance(UpdateProfileDto, fields);
+    const errors = await validate(dto);
+
+    if (errors.length > 0) {
+      const fieldErrors = errors.map((e) => ({
+        field: e.property,
+        message: Object.values(e.constraints ?? {})[0] ?? 'Invalid value',
+      }));
+      throw new BadRequestException({
+        label: 'Validation Failed',
+        detail: 'One or more fields are invalid.',
+        errors: fieldErrors,
+      });
+    }
+
+    return dto;
   }
 
   // Checks whether the channel belongs to an email flow

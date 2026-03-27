@@ -1,8 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { UserDto } from '../../../cloud-api/user/dto/entity/user.dto';
-import { UpdateUserDto } from '../../../cloud-api/user/dto/request/update-user.dto';
+import { UpdateProfileDto } from '../dto/request/update-profile.dto';
 import {
   IdentityVerificationStartDto,
   ResendTargetOtpDto,
@@ -28,9 +28,23 @@ export function ApiUpdateProfile() {
     ApiOperation({
       summary: 'Update user profile',
       description:
-        "Update the authenticated user's profile information including name, phone, profile picture, locale, and timezone.",
+        "Update the authenticated user's profile information including name, profile picture, locale, and timezone. Supports both JSON and multipart/form-data (for file upload).",
     }),
-    ApiBody({ type: UpdateUserDto }),
+    ApiConsumes('multipart/form-data', 'application/json'),
+    ApiBody({
+      description: 'Profile fields with optional profile picture file upload',
+      schema: {
+        type: 'object',
+        properties: {
+          fullName: { type: 'string', example: 'John Doe' },
+          displayName: { type: 'string', example: 'John' },
+          locale: { type: 'string', example: 'en-US' },
+          timezone: { type: 'string', example: 'America/New_York' },
+          profilePictureUrl: { type: 'string', example: 'https://cdn.example.com/avatars/user-123.jpg' },
+          file: { type: 'string', format: 'binary', description: 'Profile picture file (PNG, JPG, WebP)' },
+        },
+      },
+    }),
     ApiResponse({ status: 200, description: 'Profile updated successfully', type: UserDto }),
     ApiResponse({ status: 400, description: 'Invalid input data' }),
     ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing authentication' }),
