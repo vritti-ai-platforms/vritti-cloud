@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronRight, Layers, Shield, Zap } from 'lucide-react';
 import { useState } from 'react';
-import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '../snapshot-types';
+import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@/schemas/admin/versions';
 
 interface RoleNodeProps {
   role: SnapshotRoleTemplate;

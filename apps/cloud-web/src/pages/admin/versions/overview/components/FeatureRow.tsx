@@ -1,6 +1,6 @@
 import { ChevronDown, ChevronRight, Globe, Monitor, Smartphone } from 'lucide-react';
 import { useState } from 'react';
-import type { SnapshotFeature } from '../snapshot-types';
+import type { SnapshotFeature } from '@/schemas/admin/versions';
 
 interface FeatureRowProps {
   feature: SnapshotFeature;

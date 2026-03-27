@@ -1,5 +1,5 @@
 import { Globe, Layers, Monitor, Shield } from 'lucide-react';
-import type { Snapshot, SnapshotApp } from '../snapshot-types';
+import type { SnapshotApp, VersionSnapshot } from '@/schemas/admin/versions';
 import { AppNode } from './AppNode';
 import { FeatureRow } from './FeatureRow';
 import { RoleNode } from './RoleNode';
@@ -7,7 +7,7 @@ import { SectionHeader } from './SectionHeader';
 import { StatPill } from './StatPill';
 
 interface SnapshotViewProps {
-  snapshot: Snapshot;
+  snapshot: VersionSnapshot;
 }
 
 export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {

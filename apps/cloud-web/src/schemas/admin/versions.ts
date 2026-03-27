@@ -3,13 +3,41 @@ import { z } from 'zod';
 
 export type VersionStatus = 'ALPHA' | 'BETA' | 'PROD';
 
+export interface SnapshotFeature {
+  code: string;
+  name: string;
+  icon: string | null;
+  permissions: string[];
+  microfrontends: Record<string, { remoteEntry: string; exposedModule: string; routePrefix: string }>;
+}
+
+export interface SnapshotApp {
+  code: string;
+  name: string;
+  icon: string | null;
+  features: string[];
+}
+
+export interface SnapshotRoleTemplate {
+  name: string;
+  scope: string;
+  apps: string[];
+  features: Record<string, string[]>;
+}
+
+export interface VersionSnapshot {
+  features: SnapshotFeature[];
+  apps: SnapshotApp[];
+  roleTemplates: SnapshotRoleTemplate[];
+}
+
 export interface Version {
   id: string;
   version: string;
   name: string;
   status: VersionStatus;
   parentVersionId: string | null;
-  snapshot: Record<string, unknown> | null;
+  snapshot: VersionSnapshot | null;
   artifacts: Record<string, unknown> | null;
   createdAt: string;
 }

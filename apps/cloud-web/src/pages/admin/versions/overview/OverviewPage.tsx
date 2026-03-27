@@ -14,9 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { VersionStatus } from '@/schemas/admin/versions';
 import { EditVersionForm } from '../forms/EditVersionForm';
-
 import { SnapshotView } from './components/SnapshotView';
-import type { Snapshot } from './snapshot-types';
 
 // Maps version status to badge variant
 function statusVariant(status: VersionStatus): 'secondary' | 'outline' | 'default' {
@@ -134,7 +132,7 @@ export const OverviewPage = () => {
       </div>
 
       {/* Snapshot visualization */}
-      {version.snapshot && <SnapshotView snapshot={version.snapshot as unknown as Snapshot} />}
+      {version.snapshot && <SnapshotView snapshot={version.snapshot} />}
 
       {/* Danger zone — PROD versions cannot be deleted */}
       {version.status !== 'PROD' && (

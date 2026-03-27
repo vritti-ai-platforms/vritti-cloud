@@ -1,7 +1,7 @@
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import type { SnapshotApp, SnapshotFeature } from '../snapshot-types';
+import type { SnapshotApp, SnapshotFeature } from '@/schemas/admin/versions';
 import { FeatureRow } from './FeatureRow';
 
 interface AppNodeProps {

@@ -6,21 +6,22 @@ import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/qua
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Boxes, Plus, Trash2 } from 'lucide-react';
+import { Boxes, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { Microfrontend } from '@/schemas/admin/microfrontends';
 import { AddMicrofrontendForm } from './forms/AddMicrofrontendForm';
+import { EditMicrofrontendForm } from './forms/EditMicrofrontendForm';
 
 const TABLE_SLUG = 'microfrontends';
 
 export const MicrofrontendsPage = () => {
   const { versionId } = useVersionContext();
   const queryClient = useQueryClient();
-  const { data: response, isLoading } = useMicrofrontendsTable(versionId ?? '');
+  const { data: response, isLoading } = useMicrofrontendsTable(versionId);
   const addDialog = useDialog();
   const confirm = useConfirm();
 
-  const deleteMutation = useDeleteMicrofrontend(versionId ?? '');
+  const deleteMutation = useDeleteMicrofrontend(versionId);
 
   async function handleDelete(mf: Microfrontend) {
     const confirmed = await confirm({
@@ -133,7 +134,25 @@ function getColumns({ onDelete }: ColumnActions): ColumnDef<Microfrontend, unkno
       cell: ({ row }) => (
         <RowActions
           actions={[
-            { id: 'delete', icon: Trash2, label: 'Delete', variant: 'destructive', onClick: () => onDelete(row.original) },
+            {
+              id: 'edit',
+              icon: Pencil,
+              label: 'Edit',
+              dialog: {
+                title: 'Edit Microfrontend',
+                description: 'Update the details for this microfrontend.',
+                content: (close) => (
+                  <EditMicrofrontendForm microfrontend={row.original} onSuccess={close} onCancel={close} />
+                ),
+              },
+            },
+            {
+              id: 'delete',
+              icon: Trash2,
+              label: 'Delete',
+              variant: 'destructive',
+              onClick: () => onDelete(row.original),
+            },
           ]}
         />
       ),
