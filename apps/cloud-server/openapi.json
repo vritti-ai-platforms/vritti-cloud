@@ -12456,7 +12456,7 @@
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -12479,7 +12479,7 @@
         },
         "required": [
           "id",
-          "appVersionId",
+          "versionId",
           "code",
           "name",
           "platform",
@@ -12545,7 +12545,7 @@
       "CreateFeatureDto": {
         "type": "object",
         "properties": {
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "description": "App version UUID this feature belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -12577,7 +12577,7 @@
           }
         },
         "required": [
-          "appVersionId",
+          "versionId",
           "code",
           "name"
         ]
@@ -12589,7 +12589,7 @@
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -12636,7 +12636,7 @@
         },
         "required": [
           "id",
-          "appVersionId",
+          "versionId",
           "code",
           "name",
           "isActive",
@@ -12726,7 +12726,7 @@
       "UpdateFeatureDto": {
         "type": "object",
         "properties": {
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "description": "App version UUID this feature belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -12897,7 +12897,7 @@
       "CreateAppDto": {
         "type": "object",
         "properties": {
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "description": "App version UUID this app belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -12929,7 +12929,7 @@
           }
         },
         "required": [
-          "appVersionId",
+          "versionId",
           "code",
           "name"
         ]
@@ -12941,7 +12941,7 @@
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -12996,7 +12996,7 @@
         },
         "required": [
           "id",
-          "appVersionId",
+          "versionId",
           "code",
           "name",
           "isActive",
@@ -13037,7 +13037,7 @@
       "UpdateAppDto": {
         "type": "object",
         "properties": {
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "description": "App version UUID this app belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -13218,7 +13218,7 @@
       "CreateRoleDto": {
         "type": "object",
         "properties": {
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "description": "App version UUID this role belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -13261,7 +13261,7 @@
           }
         },
         "required": [
-          "appVersionId",
+          "versionId",
           "name",
           "scope",
           "appIds"
@@ -13364,7 +13364,7 @@
       "UpdateRoleDto": {
         "type": "object",
         "properties": {
-          "appVersionId": {
+          "versionId": {
             "type": "string",
             "description": "App version UUID this role belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
