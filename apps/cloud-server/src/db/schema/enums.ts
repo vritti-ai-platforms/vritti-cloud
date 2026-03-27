@@ -180,10 +180,10 @@ export const FeatureTypeValues = {
   MANAGE: 'MANAGE' as const,
 };
 
-// App version lifecycle status
-export const appVersionStatusEnum = cloudSchema.enum('AppVersionStatus', ['ALPHA', 'BETA', 'PROD']);
-export type AppVersionStatus = (typeof appVersionStatusEnum.enumValues)[number];
-export const AppVersionStatusValues = {
+// Version lifecycle status
+export const versionStatusEnum = cloudSchema.enum('AppVersionStatus', ['ALPHA', 'BETA', 'PROD']);
+export type VersionStatus = (typeof versionStatusEnum.enumValues)[number];
+export const VersionStatusValues = {
   ALPHA: 'ALPHA' as const,
   BETA: 'BETA' as const,
   PROD: 'PROD' as const,

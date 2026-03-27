@@ -46,7 +46,7 @@ export const TopBar = () => {
                   );
                 }
 
-                // Any segment with ver- prefix = version slug (under /app-versions/)
+                // Any segment with ver- prefix = version slug (under /versions/)
                 if (segment.raw.startsWith(VERSION_SLUG_PREFIX)) {
                   return (
                     <VersionSwitcher

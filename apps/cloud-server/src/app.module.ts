@@ -17,7 +17,7 @@ import {
   RootModule,
 } from '@vritti/api-sdk';
 import { validate } from './config/env.validation';
-import { AdminAppVersionModule } from './modules/admin-api/app-version/app-version.module';
+import { AdminVersionModule } from './modules/admin-api/version/version.module';
 import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
 import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
 import { AdminEnumModule } from './modules/admin-api/enum/enum.module';
@@ -120,7 +120,7 @@ import { ServicesModule } from './services/services.module';
     DataTableModule.forRoot({ tableViews: schema.tableViews }),
     CloudDeploymentModule,
     // Admin API modules
-    AdminAppVersionModule,
+    AdminVersionModule,
     AdminPlanModule,
     AdminDeploymentModule,
     AdminRegionModule,
@@ -150,7 +150,7 @@ import { ServicesModule } from './services/services.module';
       {
         path: 'admin-api',
         children: [
-          AdminAppVersionModule,
+          AdminVersionModule,
           AdminPlanModule,
           AdminDeploymentModule,
           AdminRegionModule,

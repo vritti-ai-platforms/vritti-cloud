@@ -4602,27 +4602,27 @@
         ]
       }
     },
-    "/admin-api/app-versions": {
+    "/admin-api/versions": {
       "post": {
-        "operationId": "AppVersionController_create",
+        "operationId": "VersionController_create",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateAppVersionDto"
+                "$ref": "#/components/schemas/CreateVersionDto"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "App version created successfully.",
+            "description": "Version created successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AppVersionDto"
+                  "$ref": "#/components/schemas/VersionDto"
                 }
               }
             }
@@ -4642,23 +4642,23 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new app version (ALPHA)",
+        "summary": "Create a new version (ALPHA)",
         "tags": [
-          "Admin - App Versions"
+          "Admin - Versions"
         ]
       }
     },
-    "/admin-api/app-versions/table": {
+    "/admin-api/versions/table": {
       "get": {
-        "operationId": "AppVersionController_findForTable",
+        "operationId": "VersionController_findForTable",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "App versions retrieved successfully.",
+            "description": "Versions retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AppVersionTableResponseDto"
+                  "$ref": "#/components/schemas/VersionTableResponseDto"
                 }
               }
             }
@@ -4672,21 +4672,21 @@
             "bearer": []
           }
         ],
-        "summary": "List app versions for data table (server-stored state)",
+        "summary": "List versions for data table (server-stored state)",
         "tags": [
-          "Admin - App Versions"
+          "Admin - Versions"
         ]
       }
     },
-    "/admin-api/app-versions/{id}": {
+    "/admin-api/versions/{id}": {
       "get": {
-        "operationId": "AppVersionController_findById",
+        "operationId": "VersionController_findById",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "App version UUID",
+            "description": "Version UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -4695,11 +4695,11 @@
         ],
         "responses": {
           "200": {
-            "description": "App version retrieved successfully.",
+            "description": "Version retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/AppVersionDto"
+                  "$ref": "#/components/schemas/VersionDto"
                 }
               }
             }
@@ -4708,7 +4708,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "App version not found."
+            "description": "Version not found."
           }
         },
         "security": [
@@ -4716,13 +4716,13 @@
             "bearer": []
           }
         ],
-        "summary": "Get an app version by ID",
+        "summary": "Get a version by ID",
         "tags": [
-          "Admin - App Versions"
+          "Admin - Versions"
         ]
       },
       "patch": {
-        "operationId": "AppVersionController_update",
+        "operationId": "VersionController_update",
         "parameters": [
           {
             "name": "id",
@@ -4738,7 +4738,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateAppVersionDto"
+                "$ref": "#/components/schemas/UpdateVersionDto"
               }
             }
           }
@@ -4754,17 +4754,17 @@
           }
         ],
         "tags": [
-          "Admin - App Versions"
+          "Admin - Versions"
         ]
       },
       "delete": {
-        "operationId": "AppVersionController_delete",
+        "operationId": "VersionController_delete",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "App version UUID",
+            "description": "Version UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -4773,7 +4773,7 @@
         ],
         "responses": {
           "200": {
-            "description": "App version deleted successfully.",
+            "description": "Version deleted successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4789,7 +4789,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "App version not found."
+            "description": "Version not found."
           }
         },
         "security": [
@@ -4797,21 +4797,21 @@
             "bearer": []
           }
         ],
-        "summary": "Delete an app version (PROD versions cannot be deleted)",
+        "summary": "Delete a version (PROD versions cannot be deleted)",
         "tags": [
-          "Admin - App Versions"
+          "Admin - Versions"
         ]
       }
     },
-    "/admin-api/app-versions/{id}/snapshot": {
+    "/admin-api/versions/{id}/snapshot": {
       "post": {
-        "operationId": "AppVersionController_createSnapshot",
+        "operationId": "VersionController_createSnapshot",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "App version UUID",
+            "description": "Version UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -4833,7 +4833,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "App version not found."
+            "description": "Version not found."
           }
         },
         "security": [
@@ -4843,19 +4843,19 @@
         ],
         "summary": "Build a snapshot from all versioned tables",
         "tags": [
-          "Admin - App Versions"
+          "Admin - Versions"
         ]
       }
     },
-    "/admin-api/app-versions/{id}/artifacts": {
+    "/admin-api/versions/{id}/artifacts": {
       "post": {
-        "operationId": "AppVersionController_pushArtifacts",
+        "operationId": "VersionController_pushArtifacts",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "App version UUID",
+            "description": "Version UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -4887,7 +4887,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "App version not found."
+            "description": "Version not found."
           }
         },
         "security": [
@@ -4897,11 +4897,11 @@
         ],
         "summary": "Push CI artifacts",
         "tags": [
-          "Admin - App Versions"
+          "Admin - Versions"
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/microfrontends": {
+    "/admin-api/versions/{versionId}/microfrontends": {
       "post": {
         "operationId": "MicrofrontendController_create",
         "parameters": [
@@ -4958,7 +4958,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/microfrontends/table": {
+    "/admin-api/versions/{versionId}/microfrontends/table": {
       "get": {
         "operationId": "MicrofrontendController_findForTable",
         "parameters": [
@@ -4999,7 +4999,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/microfrontends/{id}": {
+    "/admin-api/versions/{versionId}/microfrontends/{id}": {
       "get": {
         "operationId": "MicrofrontendController_findById",
         "parameters": [
@@ -5176,7 +5176,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features": {
+    "/admin-api/versions/{versionId}/features": {
       "post": {
         "operationId": "FeatureController_create",
         "parameters": [],
@@ -5222,7 +5222,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features/table": {
+    "/admin-api/versions/{versionId}/features/table": {
       "get": {
         "operationId": "FeatureController_findForTable",
         "parameters": [],
@@ -5252,7 +5252,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features/with-permissions": {
+    "/admin-api/versions/{versionId}/features/with-permissions": {
       "get": {
         "operationId": "FeatureController_findWithPermissions",
         "parameters": [
@@ -5295,7 +5295,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features/{id}": {
+    "/admin-api/versions/{versionId}/features/{id}": {
       "get": {
         "operationId": "FeatureController_findById",
         "parameters": [
@@ -5442,7 +5442,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features/bulk": {
+    "/admin-api/versions/{versionId}/features/bulk": {
       "post": {
         "operationId": "FeatureController_bulkCreate",
         "parameters": [],
@@ -5478,7 +5478,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features/{featureId}/permissions": {
+    "/admin-api/versions/{versionId}/features/{featureId}/permissions": {
       "get": {
         "operationId": "FeaturePermissionController_getPermissions",
         "parameters": [
@@ -5577,7 +5577,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features/{featureId}/microfrontends": {
+    "/admin-api/versions/{versionId}/features/{featureId}/microfrontends": {
       "get": {
         "operationId": "FeatureMicrofrontendController_list",
         "parameters": [
@@ -5624,7 +5624,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/features/{featureId}/microfrontends/{microfrontendId}": {
+    "/admin-api/versions/{versionId}/features/{featureId}/microfrontends/{microfrontendId}": {
       "put": {
         "operationId": "FeatureMicrofrontendController_set",
         "parameters": [
@@ -5743,7 +5743,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps": {
+    "/admin-api/versions/{versionId}/apps": {
       "post": {
         "operationId": "AppController_create",
         "parameters": [],
@@ -5789,7 +5789,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps/table": {
+    "/admin-api/versions/{versionId}/apps/table": {
       "get": {
         "operationId": "AppController_findForTable",
         "parameters": [],
@@ -5819,7 +5819,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps/{id}": {
+    "/admin-api/versions/{versionId}/apps/{id}": {
       "get": {
         "operationId": "AppController_findById",
         "parameters": [
@@ -5966,7 +5966,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps/{appId}/features/table": {
+    "/admin-api/versions/{versionId}/apps/{appId}/features/table": {
       "get": {
         "operationId": "AppFeatureController_findForTable",
         "parameters": [
@@ -6010,7 +6010,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps/{appId}/features": {
+    "/admin-api/versions/{versionId}/apps/{appId}/features": {
       "get": {
         "operationId": "AppFeatureController_findByApp",
         "parameters": [
@@ -6102,7 +6102,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps/{appId}/features/{featureId}": {
+    "/admin-api/versions/{versionId}/apps/{appId}/features/{featureId}": {
       "delete": {
         "operationId": "AppFeatureController_removeFeature",
         "parameters": [
@@ -6159,7 +6159,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps/{appId}/prices": {
+    "/admin-api/versions/{versionId}/apps/{appId}/prices": {
       "get": {
         "operationId": "AppPriceController_findByApp",
         "parameters": [
@@ -6264,7 +6264,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/apps/{appId}/prices/{priceId}": {
+    "/admin-api/versions/{versionId}/apps/{appId}/prices/{priceId}": {
       "patch": {
         "operationId": "AppPriceController_update",
         "parameters": [
@@ -6383,7 +6383,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/roles": {
+    "/admin-api/versions/{versionId}/roles": {
       "post": {
         "operationId": "RoleController_create",
         "parameters": [],
@@ -6426,7 +6426,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/roles/table": {
+    "/admin-api/versions/{versionId}/roles/table": {
       "get": {
         "operationId": "RoleController_findForTable",
         "parameters": [],
@@ -6456,7 +6456,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/roles/{id}": {
+    "/admin-api/versions/{versionId}/roles/{id}": {
       "get": {
         "operationId": "RoleController_findById",
         "parameters": [
@@ -6600,7 +6600,7 @@
         ]
       }
     },
-    "/admin-api/app-versions/{versionId}/roles/{roleId}/permissions": {
+    "/admin-api/versions/{versionId}/roles/{roleId}/permissions": {
       "get": {
         "operationId": "RolePermissionController_findByRole",
         "parameters": [
@@ -9171,9 +9171,9 @@
         ]
       }
     },
-    "/select-api/app-versions": {
+    "/select-api/versions": {
       "get": {
-        "operationId": "AppVersionSelectController_findForSelect",
+        "operationId": "VersionSelectController_findForSelect",
         "parameters": [
           {
             "name": "search",
@@ -12296,7 +12296,7 @@
           "code"
         ]
       },
-      "CreateAppVersionDto": {
+      "CreateVersionDto": {
         "type": "object",
         "properties": {
           "version": {
@@ -12315,7 +12315,7 @@
           "name"
         ]
       },
-      "AppVersionDto": {
+      "VersionDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -12360,13 +12360,13 @@
           "createdAt"
         ]
       },
-      "AppVersionTableResponseDto": {
+      "VersionTableResponseDto": {
         "type": "object",
         "properties": {
           "result": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/AppVersionDto"
+              "$ref": "#/components/schemas/VersionDto"
             }
           },
           "count": {
@@ -12387,7 +12387,7 @@
           "state"
         ]
       },
-      "UpdateAppVersionDto": {
+      "UpdateVersionDto": {
         "type": "object",
         "properties": {
           "version": {

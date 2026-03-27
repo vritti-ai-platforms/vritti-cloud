@@ -13,40 +13,40 @@ import type {
 
 // Fetches roles for the data table — server applies filter/sort state
 export function getRoles(versionId: string): Promise<RolesTableResponse> {
-  return axios.get<RolesTableResponse>(`admin-api/app-versions/${versionId}/roles/table`).then((r) => r.data);
+  return axios.get<RolesTableResponse>(`admin-api/versions/${versionId}/roles/table`).then((r) => r.data);
 }
 
 // Fetches a single role by ID with permissions
 export function getRole(versionId: string, id: string): Promise<RoleDetail> {
-  return axios.get<RoleDetail>(`admin-api/app-versions/${versionId}/roles/${id}`).then((r) => r.data);
+  return axios.get<RoleDetail>(`admin-api/versions/${versionId}/roles/${id}`).then((r) => r.data);
 }
 
 // Creates a new role
 export function createRole(versionId: string, data: CreateRoleData): Promise<CreateResponse<Role>> {
-  return axios.post<CreateResponse<Role>>(`admin-api/app-versions/${versionId}/roles`, data).then((r) => r.data);
+  return axios.post<CreateResponse<Role>>(`admin-api/versions/${versionId}/roles`, data).then((r) => r.data);
 }
 
 // Updates a role by ID
 export function updateRole(versionId: string, { id, data }: { id: string; data: UpdateRoleData }): Promise<SuccessResponse> {
-  return axios.patch<SuccessResponse>(`admin-api/app-versions/${versionId}/roles/${id}`, data).then((r) => r.data);
+  return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/roles/${id}`, data).then((r) => r.data);
 }
 
 // Deletes a role by ID
 export function deleteRole(versionId: string, id: string): Promise<void> {
-  return axios.delete(`admin-api/app-versions/${versionId}/roles/${id}`).then(() => undefined);
+  return axios.delete(`admin-api/versions/${versionId}/roles/${id}`).then(() => undefined);
 }
 
 // Fetches all features with their available permission types for a version
 export function getFeaturesWithPermissions(versionId: string): Promise<FeatureWithPermissions[]> {
   return axios
-    .get<FeatureWithPermissions[]>(`admin-api/app-versions/${versionId}/features/with-permissions`)
+    .get<FeatureWithPermissions[]>(`admin-api/versions/${versionId}/features/with-permissions`)
     .then((r) => r.data);
 }
 
 // Fetches grouped permissions for a role
 export function getRolePermissions(versionId: string, roleId: string): Promise<GroupedPermission[]> {
   return axios
-    .get<GroupedPermission[]>(`admin-api/app-versions/${versionId}/roles/${roleId}/permissions`)
+    .get<GroupedPermission[]>(`admin-api/versions/${versionId}/roles/${roleId}/permissions`)
     .then((r) => r.data);
 }
 
@@ -61,6 +61,6 @@ export function setRolePermissions({
   data: SetPermissionsData;
 }): Promise<SuccessResponse> {
   return axios
-    .put<SuccessResponse>(`admin-api/app-versions/${versionId}/roles/${roleId}/permissions`, data)
+    .put<SuccessResponse>(`admin-api/versions/${versionId}/roles/${roleId}/permissions`, data)
     .then((r) => r.data);
 }

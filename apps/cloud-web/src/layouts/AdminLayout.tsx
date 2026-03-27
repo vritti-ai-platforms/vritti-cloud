@@ -6,7 +6,7 @@ const navGroups: SidebarNavGroup[] = [
   {
     label: 'Platform',
     items: [
-      { title: 'App Versions', icon: GitBranch, path: '/app-versions' },
+      { title: 'Versions', icon: GitBranch, path: '/versions' },
       { title: 'Deployments', icon: Server, path: '/deployments' },
       { title: 'Organizations', icon: Landmark, path: '/organizations' },
     ],

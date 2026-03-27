@@ -16,7 +16,7 @@ export const VersionSwitcher = ({ currentVersionId, currentVersionName }: Versio
 
   return (
     <Select
-      optionsEndpoint="select-api/app-versions"
+      optionsEndpoint="select-api/versions"
       fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'version' }}
       value={currentVersionId}
       searchable
@@ -58,7 +58,7 @@ export const VersionSwitcher = ({ currentVersionId, currentVersionName }: Versio
             <Button
               variant="ghost"
               className="w-full justify-start h-auto px-2 py-1.5 text-sm font-normal"
-              onClick={() => navigate('/app-versions')}
+              onClick={() => navigate('/versions')}
             >
               All Versions
             </Button>
@@ -67,7 +67,7 @@ export const VersionSwitcher = ({ currentVersionId, currentVersionName }: Versio
       }
       onOptionSelect={(option) => {
         if (option) {
-          navigate(`/app-versions/ver-${buildSlug(String(option.label), String(option.value))}/microfrontends`);
+          navigate(`/versions/ver-${buildSlug(String(option.label), String(option.value))}/microfrontends`);
         }
       }}
     />

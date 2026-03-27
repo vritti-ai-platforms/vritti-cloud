@@ -4,10 +4,10 @@ import {
   NotFoundException,
   type SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { AppFeatureRepository } from '@domain/app-version/app/app-feature/repositories/app-feature.repository';
-import { AppPriceRepository } from '@domain/app-version/app/app-price/repositories/app-price.repository';
-import { AppRepository } from '@domain/app-version/app/root/repositories/app.repository';
-import { FeaturePermissionRepository } from '@domain/app-version/feature/feature-permission/repositories/feature-permission.repository';
+import { AppFeatureRepository } from '@domain/version/app/app-feature/repositories/app-feature.repository';
+import { AppPriceRepository } from '@domain/version/app/app-price/repositories/app-price.repository';
+import { AppRepository } from '@domain/version/app/root/repositories/app.repository';
+import { FeaturePermissionRepository } from '@domain/version/feature/feature-permission/repositories/feature-permission.repository';
 import { PlanAppRepository } from '@domain/plan/repositories/plan-app.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import type { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';

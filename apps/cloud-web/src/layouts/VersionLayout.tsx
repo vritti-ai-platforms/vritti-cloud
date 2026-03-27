@@ -7,7 +7,7 @@ import { useMemo } from 'react';
 // Builds sidebar nav groups with version-scoped paths
 function useVersionNavGroups(slug: string): SidebarNavGroup[] {
   return useMemo(() => {
-    const base = slug ? `/app-versions/${slug}` : '';
+    const base = slug ? `/versions/${slug}` : '';
     return [
       {
         label: 'Version',

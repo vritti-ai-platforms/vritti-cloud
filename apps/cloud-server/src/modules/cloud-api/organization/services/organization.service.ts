@@ -17,7 +17,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
 import { OrgMemberRoleValues } from '@/db/schema';
-import { CoreAppVersionRepository } from '@/modules/core-server/repositories/core-app-version.repository';
+import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CreateOrganizationDto } from '../dto/request/create-organization.dto';
@@ -37,7 +37,7 @@ export class OrganizationService {
     private readonly mediaService: MediaService,
     private readonly coreOrganizationService: CoreOrganizationService,
     private readonly deploymentRepository: DeploymentRepository,
-    private readonly coreAppVersionRepository: CoreAppVersionRepository,
+    private readonly coreVersionRepository: CoreVersionRepository,
   ) {}
 
   // Checks if a subdomain is available; throws ConflictException if already taken
@@ -245,7 +245,7 @@ export class OrganizationService {
   private async extractFeatureCatalog(version: string | null): Promise<object[] | undefined> {
     if (!version) return undefined;
 
-    const appVersion = await this.coreAppVersionRepository.findByVersion(version);
+    const appVersion = await this.coreVersionRepository.findByVersion(version);
     if (!appVersion?.snapshot) return undefined;
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;

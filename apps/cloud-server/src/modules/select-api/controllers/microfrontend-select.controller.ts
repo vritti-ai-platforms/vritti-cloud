@@ -2,7 +2,7 @@ import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { MicrofrontendService } from '@domain/app-version/microfrontend/services/microfrontend.service';
+import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
 
 @ApiTags('Select')
 @ApiBearerAuth()

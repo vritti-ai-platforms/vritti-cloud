@@ -1,6 +1,6 @@
 import { boolean, integer, text, timestamp, uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
-import { appVersions } from './app-version';
+import { appVersions } from './version';
 
 // Curated feature bundles scoped to an app version
 export const apps = cloudSchema.table(

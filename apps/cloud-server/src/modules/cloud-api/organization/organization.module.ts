@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AppVersionDomainModule } from '@domain/app-version/app-version.module';
+import { VersionDomainModule } from '@domain/version/version.module';
 import { CloudOrganizationDomainModule } from '@domain/cloud-organization/cloud-organization.module';
 import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
 import { MediaDomainModule } from '@domain/media/media.module';
@@ -21,7 +21,7 @@ import { OrganizationBusinessUnitsController } from './organization-business-uni
 import { OrganizationBusinessUnitsService } from './organization-business-units/services/organization-business-units.service';
 
 @Module({
-  imports: [CoreServerModule, AppVersionDomainModule, DeploymentDomainModule, PlanDomainModule, MediaDomainModule, CloudOrganizationDomainModule],
+  imports: [CoreServerModule, VersionDomainModule, DeploymentDomainModule, PlanDomainModule, MediaDomainModule, CloudOrganizationDomainModule],
   controllers: [
     OrganizationController,
     OrganizationUsersController,

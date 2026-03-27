@@ -2,7 +2,7 @@ import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { AppService } from '@domain/app-version/app/root/services/app.service';
+import { AppService } from '@domain/version/app/root/services/app.service';
 
 @ApiTags('Select')
 @ApiBearerAuth()

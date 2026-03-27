@@ -5,7 +5,7 @@ import type { FeatureMicrofrontend } from '@/schemas/admin/features';
 // Fetches all microfrontend links for a feature
 export function getFeatureMicrofrontends(versionId: string, featureId: string): Promise<FeatureMicrofrontend[]> {
   return axios
-    .get<FeatureMicrofrontend[]>(`admin-api/app-versions/${versionId}/features/${featureId}/microfrontends`)
+    .get<FeatureMicrofrontend[]>(`admin-api/versions/${versionId}/features/${featureId}/microfrontends`)
     .then((r) => r.data);
 }
 
@@ -23,7 +23,7 @@ export function setFeatureMicrofrontend({
 }): Promise<SuccessResponse> {
   return axios
     .put<SuccessResponse>(
-      `admin-api/app-versions/${versionId}/features/${featureId}/microfrontends/${microfrontendId}`,
+      `admin-api/versions/${versionId}/features/${featureId}/microfrontends/${microfrontendId}`,
       data,
     )
     .then((r) => r.data);
@@ -40,6 +40,6 @@ export function removeFeatureMicrofrontend({
   microfrontendId: string;
 }): Promise<void> {
   return axios
-    .delete(`admin-api/app-versions/${versionId}/features/${featureId}/microfrontends/${microfrontendId}`)
+    .delete(`admin-api/versions/${versionId}/features/${featureId}/microfrontends/${microfrontendId}`)
     .then(() => undefined);
 }

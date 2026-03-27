@@ -1,6 +1,6 @@
 import { uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
-import { appVersions } from './app-version';
+import { appVersions } from './version';
 import { appPlatformEnum } from './enums';
 
 // Microfrontend deployments scoped to an app version — one per code+platform combo

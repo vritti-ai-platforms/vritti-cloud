@@ -19,7 +19,7 @@ export * from './verification';
 export * from './media';
 export * from './table-view';
 // RBAC tables
-export * from './app-version';
+export * from './version';
 export * from './microfrontend';
 export * from './feature';
 export * from './feature-microfrontend';

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException, ServiceUnavailableException } from '@vritti/api-sdk';
-import { CoreAppVersionRepository } from '@/modules/core-server/repositories/core-app-version.repository';
+import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
 import type { RoleTemplateListResponseDto } from '../dto/response/role-template.response.dto';
@@ -12,7 +12,7 @@ export class OrganizationRolesService {
   constructor(
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly coreRoleService: CoreRoleService,
-    private readonly coreAppVersionRepository: CoreAppVersionRepository,
+    private readonly coreVersionRepository: CoreVersionRepository,
   ) {}
 
   // Returns role templates from the deployment's app version snapshot
@@ -22,7 +22,7 @@ export class OrganizationRolesService {
     if (!deployment.version) {
       throw new NotFoundException('No app version linked to this deployment.');
     }
-    const appVersion = await this.coreAppVersionRepository.findByVersion(deployment.version);
+    const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
     if (!appVersion?.snapshot) {
       throw new NotFoundException('No snapshot available for this deployment.');
     }

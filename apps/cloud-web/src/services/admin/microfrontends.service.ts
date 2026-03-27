@@ -10,7 +10,7 @@ import type {
 // Fetches microfrontends for the data table — scoped to a version
 export function getMicrofrontendsTable(versionId: string): Promise<MicrofrontendsTableResponse> {
   return axios
-    .get<MicrofrontendsTableResponse>(`admin-api/app-versions/${versionId}/microfrontends/table`)
+    .get<MicrofrontendsTableResponse>(`admin-api/versions/${versionId}/microfrontends/table`)
     .then((r) => r.data);
 }
 
@@ -23,7 +23,7 @@ export function createMicrofrontend({
   data: CreateMicrofrontendData;
 }): Promise<CreateResponse<Microfrontend>> {
   return axios
-    .post<CreateResponse<Microfrontend>>(`admin-api/app-versions/${versionId}/microfrontends`, data)
+    .post<CreateResponse<Microfrontend>>(`admin-api/versions/${versionId}/microfrontends`, data)
     .then((r) => r.data);
 }
 
@@ -38,7 +38,7 @@ export function updateMicrofrontend({
   data: UpdateMicrofrontendData;
 }): Promise<SuccessResponse> {
   return axios
-    .patch<SuccessResponse>(`admin-api/app-versions/${versionId}/microfrontends/${id}`, data)
+    .patch<SuccessResponse>(`admin-api/versions/${versionId}/microfrontends/${id}`, data)
     .then((r) => r.data);
 }
 
@@ -50,5 +50,5 @@ export function deleteMicrofrontend({
   versionId: string;
   id: string;
 }): Promise<void> {
-  return axios.delete(`admin-api/app-versions/${versionId}/microfrontends/${id}`).then(() => undefined);
+  return axios.delete(`admin-api/versions/${versionId}/microfrontends/${id}`).then(() => undefined);
 }

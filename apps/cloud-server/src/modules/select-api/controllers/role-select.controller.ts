@@ -1,4 +1,4 @@
-import { RoleService } from '@domain/app-version/role/root/services/role.service';
+import { RoleService } from '@domain/version/role/root/services/role.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';

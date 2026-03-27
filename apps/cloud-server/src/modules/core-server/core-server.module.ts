@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CoreAppVersionRepository } from './repositories/core-app-version.repository';
+import { CoreVersionRepository } from './repositories/core-version.repository';
 import { CoreDeploymentRepository } from './repositories/core-deployment.repository';
 import { CoreOrganizationRepository } from './repositories/core-organization.repository';
 import { CoreBusinessUnitService } from './services/core-business-unit.service';
@@ -15,7 +15,7 @@ import { CoreUserService } from './services/core-user.service';
     // Repositories
     CoreOrganizationRepository,
     CoreDeploymentRepository,
-    CoreAppVersionRepository,
+    CoreVersionRepository,
     // HTTP transport
     CoreHttpService,
     // Deployment resolution
@@ -27,7 +27,7 @@ import { CoreUserService } from './services/core-user.service';
     CoreBusinessUnitService,
   ],
   exports: [
-    CoreAppVersionRepository,
+    CoreVersionRepository,
     CoreDeploymentService,
     CoreOrganizationService,
     CoreUserService,

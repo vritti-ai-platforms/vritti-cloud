@@ -10,7 +10,7 @@ import {
 import { type Column, and, sql } from '@vritti/api-sdk/drizzle-orm';
 import { deployments, industries, organizations, plans } from '@/db/schema';
 import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
-import { CoreAppVersionRepository } from '@/modules/core-server/repositories/core-app-version.repository';
+import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
 import { OrganizationDto } from '@/modules/admin-api/organization/dto/entity/organization.dto';
 import { OrganizationDetailDto } from '@/modules/admin-api/organization/dto/entity/organization-detail.dto';
@@ -40,7 +40,7 @@ export class OrganizationService {
     private readonly organizationRepository: OrganizationRepository,
     private readonly dataTableStateService: DataTableStateService,
     private readonly deploymentRepository: DeploymentRepository,
-    private readonly coreAppVersionRepository: CoreAppVersionRepository,
+    private readonly coreVersionRepository: CoreVersionRepository,
     private readonly coreOrganizationService: CoreOrganizationService,
   ) {}
 
@@ -81,7 +81,7 @@ export class OrganizationService {
     const deployment = await this.deploymentRepository.findById(org.deploymentId);
     if (!deployment?.version) throw new NotFoundException('Deployment or app version not found.');
 
-    const appVersion = await this.coreAppVersionRepository.findByVersion(deployment.version);
+    const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
     if (!appVersion?.snapshot) throw new NotFoundException('App version snapshot not found.');
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;

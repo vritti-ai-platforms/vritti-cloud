@@ -11,18 +11,18 @@ import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import './index.css';
 import { ProfilePage } from './pages/account/profile/ProfilePage';
 import { SecurityPage } from './pages/account/SecurityPage';
-import { AppVersionsPage } from './pages/admin/app-versions/AppVersionsPage';
-import { AdminAppsPage } from './pages/admin/app-versions/apps/AdminAppsPage';
-import { AppViewPage } from './pages/admin/app-versions/apps/AppViewPage';
-import { AppViewPageSkeleton } from './pages/admin/app-versions/apps/AppViewPageSkeleton';
-import { FeaturesPage } from './pages/admin/app-versions/features/FeaturesPage';
-import { FeatureViewPage } from './pages/admin/app-versions/features/FeatureViewPage';
-import { FeatureViewPageSkeleton } from './pages/admin/app-versions/features/FeatureViewPageSkeleton';
-import { MicrofrontendsPage } from './pages/admin/app-versions/microfrontends/MicrofrontendsPage';
-import { OverviewPage as VersionOverviewPage } from './pages/admin/app-versions/overview/OverviewPage';
-import { AdminRolesPage } from './pages/admin/app-versions/roles/AdminRolesPage';
-import { RoleViewPage } from './pages/admin/app-versions/roles/RoleViewPage';
-import { RoleViewPageSkeleton } from './pages/admin/app-versions/roles/RoleViewPageSkeleton';
+import { VersionsPage } from './pages/admin/versions/VersionsPage';
+import { AdminAppsPage } from './pages/admin/versions/apps/AdminAppsPage';
+import { AppViewPage } from './pages/admin/versions/apps/AppViewPage';
+import { AppViewPageSkeleton } from './pages/admin/versions/apps/AppViewPageSkeleton';
+import { FeaturesPage } from './pages/admin/versions/features/FeaturesPage';
+import { FeatureViewPage } from './pages/admin/versions/features/FeatureViewPage';
+import { FeatureViewPageSkeleton } from './pages/admin/versions/features/FeatureViewPageSkeleton';
+import { MicrofrontendsPage } from './pages/admin/versions/microfrontends/MicrofrontendsPage';
+import { OverviewPage as VersionOverviewPage } from './pages/admin/versions/overview/OverviewPage';
+import { AdminRolesPage } from './pages/admin/versions/roles/AdminRolesPage';
+import { RoleViewPage } from './pages/admin/versions/roles/RoleViewPage';
+import { RoleViewPageSkeleton } from './pages/admin/versions/roles/RoleViewPageSkeleton';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
@@ -137,11 +137,11 @@ export const adminRoutes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Navigate to="app-versions" replace />,
+        element: <Navigate to="versions" replace />,
       },
       {
-        path: 'app-versions',
-        element: <AppVersionsPage />,
+        path: 'versions',
+        element: <VersionsPage />,
       },
       {
         path: 'cloud-providers',
@@ -203,7 +203,7 @@ export const adminRoutes: RouteObject[] = [
   },
   // Version-scoped routes with their own sidebar layout
   {
-    path: '/app-versions/:slug',
+    path: '/versions/:slug',
     element: <VersionLayout />,
     children: [
       {
