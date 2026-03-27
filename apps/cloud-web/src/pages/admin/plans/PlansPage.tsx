@@ -6,8 +6,8 @@ import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/qua
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
 import { CreditCard, Eye, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Plan } from '@/schemas/admin/plans';
@@ -114,11 +114,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Plan, unknown>[] {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <RowActions
-          actions={[
-            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
-          ]}
-        />
+        <RowActions actions={[{ id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) }]} />
       ),
       enableSorting: false,
       enableHiding: false,

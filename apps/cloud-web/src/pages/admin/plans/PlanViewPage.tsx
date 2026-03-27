@@ -4,7 +4,6 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { useNavigate } from 'react-router-dom';
 import type { Plan } from '@/schemas/admin/plans';
@@ -30,7 +29,7 @@ export const PlanViewPage = () => {
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: plan, isLoading: planLoading } = usePlan(id);
+  const { data: plan } = usePlan(id);
 
   const deleteMutation = useDeletePlan({
     onSuccess: () => navigate('/plans'),
@@ -40,23 +39,13 @@ export const PlanViewPage = () => {
   const handleDelete = async () => {
     if (!id) return;
     const confirmed = await confirm({
-      title: `Delete ${plan?.name}?`,
-      description: `${plan?.name} and all its associated data will be permanently removed. This action cannot be undone.`,
+      title: `Delete ${plan.name}?`,
+      description: `${plan.name} and all its associated data will be permanently removed. This action cannot be undone.`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
     if (confirmed) deleteMutation.mutate(id);
   };
-
-  if (planLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!plan) return null;
 
   return (
     <div className="flex flex-col gap-6">

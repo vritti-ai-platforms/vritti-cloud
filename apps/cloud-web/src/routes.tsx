@@ -4,10 +4,13 @@ import { AuthLayout } from '@layouts/AuthLayout';
 import { OrgLayout } from '@layouts/OrgLayout';
 import { VersionLayout } from '@layouts/VersionLayout';
 import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
+import { Suspense } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import './index.css';
+import { ProfilePage } from './pages/account/profile/ProfilePage';
+import { SecurityPage } from './pages/account/SecurityPage';
 import { AppVersionsPage } from './pages/admin/app-versions/AppVersionsPage';
 import { AdminAppsPage } from './pages/admin/app-versions/apps/AdminAppsPage';
 import { AppViewPage } from './pages/admin/app-versions/apps/AppViewPage';
@@ -25,6 +28,7 @@ import { OrganizationsPage as AdminOrganizationsPage } from './pages/admin/organ
 import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/organizations/OrganizationViewPage';
 import { PlansPage } from './pages/admin/plans/PlansPage';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
+import { PlanViewPageSkeleton } from './pages/admin/plans/PlanViewPageSkeleton';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
 import { AuthErrorPage } from './pages/auth/AuthErrorPage';
@@ -48,8 +52,6 @@ import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
 import { OnboardingPage } from './pages/onboarding/OnboardingPage';
-import { ProfilePage } from './pages/account/profile/ProfilePage';
-import { SecurityPage } from './pages/account/SecurityPage';
 
 // Catch-all 404 page using quantum-ui's NotFoundErrorPage
 const NotFoundRoute = () => {
@@ -148,7 +150,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'plans/:slug',
-        element: <PlanViewPage />,
+        element: (
+          <Suspense fallback={<PlanViewPageSkeleton />}>
+            <PlanViewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'regions',
