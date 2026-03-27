@@ -8,7 +8,6 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { useConfirm, useDialog, useSlugParams, useTheme } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { DollarSign, Layers, Link2, Link2Off, Server, ServerOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EditRegionForm } from './forms/EditRegionForm';
@@ -21,7 +20,7 @@ export const RegionViewPage = () => {
   const confirm = useConfirm();
 
   const { theme } = useTheme();
-  const { data: region, isLoading: regionLoading } = useRegion(id);
+  const { data: region } = useRegion(id);
 
   const deleteMutation = useDeleteRegion({
     onSuccess: () => navigate('/regions'),
@@ -31,7 +30,7 @@ export const RegionViewPage = () => {
   const removeProviderMutation = useRemoveCloudProvider();
 
   // Providers are now embedded in the region response with isAssigned flag
-  const allProviders = region?.providers ?? [];
+  const allProviders = region.providers ?? [];
 
   // Toggle a cloud provider on or off for this region
   const handleProviderToggle = (providerId: string, enabled: boolean) => {
@@ -47,23 +46,13 @@ export const RegionViewPage = () => {
   const handleDelete = async () => {
     if (!id) return;
     const confirmed = await confirm({
-      title: `Delete ${region?.name}?`,
-      description: `${region?.name} and all its associated data will be permanently removed. This action cannot be undone.`,
+      title: `Delete ${region.name}?`,
+      description: `${region.name} and all its associated data will be permanently removed. This action cannot be undone.`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
     if (confirmed) deleteMutation.mutate(id);
   };
-
-  if (regionLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!region) return null;
 
   return (
     <div className="flex flex-col gap-6">

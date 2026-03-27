@@ -30,6 +30,7 @@ import { PlansPage } from './pages/admin/plans/PlansPage';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
 import { PlanViewPageSkeleton } from './pages/admin/plans/PlanViewPageSkeleton';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
+import { RegionViewPageSkeleton } from './pages/admin/regions/RegionViewPageSkeleton';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
 import { AuthErrorPage } from './pages/auth/AuthErrorPage';
 import { AuthSuccessPage } from './pages/auth/AuthSuccessPage';
@@ -162,7 +163,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'regions/:slug',
-        element: <RegionViewPage />,
+        element: (
+          <Suspense fallback={<RegionViewPageSkeleton />}>
+            <RegionViewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'deployments',

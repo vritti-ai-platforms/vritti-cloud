@@ -3,9 +3,9 @@ import type { OTPFormData } from '@schemas/verification';
 import { otpSchema } from '@schemas/verification';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
+import { useTimer } from '@vritti/quantum-ui/hooks';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
-import { useTimer } from '@vritti/quantum-ui/hooks';
 import { Clock, Mail, Send, Smartphone } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
@@ -94,7 +94,9 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
                 onClick={() => setSelectedChannel(method.id)}
                 className={`w-full p-4 rounded-lg border-2 transition-all flex items-center gap-4 text-left ${isSelected ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
               >
-                <div className={`flex items-center justify-center w-10 h-10 rounded-lg ${isSelected ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground'}`}>
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-lg ${isSelected ? 'bg-primary/10 text-primary' : 'bg-secondary text-foreground'}`}
+                >
                   {method.icon}
                 </div>
                 <div className="flex-1 space-y-1">
@@ -105,7 +107,9 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
                     {method.description}
                   </Typography>
                 </div>
-                <div className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${isSelected ? 'border-primary' : 'border-muted-foreground'}`}>
+                <div
+                  className={`flex h-5 w-5 items-center justify-center rounded-full border-2 ${isSelected ? 'border-primary' : 'border-muted-foreground'}`}
+                >
                   {isSelected && <div className="h-2.5 w-2.5 rounded-full bg-primary" />}
                 </div>
               </button>
