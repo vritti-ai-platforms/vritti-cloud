@@ -1,5 +1,4 @@
-import { versionQueryKey, useVersion, useCreateSnapshot, useDeleteVersion } from '@hooks/admin/versions';
-import { useQueryClient } from '@tanstack/react-query';
+import { useCreateSnapshot, useDeleteVersion, useVersion } from '@hooks/admin/versions';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
@@ -7,15 +6,15 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
 import { Calendar, Camera, GitBranch, Pencil } from 'lucide-react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
-import type { Version, VersionStatus } from '@/schemas/admin/versions';
-import { getVersion } from '@/services/admin/versions.service';
+import type { VersionStatus } from '@/schemas/admin/versions';
 import { EditVersionForm } from '../forms/EditVersionForm';
+
 import { SnapshotView } from './components/SnapshotView';
 import type { Snapshot } from './snapshot-types';
 
@@ -34,25 +33,16 @@ function statusVariant(status: VersionStatus): 'secondary' | 'outline' | 'defaul
 export const OverviewPage = () => {
   const { versionId } = useVersionContext();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const confirm = useConfirm();
   const editDialog = useDialog();
 
-  // After edit, fetch fresh data, invalidate select cache, and navigate to updated slug
-  async function handleEditSuccess() {
-    editDialog.close();
-    const [updated] = await Promise.all([
-      queryClient.fetchQuery<Version>({
-        queryKey: versionQueryKey(versionId),
-        queryFn: () => getVersion(versionId),
-      }),
-      queryClient.invalidateQueries({ queryKey: ['select-resolve', 'select-api/versions'] }),
-      queryClient.invalidateQueries({ queryKey: ['select-search', 'select-api/versions'] }),
-    ]);
-    navigate(`/versions/ver-${buildSlug(updated.name, updated.id)}/overview`, { replace: true });
-  }
+  const { data: version } = useVersion(versionId);
 
-  const { data: version, isLoading } = useVersion(versionId);
+  // Keep URL slug in sync when version name changes after edit
+  useEffect(() => {
+    const expectedSlug = `ver-${buildSlug(version.name, version.id)}`;
+    navigate(`/versions/${expectedSlug}/overview`, { replace: true });
+  }, [version.name, version.id, navigate]);
 
   const snapshotMutation = useCreateSnapshot();
   const deleteMutation = useDeleteVersion({
@@ -80,23 +70,6 @@ export const OverviewPage = () => {
     });
     if (confirmed) deleteMutation.mutate(versionId);
   }
-
-  if (isLoading) {
-    return (
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <Skeleton className="h-8 w-48" />
-          <Skeleton className="h-4 w-96" />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-24" />
-          <Skeleton className="h-24" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!version) return null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -181,7 +154,7 @@ export const OverviewPage = () => {
         }}
         title="Edit Version"
         description="Update the version name and number."
-        content={(close) => <EditVersionForm version={version} onSuccess={handleEditSuccess} onCancel={close} />}
+        content={(close) => <EditVersionForm version={version} onSuccess={close} onCancel={close} />}
       />
     </div>
   );

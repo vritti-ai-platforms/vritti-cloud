@@ -1,4 +1,4 @@
-import { VERSIONS_TABLE_KEY, useVersionsTable } from '@hooks/admin/versions';
+import { useVersionsTable, VERSIONS_TABLE_KEY } from '@hooks/admin/versions';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';

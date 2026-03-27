@@ -11,18 +11,6 @@ import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import './index.css';
 import { ProfilePage } from './pages/account/profile/ProfilePage';
 import { SecurityPage } from './pages/account/SecurityPage';
-import { VersionsPage } from './pages/admin/versions/VersionsPage';
-import { AdminAppsPage } from './pages/admin/versions/apps/AdminAppsPage';
-import { AppViewPage } from './pages/admin/versions/apps/AppViewPage';
-import { AppViewPageSkeleton } from './pages/admin/versions/apps/AppViewPageSkeleton';
-import { FeaturesPage } from './pages/admin/versions/features/FeaturesPage';
-import { FeatureViewPage } from './pages/admin/versions/features/FeatureViewPage';
-import { FeatureViewPageSkeleton } from './pages/admin/versions/features/FeatureViewPageSkeleton';
-import { MicrofrontendsPage } from './pages/admin/versions/microfrontends/MicrofrontendsPage';
-import { OverviewPage as VersionOverviewPage } from './pages/admin/versions/overview/OverviewPage';
-import { AdminRolesPage } from './pages/admin/versions/roles/AdminRolesPage';
-import { RoleViewPage } from './pages/admin/versions/roles/RoleViewPage';
-import { RoleViewPageSkeleton } from './pages/admin/versions/roles/RoleViewPageSkeleton';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
@@ -35,8 +23,21 @@ import { PlansPage } from './pages/admin/plans/PlansPage';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
 import { PlanViewPageSkeleton } from './pages/admin/plans/PlanViewPageSkeleton';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
-import { RegionViewPageSkeleton } from './pages/admin/regions/RegionViewPageSkeleton';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
+import { RegionViewPageSkeleton } from './pages/admin/regions/RegionViewPageSkeleton';
+import { AdminAppsPage } from './pages/admin/versions/apps/AdminAppsPage';
+import { AppViewPage } from './pages/admin/versions/apps/AppViewPage';
+import { AppViewPageSkeleton } from './pages/admin/versions/apps/AppViewPageSkeleton';
+import { FeaturesPage } from './pages/admin/versions/features/FeaturesPage';
+import { FeatureViewPage } from './pages/admin/versions/features/FeatureViewPage';
+import { FeatureViewPageSkeleton } from './pages/admin/versions/features/FeatureViewPageSkeleton';
+import { MicrofrontendsPage } from './pages/admin/versions/microfrontends/MicrofrontendsPage';
+import { OverviewPage as VersionOverviewPage } from './pages/admin/versions/overview/OverviewPage';
+import { OverviewPageSkeleton as VersionOverviewPageSkeleton } from './pages/admin/versions/overview/OverviewPageSkeleton';
+import { AdminRolesPage } from './pages/admin/versions/roles/AdminRolesPage';
+import { RoleViewPage } from './pages/admin/versions/roles/RoleViewPage';
+import { RoleViewPageSkeleton } from './pages/admin/versions/roles/RoleViewPageSkeleton';
+import { VersionsPage } from './pages/admin/versions/VersionsPage';
 import { AuthErrorPage } from './pages/auth/AuthErrorPage';
 import { AuthSuccessPage } from './pages/auth/AuthSuccessPage';
 import { ForgotPasswordPage } from './pages/auth/forgot-password';
@@ -212,7 +213,11 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'overview',
-        element: <VersionOverviewPage />,
+        element: (
+          <Suspense fallback={<VersionOverviewPageSkeleton />}>
+            <VersionOverviewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'microfrontends',
