@@ -20,7 +20,7 @@ import type { DeploymentPlanAssignment, DeploymentPlanAssignmentIndustry } from 
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
 
 export const DeploymentViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('deploymentSlug');
   const navigate = useNavigate();
 
   const editDialog = useDialog();
@@ -123,10 +123,7 @@ export const DeploymentViewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit Deployment"
         description="Update the details for this deployment."
         content={(close) => <EditDeploymentForm deployment={deployment} onSuccess={close} onCancel={close} />}

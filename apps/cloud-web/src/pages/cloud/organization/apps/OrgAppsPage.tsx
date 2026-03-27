@@ -150,10 +150,7 @@ export const OrgAppsPage = () => {
 
       {/* Purchase dialog */}
       <Dialog
-        open={purchaseDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) purchaseDialog.close();
-        }}
+        handle={purchaseDialog}
         title={`Purchase ${purchaseAppRef.current?.name ?? 'Add-on'}`}
         description="Select the business units where you want to activate this application."
         content={(close) =>

@@ -24,7 +24,7 @@ export const EditAppForm: React.FC<EditAppFormProps> = ({ app, onSuccess, onCanc
       code: app.code,
       name: app.name,
       description: app.description ?? '',
-      icon: app.icon ?? '',
+      icon: app.icon,
     },
   });
 

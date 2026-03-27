@@ -17,8 +17,8 @@ export class FeatureDto {
   @ApiPropertyOptional({ example: 'Allows creating a new dine-in order', nullable: true })
   description: string | null;
 
-  @ApiPropertyOptional({ example: 'receipt', nullable: true })
-  icon: string | null;
+  @ApiProperty({ example: 'clipboard-list' })
+  icon: string;
 
   @ApiProperty({ example: true })
   isActive: boolean;

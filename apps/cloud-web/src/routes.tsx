@@ -157,7 +157,7 @@ export const adminRoutes: RouteObject[] = [
         element: <PlansPage />,
       },
       {
-        path: 'plans/:slug',
+        path: 'plans/:planSlug',
         element: (
           <Suspense fallback={<PlanViewPageSkeleton />}>
             <PlanViewPage />
@@ -169,7 +169,7 @@ export const adminRoutes: RouteObject[] = [
         element: <RegionsPage />,
       },
       {
-        path: 'regions/:slug',
+        path: 'regions/:regionSlug',
         element: (
           <Suspense fallback={<RegionViewPageSkeleton />}>
             <RegionViewPage />
@@ -181,7 +181,7 @@ export const adminRoutes: RouteObject[] = [
         element: <DeploymentsPage />,
       },
       {
-        path: 'deployments/:slug',
+        path: 'deployments/:deploymentSlug',
         element: (
           <Suspense fallback={<DeploymentViewPageSkeleton />}>
             <DeploymentViewPage />
@@ -193,7 +193,7 @@ export const adminRoutes: RouteObject[] = [
         element: <AdminOrganizationsPage />,
       },
       {
-        path: 'organizations/:slug',
+        path: 'organizations/:orgSlug',
         element: (
           <Suspense fallback={<OrganizationViewPageSkeleton />}>
             <AdminOrganizationViewPage />
@@ -204,7 +204,7 @@ export const adminRoutes: RouteObject[] = [
   },
   // Version-scoped routes with their own sidebar layout
   {
-    path: '/versions/:slug',
+    path: '/versions/:versionSlug',
     element: <VersionLayout />,
     children: [
       {
@@ -228,7 +228,7 @@ export const adminRoutes: RouteObject[] = [
         element: <FeaturesPage />,
       },
       {
-        path: 'features/:slug',
+        path: 'features/:featureSlug',
         element: (
           <Suspense fallback={<FeatureViewPageSkeleton />}>
             <FeatureViewPage />
@@ -240,7 +240,7 @@ export const adminRoutes: RouteObject[] = [
         element: <AdminAppsPage />,
       },
       {
-        path: 'apps/:slug',
+        path: 'apps/:appSlug',
         element: (
           <Suspense fallback={<AppViewPageSkeleton />}>
             <AppViewPage />
@@ -252,7 +252,7 @@ export const adminRoutes: RouteObject[] = [
         element: <AdminRolesPage />,
       },
       {
-        path: 'roles/:slug',
+        path: 'roles/:roleSlug',
         element: (
           <Suspense fallback={<RoleViewPageSkeleton />}>
             <RoleViewPage />

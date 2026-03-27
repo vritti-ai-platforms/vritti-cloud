@@ -146,10 +146,7 @@ export const OverviewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit Version"
         description="Update the version name and number."
         content={(close) => <EditVersionForm version={version} onSuccess={close} onCancel={close} />}

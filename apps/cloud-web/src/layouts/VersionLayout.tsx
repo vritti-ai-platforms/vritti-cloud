@@ -25,7 +25,7 @@ function useVersionNavGroups(slug: string): SidebarNavGroup[] {
 
 // Layout with sidebar for version-scoped admin pages
 export const VersionLayout = () => {
-  const { slug, id: versionId } = useSlugParams();
+  const { slug, id: versionId } = useSlugParams('versionSlug');
 
   return <SidebarLayout groups={useVersionNavGroups(slug)} outletContext={{ versionId }} />;
 };

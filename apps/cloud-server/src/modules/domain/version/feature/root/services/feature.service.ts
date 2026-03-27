@@ -14,10 +14,12 @@ import { and } from '@vritti/api-sdk/drizzle-orm';
 import { features } from '@/db/schema';
 import { FeatureDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature.dto';
 import type { BulkCreateFeaturesDto } from '@/modules/admin-api/version/feature/root/dto/request/bulk-create-features.dto';
-import type { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
+import { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
 import type { UpdateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '@/modules/admin-api/version/feature/root/dto/response/feature-table-response.dto';
 import type { FeatureWithPermissionsResponseDto } from '@/modules/admin-api/version/feature/root/dto/response/feature-with-permissions-response.dto';
+import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
+import { type ValidateImportResult, validateImportRows } from '@/utils/validate-import-rows';
 import { FeatureRepository } from '../repositories/feature.repository';
 
 @Injectable()
@@ -150,8 +152,26 @@ export class FeatureService {
     return { success: true, message: 'Feature deleted successfully.' };
   }
 
-  // Bulk-creates features for seeding; skips existing codes and returns created/skipped counts
-  async bulkCreate(dto: BulkCreateFeaturesDto): Promise<{ created: number; skipped: number }> {
+  // Validates a spreadsheet of features and returns parsed rows with errors
+  async validateImport(buffer: Buffer, versionId: string): Promise<ValidateImportResult> {
+    const rows = parseSpreadsheet(buffer);
+    const result = await validateImportRows(rows, CreateFeatureDto, { versionId });
+    for (const row of result.rows) {
+      if (!row.valid) continue;
+      const existing = await this.featureRepository.findByCode(row.data.code);
+      if (existing) {
+        row.valid = false;
+        row.errors.push('Code already exists');
+        result.summary.valid--;
+        result.summary.invalid++;
+      }
+    }
+    this.logger.log(`Validated feature import: ${result.summary.valid} valid, ${result.summary.invalid} invalid`);
+    return result;
+  }
+
+  // Bulk-creates features for seeding; skips existing codes
+  async bulkCreate(dto: BulkCreateFeaturesDto): Promise<SuccessResponseDto> {
     let created = 0;
     let skipped = 0;
     for (const featureDto of dto.features) {
@@ -164,6 +184,6 @@ export class FeatureService {
       created++;
     }
     this.logger.log(`Bulk created features: ${created} created, ${skipped} skipped`);
-    return { created, skipped };
+    return { success: true, message: `${created} feature(s) imported.` };
   }
 }

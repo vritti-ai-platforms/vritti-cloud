@@ -23,7 +23,7 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
     defaultValues: {
       code: feature.code,
       name: feature.name,
-      icon: feature.icon ?? '',
+      icon: feature.icon,
       description: feature.description ?? '',
     },
   });
@@ -41,7 +41,7 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
         />
         <TextField name="name" label="Name" placeholder="e.g. Orders" />
       </div>
-      <TextField name="icon" label="Icon" placeholder="e.g. clipboard-list" description="Lucide icon name (optional)" />
+      <TextField name="icon" label="Icon" placeholder="e.g. clipboard-list" description="Lucide icon name" />
       <TextField name="description" label="Description" placeholder="Optional description" />
 
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">

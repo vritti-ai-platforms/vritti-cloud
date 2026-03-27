@@ -12,7 +12,7 @@ import { MicrofrontendTab } from './tabs/MicrofrontendTab';
 import { PermissionsTab } from './tabs/PermissionsTab';
 
 export const FeatureViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('featureSlug');
   const navigate = useNavigate();
   const { versionId } = useVersionContext();
 
@@ -74,10 +74,7 @@ export const FeatureViewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit Feature"
         description="Update the details for this feature."
         content={(close) => <EditFeatureForm feature={feature} onSuccess={close} onCancel={close} />}

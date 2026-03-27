@@ -6,7 +6,7 @@ export type VersionStatus = 'ALPHA' | 'BETA' | 'PROD';
 export interface SnapshotFeature {
   code: string;
   name: string;
-  icon: string | null;
+  icon: string;
   permissions: string[];
   microfrontends: Record<string, { remoteEntry: string; exposedModule: string; routePrefix: string }>;
 }
@@ -14,7 +14,7 @@ export interface SnapshotFeature {
 export interface SnapshotApp {
   code: string;
   name: string;
-  icon: string | null;
+  icon: string;
   features: string[];
 }
 

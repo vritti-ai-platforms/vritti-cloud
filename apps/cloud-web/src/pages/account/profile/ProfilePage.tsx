@@ -133,9 +133,8 @@ export const ProfilePage: React.FC = () => {
       />
 
       <ContactChangeDialog
-        open={contactDialog.isOpen}
+        handle={contactDialog}
         contactType={contactType}
-        onClose={contactDialog.close}
         profile={profile}
       />
     </div>

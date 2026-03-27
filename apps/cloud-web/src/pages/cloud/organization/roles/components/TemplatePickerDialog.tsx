@@ -3,6 +3,7 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
+import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { FileText, LayoutTemplate } from 'lucide-react';
 import { useState } from 'react';
@@ -10,8 +11,7 @@ import type { RoleTemplate } from '@/schemas/cloud/org-roles';
 
 interface TemplatePickerDialogProps {
   orgId: string;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
+  handle: DialogHandle;
   onSuccess: () => void;
 }
 
@@ -30,8 +30,7 @@ function getScopeBadge(scope: RoleTemplate['scope']) {
 // Dialog for selecting a role template to create a role from
 export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({
   orgId,
-  isOpen,
-  onOpenChange,
+  handle,
   onSuccess,
 }) => {
   const { data: templates = [], isLoading } = useOrgRoleTemplates(orgId);
@@ -54,7 +53,7 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({
       {
         onSuccess: () => {
           setCreatingTemplate(null);
-          onOpenChange(false);
+          handle.close();
           onSuccess();
         },
         onError: () => {
@@ -66,8 +65,7 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({
 
   return (
     <Dialog
-      open={isOpen}
-      onOpenChange={onOpenChange}
+      handle={handle}
       title="Select a Template"
       description="Choose a pre-configured role template to quickly set up permissions."
       className="sm:max-w-2xl"

@@ -1,4 +1,4 @@
-import { useDeleteFeature, useFeatures } from '@hooks/admin/features';
+import { useBulkCreateFeatures, useDeleteFeature, useFeatures, useValidateFeatureImport } from '@hooks/admin/features';
 import { FEATURES_QUERY_KEY } from '@hooks/admin/features/useFeatures';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
@@ -8,8 +8,10 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
-import { Blocks, Eye, Plus, Trash2 } from 'lucide-react';
+import { Blocks, Eye, Plus, Trash2, Upload } from 'lucide-react';
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useNavigate } from 'react-router-dom';
+import { ImportDialog } from '@/components/ImportDialog';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { Feature } from '@/schemas/admin/features';
 import { AddFeatureForm } from './forms/AddFeatureForm';
@@ -23,6 +25,14 @@ export const FeaturesPage = () => {
   const { data: response, isLoading } = useFeatures(versionId);
   const confirm = useConfirm();
   const addDialog = useDialog();
+  const validateImportMutation = useValidateFeatureImport(versionId);
+  const bulkCreateMutation = useBulkCreateFeatures(versionId);
+  const importDialog = useDialog({
+    onClose: () => {
+      validateImportMutation.reset();
+      bulkCreateMutation.reset();
+    },
+  });
 
   const deleteMutation = useDeleteFeature(versionId);
 
@@ -66,9 +76,14 @@ export const FeaturesPage = () => {
         }}
         toolbarActions={{
           actions: (
-            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-              Add Feature
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" startAdornment={<Upload className="size-4" />} size="sm" onClick={importDialog.open}>
+                Import
+              </Button>
+              <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+                Add Feature
+              </Button>
+            </div>
           ),
         }}
         emptyStateConfig={{
@@ -85,13 +100,24 @@ export const FeaturesPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Feature"
         description="Define a new feature (sidebar item / screen)."
         content={(close) => <AddFeatureForm onSuccess={close} onCancel={close} />}
+      />
+
+      <ImportDialog
+        handle={importDialog}
+        title="Import Features"
+        description="Upload a CSV or Excel file with feature data."
+        columns={[
+          { key: 'code', label: 'Code' },
+          { key: 'name', label: 'Name' },
+          { key: 'icon', label: 'Icon' },
+          { key: 'description', label: 'Description' },
+        ]}
+        validateMutation={validateImportMutation}
+        importMutation={bulkCreateMutation}
       />
     </div>
   );
@@ -104,6 +130,14 @@ interface ColumnActions {
 
 function getColumns({ onView, onDelete }: ColumnActions): ColumnDef<Feature, unknown>[] {
   return [
+    {
+      accessorKey: 'icon',
+      header: '',
+      cell: ({ row }) => <DynamicIcon name={row.original.icon as IconName} className="size-4 text-muted-foreground" />,
+      enableSorting: false,
+      enableHiding: false,
+      size: 40,
+    },
     {
       accessorKey: 'code',
       header: 'Code',

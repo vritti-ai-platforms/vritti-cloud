@@ -13,9 +13,12 @@ import {
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { apps } from '@/db/schema';
 import { AppDto } from '@/modules/admin-api/version/app/root/dto/entity/app.dto';
-import type { CreateAppDto } from '@/modules/admin-api/version/app/root/dto/request/create-app.dto';
+import type { BulkCreateAppsDto } from '@/modules/admin-api/version/app/root/dto/request/bulk-create-apps.dto';
+import { CreateAppDto } from '@/modules/admin-api/version/app/root/dto/request/create-app.dto';
 import type { UpdateAppDto } from '@/modules/admin-api/version/app/root/dto/request/update-app.dto';
 import { AppTableResponseDto } from '@/modules/admin-api/version/app/root/dto/response/app-table-response.dto';
+import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
+import { type ValidateImportResult, validateImportRows } from '@/utils/validate-import-rows';
 import { AppRepository } from '../repositories/app.repository';
 
 @Injectable()
@@ -133,5 +136,40 @@ export class AppService {
     await this.appRepository.delete(id);
     this.logger.log(`Deleted app: ${existing.name} (${existing.id})`);
     return { success: true, message: 'App deleted successfully.' };
+  }
+
+  // Validates a spreadsheet of apps and returns parsed rows with errors
+  async validateImport(buffer: Buffer, versionId: string): Promise<ValidateImportResult> {
+    const rows = parseSpreadsheet(buffer);
+    const result = await validateImportRows(rows, CreateAppDto, { versionId });
+    for (const row of result.rows) {
+      if (!row.valid) continue;
+      const existing = await this.appRepository.findByCode(row.data.code);
+      if (existing) {
+        row.valid = false;
+        row.errors.push('Code already exists');
+        result.summary.valid--;
+        result.summary.invalid++;
+      }
+    }
+    this.logger.log(`Validated app import: ${result.summary.valid} valid, ${result.summary.invalid} invalid`);
+    return result;
+  }
+
+  // Bulk-creates apps for seeding; skips existing codes
+  async bulkCreate(dto: BulkCreateAppsDto): Promise<SuccessResponseDto> {
+    let created = 0;
+    let skipped = 0;
+    for (const appDto of dto.apps) {
+      const existing = await this.appRepository.findByCode(appDto.code);
+      if (existing) {
+        skipped++;
+        continue;
+      }
+      await this.appRepository.create(appDto);
+      created++;
+    }
+    this.logger.log(`Bulk created apps: ${created} created, ${skipped} skipped`);
+    return { success: true, message: `${created} app(s) imported.` };
   }
 }

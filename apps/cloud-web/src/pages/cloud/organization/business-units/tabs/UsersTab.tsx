@@ -175,10 +175,7 @@ export const UsersTab = ({ orgId, buId }: UsersTabProps) => {
 
       {/* Assign role dialog */}
       <Dialog
-        open={assignDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) assignDialog.close();
-        }}
+        handle={assignDialog}
         title="Assign Role to User"
         description="Select a user and a role to assign at this business unit."
         content={(close) => (

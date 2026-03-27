@@ -15,7 +15,7 @@ import type { AdminOrganizationMember } from '@/schemas/admin/organizations';
 const MEMBERS_TABLE_SLUG = 'organization-members';
 
 export const OrganizationViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('orgSlug');
   const queryClient = useQueryClient();
   const { data: org } = useOrganization(id);
 

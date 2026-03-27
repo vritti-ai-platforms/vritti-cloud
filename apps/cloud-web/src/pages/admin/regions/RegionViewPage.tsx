@@ -13,7 +13,7 @@ import { useNavigate } from 'react-router-dom';
 import { EditRegionForm } from './forms/EditRegionForm';
 
 export const RegionViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('regionSlug');
   const navigate = useNavigate();
 
   const editDialog = useDialog();
@@ -193,10 +193,7 @@ export const RegionViewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit Region"
         description="Update the details for this region."
         content={(close) => <EditRegionForm region={region} onSuccess={close} onCancel={close} />}

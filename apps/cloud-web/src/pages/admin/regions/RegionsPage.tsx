@@ -86,10 +86,7 @@ export const RegionsPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Region"
         description="Enter the details for the new deployment region."
         content={(close) => <AddRegionForm onSuccess={close} onCancel={close} />}

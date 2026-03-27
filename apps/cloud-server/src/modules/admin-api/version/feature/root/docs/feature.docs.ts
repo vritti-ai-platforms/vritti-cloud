@@ -97,6 +97,17 @@ export function ApiDeleteFeature() {
   );
 }
 
+// Swagger docs for validating a CSV/Excel import of features
+export function ApiValidateImportFeatures() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Validate a CSV/Excel file of features' }),
+    ApiParam({ name: 'versionId', description: 'App version UUID' }),
+    ApiResponse({ status: 200, description: 'Validation result with parsed rows and errors.' }),
+    ApiResponse({ status: 400, description: 'No file provided or spreadsheet is empty.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
 // Swagger docs for bulk-creating features
 export function ApiBulkCreateFeatures() {
   return applyDecorators(

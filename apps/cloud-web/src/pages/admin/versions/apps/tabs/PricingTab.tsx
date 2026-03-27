@@ -3,7 +3,7 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useConfirm } from '@vritti/quantum-ui/hooks';
+import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Cloud, DollarSign, Globe, Plus, Trash2 } from 'lucide-react';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
@@ -15,6 +15,7 @@ export const PricingTab = ({ appId }: { appId: string }) => {
   const { versionId } = useVersionContext();
   const { data: prices = [], isLoading } = useAppPrices(versionId, appId);
   const confirm = useConfirm();
+  const addPriceDialog = useDialog();
   const removeMutation = useRemoveAppPrice();
 
   async function handleRemove(price: AppPrice) {
@@ -45,16 +46,9 @@ export const PricingTab = ({ appId }: { appId: string }) => {
     <div className="flex flex-col gap-4 pt-4 min-h-[200px]">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">{prices.length} price(s) configured</p>
-        <Dialog
-          title="Add Price"
-          description="Set a price for a region and cloud provider combination."
-          anchor={(open) => (
-            <Button size="sm" startAdornment={<Plus className="size-4" />} onClick={open}>
-              Add Price
-            </Button>
-          )}
-          content={(close) => <AddAppPriceForm appId={appId} onSuccess={close} onCancel={close} />}
-        />
+        <Button size="sm" startAdornment={<Plus className="size-4" />} onClick={addPriceDialog.open}>
+          Add Price
+        </Button>
       </div>
 
       {prices.length === 0 && (
@@ -98,6 +92,13 @@ export const PricingTab = ({ appId }: { appId: string }) => {
           ))}
         </div>
       )}
+
+      <Dialog
+        handle={addPriceDialog}
+        title="Add Price"
+        description="Set a price for a region and cloud provider combination."
+        content={(close) => <AddAppPriceForm appId={appId} onSuccess={close} onCancel={close} />}
+      />
     </div>
   );
 };

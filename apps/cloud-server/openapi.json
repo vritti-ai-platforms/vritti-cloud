@@ -5442,6 +5442,42 @@
         ]
       }
     },
+    "/admin-api/versions/{versionId}/features/validate": {
+      "post": {
+        "operationId": "FeatureController_validateImport",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation result with parsed rows and errors."
+          },
+          "400": {
+            "description": "No file provided or spreadsheet is empty."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Validate a CSV/Excel file of features",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
     "/admin-api/versions/{versionId}/features/bulk": {
       "post": {
         "operationId": "FeatureController_bulkCreate",
@@ -5961,6 +5997,78 @@
           }
         ],
         "summary": "Delete an app",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/apps/validate": {
+      "post": {
+        "operationId": "AppController_validateImport",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Validation result with parsed rows and errors."
+          },
+          "400": {
+            "description": "No file provided or spreadsheet is empty."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Validate a CSV/Excel file of apps",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/apps/bulk": {
+      "post": {
+        "operationId": "AppController_bulkCreate",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkCreateAppsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Apps created (some may have been skipped)."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bulk create apps for seeding",
         "tags": [
           "Admin - Apps"
         ]
@@ -12567,8 +12675,8 @@
           },
           "icon": {
             "type": "string",
-            "description": "Icon identifier for the feature",
-            "example": "receipt"
+            "description": "Lucide icon name",
+            "example": "clipboard-list"
           },
           "sortOrder": {
             "type": "number",
@@ -12579,7 +12687,8 @@
         "required": [
           "versionId",
           "code",
-          "name"
+          "name",
+          "icon"
         ]
       },
       "FeatureDto": {
@@ -12607,9 +12716,8 @@
             "nullable": true
           },
           "icon": {
-            "type": "object",
-            "example": "receipt",
-            "nullable": true
+            "type": "string",
+            "example": "clipboard-list"
           },
           "isActive": {
             "type": "boolean",
@@ -12639,6 +12747,7 @@
           "versionId",
           "code",
           "name",
+          "icon",
           "isActive",
           "sortOrder",
           "createdAt",
@@ -12748,8 +12857,8 @@
           },
           "icon": {
             "type": "string",
-            "description": "Icon identifier for the feature",
-            "example": "receipt"
+            "description": "Lucide icon name",
+            "example": "clipboard-list"
           },
           "sortOrder": {
             "type": "number",
@@ -12919,7 +13028,7 @@
           },
           "icon": {
             "type": "string",
-            "description": "Icon identifier for the app",
+            "description": "Lucide icon name",
             "example": "shopping-cart"
           },
           "sortOrder": {
@@ -12931,7 +13040,8 @@
         "required": [
           "versionId",
           "code",
-          "name"
+          "name",
+          "icon"
         ]
       },
       "AppDto": {
@@ -12959,9 +13069,8 @@
             "nullable": true
           },
           "icon": {
-            "type": "object",
-            "example": "shopping-cart",
-            "nullable": true
+            "type": "string",
+            "example": "shopping-cart"
           },
           "isActive": {
             "type": "boolean",
@@ -12999,6 +13108,7 @@
           "versionId",
           "code",
           "name",
+          "icon",
           "isActive",
           "sortOrder",
           "createdAt",
@@ -13059,7 +13169,7 @@
           },
           "icon": {
             "type": "string",
-            "description": "Icon identifier for the app",
+            "description": "Lucide icon name",
             "example": "shopping-cart"
           },
           "sortOrder": {
@@ -13068,6 +13178,21 @@
             "example": 0
           }
         }
+      },
+      "BulkCreateAppsDto": {
+        "type": "object",
+        "properties": {
+          "apps": {
+            "description": "Array of apps to create",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateAppDto"
+            }
+          }
+        },
+        "required": [
+          "apps"
+        ]
       },
       "AppFeatureTableRowDto": {
         "type": "object",

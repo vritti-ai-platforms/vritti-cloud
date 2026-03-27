@@ -82,10 +82,7 @@ export const IndustriesPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Industry"
         description="Enter the details for the new industry classification."
         content={(close) => <AddIndustryForm onSuccess={close} onCancel={close} />}

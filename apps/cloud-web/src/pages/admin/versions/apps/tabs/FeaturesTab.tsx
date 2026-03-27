@@ -109,10 +109,7 @@ export const FeaturesTab = ({ appId }: { appId: string }) => {
       />
 
       <Dialog
-        open={assignDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) assignDialog.close();
-        }}
+        handle={assignDialog}
         title="Assign Features"
         description="Select features to assign to this app."
         content={(close) => (

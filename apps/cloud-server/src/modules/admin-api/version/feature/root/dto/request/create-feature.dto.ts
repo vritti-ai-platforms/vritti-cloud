@@ -29,11 +29,11 @@ export class CreateFeatureDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Icon identifier for the feature', example: 'receipt' })
-  @IsOptional()
+  @ApiProperty({ description: 'Lucide icon name', example: 'clipboard-list' })
   @IsString()
+  @MinLength(1)
   @MaxLength(255)
-  icon?: string;
+  icon: string;
 
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })
   @IsOptional()

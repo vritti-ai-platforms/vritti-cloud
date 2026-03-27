@@ -127,10 +127,7 @@ export const OrgRolesPage = () => {
       {/* Template picker dialog — stays as dialog since it's a quick picker */}
       <TemplatePickerDialog
         orgId={orgId}
-        isOpen={templateDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) templateDialog.close();
-        }}
+        handle={templateDialog}
         onSuccess={templateDialog.close}
       />
     </div>

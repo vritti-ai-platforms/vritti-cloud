@@ -29,7 +29,7 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
   const explicitApps = role.apps ?? [];
   for (const code of explicitApps) {
     if (!derivedApps.has(code)) {
-      derivedApps.set(code, { code, name: code, icon: null, features: [] });
+      derivedApps.set(code, { code, name: code, icon: 'app-window', features: [] });
     }
   }
   const roleApps = Array.from(derivedApps.values());

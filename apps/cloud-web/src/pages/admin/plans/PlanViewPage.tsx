@@ -23,7 +23,7 @@ function buildDeleteWarning(plan: Plan): string {
 }
 
 export const PlanViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('planSlug');
   const navigate = useNavigate();
 
   const editDialog = useDialog();
@@ -85,10 +85,7 @@ export const PlanViewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit Plan"
         description="Update the details for this subscription plan."
         content={(close) => <EditPlanForm plan={plan} onSuccess={close} onCancel={close} />}

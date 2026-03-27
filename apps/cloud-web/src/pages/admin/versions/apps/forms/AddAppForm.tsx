@@ -33,7 +33,7 @@ export const AddAppForm: React.FC<AddAppFormProps> = ({ onSuccess, onCancel }) =
       />
       <TextField name="name" label="App Name" placeholder="e.g. CRM" />
       <TextField name="description" label="Description" placeholder="Optional description" />
-      <TextField name="icon" label="Icon" placeholder="e.g. briefcase" description="Lucide icon name (optional)" />
+      <TextField name="icon" label="Icon" placeholder="e.g. briefcase" description="Lucide icon name" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

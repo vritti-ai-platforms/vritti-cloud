@@ -6,7 +6,7 @@ export interface App {
   code: string;
   name: string;
   description: string | null;
-  icon: string | null;
+  icon: string;
   versionId: string;
   featureCount: number;
   planCount: number;
@@ -55,7 +55,7 @@ export const createAppSchema = z.object({
     .regex(/^[a-z][a-z0-9-]*$/, 'Must be lowercase alphanumeric with hyphens'),
   name: z.string().min(1, 'App name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
-  icon: z.string().optional(),
+  icon: z.string().min(1, 'Icon is required').max(255),
   versionId: z.string().uuid('App version is required'),
 });
 
@@ -68,7 +68,7 @@ export const updateAppSchema = z.object({
     .optional(),
   name: z.string().min(1, 'App name is required').max(255).optional(),
   description: z.string().optional(),
-  icon: z.string().optional(),
+  icon: z.string().min(1, 'Icon is required').max(255).optional(),
 });
 
 export const assignFeatureSchema = z.object({

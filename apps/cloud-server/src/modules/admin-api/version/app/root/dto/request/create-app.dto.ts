@@ -29,11 +29,11 @@ export class CreateAppDto {
   @IsString()
   description?: string;
 
-  @ApiPropertyOptional({ description: 'Icon identifier for the app', example: 'shopping-cart' })
-  @IsOptional()
+  @ApiProperty({ description: 'Lucide icon name', example: 'shopping-cart' })
   @IsString()
+  @MinLength(1)
   @MaxLength(255)
-  icon?: string;
+  icon: string;
 
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })
   @IsOptional()

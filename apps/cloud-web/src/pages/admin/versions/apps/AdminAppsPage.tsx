@@ -1,4 +1,4 @@
-import { APPS_QUERY_KEY, useApps } from '@hooks/admin/apps';
+import { APPS_QUERY_KEY, useApps, useBulkCreateApps, useValidateAppImport } from '@hooks/admin/apps';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -8,8 +8,10 @@ import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
 import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
-import { AppWindow, Eye, Plus } from 'lucide-react';
+import { AppWindow, Eye, Plus, Upload } from 'lucide-react';
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useNavigate } from 'react-router-dom';
+import { ImportDialog } from '@/components/ImportDialog';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { App } from '@/schemas/admin/apps';
 import { AddAppForm } from './forms/AddAppForm';
@@ -22,6 +24,14 @@ export const AdminAppsPage = () => {
   const { versionId } = useVersionContext();
   const { data: response, isLoading } = useApps(versionId);
   const addDialog = useDialog();
+  const validateImportMutation = useValidateAppImport(versionId);
+  const bulkCreateMutation = useBulkCreateApps(versionId);
+  const importDialog = useDialog({
+    onClose: () => {
+      validateImportMutation.reset();
+      bulkCreateMutation.reset();
+    },
+  });
 
   const { table } = useDataTable({
     columns: getColumns({
@@ -58,9 +68,14 @@ export const AdminAppsPage = () => {
         ]}
         toolbarActions={{
           actions: (
-            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-              Add App
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button variant="outline" startAdornment={<Upload className="size-4" />} size="sm" onClick={importDialog.open}>
+                Import
+              </Button>
+              <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+                Add App
+              </Button>
+            </div>
           ),
         }}
         emptyStateConfig={{
@@ -76,13 +91,24 @@ export const AdminAppsPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add App"
         description="Enter the details for the new application."
         content={(close) => <AddAppForm onSuccess={close} onCancel={close} />}
+      />
+
+      <ImportDialog
+        handle={importDialog}
+        title="Import Apps"
+        description="Upload a CSV or Excel file with app data."
+        columns={[
+          { key: 'code', label: 'Code' },
+          { key: 'name', label: 'Name' },
+          { key: 'icon', label: 'Icon' },
+          { key: 'description', label: 'Description' },
+        ]}
+        validateMutation={validateImportMutation}
+        importMutation={bulkCreateMutation}
       />
     </div>
   );
@@ -94,6 +120,14 @@ interface ColumnActions {
 
 function getColumns({ onView }: ColumnActions): ColumnDef<App, unknown>[] {
   return [
+    {
+      accessorKey: 'icon',
+      header: '',
+      cell: ({ row }) => <DynamicIcon name={row.original.icon as IconName} className="size-4 text-muted-foreground" />,
+      enableSorting: false,
+      enableHiding: false,
+      size: 40,
+    },
     {
       accessorKey: 'name',
       header: 'App',

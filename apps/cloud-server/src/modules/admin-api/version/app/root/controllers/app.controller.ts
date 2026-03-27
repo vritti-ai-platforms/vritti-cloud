@@ -1,19 +1,23 @@
+import { AppService } from '@domain/version/app/root/services/app.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UploadedFile, type UploadedFileResult, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
+import type { ValidateImportResult } from '@/utils/validate-import-rows';
 import {
+  ApiBulkCreateApps,
   ApiCreateApp,
   ApiDeleteApp,
   ApiFindForTableApps,
   ApiGetAppById,
   ApiUpdateApp,
+  ApiValidateImportApps,
 } from '../docs/app.docs';
 import { AppDto } from '../dto/entity/app.dto';
+import { BulkCreateAppsDto } from '../dto/request/bulk-create-apps.dto';
 import { CreateAppDto } from '../dto/request/create-app.dto';
 import { UpdateAppDto } from '../dto/request/update-app.dto';
 import { AppTableResponseDto } from '../dto/response/app-table-response.dto';
-import { AppService } from '@domain/version/app/root/services/app.service';
 
 @ApiTags('Admin - Apps')
 @ApiBearerAuth()
@@ -64,5 +68,27 @@ export class AppController {
   delete(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`DELETE /admin-api/apps/${id}`);
     return this.appService.delete(id);
+  }
+
+  // Validates a CSV/Excel file of apps and returns parsed rows with errors
+  @Post('validate')
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('multipart/form-data')
+  @ApiValidateImportApps()
+  async validateImport(
+    @Param('versionId') versionId: string,
+    @UploadedFile() file: UploadedFileResult,
+  ): Promise<ValidateImportResult> {
+    this.logger.log('POST /admin-api/apps/validate');
+    return this.appService.validateImport(file.buffer, versionId);
+  }
+
+  // Bulk-creates apps for seeding; skips existing codes
+  @Post('bulk')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiBulkCreateApps()
+  bulkCreate(@Body() dto: BulkCreateAppsDto): Promise<SuccessResponseDto> {
+    this.logger.log('POST /admin-api/apps/bulk');
+    return this.appService.bulkCreate(dto);
   }
 }

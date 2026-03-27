@@ -1,4 +1,5 @@
 import { Dialog } from '@vritti/quantum-ui/Dialog';
+import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import type React from 'react';
 import { useState } from 'react';
 import { ContactChangeProgressIndicator } from '@/components/cloud/account/profile/ContactChangeProgressIndicator';
@@ -18,14 +19,13 @@ const STEP_MAP = {
 } as const;
 
 interface Props {
-  open: boolean;
+  handle: DialogHandle;
   contactType: 'email' | 'phone';
-  onClose: () => void;
   profile: ProfileData;
 }
 
 // Thin orchestrator — each step owns its mutations, forms, and timers
-export const ContactChangeDialog: React.FC<Props> = ({ open, contactType, onClose, profile }) => {
+export const ContactChangeDialog: React.FC<Props> = ({ handle, contactType, profile }) => {
   const [step, setStep] = useState<ContactStep>('identity');
   const [progress, setProgress] = useState(0);
   const [newContactValue, setNewContactValue] = useState('');
@@ -35,10 +35,7 @@ export const ContactChangeDialog: React.FC<Props> = ({ open, contactType, onClos
 
   return (
     <Dialog
-      open={open}
-      onOpenChange={(isOpen) => {
-        if (!isOpen) onClose();
-      }}
+      handle={handle}
       title={dialogTitle}
     >
       <div className="space-y-6">
@@ -53,7 +50,7 @@ export const ContactChangeDialog: React.FC<Props> = ({ open, contactType, onClos
               setStep('newContact');
               setProgress(0);
             }}
-            onCancel={onClose}
+            onCancel={handle.close}
           />
         )}
 
@@ -82,7 +79,7 @@ export const ContactChangeDialog: React.FC<Props> = ({ open, contactType, onClos
         )}
 
         {step === 'success' && (
-          <ContactChangeSuccessStep contactType={contactType} newContactValue={newContactValue} onClose={onClose} />
+          <ContactChangeSuccessStep contactType={contactType} newContactValue={newContactValue} onClose={handle.close} />
         )}
       </div>
     </Dialog>

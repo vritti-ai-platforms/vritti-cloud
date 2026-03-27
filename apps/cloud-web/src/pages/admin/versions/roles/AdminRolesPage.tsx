@@ -70,10 +70,7 @@ export const AdminRolesPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Role"
         description="Enter the details for the new role template."
         content={(close) => <AddRoleForm onSuccess={close} onCancel={close} />}

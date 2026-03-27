@@ -97,10 +97,7 @@ export const OverviewTab = ({ orgId, unit, allUnits }: OverviewTabProps) => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title={`Edit ${unit.name}`}
         description="Update the details for this business unit."
         className="sm:max-w-2xl"

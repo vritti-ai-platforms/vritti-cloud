@@ -142,10 +142,7 @@ export const AppsTab = ({ planId }: { planId: string }) => {
       />
 
       <Dialog
-        open={assignDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) assignDialog.close();
-        }}
+        handle={assignDialog}
         title="Assign App"
         description="Select an app to assign to this plan."
         content={(close) => (

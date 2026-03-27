@@ -74,10 +74,7 @@ export const PlansPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Plan"
         description="Enter the details for the new subscription plan."
         content={(close) => <AddPlanForm onSuccess={close} onCancel={close} />}

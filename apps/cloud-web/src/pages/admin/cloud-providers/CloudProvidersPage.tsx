@@ -80,10 +80,7 @@ export const CloudProvidersPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Cloud Provider"
         description="Enter the details for the new cloud provider."
         content={(close) => <AddCloudProviderForm onSuccess={close} onCancel={close} />}

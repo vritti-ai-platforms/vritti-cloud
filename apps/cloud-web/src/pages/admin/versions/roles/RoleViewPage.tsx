@@ -14,7 +14,7 @@ import { EditRoleForm } from './forms/EditRoleForm';
 import { RolePermissionForm } from './forms/RolePermissionForm';
 
 export const RoleViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('roleSlug');
   const navigate = useNavigate();
   const { versionId } = useVersionContext();
 
@@ -115,10 +115,7 @@ export const RoleViewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit Role"
         description="Update the details for this role template."
         content={(close) => <EditRoleForm role={role} onSuccess={close} onCancel={close} />}

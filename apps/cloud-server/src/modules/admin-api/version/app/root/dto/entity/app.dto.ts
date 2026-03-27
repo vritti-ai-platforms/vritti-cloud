@@ -17,8 +17,8 @@ export class AppDto {
   @ApiPropertyOptional({ example: 'Core POS module for order management', nullable: true })
   description: string | null;
 
-  @ApiPropertyOptional({ example: 'shopping-cart', nullable: true })
-  icon: string | null;
+  @ApiProperty({ example: 'shopping-cart' })
+  icon: string;
 
   @ApiProperty({ example: true })
   isActive: boolean;

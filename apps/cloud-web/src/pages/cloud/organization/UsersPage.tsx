@@ -91,10 +91,7 @@ export const UsersPage = () => {
 
       {/* Invite dialog */}
       <Dialog
-        open={inviteDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) inviteDialog.close();
-        }}
+        handle={inviteDialog}
         title="Invite User"
         description="Send an invitation to join this organization's portal."
         content={(close) => <InviteUserForm orgId={orgId} onSuccess={close} onCancel={close} />}
@@ -102,10 +99,7 @@ export const UsersPage = () => {
 
       {/* Edit user dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit User"
         description="Update user details. If the email has changed, resend the invitation to the new address."
         content={(close) =>

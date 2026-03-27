@@ -45,9 +45,17 @@ export class MicrofrontendService {
         errors: [{ field: 'code', message: 'Duplicate code + platform' }],
       });
     }
-    const microfrontend = await this.microfrontendRepository.create(dto);
-    this.logger.log(`Created microfrontend: ${microfrontend.code} (${microfrontend.id})`);
-    return { success: true, message: 'Microfrontend created successfully.', data: MicrofrontendDto.from(microfrontend) };
+    try {
+      const microfrontend = await this.microfrontendRepository.create(dto);
+      this.logger.log(`Created microfrontend: ${microfrontend.code} (${microfrontend.id})`);
+      return { success: true, message: 'Microfrontend created successfully.', data: MicrofrontendDto.from(microfrontend) };
+    } catch (error) {
+      const err = error as Error & { cause?: Error; code?: string; detail?: string };
+      this.logger.error(`Failed to create microfrontend: ${err.message}`);
+      this.logger.error(`Cause: ${err.cause?.message ?? 'none'}`);
+      this.logger.error(`PG code: ${err.code ?? 'none'}, detail: ${err.detail ?? 'none'}`);
+      throw error;
+    }
   }
 
   // Returns microfrontends for the data table filtered by app version

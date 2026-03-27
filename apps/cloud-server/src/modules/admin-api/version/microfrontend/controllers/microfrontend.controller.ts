@@ -1,3 +1,4 @@
+import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
@@ -13,7 +14,6 @@ import { MicrofrontendDto } from '../dto/entity/microfrontend.dto';
 import { CreateMicrofrontendDto } from '../dto/request/create-microfrontend.dto';
 import { UpdateMicrofrontendDto } from '../dto/request/update-microfrontend.dto';
 import { MicrofrontendTableResponseDto } from '../dto/response/microfrontend-table-response.dto';
-import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
 
 @ApiTags('Admin - Microfrontends')
 @ApiBearerAuth()
@@ -28,7 +28,10 @@ export class MicrofrontendController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateMicrofrontend()
-  create(@Param('versionId') versionId: string, @Body() dto: CreateMicrofrontendDto): Promise<CreateResponseDto<MicrofrontendDto>> {
+  create(
+    @Param('versionId') versionId: string,
+    @Body() dto: CreateMicrofrontendDto,
+  ): Promise<CreateResponseDto<MicrofrontendDto>> {
     this.logger.log(`POST /admin-api/versions/${versionId}/microfrontends`);
     return this.microfrontendService.create({ ...dto, versionId: versionId });
   }

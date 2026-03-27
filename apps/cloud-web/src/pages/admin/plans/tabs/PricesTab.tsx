@@ -4,8 +4,7 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useConfirm } from '@vritti/quantum-ui/hooks';
-import { useSlugParams } from '@vritti/quantum-ui/hooks';
+import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { Cloud, Globe, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import type { Price } from '@/schemas/admin/prices';
@@ -14,9 +13,10 @@ import { EditPriceForm } from '../forms/EditPriceForm';
 
 // Prices DataTable — self-contained with its own data fetching
 export const PricesTab = () => {
-  const { id: planId } = useSlugParams();
+  const { id: planId } = useSlugParams('planSlug');
   const queryClient = useQueryClient();
   const { data: response, isLoading } = usePricesTable(planId ?? '');
+  const addPriceDialog = useDialog();
 
   const columns = useMemo<ColumnDef<Price, unknown>[]>(
     () => [
@@ -97,22 +97,22 @@ export const PricesTab = () => {
         }}
         toolbarActions={{
           actions: (
-            <Dialog
-              title="Add Price"
-              description="Set a price for a specific industry, region, and cloud provider combination."
-              anchor={(open) => (
-                <Button size="sm" variant="default" startAdornment={<Plus className="size-4" />} onClick={open}>
-                  Add Price
-                </Button>
-              )}
-              content={(close) => <AddPriceForm planId={planId ?? ''} onSuccess={close} onCancel={close} />}
-            />
+            <Button size="sm" variant="default" startAdornment={<Plus className="size-4" />} onClick={addPriceDialog.open}>
+              Add Price
+            </Button>
           ),
         }}
         emptyStateConfig={{
           title: 'No prices configured',
           description: 'Add a price for a specific industry, region, and cloud provider combination.',
         }}
+      />
+
+      <Dialog
+        handle={addPriceDialog}
+        title="Add Price"
+        description="Set a price for a specific industry, region, and cloud provider combination."
+        content={(close) => <AddPriceForm planId={planId ?? ''} onSuccess={close} onCancel={close} />}
       />
     </div>
   );

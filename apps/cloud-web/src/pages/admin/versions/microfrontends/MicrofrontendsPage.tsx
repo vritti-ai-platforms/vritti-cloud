@@ -84,10 +84,7 @@ export const MicrofrontendsPage = () => {
 
       {versionId && (
         <Dialog
-          open={addDialog.isOpen}
-          onOpenChange={(v) => {
-            if (!v) addDialog.close();
-          }}
+          handle={addDialog}
           title="Add Microfrontend"
           description="Add a new microfrontend bundle to this version."
           content={(close) => <AddMicrofrontendForm versionId={versionId} onSuccess={close} onCancel={close} />}

@@ -79,10 +79,7 @@ export const VersionsPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="New Version"
         description="Create a new platform version."
         content={(close) => <CreateVersionForm onSuccess={close} onCancel={close} />}

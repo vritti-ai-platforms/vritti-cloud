@@ -13,7 +13,7 @@ import { FeaturesTab } from './tabs/FeaturesTab';
 import { PricingTab } from './tabs/PricingTab';
 
 export const AppViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('appSlug');
   const navigate = useNavigate();
   const { versionId } = useVersionContext();
 
@@ -78,10 +78,7 @@ export const AppViewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit App"
         description="Update the details for this application."
         content={(close) => <EditAppForm app={app} onSuccess={close} onCancel={close} />}
