@@ -28,9 +28,9 @@ export const RegionViewPageSkeleton = () => (
           <Skeleton className="h-4 w-72" />
         </div>
         <div className="px-6 flex flex-col gap-2 min-h-48">
-          {Array.from({ length: 3 }, (_, i) => (
-            <Skeleton key={`provider-${i}`} className="h-[69px] w-full rounded-xl" />
-          ))}
+          <Skeleton className="h-[69px] w-full rounded-xl" />
+          <Skeleton className="h-[69px] w-full rounded-xl" />
+          <Skeleton className="h-[69px] w-full rounded-xl" />
         </div>
       </div>
     </div>
