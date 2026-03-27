@@ -18,7 +18,7 @@ export const AddAppForm: React.FC<AddAppFormProps> = ({ onSuccess, onCancel }) =
 
   const form = useForm<CreateAppData>({
     resolver: zodResolver(createAppSchema),
-    defaultValues: { code: '', name: '', description: '', icon: '', appVersionId: versionId ?? '' },
+    defaultValues: { code: '', name: '', description: '', icon: '', versionId: versionId ?? '' },
   });
 
   const createMutation = useCreateApp(versionId, { onSuccess });

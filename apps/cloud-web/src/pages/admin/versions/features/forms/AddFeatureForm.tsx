@@ -21,7 +21,7 @@ export const AddFeatureForm: React.FC<AddFeatureFormProps> = ({ onSuccess, onCan
     defaultValues: {
       code: '',
       name: '',
-      appVersionId: versionId ?? '',
+      versionId: versionId ?? '',
       icon: '',
       description: '',
     },

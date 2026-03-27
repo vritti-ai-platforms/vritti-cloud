@@ -4,7 +4,7 @@ import { IsInt, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } fr
 export class CreateAppDto {
   @ApiProperty({ description: 'App version UUID this app belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
-  appVersionId: string;
+  versionId: string;
 
   @ApiProperty({
     description: 'Unique app code (lowercase, alphanumeric with hyphens)',

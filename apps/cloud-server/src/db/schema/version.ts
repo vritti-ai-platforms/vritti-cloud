@@ -3,7 +3,7 @@ import { cloudSchema } from './cloud-schema';
 import { versionStatusEnum } from './enums';
 
 // Versioned snapshots of the product catalog — all catalog entities belong to one version
-export const appVersions = cloudSchema.table('app_versions', {
+export const versions = cloudSchema.table('versions', {
   id: uuid('id').primaryKey().defaultRandom(),
   version: varchar('version', { length: 50 }).notNull().unique(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -14,5 +14,5 @@ export const appVersions = cloudSchema.table('app_versions', {
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
 });
 
-export type Version = typeof appVersions.$inferSelect;
-export type NewVersion = typeof appVersions.$inferInsert;
+export type Version = typeof versions.$inferSelect;
+export type NewVersion = typeof versions.$inferInsert;

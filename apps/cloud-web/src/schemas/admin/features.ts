@@ -5,7 +5,7 @@ export interface Feature {
   id: string;
   code: string;
   name: string;
-  appVersionId: string;
+  versionId: string;
   icon: string | null;
   description: string | null;
   sortOrder: number;
@@ -35,7 +35,7 @@ export const createFeatureSchema = z.object({
     .max(255, 'Code must be 255 characters or less')
     .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'Must be lowercase with dots (e.g. crm.leads.view)'),
   name: z.string().min(1, 'Feature name is required').max(255, 'Name must be 255 characters or less'),
-  appVersionId: z.string().uuid('App version is required'),
+  versionId: z.string().uuid('App version is required'),
   icon: z.string().max(100).optional(),
   description: z.string().optional(),
 });

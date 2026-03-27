@@ -27,7 +27,7 @@ export const AddRoleForm: React.FC<AddRoleFormProps> = ({ onSuccess, onCancel })
       scope: 'GLOBAL',
       industryId: '',
       appIds: [],
-      appVersionId: versionId ?? '',
+      versionId: versionId ?? '',
     },
   });
 

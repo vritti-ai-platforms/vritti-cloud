@@ -15,7 +15,7 @@ export class RoleRepository extends PrimaryBaseRepository<typeof roles> {
     const result = await this.db
       .select({
         id: roles.id,
-        appVersionId: roles.appVersionId,
+        versionId: roles.versionId,
         name: roles.name,
         description: roles.description,
         scope: roles.scope,
@@ -34,7 +34,7 @@ export class RoleRepository extends PrimaryBaseRepository<typeof roles> {
     const row = result[0];
     return {
       id: row.id,
-      appVersionId: row.appVersionId,
+      versionId: row.versionId,
       name: row.name,
       description: row.description,
       scope: row.scope,
@@ -57,7 +57,7 @@ export class RoleRepository extends PrimaryBaseRepository<typeof roles> {
     const baseQuery = this.db
       .select({
         id: roles.id,
-        appVersionId: roles.appVersionId,
+        versionId: roles.versionId,
         name: roles.name,
         description: roles.description,
         scope: roles.scope,
@@ -91,7 +91,7 @@ export class RoleRepository extends PrimaryBaseRepository<typeof roles> {
     return {
       result: rows.map((row) => ({
         id: row.id,
-        appVersionId: row.appVersionId,
+        versionId: row.versionId,
         name: row.name,
         description: row.description,
         scope: row.scope,

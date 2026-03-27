@@ -33,7 +33,7 @@ export class FeaturePermissionService {
     }
 
     const rows: NewFeaturePermission[] = dto.types.map((type) => ({
-      appVersionId: feature.appVersionId,
+      versionId: feature.versionId,
       featureId,
       type: type as FeatureType,
     }));

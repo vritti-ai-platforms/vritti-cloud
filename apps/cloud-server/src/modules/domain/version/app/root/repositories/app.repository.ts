@@ -36,7 +36,7 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
       this.db
         .select({
           id: apps.id,
-          appVersionId: apps.appVersionId,
+          versionId: apps.versionId,
           code: apps.code,
           name: apps.name,
           description: apps.description,
@@ -70,7 +70,7 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     const [row] = await this.db
       .select({
         id: apps.id,
-        appVersionId: apps.appVersionId,
+        versionId: apps.versionId,
         code: apps.code,
         name: apps.name,
         description: apps.description,

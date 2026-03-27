@@ -73,7 +73,7 @@ export class AppFeatureService {
       }
       await this.appFeatureRepository.upsertMany(
         dto.featureIds.map((featureId) => ({
-          appVersionId: app.appVersionId,
+          versionId: app.versionId,
           appId,
           featureId,
         })),

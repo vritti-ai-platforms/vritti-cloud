@@ -6,7 +6,7 @@ export class AppDto {
   id: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  appVersionId: string;
+  versionId: string;
 
   @ApiProperty({ example: 'pos' })
   code: string;
@@ -45,7 +45,7 @@ export class AppDto {
   static from(app: App, featureCount = 0, planCount = 0): AppDto {
     const dto = new AppDto();
     dto.id = app.id;
-    dto.appVersionId = app.appVersionId;
+    dto.versionId = app.versionId;
     dto.code = app.code;
     dto.name = app.name;
     dto.description = app.description;

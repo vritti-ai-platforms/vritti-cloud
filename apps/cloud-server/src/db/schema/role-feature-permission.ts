@@ -1,6 +1,6 @@
 import { uuid, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
-import { appVersions } from './version';
+import { versions } from './version';
 import { roles } from './role';
 import { features } from './feature';
 import { featureTypeEnum } from './enums';
@@ -10,9 +10,9 @@ export const roleFeaturePermissions = cloudSchema.table(
   'role_feature_permissions',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    appVersionId: uuid('app_version_id')
+    versionId: uuid('version_id')
       .notNull()
-      .references(() => appVersions.id, { onDelete: 'cascade' }),
+      .references(() => versions.id, { onDelete: 'cascade' }),
     roleId: uuid('role_id')
       .notNull()
       .references(() => roles.id, { onDelete: 'cascade' }),

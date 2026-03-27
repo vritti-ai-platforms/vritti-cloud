@@ -12,7 +12,7 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
-import { VersionStatusValues, appVersions } from '@/db/schema';
+import { VersionStatusValues, versions } from '@/db/schema';
 import { VersionDto } from '@/modules/admin-api/version/root/dto/entity/version.dto';
 import type { CreateVersionDto } from '@/modules/admin-api/version/root/dto/request/create-version.dto';
 import type { PushArtifactsDto } from '@/modules/admin-api/version/root/dto/request/push-artifacts.dto';
@@ -25,9 +25,9 @@ export class VersionService {
   private readonly logger = new Logger(VersionService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
-    version: { column: appVersions.version, type: 'string' },
-    name: { column: appVersions.name, type: 'string' },
-    status: { column: appVersions.status, type: 'string' },
+    version: { column: versions.version, type: 'string' },
+    name: { column: versions.name, type: 'string' },
+    status: { column: versions.status, type: 'string' },
   };
 
   constructor(

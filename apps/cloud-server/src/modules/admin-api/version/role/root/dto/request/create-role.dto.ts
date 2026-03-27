@@ -5,7 +5,7 @@ import { type RoleScope, RoleScopeValues } from '@/db/schema';
 export class CreateRoleDto {
   @ApiProperty({ description: 'App version UUID this role belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
-  appVersionId: string;
+  versionId: string;
 
   @ApiProperty({ description: 'Display name of the role', example: 'Chef' })
   @IsString()

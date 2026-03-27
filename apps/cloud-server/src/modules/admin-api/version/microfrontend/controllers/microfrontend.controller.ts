@@ -30,7 +30,7 @@ export class MicrofrontendController {
   @ApiCreateMicrofrontend()
   create(@Param('versionId') versionId: string, @Body() dto: CreateMicrofrontendDto): Promise<CreateResponseDto<MicrofrontendDto>> {
     this.logger.log(`POST /admin-api/versions/${versionId}/microfrontends`);
-    return this.microfrontendService.create({ ...dto, appVersionId: versionId });
+    return this.microfrontendService.create({ ...dto, versionId: versionId });
   }
 
   // Returns microfrontends for the data table filtered by version

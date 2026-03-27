@@ -4,7 +4,7 @@ import { eq } from '@vritti/api-sdk/drizzle-orm';
 import type { Version } from '@/db/schema';
 import {
   appFeatures,
-  appVersions,
+  versions,
   apps,
   featureMicrofrontends,
   featurePermissions,
@@ -16,9 +16,9 @@ import {
 } from '@/db/schema';
 
 @Injectable()
-export class VersionRepository extends PrimaryBaseRepository<typeof appVersions> {
+export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
   constructor(database: PrimaryDatabaseService) {
-    super(database, appVersions);
+    super(database, versions);
   }
 
   // Finds a version by its unique identifier
@@ -38,18 +38,18 @@ export class VersionRepository extends PrimaryBaseRepository<typeof appVersions>
   }
 
   // Builds a snapshot from all versioned tables for the given version
-  async buildSnapshot(appVersionId: string): Promise<Record<string, unknown>> {
+  async buildSnapshot(versionId: string): Promise<Record<string, unknown>> {
     // Fetch all versioned data in parallel
     const [featureRows, permissionRows, mfRows, featureMfRows, appRows, appFeatureRows, roleRows, rolePermRows, roleAppRows] = await Promise.all([
-      this.db.select().from(features).where(eq(features.appVersionId, appVersionId)),
-      this.db.select().from(featurePermissions).where(eq(featurePermissions.appVersionId, appVersionId)),
-      this.db.select().from(microfrontends).where(eq(microfrontends.appVersionId, appVersionId)),
-      this.db.select().from(featureMicrofrontends).where(eq(featureMicrofrontends.appVersionId, appVersionId)),
-      this.db.select().from(apps).where(eq(apps.appVersionId, appVersionId)),
-      this.db.select().from(appFeatures).where(eq(appFeatures.appVersionId, appVersionId)),
-      this.db.select().from(roles).where(eq(roles.appVersionId, appVersionId)),
-      this.db.select().from(roleFeaturePermissions).where(eq(roleFeaturePermissions.appVersionId, appVersionId)),
-      this.db.select().from(roleApps).where(eq(roleApps.appVersionId, appVersionId)),
+      this.db.select().from(features).where(eq(features.versionId, versionId)),
+      this.db.select().from(featurePermissions).where(eq(featurePermissions.versionId, versionId)),
+      this.db.select().from(microfrontends).where(eq(microfrontends.versionId, versionId)),
+      this.db.select().from(featureMicrofrontends).where(eq(featureMicrofrontends.versionId, versionId)),
+      this.db.select().from(apps).where(eq(apps.versionId, versionId)),
+      this.db.select().from(appFeatures).where(eq(appFeatures.versionId, versionId)),
+      this.db.select().from(roles).where(eq(roles.versionId, versionId)),
+      this.db.select().from(roleFeaturePermissions).where(eq(roleFeaturePermissions.versionId, versionId)),
+      this.db.select().from(roleApps).where(eq(roleApps.versionId, versionId)),
     ]);
 
     // Index microfrontends by ID for junction lookup

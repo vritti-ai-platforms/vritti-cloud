@@ -39,7 +39,7 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
   }
 
   // Upserts app-feature rows using on-conflict update
-  async upsertMany(rows: Array<{ appVersionId: string; appId: string; featureId: string; sortOrder?: number }>): Promise<void> {
+  async upsertMany(rows: Array<{ versionId: string; appId: string; featureId: string; sortOrder?: number }>): Promise<void> {
     if (rows.length === 0) return;
     await this.db
       .insert(appFeatures)

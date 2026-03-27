@@ -72,8 +72,8 @@ export const relations = defineRelations(schema, (r) => ({
     }),
   },
 
-  // App version relations
-  appVersions: {
+  // Version relations
+  versions: {
     features: r.many.features(),
     microfrontends: r.many.microfrontends(),
     featureMicrofrontends: r.many.featureMicrofrontends(),
@@ -223,9 +223,9 @@ export const relations = defineRelations(schema, (r) => ({
 
   // Feature relations
   features: {
-    appVersion: r.one.appVersions({
-      from: r.features.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.features.versionId,
+      to: r.versions.id,
     }),
     featureMicrofrontends: r.many.featureMicrofrontends(),
     featurePermissions: r.many.featurePermissions(),
@@ -235,18 +235,18 @@ export const relations = defineRelations(schema, (r) => ({
 
   // Microfrontend relations
   microfrontends: {
-    appVersion: r.one.appVersions({
-      from: r.microfrontends.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.microfrontends.versionId,
+      to: r.versions.id,
     }),
     featureMicrofrontends: r.many.featureMicrofrontends(),
   },
 
   // Feature-Microfrontend junction relations
   featureMicrofrontends: {
-    appVersion: r.one.appVersions({
-      from: r.featureMicrofrontends.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.featureMicrofrontends.versionId,
+      to: r.versions.id,
     }),
     feature: r.one.features({
       from: r.featureMicrofrontends.featureId,
@@ -260,9 +260,9 @@ export const relations = defineRelations(schema, (r) => ({
 
   // App relations
   apps: {
-    appVersion: r.one.appVersions({
-      from: r.apps.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.apps.versionId,
+      to: r.versions.id,
     }),
     appFeatures: r.many.appFeatures(),
     appPrices: r.many.appPrices(),
@@ -271,9 +271,9 @@ export const relations = defineRelations(schema, (r) => ({
 
   // App-Feature junction relations
   appFeatures: {
-    appVersion: r.one.appVersions({
-      from: r.appFeatures.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.appFeatures.versionId,
+      to: r.versions.id,
     }),
     app: r.one.apps({ from: r.appFeatures.appId, to: r.apps.id }),
     feature: r.one.features({ from: r.appFeatures.featureId, to: r.features.id }),
@@ -281,9 +281,9 @@ export const relations = defineRelations(schema, (r) => ({
 
   // Feature permission relations
   featurePermissions: {
-    appVersion: r.one.appVersions({
-      from: r.featurePermissions.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.featurePermissions.versionId,
+      to: r.versions.id,
     }),
     feature: r.one.features({
       from: r.featurePermissions.featureId,
@@ -305,9 +305,9 @@ export const relations = defineRelations(schema, (r) => ({
 
   // Role relations
   roles: {
-    appVersion: r.one.appVersions({
-      from: r.roles.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.roles.versionId,
+      to: r.versions.id,
     }),
     industry: r.one.industries({ from: r.roles.industryId, to: r.industries.id }),
     roleFeaturePermissions: r.many.roleFeaturePermissions(),
@@ -316,16 +316,16 @@ export const relations = defineRelations(schema, (r) => ({
 
   // Role-App junction relations
   roleApps: {
-    appVersion: r.one.appVersions({ from: r.roleApps.appVersionId, to: r.appVersions.id }),
+    appVersion: r.one.versions({ from: r.roleApps.versionId, to: r.versions.id }),
     role: r.one.roles({ from: r.roleApps.roleId, to: r.roles.id }),
     app: r.one.apps({ from: r.roleApps.appId, to: r.apps.id }),
   },
 
   // Role-Feature-Permission junction relations
   roleFeaturePermissions: {
-    appVersion: r.one.appVersions({
-      from: r.roleFeaturePermissions.appVersionId,
-      to: r.appVersions.id,
+    appVersion: r.one.versions({
+      from: r.roleFeaturePermissions.versionId,
+      to: r.versions.id,
     }),
     role: r.one.roles({
       from: r.roleFeaturePermissions.roleId,

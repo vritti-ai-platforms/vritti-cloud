@@ -39,7 +39,7 @@ export class FeatureMicrofrontendService {
     }
 
     const result = await this.featureMicrofrontendRepository.upsert({
-      appVersionId: feature.appVersionId,
+      versionId: feature.versionId,
       featureId,
       microfrontendId,
       exposedModule: dto.exposedModule,

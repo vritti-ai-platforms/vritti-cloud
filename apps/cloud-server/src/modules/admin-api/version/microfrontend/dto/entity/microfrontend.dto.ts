@@ -6,7 +6,7 @@ export class MicrofrontendDto {
   id: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  appVersionId: string;
+  versionId: string;
 
   @ApiProperty({ example: 'order-mf' })
   code: string;
@@ -24,7 +24,7 @@ export class MicrofrontendDto {
   static from(entity: Microfrontend): MicrofrontendDto {
     const dto = new MicrofrontendDto();
     dto.id = entity.id;
-    dto.appVersionId = entity.appVersionId;
+    dto.versionId = entity.versionId;
     dto.code = entity.code;
     dto.name = entity.name;
     dto.platform = entity.platform;

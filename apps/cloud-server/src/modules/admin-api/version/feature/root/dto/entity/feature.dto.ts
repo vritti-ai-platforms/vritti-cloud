@@ -6,7 +6,7 @@ export class FeatureDto {
   id: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  appVersionId: string;
+  versionId: string;
 
   @ApiProperty({ example: 'orders.dine-in.create' })
   code: string;
@@ -39,7 +39,7 @@ export class FeatureDto {
   static from(feature: Feature, canDelete = true): FeatureDto {
     const dto = new FeatureDto();
     dto.id = feature.id;
-    dto.appVersionId = feature.appVersionId;
+    dto.versionId = feature.versionId;
     dto.code = feature.code;
     dto.name = feature.name;
     dto.description = feature.description;

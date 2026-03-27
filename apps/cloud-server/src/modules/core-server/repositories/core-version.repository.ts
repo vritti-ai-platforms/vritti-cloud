@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import type { Version } from '@/db/schema';
-import { appVersions } from '@/db/schema';
+import { versions } from '@/db/schema';
 
 // Minimal version repository for snapshot lookups
 @Injectable()
-export class CoreVersionRepository extends PrimaryBaseRepository<typeof appVersions> {
+export class CoreVersionRepository extends PrimaryBaseRepository<typeof versions> {
   constructor(database: PrimaryDatabaseService) {
-    super(database, appVersions);
+    super(database, versions);
   }
 
   // Finds a version by ID

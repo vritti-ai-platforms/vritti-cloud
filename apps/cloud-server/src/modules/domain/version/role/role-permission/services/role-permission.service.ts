@@ -52,7 +52,7 @@ export class RolePermissionService {
 
     // Full replace: delete all existing, then bulk insert
     const entries: NewRoleFeaturePermission[] = dto.permissions.map((perm) => ({
-      appVersionId: role.appVersionId,
+      versionId: role.versionId,
       roleId,
       featureId: perm.featureId,
       type: perm.type,

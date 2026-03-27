@@ -60,7 +60,7 @@ export const createRoleSchema = z.object({
   scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU'], { message: 'Please select a scope' }),
   industryId: z.string().uuid().optional().or(z.literal('')),
   appIds: z.array(z.string().uuid()).min(1, 'Select at least one app'),
-  appVersionId: z.string().uuid('App version is required'),
+  versionId: z.string().uuid('App version is required'),
 });
 
 export const updateRoleSchema = z.object({

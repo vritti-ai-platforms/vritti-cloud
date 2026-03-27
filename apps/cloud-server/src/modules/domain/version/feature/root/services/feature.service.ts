@@ -81,14 +81,14 @@ export class FeatureService {
   }
 
   // Returns all features for a version with their permission types and app codes
-  async findWithPermissions(appVersionId: string): Promise<FeatureWithPermissionsResponseDto[]> {
+  async findWithPermissions(versionId: string): Promise<FeatureWithPermissionsResponseDto[]> {
     const [allFeatures, permissionsMap, appCodesMap] = await Promise.all([
-      this.featureRepository.findAllByVersionId(appVersionId),
-      this.featureRepository.findPermissionsByVersionId(appVersionId),
-      this.featureRepository.findAppCodesByVersionId(appVersionId),
+      this.featureRepository.findAllByVersionId(versionId),
+      this.featureRepository.findPermissionsByVersionId(versionId),
+      this.featureRepository.findAppCodesByVersionId(versionId),
     ]);
 
-    this.logger.log(`Fetched ${allFeatures.length} features with permissions for version ${appVersionId}`);
+    this.logger.log(`Fetched ${allFeatures.length} features with permissions for version ${versionId}`);
 
     return allFeatures.map((feature) => ({
       id: feature.id,

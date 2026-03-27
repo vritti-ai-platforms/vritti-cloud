@@ -21,8 +21,8 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   }
 
   // Finds all features for a given app version
-  async findAllByVersionId(appVersionId: string): Promise<Feature[]> {
-    return this.model.findMany({ where: { appVersionId } });
+  async findAllByVersionId(versionId: string): Promise<Feature[]> {
+    return this.model.findMany({ where: { versionId } });
   }
 
   // Counts how many app_features reference a given feature
@@ -49,14 +49,14 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   }
 
   // Returns permission types grouped by feature ID for a given app version
-  async findPermissionsByVersionId(appVersionId: string): Promise<Map<string, string[]>> {
+  async findPermissionsByVersionId(versionId: string): Promise<Map<string, string[]>> {
     const rows = await this.db
       .select({
         featureId: featurePermissions.featureId,
         type: featurePermissions.type,
       })
       .from(featurePermissions)
-      .where(eq(featurePermissions.appVersionId, appVersionId));
+      .where(eq(featurePermissions.versionId, versionId));
 
     const map = new Map<string, string[]>();
     for (const row of rows) {
@@ -71,7 +71,7 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   }
 
   // Returns app codes grouped by feature ID for a given app version
-  async findAppCodesByVersionId(appVersionId: string): Promise<Map<string, string[]>> {
+  async findAppCodesByVersionId(versionId: string): Promise<Map<string, string[]>> {
     const rows = await this.db
       .select({
         featureId: appFeatures.featureId,
@@ -79,7 +79,7 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
       })
       .from(appFeatures)
       .innerJoin(apps, eq(appFeatures.appId, apps.id))
-      .where(eq(appFeatures.appVersionId, appVersionId));
+      .where(eq(appFeatures.versionId, versionId));
 
     const map = new Map<string, string[]>();
     for (const row of rows) {

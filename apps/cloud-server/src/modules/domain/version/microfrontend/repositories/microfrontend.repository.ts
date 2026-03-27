@@ -16,8 +16,8 @@ export class MicrofrontendRepository extends PrimaryBaseRepository<typeof microf
   }
 
   // Finds a microfrontend by version, code, and platform for uniqueness check
-  async findByVersionAndCodeAndPlatform(appVersionId: string, code: string, platform: string): Promise<Microfrontend | undefined> {
-    return this.model.findFirst({ where: { appVersionId, code, platform } });
+  async findByVersionAndCodeAndPlatform(versionId: string, code: string, platform: string): Promise<Microfrontend | undefined> {
+    return this.model.findFirst({ where: { versionId, code, platform } });
   }
 
   // Counts how many feature-microfrontend links reference this microfrontend
@@ -30,21 +30,21 @@ export class MicrofrontendRepository extends PrimaryBaseRepository<typeof microf
   }
 
   // Returns all microfrontends for a given app version ordered by name
-  async findAllByVersionForTable(appVersionId: string): Promise<{ result: Microfrontend[]; count: number }> {
+  async findAllByVersionForTable(versionId: string): Promise<{ result: Microfrontend[]; count: number }> {
     const result = await this.db
       .select()
       .from(microfrontends)
-      .where(eq(microfrontends.appVersionId, appVersionId))
+      .where(eq(microfrontends.versionId, versionId))
       .orderBy(microfrontends.name);
     return { result: result as Microfrontend[], count: result.length };
   }
 
   // Finds microfrontends for a given version filtered by optional search query
   async findSelectOptions(
-    appVersionId: string,
+    versionId: string,
     options: { search?: string; limit: number; offset: number },
   ): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
-    let condition = eq(microfrontends.appVersionId, appVersionId);
+    let condition = eq(microfrontends.versionId, versionId);
     if (options.search) {
       condition = and(condition, sql`${microfrontends.name} ILIKE ${'%' + options.search + '%'}`) as typeof condition;
     }

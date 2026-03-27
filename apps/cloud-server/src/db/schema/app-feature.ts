@@ -1,17 +1,17 @@
-import { integer, uuid, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
-import { cloudSchema } from './cloud-schema';
-import { appVersions } from './version';
+import { integer, uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { apps } from './app';
+import { cloudSchema } from './cloud-schema';
 import { features } from './feature';
+import { versions } from './version';
 
 // Which features belong to which app within a version
 export const appFeatures = cloudSchema.table(
   'app_features',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    appVersionId: uuid('app_version_id')
+    versionId: uuid('version_id')
       .notNull()
-      .references(() => appVersions.id, { onDelete: 'cascade' }),
+      .references(() => versions.id, { onDelete: 'cascade' }),
     appId: uuid('app_id')
       .notNull()
       .references(() => apps.id, { onDelete: 'cascade' }),

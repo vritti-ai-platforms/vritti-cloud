@@ -7,7 +7,7 @@ export interface App {
   name: string;
   description: string | null;
   icon: string | null;
-  appVersionId: string;
+  versionId: string;
   featureCount: number;
   planCount: number;
   createdAt: string;
@@ -56,7 +56,7 @@ export const createAppSchema = z.object({
   name: z.string().min(1, 'App name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
   icon: z.string().optional(),
-  appVersionId: z.string().uuid('App version is required'),
+  versionId: z.string().uuid('App version is required'),
 });
 
 export const updateAppSchema = z.object({

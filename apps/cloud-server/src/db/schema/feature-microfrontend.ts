@@ -1,17 +1,17 @@
-import { uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
+import { uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
-import { appVersions } from './version';
 import { features } from './feature';
 import { microfrontends } from './microfrontend';
+import { versions } from './version';
 
 // Junction table linking features to microfrontends with module federation config
 export const featureMicrofrontends = cloudSchema.table(
   'feature_microfrontends',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    appVersionId: uuid('app_version_id')
+    versionId: uuid('version_id')
       .notNull()
-      .references(() => appVersions.id, { onDelete: 'cascade' }),
+      .references(() => versions.id, { onDelete: 'cascade' }),
     featureId: uuid('feature_id')
       .notNull()
       .references(() => features.id, { onDelete: 'cascade' }),

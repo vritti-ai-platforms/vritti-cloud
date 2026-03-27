@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 export interface Microfrontend {
   id: string;
-  appVersionId: string;
+  versionId: string;
   code: string;
   name: string;
   platform: 'WEB' | 'MOBILE';

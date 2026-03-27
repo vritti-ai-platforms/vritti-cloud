@@ -16,10 +16,10 @@ export class RoleAppRepository extends PrimaryBaseRepository<typeof roleApps> {
   }
 
   // Replaces all app links for a role
-  async setApps(roleId: string, appVersionId: string, appIds: string[]): Promise<void> {
+  async setApps(roleId: string, versionId: string, appIds: string[]): Promise<void> {
     await this.db.delete(roleApps).where(eq(roleApps.roleId, roleId));
     if (appIds.length > 0) {
-      await this.db.insert(roleApps).values(appIds.map((appId) => ({ roleId, appId, appVersionId })));
+      await this.db.insert(roleApps).values(appIds.map((appId) => ({ roleId, appId, versionId })));
     }
   }
 

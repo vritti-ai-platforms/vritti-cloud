@@ -1,6 +1,6 @@
 import { boolean, text, timestamp, uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
-import { appVersions } from './version';
+import { versions } from './version';
 import { roleScopeEnum } from './enums';
 import { industries } from './industry';
 
@@ -9,9 +9,9 @@ export const roles = cloudSchema.table(
   'roles',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    appVersionId: uuid('app_version_id')
+    versionId: uuid('version_id')
       .notNull()
-      .references(() => appVersions.id, { onDelete: 'cascade' }),
+      .references(() => versions.id, { onDelete: 'cascade' }),
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
     scope: roleScopeEnum('scope').notNull(),
@@ -21,7 +21,7 @@ export const roles = cloudSchema.table(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },
-  (table) => [uniqueIndex('role_version_name_idx').on(table.appVersionId, table.name)],
+  (table) => [uniqueIndex('role_version_name_idx').on(table.versionId, table.name)],
 );
 
 export type Role = typeof roles.$inferSelect;

@@ -42,7 +42,7 @@ export class RoleService {
   async create(dto: CreateRoleDto): Promise<CreateResponseDto<RoleDto>> {
     const { appIds, ...roleData } = dto;
     const role = await this.roleRepository.create(roleData);
-    await this.roleAppRepository.setApps(role.id, dto.appVersionId, appIds);
+    await this.roleAppRepository.setApps(role.id, dto.versionId, appIds);
     this.logger.log(`Created role: ${role.name} (${role.id}) with ${appIds.length} app(s)`);
     return { success: true, message: 'Role created successfully.', data: RoleDto.from(role, 0) };
   }
@@ -107,7 +107,7 @@ export class RoleService {
     const { appIds, ...roleData } = dto;
     const role = await this.roleRepository.update(id, roleData);
     if (appIds) {
-      await this.roleAppRepository.setApps(id, existing.appVersionId, appIds);
+      await this.roleAppRepository.setApps(id, existing.versionId, appIds);
     }
     this.logger.log(`Updated role: ${role.name} (${role.id})`);
     return { success: true, message: 'Role updated successfully.' };

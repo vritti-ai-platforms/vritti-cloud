@@ -50,7 +50,7 @@ export class FeatureMicrofrontendRepository extends PrimaryBaseRepository<typeof
 
   // Inserts or updates a junction row on conflict (feature + microfrontend unique)
   async upsert(data: {
-    appVersionId: string;
+    versionId: string;
     featureId: string;
     microfrontendId: string;
     exposedModule: string;

@@ -32,9 +32,9 @@ export class MicrofrontendService {
   ) {}
 
   // Creates a new microfrontend; throws ConflictException on duplicate code+platform within version
-  async create(dto: CreateMicrofrontendDto & { appVersionId: string }): Promise<CreateResponseDto<MicrofrontendDto>> {
+  async create(dto: CreateMicrofrontendDto & { versionId: string }): Promise<CreateResponseDto<MicrofrontendDto>> {
     const existing = await this.microfrontendRepository.findByVersionAndCodeAndPlatform(
-      dto.appVersionId,
+      dto.versionId,
       dto.code,
       dto.platform,
     );
@@ -51,23 +51,23 @@ export class MicrofrontendService {
   }
 
   // Returns microfrontends for the data table filtered by app version
-  async findForTable(userId: string, appVersionId: string): Promise<MicrofrontendTableResponseDto> {
-    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, `microfrontends-${appVersionId}`);
+  async findForTable(userId: string, versionId: string): Promise<MicrofrontendTableResponseDto> {
+    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, `microfrontends-${versionId}`);
     const filterWhere = FilterProcessor.buildWhere(state.filters, MicrofrontendService.FIELD_MAP);
     const searchWhere = FilterProcessor.buildSearch(state.search, MicrofrontendService.FIELD_MAP);
-    const versionWhere = eq(microfrontends.appVersionId, appVersionId);
+    const versionWhere = eq(microfrontends.versionId, versionId);
     const where = and(versionWhere, filterWhere, searchWhere);
     const orderBy = FilterProcessor.buildOrderBy(state.sort, MicrofrontendService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.microfrontendRepository.findAllAndCount({ where, orderBy, limit, offset });
-    this.logger.log(`Fetched microfrontends table for version: ${appVersionId} (${count} results)`);
+    this.logger.log(`Fetched microfrontends table for version: ${versionId} (${count} results)`);
     return { result: result.map(MicrofrontendDto.from), count, state, activeViewId };
   }
 
   // Returns microfrontend options for a select component within a version
-  async findForSelect(appVersionId: string, query?: string): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
-    this.logger.log(`Fetched microfrontend select options for version: ${appVersionId}`);
-    return this.microfrontendRepository.findSelectOptions(appVersionId, {
+  async findForSelect(versionId: string, query?: string): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
+    this.logger.log(`Fetched microfrontend select options for version: ${versionId}`);
+    return this.microfrontendRepository.findSelectOptions(versionId, {
       search: query,
       limit: 20,
       offset: 0,
@@ -94,7 +94,7 @@ export class MicrofrontendService {
       const code = dto.code ?? existing.code;
       const platform = dto.platform ?? existing.platform;
       const duplicate = await this.microfrontendRepository.findByVersionAndCodeAndPlatform(
-        existing.appVersionId,
+        existing.versionId,
         code,
         platform,
       );

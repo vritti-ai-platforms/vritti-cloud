@@ -1,17 +1,17 @@
-import { uuid, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
+import { uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
-import { appVersions } from './version';
-import { features } from './feature';
 import { featureTypeEnum } from './enums';
+import { features } from './feature';
+import { versions } from './version';
 
 // Declared permission types for a feature — defines what actions are possible
 export const featurePermissions = cloudSchema.table(
   'feature_permissions',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    appVersionId: uuid('app_version_id')
+    versionId: uuid('version_id')
       .notNull()
-      .references(() => appVersions.id, { onDelete: 'cascade' }),
+      .references(() => versions.id, { onDelete: 'cascade' }),
     featureId: uuid('feature_id')
       .notNull()
       .references(() => features.id, { onDelete: 'cascade' }),
