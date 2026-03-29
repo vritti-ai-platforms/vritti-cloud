@@ -1,5 +1,5 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { ChangePasswordDto, ProfileData, Session } from '@/schemas/cloud/account';
+import type { ProfileData } from '@/schemas/cloud/account';
 
 export interface SuccessResponse {
   success: boolean;
@@ -34,39 +34,6 @@ export function deleteAccount(): Promise<void> {
     .delete('account/delete', {
       loadingMessage: 'Deleting account...',
       successMessage: 'Account deleted successfully',
-    })
-    .then(() => undefined);
-}
-
-// Security
-
-export function changePassword(data: ChangePasswordDto): Promise<void> {
-  return axios
-    .post('auth/password/change', data, {
-      loadingMessage: 'Changing password...',
-      successMessage: 'Password changed successfully',
-    })
-    .then(() => undefined);
-}
-
-export function getSessions(): Promise<Session[]> {
-  return axios.get<Session[]>('auth/sessions', { showSuccessToast: false }).then((r) => r.data);
-}
-
-export function revokeSession(sessionId: string): Promise<void> {
-  return axios
-    .delete(`auth/sessions/${sessionId}`, {
-      loadingMessage: 'Revoking session...',
-      successMessage: 'Session revoked successfully',
-    })
-    .then(() => undefined);
-}
-
-export function revokeAllOtherSessions(): Promise<void> {
-  return axios
-    .post('auth/logout-all', null, {
-      loadingMessage: 'Signing out all devices...',
-      successMessage: 'Signed out from all other devices',
     })
     .then(() => undefined);
 }

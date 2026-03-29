@@ -60,18 +60,3 @@ export interface ProfileData {
   lastLoginAt: string | null;
 }
 
-// Password change DTO for API requests
-export interface ChangePasswordDto {
-  currentPassword: string;
-  newPassword: string;
-}
-
-// Session data from backend
-export interface Session {
-  sessionId: string;
-  device: string;
-  location: string;
-  ipAddress: string;
-  lastActive: string;
-  isCurrent: boolean;
-}

@@ -27,7 +27,9 @@ import { PasskeyAuthController } from './passkey/controllers/passkey-auth.contro
 import { PasskeyAuthService } from './passkey/services/passkey-auth.service';
 // Root submodule
 import { AuthController } from './root/controllers/auth.controller';
+import { AuthStatusEventListener } from './root/listeners/auth-status-event.listener';
 import { AuthService } from './root/services/auth.service';
+import { AuthStatusSseService } from './root/services/auth-status-sse.service';
 import { PasswordResetService } from './root/services/password-reset.service';
 
 @Module({
@@ -44,6 +46,8 @@ import { PasswordResetService } from './root/services/password-reset.service';
   providers: [
     // Root
     AuthService,
+    AuthStatusSseService,
+    AuthStatusEventListener,
     PasswordResetService,
     // Passkey
     PasskeyAuthService,

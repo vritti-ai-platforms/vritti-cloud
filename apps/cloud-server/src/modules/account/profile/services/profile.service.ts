@@ -3,6 +3,7 @@ import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { VerificationService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   BadRequestException,
   EmailService,
@@ -16,6 +17,10 @@ import type { FastifyRequest } from 'fastify';
 import type { VerificationChannel } from '@/db/schema';
 import { VerificationChannelValues } from '@/db/schema';
 import { SmsService } from '@/services';
+import {
+  AUTH_STATUS_EVENTS,
+  ProfileUpdatedEvent,
+} from '../../../cloud-api/auth/root/events/auth-status.events';
 import { UserDto } from '../../../cloud-api/user/dto/entity/user.dto';
 import type { UpdateUserDto } from '../../../cloud-api/user/dto/request/update-user.dto';
 import { UpdateProfileDto } from '../dto/request/update-profile.dto';
@@ -31,6 +36,7 @@ export class ProfileService {
     private readonly userService: UserService,
     private readonly sessionService: SessionService,
     private readonly mediaService: MediaService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // Returns the authenticated user's profile
@@ -51,6 +57,7 @@ export class ProfileService {
     if (!isMultipart) {
       const dto = request.body as UpdateProfileDto;
       await this.userService.update(userId, dto as UpdateUserDto);
+      this.eventEmitter.emit(AUTH_STATUS_EVENTS.PROFILE_UPDATED, new ProfileUpdatedEvent(userId));
       return { success: true, message: 'Profile updated successfully.' };
     }
 
@@ -72,6 +79,7 @@ export class ProfileService {
     }
 
     await this.userService.update(userId, updateData as UpdateUserDto);
+    this.eventEmitter.emit(AUTH_STATUS_EVENTS.PROFILE_UPDATED, new ProfileUpdatedEvent(userId));
     return { success: true, message: 'Profile updated successfully.' };
   }
 
