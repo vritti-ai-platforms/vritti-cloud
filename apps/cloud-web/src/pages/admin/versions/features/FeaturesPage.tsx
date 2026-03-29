@@ -118,6 +118,10 @@ export const FeaturesPage = () => {
         ]}
         validateMutation={validateImportMutation}
         importMutation={bulkCreateMutation}
+        sampleData={[
+          { code: 'products', name: 'Products', icon: 'package', description: 'Product catalog management' },
+          { code: 'orders', name: 'Orders', icon: 'clipboard-list', description: 'Order management' },
+        ]}
       />
     </div>
   );

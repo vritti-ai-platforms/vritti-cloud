@@ -4,12 +4,15 @@ import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
+import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { Form } from '@vritti/quantum-ui/Form';
+import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import { UploadFile } from '@vritti/quantum-ui/UploadFile';
 import type { AxiosError } from 'axios';
-import type { DialogHandle } from '@vritti/quantum-ui/hooks';
-import { ArrowLeft, FileUp } from 'lucide-react';
+import { ArrowLeft, Download, FileUp } from 'lucide-react';
+import { useCallback } from 'react';
 import { useForm } from 'react-hook-form';
+import { utils, writeFile } from 'xlsx';
 import type { ValidateImportResponse } from '@/schemas/admin/import';
 
 interface ImportDialogProps {
@@ -19,11 +22,20 @@ interface ImportDialogProps {
   columns: { key: string; label: string }[];
   validateMutation: UseMutationResult<ValidateImportResponse, AxiosError, File>;
   importMutation: UseMutationResult<SuccessResponse, AxiosError, Record<string, string>[]>;
+  sampleData?: Record<string, string>[];
 }
 
 interface UploadFormData {
   file: File;
 }
+
+const SAMPLE_FORMATS = [
+  { id: 'csv', label: 'CSV (.csv)', ext: 'csv', bookType: 'csv' as const },
+  { id: 'xlsx', label: 'Excel (.xlsx)', ext: 'xlsx', bookType: 'xlsx' as const },
+  { id: 'xls', label: 'Excel 97-2004 (.xls)', ext: 'xls', bookType: 'biff8' as const },
+  { id: 'ods', label: 'OpenDocument (.ods)', ext: 'ods', bookType: 'ods' as const },
+  { id: 'tsv', label: 'TSV (.tsv)', ext: 'tsv', bookType: 'csv' as const },
+];
 
 export const ImportDialog = ({
   handle,
@@ -32,6 +44,7 @@ export const ImportDialog = ({
   columns,
   validateMutation,
   importMutation,
+  sampleData,
 }: ImportDialogProps) => {
   const form = useForm<UploadFormData>();
 
@@ -43,6 +56,24 @@ export const ImportDialog = ({
     validateMutation.reset();
     importMutation.reset();
   }
+
+  // Generates and downloads a sample file in the selected format
+  const downloadSample = useCallback(
+    (formatId: string) => {
+      if (!sampleData?.length) return;
+      const format = SAMPLE_FORMATS.find((f) => f.id === formatId);
+      if (!format) return;
+
+      const ws = utils.json_to_sheet(sampleData);
+      const wb = utils.book_new();
+      utils.book_append_sheet(wb, ws, 'Sample');
+
+      // TSV uses csv bookType with tab separator
+      const opts = formatId === 'tsv' ? { bookType: 'csv' as const, FS: '\t' } : { bookType: format.bookType };
+      writeFile(wb, `sample.${format.ext}`, opts);
+    },
+    [sampleData],
+  );
 
   // Axios success interceptor shows the toast from the backend message
   function handleImport() {
@@ -69,11 +100,29 @@ export const ImportDialog = ({
             <UploadFile
               name="file"
               label="File"
-              accept=".csv,.xlsx,.xls"
-              placeholder="Drop a CSV or Excel file"
-              hint="Supported formats: .csv, .xlsx, .xls"
+              accept=".csv,.xlsx,.xls,.ods,.tsv"
+              placeholder="Drop a spreadsheet file"
+              hint="Supported formats: CSV, Excel, ODS, TSV"
             />
-            <div className="flex justify-end pt-2">
+            <div className="flex items-center justify-between pt-2">
+              {sampleData?.length ? (
+                <DropdownMenu
+                  trigger={{
+                    label: 'Download sample',
+                    variant: 'ghost',
+                    icon: Download,
+                    className: 'text-xs h-8',
+                  }}
+                  items={SAMPLE_FORMATS.map((f) => ({
+                    type: 'item' as const,
+                    id: f.id,
+                    label: f.label,
+                    onClick: () => downloadSample(f.id),
+                  }))}
+                />
+              ) : (
+                <div />
+              )}
               <Button type="submit" size="sm" isLoading={validateMutation.isPending} loadingText="Validating...">
                 Validate
               </Button>

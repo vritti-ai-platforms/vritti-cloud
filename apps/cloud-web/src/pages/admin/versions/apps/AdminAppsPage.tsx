@@ -109,6 +109,10 @@ export const AdminAppsPage = () => {
         ]}
         validateMutation={validateImportMutation}
         importMutation={bulkCreateMutation}
+        sampleData={[
+          { code: 'catalog', name: 'Catalog Management', icon: 'layout-grid', description: 'Product catalog app' },
+          { code: 'pos', name: 'Point of Sale', icon: 'monitor', description: 'POS terminal' },
+        ]}
       />
     </div>
   );
