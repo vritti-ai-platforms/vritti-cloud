@@ -11,8 +11,6 @@ export interface MfaChallenge {
   maskedPhone?: string;
   passkeyChallenge?: string;
   expiresAt: Date;
-  ipAddress?: string;
-  userAgent?: string;
   subdomain?: string;
 }
 
@@ -33,8 +31,6 @@ export class MfaChallengeStore {
     availableMethods: MfaMethod[],
     options: {
       maskedPhone?: string;
-      ipAddress?: string;
-      userAgent?: string;
       subdomain?: string;
     } = {},
   ): MfaChallenge {
@@ -59,8 +55,6 @@ export class MfaChallengeStore {
       defaultMethod,
       maskedPhone: options.maskedPhone,
       expiresAt,
-      ipAddress: options.ipAddress,
-      userAgent: options.userAgent,
       subdomain: options.subdomain,
     };
 

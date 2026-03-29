@@ -2,13 +2,12 @@ import {
   Body,
   Controller,
   Get,
-  Headers,
   HttpCode,
   HttpStatus,
-  Ip,
   Logger,
   type MessageEvent,
   Post,
+  Req,
   Res,
   Sse,
 } from '@nestjs/common';
@@ -25,7 +24,7 @@ import {
   UserId,
 } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import type { FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { NEVER, type Observable, concat, merge, of } from 'rxjs';
 import {
   ApiForgotPassword,
@@ -74,12 +73,11 @@ export class AuthController {
     @Body() signupDto: SignupDto,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
-    @Ip() ipAddress: string,
-    @Headers('user-agent') userAgent: string,
+    @Req() request: FastifyRequest,
   ): Promise<SignupResponseDto> {
     this.logger.log(`POST /auth/signup - Email: ${signupDto.email}`);
 
-    const { refreshToken, ...response } = await this.authService.signup(signupDto, ipAddress, userAgent);
+    const { refreshToken, ...response } = await this.authService.signup(signupDto, request);
 
     reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
 
@@ -95,12 +93,11 @@ export class AuthController {
     @Subdomain() subdomain: string | undefined,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
-    @Ip() ipAddress: string,
-    @Headers('user-agent') userAgent: string,
+    @Req() request: FastifyRequest,
   ): Promise<LoginResponse> {
     this.logger.log(`Login attempt for email: ${loginDto.email}`);
 
-    const { refreshToken, ...response } = await this.authService.login(loginDto, subdomain, ipAddress, userAgent);
+    const { refreshToken, ...response } = await this.authService.login(loginDto, subdomain, request);
 
     if (refreshToken) {
       reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
@@ -124,9 +121,9 @@ export class AuthController {
       return concat(initial$, NEVER);
     }
 
-    // Register SSE connection for real-time updates
+    // Register SSE connection for real-time updates, keyed by sessionId
     const userId = authResponse.user.id;
-    const connection$ = this.authStatusSse.addConnection(userId);
+    const connection$ = this.authStatusSse.addConnection(userId, authResponse.sessionId as string);
 
     // Push initial auth state, then stream updates
     const initial$ = of({ type: 'auth-state', data: JSON.stringify(authResponse) } as MessageEvent);
@@ -183,16 +180,11 @@ export class AuthController {
     @Body() dto: ForgotPasswordDto,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
-    @Ip() ipAddress: string,
-    @Headers('user-agent') userAgent: string,
+    @Req() request: FastifyRequest,
   ): Promise<ForgotPasswordResponseDto> {
     this.logger.log(`POST /auth/forgot-password - Email: ${dto.email}`);
 
-    const { refreshToken, ...response } = await this.passwordResetService.requestPasswordReset(
-      dto.email,
-      ipAddress,
-      userAgent,
-    );
+    const { refreshToken, ...response } = await this.passwordResetService.requestPasswordReset(dto.email, request);
 
     if (refreshToken) {
       reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
@@ -232,16 +224,14 @@ export class AuthController {
     @CookieDomain() domain: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
-    @Ip() ipAddress: string,
-    @Headers('user-agent') userAgent: string,
+    @Req() request: FastifyRequest,
   ): Promise<ResetPasswordResponseDto> {
     this.logger.log(`POST /auth/reset-password - User: ${userId}`);
 
     const { refreshToken, ...response } = await this.passwordResetService.resetPassword(
       userId,
       dto.newPassword,
-      ipAddress,
-      userAgent,
+      request,
     );
 
     reply.clearCookie(getRefreshCookieName(), { path: '/', domain });

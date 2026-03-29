@@ -39,16 +39,20 @@ export class AuthStatusEventListener {
     }
   }
 
-  // Pushes session-revoked to trigger logout on affected clients
+  // Pushes auth-state { isAuthenticated: false } to the revoked session or all sessions
   @OnEvent(AUTH_STATUS_EVENTS.SESSION_REVOKED)
   handleSessionRevoked(event: SessionRevokedEvent) {
-    this.logger.log(`Handling SESSION_REVOKED for user ${event.userId}`);
+    this.logger.log(`Handling SESSION_REVOKED for user ${event.userId}${event.sessionId ? `, session ${event.sessionId}` : ' (all sessions)'}`);
 
     const message: MessageEvent = {
-      type: 'session-revoked',
-      data: JSON.stringify({}),
+      type: 'auth-state',
+      data: JSON.stringify({ isAuthenticated: false }),
     };
 
-    this.authStatusSse.sendToUser(event.userId, message);
+    if (event.sessionId) {
+      this.authStatusSse.sendToSession(event.userId, event.sessionId, message);
+    } else {
+      this.authStatusSse.sendToUser(event.userId, message);
+    }
   }
 }

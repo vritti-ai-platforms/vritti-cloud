@@ -921,16 +921,7 @@
       "post": {
         "description": "Creates a new user account and initiates the onboarding flow. Returns an access token and sets a refresh token in an httpOnly cookie.",
         "operationId": "AuthController_signup",
-        "parameters": [
-          {
-            "name": "user-agent",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -969,16 +960,7 @@
       "post": {
         "description": "Authenticates the user with email and password. Returns an access token and sets a refresh token in an httpOnly cookie.",
         "operationId": "AuthController_login",
-        "parameters": [
-          {
-            "name": "user-agent",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1116,16 +1098,7 @@
       "post": {
         "description": "Sends a password reset OTP to the provided email and creates a RESET session. Always returns success to prevent email enumeration.",
         "operationId": "AuthController_forgotPassword",
-        "parameters": [
-          {
-            "name": "user-agent",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1236,16 +1209,7 @@
       "post": {
         "description": "Resets password, invalidates all sessions, creates a new session.",
         "operationId": "AuthController_resetPassword",
-        "parameters": [
-          {
-            "name": "user-agent",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -1548,16 +1512,7 @@
       "post": {
         "description": "Verifies the WebAuthn authentication response and creates a user session. Returns an access token and sets a refresh token in an httpOnly cookie.",
         "operationId": "PasskeyAuthController_verifyPasskeyAuth",
-        "parameters": [
-          {
-            "name": "user-agent",
-            "required": true,
-            "in": "header",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -11414,12 +11369,12 @@
           "device": {
             "type": "string",
             "description": "Device information parsed from user agent",
-            "example": "Chrome on macOS"
+            "example": "Chrome 120 on macOS"
           },
           "location": {
             "type": "string",
             "description": "Geographic location based on IP address",
-            "example": "San Francisco, CA"
+            "example": "Hyderabad, IN"
           },
           "ipAddress": {
             "type": "string",

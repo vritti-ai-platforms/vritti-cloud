@@ -1,7 +1,7 @@
-import { Body, Controller, HttpCode, HttpStatus, Logger, Post, Res } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Logger, Post, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
-import type { FastifyReply } from 'fastify';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { getRefreshCookieName } from '@domain/session/services/session.service';
 import {
   ApiSendSmsOtp,
@@ -38,9 +38,10 @@ export class MfaVerificationController {
     @Body() dto: VerifyMfaTotpDto,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
+    @Req() request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto> {
     this.logger.log(`POST /auth/mfa/verify-totp - sessionId: ${dto.sessionId}`);
-    const { refreshToken, ...response } = await this.mfaVerificationService.verifyTotp(dto.sessionId, dto.code);
+    const { refreshToken, ...response } = await this.mfaVerificationService.verifyTotp(dto.sessionId, dto.code, request);
 
     // Set refresh token in httpOnly cookie
     reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
@@ -67,9 +68,10 @@ export class MfaVerificationController {
     @Body() dto: VerifySmsOtpDto,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
+    @Req() request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto> {
     this.logger.log(`POST /auth/mfa/sms/verify - sessionId: ${dto.sessionId}`);
-    const { refreshToken, ...response } = await this.mfaVerificationService.verifySmsOtp(dto.sessionId, dto.code);
+    const { refreshToken, ...response } = await this.mfaVerificationService.verifySmsOtp(dto.sessionId, dto.code, request);
 
     // Set refresh token in httpOnly cookie
     reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
@@ -96,11 +98,13 @@ export class MfaVerificationController {
     @Body() dto: VerifyPasskeyMfaDto,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
+    @Req() request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto> {
     this.logger.log(`POST /auth/mfa/passkey/verify - sessionId: ${dto.sessionId}`);
     const { refreshToken, ...response } = await this.mfaVerificationService.verifyPasskeyMfa(
       dto.sessionId,
       dto.credential,
+      request,
     );
 
     // Set refresh token in httpOnly cookie

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
 import { OnboardingStepValues, SessionTypeValues, VerificationChannelValues } from '@/db/schema';
 import { EmailService } from '@vritti/api-sdk';
 import { EncryptionService } from '../../../../../services';
@@ -28,8 +29,7 @@ export class PasswordResetService {
   // Sends OTP and creates a RESET session. Returns generic message if user not found (no enumeration).
   async requestPasswordReset(
     email: string,
-    ipAddress?: string,
-    userAgent?: string,
+    request: FastifyRequest,
   ): Promise<{ success: boolean; message: string; accessToken?: string; expiresIn?: number; refreshToken?: string }> {
     const user = await this.userService.findByEmail(email);
 
@@ -65,8 +65,7 @@ export class PasswordResetService {
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
       user.id,
       SessionTypeValues.RESET,
-      ipAddress,
-      userAgent,
+      request,
     );
 
     this.logger.log(`Created RESET session for user: ${user.id}`);
@@ -109,8 +108,7 @@ export class PasswordResetService {
   async resetPassword(
     userId: string,
     newPassword: string,
-    ipAddress?: string,
-    userAgent?: string,
+    request: FastifyRequest,
   ): Promise<{
     success: boolean;
     message: string;
@@ -160,8 +158,7 @@ export class PasswordResetService {
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
       userId,
       targetSessionType,
-      ipAddress,
-      userAgent,
+      request,
     );
 
     this.logger.log(`Password reset completed for user ${userId}, session type: ${targetSessionType}`);

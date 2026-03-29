@@ -1,12 +1,12 @@
+import { useRevokeAllSessions, useRevokeSession, useSessions } from '@hooks/account/security';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
+import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { Separator } from '@vritti/quantum-ui/Separator';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Typography } from '@vritti/quantum-ui/Typography';
-import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { CheckCircle, LogOut, Monitor } from 'lucide-react';
-import { useRevokeAllSessions, useRevokeSession, useSessions } from '@hooks/account/security';
 
 function getRelativeTime(dateString: string) {
   const date = new Date(dateString);
@@ -159,7 +159,7 @@ export const SessionsTab: React.FC = () => {
                   className="w-full"
                 >
                   <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out All Other Sessions
+                  Sign Out All Sessions
                 </Button>
               </>
             )}

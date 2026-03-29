@@ -94,12 +94,13 @@ export class SecurityService {
     }
 
     await this.sessionService.deleteSessionById(targetSession.id);
-    this.logger.log(`Session ${sessionId} revoked for user: ${userId}`);
 
     this.eventEmitter.emit(
       AUTH_STATUS_EVENTS.SESSION_REVOKED,
-      new SessionRevokedEvent(userId),
+      new SessionRevokedEvent(userId, targetSession.id),
     );
+
+    this.logger.log(`Session ${sessionId} revoked for user: ${userId}`);
 
     return { success: true, message: 'Session revoked successfully.' };
   }

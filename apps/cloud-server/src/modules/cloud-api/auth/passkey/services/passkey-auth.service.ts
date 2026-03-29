@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
 import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
 import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
 import type { AuthenticationResponseJSON, AuthenticatorTransportFuture } from '@domain/mfa/types/webauthn.types';
@@ -74,8 +75,7 @@ export class PasskeyAuthService {
   async verifyAuthentication(
     sessionId: string,
     credential: AuthenticationResponseJSON,
-    ipAddress?: string,
-    userAgent?: string,
+    request: FastifyRequest,
   ): Promise<PasskeyAuthResponseDto> {
     // Get pending authentication
     const pending = pendingAuthentications.get(sessionId);
@@ -142,7 +142,7 @@ export class PasskeyAuthService {
     const user = await this.userService.findById(passkey.userId);
 
     // Create session
-    const session = await this.sessionService.createSession(user.id, 'CLOUD', ipAddress, userAgent);
+    const session = await this.sessionService.createSession(user.id, 'CLOUD', request);
 
     this.logger.log(`Passkey authentication successful for user: ${user.id}`);
 

@@ -3,6 +3,7 @@ import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { ConflictException, JwtAuthService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
 import { EncryptionService } from '../../../../../services';
 import { UserDto } from '../../../user/dto/entity/user.dto';
@@ -36,8 +37,7 @@ export class AuthService {
   // Creates a new user or sets password for OAuth users without one
   async signup(
     dto: SignupDto,
-    ipAddress?: string,
-    userAgent?: string,
+    request: FastifyRequest,
   ): Promise<SignupResponseDto & { refreshToken: string }> {
     const existingUser = await this.userService.findByEmail(dto.email);
 
@@ -64,8 +64,7 @@ export class AuthService {
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
       user.id,
       SessionTypeValues.ONBOARDING,
-      ipAddress,
-      userAgent,
+      request,
     );
 
     this.logger.log(`Created new user: ${user.email} (${user.id})`);
@@ -76,9 +75,8 @@ export class AuthService {
   // Validates credentials and creates session, or returns MFA challenge if MFA is enabled
   async login(
     dto: LoginDto,
-    subdomain?: string,
-    ipAddress?: string,
-    userAgent?: string,
+    subdomain: string | undefined,
+    request: FastifyRequest,
   ): Promise<LoginResponse & { refreshToken?: string }> {
     const user = await this.userService.findByEmail(dto.email);
 
@@ -114,8 +112,7 @@ export class AuthService {
       const { refreshToken } = await this.sessionService.createSession(
         user.id,
         SessionTypeValues.ONBOARDING,
-        ipAddress,
-        userAgent,
+        request,
       );
 
       return {
@@ -143,8 +140,6 @@ export class AuthService {
 
     // Check if user has MFA enabled
     const mfaChallenge = await this.mfaVerificationService.createMfaChallenge(user, {
-      ipAddress,
-      userAgent,
       subdomain,
     });
 
@@ -167,8 +162,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.sessionService.createSession(
       user.id,
       sessionType,
-      ipAddress,
-      userAgent,
+      request,
     );
 
     // Delete all onboarding sessions (user has completed onboarding)
@@ -195,7 +189,7 @@ export class AuthService {
     }
 
     try {
-      const { accessToken, expiresIn, userId, sessionType } =
+      const { accessToken, expiresIn, userId, sessionType, sessionId } =
         await this.sessionService.generateAccessToken(refreshToken);
 
       const user = await this.userService.findById(userId);
@@ -213,6 +207,7 @@ export class AuthService {
           user,
           accessToken,
           expiresIn,
+          sessionId,
         });
       }
 
@@ -223,7 +218,7 @@ export class AuthService {
 
       this.logger.log(`Session recovered for user: ${userId}`);
 
-      return new AuthStatusResponse({ isAuthenticated: true, user, accessToken, expiresIn });
+      return new AuthStatusResponse({ isAuthenticated: true, user, accessToken, expiresIn, sessionId });
     } catch {
       return new AuthStatusResponse({ isAuthenticated: false });
     }

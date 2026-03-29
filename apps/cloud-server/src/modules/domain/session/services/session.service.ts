@@ -2,7 +2,9 @@ import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import { getConfig, hashToken, JwtAuthService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
 import { and, eq, ne } from '@vritti/api-sdk/drizzle-orm';
+import type { FastifyRequest } from 'fastify';
 import { type Session, type SessionType, SessionTypeValues, sessions } from '@/db/schema';
+import { extractRequestMetadata } from '@/utils/request-metadata';
 import { SessionRepository } from '../repositories/session.repository';
 
 export function getRefreshCookieName(): string {
@@ -18,12 +20,11 @@ export class SessionService {
     private readonly jwtService: JwtAuthService,
   ) {}
 
-  // Creates a session with both access and refresh tokens for any session type
+  // Creates a session with both access and refresh tokens, extracting metadata from the request
   async createSession(
     userId: string,
     sessionType: SessionType,
-    ipAddress?: string,
-    userAgent?: string,
+    request: FastifyRequest,
   ): Promise<{
     session: Session;
     accessToken: string;
@@ -35,6 +36,8 @@ export class SessionService {
     const accessToken = this.jwtService.generateAccessToken(userId, sessionId, sessionType, refreshToken);
     const expiresAt = this.jwtService.getExpiryTime(TokenType.REFRESH);
 
+    const meta = extractRequestMetadata(request);
+
     const session = await this.sessionRepository.create({
       id: sessionId,
       userId,
@@ -42,8 +45,10 @@ export class SessionService {
       accessTokenHash: hashToken(accessToken),
       refreshTokenHash: hashToken(refreshToken),
       expiresAt,
-      ipAddress,
-      userAgent,
+      ipAddress: meta.ipAddress,
+      userAgent: meta.userAgent,
+      device: meta.device,
+      location: meta.location,
     });
 
     const expiresIn = this.jwtService.getExpiryInSeconds(TokenType.ACCESS);
@@ -87,6 +92,7 @@ export class SessionService {
     expiresIn: number;
     userId: string;
     sessionType: string;
+    sessionId: string;
   }> {
     const session = await this.validateRefreshToken(refreshToken);
     const { accessToken, expiresIn } = this.generateAccessTokenForSession(session, refreshToken as string);
@@ -95,7 +101,7 @@ export class SessionService {
 
     this.logger.log(`Generated access token for user: ${session.userId}`);
 
-    return { accessToken, expiresIn, userId: session.userId, sessionType: session.type };
+    return { accessToken, expiresIn, userId: session.userId, sessionType: session.type, sessionId: session.id };
   }
 
   // Validates refresh token presence and returns the active session

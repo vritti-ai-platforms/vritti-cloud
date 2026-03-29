@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
 import {
   type OAuthProviderType,
   OAuthProviderTypeValues,
@@ -75,6 +76,7 @@ export class OAuthService {
     providerStr: string,
     code: string | undefined,
     state: string,
+    request: FastifyRequest,
     error?: string,
     errorDescription?: string,
   ): Promise<{ redirectUrl: string; refreshToken: string }> {
@@ -128,16 +130,16 @@ export class OAuthService {
 
       // Case 1: User exists AND onboarding complete → link provider
       if (existingUser && existingUser.onboardingStep === OnboardingStepValues.COMPLETE) {
-        return await this.handleExistingCompleteUser(existingUser, profile, tokens);
+        return await this.handleExistingCompleteUser(existingUser, profile, tokens, request);
       }
 
       // Case 2: User exists BUT onboarding incomplete → resume onboarding
       if (existingUser) {
-        return await this.handleExistingIncompleteUser(existingUser, profile, tokens);
+        return await this.handleExistingIncompleteUser(existingUser, profile, tokens, request);
       }
 
       // Case 3: No user exists → create new user
-      return await this.handleNewUser(profile, tokens);
+      return await this.handleNewUser(profile, tokens, request);
     } catch (error) {
       this.logger.error('OAuth callback error', error);
       const baseUrl = this.configService.getOrThrow<string>('FRONTEND_BASE_URL');
@@ -174,10 +176,11 @@ export class OAuthService {
     existingUser: User,
     profile: OAuthUserProfile,
     tokens: { accessToken: string; refreshToken?: string; expiresIn?: number },
+    request: FastifyRequest,
   ): Promise<{ redirectUrl: string; refreshToken: string }> {
     this.logger.log(`Resuming onboarding for incomplete OAuth user: ${profile.email} (${existingUser.id})`);
     await this.sessionService.deleteOnboardingSessions(existingUser.id);
-    return this.linkProviderAndCreateSession(existingUser, profile, tokens, SessionTypeValues.ONBOARDING, true);
+    return this.linkProviderAndCreateSession(existingUser, profile, tokens, SessionTypeValues.ONBOARDING, request, true);
   }
 
   // Handles existing user with completed onboarding
@@ -185,15 +188,17 @@ export class OAuthService {
     existingUser: User,
     profile: OAuthUserProfile,
     tokens: { accessToken: string; refreshToken?: string; expiresIn?: number },
+    request: FastifyRequest,
   ): Promise<{ redirectUrl: string; refreshToken: string }> {
     this.logger.log(`Found existing user for email: ${profile.email}, linking OAuth provider`);
-    return this.linkProviderAndCreateSession(existingUser, profile, tokens, SessionTypeValues.CLOUD);
+    return this.linkProviderAndCreateSession(existingUser, profile, tokens, SessionTypeValues.CLOUD, request);
   }
 
   // Handles the case when no user exists with the email
   private async handleNewUser(
     profile: OAuthUserProfile,
     tokens: { accessToken: string; refreshToken?: string; expiresIn?: number },
+    request: FastifyRequest,
   ): Promise<{ redirectUrl: string; refreshToken: string }> {
     this.logger.log(`Creating new user from OAuth profile: ${profile.email}`);
     const user = await this.userRepository.createFromOAuth({
@@ -206,7 +211,7 @@ export class OAuthService {
       signupMethod: SignupMethodValues.OAUTH,
     });
 
-    return this.linkProviderAndCreateSession(user, profile, tokens, SessionTypeValues.ONBOARDING);
+    return this.linkProviderAndCreateSession(user, profile, tokens, SessionTypeValues.ONBOARDING, request);
   }
 
   // Links OAuth provider, creates session, and builds response
@@ -215,6 +220,7 @@ export class OAuthService {
     profile: OAuthUserProfile,
     tokens: { accessToken: string; refreshToken?: string; expiresIn?: number },
     sessionType: SessionType,
+    request: FastifyRequest,
     resume = false,
   ): Promise<{ redirectUrl: string; refreshToken: string }> {
     // Link OAuth provider to user
@@ -229,7 +235,7 @@ export class OAuthService {
     this.logger.log(`Linked OAuth provider: ${profile.provider} to user: ${user.id}`);
 
     // Create session
-    const session = await this.sessionService.createSession(user.id, sessionType);
+    const session = await this.sessionService.createSession(user.id, sessionType, request);
 
     // Build frontend redirect URL based on session type
     const baseUrl = this.configService.getOrThrow<string>('FRONTEND_BASE_URL');

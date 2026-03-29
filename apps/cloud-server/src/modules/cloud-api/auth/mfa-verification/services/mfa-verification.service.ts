@@ -1,5 +1,6 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
 import {
   type MfaAuth,
   MfaMethodValues,
@@ -38,7 +39,7 @@ export class MfaVerificationService {
   // Creates an MFA challenge if the user has MFA enabled, returning null otherwise
   async createMfaChallenge(
     user: User,
-    options: { ipAddress?: string; userAgent?: string; subdomain?: string } = {},
+    options: { subdomain?: string } = {},
   ): Promise<MfaChallenge | null> {
     // Get user's MFA settings
     const mfaRecord = await this.mfaRepo.findActiveByUserId(user.id);
@@ -75,8 +76,6 @@ export class MfaVerificationService {
 
     const challenge = this.mfaChallengeStore.create(user.id, availableMethods, {
       maskedPhone,
-      ipAddress: options.ipAddress,
-      userAgent: options.userAgent,
       subdomain: options.subdomain,
     });
 
@@ -86,7 +85,7 @@ export class MfaVerificationService {
   }
 
   // Verifies a TOTP code or backup code against the user's MFA configuration
-  async verifyTotp(sessionId: string, code: string): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
+  async verifyTotp(sessionId: string, code: string, request: FastifyRequest): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
     if (!challenge.availableMethods.includes('totp')) {
@@ -125,7 +124,7 @@ export class MfaVerificationService {
     await this.mfaRepo.updateLastUsed(mfaRecord.id);
 
     // Complete MFA verification
-    return this.completeMfaVerification(challenge);
+    return this.completeMfaVerification(challenge, request);
   }
 
   // Sends an SMS OTP to the user's verified phone number for MFA verification
@@ -172,7 +171,7 @@ export class MfaVerificationService {
   }
 
   // Verifies the SMS OTP code against the stored hash in the MFA challenge
-  async verifySmsOtp(sessionId: string, code: string): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
+  async verifySmsOtp(sessionId: string, code: string, request: FastifyRequest): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
     if (!challenge.availableMethods.includes('sms')) {
@@ -198,7 +197,7 @@ export class MfaVerificationService {
     await this.verificationService.verifyVerification(code, VerificationChannelValues.SMS_OUT, challenge.userId);
 
     // Complete MFA verification
-    return this.completeMfaVerification(challenge);
+    return this.completeMfaVerification(challenge, request);
   }
 
   // Generates WebAuthn authentication options for passkey-based MFA
@@ -243,6 +242,7 @@ export class MfaVerificationService {
   async verifyPasskeyMfa(
     sessionId: string,
     credential: AuthenticationResponseJSON,
+    request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
@@ -308,7 +308,7 @@ export class MfaVerificationService {
     }
 
     // Complete MFA verification
-    return this.completeMfaVerification(challenge);
+    return this.completeMfaVerification(challenge, request);
   }
 
   private getMfaChallengeOrThrow(sessionId: string): MfaChallenge {
@@ -348,6 +348,7 @@ export class MfaVerificationService {
 
   private async completeMfaVerification(
     challenge: MfaChallenge,
+    request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     // Get user
     const user = await this.userService.findById(challenge.userId);
@@ -360,8 +361,7 @@ export class MfaVerificationService {
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
       challenge.userId,
       sessionType,
-      challenge.ipAddress,
-      challenge.userAgent,
+      request,
     );
 
     // Clean up challenge

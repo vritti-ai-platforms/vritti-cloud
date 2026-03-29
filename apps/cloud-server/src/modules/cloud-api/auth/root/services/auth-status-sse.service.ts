@@ -3,6 +3,7 @@ import { Subject } from 'rxjs';
 
 interface UserConnection {
   subject: Subject<MessageEvent>;
+  sessionId: string;
   createdAt: Date;
 }
 
@@ -27,14 +28,14 @@ export class AuthStatusSseService implements OnModuleDestroy {
     this.connections.clear();
   }
 
-  // Adds a new SSE connection for the user and returns the observable stream
-  addConnection(userId: string): Subject<MessageEvent> {
+  // Adds a new SSE connection for the user, tagged with sessionId
+  addConnection(userId: string, sessionId: string): Subject<MessageEvent> {
     const subject = new Subject<MessageEvent>();
     const existing = this.connections.get(userId) || [];
-    existing.push({ subject, createdAt: new Date() });
+    existing.push({ subject, sessionId, createdAt: new Date() });
     this.connections.set(userId, existing);
 
-    this.logger.log(`Added SSE connection for user ${userId} (total: ${existing.length})`);
+    this.logger.log(`Added SSE connection for user ${userId}, session ${sessionId} (total: ${existing.length})`);
     return subject;
   }
 
@@ -56,6 +57,27 @@ export class AuthStatusSseService implements OnModuleDestroy {
     }
 
     this.logger.log(`Sent auth-status event to ${sentCount} connection(s) for user ${userId}`);
+    return sentCount > 0;
+  }
+
+  // Sends an event only to connections matching a specific sessionId
+  sendToSession(userId: string, sessionId: string, event: MessageEvent): boolean {
+    const conns = this.connections.get(userId);
+
+    if (!conns || conns.length === 0) {
+      this.logger.debug(`No active SSE connections for user ${userId}`);
+      return false;
+    }
+
+    let sentCount = 0;
+    for (const conn of conns) {
+      if (conn.sessionId === sessionId && !conn.subject.closed) {
+        conn.subject.next(event);
+        sentCount++;
+      }
+    }
+
+    this.logger.log(`Sent auth-status event to ${sentCount} session connection(s) for user ${userId}, session ${sessionId}`);
     return sentCount > 0;
   }
 
