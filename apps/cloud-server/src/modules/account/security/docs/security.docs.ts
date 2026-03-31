@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
+import { LinkedAccountsResponseDto } from '../dto/response/linked-account-response.dto';
 import { ChangePasswordDto } from '../dto/request/change-password.dto';
 import { VerifyPasskeySetupDto } from '../dto/request/verify-passkey-setup.dto';
 import { VerifyTotpSetupDto } from '../dto/request/verify-totp-setup.dto';
@@ -178,5 +179,30 @@ export function ApiRegenerateBackupCodes() {
     ApiResponse({ status: 200, description: 'Backup codes regenerated.', type: BackupCodesResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'No active MFA found.' }),
+  );
+}
+
+export function ApiGetLinkedAccounts() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Get linked OAuth accounts',
+      description: 'Returns all linked OAuth providers and whether the user can disconnect any.',
+    }),
+    ApiResponse({ status: 200, description: 'Linked accounts retrieved.', type: LinkedAccountsResponseDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
+export function ApiDisconnectProvider() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Disconnect OAuth provider',
+      description: 'Removes a linked OAuth provider. Requires the user to have a password or another linked provider.',
+    }),
+    ApiParam({ name: 'provider', description: 'OAuth provider to disconnect (e.g., google, microsoft)' }),
+    ApiResponse({ status: 200, description: 'Provider disconnected.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Cannot disconnect last auth method.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Provider not linked.' }),
   );
 }

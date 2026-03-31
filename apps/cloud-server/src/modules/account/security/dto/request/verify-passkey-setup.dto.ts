@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsObject } from 'class-validator';
+import type { RegistrationResponseJSON } from '@domain/mfa/types/webauthn.types';
 
 export class VerifyPasskeySetupDto {
   @ApiProperty({
@@ -16,5 +17,5 @@ export class VerifyPasskeySetupDto {
   })
   @IsObject()
   @IsNotEmpty()
-  credential: Record<string, unknown>;
+  credential: RegistrationResponseJSON;
 }

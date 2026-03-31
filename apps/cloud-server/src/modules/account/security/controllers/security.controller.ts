@@ -7,6 +7,8 @@ import {
   ApiChangePassword,
   ApiDisableAllMfa,
   ApiDisableTotp,
+  ApiDisconnectProvider,
+  ApiGetLinkedAccounts,
   ApiGetMfaStatus,
   ApiGetPasskeySetupOptions,
   ApiGetSessions,
@@ -23,6 +25,7 @@ import { ChangePasswordDto } from '../dto/request/change-password.dto';
 import { VerifyPasskeySetupDto } from '../dto/request/verify-passkey-setup.dto';
 import { VerifyTotpSetupDto } from '../dto/request/verify-totp-setup.dto';
 import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
+import { LinkedAccountsResponseDto } from '../dto/response/linked-account-response.dto';
 import { MfaStatusResponseDto, PasskeyInfoDto } from '../dto/response/mfa-status-response.dto';
 import { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
 import { SecurityService } from '../services/security.service';
@@ -134,7 +137,7 @@ export class SecurityController {
     @Body() dto: VerifyPasskeySetupDto,
   ): Promise<BackupCodesResponseDto> {
     this.logger.log(`POST /account/security/mfa/passkey/verify-setup - userId: ${userId}`);
-    return this.securityService.verifyPasskeySetup(userId, dto.credential as any);
+    return this.securityService.verifyPasskeySetup(userId, dto.credential);
   }
 
   // Lists all registered passkeys for the user
@@ -160,5 +163,21 @@ export class SecurityController {
   async regenerateBackupCodes(@UserId() userId: string): Promise<BackupCodesResponseDto> {
     this.logger.log(`POST /account/security/mfa/backup-codes/regenerate - userId: ${userId}`);
     return this.securityService.regenerateBackupCodes(userId);
+  }
+
+  // Returns all linked OAuth providers for the user
+  @Get('linked-accounts')
+  @ApiGetLinkedAccounts()
+  async getLinkedAccounts(@UserId() userId: string): Promise<LinkedAccountsResponseDto> {
+    this.logger.log(`GET /account/security/linked-accounts - userId: ${userId}`);
+    return this.securityService.getLinkedAccounts(userId);
+  }
+
+  // Disconnects a specific OAuth provider
+  @Delete('linked-accounts/:provider')
+  @ApiDisconnectProvider()
+  async disconnectProvider(@UserId() userId: string, @Param('provider') provider: string): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /account/security/linked-accounts/${provider} - userId: ${userId}`);
+    return this.securityService.disconnectProvider(userId, provider);
   }
 }

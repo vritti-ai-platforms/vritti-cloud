@@ -2702,6 +2702,84 @@
         ]
       }
     },
+    "/account/security/linked-accounts": {
+      "get": {
+        "description": "Returns all linked OAuth providers and whether the user can disconnect any.",
+        "operationId": "SecurityController_getLinkedAccounts",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Linked accounts retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LinkedAccountsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get linked OAuth accounts",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/linked-accounts/{provider}": {
+      "delete": {
+        "description": "Removes a linked OAuth provider. Requires the user to have a password or another linked provider.",
+        "operationId": "SecurityController_disconnectProvider",
+        "parameters": [
+          {
+            "name": "provider",
+            "required": true,
+            "in": "path",
+            "description": "OAuth provider to disconnect (e.g., google, microsoft)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Provider disconnected.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Cannot disconnect last auth method."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Provider not linked."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disconnect OAuth provider",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
     "/cloud-api/media/upload": {
       "post": {
         "operationId": "MediaController_uploadSingle",
@@ -11845,6 +11923,52 @@
           "id",
           "credentialId",
           "createdAt"
+        ]
+      },
+      "LinkedAccountDto": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "description": "OAuth provider type",
+            "example": "GOOGLE",
+            "enum": [
+              "GOOGLE",
+              "MICROSOFT",
+              "APPLE",
+              "FACEBOOK",
+              "X"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the provider was linked",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "provider",
+          "createdAt"
+        ]
+      },
+      "LinkedAccountsResponseDto": {
+        "type": "object",
+        "properties": {
+          "accounts": {
+            "description": "Linked OAuth providers",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkedAccountDto"
+            }
+          },
+          "canDisconnect": {
+            "type": "boolean",
+            "description": "Whether the user can disconnect providers (has password or multiple providers)"
+          }
+        },
+        "required": [
+          "accounts",
+          "canDisconnect"
         ]
       },
       "MediaDto": {

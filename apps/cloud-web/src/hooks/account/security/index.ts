@@ -12,3 +12,5 @@ export { useVerifyPasskeySetup } from './useVerifyPasskeySetup';
 export { PASSKEYS_QUERY_KEY, useListPasskeys } from './useListPasskeys';
 export { useRemovePasskey } from './useRemovePasskey';
 export { useRegenerateBackupCodes } from './useRegenerateBackupCodes';
+export { LINKED_ACCOUNTS_QUERY_KEY, useLinkedAccounts } from './useLinkedAccounts';
+export { useDisconnectProvider } from './useDisconnectProvider';

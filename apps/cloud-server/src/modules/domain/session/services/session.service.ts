@@ -4,7 +4,8 @@ import { getConfig, hashToken, JwtAuthService, TokenType, UnauthorizedException 
 import { and, eq, ne } from '@vritti/api-sdk/drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import { type Session, type SessionType, SessionTypeValues, sessions } from '@/db/schema';
-import { extractRequestMetadata } from '@/utils/request-metadata';
+import { GeoipService } from '@/services';
+import { extractDeviceInfo, extractIpAddress } from '@/utils/request-metadata';
 import { SessionRepository } from '../repositories/session.repository';
 
 export function getRefreshCookieName(): string {
@@ -18,6 +19,7 @@ export class SessionService {
   constructor(
     private readonly sessionRepository: SessionRepository,
     private readonly jwtService: JwtAuthService,
+    private readonly geoipService: GeoipService,
   ) {}
 
   // Creates a session with both access and refresh tokens, extracting metadata from the request
@@ -36,7 +38,9 @@ export class SessionService {
     const accessToken = this.jwtService.generateAccessToken(userId, sessionId, sessionType, refreshToken);
     const expiresAt = this.jwtService.getExpiryTime(TokenType.REFRESH);
 
-    const meta = extractRequestMetadata(request);
+    const { device, userAgent } = extractDeviceInfo(request);
+    const ipAddress = extractIpAddress(request);
+    const location = this.geoipService.getLocationString(ipAddress);
 
     const session = await this.sessionRepository.create({
       id: sessionId,
@@ -45,10 +49,10 @@ export class SessionService {
       accessTokenHash: hashToken(accessToken),
       refreshTokenHash: hashToken(refreshToken),
       expiresAt,
-      ipAddress: meta.ipAddress,
-      userAgent: meta.userAgent,
-      device: meta.device,
-      location: meta.location,
+      ipAddress,
+      userAgent,
+      device,
+      location,
     });
 
     const expiresIn = this.jwtService.getExpiryInSeconds(TokenType.ACCESS);

@@ -147,3 +147,28 @@ export function regenerateBackupCodes(): Promise<BackupCodesResponse> {
     })
     .then((r) => r.data);
 }
+
+// Linked Accounts
+
+export interface LinkedAccountData {
+  provider: string;
+  createdAt: string;
+}
+
+export interface LinkedAccountsResponse {
+  accounts: LinkedAccountData[];
+  canDisconnect: boolean;
+}
+
+export function getLinkedAccounts(): Promise<LinkedAccountsResponse> {
+  return axios.get<LinkedAccountsResponse>('account/security/linked-accounts', { showSuccessToast: false }).then((r) => r.data);
+}
+
+export function disconnectProvider(provider: string): Promise<SuccessResponse> {
+  return axios
+    .delete<SuccessResponse>(`account/security/linked-accounts/${provider}`, {
+      loadingMessage: 'Disconnecting...',
+      successMessage: 'Provider disconnected',
+    })
+    .then((r) => r.data);
+}

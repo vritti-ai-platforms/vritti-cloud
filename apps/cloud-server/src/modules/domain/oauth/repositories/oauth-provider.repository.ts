@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { eq } from '@vritti/api-sdk/drizzle-orm';
+import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { type OAuthProvider, oauthProviders } from '@/db/schema';
 import type { OAuthUserProfile } from '@/modules/cloud-api/auth/oauth/interfaces/oauth-user-profile.interface';
 
@@ -28,6 +28,12 @@ export class OAuthProviderRepository extends PrimaryBaseRepository<typeof oauthP
   // Removes all OAuth provider links for a user
   async deleteByUserId(userId: string): Promise<void> {
     await this.deleteMany(eq(oauthProviders.userId, userId));
+  }
+
+  // Removes a specific OAuth provider link for a user
+  async deleteByUserIdAndProvider(userId: string, provider: OAuthProvider['provider']): Promise<void> {
+    const condition = and(eq(oauthProviders.userId, userId), eq(oauthProviders.provider, provider));
+    if (condition) await this.deleteMany(condition);
   }
 
   // Creates or updates an OAuth provider link with fresh tokens and profile data

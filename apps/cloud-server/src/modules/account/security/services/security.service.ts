@@ -1,4 +1,5 @@
 import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
 import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
 import { TotpService } from '@domain/mfa/services/totp.service';
 import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
@@ -17,7 +18,9 @@ import {
 import { EncryptionService } from '@/services';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
 import { AUTH_STATUS_EVENTS, SessionRevokedEvent } from '../../../cloud-api/auth/root/events/auth-status.events';
+import type { OAuthProviderType } from '@/db/schema';
 import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
+import { LinkedAccountDto, LinkedAccountsResponseDto } from '../dto/response/linked-account-response.dto';
 import { MfaStatusResponseDto, PasskeyInfoDto } from '../dto/response/mfa-status-response.dto';
 import { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
 
@@ -34,6 +37,7 @@ export class SecurityService {
     private readonly webAuthnService: WebAuthnService,
     private readonly backupCodeService: BackupCodeService,
     private readonly mfaRepo: MfaRepository,
+    private readonly oauthProviderRepo: OAuthProviderRepository,
   ) {}
 
   // Verifies current password and updates to a new one
@@ -442,5 +446,52 @@ export class SecurityService {
       warning:
         'Save these backup codes in a secure location. Each code can only be used once and they will not be shown again.',
     });
+  }
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Linked Accounts
+  // ──────────────────────────────────────────────────────────────────────────
+
+  // Returns all linked OAuth providers and whether the user can disconnect any
+  async getLinkedAccounts(userId: string): Promise<LinkedAccountsResponseDto> {
+    const providers = await this.oauthProviderRepo.findByUserId(userId);
+    const userDto = await this.userService.findById(userId);
+    const user = await this.userService.findByEmail(userDto.email);
+
+    const accounts = providers.map(
+      (p) => new LinkedAccountDto({ provider: p.provider, createdAt: p.createdAt }),
+    );
+
+    // Can disconnect if user has a password OR has more than one linked provider
+    const canDisconnect = !!user?.passwordHash || providers.length > 1;
+
+    return new LinkedAccountsResponseDto({ accounts, canDisconnect });
+  }
+
+  // Disconnects an OAuth provider from the user's account
+  async disconnectProvider(userId: string, provider: string): Promise<SuccessResponseDto> {
+    const providers = await this.oauthProviderRepo.findByUserId(userId);
+    const userDto = await this.userService.findById(userId);
+    const user = await this.userService.findByEmail(userDto.email);
+
+    const target = providers.find((p) => p.provider === provider.toUpperCase());
+    if (!target) {
+      throw new NotFoundException('This provider is not linked to your account.');
+    }
+
+    // Guard: must have password or another provider to avoid lockout
+    const hasPassword = !!user?.passwordHash;
+    if (!hasPassword && providers.length <= 1) {
+      throw new BadRequestException({
+        label: 'Cannot Disconnect',
+        detail: 'You must have a password or another linked provider before disconnecting this one.',
+      });
+    }
+
+    await this.oauthProviderRepo.deleteByUserIdAndProvider(userId, target.provider as OAuthProviderType);
+
+    this.logger.log(`Disconnected ${provider} for user: ${userId}`);
+
+    return { success: true, message: `${provider} has been disconnected from your account.` };
   }
 }
