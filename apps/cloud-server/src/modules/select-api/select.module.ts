@@ -18,7 +18,7 @@ import { MicrofrontendSelectController } from './controllers/microfrontend-selec
 import { OrganizationSelectController } from './controllers/organization-select.controller';
 import { PlanSelectController } from './controllers/plan-select.controller';
 import { RegionSelectController } from './controllers/region-select.controller';
-import { RoleSelectController } from './controllers/role-select.controller';
+import { RoleTemplateSelectController } from './controllers/role-template-select.controller';
 
 @Module({
   imports: [
@@ -41,7 +41,7 @@ import { RoleSelectController } from './controllers/role-select.controller';
     AppSelectController,
     AppCodeSelectController,
     FeatureSelectController,
-    RoleSelectController,
+    RoleTemplateSelectController,
     MicrofrontendSelectController,
     OrganizationSelectController,
   ],

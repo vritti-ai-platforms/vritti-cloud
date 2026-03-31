@@ -10,9 +10,9 @@ import {
   featurePermissions,
   features,
   microfrontends,
-  roleApps,
-  roleFeaturePermissions,
-  roles,
+  roleTemplateApps,
+  roleTemplateFeaturePermissions,
+  roleTemplates,
 } from '@/db/schema';
 
 @Injectable()
@@ -47,9 +47,9 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       this.db.select().from(featureMicrofrontends).where(eq(featureMicrofrontends.versionId, versionId)),
       this.db.select().from(apps).where(eq(apps.versionId, versionId)),
       this.db.select().from(appFeatures).where(eq(appFeatures.versionId, versionId)),
-      this.db.select().from(roles).where(eq(roles.versionId, versionId)),
-      this.db.select().from(roleFeaturePermissions).where(eq(roleFeaturePermissions.versionId, versionId)),
-      this.db.select().from(roleApps).where(eq(roleApps.versionId, versionId)),
+      this.db.select().from(roleTemplates).where(eq(roleTemplates.versionId, versionId)),
+      this.db.select().from(roleTemplateFeaturePermissions).where(eq(roleTemplateFeaturePermissions.versionId, versionId)),
+      this.db.select().from(roleTemplateApps).where(eq(roleTemplateApps.versionId, versionId)),
     ]);
 
     // Index microfrontends by ID for junction lookup
@@ -114,28 +114,28 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
         .filter(Boolean),
     }));
 
-    // Index role-app links by roleId → app codes
+    // Index role-template-app links by roleTemplateId → app codes
     const appById = new Map(appRows.map((a) => [a.id, a]));
-    const roleAppCodesByRoleId = new Map<string, string[]>();
+    const roleAppCodesByRoleTemplateId = new Map<string, string[]>();
     for (const ra of roleAppRows) {
       const app = appById.get(ra.appId);
       if (app) {
-        const list = roleAppCodesByRoleId.get(ra.roleId) ?? [];
+        const list = roleAppCodesByRoleTemplateId.get(ra.roleTemplateId) ?? [];
         list.push(app.code);
-        roleAppCodesByRoleId.set(ra.roleId, list);
+        roleAppCodesByRoleTemplateId.set(ra.roleTemplateId, list);
       }
     }
 
-    // Build roleTemplates snapshot — group role_feature_permissions by role, then by feature code
-    const rolePermsByRoleId = new Map<string, Array<{ featureId: string; type: string }>>();
+    // Build roleTemplates snapshot — group role_template_feature_permissions by role template, then by feature code
+    const rolePermsByRoleTemplateId = new Map<string, Array<{ featureId: string; type: string }>>();
     for (const rp of rolePermRows) {
-      const list = rolePermsByRoleId.get(rp.roleId) ?? [];
+      const list = rolePermsByRoleTemplateId.get(rp.roleTemplateId) ?? [];
       list.push({ featureId: rp.featureId, type: rp.type });
-      rolePermsByRoleId.set(rp.roleId, list);
+      rolePermsByRoleTemplateId.set(rp.roleTemplateId, list);
     }
 
     const snapshotRoleTemplates = roleRows.map((r) => {
-      const perms = rolePermsByRoleId.get(r.id) ?? [];
+      const perms = rolePermsByRoleTemplateId.get(r.id) ?? [];
       const featurePerms: Record<string, string[]> = {};
       for (const p of perms) {
         const code = featureById.get(p.featureId)?.code;
@@ -147,7 +147,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       return {
         name: r.name,
         scope: r.scope,
-        apps: roleAppCodesByRoleId.get(r.id) ?? [],
+        apps: roleAppCodesByRoleTemplateId.get(r.id) ?? [],
         features: featurePerms,
       };
     });

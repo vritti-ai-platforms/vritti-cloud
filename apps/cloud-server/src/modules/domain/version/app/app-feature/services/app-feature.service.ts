@@ -83,7 +83,7 @@ export class AppFeatureService {
     return { success: true, message: 'Features assigned successfully.' };
   }
 
-  // Removes a feature from an app; rejects if referenced by any role_feature_permissions
+  // Removes a feature from an app; rejects if referenced by any role template feature permissions
   async removeFeature(appId: string, featureId: string): Promise<SuccessResponseDto> {
     await this.ensureAppExists(appId);
     const link = await this.appFeatureRepository.findByAppAndFeature(appId, featureId);

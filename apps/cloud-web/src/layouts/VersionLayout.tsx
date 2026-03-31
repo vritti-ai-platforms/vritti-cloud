@@ -16,7 +16,7 @@ function useVersionNavGroups(slug: string): SidebarNavGroup[] {
           { title: 'Microfrontends', icon: Boxes, path: `${base}/microfrontends` },
           { title: 'Features', icon: Blocks, path: `${base}/features` },
           { title: 'Apps', icon: AppWindow, path: `${base}/apps` },
-          { title: 'Role Templates', icon: Shield, path: `${base}/roles` },
+          { title: 'Role Templates', icon: Shield, path: `${base}/role-templates` },
         ],
       },
     ];

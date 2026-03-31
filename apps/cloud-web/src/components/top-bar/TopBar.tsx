@@ -7,7 +7,7 @@ import { AppSwitcher } from './app-switcher';
 import { BUSwitcher } from './bu-switcher/BUSwitcher';
 import { CompanySwitcher } from './company-switcher';
 import { FeatureSwitcher } from './feature-switcher';
-import { RoleSwitcher } from './role-switcher';
+import { RoleTemplateSwitcher } from './role-template-switcher';
 import { VersionSwitcher } from './version-switcher';
 import { UserMenu } from './UserMenu';
 
@@ -21,8 +21,8 @@ const BU_SLUG_PREFIX = 'bu-';
 const APP_SLUG_PREFIX = 'app-';
 // Feature slugs use the `feat-` prefix (e.g., feat-products~uuid)
 const FEATURE_SLUG_PREFIX = 'feat-';
-// Role slugs use the `role-` prefix (e.g., role-admin~uuid)
-const ROLE_SLUG_PREFIX = 'role-';
+// Role template slugs use the `rt-` prefix (e.g., rt-admin~uuid) — `role-` collides with `role-templates` route
+const ROLE_SLUG_PREFIX = 'rt-';
 
 export const TopBar = () => {
   const { pathname } = useLocation();
@@ -107,11 +107,11 @@ export const TopBar = () => {
                   );
                 }
 
-                // Role switcher — under /versions/:versionSlug/roles/:roleSlug
+                // Role template switcher — under /versions/:versionSlug/role-templates/:roleTemplateSlug
                 if (segment.raw.startsWith(ROLE_SLUG_PREFIX)) {
                   const versionSlug = segment.path.split('/')[2] ?? '';
                   return (
-                    <RoleSwitcher
+                    <RoleTemplateSwitcher
                       key={segment.raw}
                       versionSlug={versionSlug}
                       currentRoleId={segment.id ?? segment.raw}

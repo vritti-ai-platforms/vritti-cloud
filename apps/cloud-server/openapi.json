@@ -6491,27 +6491,27 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/roles": {
+    "/admin-api/versions/{versionId}/role-templates": {
       "post": {
-        "operationId": "RoleController_create",
+        "operationId": "RoleTemplateController_create",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateRoleDto"
+                "$ref": "#/components/schemas/CreateRoleTemplateDto"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Role created successfully.",
+            "description": "Role template created successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RoleDto"
+                  "$ref": "#/components/schemas/RoleTemplateDto"
                 }
               }
             }
@@ -6530,21 +6530,21 @@
         ],
         "summary": "Create a new role template",
         "tags": [
-          "Admin - Roles"
+          "Admin - Role Templates"
         ]
       }
     },
-    "/admin-api/versions/{versionId}/roles/table": {
+    "/admin-api/versions/{versionId}/role-templates/table": {
       "get": {
-        "operationId": "RoleController_findForTable",
+        "operationId": "RoleTemplateController_findForTable",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Roles retrieved successfully.",
+            "description": "Role templates retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RoleTableResponseDto"
+                  "$ref": "#/components/schemas/RoleTemplateTableResponseDto"
                 }
               }
             }
@@ -6558,21 +6558,21 @@
             "bearer": []
           }
         ],
-        "summary": "List roles for data table (server-stored state)",
+        "summary": "List role templates for data table (server-stored state)",
         "tags": [
-          "Admin - Roles"
+          "Admin - Role Templates"
         ]
       }
     },
-    "/admin-api/versions/{versionId}/roles/{id}": {
+    "/admin-api/versions/{versionId}/role-templates/{id}": {
       "get": {
-        "operationId": "RoleController_findById",
+        "operationId": "RoleTemplateController_findById",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Role UUID",
+            "description": "Role template UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -6581,11 +6581,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Role retrieved successfully.",
+            "description": "Role template retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/RoleDto"
+                  "$ref": "#/components/schemas/RoleTemplateDto"
                 }
               }
             }
@@ -6594,7 +6594,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Role not found."
+            "description": "Role template not found."
           }
         },
         "security": [
@@ -6602,19 +6602,19 @@
             "bearer": []
           }
         ],
-        "summary": "Get a role by ID with permissions grouped by app",
+        "summary": "Get a role template by ID with permissions grouped by app",
         "tags": [
-          "Admin - Roles"
+          "Admin - Role Templates"
         ]
       },
       "patch": {
-        "operationId": "RoleController_update",
+        "operationId": "RoleTemplateController_update",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Role UUID",
+            "description": "Role template UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -6626,14 +6626,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateRoleDto"
+                "$ref": "#/components/schemas/UpdateRoleTemplateDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Role updated successfully.",
+            "description": "Role template updated successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6649,7 +6649,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Role not found."
+            "description": "Role template not found."
           }
         },
         "security": [
@@ -6659,17 +6659,17 @@
         ],
         "summary": "Update a role template",
         "tags": [
-          "Admin - Roles"
+          "Admin - Role Templates"
         ]
       },
       "delete": {
-        "operationId": "RoleController_delete",
+        "operationId": "RoleTemplateController_delete",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Role UUID",
+            "description": "Role template UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -6678,7 +6678,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Role deleted successfully.",
+            "description": "Role template deleted successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6691,10 +6691,10 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Role not found."
+            "description": "Role template not found."
           },
           "409": {
-            "description": "Cannot delete system role."
+            "description": "Cannot delete system role template."
           }
         },
         "security": [
@@ -6704,19 +6704,19 @@
         ],
         "summary": "Delete a role template",
         "tags": [
-          "Admin - Roles"
+          "Admin - Role Templates"
         ]
       }
     },
-    "/admin-api/versions/{versionId}/roles/{roleId}/permissions": {
+    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/permissions": {
       "get": {
-        "operationId": "RolePermissionController_findByRole",
+        "operationId": "RoleTemplatePermissionController_findByRoleTemplate",
         "parameters": [
           {
-            "name": "roleId",
+            "name": "roleTemplateId",
             "required": true,
             "in": "path",
-            "description": "Role UUID",
+            "description": "Role template UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -6731,7 +6731,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Role not found."
+            "description": "Role template not found."
           }
         },
         "security": [
@@ -6739,19 +6739,19 @@
             "bearer": []
           }
         ],
-        "summary": "List permissions for a role grouped by app",
+        "summary": "List permissions for a role template grouped by app",
         "tags": [
-          "Admin - Roles"
+          "Admin - Role Templates"
         ]
       },
       "put": {
-        "operationId": "RolePermissionController_setPermissions",
+        "operationId": "RoleTemplatePermissionController_setPermissions",
         "parameters": [
           {
-            "name": "roleId",
+            "name": "roleTemplateId",
             "required": true,
             "in": "path",
-            "description": "Role UUID",
+            "description": "Role template UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -6763,7 +6763,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/AssignRolePermissionsDto"
+                "$ref": "#/components/schemas/AssignRoleTemplatePermissionsDto"
               }
             }
           }
@@ -6786,7 +6786,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Role not found."
+            "description": "Role template not found."
           }
         },
         "security": [
@@ -6794,9 +6794,9 @@
             "bearer": []
           }
         ],
-        "summary": "Set permissions for a role (full replace)",
+        "summary": "Set permissions for a role template (full replace)",
         "tags": [
-          "Admin - Roles"
+          "Admin - Role Templates"
         ]
       }
     },
@@ -9762,9 +9762,9 @@
         ]
       }
     },
-    "/select-api/roles": {
+    "/select-api/role-templates": {
       "get": {
-        "operationId": "RoleSelectController_findForSelect",
+        "operationId": "RoleTemplateSelectController_findForSelect",
         "parameters": [
           {
             "name": "search",
@@ -13371,22 +13371,22 @@
           "monthlyPrice"
         ]
       },
-      "CreateRoleDto": {
+      "CreateRoleTemplateDto": {
         "type": "object",
         "properties": {
           "versionId": {
             "type": "string",
-            "description": "App version UUID this role belongs to",
+            "description": "App version UUID this role template belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "name": {
             "type": "string",
-            "description": "Display name of the role",
+            "description": "Display name of the role template",
             "example": "Chef"
           },
           "description": {
             "type": "string",
-            "description": "Optional description of the role",
+            "description": "Optional description of the role template",
             "example": "Kitchen staff responsible for food preparation"
           },
           "scope": {
@@ -13400,7 +13400,7 @@
           },
           "industryId": {
             "type": "string",
-            "description": "Industry this role belongs to",
+            "description": "Industry this role template belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "appIds": {
@@ -13412,7 +13412,7 @@
           },
           "isSystem": {
             "type": "boolean",
-            "description": "Whether this role is a system-defined role",
+            "description": "Whether this is a system-defined role template",
             "example": false
           }
         },
@@ -13423,7 +13423,7 @@
           "appIds"
         ]
       },
-      "RoleDto": {
+      "RoleTemplateDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -13490,13 +13490,13 @@
           "createdAt"
         ]
       },
-      "RoleTableResponseDto": {
+      "RoleTemplateTableResponseDto": {
         "type": "object",
         "properties": {
           "result": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleDto"
+              "$ref": "#/components/schemas/RoleTemplateDto"
             }
           },
           "count": {
@@ -13517,22 +13517,22 @@
           "state"
         ]
       },
-      "UpdateRoleDto": {
+      "UpdateRoleTemplateDto": {
         "type": "object",
         "properties": {
           "versionId": {
             "type": "string",
-            "description": "App version UUID this role belongs to",
+            "description": "App version UUID this role template belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "name": {
             "type": "string",
-            "description": "Display name of the role",
+            "description": "Display name of the role template",
             "example": "Chef"
           },
           "description": {
             "type": "string",
-            "description": "Optional description of the role",
+            "description": "Optional description of the role template",
             "example": "Kitchen staff responsible for food preparation"
           },
           "scope": {
@@ -13546,7 +13546,7 @@
           },
           "industryId": {
             "type": "string",
-            "description": "Industry this role belongs to",
+            "description": "Industry this role template belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "appIds": {
@@ -13558,7 +13558,7 @@
           },
           "isSystem": {
             "type": "boolean",
-            "description": "Whether this role is a system-defined role",
+            "description": "Whether this is a system-defined role template",
             "example": false
           }
         }
@@ -13591,11 +13591,11 @@
           "type"
         ]
       },
-      "AssignRolePermissionsDto": {
+      "AssignRoleTemplatePermissionsDto": {
         "type": "object",
         "properties": {
           "permissions": {
-            "description": "Feature permissions to assign to the role",
+            "description": "Feature permissions to assign to the role template",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/FeaturePermissionEntry"

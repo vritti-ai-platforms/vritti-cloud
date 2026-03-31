@@ -34,9 +34,9 @@ import { FeatureViewPageSkeleton } from './pages/admin/versions/features/Feature
 import { MicrofrontendsPage } from './pages/admin/versions/microfrontends/MicrofrontendsPage';
 import { OverviewPage as VersionOverviewPage } from './pages/admin/versions/overview/OverviewPage';
 import { OverviewPageSkeleton as VersionOverviewPageSkeleton } from './pages/admin/versions/overview/OverviewPageSkeleton';
-import { AdminRolesPage } from './pages/admin/versions/roles/AdminRolesPage';
-import { RoleViewPage } from './pages/admin/versions/roles/RoleViewPage';
-import { RoleViewPageSkeleton } from './pages/admin/versions/roles/RoleViewPageSkeleton';
+import { AdminRoleTemplatesPage } from './pages/admin/versions/role-templates/AdminRoleTemplatesPage';
+import { RoleTemplateViewPage } from './pages/admin/versions/role-templates/RoleTemplateViewPage';
+import { RoleTemplateViewPageSkeleton } from './pages/admin/versions/role-templates/RoleTemplateViewPageSkeleton';
 import { VersionsPage } from './pages/admin/versions/VersionsPage';
 import { AuthErrorPage } from './pages/auth/AuthErrorPage';
 import { AuthSuccessPage } from './pages/auth/AuthSuccessPage';
@@ -248,14 +248,14 @@ export const adminRoutes: RouteObject[] = [
         ),
       },
       {
-        path: 'roles',
-        element: <AdminRolesPage />,
+        path: 'role-templates',
+        element: <AdminRoleTemplatesPage />,
       },
       {
-        path: 'roles/:roleSlug',
+        path: 'role-templates/:roleTemplateSlug',
         element: (
-          <Suspense fallback={<RoleViewPageSkeleton />}>
-            <RoleViewPage />
+          <Suspense fallback={<RoleTemplateViewPageSkeleton />}>
+            <RoleTemplateViewPage />
           </Suspense>
         ),
       },

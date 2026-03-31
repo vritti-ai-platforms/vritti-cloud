@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, count, eq, inArray, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { AppFeature } from '@/db/schema';
-import { appFeatures, features, roleFeaturePermissions } from '@/db/schema';
+import { appFeatures, features, roleTemplateFeaturePermissions } from '@/db/schema';
 
 @Injectable()
 export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatures> {
@@ -64,12 +64,12 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
     return new Set(rows.map((r) => r.id));
   }
 
-  // Counts how many role_feature_permissions reference a given feature
+  // Counts how many role_template_feature_permissions reference a given feature
   async countRoleReferences(featureId: string): Promise<number> {
     const result = await this.db
       .select({ count: count() })
-      .from(roleFeaturePermissions)
-      .where(eq(roleFeaturePermissions.featureId, featureId));
+      .from(roleTemplateFeaturePermissions)
+      .where(eq(roleTemplateFeaturePermissions.featureId, featureId));
     return Number(result[0]?.count ?? 0);
   }
 

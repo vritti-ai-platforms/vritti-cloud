@@ -23,13 +23,13 @@ import { AppFeatureService } from './app/app-feature/services/app-feature.servic
 // App Price
 import { AppPriceRepository } from './app/app-price/repositories/app-price.repository';
 import { AppPriceService } from './app/app-price/services/app-price.service';
-// Role
-import { RoleAppRepository } from './role/root/repositories/role-app.repository';
-import { RoleRepository } from './role/root/repositories/role.repository';
-import { RoleService } from './role/root/services/role.service';
-// Role Permission
-import { RoleFeaturePermissionRepository } from './role/role-permission/repositories/role-feature-permission.repository';
-import { RolePermissionService } from './role/role-permission/services/role-permission.service';
+// Role Template
+import { RoleTemplateAppRepository } from './role-template/root/repositories/role-template-app.repository';
+import { RoleTemplateRepository } from './role-template/root/repositories/role-template.repository';
+import { RoleTemplateService } from './role-template/root/services/role-template.service';
+// Role Template Permission
+import { RoleTemplateFeaturePermissionRepository } from './role-template/role-template-permission/repositories/role-template-feature-permission.repository';
+import { RoleTemplatePermissionService } from './role-template/role-template-permission/services/role-template-permission.service';
 
 @Module({
   providers: [
@@ -57,13 +57,13 @@ import { RolePermissionService } from './role/role-permission/services/role-perm
     // App Price
     AppPriceService,
     AppPriceRepository,
-    // Role
-    RoleService,
-    RoleRepository,
-    RoleAppRepository,
-    // Role Permission
-    RolePermissionService,
-    RoleFeaturePermissionRepository,
+    // Role Template
+    RoleTemplateService,
+    RoleTemplateRepository,
+    RoleTemplateAppRepository,
+    // Role Template Permission
+    RoleTemplatePermissionService,
+    RoleTemplateFeaturePermissionRepository,
   ],
   exports: [
     // Repositories
@@ -75,20 +75,20 @@ import { RolePermissionService } from './role/role-permission/services/role-perm
     AppRepository,
     AppFeatureRepository,
     AppPriceRepository,
-    RoleRepository,
-    RoleAppRepository,
-    RoleFeaturePermissionRepository,
+    RoleTemplateRepository,
+    RoleTemplateAppRepository,
+    RoleTemplateFeaturePermissionRepository,
     // Services
     VersionService,
     AppService,
     FeatureService,
-    RoleService,
+    RoleTemplateService,
     MicrofrontendService,
     AppFeatureService,
     AppPriceService,
     FeaturePermissionService,
     FeatureMicrofrontendService,
-    RolePermissionService,
+    RoleTemplatePermissionService,
   ],
 })
 export class VersionDomainModule {}
