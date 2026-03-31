@@ -2336,6 +2336,357 @@
         ]
       }
     },
+    "/account/security/mfa/status": {
+      "get": {
+        "description": "Returns the current multi-factor authentication status including method, backup codes remaining, and registered passkeys.",
+        "operationId": "SecurityController_getMfaStatus",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "MFA status retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MfaStatusResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get MFA status",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/totp/setup": {
+      "post": {
+        "description": "Generates a TOTP secret and returns the QR code URI for the authenticator app. Deletes any previous pending setup.",
+        "operationId": "SecurityController_setupTotp",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "TOTP setup initiated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TotpSetupResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "MFA is already enabled."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Initiate TOTP setup",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/totp/verify-setup": {
+      "post": {
+        "description": "Validates the 6-digit TOTP code against the pending setup and activates MFA. Returns backup codes.",
+        "operationId": "SecurityController_verifyTotpSetup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyTotpSetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "TOTP verified and MFA enabled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupCodesResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid TOTP code."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "No pending TOTP setup found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verify TOTP setup",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/totp": {
+      "delete": {
+        "description": "Deactivates TOTP-based multi-factor authentication for the user.",
+        "operationId": "SecurityController_disableTotp",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "TOTP disabled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "No active MFA found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Disable TOTP",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa": {
+      "delete": {
+        "operationId": "SecurityController_disableAllMfa",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/passkey/setup-options": {
+      "post": {
+        "description": "Generates WebAuthn registration options for passkey setup. Returns PublicKeyCredentialCreationOptions.",
+        "operationId": "SecurityController_getPasskeySetupOptions",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Passkey registration options generated."
+          },
+          "400": {
+            "description": "MFA is already enabled with a different method."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get passkey setup options",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/passkey/verify-setup": {
+      "post": {
+        "description": "Verifies the WebAuthn registration response and activates passkey-based MFA. Returns backup codes.",
+        "operationId": "SecurityController_verifyPasskeySetup",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VerifyPasskeySetupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Passkey verified and MFA enabled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupCodesResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Passkey verification failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "No pending passkey setup found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verify passkey setup",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/passkeys": {
+      "get": {
+        "description": "Returns all active passkeys registered for the authenticated user.",
+        "operationId": "SecurityController_listPasskeys",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Passkeys retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PasskeyInfoDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List registered passkeys",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/passkey/{id}": {
+      "delete": {
+        "description": "Deactivates a specific passkey by its MFA record ID.",
+        "operationId": "SecurityController_removePasskey",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "MFA record ID of the passkey to remove",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Passkey removed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Passkey not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a passkey",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
+    "/account/security/mfa/backup-codes/regenerate": {
+      "post": {
+        "description": "Generates a new set of backup codes, invalidating all previous codes.",
+        "operationId": "SecurityController_regenerateBackupCodes",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Backup codes regenerated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BackupCodesResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "No active MFA found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Regenerate backup codes",
+        "tags": [
+          "Account - Security"
+        ]
+      }
+    },
     "/cloud-api/media/upload": {
       "post": {
         "operationId": "MediaController_uploadSingle",
@@ -10478,17 +10829,17 @@
           },
           "manualSetupKey": {
             "type": "string",
-            "description": "Manual setup key for users who cannot scan the QR code, to be entered manually in authenticator app",
-            "example": "JBSWY3DPEHPK3PXP"
+            "description": "Manual setup key formatted with spaces for readability",
+            "example": "JBSW Y3DP EHPK 3PXP"
           },
           "issuer": {
             "type": "string",
-            "description": "Name of the service/application issuing the TOTP",
+            "description": "Name of the service issuing the TOTP",
             "example": "Vritti"
           },
           "accountName": {
             "type": "string",
-            "description": "Account identifier displayed in the authenticator app, typically the user email",
+            "description": "Account identifier displayed in the authenticator app",
             "example": "john.doe@example.com"
           }
         },
@@ -10519,13 +10870,13 @@
         "properties": {
           "success": {
             "type": "boolean",
-            "description": "Indicates whether the backup codes were generated successfully",
+            "description": "Indicates whether the operation completed successfully",
             "example": true
           },
           "message": {
             "type": "string",
-            "description": "Human-readable message describing the result of the operation",
-            "example": "Backup codes generated successfully. Store them securely."
+            "description": "Human-readable result message",
+            "example": "Multi-factor authentication has been enabled successfully."
           },
           "backupCodes": {
             "description": "Array of one-time use backup codes for account recovery",
@@ -10534,10 +10885,7 @@
               "FGH456IJ",
               "KLM789NO",
               "PQR012ST",
-              "UVW345XY",
-              "ZAB678CD",
-              "EFG901HI",
-              "JKL234MN"
+              "UVW345XY"
             ],
             "type": "array",
             "items": {
@@ -10546,8 +10894,8 @@
           },
           "warning": {
             "type": "string",
-            "description": "Important warning message about storing backup codes securely",
-            "example": "These codes will only be shown once. Store them in a secure location. Each code can only be used once."
+            "description": "Warning about storing backup codes securely",
+            "example": "Save these backup codes in a secure location. Each code can only be used once and they will not be shown again."
           }
         },
         "required": [
@@ -10629,40 +10977,63 @@
             "description": "Indicates whether multi-factor authentication is enabled for the user",
             "example": true
           },
-          "method": {
-            "type": "string",
-            "description": "The multi-factor authentication method configured by the user",
-            "example": "TOTP",
-            "enum": [
-              "TOTP",
-              "PASSKEY",
-              "SMS",
-              "EMAIL"
+          "methods": {
+            "type": "array",
+            "description": "The active MFA methods configured by the user",
+            "example": [
+              "TOTP"
             ],
-            "nullable": true
+            "items": {
+              "type": "string",
+              "enum": [
+                "TOTP",
+                "PASSKEY"
+              ]
+            }
           },
           "backupCodesRemaining": {
             "type": "number",
             "description": "Number of unused backup codes remaining for account recovery",
             "example": 8
           },
+          "passkeys": {
+            "type": "array",
+            "description": "List of registered passkeys with their IDs and creation dates",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "credentialId": {
+                  "type": "string"
+                },
+                "createdAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            },
+            "nullable": true
+          },
           "lastUsedAt": {
             "type": "string",
-            "description": "Timestamp when multi-factor authentication was last used",
-            "example": "2024-01-15T10:30:00.000Z",
+            "description": "Timestamp when MFA was last used for authentication",
+            "example": "2026-01-15T10:30:00.000Z",
             "format": "date-time",
             "nullable": true
           },
           "createdAt": {
             "type": "string",
-            "description": "Timestamp when multi-factor authentication was initially configured",
-            "example": "2024-01-01T08:00:00.000Z",
+            "description": "Timestamp when MFA was initially configured",
+            "example": "2026-01-01T08:00:00.000Z",
             "format": "date-time",
             "nullable": true
           }
         },
         "required": [
           "isEnabled",
+          "methods",
           "backupCodesRemaining"
         ]
       },
@@ -11400,6 +11771,65 @@
           "ipAddress",
           "lastActive",
           "isCurrent"
+        ]
+      },
+      "VerifyTotpSetupDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "6-digit TOTP code from authenticator app",
+            "example": "123456"
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "VerifyPasskeySetupDto": {
+        "type": "object",
+        "properties": {
+          "credential": {
+            "type": "object",
+            "description": "WebAuthn RegistrationResponseJSON from the browser credentials API",
+            "example": {
+              "id": "base64url-credential-id",
+              "rawId": "base64url-raw-id",
+              "type": "public-key",
+              "response": {
+                "clientDataJSON": "base64url-encoded",
+                "attestationObject": "base64url-encoded"
+              }
+            }
+          }
+        },
+        "required": [
+          "credential"
+        ]
+      },
+      "PasskeyInfoDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "MFA record ID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "credentialId": {
+            "type": "string",
+            "description": "WebAuthn credential ID",
+            "example": "base64url-credential-id"
+          },
+          "createdAt": {
+            "type": "string",
+            "description": "When the passkey was registered",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "credentialId",
+          "createdAt"
         ]
       },
       "MediaDto": {

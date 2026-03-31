@@ -41,22 +41,26 @@ export class MfaVerificationService {
     user: User,
     options: { subdomain?: string } = {},
   ): Promise<MfaChallenge | null> {
-    // Get user's MFA settings
-    const mfaRecord = await this.mfaRepo.findActiveByUserId(user.id);
+    // Get all active MFA records for the user
+    const mfaRecords = await this.mfaRepo.findAllActiveByUserId(user.id);
 
-    if (!mfaRecord) {
+    this.logger.log(
+      `MFA check for user ${user.id}: ${mfaRecords.length} active record(s)${mfaRecords.length > 0 ? ` [${mfaRecords.map((r) => r.method).join(', ')}]` : ''}`,
+    );
+
+    if (mfaRecords.length === 0) {
       // User doesn't have MFA enabled
       return null;
     }
 
-    // Determine available methods
+    // Determine available methods from all active records
     const availableMethods: MfaMethod[] = [];
 
-    if (mfaRecord.method === MfaMethodValues.TOTP) {
+    if (mfaRecords.some((r) => r.method === MfaMethodValues.TOTP)) {
       availableMethods.push('totp');
     }
 
-    if (mfaRecord.method === MfaMethodValues.PASSKEY) {
+    if (mfaRecords.some((r) => r.method === MfaMethodValues.PASSKEY)) {
       availableMethods.push('passkey');
     }
 

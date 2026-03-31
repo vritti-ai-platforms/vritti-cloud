@@ -23,11 +23,11 @@ export class TotpSetupService {
   async initiateSetup(userId: string): Promise<TotpSetupResponseDto> {
     const user = await this.userService.findById(userId);
 
-    const existing = await this.mfaRepo.findActiveByUserId(userId);
-    if (existing) {
+    const existingTotp = await this.mfaRepo.findActiveByUserIdAndMethod(userId, 'TOTP');
+    if (existingTotp) {
       throw new BadRequestException({
-        label: 'MFA Already Enabled',
-        detail: 'Please disable your current method before setting up a new one.',
+        label: 'TOTP Already Configured',
+        detail: 'Authenticator app is already enabled. Disable it first to set up a new one.',
       });
     }
 

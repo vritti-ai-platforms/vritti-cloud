@@ -17,6 +17,22 @@ export class MfaRepository extends PrimaryBaseRepository<typeof mfaAuth> {
     });
   }
 
+  // Finds all active MFA records for a user (supports multiple methods)
+  async findAllActiveByUserId(userId: string): Promise<MfaAuth[]> {
+    this.logger.debug(`Finding all active MFA for user: ${userId}`);
+    return this.model.findMany({
+      where: { userId, isActive: true },
+    });
+  }
+
+  // Finds the active MFA record for a specific user and method
+  async findActiveByUserIdAndMethod(userId: string, method: MfaMethod): Promise<MfaAuth | undefined> {
+    this.logger.debug(`Finding active ${method} MFA for user: ${userId}`);
+    return this.model.findFirst({
+      where: { userId, method, isActive: true },
+    });
+  }
+
   // Finds a MFA record for a specific user and method combination
   async findByUserIdAndMethod(userId: string, method: MfaMethod): Promise<MfaAuth | undefined> {
     this.logger.debug(`Finding MFA for user ${userId} with method ${method}`);
@@ -25,10 +41,19 @@ export class MfaRepository extends PrimaryBaseRepository<typeof mfaAuth> {
     });
   }
 
-  // Deactivates all active MFA records for a user before enabling a new method
+  // Deactivates all active MFA records for a user
   async deactivateAllByUserId(userId: string): Promise<number> {
     this.logger.log(`Deactivating all MFA for user: ${userId}`);
     const condition = and(eq(mfaAuth.userId, userId), eq(mfaAuth.isActive, true));
+    if (!condition) return 0;
+    const result = await this.updateMany(condition, { isActive: false });
+    return result.count;
+  }
+
+  // Deactivates all active MFA records for a specific method
+  async deactivateByUserIdAndMethod(userId: string, method: MfaMethod): Promise<number> {
+    this.logger.log(`Deactivating ${method} MFA for user: ${userId}`);
+    const condition = and(eq(mfaAuth.userId, userId), eq(mfaAuth.method, method), eq(mfaAuth.isActive, true));
     if (!condition) return 0;
     const result = await this.updateMany(condition, { isActive: false });
     return result.count;

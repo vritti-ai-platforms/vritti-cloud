@@ -24,13 +24,7 @@ export class PasskeySetupService {
   async initiateSetup(userId: string): Promise<PasskeyRegistrationOptionsDto> {
     const user = await this.userService.findById(userId);
 
-    const existing = await this.mfaRepo.findActiveByUserId(userId);
-    if (existing) {
-      throw new BadRequestException({
-        label: 'MFA Already Enabled',
-        detail: 'Please disable your current method before setting up a new one.',
-      });
-    }
+    // Passkeys support multiple registrations — no need to block if other methods exist
 
     // Delete any stale pending passkey record if the user is still in setup
     if (user.onboardingStep !== OnboardingStepValues.COMPLETE) {

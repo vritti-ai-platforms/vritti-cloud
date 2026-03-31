@@ -1,4 +1,5 @@
 import { MediaDomainModule } from '@domain/media/media.module';
+import { MfaModule } from '@domain/mfa/mfa.module';
 import { SessionModule } from '@domain/session/session.module';
 import { UserDomainModule } from '@domain/user/user.module';
 import { VerificationModule } from '@domain/verification/verification.module';
@@ -9,7 +10,7 @@ import { SecurityController } from './security/controllers/security.controller';
 import { SecurityService } from './security/services/security.service';
 
 @Module({
-  imports: [UserDomainModule, SessionModule, VerificationModule, MediaDomainModule],
+  imports: [UserDomainModule, SessionModule, VerificationModule, MediaDomainModule, MfaModule],
   controllers: [ProfileController, SecurityController],
   providers: [ProfileService, SecurityService],
 })
