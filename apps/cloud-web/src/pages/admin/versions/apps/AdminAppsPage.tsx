@@ -35,7 +35,7 @@ export const AdminAppsPage = () => {
 
   const { table } = useDataTable({
     columns: getColumns({
-      onView: (app) => navigate(buildSlug(app.name, app.id)),
+      onView: (app) => navigate(`app-${buildSlug(app.name, app.id)}`),
     }),
     slug: TABLE_SLUG,
     label: 'app',

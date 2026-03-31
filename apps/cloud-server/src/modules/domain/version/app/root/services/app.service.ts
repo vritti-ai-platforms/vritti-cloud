@@ -65,10 +65,8 @@ export class AppService {
   }
 
   // Returns paginated app options for the select component
-  findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
-    this.logger.log(
-      `Fetched app select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
-    );
+  findForSelect(query: SelectOptionsQueryDto & { versionId?: string }): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched app select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.appRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
@@ -80,6 +78,7 @@ export class AppService {
       values: query.values,
       excludeIds: query.excludeIds,
       orderBy: { name: 'asc' },
+      ...(query.versionId ? { where: { versionId: query.versionId } } : {}),
     });
   }
 

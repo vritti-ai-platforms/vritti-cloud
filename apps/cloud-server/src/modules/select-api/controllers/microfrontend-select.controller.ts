@@ -3,6 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
+import { MicrofrontendSelectQueryDto } from '../dto/microfrontend-select-query.dto';
 
 @ApiTags('Select')
 @ApiBearerAuth()
@@ -16,10 +17,9 @@ export class MicrofrontendSelectController {
   // Returns microfrontend options for a select component within a version
   @Get()
   findForSelect(
-    @Query('versionId') versionId: string,
-    @Query('search') search?: string,
+    @Query() query: MicrofrontendSelectQueryDto,
   ): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
     this.logger.log('GET /select-api/microfrontends');
-    return this.microfrontendService.findForSelect(versionId, search);
+    return this.microfrontendService.findForSelect(query.versionId, query.search);
   }
 }

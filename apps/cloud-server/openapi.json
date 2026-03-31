@@ -9490,6 +9490,15 @@
               "example": "regionId",
               "type": "string"
             }
+          },
+          {
+            "name": "versionId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by version ID",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -9720,9 +9729,19 @@
             }
           },
           {
-            "name": "appCode",
-            "required": true,
+            "name": "versionId",
+            "required": false,
             "in": "query",
+            "description": "Filter by version ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "appCode",
+            "required": false,
+            "in": "query",
+            "description": "Filter by app code",
             "schema": {
               "type": "string"
             }
@@ -9842,9 +9861,19 @@
             }
           },
           {
-            "name": "industryId",
-            "required": true,
+            "name": "versionId",
+            "required": false,
             "in": "query",
+            "description": "Filter by version ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "industryId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by industry ID",
             "schema": {
               "type": "string"
             }
@@ -9873,14 +9902,16 @@
             "name": "versionId",
             "required": true,
             "in": "query",
+            "description": "Version ID to scope microfrontends",
             "schema": {
               "type": "string"
             }
           },
           {
             "name": "search",
-            "required": true,
+            "required": false,
             "in": "query",
+            "description": "Search term to filter by name",
             "schema": {
               "type": "string"
             }

@@ -25,7 +25,7 @@ export const AdminRolesPage = () => {
 
   const { table } = useDataTable({
     columns: getColumns({
-      onView: (role) => navigate(buildSlug(role.name, role.id)),
+      onView: (role) => navigate(`role-${buildSlug(role.name, role.id)}`),
     }),
     slug: TABLE_SLUG,
     label: 'role',

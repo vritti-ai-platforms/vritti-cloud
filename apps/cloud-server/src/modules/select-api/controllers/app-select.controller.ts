@@ -1,8 +1,9 @@
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { AppService } from '@domain/version/app/root/services/app.service';
+import { AppSelectQueryDto } from '../dto/app-select-query.dto';
 
 @ApiTags('Select')
 @ApiBearerAuth()
@@ -15,7 +16,7 @@ export class AppSelectController {
 
   // Returns paginated app options for the select component
   @Get()
-  findForSelect(@Query() query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+  findForSelect(@Query() query: AppSelectQueryDto): Promise<SelectQueryResult> {
     this.logger.log('GET /select-api/apps');
     return this.appService.findForSelect(query);
   }

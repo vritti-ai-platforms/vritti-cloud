@@ -12,7 +12,7 @@ import {
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { cloudProviders, regionCloudProviders } from '@/db/schema';
 import { CloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/entity/cloud-provider.dto';
-import type { CloudProviderSelectQueryDto } from '@/modules/admin-api/cloud-provider/dto/request/cloud-provider-select-query.dto';
+import type { CloudProviderSelectQueryDto } from '@/modules/select-api/dto/cloud-provider-select-query.dto';
 import type { CreateCloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/request/create-cloud-provider.dto';
 import type { UpdateCloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/request/update-cloud-provider.dto';
 import { CloudProviderTableResponseDto } from '@/modules/admin-api/cloud-provider/dto/response/cloud-providers-response.dto';

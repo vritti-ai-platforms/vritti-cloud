@@ -3,8 +3,11 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Bell, ChevronRight, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLogo } from '@hooks/useLogo';
+import { AppSwitcher } from './app-switcher';
 import { BUSwitcher } from './bu-switcher/BUSwitcher';
 import { CompanySwitcher } from './company-switcher';
+import { FeatureSwitcher } from './feature-switcher';
+import { RoleSwitcher } from './role-switcher';
 import { VersionSwitcher } from './version-switcher';
 import { UserMenu } from './UserMenu';
 
@@ -14,6 +17,12 @@ const ORG_SLUG_PREFIX = 'org-';
 const VERSION_SLUG_PREFIX = 'ver-';
 // BU slugs use the `bu-` prefix (e.g., bu-north-america~uuid)
 const BU_SLUG_PREFIX = 'bu-';
+// App slugs use the `app-` prefix (e.g., app-catalog-management~uuid)
+const APP_SLUG_PREFIX = 'app-';
+// Feature slugs use the `feat-` prefix (e.g., feat-products~uuid)
+const FEATURE_SLUG_PREFIX = 'feat-';
+// Role slugs use the `role-` prefix (e.g., role-admin~uuid)
+const ROLE_SLUG_PREFIX = 'role-';
 
 export const TopBar = () => {
   const { pathname } = useLocation();
@@ -68,6 +77,45 @@ export const TopBar = () => {
                       orgSlug={orgSegment}
                       currentBuId={segment.id ?? segment.raw}
                       currentBuName={segment.slug ? segment.label : undefined}
+                    />
+                  );
+                }
+
+                // App switcher — under /versions/:versionSlug/apps/:appSlug
+                if (segment.raw.startsWith(APP_SLUG_PREFIX)) {
+                  const versionSlug = segment.path.split('/')[2] ?? '';
+                  return (
+                    <AppSwitcher
+                      key={segment.raw}
+                      versionSlug={versionSlug}
+                      currentAppId={segment.id ?? segment.raw}
+                      currentAppName={segment.slug ? segment.label : undefined}
+                    />
+                  );
+                }
+
+                // Feature switcher — under /versions/:versionSlug/features/:featureSlug
+                if (segment.raw.startsWith(FEATURE_SLUG_PREFIX)) {
+                  const versionSlug = segment.path.split('/')[2] ?? '';
+                  return (
+                    <FeatureSwitcher
+                      key={segment.raw}
+                      versionSlug={versionSlug}
+                      currentFeatureId={segment.id ?? segment.raw}
+                      currentFeatureName={segment.slug ? segment.label : undefined}
+                    />
+                  );
+                }
+
+                // Role switcher — under /versions/:versionSlug/roles/:roleSlug
+                if (segment.raw.startsWith(ROLE_SLUG_PREFIX)) {
+                  const versionSlug = segment.path.split('/')[2] ?? '';
+                  return (
+                    <RoleSwitcher
+                      key={segment.raw}
+                      versionSlug={versionSlug}
+                      currentRoleId={segment.id ?? segment.raw}
+                      currentRoleName={segment.slug ? segment.label : undefined}
                     />
                   );
                 }

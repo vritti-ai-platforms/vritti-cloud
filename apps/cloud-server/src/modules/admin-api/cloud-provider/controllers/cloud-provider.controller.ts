@@ -1,3 +1,4 @@
+import { CloudProviderService } from '@domain/cloud-provider/services/cloud-provider.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
@@ -12,7 +13,6 @@ import { CloudProviderDto } from '../dto/entity/cloud-provider.dto';
 import { CreateCloudProviderDto } from '../dto/request/create-cloud-provider.dto';
 import { UpdateCloudProviderDto } from '../dto/request/update-cloud-provider.dto';
 import { CloudProviderTableResponseDto } from '../dto/response/cloud-providers-response.dto';
-import { CloudProviderService } from '@domain/cloud-provider/services/cloud-provider.service';
 
 @ApiTags('Admin - Cloud Providers')
 @ApiBearerAuth()

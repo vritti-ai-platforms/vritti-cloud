@@ -1,8 +1,9 @@
-import { RoleService } from '@domain/version/role/root/services/role.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
+import { RoleService } from '@domain/version/role/root/services/role.service';
+import { RoleSelectQueryDto } from '../dto/role-select-query.dto';
 
 @ApiTags('Select')
 @ApiBearerAuth()
@@ -15,11 +16,8 @@ export class RoleSelectController {
 
   // Returns paginated role options for the select component
   @Get()
-  findForSelect(
-    @Query() query: SelectOptionsQueryDto,
-    @Query('industryId') industryId?: string,
-  ): Promise<SelectQueryResult> {
+  findForSelect(@Query() query: RoleSelectQueryDto): Promise<SelectQueryResult> {
     this.logger.log('GET /select-api/roles');
-    return this.roleService.findForSelect(query, industryId);
+    return this.roleService.findForSelect(query);
   }
 }

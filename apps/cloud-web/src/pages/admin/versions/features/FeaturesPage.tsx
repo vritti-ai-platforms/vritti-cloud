@@ -48,7 +48,7 @@ export const FeaturesPage = () => {
 
   const { table } = useDataTable({
     columns: getColumns({
-      onView: (feature) => navigate(buildSlug(feature.name, feature.id)),
+      onView: (feature) => navigate(`feat-${buildSlug(feature.name, feature.id)}`),
       onDelete: handleDelete,
     }),
     slug: TABLE_SLUG,

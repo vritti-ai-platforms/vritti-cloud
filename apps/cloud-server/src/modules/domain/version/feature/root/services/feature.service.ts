@@ -66,7 +66,7 @@ export class FeatureService {
   }
 
   // Returns paginated feature options for the select component
-  findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+  findForSelect(query: SelectOptionsQueryDto & { versionId?: string }): Promise<SelectQueryResult> {
     this.logger.log(`Fetched feature select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.featureRepository.findForSelect({
       value: query.valueKey || 'id',
@@ -79,6 +79,7 @@ export class FeatureService {
       values: query.values,
       excludeIds: query.excludeIds,
       orderBy: { name: 'asc' },
+      ...(query.versionId ? { where: { versionId: query.versionId } } : {}),
     });
   }
 

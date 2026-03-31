@@ -12,14 +12,14 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { roles } from '@/db/schema';
-import { RolePermissionService } from '../../role-permission/services/role-permission.service';
-import { RoleFeaturePermissionRepository } from '../../role-permission/repositories/role-feature-permission.repository';
 import { RoleDto } from '@/modules/admin-api/version/role/root/dto/entity/role.dto';
 import type { CreateRoleDto } from '@/modules/admin-api/version/role/root/dto/request/create-role.dto';
 import type { UpdateRoleDto } from '@/modules/admin-api/version/role/root/dto/request/update-role.dto';
 import { RoleTableResponseDto } from '@/modules/admin-api/version/role/root/dto/response/role-table-response.dto';
-import { RoleAppRepository } from '../repositories/role-app.repository';
+import { RoleFeaturePermissionRepository } from '../../role-permission/repositories/role-feature-permission.repository';
+import { RolePermissionService } from '../../role-permission/services/role-permission.service';
 import { RoleRepository } from '../repositories/role.repository';
+import { RoleAppRepository } from '../repositories/role-app.repository';
 
 @Injectable()
 export class RoleService {
@@ -65,9 +65,12 @@ export class RoleService {
     };
   }
 
-  // Returns paginated role options for the select component, optionally filtered by industryId
-  findForSelect(query: SelectOptionsQueryDto, industryId?: string): Promise<SelectQueryResult> {
+  // Returns paginated role options for the select component
+  findForSelect(query: SelectOptionsQueryDto & { industryId?: string; versionId?: string }): Promise<SelectQueryResult> {
     this.logger.log(`Fetched role select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    const where: Record<string, string> = {};
+    if (query.industryId) where.industryId = query.industryId;
+    if (query.versionId) where.versionId = query.versionId;
     return this.roleRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
@@ -79,12 +82,14 @@ export class RoleService {
       values: query.values,
       excludeIds: query.excludeIds,
       orderBy: { name: 'asc' },
-      ...(industryId ? { where: { industryId } } : {}),
+      ...(Object.keys(where).length > 0 ? { where } : {}),
     });
   }
 
   // Finds a role by ID with permissions grouped by app and linked app IDs
-  async findById(id: string): Promise<RoleDto & { appIds: string[]; permissions: Awaited<ReturnType<RolePermissionService['findByRole']>> }> {
+  async findById(
+    id: string,
+  ): Promise<RoleDto & { appIds: string[]; permissions: Awaited<ReturnType<RolePermissionService['findByRole']>> }> {
     const role = await this.roleRepository.findById(id);
     if (!role) {
       throw new NotFoundException('Role not found.');
