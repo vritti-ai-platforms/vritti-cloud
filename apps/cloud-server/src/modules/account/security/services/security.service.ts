@@ -143,19 +143,16 @@ export class SecurityService {
       });
     }
 
-    // Collect unique methods
     const methods = [...new Set(mfaRecords.map((r) => r.method))];
+    const first = mfaRecords[0];
 
-    // Aggregate backup codes from any record that has them
+    // Backup codes are synced across all records — read from first
     let backupCodesRemaining = 0;
-    for (const record of mfaRecords) {
-      if (record.totpBackupCodes) {
-        try {
-          const codes = JSON.parse(record.totpBackupCodes) as string[];
-          backupCodesRemaining = Math.max(backupCodesRemaining, codes.length);
-        } catch (error) {
-          this.logger.warn(`Failed to parse backup codes for MFA ${record.id}: ${(error as Error).message}`);
-        }
+    if (first.totpBackupCodes) {
+      try {
+        backupCodesRemaining = (JSON.parse(first.totpBackupCodes) as string[]).length;
+      } catch {
+        this.logger.warn(`Failed to parse backup codes for MFA ${first.id}`);
       }
     }
 
@@ -169,23 +166,13 @@ export class SecurityService {
         }),
     );
 
-    // Use the most recent lastUsedAt and earliest createdAt across all records
-    const lastUsedAt = mfaRecords.reduce<Date | null>((latest, r) => {
-      if (!r.lastUsedAt) return latest;
-      return !latest || r.lastUsedAt > latest ? r.lastUsedAt : latest;
-    }, null);
-    const createdAt = mfaRecords.reduce<Date | null>((earliest, r) => {
-      if (!r.createdAt) return earliest;
-      return !earliest || r.createdAt < earliest ? r.createdAt : earliest;
-    }, null);
-
     return new MfaStatusResponseDto({
       isEnabled: true,
       methods,
       backupCodesRemaining,
       passkeys: passkeyDtos.length > 0 ? passkeyDtos : null,
-      lastUsedAt,
-      createdAt,
+      lastUsedAt: first.lastUsedAt,
+      createdAt: first.createdAt,
     });
   }
 
@@ -246,6 +233,14 @@ export class SecurityService {
     const hashedBackupCodes = await this.backupCodeService.hashBackupCodes(backupCodes);
 
     await this.mfaRepo.confirmTotp(pending.id, JSON.stringify(hashedBackupCodes));
+
+    // Sync backup codes to all other active MFA records so codes are shared
+    const otherRecords = await this.mfaRepo.findAllActiveByUserId(userId);
+    await Promise.all(
+      otherRecords
+        .filter((r) => r.id !== pending.id)
+        .map((r) => this.mfaRepo.updateBackupCodes(r.id, hashedBackupCodes)),
+    );
 
     this.logger.log(`TOTP setup completed for user: ${userId}`);
 
@@ -363,6 +358,14 @@ export class SecurityService {
       registrationInfo.credential.counter,
       JSON.stringify(transports),
       JSON.stringify(hashedBackupCodes),
+    );
+
+    // Sync backup codes to all other active MFA records so codes are shared
+    const otherRecords = await this.mfaRepo.findAllActiveByUserId(userId);
+    await Promise.all(
+      otherRecords
+        .filter((r) => r.id !== pending.id)
+        .map((r) => this.mfaRepo.updateBackupCodes(r.id, hashedBackupCodes)),
     );
 
     this.logger.log(`Passkey setup completed for user: ${userId}`);

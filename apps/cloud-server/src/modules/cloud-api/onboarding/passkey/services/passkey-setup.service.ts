@@ -6,7 +6,7 @@ import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
 import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
 import type { RegistrationResponseJSON } from '@domain/mfa/types/webauthn.types';
 import { UserService } from '@domain/user/services/user.service';
-import { BackupCodesResponseDto } from '../../totp/dto/response/backup-codes-response.dto';
+import { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
 import { PasskeyRegistrationOptionsDto } from '../dto/response/passkey-registration-options.dto';
 
 @Injectable()

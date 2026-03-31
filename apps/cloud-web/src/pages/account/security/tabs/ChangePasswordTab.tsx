@@ -1,5 +1,5 @@
+import { SecurityTabCard } from '@components/account/security/SecurityTabCard';
 import { Button } from '@vritti/quantum-ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { Separator } from '@vritti/quantum-ui/Separator';
@@ -34,12 +34,7 @@ export const ChangePasswordTab: React.FC = () => {
   });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Change Password</CardTitle>
-        <CardDescription>Update your password to keep your account secure</CardDescription>
-      </CardHeader>
-      <CardContent>
+    <SecurityTabCard title="Change Password" description="Update your password to keep your account secure">
         <Form
           form={form}
           mutation={changePasswordMutation}
@@ -98,7 +93,6 @@ export const ChangePasswordTab: React.FC = () => {
             </Button>
           </FieldGroup>
         </Form>
-      </CardContent>
-    </Card>
+    </SecurityTabCard>
   );
 };

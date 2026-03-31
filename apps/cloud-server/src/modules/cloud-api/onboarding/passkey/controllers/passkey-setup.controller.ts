@@ -2,7 +2,7 @@ import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/co
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import type { BackupCodesResponseDto } from '../../totp/dto/response/backup-codes-response.dto';
+import type { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
 import { ApiInitiatePasskeySetup, ApiVerifyPasskeySetup } from '../docs/passkey-setup.docs';
 import { VerifyPasskeyDto } from '../dto/request/verify-passkey.dto';
 import type { PasskeyRegistrationOptionsDto } from '../dto/response/passkey-registration-options.dto';

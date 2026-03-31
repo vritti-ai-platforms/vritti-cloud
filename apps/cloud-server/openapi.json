@@ -2468,7 +2468,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "No active MFA found."
+            "description": "Authenticator app not enabled."
           }
         },
         "security": [
@@ -2484,11 +2484,25 @@
     },
     "/account/security/mfa": {
       "delete": {
+        "description": "Deactivates all multi-factor authentication methods for the user.",
         "operationId": "SecurityController_disableAllMfa",
         "parameters": [],
         "responses": {
           "200": {
-            "description": ""
+            "description": "All MFA methods disabled.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "No active MFA found."
           }
         },
         "security": [
@@ -2496,6 +2510,7 @@
             "bearer": []
           }
         ],
+        "summary": "Disable all MFA methods",
         "tags": [
           "Account - Security"
         ]

@@ -5,8 +5,8 @@ import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
 import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
 import { TotpService } from '@domain/mfa/services/totp.service';
 import { UserService } from '@domain/user/services/user.service';
-import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
-import { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
+import { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
+import { TotpSetupResponseDto } from '../../../../account/security/dto/response/totp-setup-response.dto';
 
 @Injectable()
 export class TotpSetupService {

@@ -103,6 +103,18 @@ export function ApiDisableTotp() {
     }),
     ApiResponse({ status: 200, description: 'TOTP disabled.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Authenticator app not enabled.' }),
+  );
+}
+
+export function ApiDisableAllMfa() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Disable all MFA methods',
+      description: 'Deactivates all multi-factor authentication methods for the user.',
+    }),
+    ApiResponse({ status: 200, description: 'All MFA methods disabled.', type: SuccessResponseDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'No active MFA found.' }),
   );
 }

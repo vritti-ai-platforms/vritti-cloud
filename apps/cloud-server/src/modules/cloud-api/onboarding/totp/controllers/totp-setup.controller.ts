@@ -4,8 +4,8 @@ import { RequireSession, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiInitiateTotpSetup, ApiVerifyTotpSetup } from '../docs/totp-setup.docs';
 import { VerifyTotpDto } from '../dto/request/verify-totp.dto';
-import type { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
-import type { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
+import type { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
+import type { TotpSetupResponseDto } from '../../../../account/security/dto/response/totp-setup-response.dto';
 import { TotpSetupService } from '../services/totp-setup.service';
 
 @ApiTags('Onboarding - TOTP')

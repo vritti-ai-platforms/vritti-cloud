@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { BackupCodesResponseDto } from '../../totp/dto/response/backup-codes-response.dto';
+import { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
 import { VerifyPasskeyDto } from '../dto/request/verify-passkey.dto';
 import { PasskeyRegistrationOptionsDto } from '../dto/response/passkey-registration-options.dto';
 

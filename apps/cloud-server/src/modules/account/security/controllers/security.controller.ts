@@ -5,6 +5,7 @@ import { SessionTypeValues } from '@/db/schema';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
 import {
   ApiChangePassword,
+  ApiDisableAllMfa,
   ApiDisableTotp,
   ApiGetMfaStatus,
   ApiGetPasskeySetupOptions,
@@ -109,6 +110,7 @@ export class SecurityController {
 
   // Disables all MFA methods
   @Delete('mfa')
+  @ApiDisableAllMfa()
   async disableAllMfa(@UserId() userId: string): Promise<SuccessResponseDto> {
     this.logger.log(`DELETE /account/security/mfa - userId: ${userId}`);
     return this.securityService.disableAllMfa(userId);

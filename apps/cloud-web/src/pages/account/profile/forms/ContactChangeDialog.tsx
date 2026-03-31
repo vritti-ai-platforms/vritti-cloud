@@ -2,7 +2,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import type React from 'react';
 import { useState } from 'react';
-import { ContactChangeProgressIndicator } from '@/components/cloud/account/profile/ContactChangeProgressIndicator';
+import { ContactChangeProgressIndicator } from '@/components/account/profile/ContactChangeProgressIndicator';
 import type { ProfileData } from '@/schemas/cloud/account';
 import { ContactChangeSuccessStep } from './steps/ContactChangeSuccessStep';
 import { IdentityVerificationStep } from './steps/IdentityVerificationStep';
@@ -34,10 +34,7 @@ export const ContactChangeDialog: React.FC<Props> = ({ handle, contactType, prof
   const dialogTitle = contactType === 'email' ? 'Change Email' : 'Change Phone';
 
   return (
-    <Dialog
-      handle={handle}
-      title={dialogTitle}
-    >
+    <Dialog handle={handle} title={dialogTitle}>
       <div className="space-y-6">
         <ContactChangeProgressIndicator contactType={contactType} currentStep={STEP_MAP[step]} progress={progress} />
 
@@ -79,7 +76,11 @@ export const ContactChangeDialog: React.FC<Props> = ({ handle, contactType, prof
         )}
 
         {step === 'success' && (
-          <ContactChangeSuccessStep contactType={contactType} newContactValue={newContactValue} onClose={handle.close} />
+          <ContactChangeSuccessStep
+            contactType={contactType}
+            newContactValue={newContactValue}
+            onClose={handle.close}
+          />
         )}
       </div>
     </Dialog>

@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiGetMfaStatus, ApiSkipMfaSetup } from '../docs/mfa-status.docs';
-import type { MfaStatusResponseDto } from '../../totp/dto/response/mfa-status-response.dto';
+import type { MfaStatusResponseDto } from '../../../../account/security/dto/response/mfa-status-response.dto';
 import { MfaStatusService } from '../services/mfa-status.service';
 
 @ApiTags('Onboarding - MFA')

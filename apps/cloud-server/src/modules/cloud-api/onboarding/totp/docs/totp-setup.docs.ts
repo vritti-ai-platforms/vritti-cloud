@@ -1,8 +1,8 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { VerifyTotpDto } from '../dto/request/verify-totp.dto';
-import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
-import { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
+import { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
+import { TotpSetupResponseDto } from '../../../../account/security/dto/response/totp-setup-response.dto';
 
 export function ApiInitiateTotpSetup() {
   return applyDecorators(

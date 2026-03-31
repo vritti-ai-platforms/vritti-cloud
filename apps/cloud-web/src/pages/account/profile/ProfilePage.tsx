@@ -10,7 +10,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { AccountInformationCard } from '@/components/cloud/account/profile/AccountInformationCard';
+import { AccountInformationCard } from '@/components/account/profile/AccountInformationCard';
 import { useDeleteAccount } from '@/hooks/account/profile/useDeleteAccount';
 import { useProfile } from '@/hooks/account/profile/useProfile';
 import { useUpdateProfile } from '@/hooks/account/profile/useUpdateProfile';
@@ -114,8 +114,14 @@ export const ProfilePage: React.FC = () => {
         form={form}
         mutation={updateProfileMutation}
         isEditing={isEditing}
-        onChangeEmail={() => { setContactType('email'); contactDialog.open(); }}
-        onChangePhone={() => { setContactType('phone'); contactDialog.open(); }}
+        onChangeEmail={() => {
+          setContactType('email');
+          contactDialog.open();
+        }}
+        onChangePhone={() => {
+          setContactType('phone');
+          contactDialog.open();
+        }}
       />
 
       <AccountInformationCard profile={profile} />
@@ -128,11 +134,7 @@ export const ProfilePage: React.FC = () => {
         disabled={deleteAccountMutation.isPending}
       />
 
-      <ContactChangeDialog
-        handle={contactDialog}
-        contactType={contactType}
-        profile={profile}
-      />
+      <ContactChangeDialog handle={contactDialog} contactType={contactType} profile={profile} />
     </div>
   );
 };
