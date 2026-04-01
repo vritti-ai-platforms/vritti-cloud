@@ -5783,7 +5783,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/features/export": {
+    "/admin-api/versions/{versionId}/features/export/{format}": {
       "get": {
         "operationId": "FeatureController_exportFeatures",
         "parameters": [
@@ -6340,7 +6340,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/export": {
+    "/admin-api/versions/{versionId}/apps/export/{format}": {
       "get": {
         "operationId": "AppController_exportApps",
         "parameters": [
