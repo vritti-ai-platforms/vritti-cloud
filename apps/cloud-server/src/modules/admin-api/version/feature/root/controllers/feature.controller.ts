@@ -1,28 +1,29 @@
 import { FeatureService } from '@domain/version/feature/root/services/feature.service';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   CreateResponseDto,
+  ImportResponseDto,
   RequireSession,
   SuccessResponseDto,
   UploadedFile,
   type UploadedFileResult,
   UserId,
 } from '@vritti/api-sdk';
+import { type ExportFormat, getExportExt, getExportMimeType } from '@vritti/api-sdk/xlsx';
+import type { FastifyReply } from 'fastify';
 import { SessionTypeValues } from '@/db/schema';
-import type { ValidateImportResult } from '@/utils/validate-import-rows';
 import {
-  ApiBulkCreateFeatures,
   ApiCreateFeature,
   ApiDeleteFeature,
+  ApiExportFeatures,
   ApiFindFeaturesWithPermissions,
   ApiFindForTableFeatures,
   ApiGetFeatureById,
+  ApiImportFeatures,
   ApiUpdateFeature,
-  ApiValidateImportFeatures,
 } from '../docs/feature.docs';
 import { FeatureDto } from '../dto/entity/feature.dto';
-import { BulkCreateFeaturesDto } from '../dto/request/bulk-create-features.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '../dto/response/feature-table-response.dto';
@@ -62,6 +63,35 @@ export class FeatureController {
     return this.featureService.findWithPermissions(versionId);
   }
 
+  // Imports features from a spreadsheet file (all-or-nothing)
+  @Post('import')
+  @HttpCode(HttpStatus.OK)
+  @ApiConsumes('multipart/form-data')
+  @ApiImportFeatures()
+  async importFeatures(
+    @Param('versionId') versionId: string,
+    @UploadedFile() file: UploadedFileResult,
+  ): Promise<ImportResponseDto> {
+    this.logger.log('POST /admin-api/features/import');
+    return this.featureService.importFromFile(file.buffer, versionId);
+  }
+
+  // Exports all features as a file download
+  @Get('export/:format')
+  @ApiExportFeatures()
+  async exportFeatures(
+    @Param('versionId') versionId: string,
+    @Param('format') format: ExportFormat,
+    @Res() reply: FastifyReply,
+  ): Promise<void> {
+    this.logger.log('GET /admin-api/features/export');
+    const buffer = await this.featureService.exportToBuffer(versionId, format);
+    reply.header('Content-Type', getExportMimeType(format));
+    reply.header('Content-Disposition', `attachment; filename="features.${getExportExt(format)}"`);
+    reply.header('Content-Length', buffer.length);
+    return reply.send(buffer);
+  }
+
   // Returns a single feature by ID
   @Get(':id')
   @ApiGetFeatureById()
@@ -87,26 +117,4 @@ export class FeatureController {
     return this.featureService.delete(id);
   }
 
-  // Validates a CSV/Excel file of features and returns parsed rows with errors
-  @Post('validate')
-  @HttpCode(HttpStatus.OK)
-  @ApiConsumes('multipart/form-data')
-  @ApiValidateImportFeatures()
-  async validateImport(
-    @Param('versionId') versionId: string,
-    @UploadedFile() file: UploadedFileResult,
-  ): Promise<ValidateImportResult> {
-    this.logger.log('POST /admin-api/features/validate');
-    return this.featureService.validateImport(file.buffer, versionId);
-  }
-  I;
-
-  // Bulk-creates features for seeding; skips existing codes
-  @Post('bulk')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiBulkCreateFeatures()
-  bulkCreate(@Body() dto: BulkCreateFeaturesDto): Promise<SuccessResponseDto> {
-    this.logger.log('POST /admin-api/features/bulk');
-    return this.featureService.bulkCreate(dto);
-  }
 }

@@ -117,6 +117,11 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     });
   }
 
+  // Returns all apps for a given version
+  async findAllByVersionId(versionId: string): Promise<App[]> {
+    return this.model.findMany({ where: { versionId } });
+  }
+
   // Returns apps matching the given IDs
   async findByIds(appIds: string[]): Promise<App[]> {
     if (appIds.length === 0) return [];

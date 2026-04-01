@@ -5747,6 +5747,75 @@
         ]
       }
     },
+    "/admin-api/versions/{versionId}/features/import": {
+      "post": {
+        "operationId": "FeatureController_importFeatures",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import result with success status or validation errors."
+          },
+          "400": {
+            "description": "No file provided or spreadsheet is empty."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Import features from a spreadsheet file (all-or-nothing)",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/features/export": {
+      "get": {
+        "operationId": "FeatureController_exportFeatures",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel file download."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export all features as an Excel file",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
     "/admin-api/versions/{versionId}/features/{id}": {
       "get": {
         "operationId": "FeatureController_findById",
@@ -5889,78 +5958,6 @@
           }
         ],
         "summary": "Delete a feature",
-        "tags": [
-          "Admin - Features"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/features/validate": {
-      "post": {
-        "operationId": "FeatureController_validateImport",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "description": "App version UUID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Validation result with parsed rows and errors."
-          },
-          "400": {
-            "description": "No file provided or spreadsheet is empty."
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Validate a CSV/Excel file of features",
-        "tags": [
-          "Admin - Features"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/features/bulk": {
-      "post": {
-        "operationId": "FeatureController_bulkCreate",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkCreateFeaturesDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Features created (some may have been skipped)."
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Bulk create features for seeding",
         "tags": [
           "Admin - Features"
         ]
@@ -6307,6 +6304,75 @@
         ]
       }
     },
+    "/admin-api/versions/{versionId}/apps/import": {
+      "post": {
+        "operationId": "AppController_importApps",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Import result with success status or validation errors."
+          },
+          "400": {
+            "description": "No file provided or spreadsheet is empty."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Import apps from a spreadsheet file (all-or-nothing)",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/apps/export": {
+      "get": {
+        "operationId": "AppController_exportApps",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Excel file download."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Export all apps as an Excel file",
+        "tags": [
+          "Admin - Apps"
+        ]
+      }
+    },
     "/admin-api/versions/{versionId}/apps/{id}": {
       "get": {
         "operationId": "AppController_findById",
@@ -6449,78 +6515,6 @@
           }
         ],
         "summary": "Delete an app",
-        "tags": [
-          "Admin - Apps"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/apps/validate": {
-      "post": {
-        "operationId": "AppController_validateImport",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "description": "App version UUID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Validation result with parsed rows and errors."
-          },
-          "400": {
-            "description": "No file provided or spreadsheet is empty."
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Validate a CSV/Excel file of apps",
-        "tags": [
-          "Admin - Apps"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/apps/bulk": {
-      "post": {
-        "operationId": "AppController_bulkCreate",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/BulkCreateAppsDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Apps created (some may have been skipped)."
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Bulk create apps for seeding",
         "tags": [
           "Admin - Apps"
         ]
@@ -13176,6 +13170,11 @@
             "type": "number",
             "description": "Sort order for display",
             "example": 0
+          },
+          "permissions": {
+            "type": "string",
+            "description": "Comma-separated permission types for import",
+            "example": "VIEW,CREATE,EDIT"
           }
         },
         "required": [
@@ -13230,6 +13229,32 @@
             "format": "date-time",
             "nullable": true
           },
+          "permissions": {
+            "example": [
+              "VIEW",
+              "CREATE",
+              "EDIT"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "platforms": {
+            "example": [
+              "WEB",
+              "MOBILE"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "appCount": {
+            "type": "number",
+            "example": 2,
+            "description": "Number of apps this feature is assigned to"
+          },
           "canDelete": {
             "type": "boolean",
             "example": true,
@@ -13245,6 +13270,9 @@
           "isActive",
           "sortOrder",
           "createdAt",
+          "permissions",
+          "platforms",
+          "appCount",
           "canDelete"
         ]
       },
@@ -13358,23 +13386,13 @@
             "type": "number",
             "description": "Sort order for display",
             "example": 0
+          },
+          "permissions": {
+            "type": "string",
+            "description": "Comma-separated permission types for import",
+            "example": "VIEW,CREATE,EDIT"
           }
         }
-      },
-      "BulkCreateFeaturesDto": {
-        "type": "object",
-        "properties": {
-          "features": {
-            "description": "Array of features to create",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CreateFeatureDto"
-            }
-          }
-        },
-        "required": [
-          "features"
-        ]
       },
       "FeaturePermissionTypesResponseDto": {
         "type": "object",
@@ -13672,21 +13690,6 @@
             "example": 0
           }
         }
-      },
-      "BulkCreateAppsDto": {
-        "type": "object",
-        "properties": {
-          "apps": {
-            "description": "Array of apps to create",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CreateAppDto"
-            }
-          }
-        },
-        "required": [
-          "apps"
-        ]
       },
       "AppFeatureTableRowDto": {
         "type": "object",

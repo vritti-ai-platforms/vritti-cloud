@@ -1,17 +1,16 @@
-import { APPS_QUERY_KEY, useApps, useBulkCreateApps, useValidateAppImport } from '@hooks/admin/apps';
+import { APPS_QUERY_KEY, useApps } from '@hooks/admin/apps';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, getSelectionColumn, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
 import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
-import { AppWindow, Eye, Plus, Upload } from 'lucide-react';
+import { AppWindow, Eye, Plus } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useNavigate } from 'react-router-dom';
-import { ImportDialog } from '@/components/ImportDialog';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { App } from '@/schemas/admin/apps';
 import { AddAppForm } from './forms/AddAppForm';
@@ -24,14 +23,6 @@ export const AdminAppsPage = () => {
   const { versionId } = useVersionContext();
   const { data: response, isLoading } = useApps(versionId);
   const addDialog = useDialog();
-  const validateImportMutation = useValidateAppImport(versionId);
-  const bulkCreateMutation = useBulkCreateApps(versionId);
-  const importDialog = useDialog({
-    onClose: () => {
-      validateImportMutation.reset();
-      bulkCreateMutation.reset();
-    },
-  });
 
   const { table } = useDataTable({
     columns: getColumns({
@@ -40,7 +31,7 @@ export const AdminAppsPage = () => {
     slug: TABLE_SLUG,
     label: 'app',
     serverState: response,
-    enableRowSelection: false,
+    enableRowSelection: true,
     enableSorting: true,
     enableMultiSort: false,
     onStatePush: () => queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY(versionId) }),
@@ -48,10 +39,8 @@ export const AdminAppsPage = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Header */}
       <PageHeader title="Apps" description="Manage the application catalog" />
 
-      {/* Table */}
       <DataTable
         table={table}
         isLoading={isLoading}
@@ -66,16 +55,33 @@ export const AdminAppsPage = () => {
           <ValueFilter key="name" name="name" label="Name" fieldType="string" />,
           <ValueFilter key="code" name="code" label="Code" fieldType="string" />,
         ]}
+        importExport={{
+          columns: [
+            { key: 'code', label: 'Code' },
+            { key: 'name', label: 'Name' },
+            { key: 'icon', label: 'Icon' },
+            { key: 'description', label: 'Description' },
+          ],
+          sampleData: [
+            { code: 'catalog', name: 'Catalog Management', icon: 'layout-grid', description: 'Product catalog app' },
+            { code: 'pos', name: 'Point of Sale', icon: 'monitor', description: 'POS terminal' },
+          ],
+          importEndpoint: `admin-api/versions/${versionId}/apps/import`,
+          exportEndpoint: `admin-api/versions/${versionId}/apps/export`,
+          transformExportRow: (row) => ({
+            code: row.code,
+            name: row.name,
+            icon: row.icon,
+            description: row.description ?? '',
+          }),
+          filename: 'apps',
+          onSuccess: () => queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY(versionId) }),
+        }}
         toolbarActions={{
           actions: (
-            <div className="flex items-center gap-2">
-              <Button variant="outline" startAdornment={<Upload className="size-4" />} size="sm" onClick={importDialog.open}>
-                Import
-              </Button>
-              <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-                Add App
-              </Button>
-            </div>
+            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+              Add App
+            </Button>
           ),
         }}
         emptyStateConfig={{
@@ -96,24 +102,6 @@ export const AdminAppsPage = () => {
         description="Enter the details for the new application."
         content={(close) => <AddAppForm onSuccess={close} onCancel={close} />}
       />
-
-      <ImportDialog
-        handle={importDialog}
-        title="Import Apps"
-        description="Upload a CSV or Excel file with app data."
-        columns={[
-          { key: 'code', label: 'Code' },
-          { key: 'name', label: 'Name' },
-          { key: 'icon', label: 'Icon' },
-          { key: 'description', label: 'Description' },
-        ]}
-        validateMutation={validateImportMutation}
-        importMutation={bulkCreateMutation}
-        sampleData={[
-          { code: 'catalog', name: 'Catalog Management', icon: 'layout-grid', description: 'Product catalog app' },
-          { code: 'pos', name: 'Point of Sale', icon: 'monitor', description: 'POS terminal' },
-        ]}
-      />
     </div>
   );
 };
@@ -124,6 +112,7 @@ interface ColumnActions {
 
 function getColumns({ onView }: ColumnActions): ColumnDef<App, unknown>[] {
   return [
+    getSelectionColumn<App>(),
     {
       accessorKey: 'icon',
       header: '',

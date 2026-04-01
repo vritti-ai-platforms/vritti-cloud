@@ -1,8 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiProduces, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { AppDto } from '../dto/entity/app.dto';
-import { BulkCreateAppsDto } from '../dto/request/bulk-create-apps.dto';
 import { CreateAppDto } from '../dto/request/create-app.dto';
 import { UpdateAppDto } from '../dto/request/update-app.dto';
 import { AppTableResponseDto } from '../dto/response/app-table-response.dto';
@@ -77,24 +76,25 @@ export function ApiDeleteApp() {
   );
 }
 
-// Swagger docs for validating a CSV/Excel import of apps
-export function ApiValidateImportApps() {
+// Swagger docs for importing apps from a spreadsheet (all-or-nothing)
+export function ApiImportApps() {
   return applyDecorators(
-    ApiOperation({ summary: 'Validate a CSV/Excel file of apps' }),
+    ApiOperation({ summary: 'Import apps from a spreadsheet file (all-or-nothing)' }),
     ApiParam({ name: 'versionId', description: 'App version UUID' }),
-    ApiResponse({ status: 200, description: 'Validation result with parsed rows and errors.' }),
+    ApiResponse({ status: 200, description: 'Import result with success status or validation errors.' }),
     ApiResponse({ status: 400, description: 'No file provided or spreadsheet is empty.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
 
-// Swagger docs for bulk-creating apps
-export function ApiBulkCreateApps() {
+// Swagger docs for exporting apps as an Excel file
+export function ApiExportApps() {
   return applyDecorators(
-    ApiOperation({ summary: 'Bulk create apps for seeding' }),
-    ApiBody({ type: BulkCreateAppsDto }),
-    ApiResponse({ status: 201, description: 'Apps created (some may have been skipped).' }),
-    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiOperation({ summary: 'Export all apps as an Excel file' }),
+    ApiParam({ name: 'versionId', description: 'App version UUID' }),
+    ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+    ApiResponse({ status: 200, description: 'Excel file download.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
+

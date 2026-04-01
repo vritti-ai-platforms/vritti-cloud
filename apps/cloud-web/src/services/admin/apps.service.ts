@@ -1,6 +1,5 @@
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
-import type { ValidateImportResponse } from '@/schemas/admin/import';
 import type {
   AddAppPriceData,
   App,
@@ -96,23 +95,3 @@ export function removeAppPrice({ versionId, appId, priceId }: { versionId: strin
   return axios.delete(`admin-api/versions/${versionId}/apps/${appId}/prices/${priceId}`).then(() => undefined);
 }
 
-// Uploads a file for validation and returns parsed rows with errors
-export function validateAppImport(versionId: string, file: File): Promise<ValidateImportResponse> {
-  const formData = new FormData();
-  formData.append('file', file);
-  return axios
-    .post<ValidateImportResponse>(`admin-api/versions/${versionId}/apps/validate`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      showSuccessToast: false,
-    })
-    .then((r) => r.data);
-}
-
-// Bulk creates apps from validated data
-export function bulkCreateApps(versionId: string, apps: Record<string, string>[]): Promise<SuccessResponse> {
-  return axios
-    .post<SuccessResponse>(`admin-api/versions/${versionId}/apps/bulk`, {
-      apps: apps.map((a, i) => ({ ...a, versionId, sortOrder: i })),
-    })
-    .then((r) => r.data);
-}

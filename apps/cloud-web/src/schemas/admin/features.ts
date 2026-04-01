@@ -8,6 +8,9 @@ export interface Feature {
   versionId: string;
   icon: string;
   description: string | null;
+  permissions: string[];
+  platforms: string[];
+  appCount: number;
   sortOrder: number;
   createdAt: string;
   updatedAt: string | null;

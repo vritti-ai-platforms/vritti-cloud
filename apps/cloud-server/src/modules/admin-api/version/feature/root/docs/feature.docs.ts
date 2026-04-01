@@ -1,8 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiProduces, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { FeatureDto } from '../dto/entity/feature.dto';
-import { BulkCreateFeaturesDto } from '../dto/request/bulk-create-features.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
 import { FeatureSelectResponseDto } from '../dto/response/feature-select-response.dto';
@@ -97,24 +96,25 @@ export function ApiDeleteFeature() {
   );
 }
 
-// Swagger docs for validating a CSV/Excel import of features
-export function ApiValidateImportFeatures() {
+// Swagger docs for importing features from a spreadsheet (all-or-nothing)
+export function ApiImportFeatures() {
   return applyDecorators(
-    ApiOperation({ summary: 'Validate a CSV/Excel file of features' }),
+    ApiOperation({ summary: 'Import features from a spreadsheet file (all-or-nothing)' }),
     ApiParam({ name: 'versionId', description: 'App version UUID' }),
-    ApiResponse({ status: 200, description: 'Validation result with parsed rows and errors.' }),
+    ApiResponse({ status: 200, description: 'Import result with success status or validation errors.' }),
     ApiResponse({ status: 400, description: 'No file provided or spreadsheet is empty.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
 
-// Swagger docs for bulk-creating features
-export function ApiBulkCreateFeatures() {
+// Swagger docs for exporting features as an Excel file
+export function ApiExportFeatures() {
   return applyDecorators(
-    ApiOperation({ summary: 'Bulk create features for seeding' }),
-    ApiBody({ type: BulkCreateFeaturesDto }),
-    ApiResponse({ status: 201, description: 'Features created (some may have been skipped).' }),
-    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiOperation({ summary: 'Export all features as an Excel file' }),
+    ApiParam({ name: 'versionId', description: 'App version UUID' }),
+    ApiProduces('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'),
+    ApiResponse({ status: 200, description: 'Excel file download.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
+

@@ -5,6 +5,7 @@ import {
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
+  ImportResponseDto,
   NotFoundException,
   SelectOptionsQueryDto,
   type SelectQueryResult,
@@ -13,12 +14,12 @@ import {
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { apps } from '@/db/schema';
 import { AppDto } from '@/modules/admin-api/version/app/root/dto/entity/app.dto';
-import type { BulkCreateAppsDto } from '@/modules/admin-api/version/app/root/dto/request/bulk-create-apps.dto';
 import { CreateAppDto } from '@/modules/admin-api/version/app/root/dto/request/create-app.dto';
 import type { UpdateAppDto } from '@/modules/admin-api/version/app/root/dto/request/update-app.dto';
 import { AppTableResponseDto } from '@/modules/admin-api/version/app/root/dto/response/app-table-response.dto';
+import { type ExportFormat, buildExportBuffer } from '@vritti/api-sdk/xlsx';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
-import { type ValidateImportResult, validateImportRows } from '@/utils/validate-import-rows';
+import { validateImportRows } from '@/utils/validate-import-rows';
 import { AppRepository } from '../repositories/app.repository';
 
 @Injectable()
@@ -137,10 +138,11 @@ export class AppService {
     return { success: true, message: 'App deleted successfully.' };
   }
 
-  // Validates a spreadsheet of apps and returns parsed rows with errors
-  async validateImport(buffer: Buffer, versionId: string): Promise<ValidateImportResult> {
+  // Validates and imports apps from a spreadsheet buffer (all-or-nothing)
+  async importFromFile(buffer: Buffer, versionId: string): Promise<ImportResponseDto> {
     const rows = parseSpreadsheet(buffer);
     const result = await validateImportRows(rows, CreateAppDto, { versionId });
+
     for (const row of result.rows) {
       if (!row.valid) continue;
       const existing = await this.appRepository.findByCode(row.data.code);
@@ -151,24 +153,46 @@ export class AppService {
         result.summary.invalid++;
       }
     }
-    this.logger.log(`Validated app import: ${result.summary.valid} valid, ${result.summary.invalid} invalid`);
-    return result;
+
+    if (result.summary.invalid > 0) {
+      this.logger.log(`App import validation failed: ${result.summary.valid} valid, ${result.summary.invalid} invalid`);
+      return { success: false, message: 'Validation failed.', rows: result.rows, summary: result.summary };
+    }
+
+    let created = 0;
+    let updated = 0;
+    for (const row of result.rows) {
+      const existing = await this.appRepository.findByCode(row.data.code);
+      if (existing) {
+        await this.appRepository.update(existing.id, {
+          name: row.data.name,
+          icon: row.data.icon,
+          description: row.data.description || undefined,
+        } as UpdateAppDto);
+        updated++;
+      } else {
+        await this.appRepository.create(row.data as unknown as CreateAppDto);
+        created++;
+      }
+    }
+
+    this.logger.log(`Imported apps for version ${versionId}: ${created} created, ${updated} updated`);
+    return { success: true, message: 'Import complete.', created, updated };
   }
 
-  // Bulk-creates apps for seeding; skips existing codes
-  async bulkCreate(dto: BulkCreateAppsDto): Promise<SuccessResponseDto> {
-    let created = 0;
-    let skipped = 0;
-    for (const appDto of dto.apps) {
-      const existing = await this.appRepository.findByCode(appDto.code);
-      if (existing) {
-        skipped++;
-        continue;
-      }
-      await this.appRepository.create(appDto);
-      created++;
-    }
-    this.logger.log(`Bulk created apps: ${created} created, ${skipped} skipped`);
-    return { success: true, message: `${created} app(s) imported.` };
+  // Exports all apps for a version as an Excel buffer
+  async exportToBuffer(versionId: string, format: ExportFormat = 'xlsx'): Promise<Buffer> {
+    const allApps = await this.appRepository.findAllByVersionId(versionId);
+
+    const rows = allApps.map((app) => ({
+      code: app.code,
+      name: app.name,
+      icon: app.icon,
+      description: app.description ?? '',
+    }));
+
+    this.logger.log(`Exported ${rows.length} app(s) for version ${versionId}`);
+    return buildExportBuffer(rows, format);
   }
+
 }
