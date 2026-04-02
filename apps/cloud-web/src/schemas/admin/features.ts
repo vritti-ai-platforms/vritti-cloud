@@ -1,4 +1,5 @@
 import type { TableResponse } from '@vritti/quantum-ui/api-response';
+import type { IconName } from 'lucide-react/dynamic';
 import { z } from 'zod';
 
 export interface Feature {
@@ -6,7 +7,7 @@ export interface Feature {
   code: string;
   name: string;
   versionId: string;
-  icon: string;
+  icon: IconName;
   description: string | null;
   permissions: string[];
   platforms: string[];

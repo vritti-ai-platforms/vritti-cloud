@@ -3,14 +3,14 @@ import { FEATURES_QUERY_KEY } from '@hooks/admin/features/useFeatures';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, getSelectionColumn, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/utils/slug';
 import { Blocks, Eye, Plus } from 'lucide-react';
-import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
+import { DynamicIcon } from 'lucide-react/dynamic';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { Feature } from '@/schemas/admin/features';
@@ -61,8 +61,20 @@ export const FeaturesPage = () => {
             { key: 'permissions', label: 'Permissions' },
           ],
           sampleData: [
-            { code: 'products', name: 'Products', icon: 'package', description: 'Product catalog management', permissions: 'VIEW,CREATE,EDIT,DELETE' },
-            { code: 'orders', name: 'Orders', icon: 'clipboard-list', description: 'Order management', permissions: 'VIEW,CREATE' },
+            {
+              code: 'products',
+              name: 'Products',
+              icon: 'package',
+              description: 'Product catalog management',
+              permissions: 'VIEW,CREATE,EDIT,DELETE',
+            },
+            {
+              code: 'orders',
+              name: 'Orders',
+              icon: 'clipboard-list',
+              description: 'Order management',
+              permissions: 'VIEW,CREATE',
+            },
           ],
           importEndpoint: `admin-api/versions/${versionId}/features/import`,
           exportEndpoint: `admin-api/versions/${versionId}/features/export`,
@@ -116,7 +128,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
     {
       accessorKey: 'icon',
       header: '',
-      cell: ({ row }) => <DynamicIcon name={row.original.icon as IconName} className="size-4 text-muted-foreground" />,
+      cell: ({ row }) => <DynamicIcon name={row.original.icon} className="size-4 text-muted-foreground" />,
       enableSorting: false,
       enableHiding: false,
       size: 40,
@@ -167,11 +179,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <RowActions
-          actions={[
-            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
-          ]}
-        />
+        <RowActions actions={[{ id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) }]} />
       ),
       enableSorting: false,
       enableHiding: false,
