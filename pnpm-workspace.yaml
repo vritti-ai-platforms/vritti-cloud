@@ -14,5 +14,5 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
-  '@vritti/api-sdk': link:../api-sdk
-  '@vritti/quantum-ui': link:../quantum-ui
+  # '@vritti/api-sdk': link:../api-sdk
+  # '@vritti/quantum-ui': link:../quantum-ui

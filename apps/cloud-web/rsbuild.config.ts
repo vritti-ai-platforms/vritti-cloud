@@ -60,6 +60,9 @@ export default defineConfig({
   tools: {
     rspack: {
       ignoreWarnings: [/Critical dependency: the request of a dependency is an expression/],
+      watchOptions: {
+        ignored: ['**/node_modules/**', '**/dist/**', '**/cloud-server/**'],
+      },
     },
   },
   // PostCSS configuration is in postcss.config.mjs

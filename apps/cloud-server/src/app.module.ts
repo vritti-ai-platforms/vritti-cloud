@@ -94,8 +94,6 @@ import { ServicesModule } from './services/services.module';
           // Relations must be passed separately for db.query to work (drizzle-orm v2)
           drizzleRelations: relations,
 
-          // Connection pool configuration
-          connectionCacheTTL: 300000, // 5 minutes
           maxConnections: 10,
         };
         return options;
