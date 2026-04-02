@@ -49,7 +49,7 @@ export class RegionService {
   ) {}
 
   // Returns paginated region options for the select component
-  findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+  findForSelect(query: SelectOptionsQueryDto & { isActive?: boolean }): Promise<SelectQueryResult> {
     this.logger.log(`Fetched region select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
     return this.regionRepository.findForSelect({
       value: query.valueKey || 'id',
@@ -61,7 +61,7 @@ export class RegionService {
       offset: query.offset,
       values: query.values,
       excludeIds: query.excludeIds,
-      where: { isActive: true },
+      where: query.isActive !== undefined ? { isActive: query.isActive } : undefined,
       orderBy: { name: 'asc' },
     });
   }
