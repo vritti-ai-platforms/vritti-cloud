@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { type SQL, and, countDistinct, eq, inArray, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
 import { appFeatures, apps, featureMicrofrontends, featurePermissions, features, microfrontends } from '@/db/schema';
 
@@ -33,7 +33,9 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
 
   // Counts how many app_features reference a given feature
   // Returns all features for a version with permissions — single query for export
-  async findAllForExport(versionId: string): Promise<{ code: string; name: string; icon: string; description: string | null; permissions: string[] }[]> {
+  async findAllForExport(
+    versionId: string,
+  ): Promise<{ code: string; name: string; icon: string; description: string | null; permissions: string[] }[]> {
     const rows = await this.db
       .select({
         code: features.code,
@@ -53,12 +55,18 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   }
 
   // Returns all features for a version with assignment status for a given app
-  async findAllWithAssignment(appId: string, options: {
-    where?: SQL;
-    orderBy?: SQL[];
-    limit: number;
-    offset: number;
-  }): Promise<{ result: Array<{ featureId: string; code: string; name: string; icon: string; isAssigned: boolean }>; count: number }> {
+  async findAllWithAssignment(
+    appId: string,
+    options: {
+      where?: SQL;
+      orderBy?: SQL[];
+      limit: number;
+      offset: number;
+    },
+  ): Promise<{
+    result: Array<{ featureId: string; code: string; name: string; icon: string; isAssigned: boolean }>;
+    count: number;
+  }> {
     return this.findAllAndCount({
       select: {
         featureId: features.id,
@@ -67,7 +75,7 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
         icon: features.icon,
         isAssigned: sql<boolean>`${appFeatures.id} is not null`,
       },
-      leftJoin: { table: appFeatures, on: and(eq(appFeatures.featureId, features.id), eq(appFeatures.appId, appId))! },
+      leftJoin: { table: appFeatures, on: and(eq(appFeatures.featureId, features.id), eq(appFeatures.appId, appId)) },
       ...options,
     });
   }

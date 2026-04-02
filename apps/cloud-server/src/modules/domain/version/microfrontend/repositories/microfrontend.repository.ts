@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService, type SelectQueryResult } from '@vritti/api-sdk';
-import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
+import { eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Microfrontend } from '@/db/schema';
 import { featureMicrofrontends, microfrontends, versions } from '@/db/schema';
 import type { MicrofrontendSelectQueryDto } from '@/modules/select-api/dto/microfrontend-select-query.dto';
@@ -17,7 +17,11 @@ export class MicrofrontendRepository extends PrimaryBaseRepository<typeof microf
   }
 
   // Finds a microfrontend by version, code, and platform for uniqueness check
-  async findByVersionAndCodeAndPlatform(versionId: string, code: string, platform: string): Promise<Microfrontend | undefined> {
+  async findByVersionAndCodeAndPlatform(
+    versionId: string,
+    code: string,
+    platform: string,
+  ): Promise<Microfrontend | undefined> {
     return this.model.findFirst({ where: { versionId, code, platform } });
   }
 

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, count, eq, inArray, sql, type SQL } from '@vritti/api-sdk/drizzle-orm';
+import { and, count, eq, inArray, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { AppFeature } from '@/db/schema';
 import { appFeatures, features, roleTemplateFeaturePermissions } from '@/db/schema';
 
@@ -39,7 +39,9 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
   }
 
   // Upserts app-feature rows using on-conflict update
-  async upsertMany(rows: Array<{ versionId: string; appId: string; featureId: string; sortOrder?: number }>): Promise<void> {
+  async upsertMany(
+    rows: Array<{ versionId: string; appId: string; featureId: string; sortOrder?: number }>,
+  ): Promise<void> {
     if (rows.length === 0) return;
     await this.db
       .insert(appFeatures)
@@ -57,10 +59,7 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
   // Returns the set of feature IDs that exist in the features table from the given list
   async findExistingFeatureIds(featureIds: string[]): Promise<Set<string>> {
     if (featureIds.length === 0) return new Set();
-    const rows = await this.db
-      .select({ id: features.id })
-      .from(features)
-      .where(inArray(features.id, featureIds));
+    const rows = await this.db.select({ id: features.id }).from(features).where(inArray(features.id, featureIds));
     return new Set(rows.map((r) => r.id));
   }
 
