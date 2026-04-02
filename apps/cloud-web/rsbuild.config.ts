@@ -57,5 +57,10 @@ export default defineConfig({
     },
   },
   plugins: [pluginReact()],
+  tools: {
+    rspack: {
+      ignoreWarnings: [/Critical dependency: the request of a dependency is an expression/],
+    },
+  },
   // PostCSS configuration is in postcss.config.mjs
 });
