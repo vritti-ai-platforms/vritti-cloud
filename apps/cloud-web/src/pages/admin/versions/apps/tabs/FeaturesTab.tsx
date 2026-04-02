@@ -1,22 +1,37 @@
-import { APP_FEATURES_TABLE_KEY, useAppFeaturesTable, useRemoveAppFeature } from '@hooks/admin/apps';
+import { APP_FEATURES_TABLE_KEY, useAppFeaturesTable, useAssignAppFeatures, useRemoveAppFeature } from '@hooks/admin/apps';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
-import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
-import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
-import { Blocks, Plus, Trash2 } from 'lucide-react';
+import { Checkbox } from '@vritti/quantum-ui/Checkbox';
+import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { Blocks } from 'lucide-react';
+import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { AppFeatureTableRow } from '@/schemas/admin/apps';
-import { AssignFeatureForm } from '../forms/AssignFeatureForm';
 
-interface ColumnActions {
-  onRemove: (row: AppFeatureTableRow) => void;
-}
-
-// Builds column definitions for the app features data table
-function getColumns({ onRemove }: ColumnActions): ColumnDef<AppFeatureTableRow, unknown>[] {
+function getColumns(onToggle: (row: AppFeatureTableRow) => void): ColumnDef<AppFeatureTableRow, unknown>[] {
   return [
+    {
+      id: 'assigned',
+      header: '',
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.original.isAssigned}
+          onCheckedChange={() => onToggle(row.original)}
+          aria-label={`${row.original.isAssigned ? 'Remove' : 'Assign'} ${row.original.name}`}
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+      size: 40,
+    },
+    {
+      accessorKey: 'icon',
+      header: '',
+      cell: ({ row }) => <DynamicIcon name={row.original.icon as IconName} className="size-4 text-muted-foreground" />,
+      enableSorting: false,
+      enableHiding: false,
+      size: 40,
+    },
     {
       accessorKey: 'code',
       header: 'Code',
@@ -30,43 +45,32 @@ function getColumns({ onRemove }: ColumnActions): ColumnDef<AppFeatureTableRow, 
       accessorKey: 'name',
       header: 'Name',
     },
-    {
-      id: 'actions',
-      header: '',
-      cell: ({ row }) => (
-        <RowActions
-          actions={[
-            { id: 'remove', icon: Trash2, label: 'Remove', variant: 'destructive', onClick: () => onRemove(row.original) },
-          ]}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
   ];
 }
 
-// Features tab — data table of assigned features with search and assign dialog
 export const FeaturesTab = ({ appId }: { appId: string }) => {
   const queryClient = useQueryClient();
   const { versionId } = useVersionContext();
   const { data: response, isLoading } = useAppFeaturesTable(versionId, appId);
-  const confirm = useConfirm();
-  const assignDialog = useDialog();
+  const assignMutation = useAssignAppFeatures();
   const removeMutation = useRemoveAppFeature();
 
-  async function handleRemove(row: AppFeatureTableRow) {
-    const confirmed = await confirm({
-      title: `Remove ${row.name}?`,
-      description: 'This feature will be unassigned from the app.',
-      confirmLabel: 'Remove',
-      variant: 'destructive',
-    });
-    if (confirmed) removeMutation.mutate({ versionId, appId, featureId: row.featureId });
+  function handleToggle(row: AppFeatureTableRow) {
+    if (row.isAssigned) {
+      removeMutation.mutate(
+        { versionId, appId, featureId: row.featureId },
+        { onSuccess: () => queryClient.invalidateQueries({ queryKey: APP_FEATURES_TABLE_KEY(versionId, appId) }) },
+      );
+    } else {
+      assignMutation.mutate(
+        { versionId, appId, data: { featureIds: [row.featureId] } },
+        { onSuccess: () => queryClient.invalidateQueries({ queryKey: APP_FEATURES_TABLE_KEY(versionId, appId) }) },
+      );
+    }
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ onRemove: handleRemove }),
+    columns: getColumns(handleToggle),
     slug: `app-features-${appId}`,
     label: 'feature',
     serverState: response,
@@ -81,6 +85,7 @@ export const FeaturesTab = ({ appId }: { appId: string }) => {
       <DataTable
         table={table}
         isLoading={isLoading}
+        mode="compact"
         searchConfig={{
           columns: [
             { id: 'code', label: 'Code' },
@@ -88,37 +93,11 @@ export const FeaturesTab = ({ appId }: { appId: string }) => {
           ],
           searchAll: true,
         }}
-        toolbarActions={{
-          actions: (
-            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={assignDialog.open}>
-              Assign Features
-            </Button>
-          ),
-        }}
         emptyStateConfig={{
           icon: Blocks,
-          title: 'No features assigned',
-          description: 'Assign features from the catalog to this app.',
-          action: (
-            <Button size="sm" onClick={assignDialog.open}>
-              <Plus className="size-4" />
-              Assign Features
-            </Button>
-          ),
+          title: 'No features found',
+          description: 'No features have been created for this version yet.',
         }}
-      />
-
-      <Dialog
-        handle={assignDialog}
-        title="Assign Features"
-        description="Select features to assign to this app."
-        content={(close) => (
-          <AssignFeatureForm
-            appId={appId}
-            onSuccess={close}
-            onCancel={close}
-          />
-        )}
       />
     </div>
   );

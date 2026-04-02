@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, count, eq, inArray, type SQL } from '@vritti/api-sdk/drizzle-orm';
+import { and, count, eq, inArray, sql, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { AppFeature } from '@/db/schema';
 import { appFeatures, features, roleTemplateFeaturePermissions } from '@/db/schema';
 

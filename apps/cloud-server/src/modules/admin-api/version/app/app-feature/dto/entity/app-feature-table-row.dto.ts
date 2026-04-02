@@ -10,21 +10,26 @@ export class AppFeatureTableRowDto {
   @ApiProperty({ example: 'Create Dine-In Order' })
   name: string;
 
-  @ApiProperty({ example: 0 })
-  sortOrder: number;
+  @ApiProperty({ example: 'clipboard-list' })
+  icon: string;
+
+  @ApiProperty({ example: true })
+  isAssigned: boolean;
 
   // Maps a raw join row to an AppFeatureTableRowDto
   static from(row: {
     featureId: string;
     code: string;
     name: string;
-    sortOrder: number;
+    icon: string;
+    isAssigned: boolean;
   }): AppFeatureTableRowDto {
     const dto = new AppFeatureTableRowDto();
     dto.featureId = row.featureId;
     dto.code = row.code;
     dto.name = row.name;
-    dto.sortOrder = row.sortOrder;
+    dto.icon = row.icon;
+    dto.isAssigned = row.isAssigned;
     return dto;
   }
 }

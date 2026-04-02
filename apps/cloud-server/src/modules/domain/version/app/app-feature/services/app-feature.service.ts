@@ -7,9 +7,10 @@ import {
   NotFoundException,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { and } from '@vritti/api-sdk/drizzle-orm';
+import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { features } from '@/db/schema';
 import { AppRepository } from '../../root/repositories/app.repository';
+import { FeatureRepository } from '@domain/version/feature/root/repositories/feature.repository';
 import type { AssignFeaturesDto } from '@/modules/admin-api/version/app/app-feature/dto/request/assign-features.dto';
 import { AppFeatureTableRowDto } from '@/modules/admin-api/version/app/app-feature/dto/entity/app-feature-table-row.dto';
 import type { AppFeatureTableResponseDto } from '@/modules/admin-api/version/app/app-feature/dto/response/app-feature-table-response.dto';
@@ -26,22 +27,22 @@ export class AppFeatureService {
 
   constructor(
     private readonly appFeatureRepository: AppFeatureRepository,
+    private readonly featureRepository: FeatureRepository,
     private readonly appRepository: AppRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
   // Returns app features for the data table with server-stored filter/sort/search/pagination state
-  async findForTable(userId: string, appId: string): Promise<AppFeatureTableResponseDto> {
-    await this.ensureAppExists(appId);
+  async findForTable(userId: string, appId: string, versionId: string): Promise<AppFeatureTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, `app-features-${appId}`);
     const filterWhere = FilterProcessor.buildWhere(state.filters, AppFeatureService.FIELD_MAP);
     const searchWhere = FilterProcessor.buildSearch(state.search, AppFeatureService.FIELD_MAP);
-    const where = and(filterWhere, searchWhere);
+    const where = and(eq(features.versionId, versionId), filterWhere, searchWhere);
     const orderBy = FilterProcessor.buildOrderBy(state.sort, AppFeatureService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
-    const { rows, total } = await this.appFeatureRepository.findAllForTable(appId, where, orderBy, limit, offset);
-    this.logger.log(`Fetched app features table for app: ${appId} (${total} results, limit: ${limit}, offset: ${offset})`);
-    return { result: rows.map(AppFeatureTableRowDto.from), count: total, state, activeViewId };
+    const { result, count } = await this.featureRepository.findAllWithAssignment(appId, { where, orderBy, limit, offset });
+    this.logger.log(`Fetched app features table for app: ${appId} (${count} results, limit: ${limit}, offset: ${offset})`);
+    return { result: result.map(AppFeatureTableRowDto.from), count, state, activeViewId };
   }
 
   // Lists all features assigned to an app with details

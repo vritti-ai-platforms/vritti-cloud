@@ -235,7 +235,13 @@ export class FeatureService {
         if (changed) updated++;
         else skipped++;
       } else {
-        const feature = await this.featureRepository.create(row.data as unknown as CreateFeatureDto);
+        const feature = await this.featureRepository.create({
+          versionId,
+          code: row.data.code,
+          name: row.data.name,
+          icon: row.data.icon,
+          description: row.data.description || null,
+        });
         featureId = feature.id;
         created++;
 

@@ -85,7 +85,7 @@ export const PricesTab = () => {
     <div className="pt-4">
       <DataTable
         table={table}
-        minHeight="400px"
+        mode="compact"
         isLoading={isLoading}
         searchConfig={{
           columns: [

@@ -160,6 +160,7 @@ export class AuthController {
   // Invalidates the current session and clears the refresh cookie
   @Post('logout')
   @HttpCode(HttpStatus.OK)
+  @RequireSession(SessionTypeValues.CLOUD, SessionTypeValues.ADMIN)
   @ApiLogout()
   async logout(
     @AccessToken() accessToken: string,

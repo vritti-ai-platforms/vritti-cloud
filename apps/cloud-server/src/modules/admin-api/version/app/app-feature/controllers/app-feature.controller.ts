@@ -24,9 +24,13 @@ export class AppFeatureController {
   // Returns app features for the data table with server-stored state
   @Get('table')
   @ApiFindForTableAppFeatures()
-  findForTable(@UserId() userId: string, @Param('appId') appId: string): Promise<AppFeatureTableResponseDto> {
+  findForTable(
+    @UserId() userId: string,
+    @Param('appId') appId: string,
+    @Param('versionId') versionId: string,
+  ): Promise<AppFeatureTableResponseDto> {
     this.logger.log(`GET /admin-api/apps/${appId}/features/table`);
-    return this.appFeatureService.findForTable(userId, appId);
+    return this.appFeatureService.findForTable(userId, appId, versionId);
   }
 
   // Lists features assigned to an app

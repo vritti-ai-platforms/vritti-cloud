@@ -115,7 +115,7 @@ export const AppsTab = ({ planId }: { planId: string }) => {
     <div className="flex flex-col gap-4 pt-4">
       <DataTable
         table={table}
-        minHeight="400px"
+        mode="compact"
         isLoading={isLoading}
         searchConfig={{
           columns: [{ id: 'appCode', label: 'App Code' }],

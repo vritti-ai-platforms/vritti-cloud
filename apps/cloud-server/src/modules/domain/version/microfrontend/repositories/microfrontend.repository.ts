@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService, type SelectQueryResult } from '@vritti/api-sdk';
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Microfrontend } from '@/db/schema';
-import { featureMicrofrontends, microfrontends } from '@/db/schema';
+import { featureMicrofrontends, microfrontends, versions } from '@/db/schema';
+import type { MicrofrontendSelectQueryDto } from '@/modules/select-api/dto/microfrontend-select-query.dto';
 
 @Injectable()
 export class MicrofrontendRepository extends PrimaryBaseRepository<typeof microfrontends> {
@@ -39,24 +40,31 @@ export class MicrofrontendRepository extends PrimaryBaseRepository<typeof microf
     return { result: result as Microfrontend[], count: result.length };
   }
 
-  // Finds microfrontends for a given version filtered by optional search query
-  async findSelectOptions(
-    versionId: string,
-    options: { search?: string; limit: number; offset: number },
-  ): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
-    let condition = eq(microfrontends.versionId, versionId);
-    if (options.search) {
-      condition = and(condition, sql`${microfrontends.name} ILIKE ${'%' + options.search + '%'}`) as typeof condition;
-    }
-    const rows = await this.db
-      .select({ value: microfrontends.id, label: microfrontends.name })
-      .from(microfrontends)
-      .where(condition)
-      .orderBy(microfrontends.name)
-      .limit(options.limit + 1)
-      .offset(options.offset);
-    const hasMore = rows.length > options.limit;
-    if (hasMore) rows.pop();
-    return { options: rows, hasMore };
+  // Returns microfrontend select options with optional platform/version filtering and version grouping
+  findMicrofrontendSelectOptions(query: MicrofrontendSelectQueryDto): Promise<SelectQueryResult> {
+    const where: Record<string, string> = {};
+    if (query.versionId) where.versionId = query.versionId;
+    if (query.platform) where.platform = query.platform;
+
+    return this.findForSelect({
+      value: query.valueKey || 'id',
+      label: query.labelKey || 'name',
+      description: query.descriptionKey,
+      groupId: query.groupIdKey || (!query.versionId ? 'versionId' : undefined),
+      search: query.search,
+      limit: query.limit,
+      offset: query.offset,
+      values: query.values,
+      excludeIds: query.excludeIds,
+      orderBy: { name: 'asc' },
+      ...(Object.keys(where).length > 0 ? { where } : {}),
+      ...(!query.versionId
+        ? {
+            groupTable: versions,
+            groupLabelKey: 'name',
+            groupIdKey: 'id',
+          }
+        : {}),
+    });
   }
 }

@@ -1,7 +1,7 @@
+import { TopBar } from '@components/top-bar/TopBar';
 import { QueryErrorBoundary } from '@vritti/quantum-ui/ErrorBoundary';
 import { Sidebar, SidebarInset, type SidebarNavGroup, SidebarProvider } from '@vritti/quantum-ui/Sidebar';
 import { Outlet } from 'react-router-dom';
-import { TopBar } from '@components/top-bar/TopBar';
 
 interface SidebarLayoutProps {
   groups: SidebarNavGroup[];

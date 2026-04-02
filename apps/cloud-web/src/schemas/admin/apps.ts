@@ -25,6 +25,8 @@ export interface AppFeatureTableRow {
   featureId: string;
   code: string;
   name: string;
+  icon: string;
+  isAssigned: boolean;
 }
 
 export interface AppPrice {

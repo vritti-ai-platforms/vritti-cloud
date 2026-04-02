@@ -4,14 +4,13 @@ import {
   useRemoveFeatureMicrofrontend,
   useSetFeatureMicrofrontend,
 } from '@hooks/admin/feature-microfrontends';
-import { useMicrofrontendsTable } from '@hooks/admin/microfrontends';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
-import { Select } from '@vritti/quantum-ui/Select';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { MicrofrontendSelector } from '@vritti/quantum-ui/selects/microfrontend';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { keyBy } from 'lodash';
 import { Globe, LinkIcon, Monitor, Smartphone, Unlink } from 'lucide-react';
@@ -208,18 +207,6 @@ const LinkMicrofrontendForm = ({
   onSuccess,
 }: LinkMicrofrontendFormProps) => {
   const { versionId } = useVersionContext();
-  const { data: mfResponse } = useMicrofrontendsTable(versionId ?? '');
-
-  // Only show MFs matching this platform
-  const microfrontendOptions = useMemo(() => {
-    if (!mfResponse?.result) return [];
-    return mfResponse.result
-      .filter((mf) => mf.platform === platform)
-      .map((mf) => ({
-        value: mf.id,
-        label: `${mf.name} (${mf.code})`,
-      }));
-  }, [mfResponse, platform]);
 
   const form = useForm<SetFeatureMicrofrontendData>({
     resolver: zodResolver(setFeatureMicrofrontendSchema),
@@ -245,11 +232,9 @@ const LinkMicrofrontendForm = ({
       </CardHeader>
       <CardContent>
         <Form form={form} mutation={setMutation} showRootError>
-          <Select
+          <MicrofrontendSelector
             name="microfrontendId"
-            label="Microfrontend"
-            placeholder="Select a microfrontend..."
-            options={microfrontendOptions}
+            params={{ versionId, platform }}
             description="Which MF bundle renders this feature"
           />
           <div className="grid grid-cols-2 gap-4">

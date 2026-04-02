@@ -6,10 +6,12 @@ import {
   type FieldMap,
   FilterProcessor,
   NotFoundException,
+  type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { microfrontends } from '@/db/schema';
+import type { MicrofrontendSelectQueryDto } from '@/modules/select-api/dto/microfrontend-select-query.dto';
 import { MicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/entity/microfrontend.dto';
 import type { CreateMicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/request/create-microfrontend.dto';
 import type { UpdateMicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/request/update-microfrontend.dto';
@@ -72,14 +74,10 @@ export class MicrofrontendService {
     return { result: result.map(MicrofrontendDto.from), count, state, activeViewId };
   }
 
-  // Returns microfrontend options for a select component within a version
-  async findForSelect(versionId: string, query?: string): Promise<{ options: Array<{ value: string; label: string }>; hasMore: boolean }> {
-    this.logger.log(`Fetched microfrontend select options for version: ${versionId}`);
-    return this.microfrontendRepository.findSelectOptions(versionId, {
-      search: query,
-      limit: 20,
-      offset: 0,
-    });
+  // Returns microfrontend options for a select component, optionally grouped by version
+  findForSelect(query: MicrofrontendSelectQueryDto): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched microfrontend select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    return this.microfrontendRepository.findMicrofrontendSelectOptions(query);
   }
 
   // Finds a microfrontend by ID; throws NotFoundException if not found

@@ -1,13 +1,15 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
+import { SelectOptionsQueryDto } from '@vritti/api-sdk';
 import { IsOptional, IsString, IsUUID } from 'class-validator';
 
-export class MicrofrontendSelectQueryDto {
-  @ApiProperty({ description: 'Version ID to scope microfrontends' })
+export class MicrofrontendSelectQueryDto extends SelectOptionsQueryDto {
+  @ApiPropertyOptional({ description: 'Filter by version ID' })
+  @IsOptional()
   @IsUUID()
-  versionId: string;
+  versionId?: string;
 
-  @ApiPropertyOptional({ description: 'Search term to filter by name' })
+  @ApiPropertyOptional({ description: 'Filter by platform (e.g. WEB, MOBILE)' })
   @IsOptional()
   @IsString()
-  search?: string;
+  platform?: string;
 }

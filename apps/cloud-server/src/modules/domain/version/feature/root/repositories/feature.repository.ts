@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { type SQL, countDistinct, eq, inArray, sql } from '@vritti/api-sdk/drizzle-orm';
+import { type SQL, and, countDistinct, eq, inArray, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
 import { appFeatures, apps, featureMicrofrontends, featurePermissions, features, microfrontends } from '@/db/schema';
 
@@ -50,6 +50,26 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
       .groupBy(features.id)
       .orderBy(features.sortOrder);
     return rows as { code: string; name: string; icon: string; description: string | null; permissions: string[] }[];
+  }
+
+  // Returns all features for a version with assignment status for a given app
+  async findAllWithAssignment(appId: string, options: {
+    where?: SQL;
+    orderBy?: SQL[];
+    limit: number;
+    offset: number;
+  }): Promise<{ result: Array<{ featureId: string; code: string; name: string; icon: string; isAssigned: boolean }>; count: number }> {
+    return this.findAllAndCount({
+      select: {
+        featureId: features.id,
+        code: features.code,
+        name: features.name,
+        icon: features.icon,
+        isAssigned: sql<boolean>`${appFeatures.id} is not null`,
+      },
+      leftJoin: { table: appFeatures, on: and(eq(appFeatures.featureId, features.id), eq(appFeatures.appId, appId))! },
+      ...options,
+    });
   }
 
   async countAppFeatureReferences(featureId: string): Promise<number> {

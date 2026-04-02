@@ -6533,6 +6533,14 @@
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
             }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -10345,19 +10353,113 @@
         "operationId": "MicrofrontendSelectController_findForSelect",
         "parameters": [
           {
-            "name": "versionId",
-            "required": true,
+            "name": "search",
+            "required": false,
             "in": "query",
-            "description": "Version ID to scope microfrontends",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": false,
+            "in": "query",
+            "description": "Filter by version ID",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "search",
+            "name": "platform",
             "required": false,
             "in": "query",
-            "description": "Search term to filter by name",
+            "description": "Filter by platform (e.g. WEB, MOBILE)",
             "schema": {
               "type": "string"
             }
@@ -13706,16 +13808,21 @@
             "type": "string",
             "example": "Create Dine-In Order"
           },
-          "sortOrder": {
-            "type": "number",
-            "example": 0
+          "icon": {
+            "type": "string",
+            "example": "clipboard-list"
+          },
+          "isAssigned": {
+            "type": "boolean",
+            "example": true
           }
         },
         "required": [
           "featureId",
           "code",
           "name",
-          "sortOrder"
+          "icon",
+          "isAssigned"
         ]
       },
       "AppFeatureTableResponseDto": {
