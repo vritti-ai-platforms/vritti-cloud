@@ -28,7 +28,7 @@ export class CoreUserService {
   async inviteUser(
     url: string,
     webhookSecret: string,
-    data: { orgId: string; email: string; fullName: string },
+    data: { orgId: string; email: string; fullName: string; phone?: string; phoneCountry?: string },
   ): Promise<CoreSuccessDto> {
     const result = await this.http.post<CoreSuccessDto>(url, webhookSecret, '/users/webhook', data);
     this.logger.log(`Invited user in core: ${data.email}`);

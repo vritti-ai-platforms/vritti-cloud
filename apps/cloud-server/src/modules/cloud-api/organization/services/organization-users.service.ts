@@ -46,6 +46,8 @@ export class OrganizationUsersService {
       orgId: org.orgIdentifier,
       email: dto.email,
       fullName: dto.fullName,
+      ...(dto.phone && { phone: dto.phone }),
+      ...(dto.phoneCountry && { phoneCountry: dto.phoneCountry }),
     });
   }
 
