@@ -19,10 +19,10 @@ export const FeatureViewPage = () => {
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: feature } = useFeature(versionId, id ?? '');
+  const { data: feature } = useFeature(versionId, id);
 
   const deleteMutation = useDeleteFeature(versionId, {
-    onSuccess: () => navigate('..'),
+    onSuccess: () => navigate('../features'),
   });
 
   // Prompt confirmation then delete

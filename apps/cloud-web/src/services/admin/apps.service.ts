@@ -47,17 +47,17 @@ export function getAppFeatures(versionId: string, appId: string): Promise<AppFea
   return axios.get<AppFeature[]>(`admin-api/versions/${versionId}/apps/${appId}/features`).then((r) => r.data);
 }
 
-// Assigns features to an app
-export function assignAppFeatures({
+// Assigns a feature to an app
+export function assignAppFeature({
   versionId,
   appId,
-  data,
+  featureId,
 }: {
   versionId: string;
   appId: string;
-  data: { featureIds: string[] };
+  featureId: string;
 }): Promise<SuccessResponse> {
-  return axios.post<SuccessResponse>(`admin-api/versions/${versionId}/apps/${appId}/features`, data).then((r) => r.data);
+  return axios.post<SuccessResponse>(`admin-api/versions/${versionId}/apps/${appId}/features/${featureId}`).then((r) => r.data);
 }
 
 // Removes a feature from an app

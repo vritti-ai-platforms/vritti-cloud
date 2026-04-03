@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  BadRequestException,
   ConflictException,
   DataTableStateService,
   type FieldMap,
@@ -11,7 +12,6 @@ import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { features } from '@/db/schema';
 import { AppRepository } from '../../root/repositories/app.repository';
 import { FeatureRepository } from '@domain/version/feature/root/repositories/feature.repository';
-import type { AssignFeaturesDto } from '@/modules/admin-api/version/app/app-feature/dto/request/assign-features.dto';
 import { AppFeatureTableRowDto } from '@/modules/admin-api/version/app/app-feature/dto/entity/app-feature-table-row.dto';
 import type { AppFeatureTableResponseDto } from '@/modules/admin-api/version/app/app-feature/dto/response/app-feature-table-response.dto';
 import { AppFeatureRepository } from '../repositories/app-feature.repository';
@@ -60,28 +60,25 @@ export class AppFeatureService {
     return this.appFeatureRepository.findByAppWithFeatures(appId);
   }
 
-  // Assigns features to an app; validates all featureIds exist, then bulk upserts
-  async assignFeatures(appId: string, dto: AssignFeaturesDto): Promise<SuccessResponseDto> {
+  // Assigns a feature to an app; validates feature exists and has permissions
+  async assignFeature(appId: string, featureId: string): Promise<SuccessResponseDto> {
     const app = await this.appRepository.findById(appId);
     if (!app) {
       throw new NotFoundException('App not found.');
     }
-    if (dto.featureIds.length > 0) {
-      const existingIds = await this.appFeatureRepository.findExistingFeatureIds(dto.featureIds);
-      const missing = dto.featureIds.filter((id) => !existingIds.has(id));
-      if (missing.length > 0) {
-        throw new NotFoundException(`Features not found: ${missing.join(', ')}`);
-      }
-      await this.appFeatureRepository.upsertMany(
-        dto.featureIds.map((featureId) => ({
-          versionId: app.versionId,
-          appId,
-          featureId,
-        })),
-      );
+    const result = await this.featureRepository.findByIdWithPermissionCheck(featureId);
+    if (!result) {
+      throw new NotFoundException('Feature not found.');
     }
-    this.logger.log(`Assigned ${dto.featureIds.length} features to app: ${appId}`);
-    return { success: true, message: 'Features assigned successfully.' };
+    if (!result.hasPermissions) {
+      throw new BadRequestException({
+        label: 'Missing Permissions',
+        detail: 'This feature must have at least one permission before it can be assigned to an app.',
+      });
+    }
+    await this.appFeatureRepository.create({ versionId: app.versionId, appId, featureId });
+    this.logger.log(`Assigned feature ${featureId} to app: ${appId}`);
+    return { success: true, message: 'Feature assigned successfully.' };
   }
 
   // Removes a feature from an app; rejects if referenced by any role template feature permissions

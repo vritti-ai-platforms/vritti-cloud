@@ -1,4 +1,4 @@
-import { APP_FEATURES_TABLE_KEY, useAppFeaturesTable, useAssignAppFeatures, useRemoveAppFeature } from '@hooks/admin/apps';
+import { APP_FEATURES_TABLE_KEY, useAppFeaturesTable, useAssignAppFeature, useRemoveAppFeature } from '@hooks/admin/apps';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
@@ -52,7 +52,7 @@ export const FeaturesTab = ({ appId }: { appId: string }) => {
   const queryClient = useQueryClient();
   const { versionId } = useVersionContext();
   const { data: response, isLoading } = useAppFeaturesTable(versionId, appId);
-  const assignMutation = useAssignAppFeatures();
+  const assignMutation = useAssignAppFeature();
   const removeMutation = useRemoveAppFeature();
 
   function handleToggle(row: AppFeatureTableRow) {
@@ -63,7 +63,7 @@ export const FeaturesTab = ({ appId }: { appId: string }) => {
       );
     } else {
       assignMutation.mutate(
-        { versionId, appId, data: { featureIds: [row.featureId] } },
+        { versionId, appId, featureId: row.featureId },
         { onSuccess: () => queryClient.invalidateQueries({ queryKey: APP_FEATURES_TABLE_KEY(versionId, appId) }) },
       );
     }

@@ -2,7 +2,7 @@ export { appQueryKey, useApp } from './useApp';
 export { APP_FEATURES_TABLE_KEY, useAppFeaturesTable } from './useAppFeaturesTable';
 export { APP_PRICES_QUERY_KEY, useAppPrices } from './useAppPrices';
 export { APPS_QUERY_KEY, useApps } from './useApps';
-export { useAssignAppFeatures } from './useAssignAppFeatures';
+export { useAssignAppFeature } from './useAssignAppFeatures';
 export { useCreateApp } from './useCreateApp';
 export { useCreateAppPrice } from './useCreateAppPrice';
 export { useDeleteApp } from './useDeleteApp';

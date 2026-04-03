@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, countDistinct, eq, exists, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
 import { appFeatures, apps, featureMicrofrontends, featurePermissions, features, microfrontends } from '@/db/schema';
 
@@ -19,6 +19,17 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   // Finds a feature by its unique identifier
   async findById(id: string): Promise<Feature | undefined> {
     return this.model.findFirst({ where: { id } });
+  }
+
+  // Finds a feature by ID and checks whether it has at least one permission
+  async findByIdWithPermissionCheck(id: string): Promise<{ feature: Feature; hasPermissions: boolean } | undefined> {
+    const row = await this.model.findFirst({
+      where: { id },
+      with: { featurePermissions: { columns: { id: true }, limit: 1 } },
+    });
+    if (!row) return undefined;
+    const { featurePermissions: perms, ...feature } = row as Feature & { featurePermissions: { id: string }[] };
+    return { feature, hasPermissions: perms.length > 0 };
   }
 
   // Finds a feature by its unique code
@@ -54,7 +65,7 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
     return rows as { code: string; name: string; icon: string; description: string | null; permissions: string[] }[];
   }
 
-  // Returns all features for a version with assignment status for a given app
+  // Returns all features for a version with assignment status for a given app (excludes features with no permissions)
   async findAllWithAssignment(
     appId: string,
     options: {
@@ -67,6 +78,12 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
     result: Array<{ featureId: string; code: string; name: string; icon: string; isAssigned: boolean }>;
     count: number;
   }> {
+    const hasPermissions = exists(
+      this.database.drizzleClient
+        .select({ one: sql`1` })
+        .from(featurePermissions)
+        .where(eq(featurePermissions.featureId, features.id)),
+    );
     return this.findAllAndCount({
       select: {
         featureId: features.id,
@@ -77,6 +94,7 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
       },
       leftJoin: { table: appFeatures, on: and(eq(appFeatures.featureId, features.id), eq(appFeatures.appId, appId)) },
       ...options,
+      where: and(options.where, hasPermissions),
     });
   }
 

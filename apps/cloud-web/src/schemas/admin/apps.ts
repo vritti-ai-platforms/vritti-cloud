@@ -73,10 +73,6 @@ export const updateAppSchema = z.object({
   icon: z.string().min(1, 'Icon is required').max(255).optional(),
 });
 
-export const assignFeatureSchema = z.object({
-  featureIds: z.array(z.string().uuid()).min(1, 'Select at least one feature'),
-});
-
 export const addAppPriceSchema = z.object({
   regionId: z.string().uuid('Please select a region'),
   cloudProviderId: z.string().uuid('Please select a provider'),
@@ -91,6 +87,5 @@ export const updateAppPriceSchema = z.object({
 
 export type CreateAppData = z.infer<typeof createAppSchema>;
 export type UpdateAppData = z.infer<typeof updateAppSchema>;
-export type AssignFeatureData = z.infer<typeof assignFeatureSchema>;
 export type AddAppPriceData = z.infer<typeof addAppPriceSchema>;
 export type UpdateAppPriceData = z.infer<typeof updateAppPriceSchema>;

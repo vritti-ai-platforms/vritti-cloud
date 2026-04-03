@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { type TypedDrizzleClient, PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService, type TypedDrizzleClient } from '@vritti/api-sdk';
 import { eq, inArray } from '@vritti/api-sdk/drizzle-orm';
 import type { FeaturePermission, NewFeaturePermission } from '@/db/schema';
 import { featurePermissions } from '@/db/schema';
@@ -28,12 +28,14 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
     await db.insert(featurePermissions).values(rows);
   }
 
+  // Checks whether a feature has at least one permission defined
+  async hasPermissions(featureId: string): Promise<boolean> {
+    return this.exists(eq(featurePermissions.featureId, featureId));
+  }
+
   // Finds all permission rows for multiple features
   async findByFeatureIds(featureIds: string[]): Promise<FeaturePermission[]> {
     if (featureIds.length === 0) return [];
-    return this.db
-      .select()
-      .from(featurePermissions)
-      .where(inArray(featurePermissions.featureId, featureIds));
+    return this.db.select().from(featurePermissions).where(inArray(featurePermissions.featureId, featureIds));
   }
 }

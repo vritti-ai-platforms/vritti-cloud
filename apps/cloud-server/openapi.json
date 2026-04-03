@@ -6607,9 +6607,11 @@
         "tags": [
           "Admin - App Features"
         ]
-      },
+      }
+    },
+    "/admin-api/versions/{versionId}/apps/{appId}/features/{featureId}": {
       "post": {
-        "operationId": "AppFeatureController_assignFeatures",
+        "operationId": "AppFeatureController_assignFeature",
         "parameters": [
           {
             "name": "appId",
@@ -6620,21 +6622,21 @@
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
             }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssignFeaturesDto"
-              }
+          },
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
             }
           }
-        },
+        ],
         "responses": {
           "201": {
-            "description": "Features assigned successfully.",
+            "description": "Feature assigned successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -6644,13 +6646,13 @@
             }
           },
           "400": {
-            "description": "Validation failed."
+            "description": "Feature has no permissions defined."
           },
           "401": {
             "description": "Unauthorized."
           },
           "404": {
-            "description": "App or features not found."
+            "description": "App or feature not found."
           }
         },
         "security": [
@@ -6658,13 +6660,11 @@
             "bearer": []
           }
         ],
-        "summary": "Assign features to an app (bulk upsert)",
+        "summary": "Assign a feature to an app",
         "tags": [
           "Admin - App Features"
         ]
-      }
-    },
-    "/admin-api/versions/{versionId}/apps/{appId}/features/{featureId}": {
+      },
       "delete": {
         "operationId": "AppFeatureController_removeFeature",
         "parameters": [
@@ -13870,21 +13870,6 @@
           "result",
           "count",
           "state"
-        ]
-      },
-      "AssignFeaturesDto": {
-        "type": "object",
-        "properties": {
-          "featureIds": {
-            "description": "Feature UUIDs to assign to the app",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "featureIds"
         ]
       },
       "AppPriceDto": {

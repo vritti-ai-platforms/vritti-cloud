@@ -56,13 +56,6 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
     await this.db.delete(appFeatures).where(and(eq(appFeatures.appId, appId), eq(appFeatures.featureId, featureId)));
   }
 
-  // Returns the set of feature IDs that exist in the features table from the given list
-  async findExistingFeatureIds(featureIds: string[]): Promise<Set<string>> {
-    if (featureIds.length === 0) return new Set();
-    const rows = await this.db.select({ id: features.id }).from(features).where(inArray(features.id, featureIds));
-    return new Set(rows.map((r) => r.id));
-  }
-
   // Counts how many role_template_feature_permissions reference a given feature
   async countRoleReferences(featureId: string): Promise<number> {
     const result = await this.db

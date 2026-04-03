@@ -161,7 +161,7 @@ export class FeatureService {
     }
     await this.featureRepository.delete(id);
     this.logger.log(`Deleted feature: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'Feature deleted successfully.' };
+    return { success: true, message: `Feature "${existing.name}" deleted successfully.` };
   }
 
   // Validates and imports features from a spreadsheet buffer (all-or-nothing)
