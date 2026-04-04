@@ -132,7 +132,7 @@ export const OverviewPage = () => {
       </div>
 
       {/* Snapshot visualization */}
-      {version.snapshot && <SnapshotView snapshot={version.snapshot} />}
+      <SnapshotView snapshot={version.snapshot ?? { apps: [], features: [], roleTemplates: [] }} />
 
       {/* Danger zone — PROD versions cannot be deleted */}
       {version.status !== 'PROD' && (

@@ -48,7 +48,7 @@ export class RoleTemplateService {
     this.logger.log(`Created role template: ${roleTemplate.name} (${roleTemplate.id}) with ${appIds.length} app(s)`);
     return {
       success: true,
-      message: 'Role template created successfully.',
+      message: `Role template "${roleTemplate.name}" created successfully.`,
       data: RoleTemplateDto.from(roleTemplate),
     };
   }
@@ -132,7 +132,7 @@ export class RoleTemplateService {
       return updated;
     });
     this.logger.log(`Updated role template: ${roleTemplate.name} (${roleTemplate.id})`);
-    return { success: true, message: 'Role template updated successfully.' };
+    return { success: true, message: `Role template "${roleTemplate.name}" updated successfully.` };
   }
 
   // Deletes a role template by ID

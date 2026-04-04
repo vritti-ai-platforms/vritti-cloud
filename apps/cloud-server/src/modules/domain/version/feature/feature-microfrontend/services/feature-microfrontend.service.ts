@@ -49,7 +49,7 @@ export class FeatureMicrofrontendService {
     this.logger.log(`Set microfrontend link: feature=${featureId}, mf=${microfrontendId}`);
     return {
       success: true,
-      message: 'Feature microfrontend link set successfully.',
+      message: `Microfrontend "${microfrontend.name}" linked to "${feature.name}" successfully.`,
       data: FeatureMicrofrontendDto.from({
         id: result.id,
         featureId: result.featureId,
@@ -75,6 +75,6 @@ export class FeatureMicrofrontendService {
       throw new NotFoundException('Microfrontend link not found.');
     }
     this.logger.log(`Removed microfrontend link: feature=${featureId}, mf=${microfrontendId}`);
-    return { success: true, message: 'Feature microfrontend link removed successfully.' };
+    return { success: true, message: `Microfrontend link removed from "${feature.name}" successfully.` };
   }
 }

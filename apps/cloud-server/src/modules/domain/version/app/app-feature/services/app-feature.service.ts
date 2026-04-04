@@ -78,7 +78,7 @@ export class AppFeatureService {
     }
     await this.appFeatureRepository.create({ versionId: app.versionId, appId, featureId });
     this.logger.log(`Assigned feature ${featureId} to app: ${appId}`);
-    return { success: true, message: 'Feature assigned successfully.' };
+    return { success: true, message: `Feature "${result.feature.name}" assigned to "${app.name}" successfully.` };
   }
 
   // Removes a feature from an app; rejects if referenced by any role template feature permissions
@@ -97,7 +97,7 @@ export class AppFeatureService {
     }
     await this.appFeatureRepository.removeByAppAndFeature(appId, featureId);
     this.logger.log(`Removed feature ${featureId} from app: ${appId}`);
-    return { success: true, message: 'Feature removed from app successfully.' };
+    return { success: true, message: `Feature removed from app successfully.` };
   }
 
   // Validates that an app exists; throws NotFoundException otherwise

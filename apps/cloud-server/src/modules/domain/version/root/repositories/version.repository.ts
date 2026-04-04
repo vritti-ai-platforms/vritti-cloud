@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { eq } from '@vritti/api-sdk/drizzle-orm';
+import _ from '@vritti/api-sdk/lodash';
 import type { Version } from '@/db/schema';
 import {
   appFeatures,
-  versions,
   apps,
   featureMicrofrontends,
   featurePermissions,
@@ -13,6 +13,7 @@ import {
   roleTemplateApps,
   roleTemplateFeaturePermissions,
   roleTemplates,
+  versions,
 } from '@/db/schema';
 
 @Injectable()
@@ -40,7 +41,17 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
   // Builds a snapshot from all versioned tables for the given version
   async buildSnapshot(versionId: string): Promise<Record<string, unknown>> {
     // Fetch all versioned data in parallel
-    const [featureRows, permissionRows, mfRows, featureMfRows, appRows, appFeatureRows, roleRows, rolePermRows, roleAppRows] = await Promise.all([
+    const [
+      featureRows,
+      permissionRows,
+      mfRows,
+      featureMfRows,
+      appRows,
+      appFeatureRows,
+      roleRows,
+      rolePermRows,
+      roleAppRows,
+    ] = await Promise.all([
       this.db.select().from(features).where(eq(features.versionId, versionId)),
       this.db.select().from(featurePermissions).where(eq(featurePermissions.versionId, versionId)),
       this.db.select().from(microfrontends).where(eq(microfrontends.versionId, versionId)),
@@ -48,114 +59,65 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       this.db.select().from(apps).where(eq(apps.versionId, versionId)),
       this.db.select().from(appFeatures).where(eq(appFeatures.versionId, versionId)),
       this.db.select().from(roleTemplates).where(eq(roleTemplates.versionId, versionId)),
-      this.db.select().from(roleTemplateFeaturePermissions).where(eq(roleTemplateFeaturePermissions.versionId, versionId)),
+      this.db
+        .select()
+        .from(roleTemplateFeaturePermissions)
+        .where(eq(roleTemplateFeaturePermissions.versionId, versionId)),
       this.db.select().from(roleTemplateApps).where(eq(roleTemplateApps.versionId, versionId)),
     ]);
 
-    // Index microfrontends by ID for junction lookup
-    const mfById = new Map(mfRows.map((mf) => [mf.id, mf]));
+    // Index lookup tables
+    const mfById = _.keyBy(mfRows, 'id');
+    const featureById = _.keyBy(featureRows, 'id');
+    const appById = _.keyBy(appRows, 'id');
 
-    // Index feature-microfrontend junction rows by featureId
-    const featureMfByFeatureId = new Map<string, typeof featureMfRows>();
-    for (const fmf of featureMfRows) {
-      const list = featureMfByFeatureId.get(fmf.featureId) ?? [];
-      list.push(fmf);
-      featureMfByFeatureId.set(fmf.featureId, list);
-    }
+    // Group junction/relation rows by parent ID
+    const featureMfByFeatureId = _.groupBy(featureMfRows, 'featureId');
+    const permsByFeatureId = _.mapValues(_.groupBy(permissionRows, 'featureId'), (rows) => rows.map((r) => r.type));
+    const appFeaturesByAppId = _.groupBy(appFeatureRows, 'appId');
+    const roleAppsByRoleId = _.groupBy(roleAppRows, 'roleTemplateId');
+    const rolePermsByRoleId = _.groupBy(rolePermRows, 'roleTemplateId');
 
-    // Index permissions by featureId
-    const permsByFeatureId = new Map<string, string[]>();
-    for (const perm of permissionRows) {
-      const list = permsByFeatureId.get(perm.featureId) ?? [];
-      list.push(perm.type);
-      permsByFeatureId.set(perm.featureId, list);
-    }
-
-    // Index features by ID for app and role lookups
-    const featureById = new Map(featureRows.map((f) => [f.id, f]));
-
-    // Build features snapshot with platform-keyed microfrontends map
+    // Build features snapshot
     const snapshotFeatures = featureRows.map((f) => {
-      const junctionRows = featureMfByFeatureId.get(f.id) ?? [];
       const mfMap: Record<string, { remoteEntry: string; exposedModule: string; routePrefix: string }> = {};
-      for (const jRow of junctionRows) {
-        const mf = mfById.get(jRow.microfrontendId);
+      for (const jRow of featureMfByFeatureId[f.id] ?? []) {
+        const mf = mfById[jRow.microfrontendId];
         if (mf) {
-          mfMap[mf.platform] = {
-            remoteEntry: mf.remoteEntry,
-            exposedModule: jRow.exposedModule,
-            routePrefix: jRow.routePrefix,
-          };
+          mfMap[mf.platform] = { remoteEntry: mf.remoteEntry, exposedModule: jRow.exposedModule, routePrefix: jRow.routePrefix };
         }
       }
       return {
         code: f.code,
         name: f.name,
         icon: f.icon,
-        permissions: permsByFeatureId.get(f.id) ?? [],
+        permissions: permsByFeatureId[f.id] ?? [],
         microfrontends: mfMap,
       };
     });
 
-    // Build apps snapshot — map appFeatures to feature codes
-    const featureIdsByAppId = new Map<string, string[]>();
-    for (const af of appFeatureRows) {
-      const list = featureIdsByAppId.get(af.appId) ?? [];
-      list.push(af.featureId);
-      featureIdsByAppId.set(af.appId, list);
-    }
-
+    // Build apps snapshot
     const snapshotApps = appRows.map((a) => ({
       code: a.code,
       name: a.name,
       icon: a.icon,
-      features: (featureIdsByAppId.get(a.id) ?? [])
-        .map((fId) => featureById.get(fId)?.code)
-        .filter(Boolean),
+      features: (appFeaturesByAppId[a.id] ?? []).map((af) => featureById[af.featureId]?.code).filter(Boolean),
     }));
 
-    // Index role-template-app links by roleTemplateId → app codes
-    const appById = new Map(appRows.map((a) => [a.id, a]));
-    const roleAppCodesByRoleTemplateId = new Map<string, string[]>();
-    for (const ra of roleAppRows) {
-      const app = appById.get(ra.appId);
-      if (app) {
-        const list = roleAppCodesByRoleTemplateId.get(ra.roleTemplateId) ?? [];
-        list.push(app.code);
-        roleAppCodesByRoleTemplateId.set(ra.roleTemplateId, list);
-      }
-    }
-
-    // Build roleTemplates snapshot — group role_template_feature_permissions by role template, then by feature code
-    const rolePermsByRoleTemplateId = new Map<string, Array<{ featureId: string; type: string }>>();
-    for (const rp of rolePermRows) {
-      const list = rolePermsByRoleTemplateId.get(rp.roleTemplateId) ?? [];
-      list.push({ featureId: rp.featureId, type: rp.type });
-      rolePermsByRoleTemplateId.set(rp.roleTemplateId, list);
-    }
-
+    // Build role templates snapshot
     const snapshotRoleTemplates = roleRows.map((r) => {
-      const perms = rolePermsByRoleTemplateId.get(r.id) ?? [];
+      const appCodes = (roleAppsByRoleId[r.id] ?? []).map((ra) => appById[ra.appId]?.code).filter(Boolean);
       const featurePerms: Record<string, string[]> = {};
-      for (const p of perms) {
-        const code = featureById.get(p.featureId)?.code;
+      for (const rp of rolePermsByRoleId[r.id] ?? []) {
+        const code = featureById[rp.featureId]?.code;
         if (code) {
-          featurePerms[code] = featurePerms[code] ?? [];
-          featurePerms[code].push(p.type);
+          if (!featurePerms[code]) featurePerms[code] = [];
+          featurePerms[code].push(rp.type);
         }
       }
-      return {
-        name: r.name,
-        scope: r.scope,
-        apps: roleAppCodesByRoleTemplateId.get(r.id) ?? [],
-        features: featurePerms,
-      };
+      return { name: r.name, scope: r.scope, apps: appCodes, features: featurePerms };
     });
 
-    return {
-      features: snapshotFeatures,
-      apps: snapshotApps,
-      roleTemplates: snapshotRoleTemplates,
-    };
+    return { features: snapshotFeatures, apps: snapshotApps, roleTemplates: snapshotRoleTemplates };
   }
 }

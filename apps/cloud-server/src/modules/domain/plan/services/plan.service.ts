@@ -67,7 +67,7 @@ export class PlanService {
     }
     const plan = await this.planRepository.create(dto);
     this.logger.log(`Created plan: ${plan.name} (${plan.id})`);
-    return { success: true, message: 'Plan created successfully.', data: PlanDto.from(plan) };
+    return { success: true, message: `Plan "${plan.name}" created successfully.`, data: PlanDto.from(plan) };
   }
 
   // Returns plans for the data table with server-stored filter/sort/search/pagination state
@@ -124,7 +124,7 @@ export class PlanService {
     }
     const plan = await this.planRepository.update(id, dto);
     this.logger.log(`Updated plan: ${plan.name} (${plan.id})`);
-    return { success: true, message: 'Plan updated successfully.' };
+    return { success: true, message: `Plan "${plan.name}" updated successfully.` };
   }
 
   // Deletes a plan by ID; throws NotFoundException if not found, ConflictException if referenced
@@ -145,6 +145,6 @@ export class PlanService {
     }
     await this.planRepository.delete(id);
     this.logger.log(`Deleted plan: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'Plan deleted successfully.' };
+    return { success: true, message: `Plan "${existing.name}" deleted successfully.` };
   }
 }

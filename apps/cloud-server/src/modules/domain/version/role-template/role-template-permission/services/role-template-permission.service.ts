@@ -67,7 +67,7 @@ export class RoleTemplatePermissionService {
     });
 
     this.logger.log(`Set ${entries.length} permissions for role template: ${roleTemplate.name} (${roleTemplateId})`);
-    return { success: true, message: 'Role template permissions updated successfully.' };
+    return { success: true, message: `Permissions for "${roleTemplate.name}" updated successfully (${entries.length} grants).` };
   }
 
   // Returns features available for permission assignment (only from apps linked to this role template)

@@ -52,7 +52,7 @@ export class FeatureService {
     }
     const feature = await this.featureRepository.create(dto);
     this.logger.log(`Created feature: ${feature.name} (${feature.id})`);
-    return { success: true, message: 'Feature created successfully.', data: FeatureDto.from(feature) };
+    return { success: true, message: `Feature "${feature.name}" created successfully.`, data: FeatureDto.from(feature) };
   }
 
   // Returns all features with server-stored filter/sort/search/pagination state applied
@@ -122,7 +122,7 @@ export class FeatureService {
     }
     const feature = await this.featureRepository.update(id, dto);
     this.logger.log(`Updated feature: ${feature.name} (${feature.id})`);
-    return { success: true, message: 'Feature updated successfully.' };
+    return { success: true, message: `Feature "${existing.name}" updated successfully.` };
   }
 
   // Deletes a feature by ID; throws NotFoundException if not found, ConflictException if referenced

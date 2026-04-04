@@ -48,7 +48,7 @@ export class AppService {
     }
     const app = await this.appRepository.create(dto);
     this.logger.log(`Created app: ${app.name} (${app.id})`);
-    return { success: true, message: 'App created successfully.', data: AppDto.from(app) };
+    return { success: true, message: `App "${app.name}" created successfully.`, data: AppDto.from(app) };
   }
 
   // Returns all apps with counts, applying server-stored filter/sort/search/pagination state
@@ -111,7 +111,7 @@ export class AppService {
     }
     const app = await this.appRepository.update(id, dto);
     this.logger.log(`Updated app: ${app.name} (${app.id})`);
-    return { success: true, message: 'App updated successfully.' };
+    return { success: true, message: `App "${existing.name}" updated successfully.` };
   }
 
   // Deletes an app by ID; rejects if referenced by any plan_apps or industry_apps
@@ -137,7 +137,7 @@ export class AppService {
     }
     await this.appRepository.delete(id);
     this.logger.log(`Deleted app: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'App deleted successfully.' };
+    return { success: true, message: `App "${existing.name}" deleted successfully.` };
   }
 
   // Validates and imports apps from a spreadsheet buffer (all-or-nothing)

@@ -1,4 +1,5 @@
-import { Globe, Layers, Monitor, Shield } from 'lucide-react';
+import { Boxes, Globe, Layers, Monitor, Shield } from 'lucide-react';
+import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import type { SnapshotApp, VersionSnapshot } from '@/schemas/admin/versions';
 import { AppNode } from './AppNode';
 import { FeatureRow } from './FeatureRow';
@@ -8,6 +9,18 @@ import { StatPill } from './StatPill';
 
 interface SnapshotViewProps {
   snapshot: VersionSnapshot;
+}
+
+function EmptySection({ icon: Icon, title }: { icon: React.FC<{ className?: string }>; title: string }) {
+  return (
+    <Card>
+      <CardContent className="flex flex-col items-center justify-center py-10 text-center">
+        <Icon className="size-7 text-muted-foreground mb-2" />
+        <p className="text-sm font-medium text-foreground">No {title.toLowerCase()}</p>
+        <p className="text-xs text-muted-foreground mt-1">Create a snapshot to see {title.toLowerCase()} here.</p>
+      </CardContent>
+    </Card>
+  );
 }
 
 export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
@@ -46,16 +59,20 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
       </div>
 
       {/* Apps → Features hierarchy */}
-      {apps.length > 0 && (
-        <section>
-          <SectionHeader icon={Layers} title="Applications" count={apps.length} color="text-primary" />
+      <section>
+        <SectionHeader icon={Layers} title="Applications" count={apps.length} color="text-primary" />
+        {apps.length > 0 ? (
           <div className="space-y-3 mt-3">
             {apps.map((app) => (
               <AppNode key={app.code} app={app} featureByCode={featureByCode} />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="mt-3">
+            <EmptySection icon={Boxes} title="Applications" />
+          </div>
+        )}
+      </section>
 
       {/* Standalone features not assigned to any app */}
       {(() => {
@@ -75,22 +92,26 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
       })()}
 
       {/* Role templates as permission matrix */}
-      {roleTemplates.length > 0 && (
-        <section>
-          <SectionHeader
-            icon={Shield}
-            title="Role Templates"
-            count={roleTemplates.length}
-            color="text-destructive"
-            subtitle={`${totalPerms} permission grants`}
-          />
+      <section>
+        <SectionHeader
+          icon={Shield}
+          title="Role Templates"
+          count={roleTemplates.length}
+          color="text-destructive"
+          subtitle={totalPerms > 0 ? `${totalPerms} permission grants` : undefined}
+        />
+        {roleTemplates.length > 0 ? (
           <div className="space-y-3 mt-3">
             {roleTemplates.map((role) => (
               <RoleNode key={role.name} role={role} featureByCode={featureByCode} featureToApp={featureToApp} />
             ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <div className="mt-3">
+            <EmptySection icon={Shield} title="Role Templates" />
+          </div>
+        )}
+      </section>
     </div>
   );
 };

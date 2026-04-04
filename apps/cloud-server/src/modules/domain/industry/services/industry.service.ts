@@ -69,7 +69,7 @@ export class IndustryService {
     }
     const industry = await this.industryRepository.create(dto);
     this.logger.log(`Created industry: ${industry.name} (${industry.id})`);
-    return { success: true, message: 'Industry created successfully.', data: IndustryDto.from(industry, true) };
+    return { success: true, message: `Industry "${industry.name}" created successfully.`, data: IndustryDto.from(industry, true) };
   }
 
   // Returns all industries with server-stored filter/sort/pagination state applied, optionally narrowed by a search param
@@ -106,7 +106,7 @@ export class IndustryService {
     }
     const industry = await this.industryRepository.update(id, dto);
     this.logger.log(`Updated industry: ${industry.name} (${industry.id})`);
-    return { success: true, message: 'Industry updated successfully.' };
+    return { success: true, message: `Industry "${industry.name}" updated successfully.` };
   }
 
   // Deletes an industry by ID; throws NotFoundException if not found, ConflictException if referenced
@@ -129,6 +129,6 @@ export class IndustryService {
     }
     await this.industryRepository.delete(id);
     this.logger.log(`Deleted industry: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'Industry deleted successfully.' };
+    return { success: true, message: `Industry "${existing.name}" deleted successfully.` };
   }
 }

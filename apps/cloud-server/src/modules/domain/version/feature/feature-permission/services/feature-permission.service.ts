@@ -45,6 +45,6 @@ export class FeaturePermissionService {
     });
 
     this.logger.log(`Set ${dto.types.length} permissions for feature: ${featureId}`);
-    return { success: true, message: 'Feature permissions updated successfully.' };
+    return { success: true, message: `Permissions for "${feature.name}" updated successfully (${dto.types.length} types).` };
   }
 }

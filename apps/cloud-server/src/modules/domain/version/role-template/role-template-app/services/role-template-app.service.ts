@@ -100,6 +100,6 @@ export class RoleTemplateAppService {
     }
     await this.roleTemplateAppRepository.removeByRoleTemplateAndApp(roleTemplateId, appId);
     this.logger.log(`Removed app ${appId} from role template: ${roleTemplate.name} (${roleTemplateId})`);
-    return { success: true, message: 'App removed successfully.' };
+    return { success: true, message: `App removed from role template "${roleTemplate.name}" successfully.` };
   }
 }

@@ -50,7 +50,7 @@ export class VersionService {
       status: VersionStatusValues.ALPHA,
     });
     this.logger.log(`Created version: ${version.version} (${version.id})`);
-    return { success: true, message: 'Version created successfully.', data: VersionDto.from(version) };
+    return { success: true, message: `Version "${version.name}" created successfully.`, data: VersionDto.from(version) };
   }
 
   // Returns all versions with server-stored filter/sort/search/pagination state applied
@@ -104,7 +104,7 @@ export class VersionService {
     const snapshot = await this.versionRepository.buildSnapshot(id);
     await this.versionRepository.update(id, { snapshot });
     this.logger.log(`Created snapshot for version: ${version.version} (${id})`);
-    return { success: true, message: 'Snapshot created successfully.' };
+    return { success: true, message: `Snapshot created for "${version.name}" (${version.version}).` };
   }
 
   // Stores CI artifacts on a version
@@ -115,7 +115,7 @@ export class VersionService {
     }
     await this.versionRepository.update(id, { artifacts: dto.artifacts });
     this.logger.log(`Pushed artifacts for version: ${version.version} (${id})`);
-    return { success: true, message: 'Artifacts pushed successfully.' };
+    return { success: true, message: `Artifacts pushed for "${version.name}" (${version.version}).` };
   }
 
   // Updates version name and/or version string
@@ -134,7 +134,7 @@ export class VersionService {
     }
     await this.versionRepository.update(id, dto);
     this.logger.log(`Updated version: ${id}`);
-    return { success: true, message: 'Version updated successfully.' };
+    return { success: true, message: `Version "${version.name}" updated successfully.` };
   }
 
   // Deletes a version; PROD versions cannot be deleted
@@ -148,6 +148,6 @@ export class VersionService {
     }
     await this.versionRepository.delete(id);
     this.logger.log(`Deleted version: ${version.version} (${id})`);
-    return { success: true, message: 'Version deleted successfully.' };
+    return { success: true, message: `Version "${version.name}" deleted successfully.` };
   }
 }

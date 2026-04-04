@@ -49,7 +49,7 @@ export class DeploymentService {
   async create(dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
     const deployment = await this.deploymentRepository.create(dto);
     this.logger.log(`Created deployment: ${deployment.name} (${deployment.id})`);
-    return { success: true, message: 'Deployment created successfully.', data: DeploymentDto.from(deployment) };
+    return { success: true, message: `Deployment "${deployment.name}" created successfully.`, data: DeploymentDto.from(deployment) };
   }
 
   // Returns all deployments mapped to DTOs
@@ -81,7 +81,7 @@ export class DeploymentService {
     }
     const deployment = await this.deploymentRepository.update(id, dto);
     this.logger.log(`Updated deployment: ${deployment.name} (${deployment.id})`);
-    return { success: true, message: 'Deployment updated successfully.' };
+    return { success: true, message: `Deployment "${deployment.name}" updated successfully.` };
   }
 
   // Deletes a deployment by ID; throws NotFoundException if not found, ConflictException if orgs reference it
@@ -99,7 +99,7 @@ export class DeploymentService {
     }
     await this.deploymentRepository.delete(id);
     this.logger.log(`Deleted deployment: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'Deployment deleted successfully.' };
+    return { success: true, message: `Deployment "${existing.name}" deleted successfully.` };
   }
 
   // Assigns a plan+industry combination to a deployment; throws NotFoundException if deployment missing
@@ -112,7 +112,7 @@ export class DeploymentService {
       industryId: dto.industryId,
     });
     this.logger.log(`Assigned plan ${dto.planId} + industry ${dto.industryId} to deployment ${deploymentId}`);
-    return { success: true, message: 'Plan assigned successfully.' };
+    return { success: true, message: `Plan assigned to "${deployment.name}" successfully.` };
   }
 
   // Removes a plan+industry assignment from a deployment; throws NotFoundException if deployment missing
@@ -127,7 +127,7 @@ export class DeploymentService {
       ) as SQL,
     );
     this.logger.log(`Removed plan ${dto.planId} + industry ${dto.industryId} from deployment ${deploymentId}`);
-    return { success: true, message: 'Plan removed successfully.' };
+    return { success: true, message: `Plan removed from "${deployment.name}" successfully.` };
   }
 
   // Returns all available plans with prices and assignment status for the deployment

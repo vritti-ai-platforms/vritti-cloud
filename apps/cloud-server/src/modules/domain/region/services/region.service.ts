@@ -74,7 +74,7 @@ export class RegionService {
     }
     const region = await this.regionRepository.create(dto);
     this.logger.log(`Created region: ${region.name} (${region.id})`);
-    return { success: true, message: 'Region created successfully.', data: RegionDto.from(region) };
+    return { success: true, message: `Region "${region.name}" created successfully.`, data: RegionDto.from(region) };
   }
 
   // Returns all regions with provider counts, applying server-stored filter/sort/search/pagination state
@@ -139,7 +139,7 @@ export class RegionService {
 
     const region = await this.regionRepository.update(id, dto);
     this.logger.log(`Updated region: ${region.name} (${region.id})`);
-    return { success: true, message: 'Region updated successfully.' };
+    return { success: true, message: `Region "${region.name}" updated successfully.` };
   }
 
   // Deletes a region by ID; throws NotFoundException if not found, ConflictException if dependents exist
@@ -163,7 +163,7 @@ export class RegionService {
 
     await this.regionRepository.delete(id);
     this.logger.log(`Deleted region: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'Region deleted successfully.' };
+    return { success: true, message: `Region "${existing.name}" deleted successfully.` };
   }
 
   // Assigns a single cloud provider to a region; throws NotFoundException if region missing

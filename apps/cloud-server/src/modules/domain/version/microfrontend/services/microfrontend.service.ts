@@ -50,7 +50,7 @@ export class MicrofrontendService {
     try {
       const microfrontend = await this.microfrontendRepository.create(dto);
       this.logger.log(`Created microfrontend: ${microfrontend.code} (${microfrontend.id})`);
-      return { success: true, message: 'Microfrontend created successfully.', data: MicrofrontendDto.from(microfrontend) };
+      return { success: true, message: `Microfrontend "${microfrontend.name}" created successfully.`, data: MicrofrontendDto.from(microfrontend) };
     } catch (error) {
       const err = error as Error & { cause?: Error; code?: string; detail?: string };
       this.logger.error(`Failed to create microfrontend: ${err.message}`);
@@ -114,7 +114,7 @@ export class MicrofrontendService {
     }
     const microfrontend = await this.microfrontendRepository.update(id, dto);
     this.logger.log(`Updated microfrontend: ${microfrontend.code} (${microfrontend.id})`);
-    return { success: true, message: 'Microfrontend updated successfully.' };
+    return { success: true, message: `Microfrontend "${existing.name}" updated successfully.` };
   }
 
   // Deletes a microfrontend by ID; rejects if features reference it
@@ -132,6 +132,6 @@ export class MicrofrontendService {
     }
     await this.microfrontendRepository.delete(id);
     this.logger.log(`Deleted microfrontend: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'Microfrontend deleted successfully.' };
+    return { success: true, message: `Microfrontend "${existing.name}" deleted successfully.` };
   }
 }
