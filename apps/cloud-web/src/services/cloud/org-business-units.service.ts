@@ -6,6 +6,7 @@ import type {
   CreateBusinessUnitData,
   UpdateBusinessUnitData,
 } from '@/schemas/cloud/org-business-units';
+import type { OrgRole } from '@/schemas/cloud/org-roles';
 
 // Fetches all business units for the organization
 export function getOrgBusinessUnits(orgId: string): Promise<BusinessUnitsResponse> {
@@ -91,6 +92,28 @@ export interface BURoleAssignment {
   userEmail: string;
   roleName: string;
   createdAt: string;
+}
+
+// Updates the assigned apps for a business unit
+export function updateBuApps({
+  orgId,
+  buId,
+  appCodes,
+}: {
+  orgId: string;
+  buId: string;
+  appCodes: string[];
+}): Promise<SuccessResponse> {
+  return axios
+    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/apps`, { appCodes })
+    .then((r) => r.data);
+}
+
+// Fetches roles compatible with a business unit's assigned apps
+export function getCompatibleRoles(orgId: string, buId: string): Promise<OrgRole[]> {
+  return axios
+    .get<OrgRole[]>(`cloud-api/organizations/${orgId}/business-units/${buId}/compatible-roles`)
+    .then((r) => r.data);
 }
 
 // Deletes a business unit

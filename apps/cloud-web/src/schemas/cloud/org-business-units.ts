@@ -24,6 +24,7 @@ export interface BusinessUnit {
   country: string | null;
   timezone: string | null;
   phone: string | null;
+  appCodes: string[];
   childCount: number;
   createdAt: string;
   updatedAt: string | null;

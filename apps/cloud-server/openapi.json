@@ -4453,6 +4453,78 @@
         ]
       }
     },
+    "/cloud-api/organizations/{orgId}/business-units/{buId}/apps": {
+      "patch": {
+        "operationId": "OrganizationBusinessUnitsController_updateBuApps",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Organization Business Units"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/business-units/{buId}/compatible-roles": {
+      "get": {
+        "operationId": "OrganizationBusinessUnitsController_getCompatibleRoles",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Organization Business Units"
+        ]
+      }
+    },
     "/cloud-api/organizations/{orgId}/business-units/{buId}/role-assignments": {
       "get": {
         "operationId": "OrganizationBusinessUnitsController_getRoleAssignments",

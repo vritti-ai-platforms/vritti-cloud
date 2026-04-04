@@ -42,6 +42,13 @@ export class CoreRoleService {
     return result;
   }
 
+  // Fetches roles compatible with a business unit's assigned apps from core
+  async getCompatibleRoles(url: string, webhookSecret: string, buId: string): Promise<any[]> {
+    const result = await this.http.get<any[]>(url, webhookSecret, '/organizations/webhook/roles/compatible', { buId });
+    this.logger.log(`Fetched compatible roles for BU ${buId} from core`);
+    return result;
+  }
+
   // Deletes a role in core
   async deleteOrgRole(url: string, webhookSecret: string, roleId: string): Promise<any> {
     const result = await this.http.delete<any>(url, webhookSecret, `/organizations/webhook/roles/${roleId}`);

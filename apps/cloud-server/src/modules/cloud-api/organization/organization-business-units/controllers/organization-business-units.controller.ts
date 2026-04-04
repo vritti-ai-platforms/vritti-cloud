@@ -59,6 +59,24 @@ export class OrganizationBusinessUnitsController {
     return this.orgBuService.updateBusinessUnit(orgId, buId, data);
   }
 
+  // Updates the assigned apps for a business unit
+  @Patch(':buId/apps')
+  async updateBuApps(
+    @Param('orgId') orgId: string,
+    @Param('buId') buId: string,
+    @Body() data: { appCodes: string[] },
+  ): Promise<any> {
+    this.logger.log(`PATCH /organizations/${orgId}/business-units/${buId}/apps`);
+    return this.orgBuService.updateBuApps(orgId, buId, data.appCodes);
+  }
+
+  // Returns roles compatible with a business unit's assigned apps
+  @Get(':buId/compatible-roles')
+  async getCompatibleRoles(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<any[]> {
+    this.logger.log(`GET /organizations/${orgId}/business-units/${buId}/compatible-roles`);
+    return this.orgBuService.getCompatibleRoles(orgId, buId);
+  }
+
   // Lists role assignments for a business unit
   @Get(':buId/role-assignments')
   async getRoleAssignments(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<any[]> {

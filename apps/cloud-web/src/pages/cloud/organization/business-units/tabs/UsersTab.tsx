@@ -1,4 +1,4 @@
-import { useOrgRoles } from '@hooks/cloud/org-roles';
+import { useCompatibleRoles } from '@hooks/cloud/org-business-units';
 import { useOrgUsers } from '@hooks/cloud/organizations/useOrgUsers';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
@@ -209,9 +209,9 @@ const AssignRoleForm = ({ orgId, buId, defaultUserId, defaultRoleIds, onSuccess,
     defaultValues: { userId: defaultUserId ?? '', orgRoleIds: defaultRoleIds ?? [] },
   });
 
-  // Fetch users and roles for the dropdowns
+  // Fetch users and compatible roles for the dropdowns
   const { data: usersResponse } = useOrgUsers(orgId);
-  const { data: roles = [] } = useOrgRoles(orgId);
+  const { data: roles = [] } = useCompatibleRoles(orgId, buId);
 
   const userList = usersResponse?.result ?? [];
 
