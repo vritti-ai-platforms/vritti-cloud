@@ -68,9 +68,7 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
       .leftJoin(roleTemplateFeaturePermissions, eq(roleTemplates.id, roleTemplateFeaturePermissions.roleTemplateId))
       .groupBy(roleTemplates.id, industries.name);
 
-    const countQuery = this.db
-      .select({ count: sql<number>`count(*)` })
-      .from(roleTemplates);
+    const countQuery = this.db.select({ count: sql<number>`count(*)` }).from(roleTemplates);
 
     if (params.where) {
       baseQuery.where(params.where);
@@ -90,8 +88,6 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
         description: row.description,
         scope: row.scope,
         industryId: row.industryId,
-        isSystem: row.isSystem,
-        isActive: row.isActive,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         industryName: row.industryName,
