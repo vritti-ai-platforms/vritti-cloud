@@ -11,7 +11,7 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
   }
 
   // Finds a role template by its unique identifier, joining industry name
-  async findById(id: string): Promise<(RoleTemplate & { industryName: string | null }) | undefined> {
+  async findById(id: string): Promise<(RoleTemplate & { industryName: string }) | undefined> {
     const result = await this.db
       .select({
         id: roleTemplates.id,
@@ -20,14 +20,12 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
         description: roleTemplates.description,
         scope: roleTemplates.scope,
         industryId: roleTemplates.industryId,
-        isSystem: roleTemplates.isSystem,
-        isActive: roleTemplates.isActive,
         createdAt: roleTemplates.createdAt,
         updatedAt: roleTemplates.updatedAt,
         industryName: industries.name,
       })
       .from(roleTemplates)
-      .leftJoin(industries, eq(roleTemplates.industryId, industries.id))
+      .innerJoin(industries, eq(roleTemplates.industryId, industries.id))
       .where(eq(roleTemplates.id, id));
 
     if (result.length === 0) return undefined;
@@ -39,8 +37,6 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
       description: row.description,
       scope: row.scope,
       industryId: row.industryId,
-      isSystem: row.isSystem,
-      isActive: row.isActive,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
       industryName: row.industryName,
@@ -53,7 +49,7 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
     orderBy?: SQL[];
     limit: number;
     offset: number;
-  }): Promise<{ result: (RoleTemplate & { industryName: string | null; permissionCount: number })[]; count: number }> {
+  }): Promise<{ result: (RoleTemplate & { industryName: string; permissionCount: number })[]; count: number }> {
     const baseQuery = this.db
       .select({
         id: roleTemplates.id,
@@ -62,15 +58,13 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
         description: roleTemplates.description,
         scope: roleTemplates.scope,
         industryId: roleTemplates.industryId,
-        isSystem: roleTemplates.isSystem,
-        isActive: roleTemplates.isActive,
         createdAt: roleTemplates.createdAt,
         updatedAt: roleTemplates.updatedAt,
         industryName: industries.name,
         permissionCount: sql<number>`count(${roleTemplateFeaturePermissions.id})`.as('permission_count'),
       })
       .from(roleTemplates)
-      .leftJoin(industries, eq(roleTemplates.industryId, industries.id))
+      .innerJoin(industries, eq(roleTemplates.industryId, industries.id))
       .leftJoin(roleTemplateFeaturePermissions, eq(roleTemplates.id, roleTemplateFeaturePermissions.roleTemplateId))
       .groupBy(roleTemplates.id, industries.name);
 

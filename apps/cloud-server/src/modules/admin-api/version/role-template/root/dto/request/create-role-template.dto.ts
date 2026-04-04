@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { ArrayMinSize, IsArray, IsBoolean, IsEnum, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { ArrayMinSize, IsArray, IsEnum, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { type RoleScope, RoleScopeValues } from '@/db/schema';
 
 export class CreateRoleTemplateDto {
@@ -22,19 +22,13 @@ export class CreateRoleTemplateDto {
   @IsEnum(RoleScopeValues)
   scope: RoleScope;
 
-  @ApiPropertyOptional({ description: 'Industry this role template belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
-  @IsOptional()
+  @ApiProperty({ description: 'Industry this role template belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
-  industryId?: string;
+  industryId: string;
 
   @ApiProperty({ description: 'App IDs this role template covers', type: [String] })
   @IsArray()
   @ArrayMinSize(1)
   @IsUUID('4', { each: true })
   appIds: string[];
-
-  @ApiPropertyOptional({ description: 'Whether this is a system-defined role template', example: false })
-  @IsOptional()
-  @IsBoolean()
-  isSystem?: boolean;
 }

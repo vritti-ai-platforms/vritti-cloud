@@ -8,25 +8,15 @@ export interface Role {
   name: string;
   description: string | null;
   scope: RoleScope;
-  industryId: string | null;
-  industryName: string | null;
+  industryId: string;
+  industryName: string;
   permissionCount: number;
-  isSystem: boolean;
   createdAt: string;
   updatedAt: string | null;
-  canDelete: boolean;
 }
 
 export interface RoleTemplateDetail extends Role {
-  appIds: string[];
-  permissions: RolePermission[];
-}
-
-export interface RolePermission {
-  featureId: string;
-  featureCode: string;
-  featureName: string;
-  type: string;
+  appCount: number;
 }
 
 export interface FeatureWithPermissions {
@@ -36,6 +26,7 @@ export interface FeatureWithPermissions {
   icon: string | null;
   permissions: string[];
   appCodes: string[];
+  appIds: string[];
 }
 
 export interface GroupedPermission {
@@ -49,13 +40,22 @@ export interface PermissionEntry {
   type: string;
 }
 
+export interface RoleTemplateAppTableRow {
+  appId: string;
+  code: string;
+  name: string;
+  icon: string;
+  isAssigned: boolean;
+}
+
 export type RoleTemplatesTableResponse = TableResponse<Role>;
+export type RoleTemplateAppsTableResponse = TableResponse<RoleTemplateAppTableRow>;
 
 export const createRoleTemplateSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
   scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU'], { message: 'Please select a scope' }),
-  industryId: z.string().uuid().optional().or(z.literal('')),
+  industryId: z.string().uuid('Please select an industry'),
   appIds: z.array(z.string().uuid()).min(1, 'Select at least one app'),
   versionId: z.string().uuid('App version is required'),
 });
@@ -64,8 +64,7 @@ export const updateRoleTemplateSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255).optional(),
   description: z.string().optional(),
   scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU']).optional(),
-  industryId: z.string().uuid().optional().or(z.literal('')),
-  appIds: z.array(z.string().uuid()).min(1, 'Select at least one app').optional(),
+  industryId: z.string().uuid('Please select an industry').optional(),
 });
 
 export const setPermissionsSchema = z.object({

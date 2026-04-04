@@ -1,4 +1,3 @@
-import type { GroupedPermission } from '@domain/version/role-template/role-template-permission/services/role-template-permission.service';
 import { RoleTemplateService } from '@domain/version/role-template/root/services/role-template.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -42,10 +41,10 @@ export class RoleTemplateController {
     return this.roleTemplateService.findForTable(userId);
   }
 
-  // Returns a single role template by ID with permissions
+  // Returns a single role template by ID with counts
   @Get(':id')
   @ApiGetRoleTemplateById()
-  findById(@Param('id') id: string): Promise<RoleTemplateDto & { permissions: GroupedPermission[] }> {
+  findById(@Param('id') id: string): Promise<RoleTemplateDto & { industryName: string; permissionCount: number; appCount: number }> {
     this.logger.log(`GET /admin-api/role-templates/${id}`);
     return this.roleTemplateService.findById(id);
   }

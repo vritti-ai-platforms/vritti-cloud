@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { asc, count, countDistinct, eq, inArray, sql, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { App } from '@/db/schema';
-import { appFeatures, apps, industries, planApps } from '@/db/schema';
+import { appFeatures, apps, industries, planApps, roleTemplateApps } from '@/db/schema';
 
 @Injectable()
 export class AppRepository extends PrimaryBaseRepository<typeof apps> {
@@ -20,13 +20,13 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     return this.model.findFirst({ where: { code } });
   }
 
-  // Returns paginated apps with feature/plan counts and the total filtered count
+  // Returns paginated apps with feature/plan/role counts and the total filtered count
   async findAllWithCounts(
     where?: SQL,
     orderBy?: SQL[],
     limit?: number,
     offset?: number,
-  ): Promise<{ rows: Array<App & { featureCount: number; planCount: number }>; total: number }> {
+  ): Promise<{ rows: Array<App & { featureCount: number; planCount: number; roleCount: number }>; total: number }> {
     const [countResult, rows] = await Promise.all([
       this.db
         .select({ total: count() })
@@ -47,10 +47,12 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
           updatedAt: apps.updatedAt,
           featureCount: countDistinct(appFeatures.id),
           planCount: countDistinct(planApps.id),
+          roleCount: countDistinct(roleTemplateApps.id),
         })
         .from(apps)
         .leftJoin(appFeatures, eq(appFeatures.appId, apps.id))
         .leftJoin(planApps, eq(planApps.appCode, apps.code))
+        .leftJoin(roleTemplateApps, eq(roleTemplateApps.appId, apps.id))
         .where(where)
         .groupBy(apps.id)
         .orderBy(...(orderBy && orderBy.length > 0 ? orderBy : [asc(apps.name)]))
@@ -58,15 +60,15 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
         .offset(offset ?? 0),
     ]);
     return {
-      rows: rows as Array<App & { featureCount: number; planCount: number }>,
+      rows: rows as Array<App & { featureCount: number; planCount: number; roleCount: number }>,
       total: Number(countResult),
     };
   }
 
-  // Returns a single app with feature/plan counts, or undefined if not found
+  // Returns a single app with feature/plan/role counts, or undefined if not found
   async findOneWithCounts(
     id: string,
-  ): Promise<(App & { featureCount: number; planCount: number }) | undefined> {
+  ): Promise<(App & { featureCount: number; planCount: number; roleCount: number }) | undefined> {
     const [row] = await this.db
       .select({
         id: apps.id,
@@ -81,14 +83,16 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
         updatedAt: apps.updatedAt,
         featureCount: countDistinct(appFeatures.id),
         planCount: countDistinct(planApps.id),
+        roleCount: countDistinct(roleTemplateApps.id),
       })
       .from(apps)
       .leftJoin(appFeatures, eq(appFeatures.appId, apps.id))
       .leftJoin(planApps, eq(planApps.appCode, apps.code))
+      .leftJoin(roleTemplateApps, eq(roleTemplateApps.appId, apps.id))
       .where(eq(apps.id, id))
       .groupBy(apps.id)
       .limit(1);
-    return row as (App & { featureCount: number; planCount: number }) | undefined;
+    return row as (App & { featureCount: number; planCount: number; roleCount: number }) | undefined;
   }
 
   // Counts how many plan_apps reference a given app by its code
@@ -106,6 +110,15 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
       .select({ count: count() })
       .from(industries)
       .where(sql`${industries.recommendedApps} @> ${JSON.stringify([appCode])}::jsonb`);
+    return Number(result[0]?.count ?? 0);
+  }
+
+  // Counts how many role_template_apps reference a given app by its ID
+  async countRoleTemplateReferences(appId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: count() })
+      .from(roleTemplateApps)
+      .where(eq(roleTemplateApps.appId, appId));
     return Number(result[0]?.count ?? 0);
   }
 

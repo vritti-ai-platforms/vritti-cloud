@@ -21,10 +21,10 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "paths": {
-      "@domain/*": ["src/modules/domain/*"],
-      "@/generated/*": ["src/generated/*"],
-      "@/db/*": ["src/db/*"],
-      "@/*": ["src/*"]
+      "@domain/*": ["./src/modules/domain/*"],
+      "@/generated/*": ["./src/generated/*"],
+      "@/db/*": ["./src/db/*"],
+      "@/*": ["./src/*"]
     }
   }
 }

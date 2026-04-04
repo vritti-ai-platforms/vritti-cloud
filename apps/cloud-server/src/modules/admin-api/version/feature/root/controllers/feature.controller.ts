@@ -17,7 +17,6 @@ import {
   ApiCreateFeature,
   ApiDeleteFeature,
   ApiExportFeatures,
-  ApiFindFeaturesWithPermissions,
   ApiFindForTableFeatures,
   ApiGetFeatureById,
   ApiImportFeatures,
@@ -27,7 +26,6 @@ import { FeatureDto } from '../dto/entity/feature.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '../dto/response/feature-table-response.dto';
-import type { FeatureWithPermissionsResponseDto } from '../dto/response/feature-with-permissions-response.dto';
 
 @ApiTags('Admin - Features')
 @ApiBearerAuth()
@@ -53,14 +51,6 @@ export class FeatureController {
   findForTable(@UserId() userId: string): Promise<FeatureTableResponseDto> {
     this.logger.log('GET /admin-api/features/table');
     return this.featureService.findForTable(userId);
-  }
-
-  // Returns all features for a version with their permission types and app codes
-  @Get('with-permissions')
-  @ApiFindFeaturesWithPermissions()
-  findWithPermissions(@Param('versionId') versionId: string): Promise<FeatureWithPermissionsResponseDto[]> {
-    this.logger.log(`GET /admin-api/versions/${versionId}/features/with-permissions`);
-    return this.featureService.findWithPermissions(versionId);
   }
 
   // Imports features from a spreadsheet file (all-or-nothing)

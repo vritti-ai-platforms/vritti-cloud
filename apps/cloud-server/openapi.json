@@ -5704,49 +5704,6 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/features/with-permissions": {
-      "get": {
-        "operationId": "FeatureController_findWithPermissions",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "description": "App version UUID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Features with permissions retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeatureWithPermissionsResponseDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List features with permission types and app codes for a version",
-        "tags": [
-          "Admin - Features"
-        ]
-      }
-    },
     "/admin-api/versions/{versionId}/features/import": {
       "post": {
         "operationId": "FeatureController_importFeatures",
@@ -7162,6 +7119,172 @@
         ]
       }
     },
+    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/apps/table": {
+      "get": {
+        "operationId": "RoleTemplateAppController_findForTable",
+        "parameters": [
+          {
+            "name": "roleTemplateId",
+            "required": true,
+            "in": "path",
+            "description": "Role template UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Apps retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleTemplateAppTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List apps for role template data table with assignment status (server-stored state)",
+        "tags": [
+          "Admin - Role Template Apps"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/apps/{appId}": {
+      "post": {
+        "operationId": "RoleTemplateAppController_addApp",
+        "parameters": [
+          {
+            "name": "roleTemplateId",
+            "required": true,
+            "in": "path",
+            "description": "Role template UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "App added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role template or app not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add an app to a role template",
+        "tags": [
+          "Admin - Role Template Apps"
+        ]
+      },
+      "delete": {
+        "operationId": "RoleTemplateAppController_removeApp",
+        "parameters": [
+          {
+            "name": "roleTemplateId",
+            "required": true,
+            "in": "path",
+            "description": "Role template UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "App removed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role template not found."
+          },
+          "409": {
+            "description": "App has assigned permissions."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an app from a role template",
+        "tags": [
+          "Admin - Role Template Apps"
+        ]
+      }
+    },
     "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/permissions": {
       "get": {
         "operationId": "RoleTemplatePermissionController_findByRoleTemplate",
@@ -7249,6 +7372,43 @@
           }
         ],
         "summary": "Set permissions for a role template (full replace)",
+        "tags": [
+          "Admin - Role Templates"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/permissions/features": {
+      "get": {
+        "operationId": "RoleTemplatePermissionController_findAvailableFeatures",
+        "parameters": [
+          {
+            "name": "roleTemplateId",
+            "required": true,
+            "in": "path",
+            "description": "Role template UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available features retrieved successfully."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Role template not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List features available for permission assignment from linked apps",
         "tags": [
           "Admin - Role Templates"
         ]
@@ -13425,57 +13585,6 @@
           "state"
         ]
       },
-      "FeatureWithPermissionsResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "code": {
-            "type": "string",
-            "example": "orders"
-          },
-          "name": {
-            "type": "string",
-            "example": "Orders"
-          },
-          "icon": {
-            "type": "object",
-            "example": "clipboard-list",
-            "nullable": true
-          },
-          "permissions": {
-            "example": [
-              "VIEW",
-              "CREATE",
-              "EDIT",
-              "DELETE",
-              "EXPORT"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "appCodes": {
-            "example": [
-              "order-management"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "code",
-          "name",
-          "permissions",
-          "appCodes"
-        ]
-      },
       "UpdateFeatureDto": {
         "type": "object",
         "properties": {
@@ -13734,7 +13843,7 @@
           "canDelete": {
             "type": "boolean",
             "example": true,
-            "description": "False when the app is referenced by plans or industries"
+            "description": "False when the app is referenced by plans, industries, or role templates"
           }
         },
         "required": [
@@ -13987,17 +14096,13 @@
             "items": {
               "type": "string"
             }
-          },
-          "isSystem": {
-            "type": "boolean",
-            "description": "Whether this is a system-defined role template",
-            "example": false
           }
         },
         "required": [
           "versionId",
           "name",
           "scope",
+          "industryId",
           "appIds"
         ]
       },
@@ -14027,26 +14132,8 @@
             ]
           },
           "industryId": {
-            "type": "object",
-            "example": "550e8400-e29b-41d4-a716-446655440000",
-            "nullable": true
-          },
-          "industryName": {
-            "type": "object",
-            "example": "Restaurant",
-            "nullable": true
-          },
-          "isSystem": {
-            "type": "boolean",
-            "example": false
-          },
-          "isActive": {
-            "type": "boolean",
-            "example": true
-          },
-          "permissionCount": {
-            "type": "number",
-            "example": 12
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "createdAt": {
             "type": "string",
@@ -14062,10 +14149,65 @@
           "id",
           "name",
           "scope",
-          "isSystem",
-          "isActive",
-          "permissionCount",
+          "industryId",
           "createdAt"
+        ]
+      },
+      "RoleTemplateTableRowDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Chef"
+          },
+          "description": {
+            "type": "object",
+            "example": "Kitchen staff responsible for food preparation",
+            "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "example": "GLOBAL",
+            "enum": [
+              "GLOBAL",
+              "SUBTREE",
+              "SINGLE_BU"
+            ]
+          },
+          "industryId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "industryName": {
+            "type": "string",
+            "example": "Restaurant"
+          },
+          "permissionCount": {
+            "type": "number",
+            "example": 12
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "scope",
+          "industryId",
+          "createdAt",
+          "industryName",
+          "permissionCount"
         ]
       },
       "RoleTemplateTableResponseDto": {
@@ -14074,7 +14216,7 @@
           "result": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleTemplateDto"
+              "$ref": "#/components/schemas/RoleTemplateTableRowDto"
             }
           },
           "count": {
@@ -14133,13 +14275,67 @@
             "items": {
               "type": "string"
             }
-          },
-          "isSystem": {
-            "type": "boolean",
-            "description": "Whether this is a system-defined role template",
-            "example": false
           }
         }
+      },
+      "RoleTemplateAppTableRowDto": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "pos"
+          },
+          "name": {
+            "type": "string",
+            "example": "Point of Sale"
+          },
+          "icon": {
+            "type": "string",
+            "example": "shopping-cart"
+          },
+          "isAssigned": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "appId",
+          "code",
+          "name",
+          "icon",
+          "isAssigned"
+        ]
+      },
+      "RoleTemplateAppTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RoleTemplateAppTableRowDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
       },
       "FeaturePermissionEntry": {
         "type": "object",

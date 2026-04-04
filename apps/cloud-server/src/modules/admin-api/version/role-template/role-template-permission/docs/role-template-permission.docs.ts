@@ -14,6 +14,17 @@ export function ApiGetRoleTemplatePermissions() {
   );
 }
 
+// Swagger docs for listing features available for permission assignment
+export function ApiAvailableFeatures() {
+  return applyDecorators(
+    ApiOperation({ summary: 'List features available for permission assignment from linked apps' }),
+    ApiParam({ name: 'roleTemplateId', description: 'Role template UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'Available features retrieved successfully.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Role template not found.' }),
+  );
+}
+
 // Swagger docs for setting permissions on a role template (full replace)
 export function ApiSetRoleTemplatePermissions() {
   return applyDecorators(

@@ -3,8 +3,8 @@ import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
 import { inArray } from '@vritti/api-sdk/drizzle-orm';
 import type { FeatureType, NewRoleTemplateFeaturePermission } from '@/db/schema';
 import { features } from '@/db/schema';
-import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
 import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/version/role-template/role-template-permission/dto/request/assign-role-template-permissions.dto';
+import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
 import {
   RoleTemplateFeaturePermissionRepository,
   type RoleTemplateFeaturePermissionWithDetails,
@@ -38,7 +38,10 @@ export class RoleTemplatePermissionService {
   }
 
   // Replaces all permissions for a role template with the given set
-  async setPermissions(roleTemplateId: string, dto: AssignRoleTemplatePermissionsDto): Promise<{ success: true; message: string }> {
+  async setPermissions(
+    roleTemplateId: string,
+    dto: AssignRoleTemplatePermissionsDto,
+  ): Promise<{ success: true; message: string }> {
     const roleTemplate = await this.roleTemplateRepository.findById(roleTemplateId);
     if (!roleTemplate) {
       throw new NotFoundException('Role template not found.');
@@ -58,11 +61,28 @@ export class RoleTemplatePermissionService {
       type: perm.type,
     }));
 
-    await this.roleTemplateFeaturePermissionRepository.deleteByRoleTemplateId(roleTemplateId);
-    await this.roleTemplateFeaturePermissionRepository.bulkCreate(entries);
+    await this.roleTemplateFeaturePermissionRepository.transaction(async (tx) => {
+      await this.roleTemplateFeaturePermissionRepository.deleteByRoleTemplateId(roleTemplateId, tx);
+      await this.roleTemplateFeaturePermissionRepository.bulkCreate(entries, tx);
+    });
 
     this.logger.log(`Set ${entries.length} permissions for role template: ${roleTemplate.name} (${roleTemplateId})`);
     return { success: true, message: 'Role template permissions updated successfully.' };
+  }
+
+  // Returns features available for permission assignment (only from apps linked to this role template)
+  async findAvailableFeatures(
+    roleTemplateId: string,
+  ): Promise<
+    Array<{ id: string; code: string; name: string; icon: string; permissions: string[]; appCodes: string[] }>
+  > {
+    const roleTemplate = await this.roleTemplateRepository.findById(roleTemplateId);
+    if (!roleTemplate) {
+      throw new NotFoundException('Role template not found.');
+    }
+    const rows = await this.roleTemplateFeaturePermissionRepository.findAvailableFeatures(roleTemplateId);
+    this.logger.log(`Fetched ${rows.length} available features for role template: ${roleTemplateId}`);
+    return rows;
   }
 
   // Groups flat role-template-feature-permission rows by feature

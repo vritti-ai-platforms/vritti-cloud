@@ -60,7 +60,7 @@ export class AppService {
     const orderBy = FilterProcessor.buildOrderBy(state.sort, AppService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.appRepository.findAllWithCounts(where, orderBy, limit, offset);
-    const result = rows.map((row) => AppDto.from(row, row.featureCount, row.planCount));
+    const result = rows.map((row) => AppDto.from(row, row.featureCount, row.planCount, row.roleCount));
     this.logger.log(`Fetched apps table (${total} results, limit: ${limit}, offset: ${offset})`);
     return { result, count: total, state, activeViewId };
   }
@@ -90,7 +90,7 @@ export class AppService {
       throw new NotFoundException('App not found.');
     }
     this.logger.log(`Fetched app: ${id}`);
-    return AppDto.from(row, row.featureCount, row.planCount);
+    return AppDto.from(row, row.featureCount, row.planCount, row.roleCount);
   }
 
   // Updates an app by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -120,13 +120,15 @@ export class AppService {
     if (!existing) {
       throw new NotFoundException('App not found.');
     }
-    const [planRefs, industryRefs] = await Promise.all([
+    const [planRefs, industryRefs, roleRefs] = await Promise.all([
       this.appRepository.countPlanReferences(existing.code),
       this.appRepository.countIndustryReferences(existing.code),
+      this.appRepository.countRoleTemplateReferences(existing.id),
     ]);
     const parts: string[] = [];
     if (planRefs > 0) parts.push(`${planRefs} plan${planRefs > 1 ? 's' : ''}`);
     if (industryRefs > 0) parts.push(`${industryRefs} industr${industryRefs > 1 ? 'ies' : 'y'}`);
+    if (roleRefs > 0) parts.push(`${roleRefs} role template${roleRefs > 1 ? 's' : ''}`);
     if (parts.length > 0) {
       throw new ConflictException({
         label: 'App In Use',

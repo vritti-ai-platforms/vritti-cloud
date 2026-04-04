@@ -1,4 +1,4 @@
-import { boolean, text, timestamp, uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
+import { text, timestamp, uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { versions } from './version';
 import { roleScopeEnum } from './enums';
@@ -15,9 +15,7 @@ export const roleTemplates = cloudSchema.table(
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
     scope: roleScopeEnum('scope').notNull(),
-    industryId: uuid('industry_id').references(() => industries.id, { onDelete: 'set null' }),
-    isSystem: boolean('is_system').notNull().default(false),
-    isActive: boolean('is_active').notNull().default(true),
+    industryId: uuid('industry_id').notNull().references(() => industries.id, { onDelete: 'cascade' }),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },

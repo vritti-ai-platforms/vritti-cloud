@@ -18,7 +18,6 @@ import { FeatureDto } from '@/modules/admin-api/version/feature/root/dto/entity/
 import { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
 import type { UpdateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '@/modules/admin-api/version/feature/root/dto/response/feature-table-response.dto';
-import type { FeatureWithPermissionsResponseDto } from '@/modules/admin-api/version/feature/root/dto/response/feature-with-permissions-response.dto';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
 import { validateImportRows } from '@/utils/validate-import-rows';
 import { FeaturePermissionRepository } from '../../feature-permission/repositories/feature-permission.repository';
@@ -92,26 +91,6 @@ export class FeatureService {
       orderBy: { name: 'asc' },
       ...(query.versionId ? { where: { versionId: query.versionId } } : {}),
     });
-  }
-
-  // Returns all features for a version with their permission types and app codes
-  async findWithPermissions(versionId: string): Promise<FeatureWithPermissionsResponseDto[]> {
-    const [allFeatures, permissionsMap, appCodesMap] = await Promise.all([
-      this.featureRepository.findAllByVersionId(versionId),
-      this.featureRepository.findPermissionsByVersionId(versionId),
-      this.featureRepository.findAppCodesByVersionId(versionId),
-    ]);
-
-    this.logger.log(`Fetched ${allFeatures.length} features with permissions for version ${versionId}`);
-
-    return allFeatures.map((feature) => ({
-      id: feature.id,
-      code: feature.code,
-      name: feature.name,
-      icon: feature.icon,
-      permissions: permissionsMap.get(feature.id) ?? [],
-      appCodes: appCodesMap.get(feature.id) ?? [],
-    }));
   }
 
   // Finds a feature by ID; throws NotFoundException if not found

@@ -3,7 +3,6 @@ import { useUpdateRoleTemplate } from '@hooks/admin/role-templates';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
-import { AppSelector } from '@vritti/quantum-ui/selects/app';
 import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import type React from 'react';
@@ -27,8 +26,7 @@ export const EditRoleTemplateForm: React.FC<EditRoleTemplateFormProps> = ({ role
       name: role.name,
       description: role.description ?? '',
       scope: role.scope,
-      industryId: role.industryId ?? '',
-      appIds: role.appIds,
+      industryId: role.industryId,
     },
   });
 
@@ -55,8 +53,7 @@ export const EditRoleTemplateForm: React.FC<EditRoleTemplateFormProps> = ({ role
           { value: 'SINGLE_BU', label: 'Single Business Unit' },
         ]}
       />
-      <AppSelector name="appIds" multiple label="Apps" placeholder="Select apps this role covers" />
-      <IndustrySelector name="industryId" label="Industry" placeholder="All industries (optional)" />
+      <IndustrySelector name="industryId" label="Industry" placeholder="Select industry" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

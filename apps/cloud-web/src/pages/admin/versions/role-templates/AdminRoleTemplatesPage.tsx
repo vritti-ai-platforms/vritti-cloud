@@ -109,16 +109,6 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Role, unknown>[] {
       cell: ({ row }) => <Badge variant="secondary">{row.original.permissionCount}</Badge>,
     },
     {
-      accessorKey: 'isSystem',
-      header: 'System',
-      cell: ({ row }) =>
-        row.original.isSystem ? (
-          <Badge className="bg-success/15 text-success border-success/30">System</Badge>
-        ) : (
-          <span className="text-sm text-muted-foreground">Custom</span>
-        ),
-    },
-    {
       id: 'actions',
       header: '',
       cell: ({ row }) => (

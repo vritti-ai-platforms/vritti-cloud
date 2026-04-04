@@ -1,11 +1,11 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TableResponseDto } from '@vritti/api-sdk';
 import type { TableViewState } from '@vritti/api-sdk';
-import { RoleTemplateDto } from '../entity/role-template.dto';
+import { TableResponseDto } from '@vritti/api-sdk';
+import { RoleTemplateTableRowDto } from '../entity/role-template-table-row.dto';
 
-export class RoleTemplateTableResponseDto extends TableResponseDto<RoleTemplateDto> {
-  @ApiProperty({ type: [RoleTemplateDto] })
-  declare result: RoleTemplateDto[];
+export class RoleTemplateTableResponseDto extends TableResponseDto<RoleTemplateTableRowDto> {
+  @ApiProperty({ type: [RoleTemplateTableRowDto] })
+  declare result: RoleTemplateTableRowDto[];
 
   @ApiProperty()
   declare count: number;

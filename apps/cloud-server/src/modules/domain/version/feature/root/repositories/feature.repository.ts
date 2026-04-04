@@ -161,48 +161,4 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
     return referenced;
   }
 
-  // Returns permission types grouped by feature ID for a given app version
-  async findPermissionsByVersionId(versionId: string): Promise<Map<string, string[]>> {
-    const rows = await this.db
-      .select({
-        featureId: featurePermissions.featureId,
-        type: featurePermissions.type,
-      })
-      .from(featurePermissions)
-      .where(eq(featurePermissions.versionId, versionId));
-
-    const map = new Map<string, string[]>();
-    for (const row of rows) {
-      const existing = map.get(row.featureId);
-      if (existing) {
-        existing.push(row.type);
-      } else {
-        map.set(row.featureId, [row.type]);
-      }
-    }
-    return map;
-  }
-
-  // Returns app codes grouped by feature ID for a given app version
-  async findAppCodesByVersionId(versionId: string): Promise<Map<string, string[]>> {
-    const rows = await this.db
-      .select({
-        featureId: appFeatures.featureId,
-        appCode: apps.code,
-      })
-      .from(appFeatures)
-      .innerJoin(apps, eq(appFeatures.appId, apps.id))
-      .where(eq(appFeatures.versionId, versionId));
-
-    const map = new Map<string, string[]>();
-    for (const row of rows) {
-      const existing = map.get(row.featureId);
-      if (existing) {
-        existing.push(row.appCode);
-      } else {
-        map.set(row.featureId, [row.appCode]);
-      }
-    }
-    return map;
-  }
 }

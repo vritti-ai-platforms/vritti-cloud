@@ -48,7 +48,7 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ onSucc
         ]}
       />
       <AppSelector name="appIds" multiple label="Apps" placeholder="Select apps this role covers" />
-      <IndustrySelector name="industryId" label="Industry" placeholder="All industries (optional)" />
+      <IndustrySelector name="industryId" label="Industry" placeholder="Select industry" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

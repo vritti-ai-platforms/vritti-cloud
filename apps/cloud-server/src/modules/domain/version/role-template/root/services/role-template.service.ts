@@ -13,13 +13,13 @@ import {
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { roleTemplates } from '@/db/schema';
 import { RoleTemplateDto } from '@/modules/admin-api/version/role-template/root/dto/entity/role-template.dto';
+import { RoleTemplateTableRowDto } from '@/modules/admin-api/version/role-template/root/dto/entity/role-template-table-row.dto';
 import type { CreateRoleTemplateDto } from '@/modules/admin-api/version/role-template/root/dto/request/create-role-template.dto';
 import type { UpdateRoleTemplateDto } from '@/modules/admin-api/version/role-template/root/dto/request/update-role-template.dto';
 import { RoleTemplateTableResponseDto } from '@/modules/admin-api/version/role-template/root/dto/response/role-template-table-response.dto';
+import { RoleTemplateAppRepository } from '../../role-template-app/repositories/role-template-app.repository';
 import { RoleTemplateFeaturePermissionRepository } from '../../role-template-permission/repositories/role-template-feature-permission.repository';
-import { RoleTemplatePermissionService } from '../../role-template-permission/services/role-template-permission.service';
 import { RoleTemplateRepository } from '../repositories/role-template.repository';
-import { RoleTemplateAppRepository } from '../repositories/role-template-app.repository';
 
 @Injectable()
 export class RoleTemplateService {
@@ -34,17 +34,23 @@ export class RoleTemplateService {
     private readonly roleTemplateRepository: RoleTemplateRepository,
     private readonly roleTemplateAppRepository: RoleTemplateAppRepository,
     private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionRepository,
-    private readonly roleTemplatePermissionService: RoleTemplatePermissionService,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
   // Creates a new role template and links it to selected apps
   async create(dto: CreateRoleTemplateDto): Promise<CreateResponseDto<RoleTemplateDto>> {
     const { appIds, ...roleTemplateData } = dto;
-    const roleTemplate = await this.roleTemplateRepository.create(roleTemplateData);
-    await this.roleTemplateAppRepository.setApps(roleTemplate.id, dto.versionId, appIds);
+    const roleTemplate = await this.roleTemplateRepository.transaction(async (tx) => {
+      const created = await this.roleTemplateRepository.create(roleTemplateData, tx);
+      await this.roleTemplateAppRepository.setApps(created.id, dto.versionId, appIds, tx);
+      return created;
+    });
     this.logger.log(`Created role template: ${roleTemplate.name} (${roleTemplate.id}) with ${appIds.length} app(s)`);
-    return { success: true, message: 'Role template created successfully.', data: RoleTemplateDto.from(roleTemplate, 0) };
+    return {
+      success: true,
+      message: 'Role template created successfully.',
+      data: RoleTemplateDto.from(roleTemplate),
+    };
   }
 
   // Returns role templates for the data table with server-stored filter/sort/search/pagination state
@@ -58,7 +64,7 @@ export class RoleTemplateService {
     const { result, count } = await this.roleTemplateRepository.findAllWithCounts({ where, orderBy, limit, offset });
     this.logger.log(`Fetched role templates table (${count} results, limit: ${limit}, offset: ${offset})`);
     return {
-      result: result.map((r) => RoleTemplateDto.from(r, r.permissionCount, r.industryName)),
+      result: result.map((r) => RoleTemplateTableRowDto.fromRow(r)),
       count,
       state,
       activeViewId,
@@ -66,8 +72,12 @@ export class RoleTemplateService {
   }
 
   // Returns paginated role template options for the select component
-  findForSelect(query: SelectOptionsQueryDto & { industryId?: string; versionId?: string }): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched role template select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+  findForSelect(
+    query: SelectOptionsQueryDto & { industryId?: string; versionId?: string },
+  ): Promise<SelectQueryResult> {
+    this.logger.log(
+      `Fetched role template select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     const where: Record<string, string> = {};
     if (query.industryId) where.industryId = query.industryId;
     if (query.versionId) where.versionId = query.versionId;
@@ -86,21 +96,25 @@ export class RoleTemplateService {
     });
   }
 
-  // Finds a role template by ID with permissions grouped by app and linked app IDs
+  // Finds a role template by ID with industry name, permission count, and app count
   async findById(
     id: string,
-  ): Promise<RoleTemplateDto & { appIds: string[]; permissions: Awaited<ReturnType<RoleTemplatePermissionService['findByRoleTemplate']>> }> {
+  ): Promise<RoleTemplateDto & { industryName: string; permissionCount: number; appCount: number }> {
     const roleTemplate = await this.roleTemplateRepository.findById(id);
     if (!roleTemplate) {
       throw new NotFoundException('Role template not found.');
     }
-    const [permissionCount, permissions, appIds] = await Promise.all([
+    const [permissionCount, appIds] = await Promise.all([
       this.roleTemplateFeaturePermissionRepository.countByRoleTemplateId(id),
-      this.roleTemplatePermissionService.findByRoleTemplate(id),
       this.roleTemplateAppRepository.findByRoleTemplateId(id),
     ]);
     this.logger.log(`Fetched role template: ${id}`);
-    return { ...RoleTemplateDto.from(roleTemplate, permissionCount, roleTemplate.industryName), appIds, permissions };
+    return {
+      ...RoleTemplateDto.from(roleTemplate),
+      industryName: roleTemplate.industryName,
+      permissionCount,
+      appCount: appIds.length,
+    };
   }
 
   // Updates a role template by ID and optionally replaces linked apps
@@ -110,28 +124,25 @@ export class RoleTemplateService {
       throw new NotFoundException('Role template not found.');
     }
     const { appIds, ...roleTemplateData } = dto;
-    const roleTemplate = await this.roleTemplateRepository.update(id, roleTemplateData);
-    if (appIds) {
-      await this.roleTemplateAppRepository.setApps(id, existing.versionId, appIds);
-    }
+    const roleTemplate = await this.roleTemplateRepository.transaction(async (tx) => {
+      const updated = await this.roleTemplateRepository.update(id, roleTemplateData, tx);
+      if (appIds) {
+        await this.roleTemplateAppRepository.setApps(id, existing.versionId, appIds, tx);
+      }
+      return updated;
+    });
     this.logger.log(`Updated role template: ${roleTemplate.name} (${roleTemplate.id})`);
     return { success: true, message: 'Role template updated successfully.' };
   }
 
-  // Deletes a role template by ID; rejects system role templates
+  // Deletes a role template by ID
   async delete(id: string): Promise<SuccessResponseDto> {
     const existing = await this.roleTemplateRepository.findById(id);
     if (!existing) {
       throw new NotFoundException('Role template not found.');
     }
-    if (existing.isSystem) {
-      throw new ConflictException({
-        label: 'System Role Template',
-        detail: `Cannot delete "${existing.name}" because it is a system-defined role template.`,
-      });
-    }
     await this.roleTemplateRepository.delete(id);
     this.logger.log(`Deleted role template: ${existing.name} (${existing.id})`);
-    return { success: true, message: 'Role template deleted successfully.' };
+    return { success: true, message: `Role template "${existing.name}" deleted successfully.` };
   }
 }

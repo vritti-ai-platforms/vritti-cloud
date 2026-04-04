@@ -14,6 +14,8 @@ import { FeaturePermissionController } from './feature/feature-permission/contro
 import { FeatureController } from './feature/root/controllers/feature.controller';
 // Microfrontend
 import { MicrofrontendController } from './microfrontend/controllers/microfrontend.controller';
+// Role Template App
+import { RoleTemplateAppController } from './role-template/role-template-app/controllers/role-template-app.controller';
 // Role Template Permission
 import { RoleTemplatePermissionController } from './role-template/role-template-permission/controllers/role-template-permission.controller';
 // Role Template
@@ -33,6 +35,7 @@ import { VersionController } from './root/controllers/version.controller';
     AppFeatureController,
     AppPriceController,
     RoleTemplateController,
+    RoleTemplateAppController,
     RoleTemplatePermissionController,
   ],
   exports: [VersionDomainModule],

@@ -6,7 +6,6 @@ import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
 import { FeatureSelectResponseDto } from '../dto/response/feature-select-response.dto';
 import { FeatureTableResponseDto } from '../dto/response/feature-table-response.dto';
-import { FeatureWithPermissionsResponseDto } from '../dto/response/feature-with-permissions-response.dto';
 
 // Swagger docs for creating a feature
 export function ApiCreateFeature() {
@@ -40,20 +39,6 @@ export function ApiFindFeaturesSelect() {
       status: 200,
       description: 'Feature options retrieved.',
       type: FeatureSelectResponseDto,
-    }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-// Swagger docs for getting all features with their permission types and app codes
-export function ApiFindFeaturesWithPermissions() {
-  return applyDecorators(
-    ApiOperation({ summary: 'List features with permission types and app codes for a version' }),
-    ApiParam({ name: 'versionId', description: 'App version UUID' }),
-    ApiResponse({
-      status: 200,
-      description: 'Features with permissions retrieved successfully.',
-      type: [FeatureWithPermissionsResponseDto],
     }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );

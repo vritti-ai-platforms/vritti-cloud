@@ -1,5 +1,4 @@
 import { useDeleteRoleTemplate, useRoleTemplate } from '@hooks/admin/role-templates';
-import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
@@ -7,11 +6,12 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
-import { Shield } from 'lucide-react';
+import { Boxes, Factory, GitBranch, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import { EditRoleTemplateForm } from './forms/EditRoleTemplateForm';
 import { RoleTemplatePermissionForm } from './forms/RoleTemplatePermissionForm';
+import { AppsTab } from './tabs/AppsTab';
 
 export const RoleTemplateViewPage = () => {
   const { id } = useSlugParams('roleTemplateSlug');
@@ -21,7 +21,7 @@ export const RoleTemplateViewPage = () => {
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: role } = useRoleTemplate(versionId, id ?? '');
+  const { data: role } = useRoleTemplate(versionId, id);
 
   const deleteMutation = useDeleteRoleTemplate(versionId, {
     onSuccess: () => navigate('..'),
@@ -46,21 +46,18 @@ export const RoleTemplateViewPage = () => {
         title={role.name}
         description={role.description || 'Manage this role template'}
         actions={
-          <div className="flex items-center gap-2">
-            {role.isSystem && <Badge className="bg-success/15 text-success border-success/30">System Role</Badge>}
-            <Button variant="outline" size="sm" onClick={editDialog.open} disabled={role.isSystem}>
-              Edit
-            </Button>
-          </div>
+          <Button variant="outline" size="sm" onClick={editDialog.open}>
+            Edit
+          </Button>
         }
       />
 
       {/* Role info */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-4 gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
-              <Shield className="h-6 w-6 text-primary" />
+            <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
+              <Shield className="size-6 text-primary" />
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Permissions</p>
@@ -69,23 +66,49 @@ export const RoleTemplateViewPage = () => {
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground">Scope</p>
-            <p className="text-lg font-semibold capitalize mt-1">{role.scope.toLowerCase().replace('_', ' ')}</p>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
+              <Boxes className="size-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Apps</p>
+              <p className="text-2xl font-semibold">{role.appCount}</p>
+            </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-6">
-            <p className="text-sm text-muted-foreground">Industry</p>
-            <p className="text-lg font-semibold mt-1">{role.industryName ?? 'All Industries'}</p>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
+              <GitBranch className="size-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Scope</p>
+              <p className="text-lg font-semibold capitalize">{role.scope.toLowerCase().replace('_', ' ')}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
+              <Factory className="size-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Industry</p>
+              <p className="text-lg font-semibold">{role.industryName}</p>
+            </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Tabs */}
       <Tabs
-        defaultValue="permissions"
+        defaultValue="apps"
         tabs={[
+          {
+            value: 'apps',
+            label: 'Apps',
+            content: <AppsTab roleId={role.id} />,
+          },
           {
             value: 'permissions',
             label: 'Permissions',
@@ -103,14 +126,6 @@ export const RoleTemplateViewPage = () => {
         description="This action cannot be undone. All associated permission assignments will be removed."
         buttonText="Delete Role Template"
         onClick={handleDelete}
-        disabled={!role.canDelete || role.isSystem}
-        warning={
-          role.isSystem
-            ? 'System role templates cannot be deleted.'
-            : !role.canDelete
-              ? 'This role template has active assignments. Remove all associations before deleting.'
-              : undefined
-        }
       />
 
       {/* Edit dialog */}
