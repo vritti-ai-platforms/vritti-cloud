@@ -4,10 +4,10 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { SelectFilter } from '@vritti/quantum-ui/Select';
-import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
 import { IndustryFilter } from '@vritti/quantum-ui/selects/industry';
 import { PlanFilter } from '@vritti/quantum-ui/selects/plan';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
+import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
 import { Building2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { AdminOrganization } from '@/schemas/admin/organizations';
@@ -116,11 +116,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<AdminOrganization, unk
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <RowActions
-          actions={[
-            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
-          ]}
-        />
+        <RowActions actions={[{ id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) }]} />
       ),
       enableSorting: false,
       enableHiding: false,

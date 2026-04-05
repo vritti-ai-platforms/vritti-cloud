@@ -6,7 +6,7 @@ import { type ColumnDef, DataTable, RowActions, getSelectionColumn, useDataTable
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
 import { AppWindow, Eye, Plus } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';

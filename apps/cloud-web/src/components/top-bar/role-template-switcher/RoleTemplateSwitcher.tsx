@@ -1,7 +1,7 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Separator } from '@vritti/quantum-ui/Separator';
-import { buildSlug, parseSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug, parseSlug } from '@vritti/quantum-ui/slug';
 import { Check, ChevronsUpDown, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 

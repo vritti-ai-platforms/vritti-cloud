@@ -7,10 +7,10 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@vritti/quantum-ui/Collapsible';
+import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { AppFilter } from '@vritti/quantum-ui/selects/app';
-import { ChevronDown, ChevronRight, Layers, Shield } from 'lucide-react';
+import { Layers, Shield } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { PermissionEntry } from '@/schemas/admin/role-templates';
@@ -201,48 +201,46 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
           const isExpanded = expanded.has(feature.id);
 
           return (
-            <Collapsible key={feature.id} open={isExpanded} onOpenChange={() => toggleExpanded(feature.id)}>
-              <div className="flex items-center gap-3 px-4 py-3">
+            <Collapsible
+              key={feature.id}
+              open={isExpanded}
+              onOpenChange={() => toggleExpanded(feature.id)}
+              headerClassName="px-4 py-3"
+              triggerClassName="hover:text-foreground/80 transition-colors"
+              leading={
                 <Checkbox
                   checked={isAllSelected ? true : isPartial ? 'indeterminate' : false}
                   onCheckedChange={() => toggleAllFeatureTypes(feature.id, feature.permissions)}
                 />
-                <CollapsibleTrigger asChild>
-                  <button
-                    type="button"
-                    className="flex items-center gap-2 flex-1 text-left hover:text-foreground/80 transition-colors"
-                  >
-                    {isExpanded ? (
-                      <ChevronDown className="size-4 text-muted-foreground shrink-0" />
-                    ) : (
-                      <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-                    )}
-                    <span className="text-sm font-medium">{feature.name}</span>
-                    {feature.appCodes.map((code) => (
-                      <Badge key={code} variant="secondary" className="text-[10px]">
-                        {appLabel(code)}
-                      </Badge>
-                    ))}
-                  </button>
-                </CollapsibleTrigger>
+              }
+              trailing={
                 <span className="text-xs text-muted-foreground tabular-nums shrink-0">
                   {selectedCount} / {totalCount}
                 </span>
-              </div>
-              <CollapsibleContent>
-                <div className="border-t bg-muted/20 px-12 py-3">
-                  <div className="flex flex-wrap gap-4">
-                    {feature.permissions.map((type) => (
-                      <Checkbox
-                        key={type}
-                        label={typeLabel(type)}
-                        checked={featureTypes?.has(type) ?? false}
-                        onCheckedChange={() => toggleType(feature.id, type)}
-                      />
-                    ))}
-                  </div>
+              }
+              trigger={
+                <>
+                  <span className="text-sm font-medium">{feature.name}</span>
+                  {feature.appCodes.map((code) => (
+                    <Badge key={code} variant="secondary" className="text-[10px]">
+                      {appLabel(code)}
+                    </Badge>
+                  ))}
+                </>
+              }
+            >
+              <div className="border-t bg-muted/20 px-12 py-3">
+                <div className="flex flex-wrap gap-4">
+                  {feature.permissions.map((type) => (
+                    <Checkbox
+                      key={type}
+                      label={typeLabel(type)}
+                      checked={featureTypes?.has(type) ?? false}
+                      onCheckedChange={() => toggleType(feature.id, type)}
+                    />
+                  ))}
                 </div>
-              </CollapsibleContent>
+              </div>
             </Collapsible>
           );
         })}

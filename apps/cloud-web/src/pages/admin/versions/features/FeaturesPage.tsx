@@ -8,7 +8,7 @@ import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Blocks, Eye, Plus } from 'lucide-react';
 import { DynamicIcon } from 'lucide-react/dynamic';
 import { useNavigate } from 'react-router-dom';

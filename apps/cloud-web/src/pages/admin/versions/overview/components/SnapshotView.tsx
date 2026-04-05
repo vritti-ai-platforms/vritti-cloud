@@ -1,37 +1,51 @@
-import { Boxes, Globe, Layers, Monitor, Shield } from 'lucide-react';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
+import { Collapsible } from '@vritti/quantum-ui/Collapsible';
+import { Empty } from '@vritti/quantum-ui/Empty';
+import { keyBy } from '@vritti/quantum-ui/lodash';
+import { Boxes, Globe, Layers, Monitor, Shield } from 'lucide-react';
 import type { SnapshotApp, VersionSnapshot } from '@/schemas/admin/versions';
 import { AppNode } from './AppNode';
 import { FeatureRow } from './FeatureRow';
 import { RoleNode } from './RoleNode';
 import { SectionHeader } from './SectionHeader';
-import { StatPill } from './StatPill';
 
 interface SnapshotViewProps {
   snapshot: VersionSnapshot;
 }
 
+const StatPill = ({ icon: Icon, label, value, color, bg }: { icon: React.FC<{ className?: string }>; label: string; value: number; color: string; bg: string }) => (
+  <Card>
+    <CardContent className="flex items-center gap-3 px-4 py-3">
+      <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${bg}`}>
+        <Icon className={`size-4 ${color}`} />
+      </div>
+      <div>
+        <span className="text-2xl font-bold tracking-tight leading-none">{value}</span>
+        <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
+      </div>
+    </CardContent>
+  </Card>
+);
+
 function EmptySection({ icon: Icon, title }: { icon: React.FC<{ className?: string }>; title: string }) {
   return (
-    <Card>
-      <CardContent className="flex flex-col items-center justify-center py-10 text-center">
-        <Icon className="size-7 text-muted-foreground mb-2" />
-        <p className="text-sm font-medium text-foreground">No {title.toLowerCase()}</p>
-        <p className="text-xs text-muted-foreground mt-1">Create a snapshot to see {title.toLowerCase()} here.</p>
-      </CardContent>
-    </Card>
+    <Empty
+      icon={<Icon />}
+      title={`No ${title.toLowerCase()}`}
+      description={`Create a snapshot to see ${title.toLowerCase()} here.`}
+    />
   );
 }
 
 export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
   const { apps = [], features = [], roleTemplates = [] } = snapshot;
-  const featureByCode = new Map(features.map((f) => [f.code, f]));
+  const featureByCode = keyBy(features, 'code');
 
   // Reverse map: featureCode → app (for deriving role→app relationships)
-  const featureToApp = new Map<string, SnapshotApp>();
+  const featureToApp: Record<string, SnapshotApp> = {};
   for (const app of apps) {
     for (const code of app.features) {
-      featureToApp.set(code, app);
+      featureToApp[code] = app;
     }
   }
 
@@ -59,8 +73,7 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
       </div>
 
       {/* Apps → Features hierarchy */}
-      <section>
-        <SectionHeader icon={Layers} title="Applications" count={apps.length} color="text-primary" />
+      <Collapsible defaultOpen trigger={<SectionHeader icon={Layers} title="Applications" count={apps.length} color="text-primary" />}>
         {apps.length > 0 ? (
           <div className="space-y-3 mt-3">
             {apps.map((app) => (
@@ -72,7 +85,7 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
             <EmptySection icon={Boxes} title="Applications" />
           </div>
         )}
-      </section>
+      </Collapsible>
 
       {/* Standalone features not assigned to any app */}
       {(() => {
@@ -80,26 +93,29 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
         const unassigned = features.filter((f) => !assignedCodes.has(f.code));
         if (unassigned.length === 0) return null;
         return (
-          <section>
-            <SectionHeader icon={Globe} title="Unassigned Features" count={unassigned.length} color="text-success" />
+          <Collapsible defaultOpen trigger={<SectionHeader icon={Globe} title="Unassigned Features" count={unassigned.length} color="text-success" />}>
             <div className="grid gap-2 mt-3">
               {unassigned.map((f) => (
                 <FeatureRow key={f.code} feature={f} />
               ))}
             </div>
-          </section>
+          </Collapsible>
         );
       })()}
 
       {/* Role templates as permission matrix */}
-      <section>
-        <SectionHeader
-          icon={Shield}
-          title="Role Templates"
-          count={roleTemplates.length}
-          color="text-destructive"
-          subtitle={totalPerms > 0 ? `${totalPerms} permission grants` : undefined}
-        />
+      <Collapsible
+        defaultOpen
+        trigger={
+          <SectionHeader
+            icon={Shield}
+            title="Role Templates"
+            count={roleTemplates.length}
+            color="text-destructive"
+            subtitle={totalPerms > 0 ? `${totalPerms} permission grants` : undefined}
+          />
+        }
+      >
         {roleTemplates.length > 0 ? (
           <div className="space-y-3 mt-3">
             {roleTemplates.map((role) => (
@@ -111,7 +127,7 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
             <EmptySection icon={Shield} title="Role Templates" />
           </div>
         )}
-      </section>
+      </Collapsible>
     </div>
   );
 };

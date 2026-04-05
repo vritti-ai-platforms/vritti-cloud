@@ -3,12 +3,12 @@ import { useOrgPermissions } from '@hooks/cloud/org-roles';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
-import { Collapsible, CollapsibleContent } from '@vritti/quantum-ui/Collapsible';
+import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { TextField } from '@vritti/quantum-ui/TextField';
-import { AppWindow, ChevronDown, ChevronRight, Shield } from 'lucide-react';
+import { AppWindow, Shield } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -198,76 +198,56 @@ export const OrgRoleForm: React.FC<OrgRoleFormProps> = ({ orgId, role, onSubmit,
                     key={group.appCode}
                     open={isExpanded}
                     onOpenChange={() => toggleExpanded(group.appCode)}
-                  >
-                    {/* App group header */}
-                    <div className="flex items-center gap-3 px-4 py-3">
+                    headerClassName="px-4 py-3"
+                    triggerClassName="hover:text-foreground/80 transition-colors"
+                    leading={
                       <Checkbox
                         checked={allFullySelected ? true : someFeaturesSelected ? 'indeterminate' : false}
                         onCheckedChange={() => toggleAppGroup(group)}
                       />
-                      <div
-                        role="button"
-                        tabIndex={0}
-                        className="flex items-center gap-2 flex-1 text-left cursor-pointer hover:text-foreground/80 transition-colors"
-                        onClick={() => toggleExpanded(group.appCode)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter' || e.key === ' ') toggleExpanded(group.appCode);
-                        }}
-                      >
-                        {isExpanded ? (
-                          <ChevronDown className="size-4 text-muted-foreground shrink-0" />
-                        ) : (
-                          <ChevronRight className="size-4 text-muted-foreground shrink-0" />
-                        )}
-                        <span className="text-sm font-medium">{group.appName}</span>
-                      </div>
-                    </div>
+                    }
+                    trigger={<span className="text-sm font-medium">{group.appName}</span>}
+                  >
+                    <div className="border-t bg-muted/20 divide-y divide-border/50">
+                      {group.features.map((feature) => {
+                        const featureTypes = selected.get(feature.code);
+                        const isAllSelected =
+                          featureTypes !== undefined && featureTypes.size === feature.permissions.length;
+                        const isPartial =
+                          featureTypes !== undefined && featureTypes.size > 0 && !isAllSelected;
 
-                    {/* Features within this app group */}
-                    <CollapsibleContent>
-                      <div className="border-t bg-muted/20 divide-y divide-border/50">
-                        {group.features.map((feature) => {
-                          const featureTypes = selected.get(feature.code);
-                          const isAllSelected =
-                            featureTypes !== undefined && featureTypes.size === feature.permissions.length;
-                          const isPartial =
-                            featureTypes !== undefined && featureTypes.size > 0 && !isAllSelected;
-
-                          return (
-                            <div key={feature.code} className="flex items-start gap-4 px-10 py-3">
-                              {/* Feature-level checkbox */}
-                              <div className="pt-0.5">
-                                <Checkbox
-                                  checked={isAllSelected ? true : isPartial ? 'indeterminate' : false}
-                                  onCheckedChange={() =>
-                                    toggleAllFeatureTypes(feature.code, feature.permissions)
-                                  }
-                                />
+                        return (
+                          <div key={feature.code} className="flex items-start gap-4 px-10 py-3">
+                            <div className="pt-0.5">
+                              <Checkbox
+                                checked={isAllSelected ? true : isPartial ? 'indeterminate' : false}
+                                onCheckedChange={() =>
+                                  toggleAllFeatureTypes(feature.code, feature.permissions)
+                                }
+                              />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <span className="text-sm font-medium">{feature.name}</span>
+                                <Badge variant="outline" className="text-[10px] font-mono">
+                                  {feature.code}
+                                </Badge>
                               </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-2">
-                                  <span className="text-sm font-medium">{feature.name}</span>
-                                  <Badge variant="outline" className="text-[10px] font-mono">
-                                    {feature.code}
-                                  </Badge>
-                                </div>
-                                {/* Permission type checkboxes */}
-                                <div className="flex flex-wrap gap-4">
-                                  {feature.permissions.map((type) => (
-                                    <Checkbox
-                                      key={type}
-                                      label={typeLabel(type)}
-                                      checked={featureTypes?.has(type) ?? false}
-                                      onCheckedChange={() => toggleType(feature.code, type)}
-                                    />
-                                  ))}
-                                </div>
+                              <div className="flex flex-wrap gap-4">
+                                {feature.permissions.map((type) => (
+                                  <Checkbox
+                                    key={type}
+                                    label={typeLabel(type)}
+                                    checked={featureTypes?.has(type) ?? false}
+                                    onCheckedChange={() => toggleType(feature.code, type)}
+                                  />
+                                ))}
                               </div>
                             </div>
-                          );
-                        })}
-                      </div>
-                    </CollapsibleContent>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </Collapsible>
                 );
               })}

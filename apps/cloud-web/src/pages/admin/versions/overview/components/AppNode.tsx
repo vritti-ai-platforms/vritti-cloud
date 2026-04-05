@@ -6,7 +6,7 @@ import { FeatureRow } from './FeatureRow';
 
 interface AppNodeProps {
   app: SnapshotApp;
-  featureByCode: Map<string, SnapshotFeature>;
+  featureByCode: Record<string, SnapshotFeature>;
 }
 
 export const AppNode: React.FC<AppNodeProps> = ({ app, featureByCode }) => {
@@ -42,7 +42,7 @@ export const AppNode: React.FC<AppNodeProps> = ({ app, featureByCode }) => {
       {open && app.features.length > 0 && (
         <div className="border-t border-border/40 bg-muted/30">
           {app.features.map((code, i) => {
-            const feature = featureByCode.get(code);
+            const feature = featureByCode[code];
             if (!feature) {
               return (
                 <div

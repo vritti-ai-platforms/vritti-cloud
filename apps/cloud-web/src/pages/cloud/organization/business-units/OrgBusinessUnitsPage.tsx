@@ -7,7 +7,7 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Building2, Plus } from 'lucide-react';
 import { useCallback, useMemo, useRef } from 'react';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { BusinessUnit, CreateBusinessUnitData } from '@/schemas/cloud/org-business-units';
 import { BUNodeCard } from './components/BUNodeCard';

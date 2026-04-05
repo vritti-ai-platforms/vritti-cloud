@@ -4,8 +4,8 @@ import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@/schem
 
 interface RoleNodeProps {
   role: SnapshotRoleTemplate;
-  featureByCode: Map<string, SnapshotFeature>;
-  featureToApp: Map<string, SnapshotApp>;
+  featureByCode: Record<string, SnapshotFeature>;
+  featureToApp: Record<string, SnapshotApp>;
 }
 
 const SCOPE_COLOR: Record<string, string> = {
@@ -20,19 +20,19 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
   const totalPerms = featureEntries.reduce((sum, [, perms]) => sum + perms.length, 0);
 
   // Derive apps from feature permissions (deduplicated)
-  const derivedApps = new Map<string, SnapshotApp>();
+  const derivedApps: Record<string, SnapshotApp> = {};
   for (const [featureCode] of featureEntries) {
-    const app = featureToApp.get(featureCode);
-    if (app) derivedApps.set(app.code, app);
+    const app = featureToApp[featureCode];
+    if (app) derivedApps[app.code] = app;
   }
   // Merge explicit role.apps with derived apps
   const explicitApps = role.apps ?? [];
   for (const code of explicitApps) {
-    if (!derivedApps.has(code)) {
-      derivedApps.set(code, { code, name: code, icon: 'app-window', features: [] });
+    if (!derivedApps[code]) {
+      derivedApps[code] = { code, name: code, icon: 'app-window', features: [] };
     }
   }
-  const roleApps = Array.from(derivedApps.values());
+  const roleApps = Object.values(derivedApps);
 
   return (
     <div className="rounded-xl border border-border/60 bg-card overflow-hidden">
@@ -92,7 +92,7 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
               </span>
               <div className="rounded-lg border border-border/40 bg-card overflow-hidden divide-y divide-border/30">
                 {featureEntries.map(([featureCode, perms]) => {
-                  const feature = featureByCode.get(featureCode);
+                  const feature = featureByCode[featureCode];
                   return (
                     <div key={featureCode} className="flex items-center gap-3 px-3 py-2">
                       <Zap className="size-3 text-success shrink-0" />

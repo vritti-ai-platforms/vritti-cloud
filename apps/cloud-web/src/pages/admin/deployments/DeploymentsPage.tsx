@@ -5,7 +5,7 @@ import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/qua
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Eye, Plus, Server } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Deployment } from '@/schemas/admin/deployments';
