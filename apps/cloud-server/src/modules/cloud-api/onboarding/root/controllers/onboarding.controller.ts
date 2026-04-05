@@ -1,9 +1,10 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Post, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { type CookieSerializeOptions, Onboarding, RefreshCookieOptions, RefreshTokenCookie, SessionData, type SessionInfo, UserId } from '@vritti/api-sdk';
+import { type CookieSerializeOptions, RefreshCookieOptions, RefreshTokenCookie, RequireSession, SessionData, type SessionInfo, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import type { FastifyReply } from 'fastify';
 import { TokenResponse } from '../../../auth/root/dto/response/token-response.dto';
-import { getRefreshCookieName } from '../../../auth/root/services/session.service';
+import { getRefreshCookieName } from '@domain/session/services/session.service';
 import { ApiCompleteOnboarding, ApiGetStatus, ApiSetPassword } from '../docs/onboarding.docs';
 import { OnboardingStatusResponseDto } from '../dto/entity/onboarding-status-response.dto';
 import { SetPasswordDto } from '../dto/request/set-password.dto';
@@ -20,7 +21,7 @@ export class OnboardingController {
 
   // Retrieves the user's current onboarding step and completion status
   @Get('status')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @ApiGetStatus()
   async getStatus(@UserId() userId: string): Promise<OnboardingStatusResponseDto> {
     this.logger.log(`GET /onboarding/status - User: ${userId}`);
@@ -29,7 +30,7 @@ export class OnboardingController {
 
   // Hashes and stores the user's password during onboarding
   @Post('set-password')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiSetPassword()
   async setPassword(
@@ -43,7 +44,7 @@ export class OnboardingController {
 
   // Upgrades session to CLOUD, rotates tokens, and exits onboarding
   @Post('complete')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiCompleteOnboarding()
   async completeOnboarding(

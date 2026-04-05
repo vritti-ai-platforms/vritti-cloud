@@ -1,3 +1,4 @@
+import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type { TableViewState } from '@vritti/quantum-ui/table-filter';
 import type { CloudProvider, CloudProviderPayload } from '@/schemas/admin/cloud-providers';
@@ -15,8 +16,8 @@ export function getCloudProviders(): Promise<CloudProvidersResponse> {
 }
 
 // Creates a new cloud provider
-export function createCloudProvider(data: CloudProviderPayload): Promise<{ success: boolean; message: string }> {
-  return axios.post<{ success: boolean; message: string }>('admin-api/cloud-providers', data).then((r) => r.data);
+export function createCloudProvider(data: CloudProviderPayload): Promise<CreateResponse<CloudProvider>> {
+  return axios.post<CreateResponse<CloudProvider>>('admin-api/cloud-providers', data).then((r) => r.data);
 }
 
 // Updates a cloud provider by ID

@@ -1,4 +1,4 @@
-import { text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { integer, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 
 export const plans = cloudSchema.table('plans', {
@@ -6,6 +6,7 @@ export const plans = cloudSchema.table('plans', {
   name: varchar('name', { length: 100 }).notNull(),
   code: varchar('code', { length: 100 }).notNull().unique(),
   content: text('content'),
+  maxBusinessUnits: integer('max_business_units'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

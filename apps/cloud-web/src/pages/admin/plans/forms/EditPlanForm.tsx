@@ -20,24 +20,14 @@ export const EditPlanForm: React.FC<EditPlanFormProps> = ({ plan, onSuccess, onC
     defaultValues: { name: plan.name, code: plan.code },
   });
 
-  const updateMutation = useUpdatePlan({
-    onSuccess: () => {
-      onSuccess();
-    },
-  });
-
-  // Cancel resets the form then notifies the parent
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const updateMutation = useUpdatePlan({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError transformSubmit={(data) => ({ id: plan.id, data })}>
+    <Form form={form} mutation={updateMutation} showRootError resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: plan.id, data })}>
       <TextField name="name" label="Plan Name" placeholder="e.g. Pro" />
       <TextField name="code" label="Code" placeholder="e.g. pro" description="Unique code identifier for this plan" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">

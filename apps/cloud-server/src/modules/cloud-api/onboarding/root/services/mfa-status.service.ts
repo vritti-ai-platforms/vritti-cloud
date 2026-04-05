@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
-import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
-import { UserService } from '../../../user/services/user.service';
-import { MfaStatusResponseDto } from '../../totp/dto/response/mfa-status-response.dto';
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { UserService } from '@domain/user/services/user.service';
+import { MfaStatusResponseDto } from '../../../../account/security/dto/response/mfa-status-response.dto';
 
 @Injectable()
 export class MfaStatusService {
@@ -28,37 +28,38 @@ export class MfaStatusService {
     };
   }
 
-  // Retrieves the active MFA record and returns its status including backup code count
+  // Retrieves all active MFA records and returns aggregated status
   async getMfaStatus(userId: string): Promise<MfaStatusResponseDto> {
-    const mfaRecord = await this.mfaRepo.findActiveByUserId(userId);
+    const mfaRecords = await this.mfaRepo.findAllActiveByUserId(userId);
 
-    if (!mfaRecord) {
+    if (mfaRecords.length === 0) {
       return new MfaStatusResponseDto({
         isEnabled: false,
-        method: null,
+        methods: [],
         backupCodesRemaining: 0,
         lastUsedAt: null,
         createdAt: null,
       });
     }
 
+    const methods = [...new Set(mfaRecords.map((r) => r.method))];
+    const first = mfaRecords[0];
+
     let backupCodesRemaining = 0;
-    if (mfaRecord.totpBackupCodes) {
+    if (first.totpBackupCodes) {
       try {
-        const codes = JSON.parse(mfaRecord.totpBackupCodes) as string[];
-        backupCodesRemaining = codes.length;
-      } catch (error) {
-        this.logger.warn(`Failed to parse backup codes for MFA ${mfaRecord.id}: ${(error as Error).message}`);
-        backupCodesRemaining = 0;
+        backupCodesRemaining = (JSON.parse(first.totpBackupCodes) as string[]).length;
+      } catch {
+        this.logger.warn(`Failed to parse backup codes for MFA ${first.id}`);
       }
     }
 
     return new MfaStatusResponseDto({
       isEnabled: true,
-      method: mfaRecord.method,
+      methods,
       backupCodesRemaining,
-      lastUsedAt: mfaRecord.lastUsedAt,
-      createdAt: mfaRecord.createdAt,
+      lastUsedAt: first.lastUsedAt,
+      createdAt: first.createdAt,
     });
   }
 }

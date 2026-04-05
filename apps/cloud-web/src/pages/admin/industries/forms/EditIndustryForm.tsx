@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateIndustry } from '@hooks/admin/industries';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
+import { AppCodeSelector } from '@vritti/quantum-ui/selects/app-code';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -21,23 +22,14 @@ export const EditIndustryForm: React.FC<EditIndustryFormProps> = ({ industry, on
       name: industry.name,
       code: industry.code,
       description: industry.description ?? '',
+      recommendedApps: industry.recommendedApps,
     },
   });
 
-  const updateMutation = useUpdateIndustry({
-    onSuccess: () => {
-      onSuccess();
-    },
-  });
-
-  // Cancel resets the form then notifies the parent
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const updateMutation = useUpdateIndustry({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError transformSubmit={(data) => ({ id: industry.id, data })}>
+    <Form form={form} mutation={updateMutation} showRootError resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: industry.id, data })}>
       <TextField name="name" label="Industry Name" placeholder="e.g. Healthcare" />
       <TextField
         name="code"
@@ -50,8 +42,9 @@ export const EditIndustryForm: React.FC<EditIndustryFormProps> = ({ industry, on
         label="Description (Optional)"
         placeholder="e.g. Hospitals, clinics, and medical services"
       />
+      <AppCodeSelector name="recommendedApps" label="Recommended Apps" multiple />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">

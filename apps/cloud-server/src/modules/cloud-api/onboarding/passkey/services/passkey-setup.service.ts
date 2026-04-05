@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
-import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
-import { BackupCodeService } from '../../../mfa/services/backup-code.service';
-import { WebAuthnService } from '../../../mfa/services/webauthn.service';
-import type { RegistrationResponseJSON } from '../../../mfa/types/webauthn.types';
-import { UserService } from '../../../user/services/user.service';
-import { BackupCodesResponseDto } from '../../totp/dto/response/backup-codes-response.dto';
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
+import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import type { RegistrationResponseJSON } from '@domain/mfa/types/webauthn.types';
+import { UserService } from '@domain/user/services/user.service';
+import { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
 import { PasskeyRegistrationOptionsDto } from '../dto/response/passkey-registration-options.dto';
 
 @Injectable()
@@ -24,13 +24,7 @@ export class PasskeySetupService {
   async initiateSetup(userId: string): Promise<PasskeyRegistrationOptionsDto> {
     const user = await this.userService.findById(userId);
 
-    const existing = await this.mfaRepo.findActiveByUserId(userId);
-    if (existing) {
-      throw new BadRequestException({
-        label: 'MFA Already Enabled',
-        detail: 'Please disable your current method before setting up a new one.',
-      });
-    }
+    // Passkeys support multiple registrations — no need to block if other methods exist
 
     // Delete any stale pending passkey record if the user is still in setup
     if (user.onboardingStep !== OnboardingStepValues.COMPLETE) {

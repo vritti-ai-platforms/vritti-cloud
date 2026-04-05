@@ -13,9 +13,6 @@ export class NexusUserResponseDto {
   @ApiProperty({ description: 'User full name', example: 'Jane Smith' })
   fullName: string;
 
-  @ApiProperty({ description: 'User role', example: 'SUPPORT' })
-  role: string;
-
   @ApiProperty({ description: 'User status', example: 'ACTIVE' })
   status: string;
 

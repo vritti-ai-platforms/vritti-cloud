@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UnauthorizedException } from '@vritti/api-sdk';
 import type { OAuthProviderType } from '@/db/schema';
 import type { OAuthStateData } from '../interfaces/oauth-state.interface';
-import { OAuthStateRepository } from '../repositories/oauth-state.repository';
+import { OAuthStateRepository } from '@domain/oauth/repositories/oauth-state.repository';
 import { OAuthCryptoService } from './oauth-crypto.service';
 
 @Injectable()

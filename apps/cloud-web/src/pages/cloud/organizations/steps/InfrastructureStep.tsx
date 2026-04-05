@@ -22,7 +22,7 @@ export const InfrastructureStep: React.FC<InfrastructureStepProps> = ({ form, on
   const canContinue = !!(regionId && cloudProviderId && form.getValues('deploymentId'));
 
   return (
-    <Form form={form} onSubmit={onContinue}>
+    <Form form={form} onSubmit={onContinue} resetOnSuccess={false}>
       <div className="flex flex-col gap-6">
         {/* Region */}
         <div>
@@ -30,6 +30,7 @@ export const InfrastructureStep: React.FC<InfrastructureStepProps> = ({ form, on
             name="regionId"
             label="Region"
             placeholder="Select a region"
+            params={{ isActive: true }}
             onOptionSelect={(opt) => {
               form.setValue('regionName', opt?.label ?? '');
               form.setValue('cloudProviderId', '');

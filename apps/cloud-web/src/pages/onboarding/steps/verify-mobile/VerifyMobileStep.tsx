@@ -1,4 +1,4 @@
-import { useOnboarding } from '@context/onboarding';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
 import type React from 'react';
 import { useState } from 'react';

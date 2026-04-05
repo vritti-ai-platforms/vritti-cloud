@@ -1,11 +1,9 @@
 import { Module } from '@nestjs/common';
+import { IndustryDomainModule } from '@domain/industry/industry.module';
 import { IndustryController } from './controllers/industry.controller';
-import { IndustryRepository } from './repositories/industry.repository';
-import { IndustryService } from './services/industry.service';
 
 @Module({
+  imports: [IndustryDomainModule],
   controllers: [IndustryController],
-  providers: [IndustryService, IndustryRepository],
-  exports: [IndustryService],
 })
 export class IndustryModule {}

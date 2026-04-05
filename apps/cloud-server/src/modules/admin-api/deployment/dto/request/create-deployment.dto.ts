@@ -42,4 +42,10 @@ export class CreateDeploymentDto {
   @ApiProperty({ enum: DeploymentTypeValues, description: 'Deployment type' })
   @IsEnum(DeploymentTypeValues)
   type: DeploymentType;
+
+  @ApiPropertyOptional({ description: 'App version string this deployment runs', example: '1.0.0' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  version?: string;
 }

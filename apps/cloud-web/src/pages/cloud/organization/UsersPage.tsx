@@ -3,14 +3,15 @@ import { useResendInvite } from '@hooks/cloud/organizations/useResendInvite';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Mail, MoreVertical, UserPlus, Users } from 'lucide-react';
+import { Mail, Pencil, UserPlus, Users } from 'lucide-react';
+import { useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import type { NexusUser } from '@/schemas/cloud/organizations';
+import { EditUserForm } from './forms/EditUserForm';
 import { InviteUserForm } from './forms/InviteUserForm';
 
 export const UsersPage = () => {
@@ -20,8 +21,16 @@ export const UsersPage = () => {
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useOrgUsers(orgId);
   const inviteDialog = useDialog();
+  const editDialog = useDialog();
+  const editUserRef = useRef<NexusUser | null>(null);
   const confirm = useConfirm();
   const resendMutation = useResendInvite(orgId);
+
+  // Opens the edit dialog for a pending user
+  function handleEdit(user: NexusUser) {
+    editUserRef.current = user;
+    editDialog.open();
+  }
 
   // Confirms and resends invitation email to a pending user
   async function handleResendInvite(user: NexusUser) {
@@ -35,7 +44,7 @@ export const UsersPage = () => {
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ onResendInvite: handleResendInvite }),
+    columns: getColumns({ onResendInvite: handleResendInvite, onEdit: handleEdit }),
     slug: `org-users-${orgId}`,
     label: 'user',
     serverState: response,
@@ -61,7 +70,6 @@ export const UsersPage = () => {
           ],
           searchAll: true,
         }}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: ORG_USERS_QUERY_KEY(orgId) })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<UserPlus className="size-4" />} size="sm" onClick={inviteDialog.open}>
@@ -83,13 +91,22 @@ export const UsersPage = () => {
 
       {/* Invite dialog */}
       <Dialog
-        open={inviteDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) inviteDialog.close();
-        }}
+        handle={inviteDialog}
         title="Invite User"
         description="Send an invitation to join this organization's portal."
         content={(close) => <InviteUserForm orgId={orgId} onSuccess={close} onCancel={close} />}
+      />
+
+      {/* Edit user dialog */}
+      <Dialog
+        handle={editDialog}
+        title="Edit User"
+        description="Update user details. If the email has changed, resend the invitation to the new address."
+        content={(close) =>
+          editUserRef.current ? (
+            <EditUserForm orgId={orgId} user={editUserRef.current} onSuccess={close} onCancel={close} />
+          ) : null
+        }
       />
     </div>
   );
@@ -123,10 +140,11 @@ function formatDate(dateStr: string) {
 
 interface GetColumnsOptions {
   onResendInvite: (user: NexusUser) => void;
+  onEdit: (user: NexusUser) => void;
 }
 
 // Builds column definitions for the users DataTable
-function getColumns({ onResendInvite }: GetColumnsOptions): ColumnDef<NexusUser, unknown>[] {
+function getColumns({ onResendInvite, onEdit }: GetColumnsOptions): ColumnDef<NexusUser, unknown>[] {
   return [
     {
       accessorKey: 'fullName',
@@ -135,15 +153,6 @@ function getColumns({ onResendInvite }: GetColumnsOptions): ColumnDef<NexusUser,
     {
       accessorKey: 'email',
       header: 'Email',
-    },
-    {
-      accessorKey: 'role',
-      header: 'Role',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="text-xs font-medium">
-          {row.original.role.replace(/_/g, ' ')}
-        </Badge>
-      ),
     },
     {
       accessorKey: 'status',
@@ -165,29 +174,26 @@ function getColumns({ onResendInvite }: GetColumnsOptions): ColumnDef<NexusUser,
     {
       id: 'actions',
       header: '',
-      cell: ({ row }) => {
-        if (row.original.status !== 'PENDING') return null;
-        return (
-          <DropdownMenu
-            trigger={{
-              children: (
-                <Button variant="ghost" size="icon" className="size-8">
-                  <MoreVertical className="size-4" />
-                </Button>
-              ),
-            }}
-            items={[
-              {
-                type: 'item' as const,
-                id: 'resend',
-                label: 'Resend Invite',
-                icon: Mail,
-                onClick: () => onResendInvite(row.original),
-              },
-            ]}
-          />
-        );
-      },
+      cell: ({ row }) => (
+        <RowActions
+          actions={[
+            {
+              id: 'edit',
+              icon: Pencil,
+              label: 'Edit',
+              hidden: row.original.status !== 'PENDING',
+              onClick: () => onEdit(row.original),
+            },
+            {
+              id: 'resend',
+              icon: Mail,
+              label: 'Resend Invite',
+              hidden: row.original.status !== 'PENDING',
+              onClick: () => onResendInvite(row.original),
+            },
+          ]}
+        />
+      ),
       enableSorting: false,
     },
   ];

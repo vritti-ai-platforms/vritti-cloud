@@ -1,0 +1,3 @@
+ALTER TABLE "cloud"."role_templates" DROP CONSTRAINT "roles_industry_id_industries_id_fkey";--> statement-breakpoint
+ALTER TABLE "cloud"."role_templates" ALTER COLUMN "industry_id" SET NOT NULL;--> statement-breakpoint
+ALTER TABLE "cloud"."role_templates" ADD CONSTRAINT "role_templates_industry_id_industries_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "cloud"."industries"("id") ON DELETE CASCADE;

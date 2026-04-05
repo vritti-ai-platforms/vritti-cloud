@@ -1,18 +1,18 @@
+import { MediaService } from '@domain/media/services/media.service';
+import { SessionService } from '@domain/session/services/session.service';
+import { UserService } from '@domain/user/services/user.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, ConflictException, hashToken, NotFoundException, UnauthorizedException } from '@vritti/api-sdk';
+import { ConflictException, JwtAuthService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
-import { JwtAuthService, TokenType } from '@vritti/api-sdk';
 import { EncryptionService } from '../../../../../services';
 import { UserDto } from '../../../user/dto/entity/user.dto';
-import { UserService } from '../../../user/services/user.service';
 import { MfaVerificationService } from '../../mfa-verification/services/mfa-verification.service';
-import { SessionResponse } from '../dto/entity/session-response.dto';
 import { LoginDto } from '../dto/request/login.dto';
 import { SignupDto } from '../dto/request/signup.dto';
 import { AuthStatusResponse } from '../dto/response/auth-status-response.dto';
 import { LoginResponse } from '../dto/response/login-response.dto';
 import { SignupResponseDto } from '../dto/response/signup-response.dto';
-import { SessionService } from './session.service';
 
 @Injectable()
 export class AuthService {
@@ -23,6 +23,7 @@ export class AuthService {
     private readonly encryptionService: EncryptionService,
     private readonly sessionService: SessionService,
     private readonly jwtService: JwtAuthService,
+    private readonly mediaService: MediaService,
     @Inject(forwardRef(() => MfaVerificationService))
     private readonly mfaVerificationService: MfaVerificationService,
   ) {}
@@ -36,8 +37,7 @@ export class AuthService {
   // Creates a new user or sets password for OAuth users without one
   async signup(
     dto: SignupDto,
-    ipAddress?: string,
-    userAgent?: string,
+    request: FastifyRequest,
   ): Promise<SignupResponseDto & { refreshToken: string }> {
     const existingUser = await this.userService.findByEmail(dto.email);
 
@@ -64,8 +64,7 @@ export class AuthService {
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
       user.id,
       SessionTypeValues.ONBOARDING,
-      ipAddress,
-      userAgent,
+      request,
     );
 
     this.logger.log(`Created new user: ${user.email} (${user.id})`);
@@ -76,8 +75,8 @@ export class AuthService {
   // Validates credentials and creates session, or returns MFA challenge if MFA is enabled
   async login(
     dto: LoginDto,
-    ipAddress?: string,
-    userAgent?: string,
+    subdomain: string | undefined,
+    request: FastifyRequest,
   ): Promise<LoginResponse & { refreshToken?: string }> {
     const user = await this.userService.findByEmail(dto.email);
 
@@ -113,8 +112,7 @@ export class AuthService {
       const { refreshToken } = await this.sessionService.createSession(
         user.id,
         SessionTypeValues.ONBOARDING,
-        ipAddress,
-        userAgent,
+        request,
       );
 
       return {
@@ -131,10 +129,18 @@ export class AuthService {
       });
     }
 
+    // Admin subdomain requires admin privileges
+    const isAdminLogin = subdomain === 'admin';
+    if (isAdminLogin && !user.isAdmin) {
+      throw new UnauthorizedException({
+        label: 'Access Denied',
+        detail: 'You do not have permission to access the admin portal.',
+      });
+    }
+
     // Check if user has MFA enabled
     const mfaChallenge = await this.mfaVerificationService.createMfaChallenge(user, {
-      ipAddress,
-      userAgent,
+      subdomain,
     });
 
     if (mfaChallenge) {
@@ -151,12 +157,12 @@ export class AuthService {
       });
     }
 
-    // No MFA — create CLOUD session
+    // No MFA — create session based on subdomain
+    const sessionType = isAdminLogin ? SessionTypeValues.ADMIN : SessionTypeValues.CLOUD;
     const { accessToken, refreshToken } = await this.sessionService.createSession(
       user.id,
-      SessionTypeValues.CLOUD,
-      ipAddress,
-      userAgent,
+      sessionType,
+      request,
     );
 
     // Delete all onboarding sessions (user has completed onboarding)
@@ -183,10 +189,15 @@ export class AuthService {
     }
 
     try {
-      const { accessToken, expiresIn, userId, sessionType } =
+      const { accessToken, expiresIn, userId, sessionType, sessionId } =
         await this.sessionService.generateAccessToken(refreshToken);
 
       const user = await this.userService.findById(userId);
+
+      if (user.mediaId) {
+        const presignedUrl = await this.mediaService.getPresignedUrl(user.mediaId);
+        user.profilePictureUrl = presignedUrl.url;
+      }
 
       // Onboarding sessions return tokens but are not fully authenticated
       if (sessionType === SessionTypeValues.ONBOARDING) {
@@ -196,6 +207,7 @@ export class AuthService {
           user,
           accessToken,
           expiresIn,
+          sessionId,
         });
       }
 
@@ -206,7 +218,7 @@ export class AuthService {
 
       this.logger.log(`Session recovered for user: ${userId}`);
 
-      return new AuthStatusResponse({ isAuthenticated: true, user, accessToken, expiresIn });
+      return new AuthStatusResponse({ isAuthenticated: true, user, accessToken, expiresIn, sessionId });
     } catch {
       return new AuthStatusResponse({ isAuthenticated: false });
     }
@@ -230,13 +242,6 @@ export class AuthService {
     this.logger.log('User logged out');
   }
 
-  // Invalidates all active sessions for a user across all devices
-  async logoutAll(userId: string): Promise<number> {
-    const count = await this.sessionService.invalidateAllUserSessions(userId);
-    this.logger.log(`User logged out from all devices: ${userId}`);
-    return count;
-  }
-
   // Validates that a user exists and has an active account
   async validateUser(userId: string): Promise<UserDto> {
     const user = await this.userService.findById(userId);
@@ -251,76 +256,4 @@ export class AuthService {
     return user;
   }
 
-  // Returns all sessions for the user, marking the current one by access token hash
-  async getUserSessions(userId: string, currentAccessToken: string): Promise<SessionResponse[]> {
-    const sessions = await this.sessionService.getUserActiveSessions(userId);
-    const currentAccessTokenHash = hashToken(currentAccessToken);
-    return sessions.map((session) => SessionResponse.from(session, currentAccessTokenHash));
-  }
-
-  // Revokes a specific session, preventing revocation of the current one
-  async revokeSession(userId: string, sessionId: string, currentAccessToken: string): Promise<{ message: string }> {
-    const currentSession = await this.sessionService.validateAccessToken(currentAccessToken);
-    if (currentSession.id === sessionId) {
-      throw new BadRequestException({
-        label: 'Cannot Revoke',
-        detail: 'You cannot revoke your current session. Use logout instead.',
-      });
-    }
-
-    const sessions = await this.sessionService.getUserActiveSessions(userId);
-    const targetSession = sessions.find((s) => s.id === sessionId);
-
-    if (!targetSession) {
-      throw new NotFoundException('The session you are trying to revoke does not exist or has already been revoked.');
-    }
-
-    if (targetSession.userId !== userId) {
-      throw new UnauthorizedException('You do not have permission to revoke this session.');
-    }
-
-    await this.sessionService.deleteSessionById(targetSession.id);
-    this.logger.log(`Session ${sessionId} revoked for user: ${userId}`);
-
-    return { message: 'Session revoked successfully' };
-  }
-
-  // Verifies current password and updates to a new one
-  async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<void> {
-    const userResponse = await this.userService.findById(userId);
-    const user = await this.userService.findByEmail(userResponse.email);
-
-    if (!user) {
-      throw new UnauthorizedException("We couldn't find your account. Please log in again.");
-    }
-
-    if (!user.passwordHash) {
-      throw new BadRequestException({
-        label: 'No Password Set',
-        detail: 'Your account does not have a password set. Please use password recovery or OAuth sign-in.',
-        errors: [{ field: 'password', message: 'No password set' }],
-      });
-    }
-
-    const isCurrentPasswordValid = await this.encryptionService.comparePassword(currentPassword, user.passwordHash);
-
-    if (!isCurrentPasswordValid) {
-      throw new UnauthorizedException('The current password you entered is incorrect. Please try again.');
-    }
-
-    const isSamePassword = await this.encryptionService.comparePassword(newPassword, user.passwordHash);
-    if (isSamePassword) {
-      throw new BadRequestException({
-        label: 'Password Already In Use',
-        detail: 'Your new password must be different from your current password.',
-        errors: [{ field: 'newPassword', message: 'Password already in use' }],
-      });
-    }
-
-    const newPasswordHash = await this.encryptionService.hashPassword(newPassword);
-
-    await this.userService.update(user.id, { passwordHash: newPasswordHash });
-
-    this.logger.log(`Password changed for user: ${user.id}`);
-  }
 }

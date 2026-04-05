@@ -1,10 +1,8 @@
-import { Module, forwardRef } from '@nestjs/common';
-import { ServicesModule } from '../../../services/services.module';
-import { MfaModule } from '../mfa/mfa.module';
-import { SessionRepository } from '../auth/root/repositories/session.repository';
-import { SessionService } from '../auth/root/services/session.service';
-import { UserModule } from '../user/user.module';
-import { VerificationModule } from '../verification/verification.module';
+import { Module } from '@nestjs/common';
+import { SessionModule } from '@domain/session/session.module';
+import { UserDomainModule } from '@domain/user/user.module';
+import { MfaModule } from '@domain/mfa/mfa.module';
+import { VerificationModule } from '@domain/verification/verification.module';
 import { EmailVerificationController } from './email-verification/controllers/email-verification.controller';
 import { EmailVerificationService } from './email-verification/services/email-verification.service';
 import { MobileVerificationController } from './mobile-verification/controllers/mobile-verification.controller';
@@ -24,9 +22,9 @@ import { TotpSetupService } from './totp/services/totp-setup.service';
 
 @Module({
   imports: [
-    ServicesModule,
+    SessionModule,
+    UserDomainModule,
     MfaModule,
-    forwardRef(() => UserModule),
     VerificationModule,
   ],
   controllers: [
@@ -53,9 +51,6 @@ import { TotpSetupService } from './totp/services/totp-setup.service';
     TotpSetupService,
     // Passkey setup
     PasskeySetupService,
-    // Auth (needed for session management during onboarding)
-    SessionService,
-    SessionRepository,
   ],
   exports: [
     OnboardingService,

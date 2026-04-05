@@ -1,4 +1,4 @@
-import { useOnboarding } from '@context/onboarding';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 import type { BackupCodesResponse } from '@services/onboarding.service';
 import type React from 'react';
 import { useState } from 'react';

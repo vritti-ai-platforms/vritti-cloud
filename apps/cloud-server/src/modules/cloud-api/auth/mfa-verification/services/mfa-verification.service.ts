@@ -1,14 +1,22 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
-import { type MfaAuth, MfaMethodValues, SessionTypeValues, type User, VerificationChannelValues } from '@/db/schema';
-import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
-import { BackupCodeService } from '../../../mfa/services/backup-code.service';
-import { TotpService } from '../../../mfa/services/totp.service';
-import { WebAuthnService } from '../../../mfa/services/webauthn.service';
-import type { AuthenticationResponseJSON } from '../../../mfa/types/webauthn.types';
-import { UserService } from '../../../user/services/user.service';
-import { VerificationService } from '../../../verification/services/verification.service';
-import { SessionService } from '../../root/services/session.service';
+import type { FastifyRequest } from 'fastify';
+import {
+  type MfaAuth,
+  MfaMethodValues,
+  type SessionType,
+  SessionTypeValues,
+  type User,
+  VerificationChannelValues,
+} from '@/db/schema';
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
+import { TotpService } from '@domain/mfa/services/totp.service';
+import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import type { AuthenticationResponseJSON } from '@domain/mfa/types/webauthn.types';
+import { UserService } from '@domain/user/services/user.service';
+import { VerificationService } from '@domain/verification/services/verification.service';
+import { SessionService } from '@domain/session/services/session.service';
 import { MfaVerificationResponseDto, PasskeyMfaOptionsDto, SmsOtpSentResponseDto } from '../dto';
 import { type MfaChallenge, MfaChallengeStore, type MfaMethod } from './mfa-challenge.store';
 
@@ -31,24 +39,28 @@ export class MfaVerificationService {
   // Creates an MFA challenge if the user has MFA enabled, returning null otherwise
   async createMfaChallenge(
     user: User,
-    options: { ipAddress?: string; userAgent?: string } = {},
+    options: { subdomain?: string } = {},
   ): Promise<MfaChallenge | null> {
-    // Get user's MFA settings
-    const mfaRecord = await this.mfaRepo.findActiveByUserId(user.id);
+    // Get all active MFA records for the user
+    const mfaRecords = await this.mfaRepo.findAllActiveByUserId(user.id);
 
-    if (!mfaRecord) {
+    this.logger.log(
+      `MFA check for user ${user.id}: ${mfaRecords.length} active record(s)${mfaRecords.length > 0 ? ` [${mfaRecords.map((r) => r.method).join(', ')}]` : ''}`,
+    );
+
+    if (mfaRecords.length === 0) {
       // User doesn't have MFA enabled
       return null;
     }
 
-    // Determine available methods
+    // Determine available methods from all active records
     const availableMethods: MfaMethod[] = [];
 
-    if (mfaRecord.method === MfaMethodValues.TOTP) {
+    if (mfaRecords.some((r) => r.method === MfaMethodValues.TOTP)) {
       availableMethods.push('totp');
     }
 
-    if (mfaRecord.method === MfaMethodValues.PASSKEY) {
+    if (mfaRecords.some((r) => r.method === MfaMethodValues.PASSKEY)) {
       availableMethods.push('passkey');
     }
 
@@ -68,8 +80,7 @@ export class MfaVerificationService {
 
     const challenge = this.mfaChallengeStore.create(user.id, availableMethods, {
       maskedPhone,
-      ipAddress: options.ipAddress,
-      userAgent: options.userAgent,
+      subdomain: options.subdomain,
     });
 
     this.logger.log(`Created MFA challenge for user: ${user.id}, methods: ${availableMethods.join(', ')}`);
@@ -78,7 +89,7 @@ export class MfaVerificationService {
   }
 
   // Verifies a TOTP code or backup code against the user's MFA configuration
-  async verifyTotp(sessionId: string, code: string): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
+  async verifyTotp(sessionId: string, code: string, request: FastifyRequest): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
     if (!challenge.availableMethods.includes('totp')) {
@@ -117,7 +128,7 @@ export class MfaVerificationService {
     await this.mfaRepo.updateLastUsed(mfaRecord.id);
 
     // Complete MFA verification
-    return this.completeMfaVerification(challenge);
+    return this.completeMfaVerification(challenge, request);
   }
 
   // Sends an SMS OTP to the user's verified phone number for MFA verification
@@ -164,7 +175,7 @@ export class MfaVerificationService {
   }
 
   // Verifies the SMS OTP code against the stored hash in the MFA challenge
-  async verifySmsOtp(sessionId: string, code: string): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
+  async verifySmsOtp(sessionId: string, code: string, request: FastifyRequest): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
     if (!challenge.availableMethods.includes('sms')) {
@@ -190,7 +201,7 @@ export class MfaVerificationService {
     await this.verificationService.verifyVerification(code, VerificationChannelValues.SMS_OUT, challenge.userId);
 
     // Complete MFA verification
-    return this.completeMfaVerification(challenge);
+    return this.completeMfaVerification(challenge, request);
   }
 
   // Generates WebAuthn authentication options for passkey-based MFA
@@ -219,7 +230,7 @@ export class MfaVerificationService {
     // This avoids QR code prompt when 'hybrid' transport is stored for synced passkeys
     const allowCredentials = passkeys
       .filter((pk) => pk.passkeyCredentialId)
-      .map((pk) => ({ id: pk.passkeyCredentialId! }));
+      .map((pk) => ({ id: pk.passkeyCredentialId as string }));
 
     const options = await this.webAuthnService.generateAuthenticationOptions(allowCredentials);
 
@@ -235,6 +246,7 @@ export class MfaVerificationService {
   async verifyPasskeyMfa(
     sessionId: string,
     credential: AuthenticationResponseJSON,
+    request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
@@ -300,7 +312,7 @@ export class MfaVerificationService {
     }
 
     // Complete MFA verification
-    return this.completeMfaVerification(challenge);
+    return this.completeMfaVerification(challenge, request);
   }
 
   private getMfaChallengeOrThrow(sessionId: string): MfaChallenge {
@@ -340,16 +352,20 @@ export class MfaVerificationService {
 
   private async completeMfaVerification(
     challenge: MfaChallenge,
+    request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     // Get user
     const user = await this.userService.findById(challenge.userId);
 
+    // Determine session type based on subdomain
+    const sessionType: SessionType =
+      challenge.subdomain === 'admin' ? SessionTypeValues.ADMIN : SessionTypeValues.CLOUD;
+
     // Create session - capture refreshToken for cookie
     const { accessToken, refreshToken, expiresIn } = await this.sessionService.createSession(
       challenge.userId,
-      SessionTypeValues.CLOUD,
-      challenge.ipAddress,
-      challenge.userAgent,
+      sessionType,
+      request,
     );
 
     // Clean up challenge
