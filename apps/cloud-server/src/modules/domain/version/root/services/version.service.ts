@@ -12,6 +12,7 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
+import _ from '@vritti/api-sdk/lodash';
 import { VersionStatusValues, versions } from '@/db/schema';
 import { VersionDto } from '@/modules/admin-api/version/root/dto/entity/version.dto';
 import type { CreateVersionDto } from '@/modules/admin-api/version/root/dto/request/create-version.dto';
@@ -63,7 +64,7 @@ export class VersionService {
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.versionRepository.findAllAndCount({ where, orderBy, limit, offset });
     this.logger.log(`Fetched versions table (${count} results, limit: ${limit}, offset: ${offset})`);
-    return { result: result.map(VersionDto.from), count, state, activeViewId };
+    return { result: result.map((v) => VersionDto.from(v)), count, state, activeViewId };
   }
 
   // Returns paginated version options for the select component
@@ -91,8 +92,13 @@ export class VersionService {
     if (!version) {
       throw new NotFoundException('Version not found.');
     }
-    this.logger.log(`Fetched version: ${id}`);
-    return VersionDto.from(version);
+    let isSnapshotStale = false;
+    if (version.snapshot) {
+      const currentSnapshot = await this.versionRepository.buildSnapshot(id);
+      isSnapshotStale = !_.isEqual(version.snapshot, currentSnapshot);
+    }
+    this.logger.log(`Fetched version: ${id} (snapshotStale: ${isSnapshotStale})`);
+    return VersionDto.from(version, { isSnapshotStale });
   }
 
   // Builds a snapshot from all versioned tables and stores it on the version

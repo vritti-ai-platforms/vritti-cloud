@@ -1,5 +1,7 @@
+import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
 import { VersionDomainModule } from '@domain/version/version.module';
 import { Module } from '@nestjs/common';
+import { CoreServerModule } from '@/modules/core-server/core-server.module';
 // App Feature
 import { AppFeatureController } from './app/app-feature/controllers/app-feature.controller';
 // App Price
@@ -24,7 +26,7 @@ import { RoleTemplateController } from './role-template/root/controllers/role-te
 import { VersionController } from './root/controllers/version.controller';
 
 @Module({
-  imports: [VersionDomainModule],
+  imports: [VersionDomainModule, CoreServerModule, DeploymentDomainModule],
   controllers: [
     VersionController,
     MicrofrontendController,

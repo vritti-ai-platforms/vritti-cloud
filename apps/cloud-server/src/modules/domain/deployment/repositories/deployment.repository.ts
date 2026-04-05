@@ -30,6 +30,11 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
     return this.model.findFirst({ where: { id } });
   }
 
+  // Returns all deployments using the given version string
+  async findByVersion(version: string): Promise<Deployment[]> {
+    return this.model.findMany({ where: { version } });
+  }
+
   // Returns the number of deployments referencing the given region
   async countByRegionId(regionId: string): Promise<number> {
     const result = await this.db

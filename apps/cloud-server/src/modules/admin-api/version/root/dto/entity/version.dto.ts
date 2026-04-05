@@ -26,8 +26,11 @@ export class VersionDto {
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: string;
 
+  @ApiProperty({ description: 'Whether the stored snapshot differs from the current version data' })
+  isSnapshotStale: boolean;
+
   // Maps a Version entity to a VersionDto
-  static from(entity: Version): VersionDto {
+  static from(entity: Version, options?: { isSnapshotStale: boolean }): VersionDto {
     const dto = new VersionDto();
     dto.id = entity.id;
     dto.version = entity.version;
@@ -37,6 +40,7 @@ export class VersionDto {
     dto.snapshot = entity.snapshot;
     dto.artifacts = entity.artifacts;
     dto.createdAt = entity.createdAt.toISOString();
+    dto.isSnapshotStale = options?.isSnapshotStale ?? false;
     return dto;
   }
 }

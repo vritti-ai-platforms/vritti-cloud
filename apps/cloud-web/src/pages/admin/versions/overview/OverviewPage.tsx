@@ -1,4 +1,5 @@
 import { useCreateSnapshot, useDeleteVersion, useVersion } from '@hooks/admin/versions';
+import { Alert } from '@vritti/quantum-ui/Alert';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
@@ -6,8 +7,8 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Typography } from '@vritti/quantum-ui/Typography';
 import { buildSlug } from '@vritti/quantum-ui/slug';
+import { Typography } from '@vritti/quantum-ui/Typography';
 import { Calendar, Camera, GitBranch, Pencil } from 'lucide-react';
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -47,13 +48,15 @@ export const OverviewPage = () => {
     onSuccess: () => navigate('/versions'),
   });
 
-  // Prompt confirmation then create snapshot
+  // Prompt confirmation then create/recreate snapshot
+  const hasSnapshot = !!version.snapshot;
   async function handleCreateSnapshot() {
     const confirmed = await confirm({
-      title: 'Create snapshot?',
-      description:
-        'This will build a snapshot from all features, apps, microfrontends, and role templates in this version.',
-      confirmLabel: 'Create Snapshot',
+      title: hasSnapshot ? 'Recreate snapshot?' : 'Create snapshot?',
+      description: hasSnapshot
+        ? 'This will replace the existing snapshot with the current state of all features, apps, microfrontends, and role templates.'
+        : 'This will build a snapshot from all features, apps, microfrontends, and role templates in this version.',
+      confirmLabel: hasSnapshot ? 'Recreate Snapshot' : 'Create Snapshot',
     });
     if (confirmed) snapshotMutation.mutate(versionId);
   }
@@ -85,14 +88,15 @@ export const OverviewPage = () => {
             >
               Edit
             </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              startAdornment={<Camera className="size-4" />}
-              onClick={handleCreateSnapshot}
-            >
-              Create Snapshot
-            </Button>
+            {!version.snapshot && (
+              <Button
+                size="sm"
+                startAdornment={<Camera className="size-4" />}
+                onClick={handleCreateSnapshot}
+              >
+                Create Snapshot
+              </Button>
+            )}
           </div>
         }
       />
@@ -130,6 +134,22 @@ export const OverviewPage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Snapshot sync status */}
+      {version.snapshot && (
+        <Alert
+          variant={version.isSnapshotStale ? 'warning' : 'success'}
+          title={version.isSnapshotStale ? 'Snapshot out of sync' : 'Snapshot is up to date'}
+          description={version.isSnapshotStale ? 'Data has changed since the last snapshot was created.' : undefined}
+          action={
+            version.isSnapshotStale ? (
+              <Button variant="outline" size="sm" onClick={handleCreateSnapshot} isLoading={snapshotMutation.isPending}>
+                Recreate Snapshot
+              </Button>
+            ) : undefined
+          }
+        />
+      )}
 
       {/* Snapshot visualization */}
       <SnapshotView snapshot={version.snapshot ?? { apps: [], features: [], roleTemplates: [] }} />

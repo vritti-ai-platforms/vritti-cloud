@@ -1,11 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ForbiddenException, NotFoundException, ServiceUnavailableException } from '@vritti/api-sdk';
 import type { Deployment, Organization } from '@/db/schema';
+import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
+import { CoreConfigService } from '@/modules/core-server/services/core-config.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
-import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 
 @Injectable()
 export class OrganizationBusinessUnitsService {
@@ -13,10 +14,11 @@ export class OrganizationBusinessUnitsService {
 
   constructor(
     private readonly coreDeploymentService: CoreDeploymentService,
+    private readonly organizationRepository: OrganizationRepository,
     private readonly planRepository: PlanRepository,
     private readonly coreBusinessUnitService: CoreBusinessUnitService,
+    private readonly coreConfigService: CoreConfigService,
     private readonly coreRoleService: CoreRoleService,
-    private readonly coreVersionRepository: CoreVersionRepository,
   ) {}
 
   // Lists all business units for the organization from core
@@ -186,18 +188,28 @@ export class OrganizationBusinessUnitsService {
     }
   }
 
-  // Updates the assigned apps and syncs the feature catalog for a business unit
+  // Updates the assigned apps for a business unit and invalidates the config cache
   async updateBuApps(orgId: string, buId: string, appCodes: string[]): Promise<any> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    const featureCatalog = await this.extractFeatureCatalogForApps(deployment.version, appCodes);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+
+    // Persist BU app assignment on cloud for license config endpoint
+    const assignments = (org.buAppAssignments ?? {}) as Record<string, string[]>;
+    if (appCodes.length > 0) {
+      assignments[buId] = appCodes;
+    } else {
+      delete assignments[buId];
+    }
+    await this.organizationRepository.update(orgId, { buAppAssignments: assignments });
 
     try {
       const result = await this.coreBusinessUnitService.updateBuApps(
         deployment.url,
         deployment.webhookSecret,
         buId,
-        { appCodes, featureCatalog },
+        { appCodes },
       );
+      // Invalidate config cache so core-server fetches fresh catalogs
+      await this.coreConfigService.invalidateOrg(deployment.url, deployment.webhookSecret, org.orgIdentifier);
       this.logger.log(`Updated apps for BU ${buId} in org ${orgId}: [${appCodes.join(', ')}]`);
       return result;
     } catch (error: any) {
@@ -222,57 +234,6 @@ export class OrganizationBusinessUnitsService {
         detail: 'Unable to reach the deployment to fetch compatible roles.',
       });
     }
-  }
-
-  // Extracts feature catalog entries for the given app codes from the version snapshot
-  private async extractFeatureCatalogForApps(version: string | null, appCodes: string[]): Promise<object[]> {
-    if (!version || appCodes.length === 0) {
-      this.logger.warn(`extractFeatureCatalog: skipped — version=${version}, appCodes=${JSON.stringify(appCodes)}`);
-      return [];
-    }
-
-    const appVersion = await this.coreVersionRepository.findByVersion(version);
-    if (!appVersion?.snapshot) {
-      this.logger.warn(`extractFeatureCatalog: no snapshot found for version "${version}"`);
-      return [];
-    }
-
-    const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const apps = (snapshot.apps ?? []) as Array<{ code: string; features: string[] }>;
-    const features = (snapshot.features ?? []) as Array<Record<string, unknown>>;
-
-    this.logger.log(`extractFeatureCatalog: snapshot has ${apps.length} apps, ${features.length} features`);
-    this.logger.log(`extractFeatureCatalog: snapshot app codes: [${apps.map((a) => a.code).join(', ')}]`);
-    this.logger.log(`extractFeatureCatalog: requested app codes: [${appCodes.join(', ')}]`);
-
-    // Collect feature codes from the selected apps
-    const selectedAppCodes = new Set(appCodes);
-    const featureCodes = new Set<string>();
-    for (const app of apps) {
-      if (selectedAppCodes.has(app.code)) {
-        for (const code of app.features) featureCodes.add(code);
-      }
-    }
-
-    this.logger.log(`extractFeatureCatalog: matched ${featureCodes.size} feature codes: [${[...featureCodes].join(', ')}]`);
-
-    // Build the catalog from matching features that have a WEB microfrontend
-    const catalog = features
-      .filter((f) => featureCodes.has(f.code as string) && f.microfrontends && (f.microfrontends as Record<string, unknown>).WEB)
-      .map((f) => {
-        const webMf = (f.microfrontends as Record<string, Record<string, string>>).WEB;
-        return {
-          code: f.code,
-          name: f.name,
-          icon: f.icon ?? null,
-          remoteEntry: webMf.remoteEntry,
-          exposedModule: webMf.exposedModule,
-          routePrefix: webMf.routePrefix,
-        };
-      });
-
-    this.logger.log(`extractFeatureCatalog: built ${catalog.length} catalog entries`);
-    return catalog;
   }
 
   // Extracts location fields into metadata for core-server

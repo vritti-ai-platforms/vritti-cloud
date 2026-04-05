@@ -40,6 +40,7 @@ export interface Version {
   snapshot: VersionSnapshot | null;
   artifacts: Record<string, unknown> | null;
   createdAt: string;
+  isSnapshotStale: boolean;
 }
 
 export type VersionsTableResponse = TableResponse<Version>;

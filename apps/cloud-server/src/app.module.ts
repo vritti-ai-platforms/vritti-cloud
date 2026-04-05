@@ -34,6 +34,7 @@ import { MediaModule } from './modules/cloud-api/media/media.module';
 import { OnboardingModule } from './modules/cloud-api/onboarding/onboarding.module';
 import { OrganizationModule } from './modules/cloud-api/organization/organization.module';
 import { UserModule } from './modules/cloud-api/user/user.module';
+import { LicenseApiModule } from './modules/license-api/license-api.module';
 import { SelectModule } from './modules/select-api/select.module';
 import { ServicesModule } from './services/services.module';
 
@@ -128,6 +129,8 @@ import { ServicesModule } from './services/services.module';
     AdminEnumModule,
     // Select API module
     SelectModule,
+    // License API module
+    LicenseApiModule,
     // Route prefixes
     RouterModule.register([
       {
@@ -155,6 +158,10 @@ import { ServicesModule } from './services/services.module';
       {
         path: 'select-api',
         children: [SelectModule],
+      },
+      {
+        path: '',
+        children: [LicenseApiModule],
       },
       // Top-level: /table-states and /table-views (no prefix)
       {

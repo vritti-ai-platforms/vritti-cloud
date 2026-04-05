@@ -10835,6 +10835,29 @@
           "Select"
         ]
       }
+    },
+    "/license-api/config/{orgIdentifier}": {
+      "get": {
+        "operationId": "LicenseConfigController_getConfig",
+        "parameters": [
+          {
+            "name": "orgIdentifier",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "License"
+        ]
+      }
     }
   },
   "info": {
@@ -13300,6 +13323,10 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "isSnapshotStale": {
+            "type": "boolean",
+            "description": "Whether the stored snapshot differs from the current version data"
           }
         },
         "required": [
@@ -13307,7 +13334,8 @@
           "version",
           "name",
           "status",
-          "createdAt"
+          "createdAt",
+          "isSnapshotStale"
         ]
       },
       "VersionTableResponseDto": {

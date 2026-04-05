@@ -1,8 +1,10 @@
+import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
 import { VersionService } from '@domain/version/root/services/version.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
+import { CoreConfigService } from '@/modules/core-server/services/core-config.service';
 import {
   ApiCreateSnapshot,
   ApiCreateVersion,
@@ -24,7 +26,11 @@ import { VersionTableResponseDto } from '../dto/response/version-table-response.
 export class VersionController {
   private readonly logger = new Logger(VersionController.name);
 
-  constructor(private readonly versionService: VersionService) {}
+  constructor(
+    private readonly versionService: VersionService,
+    private readonly coreConfigService: CoreConfigService,
+    private readonly deploymentRepository: DeploymentRepository,
+  ) {}
 
   // Creates a new version in ALPHA status
   @Post()
@@ -58,13 +64,26 @@ export class VersionController {
     return this.versionService.update(id, dto);
   }
 
-  // Builds a snapshot from all versioned tables
+  // Builds a snapshot from all versioned tables and invalidates config caches
   @Post(':id/snapshot')
   @HttpCode(HttpStatus.OK)
   @ApiCreateSnapshot()
-  createSnapshot(@Param('id') id: string): Promise<SuccessResponseDto> {
+  async createSnapshot(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`POST /admin-api/versions/${id}/snapshot`);
-    return this.versionService.createSnapshot(id);
+    const result = await this.versionService.createSnapshot(id);
+
+    // Invalidate config cache on all deployments using this version
+    const version = await this.versionService.findById(id);
+    const deployments = await this.deploymentRepository.findByVersion(version.version);
+    for (const deployment of deployments) {
+      try {
+        await this.coreConfigService.invalidateAll(deployment.url, deployment.webhookSecret);
+      } catch (error) {
+        this.logger.warn(`Failed to invalidate config cache for deployment ${deployment.id}: ${error}`);
+      }
+    }
+
+    return result;
   }
 
   // Pushes CI artifacts to a version

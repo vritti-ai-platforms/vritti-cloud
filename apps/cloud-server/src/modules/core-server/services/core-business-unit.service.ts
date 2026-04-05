@@ -72,17 +72,18 @@ export class CoreBusinessUnitService {
     return result;
   }
 
-  // Updates the assigned apps and feature catalog for a business unit in core
+  // Updates the assigned app codes for a business unit in core
   async updateBuApps(
     url: string,
     webhookSecret: string,
     buId: string,
-    data: { appCodes: string[]; featureCatalog: object[] },
+    data: { appCodes: string[] },
   ): Promise<any> {
     const result = await this.http.patch<any>(url, webhookSecret, `/business-units/webhook/${buId}/apps`, data);
     this.logger.log(`Updated apps for business unit ${buId} in core`);
     return result;
   }
+
 
   // Deletes a business unit in core
   async deleteBusinessUnit(url: string, webhookSecret: string, buId: string): Promise<any> {
