@@ -4,10 +4,10 @@ import { RoleTemplateDto } from './role-template.dto';
 
 export class RoleTemplateTableRowDto extends RoleTemplateDto {
   @ApiProperty({ example: 'Restaurant' })
-  industryName!: string;
+  industryName: string;
 
   @ApiProperty({ example: 12 })
-  permissionCount!: number;
+  permissionCount: number;
 
   // Maps a joined RoleTemplate row (with industryName + permissionCount) to a table row DTO
   static fromRow(row: RoleTemplate & { industryName: string; permissionCount: number }): RoleTemplateTableRowDto {
