@@ -4,9 +4,8 @@ import { SessionModule } from '@domain/session/session.module';
 import { UserDomainModule } from '@domain/user/user.module';
 import { VerificationModule } from '@domain/verification/verification.module';
 import { Module } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { jwtConfigFactory } from '@vritti/api-sdk';
 import { MediaDomainModule } from '@domain/media/media.module';
 // MFA verification submodule
 import { MfaVerificationController } from './mfa-verification/controllers/mfa-verification.controller';
@@ -34,7 +33,14 @@ import { PasswordResetService } from './root/services/password-reset.service';
 
 @Module({
   imports: [
-    JwtModule.registerAsync({ inject: [ConfigService], useFactory: jwtConfigFactory }),
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        secret: config.getOrThrow<string>('JWT_SECRET'),
+        signOptions: { algorithm: 'HS256' as const },
+      }),
+    }),
     SessionModule,
     UserDomainModule,
     VerificationModule,

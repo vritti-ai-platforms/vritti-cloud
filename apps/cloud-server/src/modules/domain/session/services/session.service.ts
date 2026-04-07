@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
-import { getConfig, hashToken, JwtAuthService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
+import { hashToken, TokenService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
 import { and, eq, ne } from '@vritti/api-sdk/drizzle-orm';
 import type { FastifyRequest } from 'fastify';
 import { type Session, type SessionType, SessionTypeValues, sessions } from '@/db/schema';
@@ -8,17 +8,13 @@ import { GeoipService } from '@/services';
 import { extractDeviceInfo, extractIpAddress } from '@/utils/request-metadata';
 import { SessionRepository } from '../repositories/session.repository';
 
-export function getRefreshCookieName(): string {
-  return getConfig().cookie.refreshCookieName;
-}
-
 @Injectable()
 export class SessionService {
   private readonly logger = new Logger(SessionService.name);
 
   constructor(
     private readonly sessionRepository: SessionRepository,
-    private readonly jwtService: JwtAuthService,
+    private readonly tokenService: TokenService,
     private readonly geoipService: GeoipService,
   ) {}
 
@@ -34,9 +30,9 @@ export class SessionService {
     expiresIn: number;
   }> {
     const sessionId = randomUUID();
-    const refreshToken = this.jwtService.generateRefreshToken(userId, sessionId, sessionType);
-    const accessToken = this.jwtService.generateAccessToken(userId, sessionId, sessionType, refreshToken);
-    const expiresAt = this.jwtService.getExpiryTime(TokenType.REFRESH);
+    const refreshToken = this.tokenService.generateRefreshToken(userId, sessionId, sessionType);
+    const accessToken = this.tokenService.generateAccessToken(userId, sessionId, sessionType, refreshToken);
+    const expiresAt = this.tokenService.getExpiryTime(TokenType.REFRESH);
 
     const { device, userAgent } = extractDeviceInfo(request);
     const ipAddress = extractIpAddress(request);
@@ -55,7 +51,7 @@ export class SessionService {
       location,
     });
 
-    const expiresIn = this.jwtService.getExpiryInSeconds(TokenType.ACCESS);
+    const expiresIn = this.tokenService.getExpiryInSeconds(TokenType.ACCESS);
 
     this.logger.log(`Created ${sessionType} session for user: ${userId}`);
 
@@ -75,14 +71,14 @@ export class SessionService {
     expiresIn: number;
   }> {
     const session = await this.validateRefreshToken(refreshToken);
-    const newRefreshToken = this.jwtService.generateRefreshToken(session.userId, session.id, session.type);
+    const newRefreshToken = this.tokenService.generateRefreshToken(session.userId, session.id, session.type);
     const { accessToken, expiresIn } = this.generateAccessTokenForSession(session, newRefreshToken);
 
     await this.sessionRepository.rotateTokens(
       session.id,
       hashToken(accessToken),
       hashToken(newRefreshToken),
-      this.jwtService.getExpiryTime(TokenType.REFRESH),
+      this.tokenService.getExpiryTime(TokenType.REFRESH),
     );
 
     this.logger.log(`Refreshed session for user: ${session.userId}`);
@@ -124,8 +120,8 @@ export class SessionService {
     session: Session,
     refreshToken: string,
   ): { accessToken: string; expiresIn: number } {
-    const accessToken = this.jwtService.generateAccessToken(session.userId, session.id, session.type, refreshToken);
-    const expiresIn = this.jwtService.getExpiryInSeconds(TokenType.ACCESS);
+    const accessToken = this.tokenService.generateAccessToken(session.userId, session.id, session.type, refreshToken);
+    const expiresIn = this.tokenService.getExpiryInSeconds(TokenType.ACCESS);
     return { accessToken, expiresIn };
   }
 

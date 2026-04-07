@@ -2,7 +2,7 @@ import { MediaService } from '@domain/media/services/media.service';
 import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { ConflictException, JwtAuthService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
+import { ConflictException, TokenService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
 import type { FastifyRequest } from 'fastify';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
 import { EncryptionService } from '../../../../../services';
@@ -22,7 +22,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly encryptionService: EncryptionService,
     private readonly sessionService: SessionService,
-    private readonly jwtService: JwtAuthService,
+    private readonly tokenService: TokenService,
     private readonly mediaService: MediaService,
     @Inject(forwardRef(() => MfaVerificationService))
     private readonly mfaVerificationService: MfaVerificationService,
@@ -175,7 +175,7 @@ export class AuthService {
     return {
       ...new LoginResponse({
         accessToken,
-        expiresIn: this.jwtService.getExpiryInSeconds(TokenType.ACCESS),
+        expiresIn: this.tokenService.getExpiryInSeconds(TokenType.ACCESS),
         user: UserDto.from(user),
       }),
       refreshToken,

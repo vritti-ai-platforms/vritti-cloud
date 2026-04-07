@@ -15,6 +15,7 @@ import { ApiTags } from '@nestjs/swagger';
 import {
   AccessToken,
   CookieDomain,
+  CookieName,
   type CookieSerializeOptions,
   Public,
   RefreshCookieOptions,
@@ -51,7 +52,6 @@ import type { TokenResponse } from '../dto/response/token-response.dto';
 import { AuthService } from '../services/auth.service';
 import { AuthStatusSseService } from '../services/auth-status-sse.service';
 import { PasswordResetService } from '../services/password-reset.service';
-import { getRefreshCookieName } from '@domain/session/services/session.service';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -71,6 +71,7 @@ export class AuthController {
   @ApiSignup()
   async signup(
     @Body() signupDto: SignupDto,
+    @CookieName() cookieName: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
     @Req() request: FastifyRequest,
@@ -79,7 +80,7 @@ export class AuthController {
 
     const { refreshToken, ...response } = await this.authService.signup(signupDto, request);
 
-    reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
+    reply.setCookie(cookieName, refreshToken, cookieOptions);
 
     return response;
   }
@@ -91,6 +92,7 @@ export class AuthController {
   async login(
     @Body() loginDto: LoginDto,
     @Subdomain() subdomain: string | undefined,
+    @CookieName() cookieName: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
     @Req() request: FastifyRequest,
@@ -100,7 +102,7 @@ export class AuthController {
     const { refreshToken, ...response } = await this.authService.login(loginDto, subdomain, request);
 
     if (refreshToken) {
-      reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
+      reply.setCookie(cookieName, refreshToken, cookieOptions);
     }
 
     return response;
@@ -145,6 +147,7 @@ export class AuthController {
   @ApiRefreshTokens()
   async refreshTokens(
     @RefreshTokenCookie() refreshToken: string | undefined,
+    @CookieName() cookieName: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<TokenResponse> {
@@ -152,7 +155,7 @@ export class AuthController {
 
     const result = await this.authService.refreshTokens(refreshToken);
 
-    reply.setCookie(getRefreshCookieName(), result.refreshToken, cookieOptions);
+    reply.setCookie(cookieName, result.refreshToken, cookieOptions);
 
     return { accessToken: result.accessToken, expiresIn: result.expiresIn };
   }
@@ -164,11 +167,12 @@ export class AuthController {
   @ApiLogout()
   async logout(
     @AccessToken() accessToken: string,
+    @CookieName() cookieName: string,
     @CookieDomain() domain: string,
     @Res({ passthrough: true }) reply: FastifyReply,
   ): Promise<MessageResponse> {
     await this.authService.logout(accessToken);
-    reply.clearCookie(getRefreshCookieName(), { path: '/', domain });
+    reply.clearCookie(cookieName, { path: '/', domain });
     return { message: 'Successfully logged out' };
   }
 
@@ -179,6 +183,7 @@ export class AuthController {
   @ApiForgotPassword()
   async forgotPassword(
     @Body() dto: ForgotPasswordDto,
+    @CookieName() cookieName: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
     @Req() request: FastifyRequest,
@@ -188,7 +193,7 @@ export class AuthController {
     const { refreshToken, ...response } = await this.passwordResetService.requestPasswordReset(dto.email, request);
 
     if (refreshToken) {
-      reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
+      reply.setCookie(cookieName, refreshToken, cookieOptions);
     }
 
     return response;
@@ -222,6 +227,7 @@ export class AuthController {
   async resetPassword(
     @UserId() userId: string,
     @Body() dto: ResetPasswordDto,
+    @CookieName() cookieName: string,
     @CookieDomain() domain: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) reply: FastifyReply,
@@ -235,8 +241,8 @@ export class AuthController {
       request,
     );
 
-    reply.clearCookie(getRefreshCookieName(), { path: '/', domain });
-    reply.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
+    reply.clearCookie(cookieName, { path: '/', domain });
+    reply.setCookie(cookieName, refreshToken, cookieOptions);
 
     return response;
   }

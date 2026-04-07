@@ -1,8 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, Post, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
+import { CookieName, type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { getRefreshCookieName } from '@domain/session/services/session.service';
 import { ApiStartPasskeyAuth, ApiVerifyPasskeyAuth } from '../docs/passkey-auth.docs';
 import { StartPasskeyAuthDto, VerifyPasskeyAuthDto } from '../dto/request/verify-passkey-auth.dto';
 import { PasskeyAuthOptionsDto } from '../dto/response/passkey-auth-options.dto';
@@ -33,6 +32,7 @@ export class PasskeyAuthController {
   @ApiVerifyPasskeyAuth()
   async verifyPasskeyAuth(
     @Body() dto: VerifyPasskeyAuthDto,
+    @CookieName() cookieName: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res({ passthrough: true }) res: FastifyReply,
     @Req() request: FastifyRequest,
@@ -41,7 +41,7 @@ export class PasskeyAuthController {
 
     const result = await this.passkeyAuthService.verifyAuthentication(dto.sessionId, dto.credential, request);
 
-    res.setCookie(getRefreshCookieName(), result.refreshToken, cookieOptions);
+    res.setCookie(cookieName, result.refreshToken, cookieOptions);
 
     return result;
   }

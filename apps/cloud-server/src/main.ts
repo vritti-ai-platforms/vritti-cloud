@@ -9,7 +9,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import {
   BadRequestException,
   CorrelationIdMiddleware,
-  configureApiSdk,
   HttpExceptionFilter,
   HttpLoggerInterceptor,
   LoggerService,
@@ -66,26 +65,6 @@ const CORS_CONFIG = {
 // ============================================================================
 
 /**
- * Configure api-sdk BEFORE creating the NestJS app
- * This sets up cookie names, JWT settings, and auth guard config
- */
-function configureApiSdkSettings() {
-  configureApiSdk({
-    cookie: {
-      refreshCookieName: ENV.refreshCookieName,
-      refreshCookieSecure: ENV.nodeEnv === 'production',
-      refreshCookieMaxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-      refreshCookieSameSite: 'strict',
-      refreshCookieDomain: ENV.refreshCookieDomain, // base domain for hostname validation in @RefreshCookieOptions()
-    },
-    guard: {
-      tenantHeaderName: 'x-tenant-id',
-      defaultSessionTypes: ['CLOUD', 'ADMIN'],
-    },
-  });
-}
-
-/**
  * Create Swagger/OpenAPI configuration
  */
 function createSwaggerConfig() {
@@ -121,9 +100,6 @@ function createSwaggerConfig() {
 // ============================================================================
 
 async function bootstrap() {
-  // Configure API SDK settings
-  configureApiSdkSettings();
-
   // Determine logger configuration
   // When using default provider, let NestJS use its built-in logger to avoid circular reference
   // When using Winston, we need to use LoggerService
