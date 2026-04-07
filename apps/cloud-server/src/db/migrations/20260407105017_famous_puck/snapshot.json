@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "56d8e27f-ecfe-47da-8c20-77bb3783f0eb",
+  "id": "91bdcd63-22ed-4902-8e80-a07440fc450c",
   "prevIds": [
-    "863f636d-7cf5-4208-ae95-81010c93956e"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -26,16 +26,6 @@
         "MOBILE"
       ],
       "name": "AppPlatform",
-      "entityType": "enums",
-      "schema": "cloud"
-    },
-    {
-      "values": [
-        "ALPHA",
-        "BETA",
-        "PROD"
-      ],
-      "name": "AppVersionStatus",
       "entityType": "enums",
       "schema": "cloud"
     },
@@ -194,9 +184,21 @@
         "EMAIL",
         "SMS_OUT",
         "SMS_IN",
-        "WHATSAPP_IN"
+        "WHATSAPP_IN",
+        "IDENTITY_EMAIL_OUT",
+        "IDENTITY_SMS_OUT"
       ],
       "name": "verification_channel",
+      "entityType": "enums",
+      "schema": "cloud"
+    },
+    {
+      "values": [
+        "ALPHA",
+        "BETA",
+        "PROD"
+      ],
+      "name": "AppVersionStatus",
       "entityType": "enums",
       "schema": "cloud"
     },
@@ -328,7 +330,7 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "app_versions",
+      "name": "versions",
       "entityType": "tables",
       "schema": "cloud"
     },
@@ -382,19 +384,19 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "roles",
+      "name": "role_templates",
       "entityType": "tables",
       "schema": "cloud"
     },
     {
       "isRlsEnabled": false,
-      "name": "role_apps",
+      "name": "role_template_apps",
       "entityType": "tables",
       "schema": "cloud"
     },
     {
       "isRlsEnabled": false,
-      "name": "role_feature_permissions",
+      "name": "role_template_feature_permissions",
       "entityType": "tables",
       "schema": "cloud"
     },
@@ -719,6 +721,32 @@
       "generated": null,
       "identity": null,
       "name": "user_agent",
+      "entityType": "columns",
+      "schema": "cloud",
+      "table": "sessions"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "device",
+      "entityType": "columns",
+      "schema": "cloud",
+      "table": "sessions"
+    },
+    {
+      "type": "varchar(255)",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "location",
       "entityType": "columns",
       "schema": "cloud",
       "table": "sessions"
@@ -1200,6 +1228,19 @@
       "generated": null,
       "identity": null,
       "name": "deployment_id",
+      "entityType": "columns",
+      "schema": "cloud",
+      "table": "organizations"
+    },
+    {
+      "type": "jsonb",
+      "typeSchema": null,
+      "notNull": true,
+      "dimensions": 0,
+      "default": "'{}'",
+      "generated": null,
+      "identity": null,
+      "name": "bu_app_assignments",
       "entityType": "columns",
       "schema": "cloud",
       "table": "organizations"
@@ -1837,6 +1878,19 @@
       "generated": null,
       "identity": null,
       "name": "profile_picture_url",
+      "entityType": "columns",
+      "schema": "cloud",
+      "table": "users"
+    },
+    {
+      "type": "uuid",
+      "typeSchema": null,
+      "notNull": false,
+      "dimensions": 0,
+      "default": null,
+      "generated": null,
+      "identity": null,
+      "name": "media_id",
       "entityType": "columns",
       "schema": "cloud",
       "table": "users"
@@ -3022,7 +3076,7 @@
       "name": "id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "varchar(50)",
@@ -3035,7 +3089,7 @@
       "name": "version",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "varchar(255)",
@@ -3048,7 +3102,7 @@
       "name": "name",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "AppVersionStatus",
@@ -3061,7 +3115,7 @@
       "name": "status",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "uuid",
@@ -3074,7 +3128,7 @@
       "name": "parent_version_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "jsonb",
@@ -3087,7 +3141,7 @@
       "name": "snapshot",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "jsonb",
@@ -3100,7 +3154,7 @@
       "name": "artifacts",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "timestamp with time zone",
@@ -3113,7 +3167,7 @@
       "name": "created_at",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_versions"
+      "table": "versions"
     },
     {
       "type": "uuid",
@@ -3136,7 +3190,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
       "table": "microfrontends"
@@ -3214,7 +3268,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
       "table": "features"
@@ -3261,7 +3315,7 @@
     {
       "type": "varchar(255)",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
@@ -3344,7 +3398,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
       "table": "feature_microfrontends"
@@ -3422,7 +3476,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
       "table": "feature_permissions"
@@ -3474,7 +3528,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
       "table": "apps"
@@ -3521,7 +3575,7 @@
     {
       "type": "varchar(255)",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
@@ -3604,7 +3658,7 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
       "table": "app_features"
@@ -3841,7 +3895,7 @@
       "name": "id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "uuid",
@@ -3851,10 +3905,10 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "varchar(255)",
@@ -3867,7 +3921,7 @@
       "name": "name",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "text",
@@ -3880,7 +3934,7 @@
       "name": "description",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "RoleScope",
@@ -3893,12 +3947,12 @@
       "name": "scope",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "uuid",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
@@ -3906,33 +3960,7 @@
       "name": "industry_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
-    },
-    {
-      "type": "boolean",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "false",
-      "generated": null,
-      "identity": null,
-      "name": "is_system",
-      "entityType": "columns",
-      "schema": "cloud",
-      "table": "roles"
-    },
-    {
-      "type": "boolean",
-      "typeSchema": null,
-      "notNull": true,
-      "dimensions": 0,
-      "default": "true",
-      "generated": null,
-      "identity": null,
-      "name": "is_active",
-      "entityType": "columns",
-      "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "timestamp with time zone",
@@ -3945,7 +3973,7 @@
       "name": "created_at",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "timestamp with time zone",
@@ -3958,7 +3986,7 @@
       "name": "updated_at",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "type": "uuid",
@@ -3971,7 +3999,7 @@
       "name": "id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "type": "uuid",
@@ -3981,10 +4009,10 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "type": "uuid",
@@ -3994,10 +4022,10 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "role_id",
+      "name": "role_template_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "type": "uuid",
@@ -4010,7 +4038,7 @@
       "name": "app_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "type": "timestamp with time zone",
@@ -4023,7 +4051,7 @@
       "name": "created_at",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "type": "uuid",
@@ -4036,7 +4064,7 @@
       "name": "id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "type": "uuid",
@@ -4046,10 +4074,10 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "app_version_id",
+      "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "type": "uuid",
@@ -4059,10 +4087,10 @@
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "role_id",
+      "name": "role_template_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "type": "uuid",
@@ -4075,7 +4103,7 @@
       "name": "feature_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "type": "FeatureType",
@@ -4088,7 +4116,7 @@
       "name": "type",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "nameExplicit": true,
@@ -4703,7 +4731,7 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "app_version_id",
+          "value": "version_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -4738,7 +4766,7 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "app_version_id",
+          "value": "version_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -4822,7 +4850,7 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "app_version_id",
+          "value": "version_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -4941,7 +4969,7 @@
       "nameExplicit": true,
       "columns": [
         {
-          "value": "app_version_id",
+          "value": "version_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -4960,16 +4988,16 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "role_version_name_idx",
+      "name": "role_template_version_name_idx",
       "entityType": "indexes",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "nameExplicit": true,
       "columns": [
         {
-          "value": "role_id",
+          "value": "role_template_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -4988,16 +5016,16 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "role_app_unique_idx",
+      "name": "role_template_app_unique_idx",
       "entityType": "indexes",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "nameExplicit": true,
       "columns": [
         {
-          "value": "role_id",
+          "value": "role_template_id",
           "isExpression": false,
           "asc": true,
           "nullsFirst": false,
@@ -5023,10 +5051,10 @@
       "with": "",
       "method": "btree",
       "concurrently": false,
-      "name": "role_feature_permission_unique_idx",
+      "name": "role_template_feature_permission_unique_idx",
       "entityType": "indexes",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "nameExplicit": false,
@@ -5337,6 +5365,23 @@
     {
       "nameExplicit": false,
       "columns": [
+        "media_id"
+      ],
+      "schemaTo": "cloud",
+      "tableTo": "media",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "SET NULL",
+      "name": "users_media_id_media_id_fkey",
+      "entityType": "fks",
+      "schema": "cloud",
+      "table": "users"
+    },
+    {
+      "nameExplicit": false,
+      "columns": [
         "user_id"
       ],
       "schemaTo": "cloud",
@@ -5507,16 +5552,16 @@
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "microfrontends_app_version_id_app_versions_id_fkey",
+      "name": "microfrontends_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "microfrontends"
@@ -5524,16 +5569,16 @@
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "features_app_version_id_app_versions_id_fkey",
+      "name": "features_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "features"
@@ -5541,16 +5586,16 @@
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "feature_microfrontends_app_version_id_app_versions_id_fkey",
+      "name": "feature_microfrontends_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "feature_microfrontends"
@@ -5592,16 +5637,16 @@
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "feature_permissions_app_version_id_app_versions_id_fkey",
+      "name": "feature_permissions_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "feature_permissions"
@@ -5626,16 +5671,16 @@
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "apps_app_version_id_app_versions_id_fkey",
+      "name": "apps_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "apps"
@@ -5643,16 +5688,16 @@
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "app_features_app_version_id_app_versions_id_fkey",
+      "name": "app_features_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "app_features"
@@ -5762,19 +5807,19 @@
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "roles_app_version_id_app_versions_id_fkey",
+      "name": "role_templates_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "nameExplicit": false,
@@ -5787,45 +5832,45 @@
         "id"
       ],
       "onUpdate": "NO ACTION",
-      "onDelete": "SET NULL",
-      "name": "roles_industry_id_industries_id_fkey",
+      "onDelete": "CASCADE",
+      "name": "role_templates_industry_id_industries_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "roles"
+      "table": "role_templates"
     },
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "role_apps_app_version_id_app_versions_id_fkey",
+      "name": "role_template_apps_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "nameExplicit": false,
       "columns": [
-        "role_id"
+        "role_template_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "roles",
+      "tableTo": "role_templates",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "role_apps_role_id_roles_id_fkey",
+      "name": "role_template_apps_role_template_id_role_templates_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "nameExplicit": false,
@@ -5839,44 +5884,44 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "role_apps_app_id_apps_id_fkey",
+      "name": "role_template_apps_app_id_apps_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "role_apps"
+      "table": "role_template_apps"
     },
     {
       "nameExplicit": false,
       "columns": [
-        "app_version_id"
+        "version_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "app_versions",
+      "tableTo": "versions",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "role_feature_permissions_app_version_id_app_versions_id_fkey",
+      "name": "role_template_feature_permissions_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "nameExplicit": false,
       "columns": [
-        "role_id"
+        "role_template_id"
       ],
       "schemaTo": "cloud",
-      "tableTo": "roles",
+      "tableTo": "role_templates",
       "columnsTo": [
         "id"
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "role_feature_permissions_role_id_roles_id_fkey",
+      "name": "role_template_feature_permissions_kQhYPC6W6CFa_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "nameExplicit": false,
@@ -5890,10 +5935,10 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "role_feature_permissions_feature_id_features_id_fkey",
+      "name": "role_template_feature_permissions_feature_id_features_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "role_feature_permissions"
+      "table": "role_template_feature_permissions"
     },
     {
       "columns": [
@@ -6113,9 +6158,9 @@
         "id"
       ],
       "nameExplicit": false,
-      "name": "app_versions_pkey",
+      "name": "versions_pkey",
       "schema": "cloud",
-      "table": "app_versions",
+      "table": "versions",
       "entityType": "pks"
     },
     {
@@ -6203,9 +6248,9 @@
         "id"
       ],
       "nameExplicit": false,
-      "name": "roles_pkey",
+      "name": "role_templates_pkey",
       "schema": "cloud",
-      "table": "roles",
+      "table": "role_templates",
       "entityType": "pks"
     },
     {
@@ -6213,9 +6258,9 @@
         "id"
       ],
       "nameExplicit": false,
-      "name": "role_apps_pkey",
+      "name": "role_template_apps_pkey",
       "schema": "cloud",
-      "table": "role_apps",
+      "table": "role_template_apps",
       "entityType": "pks"
     },
     {
@@ -6223,9 +6268,9 @@
         "id"
       ],
       "nameExplicit": false,
-      "name": "role_feature_permissions_pkey",
+      "name": "role_template_feature_permissions_pkey",
       "schema": "cloud",
-      "table": "role_feature_permissions",
+      "table": "role_template_feature_permissions",
       "entityType": "pks"
     },
     {
@@ -6367,9 +6412,9 @@
         "version"
       ],
       "nullsNotDistinct": false,
-      "name": "app_versions_version_key",
+      "name": "versions_version_key",
       "schema": "cloud",
-      "table": "app_versions",
+      "table": "versions",
       "entityType": "uniques"
     }
   ],
