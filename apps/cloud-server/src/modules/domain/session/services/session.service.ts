@@ -30,8 +30,9 @@ export class SessionService {
     expiresIn: number;
   }> {
     const sessionId = randomUUID();
-    const refreshToken = this.tokenService.generateRefreshToken(userId, sessionId, sessionType);
-    const accessToken = this.tokenService.generateAccessToken(userId, sessionId, sessionType, refreshToken);
+    const sessionInfo = { userId, sessionId, sessionType };
+    const refreshToken = this.tokenService.generateRefreshToken(sessionInfo);
+    const accessToken = this.tokenService.generateAccessToken(sessionInfo, refreshToken);
     const expiresAt = this.tokenService.getExpiryTime(TokenType.REFRESH);
 
     const { device, userAgent } = extractDeviceInfo(request);
@@ -71,7 +72,7 @@ export class SessionService {
     expiresIn: number;
   }> {
     const session = await this.validateRefreshToken(refreshToken);
-    const newRefreshToken = this.tokenService.generateRefreshToken(session.userId, session.id, session.type);
+    const newRefreshToken = this.tokenService.generateRefreshToken({ userId: session.userId, sessionId: session.id, sessionType: session.type });
     const { accessToken, expiresIn } = this.generateAccessTokenForSession(session, newRefreshToken);
 
     await this.sessionRepository.rotateTokens(
@@ -120,7 +121,7 @@ export class SessionService {
     session: Session,
     refreshToken: string,
   ): { accessToken: string; expiresIn: number } {
-    const accessToken = this.tokenService.generateAccessToken(session.userId, session.id, session.type, refreshToken);
+    const accessToken = this.tokenService.generateAccessToken({ userId: session.userId, sessionId: session.id, sessionType: session.type }, refreshToken);
     const expiresIn = this.tokenService.getExpiryInSeconds(TokenType.ACCESS);
     return { accessToken, expiresIn };
   }
