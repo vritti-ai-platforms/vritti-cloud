@@ -1,10 +1,12 @@
+import { DeploymentService } from '@domain/deployment/services/deployment.service';
 import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { ApiGetDeploymentPlans, ApiGetDeployments } from '../docs/deployment.docs';
+import { Public } from '@vritti/api-sdk';
+import { DeploymentsResponseDto } from '@/modules/admin-api/deployment/dto/response/deployments-response.dto';
+import { ApiFindAllPublicDeployments, ApiGetDeploymentPlans, ApiGetDeployments } from '../docs/deployment.docs';
 import { DeploymentFilterDto, DeploymentPlanQueryDto } from '../dto/request/deployment-filter.dto';
 import type { DeploymentOptionDto } from '../dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '../dto/response/plan-option.dto';
-import { DeploymentService } from '@domain/deployment/services/deployment.service';
 
 @ApiTags('Deployments')
 @ApiBearerAuth()
@@ -13,6 +15,15 @@ export class CloudDeploymentController {
   private readonly logger = new Logger(CloudDeploymentController.name);
 
   constructor(private readonly deploymentService: DeploymentService) {}
+
+  // Returns every deployment for public discovery
+  @Get('all')
+  @Public()
+  @ApiFindAllPublicDeployments()
+  findAll(): Promise<DeploymentsResponseDto> {
+    this.logger.log('GET /cloud-api/deployments/all');
+    return this.deploymentService.findAll();
+  }
 
   // Returns active deployments for the given region, provider, and industry
   @Get()

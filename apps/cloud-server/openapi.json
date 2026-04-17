@@ -5008,6 +5008,33 @@
         ]
       }
     },
+    "/cloud-api/deployments/all": {
+      "get": {
+        "operationId": "CloudDeploymentController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Deployments retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeploymentsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List all deployments for public discovery",
+        "tags": [
+          "Deployments"
+        ]
+      }
+    },
     "/cloud-api/deployments": {
       "get": {
         "operationId": "CloudDeploymentController_findActive",
@@ -13519,6 +13546,109 @@
           "isShared"
         ]
       },
+      "DeploymentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "US East Production"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://nexus-us-east.vritti.io"
+          },
+          "regionId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "cloudProviderId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "active",
+              "stopped",
+              "Provisioning"
+            ]
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "shared",
+              "dedicated"
+            ]
+          },
+          "version": {
+            "type": "object",
+            "example": "1.0.0",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "regionName": {
+            "type": "string",
+            "example": "US East"
+          },
+          "regionCode": {
+            "type": "string",
+            "example": "us-east"
+          },
+          "cloudProviderName": {
+            "type": "string",
+            "example": "Amazon Web Services"
+          },
+          "cloudProviderCode": {
+            "type": "string",
+            "example": "aws"
+          },
+          "organizationCount": {
+            "type": "number",
+            "example": 0
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "regionId",
+          "cloudProviderId",
+          "status",
+          "type",
+          "createdAt",
+          "organizationCount"
+        ]
+      },
+      "DeploymentsResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DeploymentDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "result",
+          "count"
+        ]
+      },
       "DeploymentOptionDto": {
         "type": "object",
         "properties": {
@@ -15128,109 +15258,6 @@
           "regionId",
           "cloudProviderId",
           "type"
-        ]
-      },
-      "DeploymentDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "name": {
-            "type": "string",
-            "example": "US East Production"
-          },
-          "url": {
-            "type": "string",
-            "example": "https://nexus-us-east.vritti.io"
-          },
-          "regionId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "cloudProviderId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "active",
-              "stopped",
-              "Provisioning"
-            ]
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "shared",
-              "dedicated"
-            ]
-          },
-          "version": {
-            "type": "object",
-            "example": "1.0.0",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "regionName": {
-            "type": "string",
-            "example": "US East"
-          },
-          "regionCode": {
-            "type": "string",
-            "example": "us-east"
-          },
-          "cloudProviderName": {
-            "type": "string",
-            "example": "Amazon Web Services"
-          },
-          "cloudProviderCode": {
-            "type": "string",
-            "example": "aws"
-          },
-          "organizationCount": {
-            "type": "number",
-            "example": 0
-          }
-        },
-        "required": [
-          "id",
-          "name",
-          "url",
-          "regionId",
-          "cloudProviderId",
-          "status",
-          "type",
-          "createdAt",
-          "organizationCount"
-        ]
-      },
-      "DeploymentsResponseDto": {
-        "type": "object",
-        "properties": {
-          "result": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DeploymentDto"
-            }
-          },
-          "count": {
-            "type": "number"
-          }
-        },
-        "required": [
-          "result",
-          "count"
         ]
       },
       "UpdateDeploymentDto": {
