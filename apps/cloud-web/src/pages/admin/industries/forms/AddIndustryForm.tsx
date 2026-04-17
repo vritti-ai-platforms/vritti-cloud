@@ -22,7 +22,7 @@ export const AddIndustryForm: React.FC<AddIndustryFormProps> = ({ onSuccess, onC
   const createMutation = useCreateIndustry({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Industry Name" placeholder="e.g. Healthcare" />
       <TextField
         name="code"

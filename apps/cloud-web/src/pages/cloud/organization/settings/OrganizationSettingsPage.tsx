@@ -138,7 +138,7 @@ export const OrganizationSettingsPage: React.FC = () => {
         id="org-settings-form"
         form={form}
         mutation={updateOrgMutation}
-        showRootError
+       
         transformSubmit={(data) => {
           const formData = new FormData();
           formData.append('name', data.name);

@@ -27,7 +27,7 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
   const createMutation = useCreateDeployment({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vritti.io" />
       <PasswordField name="webhookSecret" label="Webhook Secret" placeholder="whsec_..." />

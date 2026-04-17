@@ -30,7 +30,7 @@ export const EditRegionForm: React.FC<EditRegionFormProps> = ({ region, onSucces
   const updateMutation = useUpdateRegion({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} transformSubmit={(data) => ({ id: region.id, data })} showRootError resetOnSuccess={false} onCancel={onCancel}>
+    <Form form={form} mutation={updateMutation} transformSubmit={(data) => ({ id: region.id, data })} resetOnSuccess={false} onCancel={onCancel}>
       <TextField name="name" label="Region Name" placeholder="e.g. Asia Pacific — Mumbai" />
       <TextField name="city" label="City" placeholder="e.g. Mumbai" />
       <TextField name="state" label="State" placeholder="e.g. Maharashtra" />

@@ -36,7 +36,7 @@ export const EditRoleTemplateForm: React.FC<EditRoleTemplateFormProps> = ({ role
     <Form
       form={form}
       mutation={updateMutation}
-      showRootError
+     
       resetOnSuccess={false}
       onCancel={onCancel}
       transformSubmit={(data) => ({ id: role.id, data })}

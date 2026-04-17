@@ -77,7 +77,7 @@ export const BusinessUnitForm: React.FC<BusinessUnitFormProps> = ({
   };
 
   return (
-    <Form form={form} onSubmit={onSubmit} showRootError>
+    <Form form={form} onSubmit={onSubmit}>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <TextField name="name" label="Name" placeholder="e.g. North America HQ" />
         <TextField name="code" label="Code" placeholder="e.g. NA-HQ" />

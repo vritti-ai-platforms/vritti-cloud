@@ -60,7 +60,7 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ onChangeClick 
         </div>
       </div>
 
-      <Form form={form} mutation={verifyEmailMutation} transformSubmit={(data: OTPFormData) => data.code} showRootError>
+      <Form form={form} mutation={verifyEmailMutation} transformSubmit={(data: OTPFormData) => data.code}>
         <FieldGroup>
           <Field>
             <FieldLabel className="sr-only">Verification Code</FieldLabel>

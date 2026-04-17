@@ -38,7 +38,7 @@ export const AddAppPriceForm: React.FC<AddAppPriceFormProps> = ({ appId, onSucce
     <Form
       form={form}
       mutation={createMutation}
-      showRootError
+     
       resetOnSuccess={false}
       onCancel={onCancel}
       transformSubmit={(data: AddAppPriceData) => ({ versionId, appId, data })}

@@ -63,7 +63,7 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
           <Form
             form={form}
             mutation={saveMutation}
-            showRootError
+           
             resetOnSuccess={false}
             transformSubmit={(formData) => ({ versionId, featureId, types: formData.types })}
           >

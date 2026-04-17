@@ -96,7 +96,7 @@ export const TotpSetupDialog: React.FC<Props> = ({ handle }) => {
         )}
 
         {/* OTP form — only enabled after reveal */}
-        <Form form={form} mutation={verifyMutation} transformSubmit={(data) => data.code} showRootError>
+        <Form form={form} mutation={verifyMutation} transformSubmit={(data) => data.code}>
           <FieldGroup>
             <div className="space-y-4">
               <Typography variant="body2" align="center" className="text-foreground font-medium">

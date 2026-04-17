@@ -43,7 +43,7 @@ export const EditCloudProviderForm: React.FC<EditCloudProviderFormProps> = ({ pr
     <Form
       form={form}
       mutation={updateMutation}
-      showRootError
+     
       resetOnSuccess={false}
       onCancel={onCancel}
       transformSubmit={({ sameAsLight, ...data }) => ({

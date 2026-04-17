@@ -79,7 +79,7 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Form */}
-      <Form form={form} mutation={loginMutation} showRootError>
+      <Form form={form} mutation={loginMutation}>
         <FieldGroup>
           <TextField
             name="email"

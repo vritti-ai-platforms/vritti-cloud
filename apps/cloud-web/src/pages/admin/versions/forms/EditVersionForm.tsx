@@ -29,7 +29,7 @@ export const EditVersionForm: React.FC<EditVersionFormProps> = ({ version, onSuc
     <Form
       form={form}
       mutation={updateMutation}
-      showRootError
+     
       resetOnSuccess={false}
       onCancel={onCancel}
       transformSubmit={(data) => ({ id: version.id, data })}

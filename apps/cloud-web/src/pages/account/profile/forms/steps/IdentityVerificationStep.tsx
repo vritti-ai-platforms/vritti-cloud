@@ -138,7 +138,7 @@ export const IdentityVerificationStep: React.FC<IdentityVerificationStepProps> =
       form={form}
       mutation={verifyMutation}
       transformSubmit={(data) => ({ channel: selectedChannel, otpCode: data.otpCode })}
-      showRootError
+     
     >
       <FieldGroup>
         <div className="space-y-4">

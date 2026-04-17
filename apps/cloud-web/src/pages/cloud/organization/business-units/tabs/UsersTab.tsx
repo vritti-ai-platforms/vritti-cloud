@@ -236,7 +236,7 @@ const AssignRoleForm = ({ orgId, buId, defaultUserId, defaultRoleIds, onSuccess,
   });
 
   return (
-    <Form form={form} mutation={mutation} showRootError>
+    <Form form={form} mutation={mutation}>
       <Select name="userId" label="User" placeholder="Select user" options={userOptions} searchable />
       <Select name="orgRoleIds" label="Roles" placeholder="Select roles" options={roleOptions} searchable multiple />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">

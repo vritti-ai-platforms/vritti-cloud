@@ -42,7 +42,7 @@ export const EditUserForm: React.FC<EditUserFormProps> = ({ orgId, user, onSucce
   });
 
   return (
-    <Form form={form} mutation={mutation} showRootError>
+    <Form form={form} mutation={mutation}>
       <TextField name="fullName" label="Full Name" placeholder="e.g. Jane Smith" />
       <TextField name="email" label="Email" placeholder="e.g. jane@example.com" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">

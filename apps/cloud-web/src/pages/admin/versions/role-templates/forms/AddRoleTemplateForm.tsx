@@ -34,7 +34,7 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ onSucc
   const createMutation = useCreateRoleTemplate(versionId, { onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Role Name" placeholder="e.g. Sales Manager" />
       <TextField name="description" label="Description" placeholder="Optional description" />
       <Select

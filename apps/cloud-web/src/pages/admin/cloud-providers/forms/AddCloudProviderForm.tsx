@@ -36,7 +36,7 @@ export const AddCloudProviderForm: React.FC<AddCloudProviderFormProps> = ({ onSu
     <Form
       form={form}
       mutation={createMutation}
-      showRootError
+     
       resetOnSuccess
       onCancel={onCancel}
       transformSubmit={({ sameAsLight, ...data }) => ({

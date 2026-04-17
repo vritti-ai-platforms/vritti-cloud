@@ -27,7 +27,7 @@ export const AddMicrofrontendForm: React.FC<AddMicrofrontendFormProps> = ({ vers
       form={form}
       mutation={createMutation}
       transformSubmit={(data: CreateMicrofrontendData) => ({ versionId, data })}
-      showRootError
+     
       resetOnSuccess
       onCancel={onCancel}
     >

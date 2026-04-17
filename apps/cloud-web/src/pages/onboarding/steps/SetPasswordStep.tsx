@@ -46,7 +46,7 @@ export const SetPasswordStep: React.FC = () => {
         </Typography>
       </div>
 
-      <Form form={form} mutation={setPasswordMutation} transformSubmit={(data) => data.password} showRootError>
+      <Form form={form} mutation={setPasswordMutation} transformSubmit={(data) => data.password}>
         <FieldGroup>
           <PasswordField
             name="password"

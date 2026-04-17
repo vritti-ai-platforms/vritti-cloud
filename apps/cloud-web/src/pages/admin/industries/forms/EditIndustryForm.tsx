@@ -29,7 +29,7 @@ export const EditIndustryForm: React.FC<EditIndustryFormProps> = ({ industry, on
   const updateMutation = useUpdateIndustry({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: industry.id, data })}>
+    <Form form={form} mutation={updateMutation} resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: industry.id, data })}>
       <TextField name="name" label="Industry Name" placeholder="e.g. Healthcare" />
       <TextField
         name="code"

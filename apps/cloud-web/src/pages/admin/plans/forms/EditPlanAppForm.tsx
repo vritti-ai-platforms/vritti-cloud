@@ -45,7 +45,7 @@ export const EditPlanAppForm: React.FC<EditPlanAppFormProps> = ({
     <Form
       form={form}
       mutation={updateMutation}
-      showRootError
+     
       resetOnSuccess={false}
       transformSubmit={(data) => ({
         planId,

@@ -33,7 +33,7 @@ export const EditMicrofrontendForm: React.FC<EditMicrofrontendFormProps> = ({ mi
       form={form}
       mutation={updateMutation}
       transformSubmit={(data: UpdateMicrofrontendData) => ({ versionId: microfrontend.versionId, id: microfrontend.id, data })}
-      showRootError
+     
       resetOnSuccess={false}
       onCancel={onCancel}
     >

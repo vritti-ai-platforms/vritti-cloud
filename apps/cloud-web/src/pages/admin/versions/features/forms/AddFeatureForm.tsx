@@ -30,7 +30,7 @@ export const AddFeatureForm: React.FC<AddFeatureFormProps> = ({ onSuccess, onCan
   const createMutation = useCreateFeature(versionId, { onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError onCancel={onCancel}>
+    <Form form={form} mutation={createMutation} onCancel={onCancel}>
       <div className="grid grid-cols-2 gap-4">
         <TextField
           name="code"

@@ -21,7 +21,7 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
   const createMutation = useCreatePlan({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Plan Name" placeholder="e.g. Pro" />
       <TextField name="code" label="Code" placeholder="e.g. pro" description="Unique code identifier for this plan" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">

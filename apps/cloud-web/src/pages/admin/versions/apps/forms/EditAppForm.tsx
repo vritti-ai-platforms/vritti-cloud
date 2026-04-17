@@ -31,7 +31,7 @@ export const EditAppForm: React.FC<EditAppFormProps> = ({ app, onSuccess, onCanc
   const updateMutation = useUpdateApp(versionId, { onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: app.id, data })}>
+    <Form form={form} mutation={updateMutation} resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: app.id, data })}>
       <TextField name="code" label="App Code" placeholder="e.g. crm" description="Lowercase with hyphens" />
       <TextField name="name" label="App Name" placeholder="e.g. CRM" />
       <TextField name="description" label="Description" placeholder="Optional description" />

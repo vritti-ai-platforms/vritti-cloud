@@ -22,7 +22,7 @@ export const AddRegionForm: React.FC<AddRegionFormProps> = ({ onSuccess, onCance
   const createMutation = useCreateRegion({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Region Name" placeholder="e.g. Asia Pacific — Mumbai" />
       <TextField name="city" label="City" placeholder="e.g. Mumbai" />
       <TextField name="state" label="State" placeholder="e.g. Maharashtra" />

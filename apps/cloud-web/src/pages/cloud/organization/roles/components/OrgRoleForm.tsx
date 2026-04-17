@@ -142,7 +142,7 @@ export const OrgRoleForm: React.FC<OrgRoleFormProps> = ({ orgId, role, onSubmit,
 
   return (
     <div className="flex flex-col gap-6">
-      <Form form={form} onSubmit={handleFormSubmit} showRootError>
+      <Form form={form} onSubmit={handleFormSubmit}>
         {/* Role details */}
         <TextField name="name" label="Role Name" placeholder="e.g. Regional Manager" />
         <TextField name="description" label="Description" placeholder="Optional description" />

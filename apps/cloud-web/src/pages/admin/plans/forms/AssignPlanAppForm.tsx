@@ -30,7 +30,7 @@ export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({ planId, on
     <Form
       form={form}
       mutation={assignMutation}
-      showRootError
+     
       transformSubmit={(data) => ({ planId, data })}
     >
       <AppCodeSelector name="appCode" />

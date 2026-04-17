@@ -45,7 +45,7 @@ export const NewContactStep: React.FC<NewContactStepProps> = ({ contactType, cur
         form={emailForm}
         mutation={submitMutation}
         transformSubmit={(data) => ({ channel: targetChannel, target: data.newEmail })}
-        showRootError
+       
       >
         <FieldGroup>
           <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">
@@ -71,7 +71,7 @@ export const NewContactStep: React.FC<NewContactStepProps> = ({ contactType, cur
       form={phoneForm}
       mutation={submitMutation}
       transformSubmit={(data) => ({ channel: targetChannel, target: data.newPhone })}
-      showRootError
+     
     >
       <FieldGroup>
         <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">

@@ -31,7 +31,7 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
   const updateMutation = useUpdateFeature(versionId, { onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: feature.id, data })}>
+    <Form form={form} mutation={updateMutation} resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: feature.id, data })}>
       <div className="grid grid-cols-2 gap-4">
         <TextField
           name="code"

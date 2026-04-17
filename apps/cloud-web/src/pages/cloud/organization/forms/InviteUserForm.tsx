@@ -37,7 +37,7 @@ export const InviteUserForm: React.FC<InviteUserFormProps> = ({ orgId, onSuccess
     <Form
       form={form}
       mutation={inviteMutation}
-      showRootError
+     
       transformSubmit={(data) => ({
         email: data.email,
         fullName: data.fullName,

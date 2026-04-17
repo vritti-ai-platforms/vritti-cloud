@@ -74,7 +74,7 @@ export const SignupPage: React.FC = () => {
           password: data.password,
           fullName: data.fullName,
         })}
-        showRootError
+       
         rootErrorAction={
           <Button size="xs" variant="default" onClick={handleLoginInstead}>
             Login

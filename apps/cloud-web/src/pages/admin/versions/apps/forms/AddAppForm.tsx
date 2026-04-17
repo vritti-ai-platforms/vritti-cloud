@@ -24,7 +24,7 @@ export const AddAppForm: React.FC<AddAppFormProps> = ({ onSuccess, onCancel }) =
   const createMutation = useCreateApp(versionId, { onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError resetOnSuccess onCancel={onCancel}>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField
         name="code"
         label="App Code"

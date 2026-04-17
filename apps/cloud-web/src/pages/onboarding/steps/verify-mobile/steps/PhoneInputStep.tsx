@@ -67,7 +67,7 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({ onSuccess, onBac
           phoneCountry: data.phoneCountry,
           method: 'manual' as const,
         })}
-        showRootError
+       
       >
         <FieldGroup>
           <PhoneField name="phone" label="Phone Number" defaultCountry="IN" />

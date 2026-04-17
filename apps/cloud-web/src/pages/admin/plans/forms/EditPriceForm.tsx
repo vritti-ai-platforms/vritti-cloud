@@ -27,7 +27,7 @@ export const EditPriceForm: React.FC<EditPriceFormProps> = ({ price, onSuccess, 
     <Form
       form={form}
       mutation={updateMutation}
-      showRootError
+     
       resetOnSuccess={false}
       onCancel={onCancel}
       transformSubmit={(data) => ({ id: price.id, planId: price.planId, data })}

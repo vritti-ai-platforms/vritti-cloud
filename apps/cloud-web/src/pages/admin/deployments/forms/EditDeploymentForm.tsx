@@ -33,7 +33,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
   const updateMutation = useUpdateDeployment({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: deployment.id, data })}>
+    <Form form={form} mutation={updateMutation} resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: deployment.id, data })}>
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vrittiai.com" />
       <RegionSelector

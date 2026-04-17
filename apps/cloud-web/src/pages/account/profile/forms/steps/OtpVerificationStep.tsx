@@ -49,7 +49,7 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
       form={form}
       mutation={verifyMutation}
       transformSubmit={(data) => ({ channel: targetChannel, otpCode: data.otpCode })}
-      showRootError
+     
     >
       <FieldGroup>
         <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">

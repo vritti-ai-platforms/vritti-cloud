@@ -39,7 +39,7 @@ export const PersonalInformationCard: React.FC<PersonalInformationCardProps> = (
       id="profile-form"
       form={form}
       mutation={mutation}
-      showRootError
+     
       transformSubmit={(data) => {
         const formData = new FormData();
         formData.append('fullName', data.fullName);

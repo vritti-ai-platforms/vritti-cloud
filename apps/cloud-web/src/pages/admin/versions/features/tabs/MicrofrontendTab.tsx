@@ -231,7 +231,7 @@ const LinkMicrofrontendForm = ({
         </div>
       </CardHeader>
       <CardContent>
-        <Form form={form} mutation={setMutation} showRootError>
+        <Form form={form} mutation={setMutation}>
           <MicrofrontendSelector
             name="microfrontendId"
             params={{ versionId, platform }}
