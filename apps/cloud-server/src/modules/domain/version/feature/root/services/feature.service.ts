@@ -11,8 +11,8 @@ import {
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { type ExportFormat, buildExportBuffer } from '@vritti/api-sdk/xlsx';
 import { and } from '@vritti/api-sdk/drizzle-orm';
+import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
 import { type FeatureType, FeatureTypeValues, features, type NewFeaturePermission } from '@/db/schema';
 import { FeatureDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature.dto';
 import { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
@@ -52,7 +52,11 @@ export class FeatureService {
     }
     const feature = await this.featureRepository.create(dto);
     this.logger.log(`Created feature: ${feature.name} (${feature.id})`);
-    return { success: true, message: `Feature "${feature.name}" created successfully.`, data: FeatureDto.from(feature) };
+    return {
+      success: true,
+      message: `Feature "${feature.name}" created successfully.`,
+      data: FeatureDto.from(feature),
+    };
   }
 
   // Returns all features with server-stored filter/sort/search/pagination state applied
@@ -82,7 +86,7 @@ export class FeatureService {
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,
@@ -182,7 +186,11 @@ export class FeatureService {
 
         // Check if feature fields changed
         const incomingDesc = row.data.description || null;
-        if (existing.name !== row.data.name || existing.icon !== row.data.icon || existing.description !== incomingDesc) {
+        if (
+          existing.name !== row.data.name ||
+          existing.icon !== row.data.icon ||
+          existing.description !== incomingDesc
+        ) {
           await this.featureRepository.update(existing.id, {
             name: row.data.name,
             icon: row.data.icon,
@@ -193,7 +201,10 @@ export class FeatureService {
 
         // Check if permissions changed
         if (row.data.permissions) {
-          const incomingTypes = row.data.permissions.split(',').map((t) => t.trim().toUpperCase()).sort();
+          const incomingTypes = row.data.permissions
+            .split(',')
+            .map((t) => t.trim().toUpperCase())
+            .sort();
           const existingPerms = await this.featurePermissionRepository.findByFeatureId(featureId);
           const existingTypes = existingPerms.map((p) => p.type).sort();
 
@@ -255,5 +266,4 @@ export class FeatureService {
     this.logger.log(`Exported ${rows.length} feature(s) for version ${versionId} as ${format}`);
     return buildExportBuffer(rows, format);
   }
-
 }

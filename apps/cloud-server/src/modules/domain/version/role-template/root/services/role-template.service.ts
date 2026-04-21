@@ -1,6 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
-  ConflictException,
   CreateResponseDto,
   DataTableStateService,
   type FieldMap,
@@ -85,7 +84,7 @@ export class RoleTemplateService {
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,

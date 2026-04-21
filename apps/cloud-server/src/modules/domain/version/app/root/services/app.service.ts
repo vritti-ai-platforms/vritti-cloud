@@ -12,12 +12,12 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
+import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
 import { apps } from '@/db/schema';
 import { AppDto } from '@/modules/admin-api/version/app/root/dto/entity/app.dto';
 import { CreateAppDto } from '@/modules/admin-api/version/app/root/dto/request/create-app.dto';
 import type { UpdateAppDto } from '@/modules/admin-api/version/app/root/dto/request/update-app.dto';
 import { AppTableResponseDto } from '@/modules/admin-api/version/app/root/dto/response/app-table-response.dto';
-import { type ExportFormat, buildExportBuffer } from '@vritti/api-sdk/xlsx';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
 import { validateImportRows } from '@/utils/validate-import-rows';
 import { AppRepository } from '../repositories/app.repository';
@@ -67,12 +67,14 @@ export class AppService {
 
   // Returns paginated app options for the select component
   findForSelect(query: SelectOptionsQueryDto & { versionId?: string }): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched app select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched app select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.appRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,
@@ -196,5 +198,4 @@ export class AppService {
     this.logger.log(`Exported ${rows.length} app(s) for version ${versionId}`);
     return buildExportBuffer(rows, format);
   }
-
 }

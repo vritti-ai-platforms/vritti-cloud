@@ -12,11 +12,11 @@ import {
 } from '@vritti/api-sdk';
 import { type Column, and, sql } from '@vritti/api-sdk/drizzle-orm';
 import { plans, prices } from '@/db/schema';
-import { PriceService } from '@/modules/domain/price/services/price.service';
 import { PlanDto } from '@/modules/admin-api/plan/root/dto/entity/plan.dto';
 import type { CreatePlanDto } from '@/modules/admin-api/plan/root/dto/request/create-plan.dto';
 import type { UpdatePlanDto } from '@/modules/admin-api/plan/root/dto/request/update-plan.dto';
 import { PlansTableResponseDto } from '@/modules/admin-api/plan/root/dto/response/plans-table-response.dto';
+import { PriceService } from '@/modules/domain/price/services/price.service';
 import { PlanRepository } from '../repositories/plan.repository';
 
 @Injectable()
@@ -40,12 +40,14 @@ export class PlanService {
 
   // Returns paginated plan options for the select component
   findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched plan select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched plan select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.planRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,

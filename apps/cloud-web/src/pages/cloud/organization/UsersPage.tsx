@@ -26,7 +26,7 @@ export const UsersPage = () => {
   const confirm = useConfirm();
   const resendMutation = useResendInvite(orgId);
 
-  // Opens the edit dialog for a pending user
+  // Opens the edit dialog for a user
   function handleEdit(user: NexusUser) {
     editUserRef.current = user;
     editDialog.open();
@@ -101,7 +101,7 @@ export const UsersPage = () => {
       <Dialog
         handle={editDialog}
         title="Edit User"
-        description="Update user details. If the email has changed, resend the invitation to the new address."
+        description="Update user profile details."
         content={(close) =>
           editUserRef.current ? (
             <EditUserForm orgId={orgId} user={editUserRef.current} onSuccess={close} onCancel={close} />
@@ -181,7 +181,6 @@ function getColumns({ onResendInvite, onEdit }: GetColumnsOptions): ColumnDef<Ne
               id: 'edit',
               icon: Pencil,
               label: 'Edit',
-              hidden: row.original.status !== 'PENDING',
               onClick: () => onEdit(row.original),
             },
             {

@@ -1,5 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, CreateResponseDto, NotFoundException, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk';
+import {
+  ConflictException,
+  CreateResponseDto,
+  NotFoundException,
+  type SelectQueryResult,
+  SuccessResponseDto,
+} from '@vritti/api-sdk';
 import { and, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import { deploymentIndustryPlans } from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
@@ -9,7 +15,10 @@ import type { CreateDeploymentDto } from '@/modules/admin-api/deployment/dto/req
 import type { DeploymentSelectQueryDto } from '@/modules/admin-api/deployment/dto/request/deployment-select-query.dto';
 import type { UpdateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/update-deployment.dto';
 import { DeploymentsResponseDto } from '@/modules/admin-api/deployment/dto/response/deployments-response.dto';
-import type { DeploymentFilterDto, DeploymentPlanQueryDto } from '@/modules/cloud-api/deployment/dto/request/deployment-filter.dto';
+import type {
+  DeploymentFilterDto,
+  DeploymentPlanQueryDto,
+} from '@/modules/cloud-api/deployment/dto/request/deployment-filter.dto';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 import { DeploymentRepository } from '../repositories/deployment.repository';
@@ -26,12 +35,14 @@ export class DeploymentService {
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
   findForSelect(query: DeploymentSelectQueryDto): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched deployment select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched deployment select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.deploymentRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,
@@ -49,7 +60,11 @@ export class DeploymentService {
   async create(dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
     const deployment = await this.deploymentRepository.create(dto);
     this.logger.log(`Created deployment: ${deployment.name} (${deployment.id})`);
-    return { success: true, message: `Deployment "${deployment.name}" created successfully.`, data: DeploymentDto.from(deployment) };
+    return {
+      success: true,
+      message: `Deployment "${deployment.name}" created successfully.`,
+      data: DeploymentDto.from(deployment),
+    };
   }
 
   // Returns all deployments mapped to DTOs
@@ -138,7 +153,9 @@ export class DeploymentService {
 
   // Returns active deployments for the given region, provider, and industry combo
   findActive(query: DeploymentFilterDto): Promise<DeploymentOptionDto[]> {
-    this.logger.log(`Fetched active deployments (region: ${query.regionId}, provider: ${query.cloudProviderId}, industry: ${query.industryId})`);
+    this.logger.log(
+      `Fetched active deployments (region: ${query.regionId}, provider: ${query.cloudProviderId}, industry: ${query.industryId})`,
+    );
     return this.deploymentRepository.findActive(query.regionId, query.cloudProviderId, query.industryId);
   }
 

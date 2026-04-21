@@ -13179,6 +13179,16 @@
             "description": "User status",
             "example": "ACTIVE"
           },
+          "locale": {
+            "type": "string",
+            "description": "User locale",
+            "example": "en-US"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "User timezone",
+            "example": "America/New_York"
+          },
           "hasPassword": {
             "type": "boolean",
             "description": "Whether the user has set a password",
@@ -13196,6 +13206,8 @@
           "email",
           "fullName",
           "status",
+          "locale",
+          "timezone",
           "hasPassword",
           "createdAt"
         ]
@@ -13268,6 +13280,26 @@
             "type": "string",
             "description": "Updated full name",
             "example": "Jane Smith"
+          },
+          "status": {
+            "type": "string",
+            "description": "Updated account status",
+            "example": "ACTIVE",
+            "enum": [
+              "PENDING",
+              "ACTIVE",
+              "SUSPENDED"
+            ]
+          },
+          "locale": {
+            "type": "string",
+            "description": "Updated locale",
+            "example": "en-US"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Updated timezone",
+            "example": "America/New_York"
           }
         }
       },

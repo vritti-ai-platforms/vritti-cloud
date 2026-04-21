@@ -42,12 +42,14 @@ export class IndustryService {
 
   // Returns paginated industry options for the select component
   findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched industry select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched industry select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.industryRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,
@@ -69,7 +71,11 @@ export class IndustryService {
     }
     const industry = await this.industryRepository.create(dto);
     this.logger.log(`Created industry: ${industry.name} (${industry.id})`);
-    return { success: true, message: `Industry "${industry.name}" created successfully.`, data: IndustryDto.from(industry, true) };
+    return {
+      success: true,
+      message: `Industry "${industry.name}" created successfully.`,
+      data: IndustryDto.from(industry, true),
+    };
   }
 
   // Returns all industries with server-stored filter/sort/pagination state applied, optionally narrowed by a search param

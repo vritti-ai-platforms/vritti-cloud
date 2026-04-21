@@ -36,9 +36,7 @@ export function getOrgUsers(orgId: string): Promise<NexusUser[]> {
 
 // Fetches org users with server-side table state (sort, filter, search, pagination)
 export function getOrgUsersTable(orgId: string): Promise<DataTableServerState<NexusUser>> {
-  return axios
-    .get<DataTableServerState<NexusUser>>(`cloud-api/organizations/${orgId}/users/table`)
-    .then((r) => r.data);
+  return axios.get<DataTableServerState<NexusUser>>(`cloud-api/organizations/${orgId}/users/table`).then((r) => r.data);
 }
 
 // Invites a user to the organization in nexus
@@ -51,15 +49,13 @@ export interface SuccessResponse {
   message: string;
 }
 
-// Updates a user's email or name in nexus
+// Updates a user's details in nexus
 export function updateOrgUser(
   orgId: string,
   userId: string,
-  data: { email?: string; fullName?: string },
+  data: { email?: string; fullName?: string; status?: string; locale?: string; timezone?: string },
 ): Promise<SuccessResponse> {
-  return axios
-    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/users/${userId}`, data)
-    .then((r) => r.data);
+  return axios.patch<SuccessResponse>(`cloud-api/organizations/${orgId}/users/${userId}`, data).then((r) => r.data);
 }
 
 // Resends invitation email to a pending user in nexus

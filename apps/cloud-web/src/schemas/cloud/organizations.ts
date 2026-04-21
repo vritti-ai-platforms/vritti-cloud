@@ -75,6 +75,8 @@ export interface NexusUser {
   email: string;
   fullName: string;
   status: string;
+  locale: string;
+  timezone: string;
   hasPassword: boolean;
   createdAt: string;
 }

@@ -16,6 +16,12 @@ export class NexusUserResponseDto {
   @ApiProperty({ description: 'User status', example: 'ACTIVE' })
   status: string;
 
+  @ApiProperty({ description: 'User locale', example: 'en-US' })
+  locale: string;
+
+  @ApiProperty({ description: 'User timezone', example: 'America/New_York' })
+  timezone: string;
+
   @ApiProperty({ description: 'Whether the user has set a password', example: true })
   hasPassword: boolean;
 

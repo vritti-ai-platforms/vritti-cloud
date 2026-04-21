@@ -13,6 +13,8 @@ interface CoreUserDto {
   email: string;
   fullName: string;
   status: string;
+  locale: string;
+  timezone: string;
   hasPassword: boolean;
   createdAt: string;
 }
@@ -47,7 +49,7 @@ export class CoreUserService {
     url: string,
     webhookSecret: string,
     userId: string,
-    data: { email?: string; fullName?: string; status?: string },
+    data: { email?: string; fullName?: string; status?: string; locale?: string; timezone?: string },
   ): Promise<CoreSuccessDto> {
     const result = await this.http.patch<CoreSuccessDto>(url, webhookSecret, `/users/webhook/${userId}`, data);
     this.logger.log(`Updated user in core: ${userId}`);

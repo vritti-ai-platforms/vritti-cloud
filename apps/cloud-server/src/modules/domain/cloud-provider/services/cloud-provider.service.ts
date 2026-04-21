@@ -12,10 +12,10 @@ import {
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { cloudProviders, regionCloudProviders } from '@/db/schema';
 import { CloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/entity/cloud-provider.dto';
-import type { CloudProviderSelectQueryDto } from '@/modules/select-api/dto/cloud-provider-select-query.dto';
 import type { CreateCloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/request/create-cloud-provider.dto';
 import type { UpdateCloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/request/update-cloud-provider.dto';
 import { CloudProviderTableResponseDto } from '@/modules/admin-api/cloud-provider/dto/response/cloud-providers-response.dto';
+import type { CloudProviderSelectQueryDto } from '@/modules/select-api/dto/cloud-provider-select-query.dto';
 import { CloudProviderRepository } from '../repositories/cloud-provider.repository';
 
 @Injectable()
@@ -34,12 +34,14 @@ export class CloudProviderService {
 
   // Returns paginated cloud provider options for the select component, optionally filtered by region
   findForSelect(query: CloudProviderSelectQueryDto): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched provider select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched provider select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.cloudProviderRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,
@@ -48,7 +50,13 @@ export class CloudProviderService {
       orderBy: { name: 'asc' },
       ...(query.regionId
         ? {
-            joins: [{ table: regionCloudProviders, on: eq(regionCloudProviders.providerId, cloudProviders.id), type: 'inner' as const }],
+            joins: [
+              {
+                table: regionCloudProviders,
+                on: eq(regionCloudProviders.providerId, cloudProviders.id),
+                type: 'inner' as const,
+              },
+            ],
             conditions: [eq(regionCloudProviders.regionId, query.regionId)],
           }
         : {}),

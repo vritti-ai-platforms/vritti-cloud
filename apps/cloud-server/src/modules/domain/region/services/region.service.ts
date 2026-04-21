@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import {
   ConflictException,
   CreateResponseDto,
+  DataTableStateService,
   type FieldMap,
   FilterProcessor,
   NotFoundException,
@@ -11,7 +12,6 @@ import {
 } from '@vritti/api-sdk';
 import { and, sql } from '@vritti/api-sdk/drizzle-orm';
 import { regionCloudProviders, regions } from '@/db/schema';
-import { DataTableStateService } from '@vritti/api-sdk';
 import { RegionDto } from '@/modules/admin-api/region/dto/entity/region.dto';
 import type { CreateRegionDto } from '@/modules/admin-api/region/dto/request/create-region.dto';
 import type { UpdateRegionDto } from '@/modules/admin-api/region/dto/request/update-region.dto';
@@ -50,12 +50,14 @@ export class RegionService {
 
   // Returns paginated region options for the select component
   findForSelect(query: SelectOptionsQueryDto & { isActive?: boolean }): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched region select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched region select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.regionRepository.findForSelect({
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,

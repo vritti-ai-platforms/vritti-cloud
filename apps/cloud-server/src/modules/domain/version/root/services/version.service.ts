@@ -51,7 +51,11 @@ export class VersionService {
       status: VersionStatusValues.ALPHA,
     });
     this.logger.log(`Created version: ${version.version} (${version.id})`);
-    return { success: true, message: `Version "${version.name}" created successfully.`, data: VersionDto.from(version) };
+    return {
+      success: true,
+      message: `Version "${version.name}" created successfully.`,
+      data: VersionDto.from(version),
+    };
   }
 
   // Returns all versions with server-stored filter/sort/search/pagination state applied
@@ -76,7 +80,7 @@ export class VersionService {
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey || 'version',
-      groupId: query.groupIdKey,
+      groupIdKey: query.groupIdKey,
       search: query.search,
       limit: query.limit,
       offset: query.offset,

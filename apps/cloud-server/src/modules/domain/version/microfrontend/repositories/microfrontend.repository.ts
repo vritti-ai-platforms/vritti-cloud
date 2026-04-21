@@ -54,7 +54,7 @@ export class MicrofrontendRepository extends PrimaryBaseRepository<typeof microf
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
-      groupId: query.groupIdKey || (!query.versionId ? 'versionId' : undefined),
+      groupIdKey: query.groupIdKey || (!query.versionId ? 'versionId' : undefined),
       search: query.search,
       limit: query.limit,
       offset: query.offset,
