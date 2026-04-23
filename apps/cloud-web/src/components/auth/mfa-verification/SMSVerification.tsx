@@ -84,7 +84,7 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({ sessionId, mas
           form={form}
           mutation={verifySmsMutation}
           transformSubmit={(data) => ({ sessionId, code: data.code })}
-          showRootError
+         
         >
           <FieldGroup>
             <div className="flex justify-center">

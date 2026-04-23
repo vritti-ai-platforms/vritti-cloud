@@ -20,13 +20,13 @@ import type { DeploymentPlanAssignment, DeploymentPlanAssignmentIndustry } from 
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
 
 export const DeploymentViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('deploymentSlug');
   const navigate = useNavigate();
 
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: deployment, isLoading } = useDeployment(id ?? '');
+  const { data: deployment } = useDeployment(id ?? '');
   const { data: planAssignments = [], isLoading: plansLoading } = useDeploymentPlanAssignments(id ?? '');
 
   const assignMutation = useAssignDeploymentPlan();
@@ -50,23 +50,13 @@ export const DeploymentViewPage = () => {
   const handleDelete = async () => {
     if (!id) return;
     const confirmed = await confirm({
-      title: `Delete ${deployment?.name}?`,
+      title: `Delete ${deployment.name}?`,
       description: 'This action cannot be undone. All associated plan assignments will be removed.',
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
     if (confirmed) deleteMutation.mutate(id);
   };
-
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!deployment) return null;
 
   return (
     <div className="flex flex-col gap-6">
@@ -133,10 +123,7 @@ export const DeploymentViewPage = () => {
 
       {/* Edit dialog */}
       <Dialog
-        open={editDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) editDialog.close();
-        }}
+        handle={editDialog}
         title="Edit Deployment"
         description="Update the details for this deployment."
         content={(close) => <EditDeploymentForm deployment={deployment} onSuccess={close} onCancel={close} />}

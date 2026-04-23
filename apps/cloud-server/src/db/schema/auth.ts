@@ -15,6 +15,8 @@ export const sessions = cloudSchema.table(
     refreshTokenHash: text('refresh_token_hash').notNull().unique(),
     ipAddress: varchar('ip_address', { length: 45 }),
     userAgent: text('user_agent'),
+    device: varchar('device', { length: 255 }),
+    location: varchar('location', { length: 255 }),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

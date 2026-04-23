@@ -4,6 +4,7 @@ import { cloudSchema } from './cloud-schema';
 import { deploymentStatusEnum, deploymentTypeEnum } from './enums';
 import { regions } from './region';
 
+// Infrastructure deployment instances — linked to an app version by version string (no FK)
 export const deployments = cloudSchema.table('deployments', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -15,6 +16,7 @@ export const deployments = cloudSchema.table('deployments', {
   cloudProviderId: uuid('cloud_provider_id')
     .notNull()
     .references(() => cloudProviders.id, { onDelete: 'restrict' }),
+  version: varchar('version', { length: 50 }),
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
   type: deploymentTypeEnum('type').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

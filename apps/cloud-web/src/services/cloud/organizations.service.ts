@@ -36,9 +36,7 @@ export function getOrgUsers(orgId: string): Promise<NexusUser[]> {
 
 // Fetches org users with server-side table state (sort, filter, search, pagination)
 export function getOrgUsersTable(orgId: string): Promise<DataTableServerState<NexusUser>> {
-  return axios
-    .get<DataTableServerState<NexusUser>>(`cloud-api/organizations/${orgId}/users/table`)
-    .then((r) => r.data);
+  return axios.get<DataTableServerState<NexusUser>>(`cloud-api/organizations/${orgId}/users/table`).then((r) => r.data);
 }
 
 // Invites a user to the organization in nexus
@@ -51,9 +49,37 @@ export interface SuccessResponse {
   message: string;
 }
 
+// Updates a user's details in nexus
+export function updateOrgUser(
+  orgId: string,
+  userId: string,
+  data: { email?: string; fullName?: string; status?: string; locale?: string; timezone?: string },
+): Promise<SuccessResponse> {
+  return axios.patch<SuccessResponse>(`cloud-api/organizations/${orgId}/users/${userId}`, data).then((r) => r.data);
+}
+
 // Resends invitation email to a pending user in nexus
 export function resendUserInvite(orgId: string, userId: string): Promise<SuccessResponse> {
   return axios
     .post<SuccessResponse>(`cloud-api/organizations/${orgId}/users/${userId}/resend-invite`)
+    .then((r) => r.data);
+}
+
+// Fetches a single organization by ID
+export function getOrganization(orgId: string): Promise<OrgListItem> {
+  return axios.get<OrgListItem>(`cloud-api/organizations/${orgId}`).then((r) => r.data);
+}
+
+// Deletes an organization
+export function deleteOrganization(orgId: string): Promise<void> {
+  return axios.delete(`cloud-api/organizations/${orgId}`).then(() => undefined);
+}
+
+// Updates organization details (multipart form data for optional logo)
+export function updateOrganization(orgId: string, data: FormData): Promise<SuccessResponse> {
+  return axios
+    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}`, data, {
+      headers: { 'Content-Type': undefined },
+    })
     .then((r) => r.data);
 }

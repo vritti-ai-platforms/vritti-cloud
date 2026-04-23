@@ -1,7 +1,15 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { DeploymentsResponseDto } from '@/modules/admin-api/deployment/dto/response/deployments-response.dto';
 import { DeploymentOptionDto } from '../dto/response/deployment-option.dto';
 import { PlanOptionDto } from '../dto/response/plan-option.dto';
+
+export function ApiFindAllPublicDeployments() {
+  return applyDecorators(
+    ApiOperation({ summary: 'List all deployments for public discovery' }),
+    ApiResponse({ status: 200, description: 'Deployments retrieved successfully.', type: DeploymentsResponseDto }),
+  );
+}
 
 export function ApiGetDeployments() {
   return applyDecorators(

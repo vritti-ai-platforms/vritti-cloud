@@ -88,7 +88,7 @@ export const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
 
       {error && <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">{error}</div>}
 
-      <Form form={form} mutation={verifyOtpMutation} transformSubmit={(data) => data.code} showRootError>
+      <Form form={form} mutation={verifyOtpMutation} transformSubmit={(data) => data.code}>
         <FieldGroup>
           <div className="flex justify-center">
             <Smartphone className="h-8 w-8 text-primary" />

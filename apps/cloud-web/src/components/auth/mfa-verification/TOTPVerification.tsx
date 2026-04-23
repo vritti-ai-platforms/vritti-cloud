@@ -53,7 +53,7 @@ export const TOTPVerification: React.FC<TOTPVerificationProps> = ({ sessionId, o
         form={form}
         mutation={verifyTotpMutation}
         transformSubmit={(data) => ({ sessionId, code: data.code })}
-        showRootError
+       
       >
         <FieldGroup>
           <div className="flex justify-center">

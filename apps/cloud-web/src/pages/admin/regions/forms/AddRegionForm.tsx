@@ -19,21 +19,10 @@ export const AddRegionForm: React.FC<AddRegionFormProps> = ({ onSuccess, onCance
     defaultValues: { name: '', code: '', country: '', state: '', city: '', isActive: true },
   });
 
-  const createMutation = useCreateRegion({
-    onSuccess: () => {
-      form.reset();
-      onSuccess();
-    },
-  });
-
-  // Cancel resets the form then notifies the parent
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const createMutation = useCreateRegion({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Region Name" placeholder="e.g. Asia Pacific — Mumbai" />
       <TextField name="city" label="City" placeholder="e.g. Mumbai" />
       <TextField name="state" label="State" placeholder="e.g. Maharashtra" />
@@ -46,7 +35,7 @@ export const AddRegionForm: React.FC<AddRegionFormProps> = ({ onSuccess, onCance
       />
       <Switch name="isActive" label="Active" description="Make this region available for new deployments" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">

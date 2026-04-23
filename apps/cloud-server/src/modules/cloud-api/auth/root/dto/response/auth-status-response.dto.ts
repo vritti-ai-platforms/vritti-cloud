@@ -32,6 +32,9 @@ export class AuthStatusResponse {
   })
   requiresOnboarding?: boolean;
 
+  // Internal use only — not sent to frontend, used by SSE controller to tag connections
+  sessionId?: string;
+
   constructor(partial: Partial<AuthStatusResponse>) {
     Object.assign(this, partial);
   }

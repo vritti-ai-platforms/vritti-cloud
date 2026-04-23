@@ -21,6 +21,8 @@ export const verificationChannelEnum = cloudSchema.enum('verification_channel', 
   'SMS_OUT', // Outbound SMS with OTP (we send to user)
   'SMS_IN', // Inbound SMS with code (user sends to us via QR)
   'WHATSAPP_IN', // Inbound WhatsApp with code (user sends to us via QR)
+  'IDENTITY_EMAIL_OUT', // Identity verification OTP sent to current email (contact change flow)
+  'IDENTITY_SMS_OUT', // Identity verification OTP sent to current phone (contact change flow)
 ]);
 
 export const mfaMethodEnum = cloudSchema.enum('MfaMethod', ['TOTP', 'PASSKEY']);
@@ -38,7 +40,7 @@ export const oauthProviderTypeEnum = cloudSchema.enum('OAuthProviderType', [
 export const signupMethodEnum = cloudSchema.enum('SignupMethod', ['email', 'oauth']);
 
 // Session enums
-export const sessionTypeEnum = cloudSchema.enum('SessionType', ['ONBOARDING', 'CLOUD', 'COMPANY', 'RESET']);
+export const sessionTypeEnum = cloudSchema.enum('SessionType', ['ONBOARDING', 'CLOUD', 'COMPANY', 'RESET', 'ADMIN']);
 
 // TypeScript type exports for use in DTOs and services
 export type DatabaseType = (typeof databaseTypeEnum.enumValues)[number];
@@ -82,6 +84,8 @@ export const VerificationChannelValues = {
   SMS_OUT: 'SMS_OUT' as const,
   SMS_IN: 'SMS_IN' as const,
   WHATSAPP_IN: 'WHATSAPP_IN' as const,
+  IDENTITY_EMAIL_OUT: 'IDENTITY_EMAIL_OUT' as const,
+  IDENTITY_SMS_OUT: 'IDENTITY_SMS_OUT' as const,
 };
 
 export const MfaMethodValues = {
@@ -107,6 +111,7 @@ export const SessionTypeValues = {
   CLOUD: 'CLOUD' as const,
   COMPANY: 'COMPANY' as const,
   RESET: 'RESET' as const,
+  ADMIN: 'ADMIN' as const,
 };
 
 export const mediaStatusEnum = cloudSchema.enum('MediaStatus', ['pending', 'ready', 'failed', 'deleted']);
@@ -150,4 +155,53 @@ export const DeploymentStatusValues = {
 export const DeploymentTypeValues = {
   shared: 'shared' as const,
   dedicated: 'dedicated' as const,
+};
+
+// Feature permission type — what kind of access a permission grants
+export const featureTypeEnum = cloudSchema.enum('FeatureType', [
+  'VIEW',
+  'CREATE',
+  'EDIT',
+  'DELETE',
+  'EXPORT',
+  'IMPORT',
+  'APPROVE',
+  'MANAGE',
+]);
+export type FeatureType = (typeof featureTypeEnum.enumValues)[number];
+export const FeatureTypeValues = {
+  VIEW: 'VIEW' as const,
+  CREATE: 'CREATE' as const,
+  EDIT: 'EDIT' as const,
+  DELETE: 'DELETE' as const,
+  EXPORT: 'EXPORT' as const,
+  IMPORT: 'IMPORT' as const,
+  APPROVE: 'APPROVE' as const,
+  MANAGE: 'MANAGE' as const,
+};
+
+// Version lifecycle status
+export const versionStatusEnum = cloudSchema.enum('AppVersionStatus', ['ALPHA', 'BETA', 'PROD']);
+export type VersionStatus = (typeof versionStatusEnum.enumValues)[number];
+export const VersionStatusValues = {
+  ALPHA: 'ALPHA' as const,
+  BETA: 'BETA' as const,
+  PROD: 'PROD' as const,
+};
+
+// App microfrontend platform
+export const appPlatformEnum = cloudSchema.enum('AppPlatform', ['WEB', 'MOBILE']);
+export type AppPlatform = (typeof appPlatformEnum.enumValues)[number];
+export const AppPlatformValues = {
+  WEB: 'WEB' as const,
+  MOBILE: 'MOBILE' as const,
+};
+
+// Role scope — how far a role's access extends in the BU tree
+export const roleScopeEnum = cloudSchema.enum('RoleScope', ['GLOBAL', 'SUBTREE', 'SINGLE_BU']);
+export type RoleScope = (typeof roleScopeEnum.enumValues)[number];
+export const RoleScopeValues = {
+  GLOBAL: 'GLOBAL' as const,
+  SUBTREE: 'SUBTREE' as const,
+  SINGLE_BU: 'SINGLE_BU' as const,
 };

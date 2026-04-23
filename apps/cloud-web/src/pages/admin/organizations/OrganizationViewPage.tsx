@@ -5,16 +5,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@vritti/quantum-ui/Car
 import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
-import { Building2, Cloud, Factory, MapPin, Server, Users } from 'lucide-react';
+import { useMutation } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
+import { Button } from '@vritti/quantum-ui/Button';
+import { Building2, Cloud, Factory, MapPin, RefreshCw, Server, Users } from 'lucide-react';
+import { syncOrgFeatures } from '@/services/admin/organizations.service';
 import type { AdminOrganizationMember } from '@/schemas/admin/organizations';
 
 const MEMBERS_TABLE_SLUG = 'organization-members';
 
 export const OrganizationViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('orgSlug');
   const queryClient = useQueryClient();
-  const { data: org, isLoading } = useOrganization(id);
+  const { data: org } = useOrganization(id);
+
+  const syncMutation = useMutation<unknown, AxiosError>({
+    mutationFn: () => syncOrgFeatures(id),
+  });
   const { data: membersResponse, isLoading: membersLoading } = useOrganizationMembers(id);
 
   const { table } = useDataTable({
@@ -28,20 +35,22 @@ export const OrganizationViewPage = () => {
     onStatePush: () => queryClient.invalidateQueries({ queryKey: ORGANIZATION_MEMBERS_QUERY_KEY_FN(id) }),
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!org) return null;
-
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={org.name}
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            startAdornment={<RefreshCw className="size-4" />}
+            onClick={() => syncMutation.mutate()}
+            isLoading={syncMutation.isPending}
+            loadingText="Syncing..."
+          >
+            Sync Features
+          </Button>
+        }
         description={`${org.subdomain}.${org.deploymentUrl.replace(/^https?:\/\//, '')}`}
       />
 
@@ -138,7 +147,6 @@ export const OrganizationViewPage = () => {
           ],
           searchAll: true,
         }}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: ORGANIZATION_MEMBERS_QUERY_KEY_FN(id) })}
         emptyStateConfig={{
           icon: Users,
           title: 'No members found',

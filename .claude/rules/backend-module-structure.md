@@ -128,6 +128,60 @@ A sub-path gets its own folder when it has its own service + repository (complex
 export class AuthModule {}
 ```
 
+## Domain module architecture (cloud-server)
+
+Domain modules live in `src/modules/domain/` and contain **only** services and repositories — NO controllers, NO DTOs.
+
+```
+src/modules/domain/
+├── plan/
+│   ├── services/
+│   │   └── plan.service.ts
+│   └── repositories/
+│       └── plan.repository.ts
+├── tenant/
+│   ├── services/
+│   │   └── tenant.service.ts
+│   └── repositories/
+│       └── tenant.repository.ts
+└── ... (17 total domain modules)
+```
+
+- `@domain/` path alias resolves to `src/modules/domain/*`
+- All domain modules are aggregated into `ServicesModule` which is `@Global()`
+- API layers (`admin-api/`, `cloud-api/`, `select-api/`) are **controllers-only** — they import domain services via `ServicesModule`
+- Zero `forwardRef`, zero duplicate providers
+- No `AdminApiModule` wrapper — individual admin API modules registered directly in AppModule
+
+```
+src/modules/
+├── domain/            # Services + repos (business logic)
+├── admin-api/         # Controllers only (admin endpoints)
+├── cloud-api/         # Controllers only (cloud endpoints)
+├── select-api/        # Controllers only (select/dropdown endpoints)
+├── account/           # Top-level — shared across CLOUD + ADMIN sessions
+├── auth/              # Top-level — authentication (no session prefix)
+└── onboarding/        # Top-level — onboarding flow (no session prefix)
+```
+
+## Top-level modules (shared across session types)
+
+Modules that serve both CLOUD and ADMIN users are registered at the root path, not under `cloud-api/` or `admin-api/`:
+
+```typescript
+// app.module.ts RouterModule
+{ path: '', children: [AuthModule, OnboardingModule, AccountModule] }
+```
+
+The controller uses `@RequireSession` to accept multiple session types:
+```typescript
+@RequireSession(SessionTypeValues.CLOUD, SessionTypeValues.ADMIN)
+@Controller('account')
+export class ProfileController { ... }
+```
+
+Routes: `/account/profile`, `/account/email/*`, `/account/phone/*`
+
 ## Naming
 
 | File type | Pattern | Example |

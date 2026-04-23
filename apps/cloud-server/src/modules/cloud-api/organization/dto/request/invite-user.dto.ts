@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class InviteUserDto {
   @ApiProperty({ description: 'User email address', example: 'user@example.com' })
@@ -11,12 +11,13 @@ export class InviteUserDto {
   @IsNotEmpty()
   fullName: string;
 
-  @ApiPropertyOptional({
-    description: 'User role in nexus',
-    example: 'SUPPORT',
-    enum: ['SUPER_ADMIN', 'ADMIN', 'SUPPORT'],
-  })
+  @ApiPropertyOptional({ description: 'Phone number in E.164 digits', example: '919876543210' })
+  @IsString()
   @IsOptional()
-  @IsEnum(['SUPER_ADMIN', 'ADMIN', 'SUPPORT'])
-  role?: string;
+  phone?: string;
+
+  @ApiPropertyOptional({ description: 'Phone country code (ISO 3166-1 alpha-2)', example: 'IN' })
+  @IsString()
+  @IsOptional()
+  phoneCountry?: string;
 }

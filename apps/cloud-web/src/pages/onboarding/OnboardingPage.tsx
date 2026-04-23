@@ -1,5 +1,5 @@
 import { MultiStepProgressIndicator } from '@components/onboarding/MultiStepProgressIndicator';
-import { useOnboarding } from '@context/onboarding';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 import { useCompleteOnboarding } from '@hooks/onboarding';
 import { scheduleTokenRefresh, setToken } from '@vritti/quantum-ui/axios';
 import { Spinner } from '@vritti/quantum-ui/Spinner';

@@ -43,7 +43,9 @@ export const EditCloudProviderForm: React.FC<EditCloudProviderFormProps> = ({ pr
     <Form
       form={form}
       mutation={updateMutation}
-      showRootError
+     
+      resetOnSuccess={false}
+      onCancel={onCancel}
       transformSubmit={({ sameAsLight, ...data }) => ({
         id: provider.id,
         data: { ...data, logoDarkUrl: sameAsLight ? data.logoUrl : data.logoDarkUrl },
@@ -67,7 +69,7 @@ export const EditCloudProviderForm: React.FC<EditCloudProviderFormProps> = ({ pr
         <Checkbox name="sameAsLight" label="Same as light mode" />
       </div>
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">

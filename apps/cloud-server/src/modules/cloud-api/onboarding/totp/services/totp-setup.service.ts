@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
-import { BackupCodeService } from '../../../mfa/services/backup-code.service';
-import { MfaRepository } from '../../../mfa/repositories/mfa.repository';
-import { TotpService } from '../../../mfa/services/totp.service';
-import { UserService } from '../../../user/services/user.service';
-import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
-import { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
+import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { TotpService } from '@domain/mfa/services/totp.service';
+import { UserService } from '@domain/user/services/user.service';
+import { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
+import { TotpSetupResponseDto } from '../../../../account/security/dto/response/totp-setup-response.dto';
 
 @Injectable()
 export class TotpSetupService {
@@ -23,11 +23,11 @@ export class TotpSetupService {
   async initiateSetup(userId: string): Promise<TotpSetupResponseDto> {
     const user = await this.userService.findById(userId);
 
-    const existing = await this.mfaRepo.findActiveByUserId(userId);
-    if (existing) {
+    const existingTotp = await this.mfaRepo.findActiveByUserIdAndMethod(userId, 'TOTP');
+    if (existingTotp) {
       throw new BadRequestException({
-        label: 'MFA Already Enabled',
-        detail: 'Please disable your current method before setting up a new one.',
+        label: 'TOTP Already Configured',
+        detail: 'Authenticator app is already enabled. Disable it first to set up a new one.',
       });
     }
 

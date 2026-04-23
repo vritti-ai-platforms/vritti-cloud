@@ -1,11 +1,8 @@
-import { Body, Controller, Delete, Get, Logger, Param, Put } from '@nestjs/common';
+import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserId } from '@vritti/api-sdk';
-import { SessionService } from '../../auth/root/services/session.service';
-import { ApiDeleteAccount, ApiFindAllUsers, ApiFindUserById, ApiUpdateProfile } from '../docs/user.docs';
+import { ApiFindAllUsers, ApiFindUserById } from '../docs/user.docs';
 import { UserDto } from '../dto/entity/user.dto';
-import { UpdateUserDto } from '../dto/request/update-user.dto';
-import { UserService } from '../services/user.service';
+import { UserService } from '@domain/user/services/user.service';
 
 @ApiTags('Users')
 @ApiBearerAuth()
@@ -13,10 +10,7 @@ import { UserService } from '../services/user.service';
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
-  constructor(
-    private readonly userService: UserService,
-    private readonly sessionService: SessionService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   // Retrieves all users in the system
   @Get()
@@ -32,30 +26,5 @@ export class UserController {
   async findById(@Param('id') id: string): Promise<UserDto> {
     this.logger.log(`GET /users/${id} - Fetching user by ID`);
     return await this.userService.findById(id);
-  }
-
-  // Updates the authenticated user's profile information
-  @Put('profile')
-  @ApiUpdateProfile()
-  async updateProfile(@UserId() userId: string, @Body() updateUserDto: UpdateUserDto): Promise<UserDto> {
-    this.logger.log(`PUT /users/profile - Updating profile for user: ${userId}`);
-    return await this.userService.update(userId, updateUserDto);
-  }
-
-  // Deactivates the authenticated user's account and invalidates all sessions
-  @Delete('account')
-  @ApiDeleteAccount()
-  async deleteAccount(@UserId() userId: string): Promise<{ message: string }> {
-    this.logger.log(`DELETE /users/account - Deleting account for user: ${userId}`);
-
-    // Soft delete user account (sets accountStatus to INACTIVE)
-    await this.userService.deactivate(userId);
-
-    // Invalidate all sessions for security
-    await this.sessionService.invalidateAllUserSessions(userId);
-
-    this.logger.log(`Account deleted and all sessions invalidated for user: ${userId}`);
-
-    return { message: 'Account successfully deleted' };
   }
 }

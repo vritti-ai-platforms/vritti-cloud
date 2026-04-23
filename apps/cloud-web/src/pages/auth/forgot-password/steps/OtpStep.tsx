@@ -54,7 +54,7 @@ export const OtpStep: React.FC<OtpStepProps> = ({ email, goBack, mutation, resen
         </Typography>
       </div>
 
-      <Form form={form} mutation={mutation} transformSubmit={(data) => data.code} showRootError>
+      <Form form={form} mutation={mutation} transformSubmit={(data) => data.code}>
         <FieldGroup>
           <div className="flex justify-center">
             <OTPField

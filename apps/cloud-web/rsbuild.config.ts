@@ -41,10 +41,29 @@ export default defineConfig({
           const host = (req.headers['host'] ?? '').split(':')[0];
           if (host) proxyReq.setHeader('x-forwarded-host', host);
         },
+        onProxyRes: (proxyRes, req, res) => {
+          // Disable buffering for SSE connections so events stream in real-time
+          if (req.headers.accept === 'text/event-stream') {
+            proxyRes.headers['cache-control'] = 'no-cache';
+            proxyRes.headers['x-accel-buffering'] = 'no';
+            // Flush each chunk immediately
+            proxyRes.on('data', (chunk) => {
+              res.write(chunk);
+            });
+          }
+        },
         pathRewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
   plugins: [pluginReact()],
+  tools: {
+    rspack: {
+      ignoreWarnings: [/Critical dependency: the request of a dependency is an expression/],
+      watchOptions: {
+        ignored: ['**/node_modules/**', '**/dist/**', '**/cloud-server/**'],
+      },
+    },
+  },
   // PostCSS configuration is in postcss.config.mjs
 });

@@ -2,13 +2,13 @@ import { REGIONS_QUERY_KEY, useRegions } from '@hooks/admin/regions';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog, useTheme } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { SelectFilter } from '@vritti/quantum-ui/Select';
 import { CloudProviderFilter } from '@vritti/quantum-ui/selects/cloud-provider';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { CheckCircle2, Eye, Globe, Plus, XCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Region, RegionProvider } from '@/schemas/admin/regions';
@@ -58,7 +58,6 @@ export const RegionsPage = () => {
           <CloudProviderFilter key="cloudProviderId" name="cloudProviderId" />,
           <SelectFilter
             key="isActive"
-            field="isActive"
             name="isActive"
             label="Status"
             options={[
@@ -67,7 +66,6 @@ export const RegionsPage = () => {
             ]}
           />,
         ]}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: REGIONS_QUERY_KEY })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
@@ -88,10 +86,7 @@ export const RegionsPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Region"
         description="Enter the details for the new deployment region."
         content={(close) => <AddRegionForm onSuccess={close} onCancel={close} />}
@@ -176,9 +171,11 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Region, unknown>[] {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <Button variant="ghost" size="icon" className="size-7" onClick={() => onView(row.original)}>
-          <Eye className="size-4" />
-        </Button>
+        <RowActions
+          actions={[
+            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
+          ]}
+        />
       ),
       enableSorting: false,
       enableHiding: false,

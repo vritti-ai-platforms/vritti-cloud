@@ -30,24 +30,15 @@ export const AddCloudProviderForm: React.FC<AddCloudProviderFormProps> = ({ onSu
     if (sameAsLight) form.setValue('logoDarkUrl', logoUrl ?? '');
   }, [sameAsLight, logoUrl, form]);
 
-  const createMutation = useCreateCloudProvider({
-    onSuccess: () => {
-      form.reset();
-      onSuccess();
-    },
-  });
-
-  // Cancel resets the form then notifies the parent
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const createMutation = useCreateCloudProvider({ onSuccess });
 
   return (
     <Form
       form={form}
       mutation={createMutation}
-      showRootError
+     
+      resetOnSuccess
+      onCancel={onCancel}
       transformSubmit={({ sameAsLight, ...data }) => ({
         ...data,
         logoDarkUrl: sameAsLight ? data.logoUrl : data.logoDarkUrl,
@@ -71,7 +62,7 @@ export const AddCloudProviderForm: React.FC<AddCloudProviderFormProps> = ({ onSu
         <Checkbox name="sameAsLight" label="Same as light mode" />
       </div>
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">

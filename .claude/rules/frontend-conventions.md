@@ -159,13 +159,13 @@ async function handleDelete(id: string, name: string) {
 Pass the resource name (and relevant context) into `handleDelete` so the description is specific, not generic.
 
 ## Slug-based Routes — use `buildSlug` + `useSlugParams`
-- For detail page URLs that should show a readable name, use `buildSlug(name, id)` from `@vritti/quantum-ui/utils/slug`
+- For detail page URLs that should show a readable name, use `buildSlug(name, id)` from `@vritti/quantum-ui/slug`
 - The slug format is `name-slug~uuid` — the Breadcrumb auto-humanizes the name part
 - In the detail page, use `useSlugParams()` from `@vritti/quantum-ui/hooks` to extract `{ name, id }`
 
 ```tsx
 // Navigating to detail page
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 navigate(`/regions/${buildSlug(region.name, region.id)}`);
 // → URL: /regions/us-east~bdfc838c-...
 
@@ -195,6 +195,44 @@ Route param must be named `:slug`, not `:id`:
 - NEVER hardcode colors — use design tokens: `text-primary`, `bg-destructive/15`
 - NEVER use pixels — use Tailwind classes: `p-4`, `gap-8`, `pt-16`
 - Available tokens: primary, secondary, muted, accent, destructive, warning, success, foreground, background, card, border
+
+## Dialog Lifecycle — Conditional Mount Pattern
+
+For dialogs that need initialization on open (API calls, form setup), use conditional rendering instead of `isOpen` prop. The dialog mounts fresh each time and unmounts on close — no `useEffect`/`useRef` cleanup needed.
+
+```tsx
+// CORRECT — dialog mounts fresh, runs init on mount, unmounts = cleanup
+{emailDialog.isOpen && (
+  <EmailVerificationDialog onClose={emailDialog.close} currentEmail={email} />
+)}
+
+// WRONG — dialog always mounted, needs useEffect + useRef to manage lifecycle
+<EmailVerificationDialog
+  isOpen={emailDialog.isOpen}
+  onClose={emailDialog.close}
+  currentEmail={email}
+/>
+```
+
+Inside the dialog: `open={true}` (always open when mounted), no `isOpen` prop needed.
+
+## Form — always use mutation prop, never onSubmit for mutations
+
+Always pass `mutation` to `<Form>`. Use `transformSubmit` when form fields don't match the mutation payload. Never use `onSubmit` to call `mutation.mutate()` manually.
+
+```tsx
+// CORRECT — Form handles mutate + loading/error automatically
+<Form form={form} mutation={createMutation} showRootError>
+
+// CORRECT — transformSubmit maps form data to mutation payload
+<Form form={form} mutation={submitMutation} transformSubmit={(data) => ({ channel, target: data.newEmail })} showRootError>
+
+// WRONG — never use onSubmit for mutations
+<Form form={form} onSubmit={(data) => mutation.mutate(data)} showRootError>
+
+// WRONG — never use both mutation and onSubmit
+<Form form={form} mutation={mutation} onSubmit={handleSubmit} showRootError>
+```
 
 ## State Management
 - AuthProvider in web-nexus for authentication state

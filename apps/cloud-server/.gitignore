@@ -4,6 +4,9 @@
 /build
 /.yalc
 
+# GeoIP database
+/data/*.mmdb
+
 # Logs
 logs
 *.log

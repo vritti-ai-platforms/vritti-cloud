@@ -1,4 +1,4 @@
-import type { TableViewState } from '@vritti/quantum-ui/table-filter';
+import type { TableResponse } from '@vritti/quantum-ui/api-response';
 
 export interface AdminOrganization {
   id: string;
@@ -38,16 +38,6 @@ export interface AdminOrganizationDetail extends AdminOrganization {
   cloudProviderCode: string;
 }
 
-export interface OrganizationsResponse {
-  result: AdminOrganization[];
-  count: number;
-  state: TableViewState;
-  activeViewId: string | null;
-}
+export type OrganizationsResponse = TableResponse<AdminOrganization>;
 
-export interface OrganizationMembersResponse {
-  result: AdminOrganizationMember[];
-  count: number;
-  state: TableViewState;
-  activeViewId: string | null;
-}
+export type OrganizationMembersResponse = TableResponse<AdminOrganizationMember>;

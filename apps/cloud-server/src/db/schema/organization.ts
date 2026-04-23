@@ -1,4 +1,4 @@
-import { timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { jsonb, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { deployments } from './deployment';
 import { orgMemberRoleEnum, orgSizeEnum } from './enums';
@@ -23,6 +23,7 @@ export const organizations = cloudSchema.table('organizations', {
   deploymentId: uuid('deployment_id')
     .notNull()
     .references(() => deployments.id, { onDelete: 'restrict' }),
+  buAppAssignments: jsonb('bu_app_assignments').$type<Record<string, string[]>>().notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

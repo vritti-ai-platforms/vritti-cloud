@@ -15,18 +15,29 @@ import {
   EmailModule,
   LoggerModule,
   RootModule,
+  type TokenExpiryString,
 } from '@vritti/api-sdk';
 import { validate } from './config/env.validation';
-import { AdminApiModule } from './modules/admin-api/admin-api.module';
+import { AccountModule } from './modules/account/account.module';
+import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
+import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
+import { AdminEnumModule } from './modules/admin-api/enum/enum.module';
+import { AdminIndustryModule } from './modules/admin-api/industry/industry.module';
+import { AdminOrganizationModule } from './modules/admin-api/organization/organization.module';
+import { AdminPlanModule } from './modules/admin-api/plan/plan.module';
+import { AdminPriceModule } from './modules/admin-api/price/price.module';
+import { AdminRegionModule } from './modules/admin-api/region/region.module';
+import { AdminVersionModule } from './modules/admin-api/version/version.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
 import { CloudDeploymentModule } from './modules/cloud-api/deployment/deployment.module';
 import { IndustryModule } from './modules/cloud-api/industry/industry.module';
 import { MediaModule } from './modules/cloud-api/media/media.module';
 import { OnboardingModule } from './modules/cloud-api/onboarding/onboarding.module';
 import { OrganizationModule } from './modules/cloud-api/organization/organization.module';
-import { RegionModule } from './modules/cloud-api/region/region.module';
-
 import { UserModule } from './modules/cloud-api/user/user.module';
+import { LicenseApiModule } from './modules/license-api/license-api.module';
+import { SelectModule } from './modules/select-api/select.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -35,6 +46,8 @@ import { UserModule } from './modules/cloud-api/user/user.module';
       envFilePath: '.env',
       validate,
     }),
+    // Global services (encryption, SMS, WhatsApp)
+    ServicesModule,
     // Event emitter for SSE real-time updates
     EventEmitterModule.forRoot(),
     // Logger module
@@ -82,8 +95,6 @@ import { UserModule } from './modules/cloud-api/user/user.module';
           // Relations must be passed separately for db.query to work (drizzle-orm v2)
           drizzleRelations: relations,
 
-          // Connection pool configuration
-          connectionCacheTTL: 300000, // 5 minutes
           maxConnections: 10,
         };
         return options;
@@ -91,7 +102,21 @@ import { UserModule } from './modules/cloud-api/user/user.module';
     }),
     // Authentication module (Global guard + JWT)
     // Must be imported after DatabaseModule since VrittiAuthGuard depends on its services
-    AuthConfigModule.forRootAsync(),
+    AuthConfigModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService) => ({
+        tokenExpiry: {
+          access: config.getOrThrow('ACCESS_TOKEN_EXPIRY') as TokenExpiryString,
+          refresh: config.getOrThrow('REFRESH_TOKEN_EXPIRY') as TokenExpiryString,
+        },
+        cookie: {
+          refreshCookieName: config.get('REFRESH_COOKIE_NAME', 'vritti_refresh'),
+          refreshCookieSecure: config.get('NODE_ENV') === 'production',
+          refreshCookieSameSite: 'strict' as const,
+          refreshCookieDomain: config.get('REFRESH_COOKIE_DOMAIN'),
+        },
+      }),
+    }),
     // Email module (global, provides EmailService)
     EmailModule,
     // Root module (health + CSRF controllers)
@@ -101,32 +126,57 @@ import { UserModule } from './modules/cloud-api/user/user.module';
     UserModule,
     OnboardingModule,
     AuthModule,
+    AccountModule,
     MediaModule,
     OrganizationModule,
     IndustryModule,
     DataTableModule.forRoot({ tableViews: schema.tableViews }),
-    RegionModule,
     CloudDeploymentModule,
-    // Admin API module
-    AdminApiModule,
+    // Admin API modules
+    AdminVersionModule,
+    AdminPlanModule,
+    AdminDeploymentModule,
+    AdminRegionModule,
+    AdminCloudProviderModule,
+    AdminIndustryModule,
+    AdminOrganizationModule,
+    AdminPriceModule,
+    AdminEnumModule,
+    // Select API module
+    SelectModule,
+    // License API module
+    LicenseApiModule,
     // Route prefixes
     RouterModule.register([
       {
         path: 'cloud-api',
-        children: [
-          UserModule,
-          OnboardingModule,
-          AuthModule,
-          MediaModule,
-          OrganizationModule,
-          IndustryModule,
-          RegionModule,
-          CloudDeploymentModule,
-        ],
+        children: [UserModule, MediaModule, OrganizationModule, IndustryModule, CloudDeploymentModule],
+      },
+      {
+        path: '',
+        children: [AuthModule, OnboardingModule, AccountModule],
       },
       {
         path: 'admin-api',
-        children: [AdminApiModule],
+        children: [
+          AdminVersionModule,
+          AdminPlanModule,
+          AdminDeploymentModule,
+          AdminRegionModule,
+          AdminCloudProviderModule,
+          AdminIndustryModule,
+          AdminOrganizationModule,
+          AdminPriceModule,
+          AdminEnumModule,
+        ],
+      },
+      {
+        path: 'select-api',
+        children: [SelectModule],
+      },
+      {
+        path: '',
+        children: [LicenseApiModule],
       },
       // Top-level: /table-states and /table-views (no prefix)
       {

@@ -68,3 +68,7 @@ See `.claude/rules/` for detailed pattern documentation:
 - `frontend-file-structure.md` — File/folder organization
 - `comment-style.md` — Comment style rules
 - `export-conventions.md` — Export patterns
+- `apps/cloud-server/.claude/rules/backend-service-responses.md` — create() returns entity DTO, update/delete returns SuccessResponseDto
+- `apps/cloud-web/.claude/rules/frontend-service-responses.md` — No MutationResponse; create returns entity, update/delete returns SuccessResponse
+- `backend-module-structure.md` — Domain module architecture, API layer separation
+- `select-filter-conventions.md` — Select/Filter component conventions for quantum-ui

@@ -1,4 +1,4 @@
-import { useOnboarding } from '@context/onboarding';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSetPassword } from '@hooks/onboarding';
 import type { SetPasswordFormData } from '@schemas/auth';
@@ -46,7 +46,7 @@ export const SetPasswordStep: React.FC = () => {
         </Typography>
       </div>
 
-      <Form form={form} mutation={setPasswordMutation} transformSubmit={(data) => data.password} showRootError>
+      <Form form={form} mutation={setPasswordMutation} transformSubmit={(data) => data.password}>
         <FieldGroup>
           <PasswordField
             name="password"

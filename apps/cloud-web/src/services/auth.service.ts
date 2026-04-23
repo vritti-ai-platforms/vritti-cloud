@@ -55,7 +55,7 @@ export interface LoginResponse {
 // Registers a new user account
 export function signup(data: SignupDto): Promise<SignupResponse> {
   return axios
-    .post<SignupResponse>('cloud-api/auth/signup', data, {
+    .post<SignupResponse>('auth/signup', data, {
       public: true,
       showSuccessToast: false,
     })
@@ -65,7 +65,7 @@ export function signup(data: SignupDto): Promise<SignupResponse> {
 // Authenticates a user with email and password
 export function login(data: LoginDto): Promise<LoginResponse> {
   return axios
-    .post<LoginResponse>('cloud-api/auth/login', data, {
+    .post<LoginResponse>('auth/login', data, {
       public: true,
       showSuccessToast: false,
     })
@@ -76,7 +76,7 @@ export function login(data: LoginDto): Promise<LoginResponse> {
 export function verifyTotp(sessionId: string, code: string): Promise<LoginResponse> {
   return axios
     .post<LoginResponse>(
-      'cloud-api/auth/mfa/verify-totp',
+      'auth/mfa/verify-totp',
       { sessionId, code },
       {
         public: true,
@@ -90,7 +90,7 @@ export function verifyTotp(sessionId: string, code: string): Promise<LoginRespon
 export function sendSmsCode(sessionId: string): Promise<void> {
   return axios
     .post(
-      'cloud-api/auth/mfa/sms/send',
+      'auth/mfa/sms/send',
       { sessionId },
       {
         public: true,
@@ -105,7 +105,7 @@ export function sendSmsCode(sessionId: string): Promise<void> {
 export function verifySms(sessionId: string, code: string): Promise<LoginResponse> {
   return axios
     .post<LoginResponse>(
-      'cloud-api/auth/mfa/sms/verify',
+      'auth/mfa/sms/verify',
       { sessionId, code },
       {
         public: true,
@@ -118,7 +118,7 @@ export function verifySms(sessionId: string, code: string): Promise<LoginRespons
 // Starts passkey verification for MFA authentication
 export function startPasskeyVerification(sessionId: string): Promise<PasskeyAuthOptionsResponse> {
   return axios
-    .post<PasskeyAuthOptionsResponse>('cloud-api/auth/mfa/passkey/start', { sessionId }, { public: true })
+    .post<PasskeyAuthOptionsResponse>('auth/mfa/passkey/start', { sessionId }, { public: true })
     .then((r) => r.data);
 }
 
@@ -126,7 +126,7 @@ export function startPasskeyVerification(sessionId: string): Promise<PasskeyAuth
 export function verifyPasskeyMfa(sessionId: string, credential: AuthenticationResponseJSON): Promise<LoginResponse> {
   return axios
     .post<LoginResponse>(
-      'cloud-api/auth/mfa/passkey/verify',
+      'auth/mfa/passkey/verify',
       { sessionId, credential },
       {
         public: true,
@@ -170,14 +170,14 @@ export interface AuthenticationResponseJSON {
 // Starts passkey authentication flow
 export function startPasskeyLogin(email?: string): Promise<PasskeyAuthOptionsResponse> {
   return axios
-    .post<PasskeyAuthOptionsResponse>('cloud-api/auth/passkey/start', { email }, { public: true })
+    .post<PasskeyAuthOptionsResponse>('auth/passkey/start', { email }, { public: true })
     .then((r) => r.data);
 }
 
 // Verifies passkey authentication and logs in the user
 export function verifyPasskeyLogin(sessionId: string, credential: AuthenticationResponseJSON): Promise<LoginResponse> {
   return axios
-    .post<LoginResponse>('cloud-api/auth/passkey/verify', { sessionId, credential }, { public: true })
+    .post<LoginResponse>('auth/passkey/verify', { sessionId, credential }, { public: true })
     .then((r) => r.data);
 }
 
@@ -205,7 +205,7 @@ export interface ResetPasswordResponse {
 export function forgotPassword(email: string): Promise<ForgotPasswordResponse> {
   return axios
     .post<ForgotPasswordResponse>(
-      'cloud-api/auth/forgot-password',
+      'auth/forgot-password',
       { email },
       {
         public: true,
@@ -219,7 +219,7 @@ export function forgotPassword(email: string): Promise<ForgotPasswordResponse> {
 export function resendResetOtp(): Promise<SuccessResponse> {
   return axios
     .post<SuccessResponse>(
-      'cloud-api/auth/resend-reset-otp',
+      'auth/resend-reset-otp',
       {},
       {
         showSuccessToast: false,
@@ -232,7 +232,7 @@ export function resendResetOtp(): Promise<SuccessResponse> {
 export function verifyResetOtp(otp: string): Promise<SuccessResponse> {
   return axios
     .post<SuccessResponse>(
-      'cloud-api/auth/verify-reset-otp',
+      'auth/verify-reset-otp',
       { otp },
       {
         showSuccessToast: false,
@@ -245,7 +245,7 @@ export function verifyResetOtp(otp: string): Promise<SuccessResponse> {
 export function resetPassword(newPassword: string): Promise<ResetPasswordResponse> {
   return axios
     .post<ResetPasswordResponse>(
-      'cloud-api/auth/reset-password',
+      'auth/reset-password',
       { newPassword },
       {
         showSuccessToast: false,

@@ -1,10 +1,11 @@
 import { useDeployments } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
+import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Eye, Plus, Server } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Deployment } from '@/schemas/admin/deployments';
@@ -15,6 +16,7 @@ const TABLE_SLUG = 'deployments';
 export const DeploymentsPage = () => {
   const navigate = useNavigate();
   const { data: response, isLoading } = useDeployments();
+  const addDialog = useDialog();
   const { table } = useDataTable({
     columns: getColumns({
       onView: (d) => navigate(`/deployments/${buildSlug(d.name, d.id)}`),
@@ -36,16 +38,9 @@ export const DeploymentsPage = () => {
         isLoading={isLoading}
         toolbarActions={{
           actions: (
-            <Dialog
-              title="Add Deployment"
-              description="Configure a new deployment environment."
-              anchor={(open) => (
-                <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={open}>
-                  Add Deployment
-                </Button>
-              )}
-              content={(close) => <AddDeploymentForm onSuccess={close} onCancel={close} />}
-            />
+            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+              Add Deployment
+            </Button>
           ),
         }}
         emptyStateConfig={{
@@ -53,19 +48,19 @@ export const DeploymentsPage = () => {
           title: 'No deployments found',
           description: 'Add your first deployment to get started.',
           action: (
-            <Dialog
-              title="Add Deployment"
-              description="Configure a new deployment environment."
-              anchor={(open) => (
-                <Button size="sm" onClick={open}>
-                  <Plus className="size-4" />
-                  Add Deployment
-                </Button>
-              )}
-              content={(close) => <AddDeploymentForm onSuccess={close} onCancel={close} />}
-            />
+            <Button size="sm" onClick={addDialog.open}>
+              <Plus className="size-4" />
+              Add Deployment
+            </Button>
           ),
         }}
+      />
+
+      <Dialog
+        handle={addDialog}
+        title="Add Deployment"
+        description="Configure a new deployment environment."
+        content={(close) => <AddDeploymentForm onSuccess={close} onCancel={close} />}
       />
     </div>
   );
@@ -140,11 +135,11 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Deployment, unknown>[]
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <div className="flex items-center justify-end gap-1">
-          <Button variant="ghost" size="icon" className="size-7" onClick={() => onView(row.original)}>
-            <Eye className="size-4" />
-          </Button>
-        </div>
+        <RowActions
+          actions={[
+            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
+          ]}
+        />
       ),
       enableSorting: false,
       enableHiding: false,

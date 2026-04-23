@@ -1,18 +1,19 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
-import type { CreateRegionData } from '@/schemas/admin/regions';
+import type { CreateRegionData, Region } from '@/schemas/admin/regions';
 import { createRegion } from '../../../services/admin/regions.service';
 import { REGIONS_QUERY_KEY } from './useRegions';
 
 type UseCreateRegionOptions = Omit<
-  UseMutationOptions<{ success: boolean; message: string }, AxiosError, CreateRegionData>,
+  UseMutationOptions<CreateResponse<Region>, AxiosError, CreateRegionData>,
   'mutationFn'
 >;
 
 // Creates a new region and invalidates the regions list
 export function useCreateRegion(options?: UseCreateRegionOptions) {
   const queryClient = useQueryClient();
-  return useMutation<{ success: boolean; message: string }, AxiosError, CreateRegionData>({
+  return useMutation<CreateResponse<Region>, AxiosError, CreateRegionData>({
     ...options,
     mutationFn: createRegion,
     onSuccess: (result, ...args) => {

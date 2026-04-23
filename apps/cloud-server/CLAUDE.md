@@ -305,18 +305,35 @@ pnpm start:prod
 
 ## Module Structure
 
-### Feature Modules
+### Domain Modules (services + repos, NO controllers/DTOs)
 ```
-src/
-├── modules/
-│   ├── auth/           # Authentication (login, signup, OAuth)
-│   ├── mfa/            # Multi-factor authentication
-│   ├── onboarding/     # User onboarding flow
-│   ├── tenants/        # Tenant management
-│   ├── users/          # User management
-│   ├── health/         # Health check
-│   └── csrf/           # CSRF token management
+src/modules/domain/       # 17 domain modules, @domain/ path alias
+├── plan/
+├── tenant/
+├── user/
+├── session/
+├── feature/
+├── app/
+├── role/
+├── ...                   # (17 total)
 ```
+
+### API Layers (controllers only)
+```
+src/modules/
+├── auth/              # /auth/* (top-level, NOT /cloud-api/auth/*)
+├── onboarding/        # /onboarding/* (top-level, NOT /cloud-api/onboarding/*)
+├── cloud-api/         # /cloud-api/* endpoints
+├── admin-api/         # /admin-api/* endpoints (individual modules, no wrapper)
+├── select-api/        # /select-api/* endpoints (dropdown/select data)
+```
+
+- `ServicesModule` is `@Global()` — domain services available everywhere
+- Zero `forwardRef`, zero duplicate providers
+- Auth and onboarding routes are top-level (`/auth/*`, `/onboarding/*`)
+- Session types: ONBOARDING, CLOUD, COMPANY, RESET, ADMIN
+- `@RequireSession(SessionTypeValues.ADMIN)` replaces old `@Admin()`, `@Onboarding()`, `@Reset()`
+- Default session type: `['CLOUD']` (configured via `configureApiSdk`)
 
 ### Shared Services
 - **@vritti/api-sdk** - Shared module library
@@ -324,7 +341,7 @@ src/
   - `HttpExceptionFilter` - RFC 9457 error format
   - `HttpLoggerInterceptor` - Request/response logging
   - `CorrelationIdMiddleware` - Request tracking
-  - JWT guards and decorators
+  - JWT guards, `@RequireSession()` decorator, session type validation
   - Cookie management utilities
 
 ### Database Patterns
@@ -343,8 +360,8 @@ Controllers should be clean — business logic only. All `@ApiOperation`, `@ApiB
 
 **Structure:**
 ```
-modules/cloud-api/
-├── auth/
+modules/
+├── auth/                              # /auth/* (top-level routes)
 │   ├── controllers/
 │   │   └── auth.controller.ts          ← clean logic, uses @ApiSignup()
 │   ├── docs/
@@ -352,15 +369,18 @@ modules/cloud-api/
 │   └── mfa-verification/
 │       ├── mfa-verification.controller.ts
 │       └── mfa-verification.docs.ts    ← co-located (submodule)
-├── onboarding/
+├── onboarding/                        # /onboarding/* (top-level routes)
 │   ├── controllers/
 │   └── docs/
-├── user/
-│   ├── controllers/
-│   └── docs/
-└── tenant/
-    ├── tenant.controller.ts
-    └── docs/
+├── cloud-api/
+│   ├── user/
+│   │   ├── controllers/
+│   │   └── docs/
+│   └── tenant/
+│       ├── controllers/
+│       └── docs/
+├── admin-api/                         # /admin-api/* (individual modules)
+└── select-api/                        # /select-api/* (dropdown data)
 ```
 
 **docs file pattern** (`auth.docs.ts`):
@@ -449,6 +469,10 @@ export class UsersService {
   }
 }
 ```
+
+### Service Response Pattern
+
+See `apps/cloud-server/.claude/rules/backend-service-responses.md` -- `create()` returns entity DTO, `update()`/`delete()` returns `SuccessResponseDto`.
 
 ### Error Handling
 
