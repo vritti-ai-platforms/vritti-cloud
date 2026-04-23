@@ -1,13 +1,6 @@
 import { z } from 'zod';
 
-export type BusinessUnitType =
-  | 'ORGANIZATION'
-  | 'REGION'
-  | 'FRANCHISEE'
-  | 'BRANCH'
-  | 'TEAM'
-  | 'DEPARTMENT'
-  | 'CUSTOM';
+export type BusinessUnitType = 'ORGANIZATION' | 'REGION' | 'FRANCHISEE' | 'BRANCH' | 'TEAM' | 'DEPARTMENT' | 'CUSTOM';
 
 export interface BusinessUnit {
   id: string;
@@ -41,17 +34,16 @@ export const createBusinessUnitSchema = z.object({
     .min(1, 'Code is required')
     .max(100, 'Code must be 100 characters or less')
     .regex(/^[A-Z0-9_-]+$/, 'Only uppercase letters, numbers, underscores, and hyphens'),
-  type: z.enum(
-    ['ORGANIZATION', 'REGION', 'FRANCHISEE', 'BRANCH', 'TEAM', 'DEPARTMENT', 'CUSTOM'],
-    { message: 'Please select a type' },
-  ),
+  type: z.enum(['ORGANIZATION', 'REGION', 'FRANCHISEE', 'BRANCH', 'TEAM', 'DEPARTMENT', 'CUSTOM'], {
+    message: 'Please select a type',
+  }),
   parentId: z.string().uuid().optional().or(z.literal('')),
   description: z.string().max(500, 'Description must be 500 characters or less').optional(),
   address: z.string().max(500).optional(),
   city: z.string().max(100).optional(),
   state: z.string().max(100).optional(),
   country: z.string().max(100).optional(),
-  timezone: z.string().max(50).optional(),
+  timezone: z.string().trim().min(1, 'Timezone is required').max(50),
   phone: z.string().max(20).optional(),
 });
 

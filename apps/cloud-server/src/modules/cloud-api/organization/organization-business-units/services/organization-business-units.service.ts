@@ -1,8 +1,8 @@
+import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
+import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { ForbiddenException, NotFoundException, ServiceUnavailableException } from '@vritti/api-sdk';
 import type { Deployment, Organization } from '@/db/schema';
-import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
-import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
 import { CoreConfigService } from '@/modules/core-server/services/core-config.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
@@ -72,11 +72,7 @@ export class OrganizationBusinessUnitsService {
     const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      const result = await this.coreBusinessUnitService.getBusinessUnit(
-        deployment.url,
-        deployment.webhookSecret,
-        buId,
-      );
+      const result = await this.coreBusinessUnitService.getBusinessUnit(deployment.url, deployment.webhookSecret, buId);
       this.logger.log(`Fetched business unit ${buId} for org ${orgId}`);
       return result;
     } catch (error: any) {
@@ -152,12 +148,10 @@ export class OrganizationBusinessUnitsService {
     const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      return await this.coreBusinessUnitService.assignRole(
-        deployment.url,
-        deployment.webhookSecret,
-        data.userId,
-        { orgRoleId: data.orgRoleId, businessUnitId: buId },
-      );
+      return await this.coreBusinessUnitService.assignRole(deployment.url, deployment.webhookSecret, data.userId, {
+        orgRoleId: data.orgRoleId,
+        businessUnitId: buId,
+      });
     } catch (error: any) {
       this.logger.error(`Failed to assign role at BU ${buId}: ${error}`);
       throw new ServiceUnavailableException({
@@ -202,12 +196,9 @@ export class OrganizationBusinessUnitsService {
     await this.organizationRepository.update(orgId, { buAppAssignments: assignments });
 
     try {
-      const result = await this.coreBusinessUnitService.updateBuApps(
-        deployment.url,
-        deployment.webhookSecret,
-        buId,
-        { appCodes },
-      );
+      const result = await this.coreBusinessUnitService.updateBuApps(deployment.url, deployment.webhookSecret, buId, {
+        appCodes,
+      });
       // Invalidate config cache so core-server fetches fresh catalogs
       await this.coreConfigService.invalidateOrg(deployment.url, deployment.webhookSecret, org.orgIdentifier);
       this.logger.log(`Updated apps for BU ${buId} in org ${orgId}: [${appCodes.join(', ')}]`);
@@ -236,15 +227,14 @@ export class OrganizationBusinessUnitsService {
     }
   }
 
-  // Extracts location fields into metadata for core-server
+  // Extracts location fields into metadata for core-server while keeping timezone as a top-level BU field
   private packMetadata(data: Record<string, unknown>): Record<string, unknown> {
-    const { address, city, state, country, timezone, phone, ...rest } = data;
+    const { address, city, state, country, phone, ...rest } = data;
     const metadata: Record<string, unknown> = {};
     if (address) metadata.address = address;
     if (city) metadata.city = city;
     if (state) metadata.state = state;
     if (country) metadata.country = country;
-    if (timezone) metadata.timezone = timezone;
     if (phone) metadata.phone = phone;
 
     return Object.keys(metadata).length > 0 ? { ...rest, metadata } : rest;

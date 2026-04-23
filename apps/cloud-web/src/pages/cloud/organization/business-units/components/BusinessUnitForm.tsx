@@ -2,14 +2,12 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
+import { TimezoneSelector } from '@vritti/quantum-ui/selects/timezone';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import type { BusinessUnit } from '@/schemas/cloud/org-business-units';
-import {
-  type CreateBusinessUnitData,
-  createBusinessUnitSchema,
-} from '@/schemas/cloud/org-business-units';
+import { type CreateBusinessUnitData, createBusinessUnitSchema } from '@/schemas/cloud/org-business-units';
 
 interface BusinessUnitFormProps {
   unit?: BusinessUnit;
@@ -98,7 +96,7 @@ export const BusinessUnitForm: React.FC<BusinessUnitFormProps> = ({
           <TextField name="city" label="City" placeholder="City" />
           <TextField name="state" label="State / Province" placeholder="State or province" />
           <TextField name="country" label="Country" placeholder="Country" />
-          <TextField name="timezone" label="Timezone" placeholder="e.g. America/New_York" />
+          <TimezoneSelector name="timezone" label="Timezone" placeholder="Select timezone" />
           <TextField name="phone" label="Phone" placeholder="e.g. +1 555 123 4567" />
         </div>
       </div>
