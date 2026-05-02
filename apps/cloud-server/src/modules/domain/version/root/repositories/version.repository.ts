@@ -101,6 +101,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       code: a.code,
       name: a.name,
       icon: a.icon,
+      sortOrder: a.sortOrder,
       features: (appFeaturesByAppId[a.id] ?? []).map((af) => featureById[af.featureId]?.code).filter(Boolean),
     }));
 

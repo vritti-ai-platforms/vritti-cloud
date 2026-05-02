@@ -11,6 +11,10 @@ export interface FeatureCatalogEntry {
   remoteEntry: string;
   exposedModule: string;
   routePrefix: string;
+  appCode: string;
+  appName: string;
+  appIcon: string | null;
+  appSortOrder: number;
 }
 
 @Injectable()
@@ -47,7 +51,13 @@ export class LicenseConfigService {
     }
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const apps = (snapshot.apps ?? []) as Array<{ code: string; features: string[] }>;
+    const apps = (snapshot.apps ?? []) as Array<{
+      code: string;
+      name: string;
+      icon: string | null;
+      sortOrder: number;
+      features: string[];
+    }>;
     const features = (snapshot.features ?? []) as Array<Record<string, unknown>>;
 
     // Build per-BU feature catalogs
@@ -62,24 +72,38 @@ export class LicenseConfigService {
 
   // Extracts feature catalog entries for the given app codes from snapshot data
   private buildCatalogForApps(
-    apps: Array<{ code: string; features: string[] }>,
+    apps: Array<{ code: string; name: string; icon: string | null; sortOrder: number; features: string[] }>,
     features: Array<Record<string, unknown>>,
     appCodes: string[],
   ): FeatureCatalogEntry[] {
     if (appCodes.length === 0) return [];
 
+    // Build map: featureCode -> owning app metadata (from selected apps only)
     const selectedAppCodes = new Set(appCodes);
-    const featureCodes = new Set<string>();
+    const featureCodeToApp = new Map<string, { code: string; name: string; icon: string | null; sortOrder: number }>();
     for (const app of apps) {
       if (selectedAppCodes.has(app.code)) {
-        for (const code of app.features) featureCodes.add(code);
+        for (const code of app.features) {
+          if (!featureCodeToApp.has(code)) {
+            featureCodeToApp.set(code, {
+              code: app.code,
+              name: app.name,
+              icon: app.icon ?? null,
+              sortOrder: app.sortOrder ?? 0,
+            });
+          }
+        }
       }
     }
 
     return features
-      .filter((f) => featureCodes.has(f.code as string) && f.microfrontends && (f.microfrontends as Record<string, unknown>).WEB)
+      .filter(
+        (f) =>
+          featureCodeToApp.has(f.code as string) && f.microfrontends && (f.microfrontends as Record<string, unknown>).WEB,
+      )
       .map((f) => {
         const webMf = (f.microfrontends as Record<string, Record<string, string>>).WEB;
+        const ownerApp = featureCodeToApp.get(f.code as string)!;
         return {
           code: f.code,
           name: f.name,
@@ -87,6 +111,10 @@ export class LicenseConfigService {
           remoteEntry: webMf.remoteEntry,
           exposedModule: webMf.exposedModule,
           routePrefix: webMf.routePrefix,
+          appCode: ownerApp.code,
+          appName: ownerApp.name,
+          appIcon: ownerApp.icon,
+          appSortOrder: ownerApp.sortOrder,
         };
       });
   }
