@@ -1,5 +1,4 @@
 import { defineConfig } from 'drizzle-kit';
-import 'dotenv/config';
 
 const dbUrl = process.env.PRIMARY_DB_DATABASE_DIRECT_URL;
 if (!dbUrl) {
@@ -13,6 +12,10 @@ export default defineConfig({
   schemaFilter: ['cloud'],
   dbCredentials: {
     url: dbUrl,
+  },
+  migrations: {
+    table: '__drizzle_migrations_cloud',
+    schema: 'cloud',
   },
   verbose: true,
   strict: true,

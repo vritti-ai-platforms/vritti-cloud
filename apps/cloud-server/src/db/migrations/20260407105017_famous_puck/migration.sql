@@ -1,4 +1,4 @@
-CREATE SCHEMA "cloud";
+CREATE SCHEMA IF NOT EXISTS "cloud";
 --> statement-breakpoint
 CREATE TYPE "cloud"."AccountStatus" AS ENUM('PENDING_VERIFICATION', 'ACTIVE', 'INACTIVE');--> statement-breakpoint
 CREATE TYPE "cloud"."AppPlatform" AS ENUM('WEB', 'MOBILE');--> statement-breakpoint
