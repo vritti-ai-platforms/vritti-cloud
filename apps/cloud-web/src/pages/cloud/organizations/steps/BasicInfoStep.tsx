@@ -1,7 +1,7 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import { FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
-import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
+import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { UploadFile } from '@vritti/quantum-ui/UploadFile';
 import { ArrowRight } from 'lucide-react';
@@ -30,7 +30,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ form, onContinue }
           endAdornment={<span className="text-muted-foreground text-sm pr-3">.vrittiai.com</span>}
           description="This will be your organization's subdomain URL"
         />
-        <IndustrySelector name="businessId" onOptionSelect={(opt) => form.setValue('businessName', opt?.label ?? '')} />
+        <BusinessSelector name="businessId" onOptionSelect={(opt) => form.setValue('businessName', opt?.label ?? '')} />
         <Select
           name="size"
           label="Organization Size"

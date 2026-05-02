@@ -4,7 +4,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { AppSelector } from '@vritti/quantum-ui/selects/app';
-import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
+import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -48,7 +48,7 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ onSucc
         ]}
       />
       <AppSelector name="appIds" multiple label="Apps" placeholder="Select apps this role covers" />
-      <IndustrySelector name="businessId" label="Business" placeholder="Select business" />
+      <BusinessSelector name="businessId" label="Business" placeholder="Select business" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

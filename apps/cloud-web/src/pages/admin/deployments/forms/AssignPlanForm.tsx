@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useAssignDeploymentPlan } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
+import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { PlanSelector } from '@vritti/quantum-ui/selects/plan';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -34,7 +34,7 @@ export const AssignPlanForm: React.FC<AssignPlanFormProps> = ({ deploymentId, on
   return (
     <Form form={form} mutation={assignMutation} transformSubmit={(data) => ({ id: deploymentId, data })}>
       <PlanSelector name="planId" label="Plan" placeholder="Select plan" />
-      <IndustrySelector name="businessId" label="Business" placeholder="Select business" />
+      <BusinessSelector name="businessId" label="Business" placeholder="Select business" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={handleCancel}>
           Cancel

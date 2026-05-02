@@ -4,7 +4,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
-import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
+import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
 import { CurrencySelector } from '@vritti/quantum-ui/selects/currency';
 import type React from 'react';
@@ -34,7 +34,7 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
 
   return (
     <Form form={form} mutation={createMutation} resetOnSuccess={false} onCancel={onCancel}>
-      <IndustrySelector name="businessId" label="Business" placeholder="Select business" />
+      <BusinessSelector name="businessId" label="Business" placeholder="Select business" />
       <RegionSelector
         name="regionId"
         label="Region"

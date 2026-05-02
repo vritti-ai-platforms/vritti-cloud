@@ -4,7 +4,7 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { SelectFilter } from '@vritti/quantum-ui/Select';
-import { IndustryFilter } from '@vritti/quantum-ui/selects/industry';
+import { BusinessFilter } from '@vritti/quantum-ui/selects/business';
 import { PlanFilter } from '@vritti/quantum-ui/selects/plan';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
@@ -48,7 +48,7 @@ export const OrganizationsPage = () => {
         }}
         filters={[
           <PlanFilter key="planId" name="planId" />,
-          <IndustryFilter key="businessId" name="businessId" />,
+          <BusinessFilter key="businessId" name="businessId" />,
           <SelectFilter
             key="size"
             name="size"
