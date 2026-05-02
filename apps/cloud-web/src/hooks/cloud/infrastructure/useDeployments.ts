@@ -6,7 +6,7 @@ import { getDeployments } from '@/services/cloud/infrastructure.service';
 interface DeploymentParams {
   regionId: string;
   cloudProviderId: string;
-  industryId: string;
+  businessId: string;
 }
 
 // Fetches active deployments for org creation based on selected infra
@@ -14,9 +14,9 @@ export function useDeployments(
   params: Partial<DeploymentParams>,
   options?: Omit<UseQueryOptions<DeploymentOption[], AxiosError>, 'queryKey' | 'queryFn'>,
 ) {
-  const enabled = !!(params.regionId && params.cloudProviderId && params.industryId);
+  const enabled = !!(params.regionId && params.cloudProviderId && params.businessId);
   return useQuery<DeploymentOption[], AxiosError>({
-    queryKey: ['cloud', 'deployments', params.regionId, params.cloudProviderId, params.industryId],
+    queryKey: ['cloud', 'deployments', params.regionId, params.cloudProviderId, params.businessId],
     queryFn: () => getDeployments(params as DeploymentParams),
     enabled,
     ...options,

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { asc, count, countDistinct, eq, inArray, sql, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { App } from '@/db/schema';
-import { appFeatures, apps, industries, planApps, roleTemplateApps } from '@/db/schema';
+import { appFeatures, apps, businesses, planApps, roleTemplateApps } from '@/db/schema';
 
 @Injectable()
 export class AppRepository extends PrimaryBaseRepository<typeof apps> {
@@ -104,12 +104,12 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     return Number(result[0]?.count ?? 0);
   }
 
-  // Counts how many industries have this app code in their recommendedApps JSONB array
-  async countIndustryReferences(appCode: string): Promise<number> {
+  // Counts how many businesses have this app code in their recommendedApps JSONB array
+  async countBusinessReferences(appCode: string): Promise<number> {
     const result = await this.db
       .select({ count: count() })
-      .from(industries)
-      .where(sql`${industries.recommendedApps} @> ${JSON.stringify([appCode])}::jsonb`);
+      .from(businesses)
+      .where(sql`${businesses.recommendedApps} @> ${JSON.stringify([appCode])}::jsonb`);
     return Number(result[0]?.count ?? 0);
   }
 

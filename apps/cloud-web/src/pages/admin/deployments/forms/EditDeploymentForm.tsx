@@ -5,6 +5,7 @@ import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { VersionSelector } from '@vritti/quantum-ui/selects/version';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -27,6 +28,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       cloudProviderId: deployment.cloudProviderId,
       type: deployment.type,
       status: deployment.status,
+      version: deployment.version ?? '',
     },
   });
 
@@ -43,6 +45,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
         onOptionSelect={() => form.setValue('cloudProviderId', '')}
       />
       <CloudProviderSelector name="cloudProviderId" label="Cloud Provider" placeholder="Select provider" />
+      <VersionSelector name="version" label="Version" placeholder="Select version" />
       <Select
         name="type"
         label="Deployment Type"

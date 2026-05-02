@@ -72,13 +72,13 @@ export class RoleTemplateService {
 
   // Returns paginated role template options for the select component
   findForSelect(
-    query: SelectOptionsQueryDto & { industryId?: string; versionId?: string },
+    query: SelectOptionsQueryDto & { businessId?: string; versionId?: string },
   ): Promise<SelectQueryResult> {
     this.logger.log(
       `Fetched role template select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
     );
     const where: Record<string, string> = {};
-    if (query.industryId) where.industryId = query.industryId;
+    if (query.businessId) where.businessId = query.businessId;
     if (query.versionId) where.versionId = query.versionId;
     return this.roleTemplateRepository.findForSelect({
       value: query.valueKey || 'id',
@@ -95,10 +95,10 @@ export class RoleTemplateService {
     });
   }
 
-  // Finds a role template by ID with industry name, permission count, and app count
+  // Finds a role template by ID with business name, permission count, and app count
   async findById(
     id: string,
-  ): Promise<RoleTemplateDto & { industryName: string; permissionCount: number; appCount: number }> {
+  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number; appCount: number }> {
     const roleTemplate = await this.roleTemplateRepository.findById(id);
     if (!roleTemplate) {
       throw new NotFoundException('Role template not found.');
@@ -110,7 +110,7 @@ export class RoleTemplateService {
     this.logger.log(`Fetched role template: ${id}`);
     return {
       ...RoleTemplateDto.from(roleTemplate),
-      industryName: roleTemplate.industryName,
+      businessName: roleTemplate.businessName,
       permissionCount,
       appCount: appIds.length,
     };

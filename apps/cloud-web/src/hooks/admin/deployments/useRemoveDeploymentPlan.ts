@@ -8,7 +8,7 @@ import { DEPLOYMENT_PLAN_ASSIGNMENTS_QUERY_KEY } from './useDeploymentPlanAssign
 type Vars = { id: string; data: AssignPlanData };
 type UseRemoveOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, Vars>, 'mutationFn'>;
 
-// Removes a plan+industry assignment from a deployment
+// Removes a plan+business assignment from a deployment
 export function useRemoveDeploymentPlan(options?: UseRemoveOptions) {
   const queryClient = useQueryClient();
   return useMutation<SuccessResponse, AxiosError, Vars>({

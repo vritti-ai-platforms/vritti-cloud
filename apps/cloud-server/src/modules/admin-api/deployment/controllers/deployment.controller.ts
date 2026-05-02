@@ -70,7 +70,7 @@ export class DeploymentController {
     return this.deploymentService.getPlanAssignments(id);
   }
 
-  // Assigns a plan+industry to a deployment
+  // Assigns a plan+business to a deployment
   @Post(':id/plans')
   @HttpCode(HttpStatus.CREATED)
   @ApiAssignDeploymentPlan()
@@ -79,7 +79,7 @@ export class DeploymentController {
     return this.deploymentService.assignPlan(id, dto);
   }
 
-  // Removes a plan+industry assignment from a deployment
+  // Removes a plan+business assignment from a deployment
   @Delete(':id/plans')
   @HttpCode(HttpStatus.OK)
   @ApiRemoveDeploymentPlan()

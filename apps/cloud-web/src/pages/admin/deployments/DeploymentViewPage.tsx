@@ -16,7 +16,7 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { DeploymentPlanAssignment, DeploymentPlanAssignmentIndustry } from '@/schemas/admin/deployments';
+import type { DeploymentPlanAssignment, DeploymentPlanAssignmentBusiness } from '@/schemas/admin/deployments';
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
 
 export const DeploymentViewPage = () => {
@@ -36,13 +36,13 @@ export const DeploymentViewPage = () => {
     onSuccess: () => navigate('/deployments'),
   });
 
-  const handleChipToggle = (planId: string, industryId: string) => {
+  const handleChipToggle = (planId: string, businessId: string) => {
     const plan = planAssignments.find((p) => p.planId === planId);
-    const isAssigned = plan?.industries.find((i) => i.industryId === industryId)?.isAssigned ?? false;
+    const isAssigned = plan?.businesses.find((b) => b.businessId === businessId)?.isAssigned ?? false;
     if (isAssigned) {
-      removeMutation.mutate({ id: id ?? '', data: { planId, industryId } });
+      removeMutation.mutate({ id: id ?? '', data: { planId, businessId } });
     } else {
-      assignMutation.mutate({ id: id ?? '', data: { planId, industryId } });
+      assignMutation.mutate({ id: id ?? '', data: { planId, businessId } });
     }
   };
 
@@ -134,7 +134,7 @@ export const DeploymentViewPage = () => {
 
 interface PlanCardProps {
   plan: DeploymentPlanAssignment;
-  onToggle: (planId: string, industryId: string) => void;
+  onToggle: (planId: string, businessId: string) => void;
 }
 
 const PlanCard = ({ plan, onToggle }: PlanCardProps) => (
@@ -147,31 +147,31 @@ const PlanCard = ({ plan, onToggle }: PlanCardProps) => (
         </Badge>
       </div>
       <p className="text-xs text-muted-foreground">
-        {plan.industries.length} industr{plan.industries.length !== 1 ? 'ies' : 'y'}
+        {plan.businesses.length} business{plan.businesses.length !== 1 ? 'es' : ''}
       </p>
     </CardHeader>
     <CardContent className="pt-0">
       <div className="flex flex-wrap gap-2">
-        {plan.industries.map((industry: DeploymentPlanAssignmentIndustry) => (
+        {plan.businesses.map((business: DeploymentPlanAssignmentBusiness) => (
           <Button
-            key={industry.industryId}
+            key={business.businessId}
             variant="ghost"
             size="sm"
-            onClick={() => onToggle(plan.planId, industry.industryId)}
+            onClick={() => onToggle(plan.planId, business.businessId)}
             className={cn(
               'h-auto rounded-full border px-3 py-1.5 text-sm transition-colors',
-              industry.isAssigned
+              business.isAssigned
                 ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
                 : 'border-border bg-muted/30 text-foreground hover:bg-muted hover:border-primary/40',
             )}
           >
-            <span>{industry.industryName}</span>
-            {industry.price ? (
-              <span className={cn('font-semibold', industry.isAssigned ? 'text-primary-foreground/80' : 'text-primary')}>
-                · {industry.currency} {industry.price}
+            <span>{business.businessName}</span>
+            {business.price ? (
+              <span className={cn('font-semibold', business.isAssigned ? 'text-primary-foreground/80' : 'text-primary')}>
+                · {business.currency} {business.price}
               </span>
             ) : (
-              <span className={industry.isAssigned ? 'text-primary-foreground/60' : 'text-muted-foreground'}>· No price</span>
+              <span className={business.isAssigned ? 'text-primary-foreground/60' : 'text-muted-foreground'}>· No price</span>
             )}
           </Button>
         ))}

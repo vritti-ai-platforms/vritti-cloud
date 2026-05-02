@@ -6,7 +6,7 @@ import { getDeploymentPlanAssignments } from '../../../services/admin/deployment
 export const DEPLOYMENT_PLAN_ASSIGNMENTS_QUERY_KEY = (id: string) =>
   ['admin', 'deployments', id, 'plan-assignments'] as const;
 
-// Fetches all plan+industry combos with isAssigned status for a deployment
+// Fetches all plan+business combos with isAssigned status for a deployment
 export function useDeploymentPlanAssignments(deploymentId: string) {
   return useQuery<DeploymentPlanAssignment[], AxiosError>({
     queryKey: DEPLOYMENT_PLAN_ASSIGNMENTS_QUERY_KEY(deploymentId),

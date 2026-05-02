@@ -116,20 +116,20 @@ export class AppService {
     return { success: true, message: `App "${existing.name}" updated successfully.` };
   }
 
-  // Deletes an app by ID; rejects if referenced by any plan_apps or industry_apps
+  // Deletes an app by ID; rejects if referenced by any plan_apps or business_apps
   async delete(id: string): Promise<SuccessResponseDto> {
     const existing = await this.appRepository.findById(id);
     if (!existing) {
       throw new NotFoundException('App not found.');
     }
-    const [planRefs, industryRefs, roleRefs] = await Promise.all([
+    const [planRefs, businessRefs, roleRefs] = await Promise.all([
       this.appRepository.countPlanReferences(existing.code),
-      this.appRepository.countIndustryReferences(existing.code),
+      this.appRepository.countBusinessReferences(existing.code),
       this.appRepository.countRoleTemplateReferences(existing.id),
     ]);
     const parts: string[] = [];
     if (planRefs > 0) parts.push(`${planRefs} plan${planRefs > 1 ? 's' : ''}`);
-    if (industryRefs > 0) parts.push(`${industryRefs} industr${industryRefs > 1 ? 'ies' : 'y'}`);
+    if (businessRefs > 0) parts.push(`${businessRefs} business${businessRefs > 1 ? 'es' : ''}`);
     if (roleRefs > 0) parts.push(`${roleRefs} role template${roleRefs > 1 ? 's' : ''}`);
     if (parts.length > 0) {
       throw new ConflictException({

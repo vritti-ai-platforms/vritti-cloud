@@ -8,7 +8,7 @@ import { DEPLOYMENT_PLAN_ASSIGNMENTS_QUERY_KEY } from './useDeploymentPlanAssign
 type Vars = { id: string; data: AssignPlanData };
 type UseAssignOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, Vars>, 'mutationFn'>;
 
-// Assigns a plan+industry to a deployment and invalidates its plan assignments
+// Assigns a plan+business to a deployment and invalidates its plan assignments
 export function useAssignDeploymentPlan(options?: UseAssignOptions) {
   const queryClient = useQueryClient();
   return useMutation<SuccessResponse, AxiosError, Vars>({

@@ -54,7 +54,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           { label: 'Name', value: form.getValues('name') },
           { label: 'URL', value: `${form.getValues('subdomain')}.vrittiai.com` },
           { label: 'Size', value: `${form.getValues('size')} employees` },
-          { label: 'Industry', value: form.getValues('industryName') ?? '—' },
+          { label: 'Business', value: form.getValues('businessName') ?? '—' },
         ].map(({ label, value }) => (
           <div key={label} className="flex justify-between text-sm">
             <span className="text-muted-foreground">{label}</span>
@@ -126,7 +126,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           formData.append('size', data.size);
           if (data.planId != null) formData.append('planId', data.planId);
           if (data.deploymentId != null) formData.append('deploymentId', data.deploymentId);
-          if (data.industryId != null) formData.append('industryId', data.industryId);
+          if (data.businessId != null) formData.append('businessId', data.businessId);
           if (data.logo) formData.append('file', data.logo);
           return formData;
         }}

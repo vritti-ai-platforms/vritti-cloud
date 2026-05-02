@@ -15,18 +15,18 @@ export interface PlanOption {
   currency: string | null;
 }
 
-// Fetches active deployments filtered by region, provider, and industry
+// Fetches active deployments filtered by region, provider, and business
 export function getDeployments(params: {
   regionId: string;
   cloudProviderId: string;
-  industryId: string;
+  businessId: string;
 }): Promise<DeploymentOption[]> {
   return axios.get<DeploymentOption[]>('cloud-api/deployments', { params }).then((r) => r.data);
 }
 
-// Fetches plans for a deployment+industry combo with pricing
-export function getDeploymentPlans(deploymentId: string, industryId: string): Promise<PlanOption[]> {
+// Fetches plans for a deployment+business combo with pricing
+export function getDeploymentPlans(deploymentId: string, businessId: string): Promise<PlanOption[]> {
   return axios
-    .get<PlanOption[]>(`cloud-api/deployments/${deploymentId}/plans`, { params: { industryId } })
+    .get<PlanOption[]>(`cloud-api/deployments/${deploymentId}/plans`, { params: { businessId } })
     .then((r) => r.data);
 }

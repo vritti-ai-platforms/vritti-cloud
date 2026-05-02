@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."deployments" ALTER COLUMN "version" SET NOT NULL;

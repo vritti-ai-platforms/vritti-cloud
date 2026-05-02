@@ -38,7 +38,7 @@ export class AppDto {
   @ApiProperty({ example: 2 })
   planCount: number;
 
-  @ApiProperty({ example: true, description: 'False when the app is referenced by plans, industries, or role templates' })
+  @ApiProperty({ example: true, description: 'False when the app is referenced by plans, businesses, or role templates' })
   canDelete: boolean;
 
   // Maps an App entity to an AppDto with counts

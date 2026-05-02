@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { asc, count, eq, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { CloudProvider, Deployment, Industry, Organization, Plan, Region } from '@/db/schema';
-import { deployments, industries, organizations, plans } from '@/db/schema';
+import type { Business, CloudProvider, Deployment, Organization, Plan, Region } from '@/db/schema';
+import { businesses, deployments, organizations, plans } from '@/db/schema';
 
 export type OrganizationRow = {
   id: string;
@@ -14,7 +14,7 @@ export type OrganizationRow = {
   planCode: string;
   deploymentName: string;
   deploymentUrl: string;
-  industryName: string;
+  businessName: string;
   memberCount: number;
   createdAt: Date;
   updatedAt: Date | null;
@@ -23,7 +23,7 @@ export type OrganizationRow = {
 export type OrganizationDetail = Organization & {
   plan: Plan;
   deployment: Deployment & { region: Region; cloudProvider: CloudProvider };
-  industry: Industry;
+  business: Business;
 };
 
 @Injectable()
@@ -32,7 +32,7 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
     super(database, organizations);
   }
 
-  // Returns paginated organizations with plan/deployment/industry names and member count
+  // Returns paginated organizations with plan/deployment/business names and member count
   async findAllWithCounts(options: {
     where?: SQL;
     orderBy?: SQL[];
@@ -57,7 +57,7 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
           planCode: plans.code,
           deploymentName: deployments.name,
           deploymentUrl: deployments.url,
-          industryName: industries.name,
+          businessName: businesses.name,
           memberCount: sql<number>`(SELECT count(*) FROM cloud.organization_members WHERE organization_id = ${organizations.id})`,
           createdAt: organizations.createdAt,
           updatedAt: organizations.updatedAt,
@@ -65,7 +65,7 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
         .from(organizations)
         .innerJoin(plans, eq(plans.id, organizations.planId))
         .innerJoin(deployments, eq(deployments.id, organizations.deploymentId))
-        .innerJoin(industries, eq(industries.id, organizations.industryId))
+        .innerJoin(businesses, eq(businesses.id, organizations.businessId))
         .where(where)
         .orderBy(...(orderBy && orderBy.length > 0 ? orderBy : [asc(organizations.name)]))
         .limit(limit)
@@ -81,7 +81,7 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
       with: {
         plan: true,
         deployment: { with: { region: true, cloudProvider: true } },
-        industry: true,
+        business: true,
       },
     }) as Promise<OrganizationDetail | undefined>;
   }

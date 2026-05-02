@@ -34,7 +34,7 @@ export const AssignPlanForm: React.FC<AssignPlanFormProps> = ({ deploymentId, on
   return (
     <Form form={form} mutation={assignMutation} transformSubmit={(data) => ({ id: deploymentId, data })}>
       <PlanSelector name="planId" label="Plan" placeholder="Select plan" />
-      <IndustrySelector name="industryId" label="Industry" placeholder="Select industry" />
+      <IndustrySelector name="businessId" label="Business" placeholder="Select business" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={handleCancel}>
           Cancel

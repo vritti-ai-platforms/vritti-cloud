@@ -14,7 +14,7 @@ const navGroups: SidebarNavGroup[] = [
   {
     label: 'Configuration',
     items: [
-      { title: 'Industries', icon: Building2, path: '/industries' },
+      { title: 'Businesses', icon: Building2, path: '/businesses' },
       { title: 'Regions', icon: MapPin, path: '/regions' },
       { title: 'Cloud Providers', icon: Cloud, path: '/cloud-providers' },
       { title: 'Plans', icon: CreditCard, path: '/plans' },

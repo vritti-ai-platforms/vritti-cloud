@@ -48,7 +48,7 @@ export const OrganizationsPage = () => {
         }}
         filters={[
           <PlanFilter key="planId" name="planId" />,
-          <IndustryFilter key="industryId" name="industryId" />,
+          <IndustryFilter key="businessId" name="businessId" />,
           <SelectFilter
             key="size"
             name="size"
@@ -99,8 +99,8 @@ function getColumns({ onView }: ColumnActions): ColumnDef<AdminOrganization, unk
       header: 'Plan',
     },
     {
-      accessorKey: 'industryName',
-      header: 'Industry',
+      accessorKey: 'businessName',
+      header: 'Business',
     },
     {
       accessorKey: 'size',

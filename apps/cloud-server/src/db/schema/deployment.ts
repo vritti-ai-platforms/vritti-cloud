@@ -16,7 +16,7 @@ export const deployments = cloudSchema.table('deployments', {
   cloudProviderId: uuid('cloud_provider_id')
     .notNull()
     .references(() => cloudProviders.id, { onDelete: 'restrict' }),
-  version: varchar('version', { length: 50 }),
+  version: varchar('version', { length: 50 }).notNull(),
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
   type: deploymentTypeEnum('type').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

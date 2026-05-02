@@ -10,7 +10,7 @@ export interface AdminOrganization {
   planCode: string;
   deploymentName: string;
   deploymentUrl: string;
-  industryName: string;
+  businessName: string;
   memberCount: number;
   createdAt: string;
   updatedAt: string | null;
@@ -31,7 +31,7 @@ export interface AdminOrganizationDetail extends AdminOrganization {
   planId: string;
   deploymentId: string;
   deploymentType: string;
-  industryId: string;
+  businessId: string;
   regionName: string;
   regionCode: string;
   cloudProviderName: string;

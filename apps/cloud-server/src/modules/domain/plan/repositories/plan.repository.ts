@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { asc, count, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { Plan } from '@/db/schema';
-import { deploymentIndustryPlans, organizations, plans, prices } from '@/db/schema';
+import { deploymentBusinessPlans, organizations, plans, prices } from '@/db/schema';
 
 export type PlanRow = Plan & { priceCount: number };
 
@@ -26,9 +26,9 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
   async getReferenceCountsWithoutPrices(planId: string): Promise<{ deploymentCount: number; orgCount: number }> {
     const [deploymentRows, orgRows] = await Promise.all([
       this.db
-        .select({ n: count(deploymentIndustryPlans.planId) })
-        .from(deploymentIndustryPlans)
-        .where(eq(deploymentIndustryPlans.planId, planId)),
+        .select({ n: count(deploymentBusinessPlans.planId) })
+        .from(deploymentBusinessPlans)
+        .where(eq(deploymentBusinessPlans.planId, planId)),
       this.db.select({ n: count(organizations.id) }).from(organizations).where(eq(organizations.planId, planId)),
     ]);
     return {

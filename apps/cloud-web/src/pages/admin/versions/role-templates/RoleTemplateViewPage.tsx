@@ -93,8 +93,8 @@ export const RoleTemplateViewPage = () => {
               <Factory className="size-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Industry</p>
-              <p className="text-lg font-semibold">{role.industryName}</p>
+              <p className="text-sm text-muted-foreground">Business</p>
+              <p className="text-lg font-semibold">{role.businessName}</p>
             </div>
           </CardContent>
         </Card>

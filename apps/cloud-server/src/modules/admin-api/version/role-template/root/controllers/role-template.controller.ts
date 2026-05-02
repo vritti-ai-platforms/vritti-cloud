@@ -44,7 +44,7 @@ export class RoleTemplateController {
   // Returns a single role template by ID with counts
   @Get(':id')
   @ApiGetRoleTemplateById()
-  findById(@Param('id') id: string): Promise<RoleTemplateDto & { industryName: string; permissionCount: number; appCount: number }> {
+  findById(@Param('id') id: string): Promise<RoleTemplateDto & { businessName: string; permissionCount: number; appCount: number }> {
     this.logger.log(`GET /admin-api/role-templates/${id}`);
     return this.roleTemplateService.findById(id);
   }

@@ -8,7 +8,7 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { type Column, and, sql } from '@vritti/api-sdk/drizzle-orm';
-import { deployments, industries, organizations, plans } from '@/db/schema';
+import { businesses, deployments, organizations, plans } from '@/db/schema';
 import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
@@ -26,10 +26,10 @@ export class OrganizationService {
     subdomain: { column: organizations.subdomain, type: 'string' },
     size: { column: organizations.size, type: 'string' },
     planName: { column: plans.name, type: 'string' },
-    industryName: { column: industries.name, type: 'string' },
+    businessName: { column: businesses.name, type: 'string' },
     deploymentName: { column: deployments.name, type: 'string' },
     planId: { column: organizations.planId, type: 'string' },
-    industryId: { column: organizations.industryId, type: 'string' },
+    businessId: { column: organizations.businessId, type: 'string' },
     memberCount: {
       column: sql<number>`(SELECT count(*) FROM cloud.organization_members WHERE organization_id = ${organizations.id})` as unknown as Column,
       type: 'number',

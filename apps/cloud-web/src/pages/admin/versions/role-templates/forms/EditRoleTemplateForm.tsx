@@ -26,7 +26,7 @@ export const EditRoleTemplateForm: React.FC<EditRoleTemplateFormProps> = ({ role
       name: role.name,
       description: role.description ?? '',
       scope: role.scope,
-      industryId: role.industryId,
+      businessId: role.businessId,
     },
   });
 
@@ -53,7 +53,7 @@ export const EditRoleTemplateForm: React.FC<EditRoleTemplateFormProps> = ({ role
           { value: 'SINGLE_BU', label: 'Single Business Unit' },
         ]}
       />
-      <IndustrySelector name="industryId" label="Industry" placeholder="Select industry" />
+      <IndustrySelector name="businessId" label="Business" placeholder="Select business" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

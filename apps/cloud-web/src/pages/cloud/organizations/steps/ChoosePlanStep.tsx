@@ -32,9 +32,9 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
   onContinue,
 }) => {
   const deploymentId = form.watch('deploymentId') ?? '';
-  const industryId = form.watch('industryId') ?? '';
+  const businessId = form.watch('businessId') ?? '';
 
-  const { data: plans = [], isLoading } = useDeploymentPlans(deploymentId, industryId);
+  const { data: plans = [], isLoading } = useDeploymentPlans(deploymentId, businessId);
 
   return (
     <Form form={form} onSubmit={onContinue} resetOnSuccess={false}>
@@ -47,7 +47,7 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
         <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
           <CreditCard className="size-10 text-muted-foreground" />
           <Typography variant="body1" intent="muted">
-            No plans available for this deployment and industry combination.
+            No plans available for this deployment and business combination.
           </Typography>
           <Button type="button" variant="outline" onClick={onBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />

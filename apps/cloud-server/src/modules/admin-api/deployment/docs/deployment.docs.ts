@@ -78,7 +78,7 @@ export function ApiDeleteDeployment() {
 
 export function ApiRemoveDeploymentPlan() {
   return applyDecorators(
-    ApiOperation({ summary: 'Remove a plan and industry assignment from a deployment' }),
+    ApiOperation({ summary: 'Remove a plan and business assignment from a deployment' }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiBody({ type: AssignDeploymentPlanDto }),
     ApiResponse({ status: 200, description: 'Assignment removed successfully.' }),
@@ -102,7 +102,7 @@ export function ApiGetDeploymentPlanAssignments() {
 
 export function ApiAssignDeploymentPlan() {
   return applyDecorators(
-    ApiOperation({ summary: 'Assign a plan and industry to a deployment' }),
+    ApiOperation({ summary: 'Assign a plan and business to a deployment' }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiBody({ type: AssignDeploymentPlanDto }),
     ApiResponse({ status: 201, description: 'Assignment created successfully.', type: SuccessResponseDto }),

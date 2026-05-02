@@ -1,8 +1,8 @@
+import { VersionService } from '@domain/version/root/services/version.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { VersionService } from '@domain/version/root/services/version.service';
 
 @ApiTags('Select')
 @ApiBearerAuth()

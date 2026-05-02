@@ -38,7 +38,7 @@ export function ApiCreateOrganization() {
             example: '0-10',
           },
           plan: { type: 'string', enum: ['free', 'pro', 'enterprise'], example: 'free' },
-          industryId: { type: 'integer', example: 1 },
+          businessId: { type: 'integer', example: 1 },
           file: { type: 'string', format: 'binary', description: 'Optional logo file' },
         },
       },

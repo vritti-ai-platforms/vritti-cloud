@@ -6,7 +6,7 @@ export class AssignDeploymentPlanDto {
   @IsUUID()
   planId: string;
 
-  @ApiProperty({ description: 'Industry UUID', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiProperty({ description: 'Business UUID', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
-  industryId: string;
+  businessId: string;
 }

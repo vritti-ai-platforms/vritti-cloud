@@ -99,9 +99,9 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Role, unknown>[] {
       ),
     },
     {
-      accessorKey: 'industryName',
-      header: 'Industry',
-      cell: ({ row }) => <span className="text-sm">{row.original.industryName ?? 'All'}</span>,
+      accessorKey: 'businessName',
+      header: 'Business',
+      cell: ({ row }) => <span className="text-sm">{row.original.businessName ?? 'All'}</span>,
     },
     {
       accessorKey: 'permissionCount',

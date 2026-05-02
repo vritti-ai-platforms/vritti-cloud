@@ -38,7 +38,7 @@ export class PriceRepository extends PrimaryBaseRepository<typeof prices> {
         .select({
           id: prices.id,
           planId: prices.planId,
-          industryId: prices.industryId,
+          businessId: prices.businessId,
           regionId: prices.regionId,
           region: {
             name: regions.name,
@@ -65,9 +65,9 @@ export class PriceRepository extends PrimaryBaseRepository<typeof prices> {
     return { rows: rows as PriceWithRelations[], total: Number(countResult) };
   }
 
-  // Finds a price matching the exact plan + industry + region + provider combination
-  async findByComposite(planId: string, industryId: string, regionId: string, providerId: string) {
-    return this.model.findFirst({ where: { planId, industryId, regionId, providerId } });
+  // Finds a price matching the exact plan + business + region + provider combination
+  async findByComposite(planId: string, businessId: string, regionId: string, providerId: string) {
+    return this.model.findFirst({ where: { planId, businessId, regionId, providerId } });
   }
 
   // Returns price, region, and provider counts for a given plan

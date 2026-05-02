@@ -30,7 +30,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ form, onContinue }
           endAdornment={<span className="text-muted-foreground text-sm pr-3">.vrittiai.com</span>}
           description="This will be your organization's subdomain URL"
         />
-        <IndustrySelector name="industryId" onOptionSelect={(opt) => form.setValue('industryName', opt?.label ?? '')} />
+        <IndustrySelector name="businessId" onOptionSelect={(opt) => form.setValue('businessName', opt?.label ?? '')} />
         <Select
           name="size"
           label="Organization Size"

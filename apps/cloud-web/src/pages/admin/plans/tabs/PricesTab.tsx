@@ -104,14 +104,14 @@ export const PricesTab = () => {
         }}
         emptyStateConfig={{
           title: 'No prices configured',
-          description: 'Add a price for a specific industry, region, and cloud provider combination.',
+          description: 'Add a price for a specific business, region, and cloud provider combination.',
         }}
       />
 
       <Dialog
         handle={addPriceDialog}
         title="Add Price"
-        description="Set a price for a specific industry, region, and cloud provider combination."
+        description="Set a price for a specific business, region, and cloud provider combination."
         content={(close) => <AddPriceForm planId={planId ?? ''} onSuccess={close} onCancel={close} />}
       />
     </div>

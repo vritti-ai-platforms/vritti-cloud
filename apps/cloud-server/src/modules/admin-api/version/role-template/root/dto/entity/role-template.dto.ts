@@ -15,7 +15,7 @@ export class RoleTemplateDto {
   scope: RoleScope;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  industryId: string;
+  businessId: string;
 
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
@@ -30,7 +30,7 @@ export class RoleTemplateDto {
     dto.name = roleTemplate.name;
     dto.description = roleTemplate.description;
     dto.scope = roleTemplate.scope;
-    dto.industryId = roleTemplate.industryId;
+    dto.businessId = roleTemplate.businessId;
     dto.createdAt = roleTemplate.createdAt;
     dto.updatedAt = roleTemplate.updatedAt;
     return dto;

@@ -5,9 +5,9 @@ export * from './cloud-schema';
 // Export all enums
 export * from './enums';
 // Export all tables
+export * from './business';
 export * from './deployment';
-export * from './deployment-industry-plan';
-export * from './industry';
+export * from './deployment-business-plan';
 export * from './organization';
 export * from './plan';
 export * from './price';

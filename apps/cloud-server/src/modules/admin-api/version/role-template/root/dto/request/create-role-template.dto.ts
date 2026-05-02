@@ -22,9 +22,9 @@ export class CreateRoleTemplateDto {
   @IsEnum(RoleScopeValues)
   scope: RoleScope;
 
-  @ApiProperty({ description: 'Industry this role template belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiProperty({ description: 'Business this role template belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
-  industryId: string;
+  businessId: string;
 
   @ApiProperty({ description: 'App IDs this role template covers', type: [String] })
   @IsArray()

@@ -31,10 +31,10 @@ export class CreateOrganizationDto {
   @IsUUID()
   planId: string;
 
-  @ApiProperty({ description: 'Industry ID for the organization', example: '550e8400-e29b-41d4-a716-446655440001' })
+  @ApiProperty({ description: 'Business ID for the organization', example: '550e8400-e29b-41d4-a716-446655440001' })
   @IsNotEmpty()
   @IsUUID()
-  industryId: string;
+  businessId: string;
 
   @ApiProperty({ description: 'Deployment ID for the organization', example: '550e8400-e29b-41d4-a716-446655440002' })
   @IsNotEmpty()

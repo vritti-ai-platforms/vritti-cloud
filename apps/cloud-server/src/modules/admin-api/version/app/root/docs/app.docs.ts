@@ -72,7 +72,7 @@ export function ApiDeleteApp() {
     ApiResponse({ status: 200, description: 'App deleted successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'App not found.' }),
-    ApiResponse({ status: 409, description: 'App is referenced by plans or industries.' }),
+    ApiResponse({ status: 409, description: 'App is referenced by plans or businesses.' }),
   );
 }
 

@@ -10,14 +10,14 @@ export class DeploymentFilterDto {
   @IsUUID()
   cloudProviderId: string;
 
-  @ApiProperty({ description: 'Industry UUID to filter deployments', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiProperty({ description: 'Business UUID to filter deployments', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
-  industryId: string;
+  businessId: string;
 }
 
 export class DeploymentPlanQueryDto {
-  @ApiPropertyOptional({ description: 'Industry UUID to filter plans', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiPropertyOptional({ description: 'Business UUID to filter plans', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsOptional()
   @IsUUID()
-  industryId?: string;
+  businessId?: string;
 }

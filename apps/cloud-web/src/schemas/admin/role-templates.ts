@@ -8,8 +8,8 @@ export interface Role {
   name: string;
   description: string | null;
   scope: RoleScope;
-  industryId: string;
-  industryName: string;
+  businessId: string;
+  businessName: string;
   permissionCount: number;
   createdAt: string;
   updatedAt: string | null;
@@ -55,7 +55,7 @@ export const createRoleTemplateSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
   scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU'], { message: 'Please select a scope' }),
-  industryId: z.string().uuid('Please select an industry'),
+  businessId: z.string().uuid('Please select a business'),
   appIds: z.array(z.string().uuid()).min(1, 'Select at least one app'),
   versionId: z.string().uuid('App version is required'),
 });
@@ -64,7 +64,7 @@ export const updateRoleTemplateSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255).optional(),
   description: z.string().optional(),
   scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU']).optional(),
-  industryId: z.string().uuid('Please select an industry').optional(),
+  businessId: z.string().uuid('Please select a business').optional(),
 });
 
 export const setPermissionsSchema = z.object({

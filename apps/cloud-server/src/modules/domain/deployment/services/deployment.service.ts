@@ -7,7 +7,7 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
-import { deploymentIndustryPlans } from '@/db/schema';
+import { deploymentBusinessPlans } from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
 import type { DeploymentPlanAssignmentDto } from '@/modules/admin-api/deployment/dto/entity/deployment-plan-assignment.dto';
 import type { AssignDeploymentPlanDto } from '@/modules/admin-api/deployment/dto/request/assign-deployment-plan.dto';
@@ -22,7 +22,7 @@ import type {
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 import { DeploymentRepository } from '../repositories/deployment.repository';
-import { DeploymentIndustryPlanRepository } from '../repositories/deployment-industry-plan.repository';
+import { DeploymentBusinessPlanRepository } from '../repositories/deployment-business-plan.repository';
 
 @Injectable()
 export class DeploymentService {
@@ -30,7 +30,7 @@ export class DeploymentService {
 
   constructor(
     private readonly deploymentRepository: DeploymentRepository,
-    private readonly deploymentIndustryPlanRepository: DeploymentIndustryPlanRepository,
+    private readonly deploymentBusinessPlanRepository: DeploymentBusinessPlanRepository,
   ) {}
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
@@ -117,52 +117,52 @@ export class DeploymentService {
     return { success: true, message: `Deployment "${existing.name}" deleted successfully.` };
   }
 
-  // Assigns a plan+industry combination to a deployment; throws NotFoundException if deployment missing
+  // Assigns a plan+business combination to a deployment; throws NotFoundException if deployment missing
   async assignPlan(deploymentId: string, dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
     const deployment = await this.deploymentRepository.findById(deploymentId);
     if (!deployment) throw new NotFoundException('Deployment not found.');
-    await this.deploymentIndustryPlanRepository.create({
+    await this.deploymentBusinessPlanRepository.create({
       deploymentId,
       planId: dto.planId,
-      industryId: dto.industryId,
+      businessId: dto.businessId,
     });
-    this.logger.log(`Assigned plan ${dto.planId} + industry ${dto.industryId} to deployment ${deploymentId}`);
+    this.logger.log(`Assigned plan ${dto.planId} + business ${dto.businessId} to deployment ${deploymentId}`);
     return { success: true, message: `Plan assigned to "${deployment.name}" successfully.` };
   }
 
-  // Removes a plan+industry assignment from a deployment; throws NotFoundException if deployment missing
+  // Removes a plan+business assignment from a deployment; throws NotFoundException if deployment missing
   async removePlan(deploymentId: string, dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
     const deployment = await this.deploymentRepository.findById(deploymentId);
     if (!deployment) throw new NotFoundException('Deployment not found.');
-    await this.deploymentIndustryPlanRepository.deleteMany(
+    await this.deploymentBusinessPlanRepository.deleteMany(
       and(
-        eq(deploymentIndustryPlans.deploymentId, deploymentId),
-        eq(deploymentIndustryPlans.planId, dto.planId),
-        eq(deploymentIndustryPlans.industryId, dto.industryId),
+        eq(deploymentBusinessPlans.deploymentId, deploymentId),
+        eq(deploymentBusinessPlans.planId, dto.planId),
+        eq(deploymentBusinessPlans.businessId, dto.businessId),
       ) as SQL,
     );
-    this.logger.log(`Removed plan ${dto.planId} + industry ${dto.industryId} from deployment ${deploymentId}`);
+    this.logger.log(`Removed plan ${dto.planId} + business ${dto.businessId} from deployment ${deploymentId}`);
     return { success: true, message: `Plan removed from "${deployment.name}" successfully.` };
   }
 
   // Returns all available plans with prices and assignment status for the deployment
   getPlanAssignments(deploymentId: string): Promise<DeploymentPlanAssignmentDto[]> {
     this.logger.log(`Fetched plan assignments for deployment: ${deploymentId}`);
-    return this.deploymentIndustryPlanRepository.findPlanAssignmentsForDeployment(deploymentId);
+    return this.deploymentBusinessPlanRepository.findPlanAssignmentsForDeployment(deploymentId);
   }
 
-  // Returns active deployments for the given region, provider, and industry combo
+  // Returns active deployments for the given region, provider, and business combo
   findActive(query: DeploymentFilterDto): Promise<DeploymentOptionDto[]> {
     this.logger.log(
-      `Fetched active deployments (region: ${query.regionId}, provider: ${query.cloudProviderId}, industry: ${query.industryId})`,
+      `Fetched active deployments (region: ${query.regionId}, provider: ${query.cloudProviderId}, business: ${query.businessId})`,
     );
-    return this.deploymentRepository.findActive(query.regionId, query.cloudProviderId, query.industryId);
+    return this.deploymentRepository.findActive(query.regionId, query.cloudProviderId, query.businessId);
   }
 
-  // Returns plans available on a deployment for the given industry, with price included
+  // Returns plans available on a deployment for the given business, with price included
   findPlansForDeployment(deploymentId: string, query: DeploymentPlanQueryDto): Promise<PlanOptionDto[]> {
-    if (!query.industryId) return Promise.resolve([]);
-    this.logger.log(`Fetched plans for deployment: ${deploymentId} (industry: ${query.industryId})`);
-    return this.deploymentRepository.findPlansForDeployment(deploymentId, query.industryId);
+    if (!query.businessId) return Promise.resolve([]);
+    this.logger.log(`Fetched plans for deployment: ${deploymentId} (business: ${query.businessId})`);
+    return this.deploymentRepository.findPlansForDeployment(deploymentId, query.businessId);
   }
 }

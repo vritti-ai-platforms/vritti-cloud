@@ -34,7 +34,7 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
 
   return (
     <Form form={form} mutation={createMutation} resetOnSuccess={false} onCancel={onCancel}>
-      <IndustrySelector name="industryId" label="Industry" placeholder="Select industry" />
+      <IndustrySelector name="businessId" label="Business" placeholder="Select business" />
       <RegionSelector
         name="regionId"
         label="Region"

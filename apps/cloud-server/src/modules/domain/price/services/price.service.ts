@@ -33,18 +33,18 @@ export class PriceService {
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
-  // Creates a new price, rejecting duplicate plan+industry+region+provider combinations
+  // Creates a new price, rejecting duplicate plan+business+region+provider combinations
   async create(dto: CreatePriceDto): Promise<CreateResponseDto<PriceDetailDto>> {
     const existing = await this.priceRepository.findByComposite(
       dto.planId,
-      dto.industryId,
+      dto.businessId,
       dto.regionId,
       dto.providerId,
     );
     if (existing) {
       throw new ConflictException({
         label: 'Price Already Exists',
-        detail: 'A price for this plan, industry, region, and provider combination already exists.',
+        detail: 'A price for this plan, business, region, and provider combination already exists.',
       });
     }
     const price = await this.priceRepository.create(dto);

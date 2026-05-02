@@ -34,7 +34,7 @@ export function ApiFindRoleTemplatesSelect() {
     ApiQuery({ name: 'search', required: false }),
     ApiQuery({ name: 'limit', required: false, type: Number }),
     ApiQuery({ name: 'offset', required: false, type: Number }),
-    ApiQuery({ name: 'industryId', required: false, description: 'Filter role templates by industry UUID' }),
+    ApiQuery({ name: 'businessId', required: false, description: 'Filter role templates by business UUID' }),
     ApiResponse({ status: 200, description: 'Role template options retrieved.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );

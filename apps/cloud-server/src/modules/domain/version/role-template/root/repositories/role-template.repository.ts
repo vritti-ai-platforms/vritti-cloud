@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { asc, eq, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { RoleTemplate } from '@/db/schema';
-import { industries, roleTemplateFeaturePermissions, roleTemplates } from '@/db/schema';
+import { businesses, roleTemplateFeaturePermissions, roleTemplates } from '@/db/schema';
 
 @Injectable()
 export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTemplates> {
@@ -10,8 +10,8 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
     super(database, roleTemplates);
   }
 
-  // Finds a role template by its unique identifier, joining industry name
-  async findById(id: string): Promise<(RoleTemplate & { industryName: string }) | undefined> {
+  // Finds a role template by its unique identifier, joining business name
+  async findById(id: string): Promise<(RoleTemplate & { businessName: string }) | undefined> {
     const result = await this.db
       .select({
         id: roleTemplates.id,
@@ -19,13 +19,13 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
         name: roleTemplates.name,
         description: roleTemplates.description,
         scope: roleTemplates.scope,
-        industryId: roleTemplates.industryId,
+        businessId: roleTemplates.businessId,
         createdAt: roleTemplates.createdAt,
         updatedAt: roleTemplates.updatedAt,
-        industryName: industries.name,
+        businessName: businesses.name,
       })
       .from(roleTemplates)
-      .innerJoin(industries, eq(roleTemplates.industryId, industries.id))
+      .innerJoin(businesses, eq(roleTemplates.businessId, businesses.id))
       .where(eq(roleTemplates.id, id));
 
     if (result.length === 0) return undefined;
@@ -36,20 +36,20 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
       name: row.name,
       description: row.description,
       scope: row.scope,
-      industryId: row.industryId,
+      businessId: row.businessId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
-      industryName: row.industryName,
+      businessName: row.businessName,
     };
   }
 
-  // Returns role templates with permission counts and industry names for the data table
+  // Returns role templates with permission counts and business names for the data table
   async findAllWithCounts(params: {
     where?: SQL;
     orderBy?: SQL[];
     limit: number;
     offset: number;
-  }): Promise<{ result: (RoleTemplate & { industryName: string; permissionCount: number })[]; count: number }> {
+  }): Promise<{ result: (RoleTemplate & { businessName: string; permissionCount: number })[]; count: number }> {
     const baseQuery = this.db
       .select({
         id: roleTemplates.id,
@@ -57,16 +57,16 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
         name: roleTemplates.name,
         description: roleTemplates.description,
         scope: roleTemplates.scope,
-        industryId: roleTemplates.industryId,
+        businessId: roleTemplates.businessId,
         createdAt: roleTemplates.createdAt,
         updatedAt: roleTemplates.updatedAt,
-        industryName: industries.name,
+        businessName: businesses.name,
         permissionCount: sql<number>`count(${roleTemplateFeaturePermissions.id})`.as('permission_count'),
       })
       .from(roleTemplates)
-      .innerJoin(industries, eq(roleTemplates.industryId, industries.id))
+      .innerJoin(businesses, eq(roleTemplates.businessId, businesses.id))
       .leftJoin(roleTemplateFeaturePermissions, eq(roleTemplates.id, roleTemplateFeaturePermissions.roleTemplateId))
-      .groupBy(roleTemplates.id, industries.name);
+      .groupBy(roleTemplates.id, businesses.name);
 
     const countQuery = this.db.select({ count: sql<number>`count(*)` }).from(roleTemplates);
 
@@ -87,10 +87,10 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
         name: row.name,
         description: row.description,
         scope: row.scope,
-        industryId: row.industryId,
+        businessId: row.businessId,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
-        industryName: row.industryName,
+        businessName: row.businessName,
         permissionCount: Number(row.permissionCount),
       })),
       count: Number(countResult[0]?.count ?? 0),

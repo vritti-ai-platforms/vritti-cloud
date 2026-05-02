@@ -4,7 +4,7 @@ import { z } from 'zod';
 export interface Price {
   id: string;
   planId: string;
-  industryId: string;
+  businessId: string;
   regionId: string;
   regionName: string;
   regionCode: string;
@@ -19,7 +19,7 @@ export interface Price {
 
 export const createPriceSchema = z.object({
   planId: z.string().uuid('Please select a plan'),
-  industryId: z.string().uuid('Please select an industry'),
+  businessId: z.string().uuid('Please select a business'),
   regionId: z.string().uuid('Please select a region'),
   providerId: z.string().uuid('Please select a provider'),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Enter a valid price (e.g. 99.99)'),

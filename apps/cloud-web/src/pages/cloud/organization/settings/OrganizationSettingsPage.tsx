@@ -252,10 +252,10 @@ export const OrganizationSettingsPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Typography variant="body2" intent="muted" className="mb-1">
-                  Industry ID
+                  Business ID
                 </Typography>
                 <Typography variant="body1" className="font-mono text-sm">
-                  {org.industryId}
+                  {org.businessId}
                 </Typography>
               </div>
               <div>

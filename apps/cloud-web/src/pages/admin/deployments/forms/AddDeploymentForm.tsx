@@ -7,6 +7,7 @@ import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { VersionSelector } from '@vritti/quantum-ui/selects/version';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type CreateDeploymentData, createDeploymentSchema } from '@/schemas/admin/deployments';
@@ -53,7 +54,7 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
           { value: 'dedicated', label: 'Dedicated' },
         ]}
       />
-      <TextField name="version" label="App Version" placeholder="e.g. 1.0.0 (optional)" />
+      <VersionSelector name="version" label="Version" placeholder="Select version" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

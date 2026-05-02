@@ -38,17 +38,17 @@ export function deleteDeployment(id: string): Promise<void> {
   return axios.delete(`admin-api/deployments/${id}`).then(() => undefined);
 }
 
-// Assigns a plan+industry combo to a deployment
+// Assigns a plan+business combo to a deployment
 export function assignDeploymentPlan({ id, data }: { id: string; data: AssignPlanData }): Promise<SuccessResponse> {
   return axios.post<SuccessResponse>(`admin-api/deployments/${id}/plans`, data).then((r) => r.data);
 }
 
-// Removes a plan+industry assignment from a deployment
+// Removes a plan+business assignment from a deployment
 export function removeDeploymentPlan({ id, data }: { id: string; data: AssignPlanData }): Promise<SuccessResponse> {
   return axios.delete<SuccessResponse>(`admin-api/deployments/${id}/plans`, { data }).then((r) => r.data);
 }
 
-// Fetches all plan+industry combos with assignment status for a deployment
+// Fetches all plan+business combos with assignment status for a deployment
 export function getDeploymentPlanAssignments(deploymentId: string): Promise<DeploymentPlanAssignment[]> {
   return axios
     .get<DeploymentPlanAssignment[]>(`admin-api/deployments/${deploymentId}/plan-assignments`)

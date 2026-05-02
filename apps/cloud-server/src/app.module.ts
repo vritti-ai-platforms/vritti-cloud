@@ -22,7 +22,7 @@ import { AccountModule } from './modules/account/account.module';
 import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
 import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
 import { AdminEnumModule } from './modules/admin-api/enum/enum.module';
-import { AdminIndustryModule } from './modules/admin-api/industry/industry.module';
+import { AdminBusinessModule } from './modules/admin-api/business/business.module';
 import { AdminOrganizationModule } from './modules/admin-api/organization/organization.module';
 import { AdminPlanModule } from './modules/admin-api/plan/plan.module';
 import { AdminPriceModule } from './modules/admin-api/price/price.module';
@@ -30,7 +30,7 @@ import { AdminRegionModule } from './modules/admin-api/region/region.module';
 import { AdminVersionModule } from './modules/admin-api/version/version.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
 import { CloudDeploymentModule } from './modules/cloud-api/deployment/deployment.module';
-import { IndustryModule } from './modules/cloud-api/industry/industry.module';
+import { BusinessModule } from './modules/cloud-api/business/business.module';
 import { MediaModule } from './modules/cloud-api/media/media.module';
 import { OnboardingModule } from './modules/cloud-api/onboarding/onboarding.module';
 import { OrganizationModule } from './modules/cloud-api/organization/organization.module';
@@ -129,7 +129,7 @@ import { ServicesModule } from './services/services.module';
     AccountModule,
     MediaModule,
     OrganizationModule,
-    IndustryModule,
+    BusinessModule,
     DataTableModule.forRoot({ tableViews: schema.tableViews }),
     CloudDeploymentModule,
     // Admin API modules
@@ -138,7 +138,7 @@ import { ServicesModule } from './services/services.module';
     AdminDeploymentModule,
     AdminRegionModule,
     AdminCloudProviderModule,
-    AdminIndustryModule,
+    AdminBusinessModule,
     AdminOrganizationModule,
     AdminPriceModule,
     AdminEnumModule,
@@ -150,7 +150,7 @@ import { ServicesModule } from './services/services.module';
     RouterModule.register([
       {
         path: 'cloud-api',
-        children: [UserModule, MediaModule, OrganizationModule, IndustryModule, CloudDeploymentModule],
+        children: [UserModule, MediaModule, OrganizationModule, BusinessModule, CloudDeploymentModule],
       },
       {
         path: '',
@@ -164,7 +164,7 @@ import { ServicesModule } from './services/services.module';
           AdminDeploymentModule,
           AdminRegionModule,
           AdminCloudProviderModule,
-          AdminIndustryModule,
+          AdminBusinessModule,
           AdminOrganizationModule,
           AdminPriceModule,
           AdminEnumModule,

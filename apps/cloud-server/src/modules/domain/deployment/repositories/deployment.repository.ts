@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { CloudProvider, Deployment, Region } from '@/db/schema';
-import { deploymentIndustryPlans, deployments, organizations, plans, prices } from '@/db/schema';
+import { deploymentBusinessPlans, deployments, organizations, plans, prices } from '@/db/schema';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 
@@ -67,8 +67,8 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
     return map;
   }
 
-  // Returns active deployments that have at least one plan assigned for the given region, provider, and industry
-  async findActive(regionId: string, cloudProviderId: string, industryId: string): Promise<DeploymentOptionDto[]> {
+  // Returns active deployments that have at least one plan assigned for the given region, provider, and business
+  async findActive(regionId: string, cloudProviderId: string, businessId: string): Promise<DeploymentOptionDto[]> {
     const rows = await this.db
       .selectDistinct({
         id: deployments.id,
@@ -77,10 +77,10 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
       })
       .from(deployments)
       .innerJoin(
-        deploymentIndustryPlans,
+        deploymentBusinessPlans,
         and(
-          eq(deploymentIndustryPlans.deploymentId, deployments.id),
-          eq(deploymentIndustryPlans.industryId, industryId),
+          eq(deploymentBusinessPlans.deploymentId, deployments.id),
+          eq(deploymentBusinessPlans.businessId, businessId),
         ),
       )
       .where(
@@ -93,8 +93,8 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
     return rows as DeploymentOptionDto[];
   }
 
-  // Returns plans for a deployment+industry combo with price info from pricing matrix
-  async findPlansForDeployment(deploymentId: string, industryId: string): Promise<PlanOptionDto[]> {
+  // Returns plans for a deployment+business combo with price info from pricing matrix
+  async findPlansForDeployment(deploymentId: string, businessId: string): Promise<PlanOptionDto[]> {
     const deployment = await this.db
       .select({
         regionId: deployments.regionId,
@@ -116,21 +116,21 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
         price: prices.price,
         currency: prices.currency,
       })
-      .from(deploymentIndustryPlans)
-      .innerJoin(plans, eq(deploymentIndustryPlans.planId, plans.id))
+      .from(deploymentBusinessPlans)
+      .innerJoin(plans, eq(deploymentBusinessPlans.planId, plans.id))
       .leftJoin(
         prices,
         and(
           eq(prices.planId, plans.id),
-          eq(prices.industryId, industryId),
+          eq(prices.businessId, businessId),
           eq(prices.regionId, regionId),
           eq(prices.providerId, cloudProviderId),
         ),
       )
       .where(
         and(
-          eq(deploymentIndustryPlans.deploymentId, deploymentId),
-          eq(deploymentIndustryPlans.industryId, industryId),
+          eq(deploymentBusinessPlans.deploymentId, deploymentId),
+          eq(deploymentBusinessPlans.businessId, businessId),
         ),
       );
 

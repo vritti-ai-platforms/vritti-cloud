@@ -30,7 +30,7 @@ export class OrganizationDto {
   deploymentUrl: string;
 
   @ApiProperty({ example: 'Technology' })
-  industryName: string;
+  businessName: string;
 
   @ApiProperty({ example: 3 })
   memberCount: number;
@@ -52,7 +52,7 @@ export class OrganizationDto {
     dto.planCode = row.planCode;
     dto.deploymentName = row.deploymentName;
     dto.deploymentUrl = row.deploymentUrl;
-    dto.industryName = row.industryName;
+    dto.businessName = row.businessName;
     dto.memberCount = Number(row.memberCount);
     dto.createdAt = row.createdAt;
     dto.updatedAt = row.updatedAt;

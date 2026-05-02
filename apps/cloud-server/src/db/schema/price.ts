@@ -1,7 +1,7 @@
 import { numeric, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { businesses } from './business';
 import { cloudProviders } from './cloud-provider';
 import { cloudSchema } from './cloud-schema';
-import { industries } from './industry';
 import { plans } from './plan';
 import { regions } from './region';
 
@@ -10,9 +10,9 @@ export const prices = cloudSchema.table('prices', {
   planId: uuid('plan_id')
     .notNull()
     .references(() => plans.id, { onDelete: 'restrict' }),
-  industryId: uuid('industry_id')
+  businessId: uuid('business_id')
     .notNull()
-    .references(() => industries.id, { onDelete: 'restrict' }),
+    .references(() => businesses.id, { onDelete: 'restrict' }),
   regionId: uuid('region_id')
     .notNull()
     .references(() => regions.id, { onDelete: 'restrict' }),

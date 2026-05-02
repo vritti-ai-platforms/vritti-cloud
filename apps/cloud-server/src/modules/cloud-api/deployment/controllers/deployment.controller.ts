@@ -25,7 +25,7 @@ export class CloudDeploymentController {
     return this.deploymentService.findAll();
   }
 
-  // Returns active deployments for the given region, provider, and industry
+  // Returns active deployments for the given region, provider, and business
   @Get()
   @ApiGetDeployments()
   findActive(@Query() query: DeploymentFilterDto): Promise<DeploymentOptionDto[]> {
@@ -33,7 +33,7 @@ export class CloudDeploymentController {
     return this.deploymentService.findActive(query);
   }
 
-  // Returns plans assigned to a deployment for the given industry, with price info
+  // Returns plans assigned to a deployment for the given business, with price info
   @Get(':id/plans')
   @ApiGetDeploymentPlans()
   getPlans(@Param('id') id: string, @Query() query: DeploymentPlanQueryDto): Promise<PlanOptionDto[]> {

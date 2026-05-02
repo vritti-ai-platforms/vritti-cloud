@@ -3194,7 +3194,7 @@
                     ],
                     "example": "free"
                   },
-                  "industryId": {
+                  "businessId": {
                     "type": "integer",
                     "example": 1
                   },
@@ -4639,29 +4639,29 @@
         ]
       }
     },
-    "/cloud-api/industries": {
+    "/cloud-api/businesses": {
       "get": {
-        "description": "Returns a list of all available industry types.",
-        "operationId": "IndustryController_findAll",
+        "description": "Returns a list of all available business types.",
+        "operationId": "BusinessController_findAll",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Industries retrieved successfully.",
+            "description": "Businesses retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/CloudIndustryDto"
+                    "$ref": "#/components/schemas/CloudBusinessDto"
                   }
                 }
               }
             }
           }
         },
-        "summary": "Get all industries",
+        "summary": "Get all businesses",
         "tags": [
-          "Industries"
+          "Businesses"
         ]
       }
     },
@@ -5060,10 +5060,10 @@
             }
           },
           {
-            "name": "industryId",
+            "name": "businessId",
             "required": true,
             "in": "query",
-            "description": "Industry UUID",
+            "description": "Business UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -5093,7 +5093,7 @@
             "bearer": []
           }
         ],
-        "summary": "List active deployments for a region, cloud provider, and industry",
+        "summary": "List active deployments for a region, cloud provider, and business",
         "tags": [
           "Deployments"
         ]
@@ -5114,10 +5114,10 @@
             }
           },
           {
-            "name": "industryId",
+            "name": "businessId",
             "required": false,
             "in": "query",
-            "description": "Industry UUID",
+            "description": "Business UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -5147,7 +5147,7 @@
             "bearer": []
           }
         ],
-        "summary": "List plans for a deployment and industry with pricing",
+        "summary": "List plans for a deployment and business with pricing",
         "tags": [
           "Deployments"
         ]
@@ -6562,7 +6562,7 @@
             "description": "App not found."
           },
           "409": {
-            "description": "App is referenced by plans or industries."
+            "description": "App is referenced by plans or businesses."
           }
         },
         "security": [
@@ -8308,7 +8308,7 @@
             "bearer": []
           }
         ],
-        "summary": "Assign a plan and industry to a deployment",
+        "summary": "Assign a plan and business to a deployment",
         "tags": [
           "Admin - Deployments"
         ]
@@ -8356,7 +8356,7 @@
             "bearer": []
           }
         ],
-        "summary": "Remove a plan and industry assignment from a deployment",
+        "summary": "Remove a plan and business assignment from a deployment",
         "tags": [
           "Admin - Deployments"
         ]
@@ -8850,27 +8850,27 @@
         ]
       }
     },
-    "/admin-api/industries": {
+    "/admin-api/businesses": {
       "post": {
-        "operationId": "IndustryController_create",
+        "operationId": "BusinessController_create",
         "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateIndustryDto"
+                "$ref": "#/components/schemas/CreateBusinessDto"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Industry created successfully.",
+            "description": "Business created successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IndustryDto"
+                  "$ref": "#/components/schemas/BusinessDto"
                 }
               }
             }
@@ -8882,7 +8882,7 @@
             "description": "Unauthorized."
           },
           "409": {
-            "description": "Industry with this code or slug already exists."
+            "description": "Business with this code or slug already exists."
           }
         },
         "security": [
@@ -8890,15 +8890,15 @@
             "bearer": []
           }
         ],
-        "summary": "Create a new industry",
+        "summary": "Create a new business",
         "tags": [
-          "Admin - Industries"
+          "Admin - Businesses"
         ]
       }
     },
-    "/admin-api/industries/table": {
+    "/admin-api/businesses/table": {
       "get": {
-        "operationId": "IndustryController_findForTable",
+        "operationId": "BusinessController_findForTable",
         "parameters": [
           {
             "name": "searchColumn",
@@ -8919,11 +8919,11 @@
         ],
         "responses": {
           "200": {
-            "description": "Industries retrieved successfully.",
+            "description": "Businesses retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/IndustryTableResponseDto"
+                  "$ref": "#/components/schemas/BusinessTableResponseDto"
                 }
               }
             }
@@ -8937,21 +8937,21 @@
             "bearer": []
           }
         ],
-        "summary": "List industries for data table (server-stored state)",
+        "summary": "List businesses for data table (server-stored state)",
         "tags": [
-          "Admin - Industries"
+          "Admin - Businesses"
         ]
       }
     },
-    "/admin-api/industries/{id}": {
+    "/admin-api/businesses/{id}": {
       "patch": {
-        "operationId": "IndustryController_update",
+        "operationId": "BusinessController_update",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Industry UUID",
+            "description": "Business UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -8963,14 +8963,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateIndustryDto"
+                "$ref": "#/components/schemas/UpdateBusinessDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Industry updated successfully.",
+            "description": "Business updated successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8986,10 +8986,10 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Industry not found."
+            "description": "Business not found."
           },
           "409": {
-            "description": "Industry with this code or slug already exists."
+            "description": "Business with this code or slug already exists."
           }
         },
         "security": [
@@ -8997,19 +8997,19 @@
             "bearer": []
           }
         ],
-        "summary": "Update an industry",
+        "summary": "Update a business",
         "tags": [
-          "Admin - Industries"
+          "Admin - Businesses"
         ]
       },
       "delete": {
-        "operationId": "IndustryController_delete",
+        "operationId": "BusinessController_delete",
         "parameters": [
           {
             "name": "id",
             "required": true,
             "in": "path",
-            "description": "Industry UUID",
+            "description": "Business UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
               "type": "string"
@@ -9018,7 +9018,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Industry deleted successfully.",
+            "description": "Business deleted successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9031,7 +9031,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Industry not found."
+            "description": "Business not found."
           }
         },
         "security": [
@@ -9039,9 +9039,9 @@
             "bearer": []
           }
         ],
-        "summary": "Delete an industry",
+        "summary": "Delete a business",
         "tags": [
-          "Admin - Industries"
+          "Admin - Businesses"
         ]
       }
     },
@@ -9395,9 +9395,9 @@
         ]
       }
     },
-    "/select-api/industries": {
+    "/select-api/businesses": {
       "get": {
-        "operationId": "IndustrySelectController_findForSelect",
+        "operationId": "BusinessSelectController_findForSelect",
         "parameters": [
           {
             "name": "search",
@@ -10953,10 +10953,10 @@
             }
           },
           {
-            "name": "industryId",
+            "name": "businessId",
             "required": false,
             "in": "query",
-            "description": "Filter by industry ID",
+            "description": "Filter by business ID",
             "schema": {
               "type": "string"
             }
@@ -12949,9 +12949,9 @@
             "description": "Organization ID in api-nexus",
             "example": "550e8400-e29b-41d4-a716-446655440001"
           },
-          "industryId": {
+          "businessId": {
             "type": "object",
-            "description": "Industry ID",
+            "description": "Business ID",
             "example": "550e8400-e29b-41d4-a716-446655440002",
             "nullable": true
           },
@@ -13045,9 +13045,9 @@
             "description": "Organization ID in api-nexus",
             "example": "550e8400-e29b-41d4-a716-446655440001"
           },
-          "industryId": {
+          "businessId": {
             "type": "object",
-            "description": "Industry ID",
+            "description": "Business ID",
             "example": "550e8400-e29b-41d4-a716-446655440002",
             "nullable": true
           },
@@ -13541,7 +13541,7 @@
           "result"
         ]
       },
-      "CloudIndustryDto": {
+      "CloudBusinessDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -14537,7 +14537,7 @@
           "canDelete": {
             "type": "boolean",
             "example": true,
-            "description": "False when the app is referenced by plans, industries, or role templates"
+            "description": "False when the app is referenced by plans, businesses, or role templates"
           }
         },
         "required": [
@@ -14779,9 +14779,9 @@
             ],
             "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
-            "description": "Industry this role template belongs to",
+            "description": "Business this role template belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "appIds": {
@@ -14796,7 +14796,7 @@
           "versionId",
           "name",
           "scope",
-          "industryId",
+          "businessId",
           "appIds"
         ]
       },
@@ -14825,7 +14825,7 @@
               "SINGLE_BU"
             ]
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -14843,7 +14843,7 @@
           "id",
           "name",
           "scope",
-          "industryId",
+          "businessId",
           "createdAt"
         ]
       },
@@ -14872,7 +14872,7 @@
               "SINGLE_BU"
             ]
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -14885,7 +14885,7 @@
             "format": "date-time",
             "nullable": true
           },
-          "industryName": {
+          "businessName": {
             "type": "string",
             "example": "Restaurant"
           },
@@ -14898,9 +14898,9 @@
           "id",
           "name",
           "scope",
-          "industryId",
+          "businessId",
           "createdAt",
-          "industryName",
+          "businessName",
           "permissionCount"
         ]
       },
@@ -14958,9 +14958,9 @@
             ],
             "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
-            "description": "Industry this role template belongs to",
+            "description": "Business this role template belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "appIds": {
@@ -15409,7 +15409,8 @@
           "webhookSecret",
           "regionId",
           "cloudProviderId",
-          "type"
+          "type",
+          "version"
         ]
       },
       "UpdateDeploymentDto": {
@@ -15477,15 +15478,15 @@
             "description": "Plan UUID",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
-            "description": "Industry UUID",
+            "description": "Business UUID",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           }
         },
         "required": [
           "planId",
-          "industryId"
+          "businessId"
         ]
       },
       "CreateRegionDto": {
@@ -15844,22 +15845,22 @@
           }
         }
       },
-      "CreateIndustryDto": {
+      "CreateBusinessDto": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "description": "Display name of the industry",
+            "description": "Display name of the business",
             "example": "Healthcare"
           },
           "code": {
             "type": "string",
-            "description": "Unique code identifier for the industry",
+            "description": "Unique code identifier for the business",
             "example": "healthcare"
           },
           "description": {
             "type": "string",
-            "description": "Optional description of the industry",
+            "description": "Optional description of the business",
             "example": "Healthcare and medical services"
           },
           "recommendedApps": {
@@ -15877,7 +15878,7 @@
           "code"
         ]
       },
-      "IndustryDto": {
+      "BusinessDto": {
         "type": "object",
         "properties": {
           "id": {
@@ -15919,7 +15920,7 @@
           "canDelete": {
             "type": "boolean",
             "example": true,
-            "description": "False when the industry is referenced by organizations, prices, or deployment plans"
+            "description": "False when the business is referenced by organizations, prices, or deployment plans"
           }
         },
         "required": [
@@ -15931,13 +15932,13 @@
           "canDelete"
         ]
       },
-      "IndustryTableResponseDto": {
+      "BusinessTableResponseDto": {
         "type": "object",
         "properties": {
           "result": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/IndustryDto"
+              "$ref": "#/components/schemas/BusinessDto"
             }
           },
           "count": {
@@ -15958,22 +15959,22 @@
           "state"
         ]
       },
-      "UpdateIndustryDto": {
+      "UpdateBusinessDto": {
         "type": "object",
         "properties": {
           "name": {
             "type": "string",
-            "description": "Display name of the industry",
+            "description": "Display name of the business",
             "example": "Healthcare"
           },
           "code": {
             "type": "string",
-            "description": "Unique code identifier for the industry",
+            "description": "Unique code identifier for the business",
             "example": "healthcare"
           },
           "description": {
             "type": "string",
-            "description": "Optional description of the industry",
+            "description": "Optional description of the business",
             "example": "Healthcare and medical services"
           },
           "recommendedApps": {
@@ -16026,7 +16027,7 @@
             "type": "string",
             "example": "https://nexus-us-east.vritti.io"
           },
-          "industryName": {
+          "businessName": {
             "type": "string",
             "example": "Technology"
           },
@@ -16054,7 +16055,7 @@
           "planCode",
           "deploymentName",
           "deploymentUrl",
-          "industryName",
+          "businessName",
           "memberCount",
           "createdAt",
           "updatedAt"
@@ -16141,11 +16142,11 @@
               "dedicated"
             ]
           },
-          "industryName": {
+          "businessName": {
             "type": "string",
             "example": "Technology"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -16188,8 +16189,8 @@
           "deploymentUrl",
           "deploymentId",
           "deploymentType",
-          "industryName",
-          "industryId",
+          "businessName",
+          "businessId",
           "regionName",
           "regionCode",
           "cloudProviderName",
@@ -16279,9 +16280,9 @@
             "description": "Plan UUID",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
-            "description": "Industry UUID",
+            "description": "Business UUID",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "regionId": {
@@ -16307,7 +16308,7 @@
         },
         "required": [
           "planId",
-          "industryId",
+          "businessId",
           "regionId",
           "providerId",
           "price",
@@ -16325,7 +16326,7 @@
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -16358,7 +16359,7 @@
         "required": [
           "id",
           "planId",
-          "industryId",
+          "businessId",
           "regionId",
           "providerId",
           "price",
@@ -16377,7 +16378,7 @@
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
@@ -16426,7 +16427,7 @@
         "required": [
           "id",
           "planId",
-          "industryId",
+          "businessId",
           "regionId",
           "regionName",
           "regionCode",
@@ -16473,9 +16474,9 @@
             "description": "Plan UUID",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "industryId": {
+          "businessId": {
             "type": "string",
-            "description": "Industry UUID",
+            "description": "Business UUID",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "regionId": {

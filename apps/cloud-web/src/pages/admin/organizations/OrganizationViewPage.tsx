@@ -84,8 +84,8 @@ export const OrganizationViewPage = () => {
               <Factory className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Industry</p>
-              <p className="text-2xl font-semibold">{org.industryName}</p>
+              <p className="text-sm text-muted-foreground">Business</p>
+              <p className="text-2xl font-semibold">{org.businessName}</p>
             </div>
           </CardContent>
         </Card>

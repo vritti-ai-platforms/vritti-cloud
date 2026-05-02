@@ -8,8 +8,8 @@ export class RoleTemplateSelectQueryDto extends SelectOptionsQueryDto {
   @IsUUID()
   versionId?: string;
 
-  @ApiPropertyOptional({ description: 'Filter by industry ID' })
+  @ApiPropertyOptional({ description: 'Filter by business ID' })
   @IsOptional()
   @IsUUID()
-  industryId?: string;
+  businessId?: string;
 }
