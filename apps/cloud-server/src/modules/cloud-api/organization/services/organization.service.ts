@@ -81,7 +81,8 @@ export class OrganizationService {
     if (file) {
       const ext = file.filename.split('.').pop() ?? 'png';
       const key = `organization-logo/${dto.subdomain}.${ext}`;
-      logoUrl = await this.mediaService.uploadPublic(file, key);
+      const url = await this.mediaService.uploadPublic(file, key);
+      logoUrl = `${url}?v=${Date.now()}`;
     }
     // Create the organization in core-server first to get the nexus org ID
     let nexusOrg: { id: string };
@@ -288,10 +289,10 @@ export class OrganizationService {
       });
       updateData.mediaId = media.id;
 
-      // Upload to public bucket for core-server
       const ext = file.filename.split('.').pop() ?? 'png';
       const key = `organization-logo/${org.subdomain}.${ext}`;
-      logoUrl = await this.mediaService.uploadPublic(file, key);
+      const url = await this.mediaService.uploadPublic(file, key);
+      logoUrl = `${url}?v=${Date.now()}`;
     }
 
     if (Object.keys(updateData).length > 0) {
