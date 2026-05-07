@@ -70,12 +70,19 @@ export class OrganizationBusinessUnitsService {
 
   // Fetches a single business unit from core (returns subtree)
   async getBusinessUnit(orgId: string, buId: string): Promise<CoreBusinessUnit | null> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      const result = await this.coreBusinessUnitService.getBusinessUnit(deployment.url, deployment.webhookSecret, buId);
+      const result = await this.coreBusinessUnitService.getBusinessUnit(
+        deployment.url,
+        deployment.webhookSecret,
+        org.orgIdentifier,
+        buId,
+      );
       this.logger.log(`Fetched business unit ${buId} for org ${orgId}`);
-      return Array.isArray(result) ? (result[0] ?? null) : result;
+      // Pick the requested BU explicitly — findSubtree returns the BU plus descendants in unspecified order
+      const list = Array.isArray(result) ? result : [result];
+      return list.find((bu) => bu?.id === buId) ?? list[0] ?? null;
     } catch (error: unknown) {
       this.logger.error(`Failed to fetch business unit ${buId} for org ${orgId}: ${error}`);
       throw new ServiceUnavailableException({
@@ -87,13 +94,14 @@ export class OrganizationBusinessUnitsService {
 
   // Updates a business unit in core
   async updateBusinessUnit(orgId: string, buId: string, data: Record<string, unknown>): Promise<SuccessResponseDto> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
       const { parentId: _parentId, ...updateData } = this.packMetadata(data);
       const result = await this.coreBusinessUnitService.updateBusinessUnit(
         deployment.url,
         deployment.webhookSecret,
+        org.orgIdentifier,
         buId,
         updateData,
       );
@@ -110,12 +118,13 @@ export class OrganizationBusinessUnitsService {
 
   // Deletes a business unit in core
   async deleteBusinessUnit(orgId: string, buId: string): Promise<SuccessResponseDto> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
       const result = await this.coreBusinessUnitService.deleteBusinessUnit(
         deployment.url,
         deployment.webhookSecret,
+        org.orgIdentifier,
         buId,
       );
       this.logger.log(`Deleted business unit ${buId} for org ${orgId}`);
@@ -131,10 +140,10 @@ export class OrganizationBusinessUnitsService {
 
   // Lists role assignments for a business unit
   async getRoleAssignments(orgId: string, buId: string): Promise<BuRoleAssignment[]> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      return await this.coreBusinessUnitService.getRoleAssignments(deployment.url, deployment.webhookSecret, buId);
+      return await this.coreBusinessUnitService.getRoleAssignments(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId);
     } catch (error: unknown) {
       this.logger.error(`Failed to fetch role assignments for BU ${buId}: ${error}`);
       throw new ServiceUnavailableException({
@@ -146,13 +155,19 @@ export class OrganizationBusinessUnitsService {
 
   // Assigns a role to a user at a business unit
   async assignRole(orgId: string, buId: string, data: { userId: string; orgRoleId: string }): Promise<SuccessResponseDto> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      return await this.coreBusinessUnitService.assignRole(deployment.url, deployment.webhookSecret, data.userId, {
-        orgRoleId: data.orgRoleId,
-        businessUnitId: buId,
-      });
+      return await this.coreBusinessUnitService.assignRole(
+        deployment.url,
+        deployment.webhookSecret,
+        org.orgIdentifier,
+        data.userId,
+        {
+          orgRoleId: data.orgRoleId,
+          businessUnitId: buId,
+        },
+      );
     } catch (error: unknown) {
       this.logger.error(`Failed to assign role at BU ${buId}: ${error}`);
       throw new ServiceUnavailableException({
@@ -164,13 +179,14 @@ export class OrganizationBusinessUnitsService {
 
   // Removes a role assignment
   async removeRoleAssignment(orgId: string, assignmentId: string): Promise<SuccessResponseDto> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
       // Core-server DELETE /users/webhook/:userId/roles/:assignmentId — userId is ignored, only assignmentId matters
       return await this.coreBusinessUnitService.removeRoleAssignment(
         deployment.url,
         deployment.webhookSecret,
+        org.orgIdentifier,
         '_',
         assignmentId,
       );
@@ -197,7 +213,7 @@ export class OrganizationBusinessUnitsService {
     await this.organizationRepository.update(orgId, { buAppAssignments: assignments });
 
     try {
-      const result = await this.coreBusinessUnitService.updateBuApps(deployment.url, deployment.webhookSecret, buId, {
+      const result = await this.coreBusinessUnitService.updateBuApps(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId, {
         appCodes,
       });
       // Invalidate config cache so core-server fetches fresh catalogs
@@ -215,10 +231,10 @@ export class OrganizationBusinessUnitsService {
 
   // Returns roles compatible with a business unit's assigned apps
   async getCompatibleRoles(orgId: string, buId: string): Promise<CoreOrgRole[]> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      return await this.coreRoleService.getCompatibleRoles(deployment.url, deployment.webhookSecret, buId);
+      return await this.coreRoleService.getCompatibleRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId);
     } catch (error: unknown) {
       this.logger.error(`Failed to fetch compatible roles for BU ${buId}: ${error}`);
       throw new ServiceUnavailableException({

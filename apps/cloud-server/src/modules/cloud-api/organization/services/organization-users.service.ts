@@ -53,13 +53,13 @@ export class OrganizationUsersService {
 
   // Updates a user's details in nexus
   async updateUser(orgId: string, userId: string, dto: UpdateOrgUserDto): Promise<SuccessResponseDto> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.updateUser(deployment.url, deployment.webhookSecret, userId, dto);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    return this.coreUserService.updateUser(deployment.url, deployment.webhookSecret, org.orgIdentifier, userId, dto);
   }
 
   // Resends invitation email to a pending user in nexus
   async resendInvite(orgId: string, userId: string): Promise<SuccessResponseDto> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.resendInvite(deployment.url, deployment.webhookSecret, userId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    return this.coreUserService.resendInvite(deployment.url, deployment.webhookSecret, org.orgIdentifier, userId);
   }
 }

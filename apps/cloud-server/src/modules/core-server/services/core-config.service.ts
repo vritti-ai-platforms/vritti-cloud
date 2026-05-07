@@ -10,7 +10,7 @@ export class CoreConfigService {
 
   // Invalidates the in-memory config cache for a single org on core-server
   async invalidateOrg(url: string, webhookSecret: string, orgId: string): Promise<void> {
-    await this.http.post(url, webhookSecret, `/config/webhook/invalidate/${orgId}`, {});
+    await this.http.post(url, webhookSecret, `/config/webhook/invalidate/${orgId}`, {}, { orgId });
     this.logger.log(`Invalidated config cache for org ${orgId} in core`);
   }
 

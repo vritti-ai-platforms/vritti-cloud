@@ -79,12 +79,13 @@ export class OrganizationRolesService {
 
   // Updates a role in core
   async updateRole(orgId: string, roleId: string, data: Record<string, unknown>): Promise<any> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
       const result = await this.coreRoleService.updateOrgRole(
         deployment.url,
         deployment.webhookSecret,
+        org.orgIdentifier,
         roleId,
         data,
       );
@@ -101,12 +102,13 @@ export class OrganizationRolesService {
 
   // Deletes a role in core
   async deleteRole(orgId: string, roleId: string): Promise<any> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
       const result = await this.coreRoleService.deleteOrgRole(
         deployment.url,
         deployment.webhookSecret,
+        org.orgIdentifier,
         roleId,
       );
       this.logger.log(`Deleted role ${roleId} for org ${orgId}`);

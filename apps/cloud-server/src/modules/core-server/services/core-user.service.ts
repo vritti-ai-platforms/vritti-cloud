@@ -19,7 +19,7 @@ interface CoreUserDto {
   createdAt: string;
 }
 
-// Proxies user management calls to core-server
+// Proxies user management calls to core-server. orgId is sent as `x-org-id` for RLS scoping.
 @Injectable()
 export class CoreUserService {
   private readonly logger = new Logger(CoreUserService.name);
@@ -32,14 +32,14 @@ export class CoreUserService {
     webhookSecret: string,
     data: { orgId: string; email: string; fullName: string; phone?: string; phoneCountry?: string },
   ): Promise<CoreSuccessDto> {
-    const result = await this.http.post<CoreSuccessDto>(url, webhookSecret, '/users/webhook', data);
+    const result = await this.http.post<CoreSuccessDto>(url, webhookSecret, '/users/webhook', data, { orgId: data.orgId });
     this.logger.log(`Invited user in core: ${data.email}`);
     return result;
   }
 
   // Fetches all portal users for an organization from core
   async getUsers(url: string, webhookSecret: string, orgId: string): Promise<CoreUserDto[]> {
-    const result = await this.http.get<CoreUserDto[]>(url, webhookSecret, '/users/webhook', { orgId });
+    const result = await this.http.get<CoreUserDto[]>(url, webhookSecret, '/users/webhook', { orgId, params: { orgId } });
     this.logger.log(`Fetched ${result.length} users from core for org: ${orgId}`);
     return result;
   }
@@ -48,10 +48,11 @@ export class CoreUserService {
   async updateUser(
     url: string,
     webhookSecret: string,
+    orgId: string,
     userId: string,
     data: { email?: string; fullName?: string; status?: string; locale?: string; timezone?: string },
   ): Promise<CoreSuccessDto> {
-    const result = await this.http.patch<CoreSuccessDto>(url, webhookSecret, `/users/webhook/${userId}`, data);
+    const result = await this.http.patch<CoreSuccessDto>(url, webhookSecret, `/users/webhook/${userId}`, data, { orgId });
     this.logger.log(`Updated user in core: ${userId}`);
     return result;
   }
@@ -69,23 +70,22 @@ export class CoreUserService {
       offset?: number;
     },
   ): Promise<{ result: CoreUserDto[]; count: number }> {
-    const result = await this.http.get<{ result: CoreUserDto[]; count: number }>(
-      url,
-      webhookSecret,
-      '/users/webhook',
-      params as Record<string, unknown>,
-    );
+    const result = await this.http.get<{ result: CoreUserDto[]; count: number }>(url, webhookSecret, '/users/webhook', {
+      orgId: params.orgId,
+      params: params as Record<string, unknown>,
+    });
     this.logger.log(`Fetched ${result.result.length}/${result.count} users from core for org: ${params.orgId}`);
     return result;
   }
 
   // Resends invitation email to a pending user in core
-  async resendInvite(url: string, webhookSecret: string, userId: string): Promise<SuccessResponseDto> {
+  async resendInvite(url: string, webhookSecret: string, orgId: string, userId: string): Promise<SuccessResponseDto> {
     const result = await this.http.post<SuccessResponseDto>(
       url,
       webhookSecret,
       `/users/webhook/${userId}/resend-invite`,
       {},
+      { orgId },
     );
     this.logger.log(`Resent invite in core for user: ${userId}`);
     return result;

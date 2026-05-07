@@ -3,7 +3,7 @@ import type { SuccessResponseDto } from '@vritti/api-sdk';
 import type { CoreOrgRole } from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreHttpService } from './core-http.service';
 
-// Proxies role management calls to core-server
+// Proxies role management calls to core-server. orgId is sent as `x-org-id` for RLS scoping.
 @Injectable()
 export class CoreRoleService {
   private readonly logger = new Logger(CoreRoleService.name);
@@ -12,7 +12,10 @@ export class CoreRoleService {
 
   // Fetches all roles for an organization from core
   async getOrgRoles(url: string, webhookSecret: string, orgId: string): Promise<CoreOrgRole[]> {
-    const result = await this.http.get<CoreOrgRole[]>(url, webhookSecret, '/organizations/webhook/roles', { orgId });
+    const result = await this.http.get<CoreOrgRole[]>(url, webhookSecret, '/organizations/webhook/roles', {
+      orgId,
+      params: { orgId },
+    });
     this.logger.log(`Fetched ${result.length} roles from core for org: ${orgId}`);
     return result;
   }
@@ -24,10 +27,13 @@ export class CoreRoleService {
     orgId: string,
     roleData: Record<string, unknown>,
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.post<SuccessResponseDto>(url, webhookSecret, '/organizations/webhook/roles/create', {
-      orgId,
-      ...roleData,
-    });
+    const result = await this.http.post<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      '/organizations/webhook/roles/create',
+      { orgId, ...roleData },
+      { orgId },
+    );
     this.logger.log(`Created role for org ${orgId} in core`);
     return result;
   }
@@ -36,24 +42,28 @@ export class CoreRoleService {
   async updateOrgRole(
     url: string,
     webhookSecret: string,
+    orgId: string,
     roleId: string,
     data: Record<string, unknown>,
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.patch<SuccessResponseDto>(url, webhookSecret, `/organizations/webhook/roles/${roleId}`, data);
+    const result = await this.http.patch<SuccessResponseDto>(url, webhookSecret, `/organizations/webhook/roles/${roleId}`, data, { orgId });
     this.logger.log(`Updated role ${roleId} in core`);
     return result;
   }
 
   // Fetches roles compatible with a business unit's assigned apps from core
-  async getCompatibleRoles(url: string, webhookSecret: string, buId: string): Promise<CoreOrgRole[]> {
-    const result = await this.http.get<CoreOrgRole[]>(url, webhookSecret, '/organizations/webhook/roles/compatible', { buId });
+  async getCompatibleRoles(url: string, webhookSecret: string, orgId: string, buId: string): Promise<CoreOrgRole[]> {
+    const result = await this.http.get<CoreOrgRole[]>(url, webhookSecret, '/organizations/webhook/roles/compatible', {
+      orgId,
+      params: { buId },
+    });
     this.logger.log(`Fetched compatible roles for BU ${buId} from core`);
     return result;
   }
 
   // Deletes a role in core
-  async deleteOrgRole(url: string, webhookSecret: string, roleId: string): Promise<SuccessResponseDto> {
-    const result = await this.http.delete<SuccessResponseDto>(url, webhookSecret, `/organizations/webhook/roles/${roleId}`);
+  async deleteOrgRole(url: string, webhookSecret: string, orgId: string, roleId: string): Promise<SuccessResponseDto> {
+    const result = await this.http.delete<SuccessResponseDto>(url, webhookSecret, `/organizations/webhook/roles/${roleId}`, { orgId });
     this.logger.log(`Deleted role ${roleId} in core`);
     return result;
   }

@@ -26,13 +26,13 @@ export class CoreOrganizationService {
     orgId: string,
     data: Record<string, unknown>,
   ): Promise<void> {
-    await this.http.patch(url, webhookSecret, `/organizations/webhook/${orgId}`, data);
+    await this.http.patch(url, webhookSecret, `/organizations/webhook/${orgId}`, data, { orgId });
     this.logger.log(`Updated organization in core: ${orgId}`);
   }
 
   // Deletes an organization in core
   async deleteOrganization(url: string, webhookSecret: string, orgId: string): Promise<void> {
-    await this.http.delete(url, webhookSecret, `/organizations/webhook/${orgId}`);
+    await this.http.delete(url, webhookSecret, `/organizations/webhook/${orgId}`, { orgId });
     this.logger.log(`Deleted organization in core: ${orgId}`);
   }
 }
