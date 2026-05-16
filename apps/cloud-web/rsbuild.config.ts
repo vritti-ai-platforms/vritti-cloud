@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+
+const require = createRequire(import.meta.url);
 
 // Environment configuration
 const useHttps = process.env.USE_HTTPS === 'true';
@@ -37,20 +40,20 @@ export default defineConfig({
         target: process.env.PUBLIC_API_URL || defaultApiHost,
         changeOrigin: true,
         secure: false,
-        onProxyReq: (proxyReq, req) => {
-          const host = (req.headers['host'] ?? '').split(':')[0];
-          if (host) proxyReq.setHeader('x-forwarded-host', host);
-        },
-        onProxyRes: (proxyRes, req, res) => {
-          // Disable buffering for SSE connections so events stream in real-time
-          if (req.headers.accept === 'text/event-stream') {
-            proxyRes.headers['cache-control'] = 'no-cache';
-            proxyRes.headers['x-accel-buffering'] = 'no';
-            // Flush each chunk immediately
-            proxyRes.on('data', (chunk) => {
-              res.write(chunk);
-            });
-          }
+        on: {
+          proxyReq: (proxyReq, req) => {
+            const host = (req.headers['host'] ?? '').split(':')[0];
+            if (host) proxyReq.setHeader('x-forwarded-host', host);
+          },
+          proxyRes: (proxyRes, req, res) => {
+            if (req.headers.accept === 'text/event-stream') {
+              proxyRes.headers['cache-control'] = 'no-cache';
+              proxyRes.headers['x-accel-buffering'] = 'no';
+              proxyRes.on('data', (chunk) => {
+                res.write(chunk);
+              });
+            }
+          },
         },
         pathRewrite: (path) => path.replace(/^\/api/, ''),
       },
@@ -59,7 +62,10 @@ export default defineConfig({
   plugins: [pluginReact()],
   tools: {
     rspack: {
-      ignoreWarnings: [/Critical dependency: the request of a dependency is an expression/],
+      ignoreWarnings: [
+        /Critical dependency: the request of a dependency is an expression/,
+        /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
+      ],
       watchOptions: {
         ignored: ['**/node_modules/**', '**/dist/**', '**/cloud-server/**'],
       },

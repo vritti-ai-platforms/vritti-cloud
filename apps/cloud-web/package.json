@@ -19,8 +19,8 @@
   },
   "dependencies": {
     "@simplewebauthn/browser": "^13.2.2",
-    "@tanstack/react-query": "5.90.20",
-    "@vritti/quantum-ui": "0.3.0",
+    "@tanstack/react-query": "^5.100.10",
+    "@vritti/quantum-ui": "0.3.1",
     "axios": "^1.13.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -37,9 +37,9 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@rsbuild/core": "^1.7.2",
-    "@rsbuild/plugin-node-polyfill": "^1.4.3",
-    "@rsbuild/plugin-react": "^1.4.3",
+    "@rsbuild/core": "2.0.6",
+    "@rsbuild/plugin-node-polyfill": "^1.4.4",
+    "@rsbuild/plugin-react": "2.0.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
