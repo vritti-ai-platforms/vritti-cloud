@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { NewEmailFormData, NewPhoneFormData } from '@schemas/verification';
 import { newEmailSchema, newPhoneSchema } from '@schemas/verification';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -7,6 +6,7 @@ import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
 import { PhoneField } from '@vritti/quantum-ui/PhoneField';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Info } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -45,7 +45,6 @@ export const NewContactStep: React.FC<NewContactStepProps> = ({ contactType, cur
         form={emailForm}
         mutation={submitMutation}
         transformSubmit={(data) => ({ channel: targetChannel, target: data.newEmail })}
-       
       >
         <FieldGroup>
           <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">
@@ -71,7 +70,6 @@ export const NewContactStep: React.FC<NewContactStepProps> = ({ contactType, cur
       form={phoneForm}
       mutation={submitMutation}
       transformSubmit={(data) => ({ channel: targetChannel, target: data.newPhone })}
-     
     >
       <FieldGroup>
         <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">

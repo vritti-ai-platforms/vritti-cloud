@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   useFeatureMicrofrontends,
   useRemoveFeatureMicrofrontend,
@@ -9,10 +8,11 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
+import { keyBy } from '@vritti/quantum-ui/lodash';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { MicrofrontendSelector } from '@vritti/quantum-ui/selects/microfrontend';
 import { TextField } from '@vritti/quantum-ui/TextField';
-import { keyBy } from 'lodash';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Globe, LinkIcon, Monitor, Smartphone, Unlink } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';

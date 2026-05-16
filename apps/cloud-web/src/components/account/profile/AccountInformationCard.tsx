@@ -2,8 +2,8 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import type React from 'react';
-import { AccountStatus } from '@/schemas/cloud/account';
 import type { ProfileData } from '@/schemas/cloud/account';
+import { AccountStatus } from '@/schemas/cloud/account';
 
 // Maps account status to badge variant
 function getStatusBadgeVariant(status: AccountStatus): 'default' | 'secondary' | 'destructive' | 'outline' {

@@ -1,4 +1,9 @@
-import { roleTemplateAppsTableKey, useAddRoleTemplateApp, useRemoveRoleTemplateApp, useRoleTemplateAppsTable } from '@hooks/admin/role-templates';
+import {
+  roleTemplateAppsTableKey,
+  useAddRoleTemplateApp,
+  useRemoveRoleTemplateApp,
+  useRoleTemplateAppsTable,
+} from '@hooks/admin/role-templates';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';

@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useOrgPermissions } from '@hooks/cloud/org-roles';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -8,6 +7,7 @@ import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { AppWindow, Shield } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -213,17 +213,14 @@ export const OrgRoleForm: React.FC<OrgRoleFormProps> = ({ orgId, role, onSubmit,
                         const featureTypes = selected.get(feature.code);
                         const isAllSelected =
                           featureTypes !== undefined && featureTypes.size === feature.permissions.length;
-                        const isPartial =
-                          featureTypes !== undefined && featureTypes.size > 0 && !isAllSelected;
+                        const isPartial = featureTypes !== undefined && featureTypes.size > 0 && !isAllSelected;
 
                         return (
                           <div key={feature.code} className="flex items-start gap-4 px-10 py-3">
                             <div className="pt-0.5">
                               <Checkbox
                                 checked={isAllSelected ? true : isPartial ? 'indeterminate' : false}
-                                onCheckedChange={() =>
-                                  toggleAllFeatureTypes(feature.code, feature.permissions)
-                                }
+                                onCheckedChange={() => toggleAllFeatureTypes(feature.code, feature.permissions)}
                               />
                             </div>
                             <div className="flex-1 min-w-0">

@@ -64,7 +64,9 @@ export const RoleTemplateSwitcher = ({ versionSlug, currentRoleId, currentRoleNa
       }
       onOptionSelect={(option) => {
         if (option) {
-          navigate(`/versions/${versionSlug}/role-templates/rt-${buildSlug(String(option.label), String(option.value))}`);
+          navigate(
+            `/versions/${versionSlug}/role-templates/rt-${buildSlug(String(option.label), String(option.value))}`,
+          );
         }
       }}
     />

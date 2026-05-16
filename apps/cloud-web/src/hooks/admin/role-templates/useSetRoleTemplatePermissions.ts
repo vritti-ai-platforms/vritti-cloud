@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import type { SetPermissionsData } from '@/schemas/admin/role-templates';
 import { setRoleTemplatePermissions } from '../../../services/admin/role-templates.service';
 import { roleTemplateQueryKey } from './useRoleTemplate';

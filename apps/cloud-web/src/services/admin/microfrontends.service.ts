@@ -37,18 +37,10 @@ export function updateMicrofrontend({
   id: string;
   data: UpdateMicrofrontendData;
 }): Promise<SuccessResponse> {
-  return axios
-    .patch<SuccessResponse>(`admin-api/versions/${versionId}/microfrontends/${id}`, data)
-    .then((r) => r.data);
+  return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/microfrontends/${id}`, data).then((r) => r.data);
 }
 
 // Deletes a microfrontend by ID
-export function deleteMicrofrontend({
-  versionId,
-  id,
-}: {
-  versionId: string;
-  id: string;
-}): Promise<void> {
+export function deleteMicrofrontend({ versionId, id }: { versionId: string; id: string }): Promise<void> {
   return axios.delete(`admin-api/versions/${versionId}/microfrontends/${id}`).then(() => undefined);
 }

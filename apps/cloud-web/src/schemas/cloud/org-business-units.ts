@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 export type BusinessUnitType = 'ORGANIZATION' | 'REGION' | 'FRANCHISEE' | 'BRANCH' | 'TEAM' | 'DEPARTMENT' | 'CUSTOM';
 

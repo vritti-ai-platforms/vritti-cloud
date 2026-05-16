@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { OTPFormData } from '@schemas/verification';
 import { otpSchema } from '@schemas/verification';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -6,6 +5,7 @@ import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { useTimer } from '@vritti/quantum-ui/hooks';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Clock, Info } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -49,7 +49,6 @@ export const OtpVerificationStep: React.FC<OtpVerificationStepProps> = ({
       form={form}
       mutation={verifyMutation}
       transformSubmit={(data) => ({ channel: targetChannel, otpCode: data.otpCode })}
-     
     >
       <FieldGroup>
         <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">

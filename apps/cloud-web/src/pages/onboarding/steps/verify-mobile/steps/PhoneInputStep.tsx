@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useInitiateMobileVerification } from '@hooks/onboarding/mobile-verification';
 import type { PhoneFormData } from '@schemas/auth';
 import { phoneSchema } from '@schemas/auth';
@@ -7,6 +6,7 @@ import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
 import { PhoneField } from '@vritti/quantum-ui/PhoneField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { ArrowLeft } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -67,7 +67,6 @@ export const PhoneInputStep: React.FC<PhoneInputStepProps> = ({ onSuccess, onBac
           phoneCountry: data.phoneCountry,
           method: 'manual' as const,
         })}
-       
       >
         <FieldGroup>
           <PhoneField name="phone" label="Phone Number" defaultCountry="IN" />

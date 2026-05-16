@@ -1,8 +1,8 @@
+import type { BackupCodesResponse } from '@services/account/security.service';
+import { verifyTotpSetup } from '@services/account/security.service';
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { BackupCodesResponse } from '@services/account/security.service';
-import { verifyTotpSetup } from '@services/account/security.service';
 import { MFA_STATUS_QUERY_KEY } from './useMfaStatus';
 
 export function useVerifyTotpSetup(

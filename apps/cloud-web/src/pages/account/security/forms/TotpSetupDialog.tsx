@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useInitiateTotpSetup, useVerifyTotpSetup } from '@hooks/account/security';
 import type { OTPFormData } from '@schemas/auth';
 import { otpSchema } from '@schemas/auth';
@@ -9,6 +8,7 @@ import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Eye } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import type React from 'react';
@@ -40,11 +40,7 @@ export const TotpSetupDialog: React.FC<Props> = ({ handle }) => {
   if (backupCodes) {
     return (
       <Dialog handle={handle} title="Save Your Backup Codes">
-        <BackupCodesView
-          backupCodes={backupCodes.backupCodes}
-          warning={backupCodes.warning}
-          onDone={handle.close}
-        />
+        <BackupCodesView backupCodes={backupCodes.backupCodes} warning={backupCodes.warning} onDone={handle.close} />
       </Dialog>
     );
   }
@@ -116,12 +112,7 @@ export const TotpSetupDialog: React.FC<Props> = ({ handle }) => {
             </div>
 
             <Field>
-              <Button
-                type="submit"
-                className="w-full"
-                loadingText="Verifying..."
-                disabled={!totpData}
-              >
+              <Button type="submit" className="w-full" loadingText="Verifying..." disabled={!totpData}>
                 Verify & Enable
               </Button>
             </Field>

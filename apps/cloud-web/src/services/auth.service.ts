@@ -169,9 +169,7 @@ export interface AuthenticationResponseJSON {
 
 // Starts passkey authentication flow
 export function startPasskeyLogin(email?: string): Promise<PasskeyAuthOptionsResponse> {
-  return axios
-    .post<PasskeyAuthOptionsResponse>('auth/passkey/start', { email }, { public: true })
-    .then((r) => r.data);
+  return axios.post<PasskeyAuthOptionsResponse>('auth/passkey/start', { email }, { public: true }).then((r) => r.data);
 }
 
 // Verifies passkey authentication and logs in the user

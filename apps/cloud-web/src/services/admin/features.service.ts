@@ -18,7 +18,10 @@ export function createFeature(versionId: string, data: CreateFeatureData): Promi
 }
 
 // Updates a feature by ID
-export function updateFeature(versionId: string, { id, data }: { id: string; data: UpdateFeatureData }): Promise<SuccessResponse> {
+export function updateFeature(
+  versionId: string,
+  { id, data }: { id: string; data: UpdateFeatureData },
+): Promise<SuccessResponse> {
   return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/features/${id}`, data).then((r) => r.data);
 }
 

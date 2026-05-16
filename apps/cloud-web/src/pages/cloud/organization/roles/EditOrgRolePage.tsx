@@ -26,10 +26,7 @@ export const EditOrgRolePage = () => {
       scope: data.scope,
       features: data.features,
     };
-    updateMutation.mutate(
-      { orgId, roleId, data: updateData },
-      { onSuccess: () => navigate('..', { replace: true }) },
-    );
+    updateMutation.mutate({ orgId, roleId, data: updateData }, { onSuccess: () => navigate('..', { replace: true }) });
   }
 
   return (
@@ -38,11 +35,7 @@ export const EditOrgRolePage = () => {
         title={`Edit ${role?.name ?? 'Role'}`}
         description="Update role details and permissions."
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('..')}
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate('..')}>
             Cancel
           </Button>
         }
@@ -61,21 +54,14 @@ export const EditOrgRolePage = () => {
 
       {!isLoading && !role && (
         <Card>
-          <CardContent className="p-6 text-center text-sm text-muted-foreground">
-            Role not found.
-          </CardContent>
+          <CardContent className="p-6 text-center text-sm text-muted-foreground">Role not found.</CardContent>
         </Card>
       )}
 
       {!isLoading && role && (
         <Card>
           <CardContent className="p-6">
-            <OrgRoleForm
-              orgId={orgId}
-              role={role}
-              onSubmit={handleSubmit}
-              isPending={updateMutation.isPending}
-            />
+            <OrgRoleForm orgId={orgId} role={role} onSubmit={handleSubmit} isPending={updateMutation.isPending} />
           </CardContent>
         </Card>
       )}

@@ -89,11 +89,7 @@ export const OverviewPage = () => {
               Edit
             </Button>
             {!version.snapshot && (
-              <Button
-                size="sm"
-                startAdornment={<Camera className="size-4" />}
-                onClick={handleCreateSnapshot}
-              >
+              <Button size="sm" startAdornment={<Camera className="size-4" />} onClick={handleCreateSnapshot}>
                 Create Snapshot
               </Button>
             )}

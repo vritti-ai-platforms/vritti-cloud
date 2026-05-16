@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateBusiness } from '@hooks/admin/businesses';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { AppCodeSelector } from '@vritti/quantum-ui/selects/app-code';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import type { Business } from '@/schemas/admin/businesses';
@@ -29,7 +29,13 @@ export const EditBusinessForm: React.FC<EditBusinessFormProps> = ({ business, on
   const updateMutation = useUpdateBusiness({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: business.id, data })}>
+    <Form
+      form={form}
+      mutation={updateMutation}
+      resetOnSuccess={false}
+      onCancel={onCancel}
+      transformSubmit={(data) => ({ id: business.id, data })}
+    >
       <TextField name="name" label="Business Name" placeholder="e.g. Healthcare" />
       <TextField
         name="code"

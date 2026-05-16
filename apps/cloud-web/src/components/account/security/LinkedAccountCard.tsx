@@ -1,8 +1,8 @@
-import { getRelativeTime } from '@/utils/getRelativeTime';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import type React from 'react';
+import { getRelativeTime } from '@/utils/getRelativeTime';
 
 const PROVIDER_META: Record<string, { label: string; color: string }> = {
   GOOGLE: { label: 'Google', color: 'text-foreground' },

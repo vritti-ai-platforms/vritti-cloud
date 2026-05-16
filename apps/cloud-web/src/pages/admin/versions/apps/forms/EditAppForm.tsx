@@ -1,8 +1,8 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateApp } from '@hooks/admin/apps';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
@@ -31,7 +31,13 @@ export const EditAppForm: React.FC<EditAppFormProps> = ({ app, onSuccess, onCanc
   const updateMutation = useUpdateApp(versionId, { onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: app.id, data })}>
+    <Form
+      form={form}
+      mutation={updateMutation}
+      resetOnSuccess={false}
+      onCancel={onCancel}
+      transformSubmit={(data) => ({ id: app.id, data })}
+    >
       <TextField name="code" label="App Code" placeholder="e.g. crm" description="Lowercase with hyphens" />
       <TextField name="name" label="App Name" placeholder="e.g. CRM" />
       <TextField name="description" label="Description" placeholder="Optional description" />

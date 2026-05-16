@@ -1,7 +1,7 @@
-import { useOnboarding } from '@/providers/OnboardingProvider';
 import type { BackupCodesResponse } from '@services/onboarding.service';
 import type React from 'react';
 import { useState } from 'react';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 import { AuthenticatorSetupStep } from './steps/AuthenticatorSetupStep';
 import { BackupCodesStep } from './steps/BackupCodesStep';
 import { MethodSelectionStep } from './steps/MethodSelectionStep';

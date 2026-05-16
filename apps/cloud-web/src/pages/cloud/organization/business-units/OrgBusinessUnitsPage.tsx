@@ -5,9 +5,9 @@ import { HierarchyGraph } from '@vritti/quantum-ui/HierarchyGraph';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Building2, Plus } from 'lucide-react';
 import { useCallback, useMemo, useRef } from 'react';
-import { buildSlug } from '@vritti/quantum-ui/slug';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { BusinessUnit, CreateBusinessUnitData } from '@/schemas/cloud/org-business-units';
 import { BUNodeCard } from './components/BUNodeCard';
@@ -28,10 +28,7 @@ export const OrgBusinessUnitsPage = () => {
   // Creates a new business unit
   function handleCreate(data: CreateBusinessUnitData) {
     const cleaned = { ...data, parentId: data.parentId || undefined };
-    createMutation.mutate(
-      { orgId, data: cleaned },
-      { onSuccess: () => createDialog.close() },
-    );
+    createMutation.mutate({ orgId, data: cleaned }, { onSuccess: () => createDialog.close() });
   }
 
   // Opens the create dialog with optional parent pre-selected
@@ -94,12 +91,7 @@ export const OrgBusinessUnitsPage = () => {
           <p className="text-xs text-muted-foreground mt-1">
             Create your first business unit to define your organization's structure.
           </p>
-          <Button
-            startAdornment={<Plus className="size-4" />}
-            size="sm"
-            className="mt-4"
-            onClick={createDialog.open}
-          >
+          <Button startAdornment={<Plus className="size-4" />} size="sm" className="mt-4" onClick={createDialog.open}>
             Create Business Unit
           </Button>
         </div>

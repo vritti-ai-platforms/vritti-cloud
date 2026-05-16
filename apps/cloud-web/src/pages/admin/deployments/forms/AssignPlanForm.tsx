@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useAssignDeploymentPlan } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { PlanSelector } from '@vritti/quantum-ui/selects/plan';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type AssignPlanData, assignPlanSchema } from '@/schemas/admin/deployments';

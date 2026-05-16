@@ -13,7 +13,11 @@ import type { PlanOption } from '@/services/cloud/infrastructure.service';
 // Returns undefined if value is falsy or not valid JSON
 function safeParse(value: string | null | undefined) {
   if (!value) return undefined;
-  try { return JSON.parse(value); } catch { return undefined; }
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
 }
 
 interface ChoosePlanStepProps {

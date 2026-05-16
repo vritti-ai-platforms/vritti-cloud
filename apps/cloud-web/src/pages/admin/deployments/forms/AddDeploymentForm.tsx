@@ -1,13 +1,13 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { Select } from '@vritti/quantum-ui/Select';
-import { TextField } from '@vritti/quantum-ui/TextField';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
 import { VersionSelector } from '@vritti/quantum-ui/selects/version';
+import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type CreateDeploymentData, createDeploymentSchema } from '@/schemas/admin/deployments';

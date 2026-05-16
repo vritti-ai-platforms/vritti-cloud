@@ -14,10 +14,7 @@ export const CreateOrgRolePage = () => {
 
   // Creates the role and navigates back to roles list
   function handleSubmit(data: CreateOrgRoleData) {
-    createMutation.mutate(
-      { orgId, data },
-      { onSuccess: () => navigate('..', { replace: true }) },
-    );
+    createMutation.mutate({ orgId, data }, { onSuccess: () => navigate('..', { replace: true }) });
   }
 
   return (
@@ -26,22 +23,14 @@ export const CreateOrgRolePage = () => {
         title="Create Role"
         description="Define a new role with permissions for your organization."
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => navigate('..')}
-          >
+          <Button variant="outline" size="sm" onClick={() => navigate('..')}>
             Cancel
           </Button>
         }
       />
       <Card>
         <CardContent className="p-6">
-          <OrgRoleForm
-            orgId={orgId}
-            onSubmit={handleSubmit}
-            isPending={createMutation.isPending}
-          />
+          <OrgRoleForm orgId={orgId} onSubmit={handleSubmit} isPending={createMutation.isPending} />
         </CardContent>
       </Card>
     </div>

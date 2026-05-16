@@ -13,7 +13,19 @@ interface SnapshotViewProps {
   snapshot: VersionSnapshot;
 }
 
-const StatPill = ({ icon: Icon, label, value, color, bg }: { icon: React.FC<{ className?: string }>; label: string; value: number; color: string; bg: string }) => (
+const StatPill = ({
+  icon: Icon,
+  label,
+  value,
+  color,
+  bg,
+}: {
+  icon: React.FC<{ className?: string }>;
+  label: string;
+  value: number;
+  color: string;
+  bg: string;
+}) => (
   <Card>
     <CardContent className="flex items-center gap-3 px-4 py-3">
       <div className={`flex items-center justify-center w-8 h-8 rounded-lg ${bg}`}>
@@ -73,7 +85,10 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
       </div>
 
       {/* Apps → Features hierarchy */}
-      <Collapsible defaultOpen trigger={<SectionHeader icon={Layers} title="Applications" count={apps.length} color="text-primary" />}>
+      <Collapsible
+        defaultOpen
+        trigger={<SectionHeader icon={Layers} title="Applications" count={apps.length} color="text-primary" />}
+      >
         {apps.length > 0 ? (
           <div className="space-y-3 mt-3">
             {apps.map((app) => (
@@ -93,7 +108,12 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
         const unassigned = features.filter((f) => !assignedCodes.has(f.code));
         if (unassigned.length === 0) return null;
         return (
-          <Collapsible defaultOpen trigger={<SectionHeader icon={Globe} title="Unassigned Features" count={unassigned.length} color="text-success" />}>
+          <Collapsible
+            defaultOpen
+            trigger={
+              <SectionHeader icon={Globe} title="Unassigned Features" count={unassigned.length} color="text-success" />
+            }
+          >
             <div className="grid gap-2 mt-3">
               {unassigned.map((f) => (
                 <FeatureRow key={f.code} feature={f} />

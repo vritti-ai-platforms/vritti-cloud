@@ -1,8 +1,8 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdatePlan } from '@hooks/admin/plans';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import type { Plan } from '@/schemas/admin/plans';
@@ -23,7 +23,13 @@ export const EditPlanForm: React.FC<EditPlanFormProps> = ({ plan, onSuccess, onC
   const updateMutation = useUpdatePlan({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} resetOnSuccess={false} onCancel={onCancel} transformSubmit={(data) => ({ id: plan.id, data })}>
+    <Form
+      form={form}
+      mutation={updateMutation}
+      resetOnSuccess={false}
+      onCancel={onCancel}
+      transformSubmit={(data) => ({ id: plan.id, data })}
+    >
       <TextField name="name" label="Plan Name" placeholder="e.g. Pro" />
       <TextField name="code" label="Code" placeholder="e.g. pro" description="Unique code identifier for this plan" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">

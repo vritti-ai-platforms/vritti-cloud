@@ -50,9 +50,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onToggle, onPurchase, isT
               </Badge>
             </div>
 
-            {app.description && (
-              <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{app.description}</p>
-            )}
+            {app.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{app.description}</p>}
 
             {/* Addon pricing */}
             {app.status === 'addon' && app.price && (
@@ -81,11 +79,7 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onToggle, onPurchase, isT
           {/* Actions */}
           <div className="shrink-0">
             {app.status === 'included' && (
-              <Switch
-                checked={true}
-                onCheckedChange={() => onToggle(app)}
-                disabled={isToggling}
-              />
+              <Switch checked={true} onCheckedChange={() => onToggle(app)} disabled={isToggling} />
             )}
             {app.status === 'addon' && (
               <Button

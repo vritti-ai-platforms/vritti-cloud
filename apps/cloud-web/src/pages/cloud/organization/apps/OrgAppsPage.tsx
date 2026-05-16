@@ -1,9 +1,4 @@
-import {
-  useDisableApp,
-  useEnableApp,
-  useOrgApps,
-  usePurchaseAddon,
-} from '@hooks/cloud/org-apps';
+import { useDisableApp, useEnableApp, useOrgApps, usePurchaseAddon } from '@hooks/cloud/org-apps';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -67,10 +62,7 @@ export const OrgAppsPage = () => {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title="Applications"
-        description="Manage the applications available to your organization"
-      />
+      <PageHeader title="Applications" description="Manage the applications available to your organization" />
 
       {isLoading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -103,8 +95,7 @@ export const OrgAppsPage = () => {
                 onPurchase={handlePurchase}
                 isToggling={
                   (enableMutation.isPending || disableMutation.isPending) &&
-                  (enableMutation.variables?.appId === app.id ||
-                    disableMutation.variables?.appId === app.id)
+                  (enableMutation.variables?.appId === app.id || disableMutation.variables?.appId === app.id)
                 }
               />
             ))}
@@ -118,13 +109,7 @@ export const OrgAppsPage = () => {
           <h2 className="text-sm font-semibold text-muted-foreground mb-3">Available add-ons</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {addonApps.map((app) => (
-              <AppCard
-                key={app.id}
-                app={app}
-                onToggle={handleToggle}
-                onPurchase={handlePurchase}
-                isToggling={false}
-              />
+              <AppCard key={app.id} app={app} onToggle={handleToggle} onPurchase={handlePurchase} isToggling={false} />
             ))}
           </div>
         </section>
@@ -136,13 +121,7 @@ export const OrgAppsPage = () => {
           <h2 className="text-sm font-semibold text-muted-foreground mb-3">Not available</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {unavailableApps.map((app) => (
-              <AppCard
-                key={app.id}
-                app={app}
-                onToggle={handleToggle}
-                onPurchase={handlePurchase}
-                isToggling={false}
-              />
+              <AppCard key={app.id} app={app} onToggle={handleToggle} onPurchase={handlePurchase} isToggling={false} />
             ))}
           </div>
         </section>

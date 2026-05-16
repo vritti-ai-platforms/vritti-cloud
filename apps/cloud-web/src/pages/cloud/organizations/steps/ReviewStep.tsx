@@ -116,7 +116,6 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       <Form
         form={form}
         mutation={createMutation}
-       
         resetOnSuccess={false}
         transformSubmit={(data) => {
           const formData = new FormData();

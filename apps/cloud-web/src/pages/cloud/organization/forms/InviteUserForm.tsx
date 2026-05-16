@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useInviteUser } from '@hooks/cloud/organizations/useInviteUser';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { PhoneField } from '@vritti/quantum-ui/PhoneField';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type InviteUserFormData, inviteUserSchema } from '@/schemas/cloud/organizations';
@@ -37,7 +37,6 @@ export const InviteUserForm: React.FC<InviteUserFormProps> = ({ orgId, onSuccess
     <Form
       form={form}
       mutation={inviteMutation}
-     
       transformSubmit={(data) => ({
         email: data.email,
         fullName: data.fullName,

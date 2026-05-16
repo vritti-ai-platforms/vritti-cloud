@@ -1,4 +1,9 @@
-import { APP_FEATURES_TABLE_KEY, useAppFeaturesTable, useAssignAppFeature, useRemoveAppFeature } from '@hooks/admin/apps';
+import {
+  APP_FEATURES_TABLE_KEY,
+  useAppFeaturesTable,
+  useAssignAppFeature,
+  useRemoveAppFeature,
+} from '@hooks/admin/apps';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';

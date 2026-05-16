@@ -5,7 +5,10 @@ import type { CreateRoleTemplateData, Role } from '@/schemas/admin/role-template
 import { createRoleTemplate } from '../../../services/admin/role-templates.service';
 import { ROLE_TEMPLATES_QUERY_KEY } from './useRoleTemplates';
 
-type UseCreateRoleTemplateOptions = Omit<UseMutationOptions<CreateResponse<Role>, AxiosError, CreateRoleTemplateData>, 'mutationFn'>;
+type UseCreateRoleTemplateOptions = Omit<
+  UseMutationOptions<CreateResponse<Role>, AxiosError, CreateRoleTemplateData>,
+  'mutationFn'
+>;
 
 export function useCreateRoleTemplate(versionId: string, options?: UseCreateRoleTemplateOptions) {
   const queryClient = useQueryClient();

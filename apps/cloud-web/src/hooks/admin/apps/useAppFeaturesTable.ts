@@ -3,7 +3,8 @@ import type { AxiosError } from 'axios';
 import type { AppFeaturesTableResponse } from '@/schemas/admin/apps';
 import { getAppFeaturesTable } from '../../../services/admin/apps.service';
 
-export const APP_FEATURES_TABLE_KEY = (versionId: string, appId: string) => ['admin', 'versions', versionId, 'apps', appId, 'features', 'table'] as const;
+export const APP_FEATURES_TABLE_KEY = (versionId: string, appId: string) =>
+  ['admin', 'versions', versionId, 'apps', appId, 'features', 'table'] as const;
 
 // Fetches app features for the data table — server applies filter/sort state
 export function useAppFeaturesTable(

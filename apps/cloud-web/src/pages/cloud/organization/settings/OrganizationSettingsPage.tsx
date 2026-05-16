@@ -1,6 +1,4 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import { Avatar, AvatarFallback, AvatarImage } from '@vritti/quantum-ui/Avatar';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
@@ -13,16 +11,18 @@ import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { UploadFile } from '@vritti/quantum-ui/UploadFile';
+import { zodResolver } from '@vritti/quantum-ui/zod';
+import type { AxiosError } from 'axios';
 import { Building2, Edit } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
-import { deleteOrganization } from '@/services/cloud/organizations.service';
 import { useMediaUrl } from '@/hooks/cloud/media/useMediaUrl';
 import { useOrganization, useUpdateOrganization } from '@/hooks/cloud/organizations';
-import { OrgSize, updateOrganizationSchema } from '@/schemas/cloud/organizations';
 import type { UpdateOrgFormData } from '@/schemas/cloud/organizations';
+import { OrgSize, updateOrganizationSchema } from '@/schemas/cloud/organizations';
+import { deleteOrganization } from '@/services/cloud/organizations.service';
 
 const SIZE_OPTIONS = [
   { value: '0-10', label: '0-10 employees' },
@@ -71,16 +71,16 @@ export const OrganizationSettingsPage: React.FC = () => {
 
   const deleteMutation = useMutation<void, AxiosError>({
     mutationFn: () => deleteOrganization(orgId),
-    onSuccess: () => navigate("/", { replace: true }),
+    onSuccess: () => navigate('/', { replace: true }),
   });
 
   // Confirms and deletes the organization
   async function handleDelete() {
     const confirmed = await confirm({
-      title: `Delete ${org?.name ?? "organization"}?`,
-      description: "This organization and all its data will be permanently removed. This action cannot be undone.",
-      confirmLabel: "Delete",
-      variant: "destructive",
+      title: `Delete ${org?.name ?? 'organization'}?`,
+      description: 'This organization and all its data will be permanently removed. This action cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'destructive',
     });
     if (confirmed) deleteMutation.mutate();
   }
@@ -138,7 +138,6 @@ export const OrganizationSettingsPage: React.FC = () => {
         id="org-settings-form"
         form={form}
         mutation={updateOrgMutation}
-       
         transformSubmit={(data) => {
           const formData = new FormData();
           formData.append('name', data.name);
@@ -291,7 +290,7 @@ export const OrganizationSettingsPage: React.FC = () => {
       {/* Delete Organization */}
       <DangerZone
         title="Delete Organization"
-        description={`Permanently delete ${org?.name ?? "this organization"} and all its data. This action cannot be undone.`}
+        description={`Permanently delete ${org?.name ?? 'this organization'} and all its data. This action cannot be undone.`}
         buttonText="Delete Organization"
         onClick={handleDelete}
         disabled={deleteMutation.isPending}

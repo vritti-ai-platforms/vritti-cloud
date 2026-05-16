@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import type { UpdateBusinessUnitData } from '@/schemas/cloud/org-business-units';
 import { updateOrgBusinessUnit } from '../../../services/cloud/org-business-units.service';
 import { ORG_BU_QUERY_KEY } from './useOrgBusinessUnits';

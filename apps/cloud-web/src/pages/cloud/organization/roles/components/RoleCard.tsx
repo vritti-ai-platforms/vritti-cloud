@@ -53,9 +53,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({ role, onEdit, onDelete }) =>
               )}
             </div>
 
-            {role.description && (
-              <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{role.description}</p>
-            )}
+            {role.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{role.description}</p>}
 
             <div className="flex items-center gap-4">
               <Badge variant="secondary" className={`text-xs ${scopeBadge.className}`}>

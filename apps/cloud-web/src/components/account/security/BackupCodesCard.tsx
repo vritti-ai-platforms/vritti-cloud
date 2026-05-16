@@ -10,12 +10,7 @@ interface BackupCodesCardProps {
   isRegenerating: boolean;
 }
 
-export const BackupCodesCard: React.FC<BackupCodesCardProps> = ({
-  remaining,
-  total,
-  onRegenerate,
-  isRegenerating,
-}) => (
+export const BackupCodesCard: React.FC<BackupCodesCardProps> = ({ remaining, total, onRegenerate, isRegenerating }) => (
   <div className="border border-border rounded-lg p-4">
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-3">

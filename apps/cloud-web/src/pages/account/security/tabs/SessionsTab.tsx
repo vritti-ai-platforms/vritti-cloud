@@ -47,53 +47,53 @@ export const SessionsTab: React.FC = () => {
       description="Manage devices where you're currently signed in"
       isLoading={isLoading}
     >
-          <div className="space-y-4">
-            {currentSession && <SessionCard session={currentSession} isCurrent />}
+      <div className="space-y-4">
+        {currentSession && <SessionCard session={currentSession} isCurrent />}
 
-            {otherSessions && otherSessions.length > 0 && (
-              <>
-                <Separator />
-                <div className="space-y-3">
-                  {otherSessions.map((session) => (
-                    <SessionCard
-                      key={session.sessionId}
-                      session={session}
-                      isCurrent={false}
-                      onRevoke={() => handleRevokeSession(session.sessionId)}
-                      isRevoking={revokeSessionMutation.isPending}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
+        {otherSessions && otherSessions.length > 0 && (
+          <>
+            <Separator />
+            <div className="space-y-3">
+              {otherSessions.map((session) => (
+                <SessionCard
+                  key={session.sessionId}
+                  session={session}
+                  isCurrent={false}
+                  onRevoke={() => handleRevokeSession(session.sessionId)}
+                  isRevoking={revokeSessionMutation.isPending}
+                />
+              ))}
+            </div>
+          </>
+        )}
 
-            {otherSessions && otherSessions.length === 0 && (
-              <>
-                <Separator />
-                <div className="text-center py-6">
-                  <Typography variant="body2" intent="muted">
-                    No other active sessions
-                  </Typography>
-                </div>
-              </>
-            )}
+        {otherSessions && otherSessions.length === 0 && (
+          <>
+            <Separator />
+            <div className="text-center py-6">
+              <Typography variant="body2" intent="muted">
+                No other active sessions
+              </Typography>
+            </div>
+          </>
+        )}
 
-            {otherSessions && otherSessions.length > 0 && (
-              <>
-                <Separator />
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleRevokeAll}
-                  disabled={revokeAllMutation.isPending}
-                  className="w-full"
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out All Sessions
-                </Button>
-              </>
-            )}
-          </div>
+        {otherSessions && otherSessions.length > 0 && (
+          <>
+            <Separator />
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleRevokeAll}
+              disabled={revokeAllMutation.isPending}
+              className="w-full"
+            >
+              <LogOut className="h-4 w-4 mr-2" />
+              Sign Out All Sessions
+            </Button>
+          </>
+        )}
+      </div>
     </SecurityTabCard>
   );
 };

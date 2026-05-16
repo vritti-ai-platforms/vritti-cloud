@@ -33,10 +33,7 @@ export const OverviewTab = ({ orgId, unit, allUnits }: OverviewTabProps) => {
   // Handles update and closes dialog
   function handleUpdate(data: CreateBusinessUnitData) {
     const cleaned = { ...data, parentId: data.parentId || undefined };
-    updateMutation.mutate(
-      { orgId, buId: unit.id, data: cleaned },
-      { onSuccess: () => editDialog.close() },
-    );
+    updateMutation.mutate({ orgId, buId: unit.id, data: cleaned }, { onSuccess: () => editDialog.close() });
   }
 
   return (

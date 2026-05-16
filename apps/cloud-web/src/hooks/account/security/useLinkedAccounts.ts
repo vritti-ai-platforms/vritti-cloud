@@ -1,4 +1,4 @@
-import { type LinkedAccountsResponse, getLinkedAccounts } from '@services/account/security.service';
+import { getLinkedAccounts, type LinkedAccountsResponse } from '@services/account/security.service';
 import { useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 

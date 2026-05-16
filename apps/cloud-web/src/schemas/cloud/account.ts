@@ -1,5 +1,5 @@
 import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 // Validation schema for profile update form
 export const profileSchema = z.object({
@@ -59,4 +59,3 @@ export interface ProfileData {
   createdAt: string;
   lastLoginAt: string | null;
 }
-

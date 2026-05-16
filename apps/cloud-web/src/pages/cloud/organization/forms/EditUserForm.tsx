@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { ORG_USERS_QUERY_KEY } from '@hooks/cloud/organizations/useOrgUsers';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -7,10 +6,10 @@ import { Select } from '@vritti/quantum-ui/Select';
 import { LocaleSelector } from '@vritti/quantum-ui/selects/locale';
 import { TimezoneSelector } from '@vritti/quantum-ui/selects/timezone';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { z, zodResolver } from '@vritti/quantum-ui/zod';
 import type { AxiosError } from 'axios';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import type { NexusUser } from '@/schemas/cloud/organizations';
 import { type SuccessResponse, updateOrgUser } from '@/services/cloud/organizations.service';
 

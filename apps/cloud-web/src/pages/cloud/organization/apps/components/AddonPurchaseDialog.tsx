@@ -88,9 +88,7 @@ export const AddonPurchaseDialog: React.FC<AddonPurchaseDialogProps> = ({
                 >
                   <div
                     className={`flex items-center justify-center size-4 rounded border shrink-0 transition-colors ${
-                      isChecked
-                        ? 'bg-primary border-primary text-primary-foreground'
-                        : 'border-border'
+                      isChecked ? 'bg-primary border-primary text-primary-foreground' : 'border-border'
                     }`}
                   >
                     {isChecked && <Check className="size-3" />}

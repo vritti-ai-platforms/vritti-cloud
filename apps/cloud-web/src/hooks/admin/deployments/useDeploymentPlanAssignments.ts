@@ -1,5 +1,5 @@
-import type { AxiosError } from 'axios';
 import { useQuery } from '@tanstack/react-query';
+import type { AxiosError } from 'axios';
 import type { DeploymentPlanAssignment } from '@/schemas/admin/deployments';
 import { getDeploymentPlanAssignments } from '../../../services/admin/deployments.service';
 

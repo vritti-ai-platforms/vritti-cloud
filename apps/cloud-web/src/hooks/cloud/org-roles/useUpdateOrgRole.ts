@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import type { UpdateOrgRoleData } from '@/schemas/cloud/org-roles';
 import { updateOrgRole } from '../../../services/cloud/org-roles.service';
 import { ORG_ROLES_QUERY_KEY } from './useOrgRoles';

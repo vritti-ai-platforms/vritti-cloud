@@ -1,12 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreatePrice } from '@hooks/admin/prices';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { TextField } from '@vritti/quantum-ui/TextField';
-import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
-import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { CurrencySelector } from '@vritti/quantum-ui/selects/currency';
+import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type CreatePriceData, createPriceSchema } from '@/schemas/admin/prices';

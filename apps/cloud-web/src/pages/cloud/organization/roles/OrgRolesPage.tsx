@@ -54,11 +54,7 @@ export const OrgRolesPage = () => {
             >
               From Template
             </Button>
-            <Button
-              startAdornment={<Plus className="size-4" />}
-              size="sm"
-              onClick={() => navigate('create')}
-            >
+            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={() => navigate('create')}>
               Custom Role
             </Button>
           </div>
@@ -77,9 +73,7 @@ export const OrgRolesPage = () => {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Shield className="size-10 text-muted-foreground mb-3" />
           <p className="text-sm font-medium text-foreground">No roles defined</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Create your first role to manage access control.
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Create your first role to manage access control.</p>
           <div className="flex gap-2 mt-4">
             <Button
               startAdornment={<Copy className="size-4" />}
@@ -89,11 +83,7 @@ export const OrgRolesPage = () => {
             >
               From Template
             </Button>
-            <Button
-              startAdornment={<Plus className="size-4" />}
-              size="sm"
-              onClick={() => navigate('create')}
-            >
+            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={() => navigate('create')}>
               Custom Role
             </Button>
           </div>
@@ -125,11 +115,7 @@ export const OrgRolesPage = () => {
       )}
 
       {/* Template picker dialog — stays as dialog since it's a quick picker */}
-      <TemplatePickerDialog
-        orgId={orgId}
-        handle={templateDialog}
-        onSuccess={templateDialog.close}
-      />
+      <TemplatePickerDialog orgId={orgId} handle={templateDialog} onSuccess={templateDialog.close} />
     </div>
   );
 };

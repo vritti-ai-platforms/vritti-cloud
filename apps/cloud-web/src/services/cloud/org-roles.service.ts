@@ -1,5 +1,5 @@
-import { axios } from '@vritti/quantum-ui/axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateOrgRoleData, OrgRole, RoleTemplate, UpdateOrgRoleData } from '@/schemas/cloud/org-roles';
 
 // Fetches all roles for the organization
@@ -22,9 +22,7 @@ export function updateOrgRole({
   roleId: string;
   data: UpdateOrgRoleData;
 }): Promise<SuccessResponse> {
-  return axios
-    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/roles/${roleId}`, data)
-    .then((r) => r.data);
+  return axios.patch<SuccessResponse>(`cloud-api/organizations/${orgId}/roles/${roleId}`, data).then((r) => r.data);
 }
 
 // Deletes a role from the organization

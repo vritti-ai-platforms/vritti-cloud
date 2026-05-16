@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 export type DeploymentStatus = 'active' | 'stopped' | 'provisioning';
 export type DeploymentType = 'shared' | 'dedicated';

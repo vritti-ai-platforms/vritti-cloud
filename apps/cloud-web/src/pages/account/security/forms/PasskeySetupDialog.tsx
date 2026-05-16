@@ -37,11 +37,7 @@ export const PasskeySetupDialog: React.FC<Props> = ({ handle }) => {
   if (backupCodes) {
     return (
       <Dialog handle={handle} title="Save Your Backup Codes">
-        <BackupCodesView
-          backupCodes={backupCodes.backupCodes}
-          warning={backupCodes.warning}
-          onDone={handle.close}
-        />
+        <BackupCodesView backupCodes={backupCodes.backupCodes} warning={backupCodes.warning} onDone={handle.close} />
       </Dialog>
     );
   }

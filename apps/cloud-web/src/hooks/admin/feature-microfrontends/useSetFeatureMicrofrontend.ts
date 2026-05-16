@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import { setFeatureMicrofrontend } from '../../../services/admin/feature-microfrontends.service';
 import { featureMicrofrontendsKey } from './useFeatureMicrofrontends';
 

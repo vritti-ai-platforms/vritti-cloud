@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateMicrofrontend } from '@hooks/admin/microfrontends';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type CreateMicrofrontendData, createMicrofrontendSchema } from '@/schemas/admin/microfrontends';
@@ -27,7 +27,6 @@ export const AddMicrofrontendForm: React.FC<AddMicrofrontendFormProps> = ({ vers
       form={form}
       mutation={createMutation}
       transformSubmit={(data: CreateMicrofrontendData) => ({ versionId, data })}
-     
       resetOnSuccess
       onCancel={onCancel}
     >

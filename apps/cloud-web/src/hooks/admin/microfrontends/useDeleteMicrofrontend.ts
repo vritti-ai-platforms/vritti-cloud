@@ -4,10 +4,7 @@ import { deleteMicrofrontend } from '../../../services/admin/microfrontends.serv
 import { microfrontendsTableKey } from './useMicrofrontendsTable';
 
 type DeleteMicrofrontendVars = { versionId: string; id: string };
-type UseDeleteMicrofrontendOptions = Omit<
-  UseMutationOptions<void, AxiosError, DeleteMicrofrontendVars>,
-  'mutationFn'
->;
+type UseDeleteMicrofrontendOptions = Omit<UseMutationOptions<void, AxiosError, DeleteMicrofrontendVars>, 'mutationFn'>;
 
 // Deletes a microfrontend and invalidates the table
 export function useDeleteMicrofrontend(versionId: string, options?: UseDeleteMicrofrontendOptions) {

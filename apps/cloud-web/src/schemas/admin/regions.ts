@@ -1,5 +1,5 @@
 import type { TableViewState } from '@vritti/quantum-ui/table-filter';
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 export interface RegionProvider {
   id: string;

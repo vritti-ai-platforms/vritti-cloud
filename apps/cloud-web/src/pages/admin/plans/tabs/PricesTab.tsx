@@ -97,7 +97,12 @@ export const PricesTab = () => {
         }}
         toolbarActions={{
           actions: (
-            <Button size="sm" variant="default" startAdornment={<Plus className="size-4" />} onClick={addPriceDialog.open}>
+            <Button
+              size="sm"
+              variant="default"
+              startAdornment={<Plus className="size-4" />}
+              onClick={addPriceDialog.open}
+            >
               Add Price
             </Button>
           ),

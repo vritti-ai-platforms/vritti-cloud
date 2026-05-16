@@ -1,14 +1,13 @@
 import { usePermissionTypes } from '@hooks/admin/enums';
 import { useFeaturePermissions, useSetFeaturePermissions } from '@hooks/admin/feature-permissions';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { CheckboxGroup } from '@vritti/quantum-ui/CheckboxGroup';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { z, zodResolver } from '@vritti/quantum-ui/zod';
 import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 
 // Display label for a permission type
@@ -63,7 +62,6 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
           <Form
             form={form}
             mutation={saveMutation}
-           
             resetOnSuccess={false}
             transformSubmit={(formData) => ({ versionId, featureId, types: formData.types })}
           >

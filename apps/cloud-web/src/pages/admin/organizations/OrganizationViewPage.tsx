@@ -1,16 +1,15 @@
 import { ORGANIZATION_MEMBERS_QUERY_KEY_FN, useOrganization, useOrganizationMembers } from '@hooks/admin/organizations';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
+import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { useMutation } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { Button } from '@vritti/quantum-ui/Button';
 import { Building2, Cloud, Factory, MapPin, RefreshCw, Server, Users } from 'lucide-react';
-import { syncOrgFeatures } from '@/services/admin/organizations.service';
 import type { AdminOrganizationMember } from '@/schemas/admin/organizations';
+import { syncOrgFeatures } from '@/services/admin/organizations.service';
 
 const MEMBERS_TABLE_SLUG = 'organization-members';
 
@@ -165,7 +164,11 @@ function getMemberColumns(): ColumnDef<AdminOrganizationMember, unknown>[] {
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           {row.original.profilePictureUrl ? (
-            <img src={row.original.profilePictureUrl} alt={row.original.fullName} className="size-8 rounded-full object-cover" />
+            <img
+              src={row.original.profilePictureUrl}
+              alt={row.original.fullName}
+              className="size-8 rounded-full object-cover"
+            />
           ) : (
             <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
               <span className="text-xs font-medium text-primary">{row.original.fullName.charAt(0)}</span>

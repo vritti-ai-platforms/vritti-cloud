@@ -1,12 +1,11 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdatePlanApp } from '@hooks/admin/plan-apps';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { FeatureSelector } from '@vritti/quantum-ui/selects/feature';
 import { Switch } from '@vritti/quantum-ui/Switch';
+import { FeatureSelector } from '@vritti/quantum-ui/selects/feature';
+import { z, zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 
 const editPlanAppSchema = z.object({
   allFeatures: z.boolean(),
@@ -45,17 +44,20 @@ export const EditPlanAppForm: React.FC<EditPlanAppFormProps> = ({
     <Form
       form={form}
       mutation={updateMutation}
-     
       resetOnSuccess={false}
       transformSubmit={(data) => ({
         planId,
         appId: appCode,
         data: {
-          includedFeatureCodes: data.allFeatures ? null : data.featureCodes ?? null,
+          includedFeatureCodes: data.allFeatures ? null : (data.featureCodes ?? null),
         },
       })}
     >
-      <Switch name="allFeatures" label="Include all features" description="When enabled, all features in this app are included in the plan" />
+      <Switch
+        name="allFeatures"
+        label="Include all features"
+        description="When enabled, all features in this app are included in the plan"
+      />
       {!allFeatures && (
         <FeatureSelector
           name="featureCodes"

@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { type SuccessResponse, resendUserInvite } from '@/services/cloud/organizations.service';
+import { resendUserInvite, type SuccessResponse } from '@/services/cloud/organizations.service';
 import { ORG_USERS_QUERY_KEY } from './useOrgUsers';
 
 type UseResendInviteOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, string>, 'mutationFn'>;

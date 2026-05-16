@@ -145,9 +145,7 @@ export const AppsTab = ({ planId }: { planId: string }) => {
         handle={assignDialog}
         title="Assign App"
         description="Select an app to assign to this plan."
-        content={(close) => (
-          <AssignPlanAppForm planId={planId} onSuccess={close} onCancel={close} />
-        )}
+        content={(close) => <AssignPlanAppForm planId={planId} onSuccess={close} onCancel={close} />}
       />
     </div>
   );

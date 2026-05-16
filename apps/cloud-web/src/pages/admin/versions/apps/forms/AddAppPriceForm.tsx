@@ -1,11 +1,11 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateAppPrice } from '@hooks/admin/apps';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { TextField } from '@vritti/quantum-ui/TextField';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { CurrencySelector } from '@vritti/quantum-ui/selects/currency';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { type Resolver, useForm } from 'react-hook-form';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
@@ -38,7 +38,6 @@ export const AddAppPriceForm: React.FC<AddAppPriceFormProps> = ({ appId, onSucce
     <Form
       form={form}
       mutation={createMutation}
-     
       resetOnSuccess={false}
       onCancel={onCancel}
       transformSubmit={(data: AddAppPriceData) => ({ versionId, appId, data })}

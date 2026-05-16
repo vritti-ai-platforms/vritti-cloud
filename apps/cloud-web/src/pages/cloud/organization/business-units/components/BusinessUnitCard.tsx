@@ -57,9 +57,7 @@ export const BusinessUnitCard: React.FC<BusinessUnitCardProps> = ({ unit, onEdit
               </Badge>
             </div>
 
-            {unit.description && (
-              <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{unit.description}</p>
-            )}
+            {unit.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{unit.description}</p>}
 
             <div className="flex flex-wrap items-center gap-3">
               <Badge variant="secondary" className={`text-xs ${typeBadge.className}`}>
@@ -73,11 +71,7 @@ export const BusinessUnitCard: React.FC<BusinessUnitCardProps> = ({ unit, onEdit
                 </span>
               )}
 
-              {unit.depth > 0 && (
-                <span className="text-xs text-muted-foreground">
-                  Depth {unit.depth}
-                </span>
-              )}
+              {unit.depth > 0 && <span className="text-xs text-muted-foreground">Depth {unit.depth}</span>}
 
               {unit.childCount > 0 && (
                 <span className="text-xs text-muted-foreground">
@@ -87,9 +81,7 @@ export const BusinessUnitCard: React.FC<BusinessUnitCardProps> = ({ unit, onEdit
             </div>
 
             {/* Location metadata */}
-            {location && (
-              <p className="text-xs text-muted-foreground mt-2">{location}</p>
-            )}
+            {location && <p className="text-xs text-muted-foreground mt-2">{location}</p>}
           </div>
 
           {/* Actions */}

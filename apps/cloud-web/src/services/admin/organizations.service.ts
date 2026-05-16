@@ -1,5 +1,9 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { AdminOrganizationDetail, OrganizationMembersResponse, OrganizationsResponse } from '@/schemas/admin/organizations';
+import type {
+  AdminOrganizationDetail,
+  OrganizationMembersResponse,
+  OrganizationsResponse,
+} from '@/schemas/admin/organizations';
 
 // Fetches organizations for the data table — server applies filter/sort state
 export function getOrganizations(): Promise<OrganizationsResponse> {

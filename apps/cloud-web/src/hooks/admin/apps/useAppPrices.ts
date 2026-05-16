@@ -3,7 +3,8 @@ import type { AxiosError } from 'axios';
 import type { AppPrice } from '@/schemas/admin/apps';
 import { getAppPrices } from '../../../services/admin/apps.service';
 
-export const APP_PRICES_QUERY_KEY = (versionId: string, appId: string) => ['admin', 'versions', versionId, 'apps', appId, 'prices'] as const;
+export const APP_PRICES_QUERY_KEY = (versionId: string, appId: string) =>
+  ['admin', 'versions', versionId, 'apps', appId, 'prices'] as const;
 
 // Fetches prices for an app
 export function useAppPrices(

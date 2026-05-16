@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateMicrofrontend } from '@hooks/admin/microfrontends';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import type { Microfrontend } from '@/schemas/admin/microfrontends';
@@ -32,8 +32,11 @@ export const EditMicrofrontendForm: React.FC<EditMicrofrontendFormProps> = ({ mi
     <Form
       form={form}
       mutation={updateMutation}
-      transformSubmit={(data: UpdateMicrofrontendData) => ({ versionId: microfrontend.versionId, id: microfrontend.id, data })}
-     
+      transformSubmit={(data: UpdateMicrofrontendData) => ({
+        versionId: microfrontend.versionId,
+        id: microfrontend.id,
+        data,
+      })}
       resetOnSuccess={false}
       onCancel={onCancel}
     >

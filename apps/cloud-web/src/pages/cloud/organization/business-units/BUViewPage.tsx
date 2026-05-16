@@ -32,19 +32,13 @@ export const BUViewPage = () => {
       variant: 'destructive',
     });
     if (confirmed) {
-      deleteMutation.mutate(
-        { orgId, buId: unit.id },
-        { onSuccess: () => navigate('..') },
-      );
+      deleteMutation.mutate({ orgId, buId: unit.id }, { onSuccess: () => navigate('..') });
     }
   }
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={unit.name}
-        description={unit.description ?? `${unit.type ?? ''} business unit`}
-      />
+      <PageHeader title={unit.name} description={unit.description ?? `${unit.type ?? ''} business unit`} />
 
       <Tabs
         defaultValue="overview"

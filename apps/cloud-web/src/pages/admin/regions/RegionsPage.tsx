@@ -171,11 +171,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Region, unknown>[] {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <RowActions
-          actions={[
-            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
-          ]}
-        />
+        <RowActions actions={[{ id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) }]} />
       ),
       enableSorting: false,
       enableHiding: false,

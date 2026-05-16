@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateCloudProvider } from '@hooks/admin/cloud-providers';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
@@ -36,7 +36,6 @@ export const AddCloudProviderForm: React.FC<AddCloudProviderFormProps> = ({ onSu
     <Form
       form={form}
       mutation={createMutation}
-     
       resetOnSuccess
       onCancel={onCancel}
       transformSubmit={({ sameAsLight, ...data }) => ({

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 // OTP verification form validation
 export const otpSchema = z.object({

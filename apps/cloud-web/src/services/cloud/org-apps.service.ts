@@ -1,5 +1,5 @@
-import { axios } from '@vritti/quantum-ui/axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import { axios } from '@vritti/quantum-ui/axios';
 import type { OrgAppsResponse, PurchaseAddonData } from '@/schemas/cloud/org-apps';
 
 // Fetches all apps available to the organization with their enabled status

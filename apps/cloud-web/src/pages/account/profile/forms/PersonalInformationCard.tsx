@@ -39,7 +39,6 @@ export const PersonalInformationCard: React.FC<PersonalInformationCardProps> = (
       id="profile-form"
       form={form}
       mutation={mutation}
-     
       transformSubmit={(data) => {
         const formData = new FormData();
         formData.append('fullName', data.fullName);

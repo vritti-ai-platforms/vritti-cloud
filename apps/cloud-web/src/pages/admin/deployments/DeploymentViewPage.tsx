@@ -167,11 +167,15 @@ const PlanCard = ({ plan, onToggle }: PlanCardProps) => (
           >
             <span>{business.businessName}</span>
             {business.price ? (
-              <span className={cn('font-semibold', business.isAssigned ? 'text-primary-foreground/80' : 'text-primary')}>
+              <span
+                className={cn('font-semibold', business.isAssigned ? 'text-primary-foreground/80' : 'text-primary')}
+              >
                 · {business.currency} {business.price}
               </span>
             ) : (
-              <span className={business.isAssigned ? 'text-primary-foreground/60' : 'text-muted-foreground'}>· No price</span>
+              <span className={business.isAssigned ? 'text-primary-foreground/60' : 'text-muted-foreground'}>
+                · No price
+              </span>
             )}
           </Button>
         ))}

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 export interface CloudProvider {
   id: string;
@@ -23,4 +23,3 @@ export const cloudProviderSchema = z.object({
 
 export type CloudProviderFormData = z.infer<typeof cloudProviderSchema>;
 export type CloudProviderPayload = Omit<CloudProviderFormData, 'sameAsLight'>;
-

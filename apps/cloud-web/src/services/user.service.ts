@@ -42,7 +42,5 @@ export function logout(): Promise<void> {
 
 // Logs out the current user from all devices
 export function logoutAll(): Promise<void> {
-  return axios
-    .post('auth/logout-all', {}, { successMessage: 'Logged out from all devices' })
-    .then(() => undefined);
+  return axios.post('auth/logout-all', {}, { successMessage: 'Logged out from all devices' }).then(() => undefined);
 }

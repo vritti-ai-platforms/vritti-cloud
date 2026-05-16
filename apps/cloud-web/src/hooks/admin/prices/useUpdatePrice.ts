@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import type { UpdatePriceData } from '@/schemas/admin/prices';
 import { updatePrice } from '@/services/admin/prices.service';
 import { pricesTableQueryKey } from './usePricesTable';

@@ -28,11 +28,7 @@ function getScopeBadge(scope: RoleTemplate['scope']) {
 }
 
 // Dialog for selecting a role template to create a role from
-export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({
-  orgId,
-  handle,
-  onSuccess,
-}) => {
+export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgId, handle, onSuccess }) => {
   const { data: templates = [], isLoading } = useOrgRoleTemplates(orgId);
   const createMutation = useCreateOrgRole();
   const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null);

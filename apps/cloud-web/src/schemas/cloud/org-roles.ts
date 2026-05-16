@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 export type OrgRoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
 

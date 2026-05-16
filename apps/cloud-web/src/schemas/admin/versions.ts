@@ -1,5 +1,5 @@
 import type { TableResponse } from '@vritti/quantum-ui/api-response';
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 export type VersionStatus = 'ALPHA' | 'BETA' | 'PROD';
 
@@ -57,7 +57,12 @@ export const createVersionSchema = z.object({
 export type CreateVersionData = z.infer<typeof createVersionSchema>;
 
 export const updateVersionSchema = z.object({
-  version: z.string().min(1, 'Version is required').max(50).regex(/^[0-9]+\.[0-9]+\.[0-9]+/, 'Must be semver format').optional(),
+  version: z
+    .string()
+    .min(1, 'Version is required')
+    .max(50)
+    .regex(/^[0-9]+\.[0-9]+\.[0-9]+/, 'Must be semver format')
+    .optional(),
   name: z.string().min(1, 'Name is required').max(255).optional(),
 });
 

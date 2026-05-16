@@ -1,6 +1,6 @@
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type Node, type NodeProps, Handle, Position } from '@vritti/quantum-ui/HierarchyGraph';
+import { Handle, type Node, type NodeProps, Position } from '@vritti/quantum-ui/HierarchyGraph';
 import { Building2, Plus, Users } from 'lucide-react';
 
 // Maps BU type to a display badge
@@ -45,9 +45,7 @@ export const BUNodeCard = ({ data }: NodeProps<Node<BUNodeData>>) => {
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold truncate leading-tight">{data.name}</h3>
-            {data.code && (
-              <span className="text-[10px] font-mono text-muted-foreground">{data.code}</span>
-            )}
+            {data.code && <span className="text-[10px] font-mono text-muted-foreground">{data.code}</span>}
           </div>
         </div>
 

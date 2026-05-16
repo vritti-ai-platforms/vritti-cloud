@@ -1,14 +1,8 @@
 import { BackupCodesCard } from '@components/account/security/BackupCodesCard';
-import { MfaMethodCard } from '@components/account/security/MfaMethodCard';
 import { MethodSelectionView } from '@components/account/security/MethodSelectionView';
+import { MfaMethodCard } from '@components/account/security/MfaMethodCard';
 import { SecurityTabCard } from '@components/account/security/SecurityTabCard';
-import {
-  useDisableAllMfa,
-  useDisableTotp,
-  useMfaStatus,
-  useRegenerateBackupCodes,
-} from '@hooks/account/security';
-import { getRelativeTime } from '@/utils/getRelativeTime';
+import { useDisableAllMfa, useDisableTotp, useMfaStatus, useRegenerateBackupCodes } from '@hooks/account/security';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { CardTitle } from '@vritti/quantum-ui/Card';
@@ -18,6 +12,7 @@ import { Typography } from '@vritti/quantum-ui/Typography';
 import { Fingerprint, Plus, ShieldCheck, Smartphone } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
+import { getRelativeTime } from '@/utils/getRelativeTime';
 import { BackupCodesDialog } from '../forms/BackupCodesDialog';
 import { PasskeySetupDialog } from '../forms/PasskeySetupDialog';
 import { TotpSetupDialog } from '../forms/TotpSetupDialog';
@@ -44,8 +39,7 @@ export const MfaTab: React.FC = () => {
   const handleDisableTotp = async () => {
     const confirmed = await confirm({
       title: 'Disable Authenticator App',
-      description:
-        'Are you sure you want to disable the authenticator app? You can still use other enabled methods.',
+      description: 'Are you sure you want to disable the authenticator app? You can still use other enabled methods.',
       confirmLabel: 'Disable',
       variant: 'destructive',
     });
@@ -121,7 +115,9 @@ export const MfaTab: React.FC = () => {
           <MfaMethodCard
             icon={<Smartphone className={`h-5 w-5 ${hasTotp ? 'text-success' : 'text-muted-foreground'}`} />}
             title="Authenticator App"
-            description={hasTotp ? 'Verify with codes from your authenticator app' : 'Use Google Authenticator, Authy, or similar'}
+            description={
+              hasTotp ? 'Verify with codes from your authenticator app' : 'Use Google Authenticator, Authy, or similar'
+            }
             badge={hasTotp ? <Badge variant="default">Enabled</Badge> : undefined}
             action={
               hasTotp ? (
@@ -148,7 +144,9 @@ export const MfaTab: React.FC = () => {
           <MfaMethodCard
             icon={<Fingerprint className={`h-5 w-5 ${hasPasskey ? 'text-success' : 'text-muted-foreground'}`} />}
             title="Passkey / Security Key"
-            description={hasPasskey ? 'Verify with Face ID, Touch ID, or device PIN' : 'Use biometrics or a security key'}
+            description={
+              hasPasskey ? 'Verify with Face ID, Touch ID, or device PIN' : 'Use biometrics or a security key'
+            }
             badge={hasPasskey ? <Badge variant="default">{status?.passkeys?.length ?? 0} registered</Badge> : undefined}
             action={
               <Button variant="outline" size="sm" onClick={passkeyDialog.open}>

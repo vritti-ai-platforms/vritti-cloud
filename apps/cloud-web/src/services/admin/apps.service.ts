@@ -28,7 +28,10 @@ export function createApp(versionId: string, data: CreateAppData): Promise<Creat
 }
 
 // Updates an app by ID
-export function updateApp(versionId: string, { id, data }: { id: string; data: UpdateAppData }): Promise<SuccessResponse> {
+export function updateApp(
+  versionId: string,
+  { id, data }: { id: string; data: UpdateAppData },
+): Promise<SuccessResponse> {
   return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/apps/${id}`, data).then((r) => r.data);
 }
 
@@ -39,7 +42,9 @@ export function deleteApp(versionId: string, id: string): Promise<void> {
 
 // Fetches app features for the data table — server applies filter/sort state
 export function getAppFeaturesTable(versionId: string, appId: string): Promise<AppFeaturesTableResponse> {
-  return axios.get<AppFeaturesTableResponse>(`admin-api/versions/${versionId}/apps/${appId}/features/table`).then((r) => r.data);
+  return axios
+    .get<AppFeaturesTableResponse>(`admin-api/versions/${versionId}/apps/${appId}/features/table`)
+    .then((r) => r.data);
 }
 
 // Fetches features assigned to an app
@@ -57,11 +62,21 @@ export function assignAppFeature({
   appId: string;
   featureId: string;
 }): Promise<SuccessResponse> {
-  return axios.post<SuccessResponse>(`admin-api/versions/${versionId}/apps/${appId}/features/${featureId}`).then((r) => r.data);
+  return axios
+    .post<SuccessResponse>(`admin-api/versions/${versionId}/apps/${appId}/features/${featureId}`)
+    .then((r) => r.data);
 }
 
 // Removes a feature from an app
-export function removeAppFeature({ versionId, appId, featureId }: { versionId: string; appId: string; featureId: string }): Promise<void> {
+export function removeAppFeature({
+  versionId,
+  appId,
+  featureId,
+}: {
+  versionId: string;
+  appId: string;
+  featureId: string;
+}): Promise<void> {
   return axios.delete(`admin-api/versions/${versionId}/apps/${appId}/features/${featureId}`).then(() => undefined);
 }
 
@@ -71,8 +86,18 @@ export function getAppPrices(versionId: string, appId: string): Promise<AppPrice
 }
 
 // Creates a new price for an app
-export function createAppPrice({ versionId, appId, data }: { versionId: string; appId: string; data: AddAppPriceData }): Promise<CreateResponse<AppPrice>> {
-  return axios.post<CreateResponse<AppPrice>>(`admin-api/versions/${versionId}/apps/${appId}/prices`, data).then((r) => r.data);
+export function createAppPrice({
+  versionId,
+  appId,
+  data,
+}: {
+  versionId: string;
+  appId: string;
+  data: AddAppPriceData;
+}): Promise<CreateResponse<AppPrice>> {
+  return axios
+    .post<CreateResponse<AppPrice>>(`admin-api/versions/${versionId}/apps/${appId}/prices`, data)
+    .then((r) => r.data);
 }
 
 // Updates an app price by ID
@@ -87,11 +112,20 @@ export function updateAppPrice({
   priceId: string;
   data: UpdateAppPriceData;
 }): Promise<SuccessResponse> {
-  return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/apps/${appId}/prices/${priceId}`, data).then((r) => r.data);
+  return axios
+    .patch<SuccessResponse>(`admin-api/versions/${versionId}/apps/${appId}/prices/${priceId}`, data)
+    .then((r) => r.data);
 }
 
 // Removes an app price by ID
-export function removeAppPrice({ versionId, appId, priceId }: { versionId: string; appId: string; priceId: string }): Promise<void> {
+export function removeAppPrice({
+  versionId,
+  appId,
+  priceId,
+}: {
+  versionId: string;
+  appId: string;
+  priceId: string;
+}): Promise<void> {
   return axios.delete(`admin-api/versions/${versionId}/apps/${appId}/prices/${priceId}`).then(() => undefined);
 }
-

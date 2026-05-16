@@ -1,5 +1,5 @@
-import { axios } from '@vritti/quantum-ui/axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import { axios } from '@vritti/quantum-ui/axios';
 import type { AssignPlanAppData, PlanApp, PlanAppsTableResponse, UpdatePlanAppData } from '@/schemas/admin/plan-apps';
 
 // Fetches plan apps for the data table — server applies filter/sort state
@@ -13,13 +13,7 @@ export function getPlanApps(planId: string): Promise<PlanApp[]> {
 }
 
 // Assigns an app to a plan
-export function assignPlanApp({
-  planId,
-  data,
-}: {
-  planId: string;
-  data: AssignPlanAppData;
-}): Promise<PlanApp> {
+export function assignPlanApp({ planId, data }: { planId: string; data: AssignPlanAppData }): Promise<PlanApp> {
   return axios.post<PlanApp>(`admin-api/plans/${planId}/apps`, data).then((r) => r.data);
 }
 

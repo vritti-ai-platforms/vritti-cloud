@@ -1,5 +1,5 @@
-import { disconnectProvider } from '@services/account/security.service';
 import type { SuccessResponse } from '@services/account/profile.service';
+import { disconnectProvider } from '@services/account/security.service';
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';

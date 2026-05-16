@@ -161,7 +161,9 @@ export interface LinkedAccountsResponse {
 }
 
 export function getLinkedAccounts(): Promise<LinkedAccountsResponse> {
-  return axios.get<LinkedAccountsResponse>('account/security/linked-accounts', { showSuccessToast: false }).then((r) => r.data);
+  return axios
+    .get<LinkedAccountsResponse>('account/security/linked-accounts', { showSuccessToast: false })
+    .then((r) => r.data);
 }
 
 export function disconnectProvider(provider: string): Promise<SuccessResponse> {

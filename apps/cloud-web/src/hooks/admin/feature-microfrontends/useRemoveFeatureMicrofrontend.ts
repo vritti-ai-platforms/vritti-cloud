@@ -14,8 +14,7 @@ export function useRemoveFeatureMicrofrontend(
   const queryClient = useQueryClient();
   return useMutation<void, AxiosError, string>({
     ...options,
-    mutationFn: (microfrontendId) =>
-      removeFeatureMicrofrontend({ versionId, featureId, microfrontendId }),
+    mutationFn: (microfrontendId) => removeFeatureMicrofrontend({ versionId, featureId, microfrontendId }),
     onSuccess: (...args) => {
       queryClient.invalidateQueries({ queryKey: featureMicrofrontendsKey(versionId, featureId) });
       options?.onSuccess?.(...args);

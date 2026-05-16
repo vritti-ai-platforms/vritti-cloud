@@ -1,8 +1,8 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateFeature } from '@hooks/admin/features';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
@@ -32,12 +32,7 @@ export const AddFeatureForm: React.FC<AddFeatureFormProps> = ({ onSuccess, onCan
   return (
     <Form form={form} mutation={createMutation} onCancel={onCancel}>
       <div className="grid grid-cols-2 gap-4">
-        <TextField
-          name="code"
-          label="Code"
-          placeholder="e.g. orders"
-          description="Lowercase with hyphens"
-        />
+        <TextField name="code" label="Code" placeholder="e.g. orders" description="Lowercase with hyphens" />
         <TextField name="name" label="Name" placeholder="e.g. Orders" />
       </div>
       <TextField name="icon" label="Icon" placeholder="e.g. clipboard-list" description="Lucide icon name" />

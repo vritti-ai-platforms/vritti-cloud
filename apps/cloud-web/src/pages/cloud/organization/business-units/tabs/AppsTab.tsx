@@ -17,9 +17,7 @@ export const AppsTab = ({ orgId, buId, appCodes }: AppsTabProps) => {
   const updateMutation = useUpdateBuApps();
 
   // Only show apps that are included in the plan or already enabled
-  const availableApps = (response?.result ?? []).filter(
-    (a) => a.status === 'included' || a.status === 'enabled',
-  );
+  const availableApps = (response?.result ?? []).filter((a) => a.status === 'included' || a.status === 'enabled');
 
   const assignedSet = new Set(appCodes);
 
@@ -52,9 +50,7 @@ export const AppsTab = ({ orgId, buId, appCodes }: AppsTabProps) => {
         <div className="flex flex-col items-center justify-center py-16 text-center">
           <Layers className="size-10 text-muted-foreground mb-3" />
           <p className="text-sm font-medium text-foreground">No applications available</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Enable applications for your organization first.
-          </p>
+          <p className="text-xs text-muted-foreground mt-1">Enable applications for your organization first.</p>
         </div>
       )}
 
@@ -69,9 +65,7 @@ export const AppsTab = ({ orgId, buId, appCodes }: AppsTabProps) => {
                   </div>
                   <div>
                     <p className="text-sm font-medium">{app.name}</p>
-                    {app.description && (
-                      <p className="text-xs text-muted-foreground line-clamp-1">{app.description}</p>
-                    )}
+                    {app.description && <p className="text-xs text-muted-foreground line-clamp-1">{app.description}</p>}
                     <p className="text-xs text-muted-foreground mt-0.5">
                       {app.features.length} feature{app.features.length !== 1 ? 's' : ''}
                     </p>

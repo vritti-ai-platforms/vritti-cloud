@@ -1,7 +1,7 @@
-import { useOnboarding } from '@/providers/OnboardingProvider';
 import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
 import type React from 'react';
 import { useState } from 'react';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 import { MethodSelectionStep } from './steps/MethodSelectionStep';
 import { OTPVerificationStep } from './steps/OTPVerificationStep';
 import { PhoneInputStep } from './steps/PhoneInputStep';

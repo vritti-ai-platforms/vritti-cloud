@@ -2,8 +2,8 @@ import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
 import { createSnapshot } from '../../../services/admin/versions.service';
-import { VERSIONS_TABLE_KEY } from './useVersionsTable';
 import { versionQueryKey } from './useVersion';
+import { VERSIONS_TABLE_KEY } from './useVersionsTable';
 
 type UseCreateSnapshotOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, string>, 'mutationFn'>;
 

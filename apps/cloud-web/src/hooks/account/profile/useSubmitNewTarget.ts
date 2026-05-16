@@ -5,7 +5,10 @@ import { submitNewTarget } from '@/services/account/profile.service';
 
 type SubmitNewTargetData = { channel: string; target: string };
 
-type UseSubmitNewTargetOptions = Omit<UseMutationOptions<{ expiresAt: string }, AxiosError, SubmitNewTargetData>, 'mutationFn'>;
+type UseSubmitNewTargetOptions = Omit<
+  UseMutationOptions<{ expiresAt: string }, AxiosError, SubmitNewTargetData>,
+  'mutationFn'
+>;
 
 export function useSubmitNewTarget(options?: UseSubmitNewTargetOptions) {
   return useMutation<{ expiresAt: string }, AxiosError, SubmitNewTargetData>({

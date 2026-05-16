@@ -1,5 +1,3 @@
-import { useOnboarding } from '@/providers/OnboardingProvider';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useSetPassword } from '@hooks/onboarding';
 import type { SetPasswordFormData } from '@schemas/auth';
 import { setPasswordSchema } from '@schemas/auth';
@@ -7,9 +5,11 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Check, Lock } from 'lucide-react';
 import type React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 
 export const SetPasswordStep: React.FC = () => {
   const { refetch } = useOnboarding();

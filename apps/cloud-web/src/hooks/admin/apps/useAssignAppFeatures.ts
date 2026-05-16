@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import { assignAppFeature } from '../../../services/admin/apps.service';
 import { appQueryKey } from './useApp';
 import { APP_FEATURES_TABLE_KEY } from './useAppFeaturesTable';

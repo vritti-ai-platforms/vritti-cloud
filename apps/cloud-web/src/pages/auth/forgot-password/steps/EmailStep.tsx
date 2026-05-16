@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import type { PasswordResetFlow } from '@hooks/password-reset';
 import type { ForgotPasswordFormData } from '@schemas/auth';
 import { forgotPasswordSchema } from '@schemas/auth';
@@ -6,6 +5,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { ArrowLeft, Mail } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';

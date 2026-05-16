@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { AxiosError } from 'axios';
 import type { UpdatePlanAppData } from '@/schemas/admin/plan-apps';
 import { updatePlanApp } from '../../../services/admin/plan-apps.service';
 import { planAppsQueryKey } from './usePlanApps';

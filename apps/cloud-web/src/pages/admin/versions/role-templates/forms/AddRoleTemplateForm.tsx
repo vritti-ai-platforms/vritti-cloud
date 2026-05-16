@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateRoleTemplate } from '@hooks/admin/role-templates';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -6,6 +5,7 @@ import { Select } from '@vritti/quantum-ui/Select';
 import { AppSelector } from '@vritti/quantum-ui/selects/app';
 import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
