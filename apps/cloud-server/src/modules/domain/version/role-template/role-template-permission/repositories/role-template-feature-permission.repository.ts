@@ -61,6 +61,13 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
     await db.insert(roleTemplateFeaturePermissions).values(entries);
   }
 
+  // Deletes all role-template-feature-permission entries for a given feature across all role templates
+  async deleteByFeatureId(featureId: string): Promise<void> {
+    await this.db
+      .delete(roleTemplateFeaturePermissions)
+      .where(eq(roleTemplateFeaturePermissions.featureId, featureId));
+  }
+
   // Counts the number of permissions for a given role template
   async countByRoleTemplateId(roleTemplateId: string): Promise<number> {
     const result = await this.db

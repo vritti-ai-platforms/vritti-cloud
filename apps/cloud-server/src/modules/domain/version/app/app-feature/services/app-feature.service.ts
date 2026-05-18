@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
   BadRequestException,
-  ConflictException,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
@@ -14,6 +13,7 @@ import { AppRepository } from '../../root/repositories/app.repository';
 import { FeatureRepository } from '@domain/version/feature/root/repositories/feature.repository';
 import { AppFeatureTableRowDto } from '@/modules/admin-api/version/app/app-feature/dto/entity/app-feature-table-row.dto';
 import type { AppFeatureTableResponseDto } from '@/modules/admin-api/version/app/app-feature/dto/response/app-feature-table-response.dto';
+import { RoleTemplateFeaturePermissionRepository } from '@domain/version/role-template/role-template-permission/repositories/role-template-feature-permission.repository';
 import { AppFeatureRepository } from '../repositories/app-feature.repository';
 
 @Injectable()
@@ -30,6 +30,7 @@ export class AppFeatureService {
     private readonly featureRepository: FeatureRepository,
     private readonly appRepository: AppRepository,
     private readonly dataTableStateService: DataTableStateService,
+    private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionRepository,
   ) {}
 
   // Returns app features for the data table with server-stored filter/sort/search/pagination state
@@ -81,20 +82,14 @@ export class AppFeatureService {
     return { success: true, message: `Feature "${result.feature.name}" assigned to "${app.name}" successfully.` };
   }
 
-  // Removes a feature from an app; rejects if referenced by any role template feature permissions
+  // Removes a feature from an app; also removes it from all role template permissions
   async removeFeature(appId: string, featureId: string): Promise<SuccessResponseDto> {
     await this.ensureAppExists(appId);
     const link = await this.appFeatureRepository.findByAppAndFeature(appId, featureId);
     if (!link) {
       throw new NotFoundException('Feature is not assigned to this app.');
     }
-    const roleRefs = await this.appFeatureRepository.countRoleReferences(featureId);
-    if (roleRefs > 0) {
-      throw new ConflictException({
-        label: 'Feature In Use',
-        detail: `Cannot remove this feature — it is referenced by ${roleRefs} role permission${roleRefs > 1 ? 's' : ''}. Remove those role assignments first.`,
-      });
-    }
+    await this.roleTemplateFeaturePermissionRepository.deleteByFeatureId(featureId);
     await this.appFeatureRepository.removeByAppAndFeature(appId, featureId);
     this.logger.log(`Removed feature ${featureId} from app: ${appId}`);
     return { success: true, message: `Feature removed from app successfully.` };
