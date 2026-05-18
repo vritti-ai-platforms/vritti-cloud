@@ -42,7 +42,9 @@ export default defineConfig({
         secure: false,
         on: {
           proxyReq: (proxyReq, req) => {
-            const host = (req.headers['host'] ?? '').split(':')[0];
+            // HTTP/2 uses :authority instead of Host
+            const rawHost = (req.headers.host ?? req.headers[':authority'] ?? '') as string;
+            const host = rawHost.split(':')[0];
             if (host) proxyReq.setHeader('x-forwarded-host', host);
           },
           proxyRes: (proxyRes, req, res) => {
