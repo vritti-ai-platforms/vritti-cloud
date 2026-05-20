@@ -1,14 +1,11 @@
 import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodPhoneField } from '@vritti/quantum-ui/zod';
 
 // Validation schema for profile update form
 export const profileSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   displayName: z.string().optional(),
-  phone: z
-    .string()
-    .min(10, 'Please enter a valid phone number')
-    .regex(/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number'),
+  phone: zodPhoneField({ required: 'Please enter a valid phone number' }),
   locale: z.string(),
   timezone: z.string(),
   profilePicture: z.any().optional(),

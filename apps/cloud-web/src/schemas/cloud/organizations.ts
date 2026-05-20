@@ -1,4 +1,4 @@
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodPhoneField } from '@vritti/quantum-ui/zod';
 
 export enum OrgSize {
   s0_10 = '0-10',
@@ -84,7 +84,7 @@ export interface NexusUser {
 export const inviteUserSchema = z.object({
   email: z.string().email('Valid email is required'),
   fullName: z.string().min(1, 'Full name is required'),
-  phone: z.any().optional(),
+  phone: zodPhoneField({ optional: true }).optional(),
 });
 export type InviteUserFormData = z.infer<typeof inviteUserSchema>;
 

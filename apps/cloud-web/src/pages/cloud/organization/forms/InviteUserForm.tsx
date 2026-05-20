@@ -40,10 +40,7 @@ export const InviteUserForm: React.FC<InviteUserFormProps> = ({ orgId, onSuccess
       transformSubmit={(data) => ({
         email: data.email,
         fullName: data.fullName,
-        ...(data.phone?.number && {
-          phone: data.phone.number,
-          phoneCountry: data.phone.country,
-        }),
+        ...(data.phone && { phone: data.phone }),
       })}
     >
       <TextField name="fullName" label="Full Name" placeholder="e.g. Jane Smith" />
