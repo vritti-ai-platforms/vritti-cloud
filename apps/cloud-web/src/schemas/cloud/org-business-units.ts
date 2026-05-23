@@ -16,6 +16,7 @@ export interface BusinessUnit {
   state: string | null;
   country: string | null;
   timezone: string | null;
+  currencyCode: string;
   phone: string | null;
   appCodes: string[];
   childCount: number;
@@ -44,6 +45,7 @@ export const createBusinessUnitSchema = z.object({
   state: z.string().max(100).optional(),
   country: z.string().max(100).optional(),
   timezone: z.string().trim().min(1, 'Timezone is required').max(50),
+  currencyCode: z.string().regex(/^[A-Z]{3}$/, 'Currency is required'),
   phone: z.string().max(20).optional(),
 });
 
@@ -63,6 +65,10 @@ export const updateBusinessUnitSchema = z.object({
   state: z.string().max(100).optional(),
   country: z.string().max(100).optional(),
   timezone: z.string().max(50).optional(),
+  currencyCode: z
+    .string()
+    .regex(/^[A-Z]{3}$/, 'Currency is required')
+    .optional(),
   phone: z.string().max(20).optional(),
 });
 

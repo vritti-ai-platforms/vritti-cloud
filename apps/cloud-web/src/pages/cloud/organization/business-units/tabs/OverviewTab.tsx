@@ -71,7 +71,7 @@ export const OverviewTab = ({ orgId, unit, allUnits }: OverviewTabProps) => {
       </Card>
 
       {/* Location card */}
-      {(unit.address || unit.city || unit.state || unit.country || unit.timezone || unit.phone) && (
+      {(unit.address || unit.city || unit.state || unit.country || unit.timezone || unit.currencyCode || unit.phone) && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -86,6 +86,7 @@ export const OverviewTab = ({ orgId, unit, allUnits }: OverviewTabProps) => {
               <DetailRow label="State / Province" value={unit.state} />
               <DetailRow label="Country" value={unit.country} />
               <DetailRow label="Timezone" value={unit.timezone} />
+              <DetailRow label="Currency" value={unit.currencyCode} />
               <DetailRow label="Phone" value={unit.phone} />
             </div>
           </CardContent>

@@ -1,6 +1,7 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
+import { CurrencySelector } from '@vritti/quantum-ui/selects/currency';
 import { TimezoneSelector } from '@vritti/quantum-ui/selects/timezone';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
@@ -53,6 +54,7 @@ export const BusinessUnitForm: React.FC<BusinessUnitFormProps> = ({
       state: unit?.state ?? '',
       country: unit?.country ?? '',
       timezone: unit?.timezone ?? '',
+      currencyCode: unit?.currencyCode ?? '',
       phone: unit?.phone ?? '',
     },
   });
@@ -97,6 +99,7 @@ export const BusinessUnitForm: React.FC<BusinessUnitFormProps> = ({
           <TextField name="state" label="State / Province" placeholder="State or province" />
           <TextField name="country" label="Country" placeholder="Country" />
           <TimezoneSelector name="timezone" label="Timezone" placeholder="Select timezone" />
+          <CurrencySelector name="currencyCode" label="Currency" placeholder="Select currency" />
           <TextField name="phone" label="Phone" placeholder="e.g. +1 555 123 4567" />
         </div>
       </div>

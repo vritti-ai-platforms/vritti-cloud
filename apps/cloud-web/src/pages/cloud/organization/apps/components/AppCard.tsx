@@ -79,7 +79,13 @@ export const AppCard: React.FC<AppCardProps> = ({ app, onToggle, onPurchase, isT
           {/* Actions */}
           <div className="shrink-0">
             {app.status === 'included' && (
-              <Switch checked={true} onCheckedChange={() => onToggle(app)} disabled={isToggling} />
+              <Switch
+                label={`Enable ${app.name}`}
+                description={`Toggle ${app.name} on or off for this organization.`}
+                checked={true}
+                onCheckedChange={() => onToggle(app)}
+                disabled={isToggling}
+              />
             )}
             {app.status === 'addon' && (
               <Button

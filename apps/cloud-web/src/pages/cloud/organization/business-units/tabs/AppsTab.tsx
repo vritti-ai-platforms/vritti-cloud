@@ -72,6 +72,8 @@ export const AppsTab = ({ orgId, buId, appCodes }: AppsTabProps) => {
                   </div>
                 </div>
                 <Switch
+                  label={`Assign ${app.name}`}
+                  description={`Make ${app.name} available to this business unit.`}
                   checked={assignedSet.has(app.code)}
                   onCheckedChange={() => handleToggle(app.code)}
                   disabled={updateMutation.isPending}

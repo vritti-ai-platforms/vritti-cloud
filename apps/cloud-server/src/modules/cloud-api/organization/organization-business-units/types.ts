@@ -10,6 +10,7 @@ export interface CoreBusinessUnit {
   isActive: boolean;
   sortOrder: number;
   timezone: string;
+  currencyCode: string;
   metadata: Record<string, unknown> | null;
   createdAt: string;
   updatedAt: string;
