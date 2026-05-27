@@ -66,6 +66,7 @@ See `.claude/rules/` for detailed pattern documentation:
 - `frontend-hook.md` — TanStack Query hook conventions
 - `frontend-service.md` — Axios service conventions
 - `frontend-file-structure.md` — File/folder organization
+- `value-formatting.md` — DetailField / DataTable cells / useFormatters for dates, currency, numbers
 - `comment-style.md` — Comment style rules
 - `export-conventions.md` — Export patterns
 - `apps/cloud-server/.claude/rules/backend-service-responses.md` — create() returns entity DTO, update/delete returns SuccessResponseDto
