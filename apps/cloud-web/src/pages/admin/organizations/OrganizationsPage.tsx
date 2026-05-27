@@ -1,7 +1,7 @@
 import { ORGANIZATIONS_QUERY_KEY, useOrganizations } from '@hooks/admin/organizations';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, NumberCell, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { SelectFilter } from '@vritti/quantum-ui/Select';
 import { BusinessFilter } from '@vritti/quantum-ui/selects/business';
@@ -110,7 +110,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<AdminOrganization, unk
     {
       accessorKey: 'memberCount',
       header: 'Members',
-      cell: ({ row }) => row.original.memberCount,
+      cell: ({ row }) => <NumberCell value={row.original.memberCount} />,
     },
     {
       id: 'actions',

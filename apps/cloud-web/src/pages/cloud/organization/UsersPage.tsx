@@ -3,7 +3,7 @@ import { useResendInvite } from '@hooks/cloud/organizations/useResendInvite';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, DateCell, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -129,15 +129,6 @@ function getStatusBadge(status: string): {
   }
 }
 
-// Formats ISO date string to a readable short format
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
-}
-
 interface GetColumnsOptions {
   onResendInvite: (user: NexusUser) => void;
   onEdit: (user: NexusUser) => void;
@@ -169,7 +160,7 @@ function getColumns({ onResendInvite, onEdit }: GetColumnsOptions): ColumnDef<Ne
     {
       accessorKey: 'createdAt',
       header: 'Joined',
-      cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatDate(row.original.createdAt)}</span>,
+      cell: ({ row }) => <DateCell value={row.original.createdAt} className="text-sm text-muted-foreground" />,
     },
     {
       id: 'actions',

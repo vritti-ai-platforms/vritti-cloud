@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, DateCell, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import type { AxiosError } from 'axios';
@@ -192,7 +192,7 @@ function getMemberColumns(): ColumnDef<AdminOrganizationMember, unknown>[] {
     {
       accessorKey: 'createdAt',
       header: 'Joined',
-      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+      cell: ({ row }) => <DateCell value={row.original.createdAt} />,
     },
   ];
 }

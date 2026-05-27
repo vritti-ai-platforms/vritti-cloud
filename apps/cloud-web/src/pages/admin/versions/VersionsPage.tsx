@@ -2,7 +2,7 @@ import { useVersionsTable, VERSIONS_TABLE_KEY } from '@hooks/admin/versions';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, DateCell, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -115,9 +115,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Version, unknown>[] {
     {
       accessorKey: 'createdAt',
       header: 'Created',
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground">{new Date(row.original.createdAt).toLocaleDateString()}</span>
-      ),
+      cell: ({ row }) => <DateCell value={row.original.createdAt} className="text-sm text-muted-foreground" />,
     },
     {
       id: 'actions',
