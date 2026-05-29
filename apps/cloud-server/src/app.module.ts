@@ -1,12 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { EventEmitterModule } from '@nestjs/event-emitter';
-import * as schema from '@/db/schema';
-import { relations } from '@/db/schema';
-
-import './db/schema.registry';
-
 import { RouterModule } from '@nestjs/core';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import {
   AuthConfigModule,
   DatabaseModule,
@@ -17,20 +12,22 @@ import {
   RootModule,
   type TokenExpiryString,
 } from '@vritti/api-sdk';
+import * as schema from '@/db/schema';
+import { relations } from '@/db/schema';
 import { validate } from './config/env.validation';
 import { AccountModule } from './modules/account/account.module';
+import { AdminBusinessModule } from './modules/admin-api/business/business.module';
 import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
 import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
 import { AdminEnumModule } from './modules/admin-api/enum/enum.module';
-import { AdminBusinessModule } from './modules/admin-api/business/business.module';
 import { AdminOrganizationModule } from './modules/admin-api/organization/organization.module';
 import { AdminPlanModule } from './modules/admin-api/plan/plan.module';
 import { AdminPriceModule } from './modules/admin-api/price/price.module';
 import { AdminRegionModule } from './modules/admin-api/region/region.module';
 import { AdminVersionModule } from './modules/admin-api/version/version.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
-import { CloudDeploymentModule } from './modules/cloud-api/deployment/deployment.module';
 import { BusinessModule } from './modules/cloud-api/business/business.module';
+import { CloudDeploymentModule } from './modules/cloud-api/deployment/deployment.module';
 import { MediaModule } from './modules/cloud-api/media/media.module';
 import { OnboardingModule } from './modules/cloud-api/onboarding/onboarding.module';
 import { OrganizationModule } from './modules/cloud-api/organization/organization.module';
@@ -91,8 +88,7 @@ import { ServicesModule } from './services/services.module';
             sslMode: config.get<'require' | 'prefer' | 'disable' | 'no-verify'>('PRIMARY_DB_SSL_MODE'),
           },
 
-          drizzleSchema: schema,
-          // Relations must be passed separately for db.query to work (drizzle-orm v2)
+          // Relations drive db.query.X in Drizzle 1.0; schema generic was removed.
           drizzleRelations: relations,
 
           maxConnections: 10,
