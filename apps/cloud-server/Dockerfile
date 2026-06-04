@@ -6,7 +6,7 @@
 # ============================================================================
 FROM node:20-alpine AS builder
 WORKDIR /repo
-RUN corepack enable
+RUN npm install -g pnpm@10.28.0
 
 # Full workspace install (lockfile must match — regenerate after dropping the
 # link: overrides). Heavy, but runs on the CI runner, never on the VM.
