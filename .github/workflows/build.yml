@@ -1,9 +1,8 @@
 name: Build & Push
 
-# Auto-builds on merge to main. Uses `nx affected` so only the apps that
-# actually changed get built. Backend -> Docker image in GHCR.
-# Frontend -> static bundle synced to the VM (safe; servers are gated by the
-# separate manual Deploy workflow in the infrastructure repo).
+# Auto-builds on merge to main via `nx affected`. Nothing touches the VM here —
+# server images and the web .tar.gz both land in GHCR. The manual Deploy
+# workflow (infrastructure repo) pulls + ships them.
 
 on:
   push:
@@ -13,6 +12,12 @@ on:
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
+
+# Reusable workflows can't request more than the caller grants. The backend-image
+# and web reusables push to GHCR, so the caller must hold packages: write.
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   affected:
@@ -37,7 +42,7 @@ jobs:
           echo "projects=$PROJECTS" >> "$GITHUB_OUTPUT"
           echo "Affected apps: $PROJECTS"
 
-  # ---- Backend: build + push image to GHCR (does NOT deploy) ----
+  # ---- Backend: build + push image to GHCR ----
   cloud-server:
     needs: affected
     if: contains(fromJSON(needs.affected.outputs.projects), 'vritti-cloud-server')
@@ -49,28 +54,14 @@ jobs:
       package_json_path: apps/cloud-server/package.json
     secrets: inherit
 
-  # ---- Frontend: build static bundle (artifact) ----
-  cloud-web-build:
+  # ---- Frontend: build + push .tar.gz to GHCR (oras) ----
+  cloud-web:
     needs: affected
     if: contains(fromJSON(needs.affected.outputs.projects), 'vritti-cloud-web')
     uses: vritti-ai-platforms/infrastructure/.github/workflows/reusable-build-web.yml@main
     with:
-      app_type: container
       app_name: cloud-web
-      deploy_path: /
       build_command: pnpm exec nx build vritti-cloud-web
       output_dir: apps/cloud-web/dist
       production_domain: https://cloud.vrittiai.com
     secrets: inherit
-
-  # ---- Frontend: sync static bundle to /opt/vritti/www/cloud ----
-  cloud-web-deploy:
-    needs: cloud-web-build
-    uses: vritti-ai-platforms/infrastructure/.github/workflows/reusable-deploy-web-build.yml@main
-    with:
-      artifact_name: ${{ needs.cloud-web-build.outputs.artifact_name }}
-      deploy_path: /opt/vritti/www/cloud
-    secrets:
-      SERVER_VM_HOST: ${{ secrets.SERVER_VM_HOST }}
-      SERVER_VM_USER: ${{ secrets.SERVER_VM_USER }}
-      SERVER_VM_SSH_KEY: ${{ secrets.SERVER_VM_SSH_KEY }}
