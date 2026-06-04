@@ -75,8 +75,8 @@ importers:
         specifier: ^13.2.2
         version: 13.3.0
       '@vritti/api-sdk':
-        specifier: 0.2.6
-        version: 0.2.6(784a71a729eb3530179dc5580b65dd6f)
+        specifier: ^0.2.7
+        version: 0.2.7(784a71a729eb3530179dc5580b65dd6f)
       axios:
         specifier: ^1.13.2
         version: 1.13.6
@@ -4415,15 +4415,15 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@vritti/api-sdk@0.2.6':
-    resolution: {integrity: sha512-Vl/mwppikoY+dfXFzKiWyBIqn1zwG6gpprRfYFn7K9TZ0qvoc5jcQ5USsea9sI0E/GWv6bwksjegz7WyyKBYZg==}
+  '@vritti/api-sdk@0.2.7':
+    resolution: {integrity: sha512-Wk74+/fursEgKQqXaA5FqNQM3Aiu4yD1h6u42itHTIfmLjZfXU8JydNx2oahsCarc7US9P4kMFP/6rM5/mOVwg==}
     peerDependencies:
       '@nestjs/common': ^11.0.0
-      '@nestjs/config': ^3.0.0
+      '@nestjs/config': ^4.0.0
       '@nestjs/core': ^11.0.0
       '@nestjs/jwt': ^11.0.0
       '@nestjs/microservices': ^11.0.0
-      '@nestjs/swagger': ^8.0.0
+      '@nestjs/swagger': ^11.0.0
       class-transformer: ^0.5.0
       class-validator: ^0.14.0
       fastify: 5.7.4
@@ -14733,7 +14733,7 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@vritti/api-sdk@0.2.6(784a71a729eb3530179dc5580b65dd6f)':
+  '@vritti/api-sdk@0.2.7(784a71a729eb3530179dc5580b65dd6f)':
     dependencies:
       '@getbrevo/brevo': 4.0.1
       '@nestjs/common': 11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
