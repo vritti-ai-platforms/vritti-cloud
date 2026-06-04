@@ -1,0 +1,13 @@
+# Keep Docker build context small + deterministic
+**/node_modules
+**/dist
+**/.nx
+**/coverage
+**/.turbo
+.git
+.github
+**/*.log
+e2e
+certs
+**/.env
+**/.env.*
