@@ -1,12 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreatePrice } from '@hooks/admin/prices';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { TextField } from '@vritti/quantum-ui/TextField';
+import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
-import { IndustrySelector } from '@vritti/quantum-ui/selects/industry';
-import { RegionSelector } from '@vritti/quantum-ui/selects/region';
 import { CurrencySelector } from '@vritti/quantum-ui/selects/currency';
+import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type CreatePriceData, createPriceSchema } from '@/schemas/admin/prices';
@@ -32,14 +32,9 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
     },
   });
 
-  const handleCancel = () => {
-    form.reset({ planId, currency: 'INR' });
-    onCancel();
-  };
-
   return (
-    <Form form={form} mutation={createMutation} showRootError>
-      <IndustrySelector name="industryId" label="Industry" placeholder="Select industry" />
+    <Form form={form} mutation={createMutation} resetOnSuccess={false} onCancel={onCancel}>
+      <BusinessSelector name="businessId" label="Business" placeholder="Select business" />
       <RegionSelector
         name="regionId"
         label="Region"
@@ -56,7 +51,7 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
       <TextField name="price" label="Price" placeholder="e.g. 2999.00" />
       <CurrencySelector name="currency" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">

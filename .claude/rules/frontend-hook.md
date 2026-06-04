@@ -67,6 +67,78 @@ mutationFn: async (sessionId) => {
 type UseLoginOptions = Omit<UseMutationOptions<LoginResponse, AxiosError, LoginDto>, 'mutationFn'>;
 ```
 
+## Create hooks use CreateResponse\<Entity\>
+
+Create mutations return `{ success, message, data }` from the backend. Use `CreateResponse<T>` from quantum-ui.
+
+```typescript
+import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+
+type UseCreateFeatureOptions = Omit<UseMutationOptions<CreateResponse<Feature>, AxiosError, CreateFeatureData>, 'mutationFn'>;
+
+export function useCreateFeature(options?: UseCreateFeatureOptions) {
+  const queryClient = useQueryClient();
+  return useMutation<CreateResponse<Feature>, AxiosError, CreateFeatureData>({
+    ...options,
+    mutationFn: createFeature,
+    onSuccess: (result, ...args) => {
+      queryClient.invalidateQueries({ queryKey: FEATURES_QUERY_KEY });
+      options?.onSuccess?.(result, ...args);
+    },
+  });
+}
+```
+
+## One hook per file
+
+Each hook lives in its own file. The filename matches the function name.
+
+```
+hooks/account/useRequestEmailChange.ts → exports useRequestEmailChange()
+hooks/account/useVerifyEmailIdentity.ts → exports useVerifyEmailIdentity()
+hooks/account/useProfile.ts → exports useProfile() + PROFILE_QUERY_KEY
+```
+
+Never bundle multiple hooks in one file.
+
+## Options spread order — `...options` BEFORE `onSuccess`
+
+When a hook has internal `onSuccess` logic (cache invalidation), spread `...options` BEFORE `onSuccess` so the internal handler always runs:
+
+```typescript
+// CORRECT — internal onSuccess always fires
+return useMutation({
+  ...options,
+  mutationFn: updateProfile,
+  onSuccess: (data, ...args) => {
+    queryClient.setQueryData(PROFILE_QUERY_KEY, data);
+    options?.onSuccess?.(data, ...args);
+  },
+});
+
+// WRONG — caller's onSuccess overwrites internal cache update
+return useMutation({
+  mutationFn: updateProfile,
+  onSuccess: (data, ...args) => {
+    queryClient.setQueryData(PROFILE_QUERY_KEY, data);
+    options?.onSuccess?.(data, ...args);
+  },
+  ...options,  // ← overwrites onSuccess above!
+});
+```
+
+## useTimer — countdown timer from quantum-ui
+
+For OTP resend cooldowns or any countdown, use `useTimer` from quantum-ui (not a local hook):
+
+```typescript
+import { useTimer } from '@vritti/quantum-ui/hooks';
+
+const { timer, startTimer } = useTimer();
+// timer: current countdown value (0 = done)
+// startTimer(45): start 45-second countdown
+```
+
 ## Query keys — hierarchical arrays
 
 ```typescript

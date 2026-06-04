@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, zodPhoneField } from '@vritti/quantum-ui/zod';
 
 // Login form validation
 export const loginSchema = z.object({
@@ -67,10 +67,7 @@ export type OTPFormData = z.infer<typeof otpSchema>;
 
 // Phone number form validation
 export const phoneSchema = z.object({
-  phone: z
-    .string()
-    .min(10, 'Please enter a valid phone number')
-    .regex(/^\+?[1-9]\d{1,14}$/, 'Please enter a valid phone number'),
+  phone: zodPhoneField({ required: 'Please enter a valid phone number' }),
   phoneCountry: z.string().min(2).max(5),
 });
 

@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
 import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
+
+const require = createRequire(import.meta.url);
 
 // Environment configuration
 const useHttps = process.env.USE_HTTPS === 'true';
@@ -37,14 +40,38 @@ export default defineConfig({
         target: process.env.PUBLIC_API_URL || defaultApiHost,
         changeOrigin: true,
         secure: false,
-        onProxyReq: (proxyReq, req) => {
-          const host = (req.headers['host'] ?? '').split(':')[0];
-          if (host) proxyReq.setHeader('x-forwarded-host', host);
+        on: {
+          proxyReq: (proxyReq, req) => {
+            // HTTP/2 uses :authority instead of Host
+            const rawHost = (req.headers.host ?? req.headers[':authority'] ?? '') as string;
+            const host = rawHost.split(':')[0];
+            if (host) proxyReq.setHeader('x-forwarded-host', host);
+          },
+          proxyRes: (proxyRes, req, res) => {
+            if (req.headers.accept === 'text/event-stream') {
+              proxyRes.headers['cache-control'] = 'no-cache';
+              proxyRes.headers['x-accel-buffering'] = 'no';
+              proxyRes.on('data', (chunk) => {
+                res.write(chunk);
+              });
+            }
+          },
         },
         pathRewrite: (path) => path.replace(/^\/api/, ''),
       },
     },
   },
   plugins: [pluginReact()],
+  tools: {
+    rspack: {
+      ignoreWarnings: [
+        /Critical dependency: the request of a dependency is an expression/,
+        /Critical dependency: require function is used in a way in which dependencies cannot be statically extracted/,
+      ],
+      watchOptions: {
+        ignored: ['**/node_modules/**', '**/dist/**', '**/cloud-server/**'],
+      },
+    },
+  },
   // PostCSS configuration is in postcss.config.mjs
 });

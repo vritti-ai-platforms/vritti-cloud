@@ -1,11 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useUpdateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { VersionSelector } from '@vritti/quantum-ui/selects/version';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import type { Deployment } from '@/schemas/admin/deployments';
@@ -27,15 +28,20 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       cloudProviderId: deployment.cloudProviderId,
       type: deployment.type,
       status: deployment.status,
+      version: deployment.version ?? '',
     },
   });
 
-  const updateMutation = useUpdateDeployment({
-    onSuccess: () => onSuccess(),
-  });
+  const updateMutation = useUpdateDeployment({ onSuccess });
 
   return (
-    <Form form={form} mutation={updateMutation} showRootError transformSubmit={(data) => ({ id: deployment.id, data })}>
+    <Form
+      form={form}
+      mutation={updateMutation}
+      resetOnSuccess={false}
+      onCancel={onCancel}
+      transformSubmit={(data) => ({ id: deployment.id, data })}
+    >
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vrittiai.com" />
       <RegionSelector
@@ -45,6 +51,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
         onOptionSelect={() => form.setValue('cloudProviderId', '')}
       />
       <CloudProviderSelector name="cloudProviderId" label="Cloud Provider" placeholder="Select provider" />
+      <VersionSelector name="version" label="Version" placeholder="Select version" />
       <Select
         name="type"
         label="Deployment Type"
@@ -63,7 +70,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
         ]}
       />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">

@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useInitiateMobileVerification, useVerifyMobileOtp } from '@hooks/onboarding/mobile-verification';
 import type { OTPFormData } from '@schemas/auth';
 import { otpSchema } from '@schemas/auth';
@@ -7,6 +6,7 @@ import { Field, FieldGroup, FieldLabel, Form } from '@vritti/quantum-ui/Form';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import type { PhoneValue } from '@vritti/quantum-ui/PhoneField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { ArrowLeft, Smartphone } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useState } from 'react';
@@ -88,7 +88,7 @@ export const OTPVerificationStep: React.FC<OTPVerificationStepProps> = ({
 
       {error && <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm text-center">{error}</div>}
 
-      <Form form={form} mutation={verifyOtpMutation} transformSubmit={(data) => data.code} showRootError>
+      <Form form={form} mutation={verifyOtpMutation} transformSubmit={(data) => data.code}>
         <FieldGroup>
           <div className="flex justify-center">
             <Smartphone className="h-8 w-8 text-primary" />

@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, type MessageEvent, Post, Sse } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Onboarding, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { Observable } from 'rxjs';
 import { VerificationChannelValues } from '@/db/schema/enums';
 import {
@@ -24,7 +25,7 @@ export class MobileVerificationController {
 
   // Starts manual OTP verification via SMS (requires phone number in body)
   @Post('initiate/manual')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiInitiateManualMobileVerification()
   async initiateMobileVerification(
@@ -38,7 +39,7 @@ export class MobileVerificationController {
 
   // Initiates WhatsApp verification and streams real-time status events
   @Sse('events/whatsapp')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @ApiSubscribeWhatsApp()
   async subscribeWhatsApp(@UserId() userId: string): Promise<Observable<MessageEvent>> {
     this.logger.log(`SSE /onboarding/mobile-verification/events/whatsapp - User: ${userId}`);
@@ -48,7 +49,7 @@ export class MobileVerificationController {
 
   // Initiates SMS QR verification and streams real-time status events
   @Sse('events/sms')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @ApiSubscribeSms()
   async subscribeSms(@UserId() userId: string): Promise<Observable<MessageEvent>> {
     this.logger.log(`SSE /onboarding/mobile-verification/events/sms - User: ${userId}`);
@@ -58,7 +59,7 @@ export class MobileVerificationController {
 
   // Validates the manually-entered OTP for mobile phone verification
   @Post('verify-otp')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiVerifyMobileOtp()
   async verifyMobileOtp(

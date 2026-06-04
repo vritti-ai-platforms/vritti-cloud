@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, zodPhoneField } from '@vritti/quantum-ui/zod';
 
 export enum OrgSize {
   s0_10 = '0-10',
@@ -19,7 +19,7 @@ export interface OrgListItem {
   name: string;
   subdomain: string;
   orgIdentifier: string;
-  industryId: string;
+  businessId: string;
   size: OrgSize;
   mediaId: string | null;
   planId: string | null;
@@ -45,8 +45,8 @@ export const createOrganizationSchema = z.object({
     .min(1, 'URL is required')
     .regex(/^[a-z0-9-]+$/, 'Only lowercase letters, numbers, and hyphens'),
   size: z.enum(Object.values(OrgSize) as [OrgSize, ...OrgSize[]], { message: 'Please select a size' }),
-  industryId: z.string({ message: 'Please select an industry' }),
-  industryName: z.string().optional(),
+  businessId: z.string({ message: 'Please select a business' }),
+  businessName: z.string().optional(),
   regionId: z.string({ message: 'Please select a region' }).optional(),
   regionName: z.string().optional(),
   cloudProviderId: z.string({ message: 'Please select a provider' }).optional(),
@@ -74,8 +74,9 @@ export interface NexusUser {
   organizationId: string;
   email: string;
   fullName: string;
-  role: string;
   status: string;
+  locale: string;
+  timezone: string;
   hasPassword: boolean;
   createdAt: string;
 }
@@ -83,6 +84,17 @@ export interface NexusUser {
 export const inviteUserSchema = z.object({
   email: z.string().email('Valid email is required'),
   fullName: z.string().min(1, 'Full name is required'),
-  role: z.enum(['SUPER_ADMIN', 'ADMIN', 'SUPPORT']).optional(),
+  phone: zodPhoneField({ optional: true }).optional(),
 });
 export type InviteUserFormData = z.infer<typeof inviteUserSchema>;
+
+export const updateOrganizationSchema = z.object({
+  name: z.string().min(1, 'Organization name is required').max(255, 'Name must be 255 characters or less'),
+  size: z.enum(Object.values(OrgSize) as [OrgSize, ...OrgSize[]], { message: 'Please select a size' }),
+  logo: z
+    .instanceof(File)
+    .refine((f) => f.size <= 10 * 1024 * 1024, 'File must be under 10MB')
+    .optional(),
+});
+
+export type UpdateOrgFormData = z.infer<typeof updateOrganizationSchema>;

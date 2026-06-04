@@ -1,12 +1,13 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useCreateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
 import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { Select } from '@vritti/quantum-ui/Select';
-import { TextField } from '@vritti/quantum-ui/TextField';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { VersionSelector } from '@vritti/quantum-ui/selects/version';
+import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type CreateDeploymentData, createDeploymentSchema } from '@/schemas/admin/deployments';
@@ -19,25 +20,15 @@ interface AddDeploymentFormProps {
 export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess, onCancel }) => {
   const form = useForm<CreateDeploymentData>({
     resolver: zodResolver(createDeploymentSchema),
-    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared' },
+    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared', version: '' },
   });
 
   const regionId = form.watch('regionId');
 
-  const createMutation = useCreateDeployment({
-    onSuccess: () => {
-      form.reset();
-      onSuccess();
-    },
-  });
-
-  const handleCancel = () => {
-    form.reset();
-    onCancel();
-  };
+  const createMutation = useCreateDeployment({ onSuccess });
 
   return (
-    <Form form={form} mutation={createMutation} showRootError>
+    <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vritti.io" />
       <PasswordField name="webhookSecret" label="Webhook Secret" placeholder="whsec_..." />
@@ -63,8 +54,9 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
           { value: 'dedicated', label: 'Dedicated' },
         ]}
       />
+      <VersionSelector name="version" label="Version" placeholder="Select version" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={handleCancel}>
+        <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">

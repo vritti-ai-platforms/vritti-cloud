@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useVerifyTotp } from '@hooks/auth';
 import type { OTPFormData } from '@schemas/auth';
 import { otpSchema } from '@schemas/auth';
@@ -7,6 +6,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { ShieldCheck } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -49,12 +49,7 @@ export const TOTPVerification: React.FC<TOTPVerificationProps> = ({ sessionId, o
       </Typography>
 
       {/* OTP Form */}
-      <Form
-        form={form}
-        mutation={verifyTotpMutation}
-        transformSubmit={(data) => ({ sessionId, code: data.code })}
-        showRootError
-      >
+      <Form form={form} mutation={verifyTotpMutation} transformSubmit={(data) => ({ sessionId, code: data.code })}>
         <FieldGroup>
           <div className="flex justify-center">
             <OTPField

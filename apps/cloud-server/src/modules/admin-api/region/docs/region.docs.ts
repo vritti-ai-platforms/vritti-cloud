@@ -11,7 +11,7 @@ export function ApiCreateRegion() {
   return applyDecorators(
     ApiOperation({ summary: 'Create a new region' }),
     ApiBody({ type: CreateRegionDto }),
-    ApiResponse({ status: 201, description: 'Region created successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 201, description: 'Region created successfully.', type: RegionDto }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 409, description: 'Region with this code already exists.' }),

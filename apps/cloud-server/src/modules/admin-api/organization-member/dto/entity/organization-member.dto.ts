@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { OrganizationMemberRow } from '../../repositories/organization-member.repository';
+import type { OrganizationMemberRow } from '@domain/organization-member/repositories/organization-member.repository';
 
 export class OrganizationMemberDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })

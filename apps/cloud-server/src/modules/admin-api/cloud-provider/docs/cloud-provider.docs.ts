@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
+import { CloudProviderDto } from '../dto/entity/cloud-provider.dto';
 import { CreateCloudProviderDto } from '../dto/request/create-cloud-provider.dto';
 import { UpdateCloudProviderDto } from '../dto/request/update-cloud-provider.dto';
 import { CloudProviderSelectResponseDto } from '../dto/response/cloud-provider-select-response.dto';
@@ -10,7 +11,7 @@ export function ApiCreateCloudProvider() {
   return applyDecorators(
     ApiOperation({ summary: 'Create a new cloud provider' }),
     ApiBody({ type: CreateCloudProviderDto }),
-    ApiResponse({ status: 201, description: 'Cloud provider created successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 201, description: 'Cloud provider created successfully.', type: CloudProviderDto }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 409, description: 'Cloud provider with this code already exists.' }),

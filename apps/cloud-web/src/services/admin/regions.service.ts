@@ -1,3 +1,4 @@
+import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateRegionData, Region, RegionsResponse, UpdateRegionData } from '@/schemas/admin/regions';
 
@@ -12,8 +13,8 @@ export function getRegion(id: string): Promise<Region> {
 }
 
 // Creates a new region
-export function createRegion(data: CreateRegionData): Promise<{ success: boolean; message: string }> {
-  return axios.post<{ success: boolean; message: string }>('admin-api/regions', data).then((r) => r.data);
+export function createRegion(data: CreateRegionData): Promise<CreateResponse<Region>> {
+  return axios.post<CreateResponse<Region>>('admin-api/regions', data).then((r) => r.data);
 }
 
 // Updates an existing region by ID

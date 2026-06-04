@@ -2,6 +2,7 @@
   "name": "vritti-cloud",
   "version": "0.0.0",
   "private": true,
+  "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "nx run-many --target=dev --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
     "dev:ssl": "nx run-many --target=dev:ssl --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",

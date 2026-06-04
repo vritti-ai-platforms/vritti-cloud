@@ -1,1 +1,0 @@
-ALTER TABLE "cloud"."plans" DROP COLUMN "price";

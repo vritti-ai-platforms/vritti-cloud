@@ -9,7 +9,7 @@ export class PriceDto {
   planId: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  industryId: string;
+  businessId: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   regionId: string;
@@ -33,7 +33,7 @@ export class PriceDto {
     const dto = new PriceDto();
     dto.id = price.id;
     dto.planId = price.planId;
-    dto.industryId = price.industryId;
+    dto.businessId = price.businessId;
     dto.regionId = price.regionId;
     dto.providerId = price.providerId;
     dto.price = price.price;

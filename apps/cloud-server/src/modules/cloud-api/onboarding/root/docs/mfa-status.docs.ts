@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
-import { MfaStatusResponseDto } from '../../totp/dto/response/mfa-status-response.dto';
+import { MfaStatusResponseDto } from '../../../../account/security/dto/response/mfa-status-response.dto';
 
 export function ApiSkipMfaSetup() {
   return applyDecorators(

@@ -4,7 +4,7 @@ import { CloudProvider, Region } from '@/db/schema';
 export interface PriceWithRelations {
   id: string;
   planId: string;
-  industryId: string;
+  businessId: string;
   regionId: string;
   providerId: string;
   price: string;
@@ -23,7 +23,7 @@ export class PriceDetailDto {
   planId: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  industryId: string;
+  businessId: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   regionId: string;
@@ -59,7 +59,7 @@ export class PriceDetailDto {
     const dto = new PriceDetailDto();
     dto.id = row.id;
     dto.planId = row.planId;
-    dto.industryId = row.industryId;
+    dto.businessId = row.businessId;
     dto.regionId = row.regionId;
     dto.regionName = row.region?.name ?? '';
     dto.regionCode = row.region?.code ?? '';

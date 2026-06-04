@@ -2,12 +2,12 @@ import { PLANS_QUERY_KEY, usePlans } from '@hooks/admin/plans';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
+import { buildSlug } from '@vritti/quantum-ui/slug';
 import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
 import { CreditCard, Eye, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Plan } from '@/schemas/admin/plans';
@@ -54,7 +54,6 @@ export const PlansPage = () => {
           <ValueFilter key="name" name="name" label="Name" fieldType="string" />,
           <ValueFilter key="code" name="code" label="Code" fieldType="string" />,
         ]}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY })}
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
@@ -75,10 +74,7 @@ export const PlansPage = () => {
       />
 
       <Dialog
-        open={addDialog.isOpen}
-        onOpenChange={(v) => {
-          if (!v) addDialog.close();
-        }}
+        handle={addDialog}
         title="Add Plan"
         description="Enter the details for the new subscription plan."
         content={(close) => <AddPlanForm onSuccess={close} onCancel={close} />}
@@ -115,9 +111,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Plan, unknown>[] {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <Button variant="ghost" size="icon" className="size-7" onClick={() => onView(row.original)}>
-          <Eye className="size-4" />
-        </Button>
+        <RowActions actions={[{ id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) }]} />
       ),
       enableSorting: false,
       enableHiding: false,

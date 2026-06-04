@@ -119,6 +119,34 @@ import { useLogin, useSignup } from '@hooks/auth';
 import { login } from '@services/auth.service';
 ```
 
+## Account pages (shared between cloud and admin)
+
+Account pages (profile, security) live under `pages/account/` with `forms/` and `components/` subfolders:
+
+```
+pages/account/
+├── profile/
+│   ├── ProfilePage.tsx
+│   └── forms/
+│       ├── PersonalInformationCard.tsx
+│       ├── ProfilePictureCard.tsx
+│       ├── EmailVerificationDialog.tsx
+│       ├── PhoneVerificationDialog.tsx
+│       └── steps/
+│           ├── IdentityVerificationStep.tsx
+│           ├── OtpVerificationStep.tsx
+│           └── ContactChangeSuccessStep.tsx
+└── SecurityPage.tsx
+```
+
+Pure display components go in `components/cloud/account/`:
+```
+components/cloud/account/
+└── profile/
+    ├── AccountInformationCard.tsx
+    └── ContactChangeProgressIndicator.tsx
+```
+
 ## Barrel exports — domain barrels only
 
 Domain barrel `index.ts` files re-export within their folder only — never up to a parent barrel.

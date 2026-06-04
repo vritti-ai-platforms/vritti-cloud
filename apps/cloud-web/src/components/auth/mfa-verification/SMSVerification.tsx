@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useSendSmsCode, useVerifySms } from '@hooks/auth';
 import type { OTPFormData } from '@schemas/auth';
 import { otpSchema } from '@schemas/auth';
@@ -7,6 +6,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Smartphone } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
@@ -80,12 +80,7 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({ sessionId, mas
         </Button>
       ) : (
         /* OTP Form */
-        <Form
-          form={form}
-          mutation={verifySmsMutation}
-          transformSubmit={(data) => ({ sessionId, code: data.code })}
-          showRootError
-        >
+        <Form form={form} mutation={verifySmsMutation} transformSubmit={(data) => ({ sessionId, code: data.code })}>
           <FieldGroup>
             <div className="flex justify-center">
               <OTPField

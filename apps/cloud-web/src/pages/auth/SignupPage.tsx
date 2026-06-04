@@ -1,6 +1,5 @@
 import { AuthDivider } from '@components/auth/AuthDivider';
 import { SocialAuthButtons } from '@components/auth/SocialAuthButtons';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useSignup } from '@hooks/auth';
 import type { SignupFormData } from '@schemas/auth';
 import { signupSchema } from '@schemas/auth';
@@ -10,6 +9,7 @@ import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Lock, Mail, User } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
@@ -74,7 +74,6 @@ export const SignupPage: React.FC = () => {
           password: data.password,
           fullName: data.fullName,
         })}
-        showRootError
         rootErrorAction={
           <Button size="xs" variant="default" onClick={handleLoginInstead}>
             Login

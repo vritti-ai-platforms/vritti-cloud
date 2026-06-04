@@ -1,14 +1,13 @@
 import { ORGANIZATIONS_QUERY_KEY, useOrganizations } from '@hooks/admin/organizations';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
-import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, NumberCell, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { SelectFilter } from '@vritti/quantum-ui/Select';
-import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
-import { IndustryFilter } from '@vritti/quantum-ui/selects/industry';
+import { BusinessFilter } from '@vritti/quantum-ui/selects/business';
 import { PlanFilter } from '@vritti/quantum-ui/selects/plan';
-import { buildSlug } from '@vritti/quantum-ui/utils/slug';
+import { buildSlug } from '@vritti/quantum-ui/slug';
+import { ValueFilter } from '@vritti/quantum-ui/ValueFilter';
 import { Building2, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { AdminOrganization } from '@/schemas/admin/organizations';
@@ -49,10 +48,9 @@ export const OrganizationsPage = () => {
         }}
         filters={[
           <PlanFilter key="planId" name="planId" />,
-          <IndustryFilter key="industryId" name="industryId" />,
+          <BusinessFilter key="businessId" name="businessId" />,
           <SelectFilter
             key="size"
-            field="size"
             name="size"
             label="Size"
             options={[
@@ -66,7 +64,6 @@ export const OrganizationsPage = () => {
           />,
           <ValueFilter key="memberCount" name="memberCount" label="Members" fieldType="number" />,
         ]}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: ORGANIZATIONS_QUERY_KEY })}
         emptyStateConfig={{
           icon: Building2,
           title: 'No organizations found',
@@ -102,8 +99,8 @@ function getColumns({ onView }: ColumnActions): ColumnDef<AdminOrganization, unk
       header: 'Plan',
     },
     {
-      accessorKey: 'industryName',
-      header: 'Industry',
+      accessorKey: 'businessName',
+      header: 'Business',
     },
     {
       accessorKey: 'size',
@@ -113,15 +110,13 @@ function getColumns({ onView }: ColumnActions): ColumnDef<AdminOrganization, unk
     {
       accessorKey: 'memberCount',
       header: 'Members',
-      cell: ({ row }) => row.original.memberCount,
+      cell: ({ row }) => <NumberCell value={row.original.memberCount} />,
     },
     {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <Button variant="ghost" size="icon" className="size-7" onClick={() => onView(row.original)}>
-          <Eye className="size-4" />
-        </Button>
+        <RowActions actions={[{ id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) }]} />
       ),
       enableSorting: false,
       enableHiding: false,

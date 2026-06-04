@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { OrganizationRow } from '../../repositories/organization.repository';
+import type { OrganizationRow } from '@domain/organization/repositories/organization.repository';
 
 export class OrganizationDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -30,7 +30,7 @@ export class OrganizationDto {
   deploymentUrl: string;
 
   @ApiProperty({ example: 'Technology' })
-  industryName: string;
+  businessName: string;
 
   @ApiProperty({ example: 3 })
   memberCount: number;
@@ -52,7 +52,7 @@ export class OrganizationDto {
     dto.planCode = row.planCode;
     dto.deploymentName = row.deploymentName;
     dto.deploymentUrl = row.deploymentUrl;
-    dto.industryName = row.industryName;
+    dto.businessName = row.businessName;
     dto.memberCount = Number(row.memberCount);
     dto.createdAt = row.createdAt;
     dto.updatedAt = row.updatedAt;

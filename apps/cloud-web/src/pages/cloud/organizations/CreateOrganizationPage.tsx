@@ -1,7 +1,7 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@vritti/quantum-ui/Button';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { type StepDef, StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Building2, ClipboardList, CreditCard, Server } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';

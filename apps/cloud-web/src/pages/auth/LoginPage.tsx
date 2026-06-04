@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useLogin } from '@hooks/auth';
 import { scheduleTokenRefresh, setToken } from '@vritti/quantum-ui/axios';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -6,6 +5,7 @@ import { Field, FieldGroup, FieldLabel, Form } from '@vritti/quantum-ui/Form';
 import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Lock, Mail } from 'lucide-react';
 import type React from 'react';
 import { useEffect } from 'react';
@@ -79,7 +79,7 @@ export const LoginPage: React.FC = () => {
       </div>
 
       {/* Form */}
-      <Form form={form} mutation={loginMutation} showRootError>
+      <Form form={form} mutation={loginMutation}>
         <FieldGroup>
           <TextField
             name="email"

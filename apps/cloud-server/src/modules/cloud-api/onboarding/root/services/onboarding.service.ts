@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException } from '@vritti/api-sdk';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
 import { EncryptionService } from '../../../../../services';
-import { SessionService } from '../../../auth/root/services/session.service';
-import { UserService } from '../../../user/services/user.service';
+import { SessionService } from '@domain/session/services/session.service';
+import { UserService } from '@domain/user/services/user.service';
 import { OnboardingStatusResponseDto } from '../dto/entity/onboarding-status-response.dto';
 import { StartOnboardingResponseDto } from '../dto/response/start-onboarding-response.dto';
 

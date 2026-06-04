@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { DeploymentTypeValues } from '@/db/schema';
-import type { OrganizationDetail } from '../../repositories/organization.repository';
+import type { OrganizationDetail } from '@domain/organization/repositories/organization.repository';
 
 export class OrganizationDetailDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -40,10 +40,10 @@ export class OrganizationDetailDto {
   deploymentType: string;
 
   @ApiProperty({ example: 'Technology' })
-  industryName: string;
+  businessName: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  industryId: string;
+  businessId: string;
 
   @ApiProperty({ example: 'US East' })
   regionName: string;
@@ -77,8 +77,8 @@ export class OrganizationDetailDto {
     dto.deploymentUrl = org.deployment.url;
     dto.deploymentId = org.deploymentId;
     dto.deploymentType = org.deployment.type;
-    dto.industryName = org.industry.name;
-    dto.industryId = org.industryId;
+    dto.businessName = org.business.name;
+    dto.businessId = org.businessId;
     dto.regionName = org.deployment.region.name;
     dto.regionCode = org.deployment.region.code;
     dto.cloudProviderName = org.deployment.cloudProvider.name;

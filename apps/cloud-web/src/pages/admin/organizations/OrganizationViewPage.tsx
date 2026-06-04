@@ -1,20 +1,26 @@
 import { ORGANIZATION_MEMBERS_QUERY_KEY_FN, useOrganization, useOrganizationMembers } from '@hooks/admin/organizations';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
+import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
-import { type ColumnDef, DataTable, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, DateCell, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Spinner } from '@vritti/quantum-ui/Spinner';
-import { Building2, Cloud, Factory, MapPin, Server, Users } from 'lucide-react';
+import type { AxiosError } from 'axios';
+import { Building2, Cloud, Factory, MapPin, RefreshCw, Server, Users } from 'lucide-react';
 import type { AdminOrganizationMember } from '@/schemas/admin/organizations';
+import { syncOrgFeatures } from '@/services/admin/organizations.service';
 
 const MEMBERS_TABLE_SLUG = 'organization-members';
 
 export const OrganizationViewPage = () => {
-  const { id } = useSlugParams();
+  const { id } = useSlugParams('orgSlug');
   const queryClient = useQueryClient();
-  const { data: org, isLoading } = useOrganization(id);
+  const { data: org } = useOrganization(id);
+
+  const syncMutation = useMutation<unknown, AxiosError>({
+    mutationFn: () => syncOrgFeatures(id),
+  });
   const { data: membersResponse, isLoading: membersLoading } = useOrganizationMembers(id);
 
   const { table } = useDataTable({
@@ -28,20 +34,22 @@ export const OrganizationViewPage = () => {
     onStatePush: () => queryClient.invalidateQueries({ queryKey: ORGANIZATION_MEMBERS_QUERY_KEY_FN(id) }),
   });
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner className="size-8 text-primary" />
-      </div>
-    );
-  }
-
-  if (!org) return null;
-
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         title={org.name}
+        actions={
+          <Button
+            variant="outline"
+            size="sm"
+            startAdornment={<RefreshCw className="size-4" />}
+            onClick={() => syncMutation.mutate()}
+            isLoading={syncMutation.isPending}
+            loadingText="Syncing..."
+          >
+            Sync Features
+          </Button>
+        }
         description={`${org.subdomain}.${org.deploymentUrl.replace(/^https?:\/\//, '')}`}
       />
 
@@ -75,8 +83,8 @@ export const OrganizationViewPage = () => {
               <Factory className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <p className="text-sm text-muted-foreground">Industry</p>
-              <p className="text-2xl font-semibold">{org.industryName}</p>
+              <p className="text-sm text-muted-foreground">Business</p>
+              <p className="text-2xl font-semibold">{org.businessName}</p>
             </div>
           </CardContent>
         </Card>
@@ -138,7 +146,6 @@ export const OrganizationViewPage = () => {
           ],
           searchAll: true,
         }}
-        onStatePush={() => queryClient.invalidateQueries({ queryKey: ORGANIZATION_MEMBERS_QUERY_KEY_FN(id) })}
         emptyStateConfig={{
           icon: Users,
           title: 'No members found',
@@ -157,7 +164,11 @@ function getMemberColumns(): ColumnDef<AdminOrganizationMember, unknown>[] {
       cell: ({ row }) => (
         <div className="flex items-center gap-3">
           {row.original.profilePictureUrl ? (
-            <img src={row.original.profilePictureUrl} alt={row.original.fullName} className="size-8 rounded-full object-cover" />
+            <img
+              src={row.original.profilePictureUrl}
+              alt={row.original.fullName}
+              className="size-8 rounded-full object-cover"
+            />
           ) : (
             <div className="size-8 rounded-full bg-primary/10 flex items-center justify-center">
               <span className="text-xs font-medium text-primary">{row.original.fullName.charAt(0)}</span>
@@ -181,7 +192,7 @@ function getMemberColumns(): ColumnDef<AdminOrganizationMember, unknown>[] {
     {
       accessorKey: 'createdAt',
       header: 'Joined',
-      cell: ({ row }) => new Date(row.original.createdAt).toLocaleDateString(),
+      cell: ({ row }) => <DateCell value={row.original.createdAt} />,
     },
   ];
 }

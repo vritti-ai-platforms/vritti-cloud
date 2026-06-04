@@ -1,8 +1,7 @@
-import { Controller, Get, Logger, Param, Query, Redirect, Res } from '@nestjs/common';
+import { Controller, Get, Logger, Param, Query, Redirect, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
-import type { FastifyReply } from 'fastify';
-import { getRefreshCookieName } from '../../root/services/session.service';
+import { CookieName, type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
+import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ApiHandleOAuthCallback, ApiInitiateOAuth } from '../docs/oauth.docs';
 import { OAuthCallbackQueryDto } from '../dto/request/oauth-callback-query.dto';
 import { OAuthService } from '../services/oauth.service';
@@ -31,8 +30,10 @@ export class OAuthController {
   async handleOAuthCallback(
     @Param('provider') provider: string,
     @Query() dto: OAuthCallbackQueryDto,
+    @CookieName() cookieName: string,
     @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
     @Res() res: FastifyReply,
+    @Req() request: FastifyRequest,
   ): Promise<void> {
     this.logger.log(`OAuth callback for: ${provider}`);
 
@@ -44,13 +45,14 @@ export class OAuthController {
       provider,
       dto.code,
       dto.state,
+      request,
       error,
       errorDescription,
     );
 
     // Set refresh token cookie only on success (non-empty token)
     if (refreshToken) {
-      res.setCookie(getRefreshCookieName(), refreshToken, cookieOptions);
+      res.setCookie(cookieName, refreshToken, cookieOptions);
     }
 
     res.redirect(redirectUrl, 302);

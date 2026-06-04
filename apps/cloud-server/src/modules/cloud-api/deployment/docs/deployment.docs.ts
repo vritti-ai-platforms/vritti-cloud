@@ -1,14 +1,22 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { DeploymentsResponseDto } from '@/modules/admin-api/deployment/dto/response/deployments-response.dto';
 import { DeploymentOptionDto } from '../dto/response/deployment-option.dto';
 import { PlanOptionDto } from '../dto/response/plan-option.dto';
 
+export function ApiFindAllPublicDeployments() {
+  return applyDecorators(
+    ApiOperation({ summary: 'List all deployments for public discovery' }),
+    ApiResponse({ status: 200, description: 'Deployments retrieved successfully.', type: DeploymentsResponseDto }),
+  );
+}
+
 export function ApiGetDeployments() {
   return applyDecorators(
-    ApiOperation({ summary: 'List active deployments for a region, cloud provider, and industry' }),
+    ApiOperation({ summary: 'List active deployments for a region, cloud provider, and business' }),
     ApiQuery({ name: 'regionId', description: 'Region UUID', required: true }),
     ApiQuery({ name: 'cloudProviderId', description: 'Cloud provider UUID', required: true }),
-    ApiQuery({ name: 'industryId', description: 'Industry UUID', required: true }),
+    ApiQuery({ name: 'businessId', description: 'Business UUID', required: true }),
     ApiResponse({ status: 200, description: 'Deployments retrieved successfully.', type: DeploymentOptionDto, isArray: true }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
@@ -16,9 +24,9 @@ export function ApiGetDeployments() {
 
 export function ApiGetDeploymentPlans() {
   return applyDecorators(
-    ApiOperation({ summary: 'List plans for a deployment and industry with pricing' }),
+    ApiOperation({ summary: 'List plans for a deployment and business with pricing' }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiQuery({ name: 'industryId', description: 'Industry UUID', required: false }),
+    ApiQuery({ name: 'businessId', description: 'Business UUID', required: false }),
     ApiResponse({ status: 200, description: 'Plans retrieved successfully.', type: PlanOptionDto, isArray: true }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );

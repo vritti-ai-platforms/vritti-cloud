@@ -1,5 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 import type { AccountStatus, OnboardingStep } from '@/db/schema';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
 
@@ -109,4 +109,9 @@ export class UpdateUserDto {
   @IsString()
   @IsOptional()
   passwordHash?: string;
+
+  @ApiPropertyOptional({ description: 'Media asset identifier for profile picture' })
+  @IsOptional()
+  @IsUUID()
+  mediaId?: string;
 }

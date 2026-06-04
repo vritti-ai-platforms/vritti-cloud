@@ -1,1 +1,0 @@
-ALTER TABLE "cloud"."regions" ADD COLUMN "country" varchar(100) NOT NULL;

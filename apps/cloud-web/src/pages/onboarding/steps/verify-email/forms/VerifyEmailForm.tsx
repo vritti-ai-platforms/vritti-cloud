@@ -1,5 +1,3 @@
-import { useOnboarding } from '@context/onboarding';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useSendEmailOtp, useVerifyEmail } from '@hooks/onboarding';
 import type { OTPFormData } from '@schemas/auth';
 import { otpSchema } from '@schemas/auth';
@@ -7,8 +5,10 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, FieldLabel, Form } from '@vritti/quantum-ui/Form';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 
 interface VerifyEmailFormProps {
   onChangeClick: () => void;
@@ -60,7 +60,7 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ onChangeClick 
         </div>
       </div>
 
-      <Form form={form} mutation={verifyEmailMutation} transformSubmit={(data: OTPFormData) => data.code} showRootError>
+      <Form form={form} mutation={verifyEmailMutation} transformSubmit={(data: OTPFormData) => data.code}>
         <FieldGroup>
           <Field>
             <FieldLabel className="sr-only">Verification Code</FieldLabel>

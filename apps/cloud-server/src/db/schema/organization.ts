@@ -1,8 +1,8 @@
-import { timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { jsonb, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
 import { deployments } from './deployment';
 import { orgMemberRoleEnum, orgSizeEnum } from './enums';
-import { industries } from './industry';
 import { plans } from './plan';
 import { users } from './user';
 
@@ -12,9 +12,9 @@ export const organizations = cloudSchema.table('organizations', {
   name: varchar('name', { length: 255 }).notNull(),
   subdomain: varchar('subdomain', { length: 100 }).notNull().unique(),
   orgIdentifier: varchar('org_identifier', { length: 100 }).notNull().unique(),
-  industryId: uuid('industry_id')
+  businessId: uuid('business_id')
     .notNull()
-    .references(() => industries.id, { onDelete: 'restrict' }),
+    .references(() => businesses.id, { onDelete: 'restrict' }),
   size: orgSizeEnum('size').notNull(),
   mediaId: varchar('media_id', { length: 255 }),
   planId: uuid('plan_id')
@@ -23,6 +23,7 @@ export const organizations = cloudSchema.table('organizations', {
   deploymentId: uuid('deployment_id')
     .notNull()
     .references(() => deployments.id, { onDelete: 'restrict' }),
+  buAppAssignments: jsonb('bu_app_assignments').$type<Record<string, string[]>>().notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

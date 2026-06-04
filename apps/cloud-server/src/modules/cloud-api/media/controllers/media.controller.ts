@@ -16,7 +16,7 @@ import { MediaQueryDto } from '../dto/request/media-query.dto';
 import { UploadQueryDto } from '../dto/request/upload-query.dto';
 import type { BatchUploadResponseDto } from '../dto/response/batch-upload-response.dto';
 import type { PresignedUrlResponseDto } from '../dto/response/presigned-url-response.dto';
-import { MediaService } from '../services/media.service';
+import { MediaService } from '@domain/media/services/media.service';
 
 @ApiTags('Media')
 @ApiBearerAuth()

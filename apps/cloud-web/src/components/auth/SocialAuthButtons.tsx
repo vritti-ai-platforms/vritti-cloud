@@ -75,7 +75,7 @@ export const SocialAuthButtons: React.FC = () => {
     // Use relative /api path - works in both development and production
     // Dev: Rsbuild proxy forwards /api/* to localhost:3000
     // Prod: Nginx proxy forwards /api/* to backend service
-    window.location.href = `/api/cloud-api/auth/oauth/${provider}`;
+    window.location.href = `/api/auth/oauth/${provider}`;
   };
 
   return (

@@ -13,7 +13,11 @@ import type { PlanOption } from '@/services/cloud/infrastructure.service';
 // Returns undefined if value is falsy or not valid JSON
 function safeParse(value: string | null | undefined) {
   if (!value) return undefined;
-  try { return JSON.parse(value); } catch { return undefined; }
+  try {
+    return JSON.parse(value);
+  } catch {
+    return undefined;
+  }
 }
 
 interface ChoosePlanStepProps {
@@ -31,13 +35,13 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
   onBack,
   onContinue,
 }) => {
-  const deploymentId = form.getValues('deploymentId') ?? '';
-  const industryId = form.getValues('industryId') ?? '';
+  const deploymentId = form.watch('deploymentId') ?? '';
+  const businessId = form.watch('businessId') ?? '';
 
-  const { data: plans = [], isLoading } = useDeploymentPlans(deploymentId, industryId);
+  const { data: plans = [], isLoading } = useDeploymentPlans(deploymentId, businessId);
 
   return (
-    <Form form={form} onSubmit={onContinue}>
+    <Form form={form} onSubmit={onContinue} resetOnSuccess={false}>
       {isLoading ? (
         <div className="flex items-center justify-center py-16 gap-3 text-muted-foreground">
           <Spinner className="size-6 text-primary" />
@@ -47,7 +51,7 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
         <div className="flex flex-col items-center justify-center py-16 gap-3 text-center">
           <CreditCard className="size-10 text-muted-foreground" />
           <Typography variant="body1" intent="muted">
-            No plans available for this deployment and industry combination.
+            No plans available for this deployment and business combination.
           </Typography>
           <Button type="button" variant="outline" onClick={onBack}>
             <ArrowLeft className="mr-2 h-4 w-4" />

@@ -1,10 +1,11 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Onboarding, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk';
+import { SessionTypeValues } from '@/db/schema';
 import { ApiInitiateTotpSetup, ApiVerifyTotpSetup } from '../docs/totp-setup.docs';
 import { VerifyTotpDto } from '../dto/request/verify-totp.dto';
-import type { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
-import type { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
+import type { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
+import type { TotpSetupResponseDto } from '../../../../account/security/dto/response/totp-setup-response.dto';
 import { TotpSetupService } from '../services/totp-setup.service';
 
 @ApiTags('Onboarding - TOTP')
@@ -17,7 +18,7 @@ export class TotpSetupController {
 
   // Generates a TOTP secret and returns the QR code for authenticator app setup
   @Post('setup')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiInitiateTotpSetup()
   async initiateTotpSetup(@UserId() userId: string): Promise<TotpSetupResponseDto> {
@@ -27,7 +28,7 @@ export class TotpSetupController {
 
   // Validates the TOTP token and completes MFA setup with backup codes
   @Post('verify')
-  @Onboarding()
+  @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiVerifyTotpSetup()
   async verifyTotpSetup(

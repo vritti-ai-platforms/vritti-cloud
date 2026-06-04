@@ -1,1 +1,0 @@
-ALTER TABLE "cloud"."plans" ADD COLUMN "content" text;

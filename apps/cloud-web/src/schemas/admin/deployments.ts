@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z } from '@vritti/quantum-ui/zod';
 
 export type DeploymentStatus = 'active' | 'stopped' | 'provisioning';
 export type DeploymentType = 'shared' | 'dedicated';
@@ -11,6 +11,7 @@ export interface Deployment {
   cloudProviderId: string;
   status: DeploymentStatus;
   type: DeploymentType;
+  version: string | null;
   regionName?: string;
   regionCode?: string;
   cloudProviderName?: string;
@@ -28,6 +29,7 @@ export const createDeploymentSchema = z.object({
   cloudProviderId: z.string().uuid('Please select a cloud provider'),
   type: z.enum(['shared', 'dedicated'], { message: 'Please select a type' }),
   status: z.enum(['active', 'stopped', 'provisioning']).optional(),
+  version: z.string().min(1, 'Version is required').max(50),
 });
 
 export const updateDeploymentSchema = z.object({
@@ -37,20 +39,21 @@ export const updateDeploymentSchema = z.object({
   cloudProviderId: z.string().uuid().optional(),
   type: z.enum(['shared', 'dedicated']).optional(),
   status: z.enum(['active', 'stopped', 'provisioning']).optional(),
+  version: z.string().max(50).optional().or(z.literal('')),
 });
 
 export const assignPlanSchema = z.object({
   planId: z.string().uuid('Please select a plan'),
-  industryId: z.string().uuid('Please select an industry'),
+  businessId: z.string().uuid('Please select a business'),
 });
 
 export type CreateDeploymentData = z.infer<typeof createDeploymentSchema>;
 export type UpdateDeploymentData = z.infer<typeof updateDeploymentSchema>;
 export type AssignPlanData = z.infer<typeof assignPlanSchema>;
 
-export interface DeploymentPlanAssignmentIndustry {
-  industryId: string;
-  industryName: string;
+export interface DeploymentPlanAssignmentBusiness {
+  businessId: string;
+  businessName: string;
   price: string | null;
   currency: string | null;
   isAssigned: boolean;
@@ -60,5 +63,5 @@ export interface DeploymentPlanAssignment {
   planId: string;
   planName: string;
   planCode: string;
-  industries: DeploymentPlanAssignmentIndustry[];
+  businesses: DeploymentPlanAssignmentBusiness[];
 }

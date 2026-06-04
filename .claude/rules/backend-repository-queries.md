@@ -1,6 +1,6 @@
 # Backend Repository Query Pattern
 
-Repositories extend `PrimaryBaseRepository` or `TenantBaseRepository` which provide two query interfaces:
+Repositories extend `PrimaryBaseRepository` which provides two query interfaces:
 - `this.model` - Clean Drizzle ORM model methods
 - `this.db` - Low-level Drizzle query builder
 

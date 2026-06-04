@@ -49,6 +49,9 @@ export class UserDto {
   @ApiPropertyOptional({ description: 'Profile picture URL', example: 'https://example.com/avatar.jpg' })
   profilePictureUrl?: string | null;
 
+  @ApiPropertyOptional({ description: 'Media asset identifier for profile picture' })
+  mediaId: string | null;
+
   @ApiProperty({ description: 'User locale', example: 'en-US' })
   locale: string;
 
@@ -90,6 +93,7 @@ export class UserDto {
       phone: user.phone,
       phoneCountry: user.phoneCountry,
       profilePictureUrl: user.profilePictureUrl,
+      mediaId: user.mediaId ?? null,
       locale: user.locale,
       timezone: user.timezone,
       createdAt: user.createdAt,

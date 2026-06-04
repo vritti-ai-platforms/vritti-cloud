@@ -1,0 +1,120 @@
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { SuccessResponseDto } from '@vritti/api-sdk';
+import {
+  ApiCreateBusinessUnit,
+  ApiDeleteBusinessUnit,
+  ApiGetBusinessUnit,
+  ApiListBusinessUnits,
+  ApiUpdateBusinessUnit,
+} from '../docs/organization-business-units.docs';
+import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
+import { OrganizationBusinessUnitsService } from '../services/organization-business-units.service';
+
+@ApiTags('Organization Business Units')
+@ApiBearerAuth()
+@Controller('organizations/:orgId/business-units')
+export class OrganizationBusinessUnitsController {
+  private readonly logger = new Logger(OrganizationBusinessUnitsController.name);
+
+  constructor(private readonly orgBuService: OrganizationBusinessUnitsService) {}
+
+  // Lists all business units for the organization (proxied from core)
+  @Get()
+  @ApiListBusinessUnits()
+  async listBusinessUnits(@Param('orgId') orgId: string): Promise<{ result: CoreBusinessUnit[] }> {
+    this.logger.log(`GET /organizations/${orgId}/business-units`);
+    const result = await this.orgBuService.listBusinessUnits(orgId);
+    return { result };
+  }
+
+  // Creates a new business unit for the organization (proxied to core)
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreateBusinessUnit()
+  async createBusinessUnit(
+    @Param('orgId') orgId: string,
+    @Body() data: Record<string, unknown>,
+  ): Promise<CoreBusinessUnit> {
+    this.logger.log(`POST /organizations/${orgId}/business-units`);
+    return this.orgBuService.createBusinessUnit(orgId, data);
+  }
+
+  // Fetches a single business unit from core
+  @Get(':buId')
+  @ApiGetBusinessUnit()
+  async getBusinessUnit(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<CoreBusinessUnit | null> {
+    this.logger.log(`GET /organizations/${orgId}/business-units/${buId}`);
+    return this.orgBuService.getBusinessUnit(orgId, buId);
+  }
+
+  // Updates a business unit in core
+  @Patch(':buId')
+  @ApiUpdateBusinessUnit()
+  async updateBusinessUnit(
+    @Param('orgId') orgId: string,
+    @Param('buId') buId: string,
+    @Body() data: Record<string, unknown>,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /organizations/${orgId}/business-units/${buId}`);
+    return this.orgBuService.updateBusinessUnit(orgId, buId, data);
+  }
+
+  // Updates the assigned apps for a business unit
+  @Patch(':buId/apps')
+  async updateBuApps(
+    @Param('orgId') orgId: string,
+    @Param('buId') buId: string,
+    @Body() data: { appCodes: string[] },
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /organizations/${orgId}/business-units/${buId}/apps`);
+    return this.orgBuService.updateBuApps(orgId, buId, data.appCodes);
+  }
+
+  // Returns roles compatible with a business unit's assigned apps
+  @Get(':buId/compatible-roles')
+  async getCompatibleRoles(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<CoreOrgRole[]> {
+    this.logger.log(`GET /organizations/${orgId}/business-units/${buId}/compatible-roles`);
+    return this.orgBuService.getCompatibleRoles(orgId, buId);
+  }
+
+  // Lists role assignments for a business unit
+  @Get(':buId/role-assignments')
+  async getRoleAssignments(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<BuRoleAssignment[]> {
+    this.logger.log(`GET /organizations/${orgId}/business-units/${buId}/role-assignments`);
+    return this.orgBuService.getRoleAssignments(orgId, buId);
+  }
+
+  // Assigns a role to a user at a business unit
+  @Post(':buId/role-assignments')
+  @HttpCode(HttpStatus.CREATED)
+  async assignRole(
+    @Param('orgId') orgId: string,
+    @Param('buId') buId: string,
+    @Body() data: { userId: string; orgRoleId: string },
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /organizations/${orgId}/business-units/${buId}/role-assignments`);
+    return this.orgBuService.assignRole(orgId, buId, data);
+  }
+
+  // Removes a role assignment
+  @Delete(':buId/role-assignments/:assignmentId')
+  @HttpCode(HttpStatus.OK)
+  async removeRoleAssignment(
+    @Param('orgId') orgId: string,
+    @Param('buId') _buId: string,
+    @Param('assignmentId') assignmentId: string,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /organizations/${orgId}/business-units/${_buId}/role-assignments/${assignmentId}`);
+    return this.orgBuService.removeRoleAssignment(orgId, assignmentId);
+  }
+
+  // Deletes a business unit in core
+  @Delete(':buId')
+  @HttpCode(HttpStatus.OK)
+  @ApiDeleteBusinessUnit()
+  async deleteBusinessUnit(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /organizations/${orgId}/business-units/${buId}`);
+    return this.orgBuService.deleteBusinessUnit(orgId, buId);
+  }
+}

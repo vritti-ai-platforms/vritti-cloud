@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useInitiateTotpSetup, useVerifyTotpSetup } from '@hooks/onboarding/mfa';
 import type { OTPFormData } from '@schemas/auth';
 import { otpSchema } from '@schemas/auth';
@@ -7,6 +6,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Field, FieldGroup, Form } from '@vritti/quantum-ui/Form';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import { ArrowLeft, Eye } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import type React from 'react';
@@ -92,7 +92,7 @@ export const AuthenticatorSetupStep: React.FC<AuthenticatorSetupStepProps> = ({ 
       )}
 
       {/* OTP form — only enabled after reveal */}
-      <Form form={form} mutation={verifyMutation} transformSubmit={(data) => data.code} showRootError>
+      <Form form={form} mutation={verifyMutation} transformSubmit={(data) => data.code}>
         <FieldGroup>
           <div className="space-y-4">
             <Typography variant="body2" align="center" className="text-foreground font-medium">

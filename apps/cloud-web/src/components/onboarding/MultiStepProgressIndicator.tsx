@@ -1,8 +1,8 @@
-import { useOnboarding } from '@context/onboarding';
 import { type StepDef, StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
 import { Check, KeyRound, Mail, Smartphone } from 'lucide-react';
 import type React from 'react';
 import { useMemo } from 'react';
+import { useOnboarding } from '@/providers/OnboardingProvider';
 
 // Maps backend onboarding step strings to progress indicator step numbers
 function deriveCurrentStep(onboardingStep: string): number {

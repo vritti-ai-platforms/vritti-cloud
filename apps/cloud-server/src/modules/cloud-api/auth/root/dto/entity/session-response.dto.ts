@@ -10,13 +10,13 @@ export class SessionResponse {
 
   @ApiProperty({
     description: 'Device information parsed from user agent',
-    example: 'Chrome on macOS',
+    example: 'Chrome 120 on macOS',
   })
   device: string;
 
   @ApiProperty({
     description: 'Geographic location based on IP address',
-    example: 'San Francisco, CA',
+    example: 'Hyderabad, IN',
   })
   location: string;
 
@@ -38,48 +38,15 @@ export class SessionResponse {
   })
   isCurrent: boolean;
 
+  // Maps a session record to the frontend response shape
   static from(session: Session, currentAccessTokenHash: string): SessionResponse {
     return {
       sessionId: session.id,
-      device: this.parseUserAgent(session.userAgent),
-      location: 'Unknown', // Stub for now, can add IP geolocation later
+      device: session.device || 'Unknown Device',
+      location: session.location || 'Unknown',
       ipAddress: session.ipAddress || 'Unknown',
       lastActive: session.createdAt,
       isCurrent: session.accessTokenHash === currentAccessTokenHash,
     };
-  }
-
-  private static parseUserAgent(userAgent: string | null): string {
-    if (!userAgent) return 'Unknown Device';
-
-    // Simple parsing - can be enhanced with ua-parser-js library
-    let browser = 'Unknown Browser';
-    let os = 'Unknown OS';
-
-    // Detect browser
-    if (userAgent.includes('Chrome') && !userAgent.includes('Edg')) {
-      browser = 'Chrome';
-    } else if (userAgent.includes('Safari') && !userAgent.includes('Chrome')) {
-      browser = 'Safari';
-    } else if (userAgent.includes('Firefox')) {
-      browser = 'Firefox';
-    } else if (userAgent.includes('Edg')) {
-      browser = 'Edge';
-    }
-
-    // Detect OS
-    if (userAgent.includes('Windows')) {
-      os = 'Windows';
-    } else if (userAgent.includes('Mac OS')) {
-      os = 'macOS';
-    } else if (userAgent.includes('Linux')) {
-      os = 'Linux';
-    } else if (userAgent.includes('Android')) {
-      os = 'Android';
-    } else if (userAgent.includes('iOS') || userAgent.includes('iPhone') || userAgent.includes('iPad')) {
-      os = 'iOS';
-    }
-
-    return `${browser} on ${os}`;
   }
 }

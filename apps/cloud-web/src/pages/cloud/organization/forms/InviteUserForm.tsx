@@ -1,9 +1,9 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useInviteUser } from '@hooks/cloud/organizations/useInviteUser';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { Select } from '@vritti/quantum-ui/Select';
+import { PhoneField } from '@vritti/quantum-ui/PhoneField';
 import { TextField } from '@vritti/quantum-ui/TextField';
+import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { type InviteUserFormData, inviteUserSchema } from '@/schemas/cloud/organizations';
@@ -17,7 +17,7 @@ interface InviteUserFormProps {
 export const InviteUserForm: React.FC<InviteUserFormProps> = ({ orgId, onSuccess, onCancel }) => {
   const form = useForm<InviteUserFormData>({
     resolver: zodResolver(inviteUserSchema),
-    defaultValues: { email: '', fullName: '', role: undefined },
+    defaultValues: { email: '', fullName: '', phone: undefined },
   });
 
   const inviteMutation = useInviteUser(orgId, {
@@ -34,19 +34,18 @@ export const InviteUserForm: React.FC<InviteUserFormProps> = ({ orgId, onSuccess
   };
 
   return (
-    <Form form={form} mutation={inviteMutation} showRootError>
+    <Form
+      form={form}
+      mutation={inviteMutation}
+      transformSubmit={(data) => ({
+        email: data.email,
+        fullName: data.fullName,
+        ...(data.phone && { phone: data.phone }),
+      })}
+    >
       <TextField name="fullName" label="Full Name" placeholder="e.g. Jane Smith" />
       <TextField name="email" label="Email" placeholder="e.g. jane@example.com" />
-      <Select
-        name="role"
-        label="Role"
-        placeholder="Select role (optional)"
-        options={[
-          { value: 'SUPPORT', label: 'Support' },
-          { value: 'ADMIN', label: 'Admin' },
-          { value: 'SUPER_ADMIN', label: 'Super Admin' },
-        ]}
-      />
+      <PhoneField name="phone" label="Phone Number" defaultCountry="IN" />
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={handleCancel}>
           Cancel

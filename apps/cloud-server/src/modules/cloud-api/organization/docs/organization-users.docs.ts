@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { InviteUserDto } from '../dto/request/invite-user.dto';
+import { UpdateOrgUserDto } from '../dto/request/update-org-user.dto';
 import { NexusUserResponseDto } from '../dto/response/nexus-user-response.dto';
 import { UsersTableResponseDto } from '../dto/response/users-table-response.dto';
 
@@ -35,6 +36,19 @@ export function ApiInviteUser() {
     ApiResponse({ status: 201, description: 'User invited successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
     ApiResponse({ status: 404, description: 'Organization or deployment not found.' }),
+  );
+}
+
+export function ApiUpdateOrgUser() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Update a user',
+      description: 'Updates a portal user\'s email or name in the nexus deployment.',
+    }),
+    ApiBody({ type: UpdateOrgUserDto }),
+    ApiResponse({ status: 200, description: 'User updated successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 409, description: 'Email already in use.' }),
   );
 }
 

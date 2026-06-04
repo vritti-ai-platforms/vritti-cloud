@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOperation, ApiParam, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import { SessionResponse } from '../dto/entity/session-response.dto';
 import { ChangePasswordDto } from '../dto/request/change-password.dto';
 import { ForgotPasswordDto, ResetPasswordDto, VerifyResetOtpDto } from '../dto/request/forgot-password.dto';
@@ -92,11 +92,13 @@ export function ApiLogoutAll() {
 export function ApiGetAuthStatus() {
   return applyDecorators(
     ApiOperation({
-      summary: 'Get current user authentication status',
+      summary: 'Stream authentication status via SSE',
       description:
-        'Checks authentication status via httpOnly cookie. Returns user data and access token if authenticated, or { isAuthenticated: false } if not. Never returns 401.',
+        'SSE endpoint that pushes initial auth state on connect, then streams real-time updates ' +
+        '(profile-updated, session-revoked, all-sessions-revoked). Uses httpOnly cookie for authentication.',
     }),
-    ApiResponse({ status: 200, description: 'Authentication status returned.', type: AuthStatusResponse }),
+    ApiProduces('text/event-stream'),
+    ApiResponse({ status: 200, description: 'SSE stream established with initial auth-state event.' }),
   );
 }
 

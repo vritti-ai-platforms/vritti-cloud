@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Deployment } from '@/db/schema';
 import { type DeploymentStatus, DeploymentStatusValues, type DeploymentType, DeploymentTypeValues } from '@/db/schema';
-import type { DeploymentWithNames } from '../../repositories/deployment.repository';
+import type { DeploymentWithNames } from '@domain/deployment/repositories/deployment.repository';
 
 export class DeploymentDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -24,6 +24,9 @@ export class DeploymentDto {
 
   @ApiProperty({ enum: DeploymentTypeValues })
   type: DeploymentType;
+
+  @ApiPropertyOptional({ example: '1.0.0', nullable: true })
+  version: string | null;
 
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
@@ -56,6 +59,7 @@ export class DeploymentDto {
     dto.cloudProviderId = deployment.cloudProviderId;
     dto.status = deployment.status;
     dto.type = deployment.type;
+    dto.version = deployment.version;
     dto.createdAt = deployment.createdAt;
     dto.updatedAt = deployment.updatedAt;
     dto.organizationCount = organizationCount;

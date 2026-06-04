@@ -1,34 +1,10 @@
-import { forwardRef, Module } from '@nestjs/common';
-import { EncryptionService, SmsService } from '@/services';
-import { AuthModule } from '../auth/auth.module';
-import { OnboardingModule } from '../onboarding/onboarding.module';
-import { VerificationModule } from '../verification/verification.module';
-import { ContactChangeController } from './controllers/contact-change.controller';
+import { Module } from '@nestjs/common';
+import { UserDomainModule } from '@domain/user/user.module';
 import { UserController } from './controllers/user.controller';
-import { ChangeRequestRateLimitRepository } from './repositories/change-request-rate-limit.repository';
-import { EmailChangeRequestRepository } from './repositories/email-change-request.repository';
-import { PhoneChangeRequestRepository } from './repositories/phone-change-request.repository';
-import { EmailChangeService } from './services/email-change.service';
-import { PhoneChangeService } from './services/phone-change.service';
-import { RateLimitService } from './services/rate-limit.service';
-import { UserRepository } from './repositories/user.repository';
-import { UserService } from './services/user.service';
 
 @Module({
-  imports: [forwardRef(() => AuthModule), forwardRef(() => OnboardingModule), VerificationModule],
-  controllers: [UserController, ContactChangeController],
-  providers: [
-    UserService,
-    UserRepository,
-    EmailChangeService,
-    PhoneChangeService,
-    RateLimitService,
-    EmailChangeRequestRepository,
-    PhoneChangeRequestRepository,
-    ChangeRequestRateLimitRepository,
-    SmsService,
-    EncryptionService,
-  ],
-  exports: [UserService, UserRepository],
+  imports: [UserDomainModule],
+  controllers: [UserController],
+  exports: [UserDomainModule],
 })
 export class UserModule {}

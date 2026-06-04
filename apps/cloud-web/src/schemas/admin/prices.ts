@@ -1,9 +1,10 @@
-import { z } from 'zod';
+import type { TableResponse } from '@vritti/quantum-ui/api-response';
+import { z } from '@vritti/quantum-ui/zod';
 
 export interface Price {
   id: string;
   planId: string;
-  industryId: string;
+  businessId: string;
   regionId: string;
   regionName: string;
   regionCode: string;
@@ -18,7 +19,7 @@ export interface Price {
 
 export const createPriceSchema = z.object({
   planId: z.string().uuid('Please select a plan'),
-  industryId: z.string().uuid('Please select an industry'),
+  businessId: z.string().uuid('Please select a business'),
   regionId: z.string().uuid('Please select a region'),
   providerId: z.string().uuid('Please select a provider'),
   price: z.string().regex(/^\d+(\.\d{1,2})?$/, 'Enter a valid price (e.g. 99.99)'),
@@ -33,13 +34,7 @@ export const updatePriceSchema = z.object({
   currency: z.string().length(3, 'Currency must be exactly 3 characters').optional(),
 });
 
-export interface PricesTableResponse {
-  result: Price[];
-  count: number;
-  // biome-ignore lint/suspicious/noExplicitAny: server state shape is opaque to frontend
-  state: any;
-  activeViewId: string | null;
-}
+export type PricesTableResponse = TableResponse<Price>;
 
 export type CreatePriceData = z.infer<typeof createPriceSchema>;
 export type UpdatePriceData = z.infer<typeof updatePriceSchema>;

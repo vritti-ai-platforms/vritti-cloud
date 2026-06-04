@@ -5,9 +5,9 @@ export * from './cloud-schema';
 // Export all enums
 export * from './enums';
 // Export all tables
+export * from './business';
 export * from './deployment';
-export * from './deployment-industry-plan';
-export * from './industry';
+export * from './deployment-business-plan';
 export * from './organization';
 export * from './plan';
 export * from './price';
@@ -18,5 +18,18 @@ export * from './user';
 export * from './verification';
 export * from './media';
 export * from './table-view';
+// RBAC tables
+export * from './version';
+export * from './microfrontend';
+export * from './feature';
+export * from './feature-microfrontend';
+export * from './feature-permission';
+export * from './app';
+export * from './app-feature';
+export * from './app-price';
+export * from './plan-app';
+export * from './role-template';
+export * from './role-template-app';
+export * from './role-template-feature-permission';
 // Export relations last (depends on tables above)
 export * from './relations';
