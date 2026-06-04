@@ -54,8 +54,8 @@ export class OrganizationAppsService {
 
       // Filter features by includedFeatureCodes when plan-included
       const filteredFeatures =
-        planApp && planApp.includedFeatureCodes
-          ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes!.includes(f.code))
+        planApp?.includedFeatureCodes
+          ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
           : appFeaturesForApp;
 
       let status: OrgAppItemResponseDto['status'];
@@ -112,7 +112,7 @@ export class OrganizationAppsService {
   }
 
   // Purchases an addon app for specific business units
-  async purchaseAddon(orgId: string, appId: string, dto: PurchaseAddonDto): Promise<SuccessResponseDto> {
+  async purchaseAddon(orgId: string, appId: string, _dto: PurchaseAddonDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const app = await this.appRepository.findById(appId);
@@ -176,7 +176,7 @@ export class OrganizationAppsService {
 
       const filteredFeatures =
         planApp.includedFeatureCodes
-          ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes!.includes(f.code))
+          ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
           : appFeaturesForApp;
 
       return {

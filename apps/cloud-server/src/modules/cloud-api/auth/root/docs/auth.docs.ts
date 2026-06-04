@@ -5,7 +5,6 @@ import { ChangePasswordDto } from '../dto/request/change-password.dto';
 import { ForgotPasswordDto, ResetPasswordDto, VerifyResetOtpDto } from '../dto/request/forgot-password.dto';
 import { LoginDto } from '../dto/request/login.dto';
 import { SignupDto } from '../dto/request/signup.dto';
-import { AuthStatusResponse } from '../dto/response/auth-status-response.dto';
 import { ForgotPasswordResponseDto } from '../dto/response/forgot-password-response.dto';
 import { LoginResponse } from '../dto/response/login-response.dto';
 import { MessageResponse } from '../dto/response/message-response.dto';
