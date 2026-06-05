@@ -30,4 +30,3 @@
  * because the consumer's Tailwind purges imported utility rules it doesn't see used.
  */
 @source "../src/**/*.{js,ts,jsx,tsx}";
-@source "../node_modules/@vritti/quantum-ui/dist/**/*.js";
