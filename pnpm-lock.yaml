@@ -75,8 +75,8 @@ importers:
         specifier: ^13.2.2
         version: 13.3.0
       '@vritti/api-sdk':
-        specifier: ^0.2.7
-        version: 0.2.7(784a71a729eb3530179dc5580b65dd6f)
+        specifier: ^0.2.8
+        version: 0.2.8(784a71a729eb3530179dc5580b65dd6f)
       axios:
         specifier: ^1.13.2
         version: 1.13.6
@@ -4415,8 +4415,8 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@vritti/api-sdk@0.2.7':
-    resolution: {integrity: sha512-Wk74+/fursEgKQqXaA5FqNQM3Aiu4yD1h6u42itHTIfmLjZfXU8JydNx2oahsCarc7US9P4kMFP/6rM5/mOVwg==}
+  '@vritti/api-sdk@0.2.8':
+    resolution: {integrity: sha512-fVOcAN57pkBLgy90uo8p6SUaE/seGv/eSOHwictq23+Gu35wZ8nSTp6UiO8JP3hOxDw5DKRTUbQwtbbIDaOv3Q==}
     peerDependencies:
       '@nestjs/common': ^11.0.0
       '@nestjs/config': ^4.0.0
@@ -14733,7 +14733,7 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@vritti/api-sdk@0.2.7(784a71a729eb3530179dc5580b65dd6f)':
+  '@vritti/api-sdk@0.2.8(784a71a729eb3530179dc5580b65dd6f)':
     dependencies:
       '@getbrevo/brevo': 4.0.1
       '@nestjs/common': 11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
