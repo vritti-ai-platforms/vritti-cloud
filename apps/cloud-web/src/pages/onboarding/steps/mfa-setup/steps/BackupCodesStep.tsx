@@ -45,9 +45,9 @@ export const BackupCodesStep: React.FC<BackupCodesStepProps> = ({ backupCodes, w
       <Alert variant="warning" title="Important" description={warning} />
 
       <div className="grid grid-cols-2 gap-2">
-        {backupCodes.map((code, index) => (
+        {backupCodes.map((code) => (
           <div
-            key={index}
+            key={code}
             className="px-3 py-2 bg-secondary border border-border rounded text-sm font-mono text-foreground text-center select-all"
           >
             {code}

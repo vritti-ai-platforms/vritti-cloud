@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsOptional, IsString, Length, Matches } from 'class-validator';
+import { ApiProperty, } from '@nestjs/swagger';
+import { IsNotEmpty, IsString, Length, Matches } from 'class-validator';
 
 export class IdentityVerificationStartDto {
   @ApiProperty({ description: 'Verification channel', example: 'IDENTITY_EMAIL_OUT' })

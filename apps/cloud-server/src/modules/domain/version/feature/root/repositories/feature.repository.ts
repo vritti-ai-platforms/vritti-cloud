@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, countDistinct, eq, exists, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
-import { appFeatures, apps, featureMicrofrontends, featurePermissions, features, microfrontends } from '@/db/schema';
+import { appFeatures, featureMicrofrontends, featurePermissions, features, microfrontends } from '@/db/schema';
 
 export type FeatureTableRow = Feature & {
   permissions: string[];

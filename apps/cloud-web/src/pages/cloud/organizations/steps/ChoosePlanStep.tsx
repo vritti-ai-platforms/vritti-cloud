@@ -64,9 +64,18 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
             {plans.map((plan) => {
               const isSelected = selectedPlanId === plan.id;
               return (
+                // biome-ignore lint/a11y/useSemanticElements: large clickable plan card region, not a native button
                 <div
                   key={plan.id}
+                  role="button"
+                  tabIndex={0}
                   onClick={() => onSelect(plan)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onSelect(plan);
+                    }
+                  }}
                   className={`group relative cursor-pointer rounded-xl border bg-card p-6 transition-all hover:border-primary/50 hover:bg-card/80 ${
                     isSelected ? 'ring-2 ring-primary border-primary' : ''
                   }`}

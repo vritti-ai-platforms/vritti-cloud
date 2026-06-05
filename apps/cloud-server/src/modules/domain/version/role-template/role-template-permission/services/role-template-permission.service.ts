@@ -103,7 +103,7 @@ export class RoleTemplatePermissionService {
 
   // Validates that all provided featureIds exist in the features table
   private async validateFeaturesExist(featureIds: string[]): Promise<void> {
-    const existingFeatures = await this.roleTemplateFeaturePermissionRepository['db']
+    const existingFeatures = await this.roleTemplateFeaturePermissionRepository.db
       .select({ id: features.id })
       .from(features)
       .where(inArray(features.id, featureIds));

@@ -1,9 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, } from '@nestjs/common';
 import { EncryptionService } from '../../../../services';
 
 @Injectable()
 export class BackupCodeService {
-  private readonly logger = new Logger(BackupCodeService.name);
   private readonly BACKUP_CODE_COUNT = 10;
   private readonly BACKUP_CODE_LENGTH = 8;
 

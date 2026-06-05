@@ -9,7 +9,6 @@ import {
   ApiListOrgApps,
   ApiPurchaseAddon,
 } from '../docs/organization-apps.docs';
-import type { EnableAppDto } from '../dto/request/enable-app.dto';
 import type { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';
 import type { OrgAppListResponseDto, OrgPermissionsResponseDto } from '../dto/response/org-app-list.response.dto';
 import { OrganizationAppsService } from '../services/organization-apps.service';

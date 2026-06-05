@@ -2,7 +2,6 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { UserDto } from '../../../cloud-api/user/dto/entity/user.dto';
-import { UpdateProfileDto } from '../dto/request/update-profile.dto';
 import {
   IdentityVerificationStartDto,
   ResendTargetOtpDto,

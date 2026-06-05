@@ -110,7 +110,7 @@ export class PasskeyAuthService {
     }
 
     // Verify authentication
-    let verification;
+    let verification: Awaited<ReturnType<typeof this.webAuthnService.verifyAuthentication>>;
     try {
       const publicKey = this.webAuthnService.base64urlToUint8Array(passkey.passkeyPublicKey);
       const transports = passkey.passkeyTransports ? JSON.parse(passkey.passkeyTransports) : undefined;
