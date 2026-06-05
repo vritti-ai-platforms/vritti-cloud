@@ -15,6 +15,20 @@ export default defineConfig({
   output: {
     assetPrefix: '/',
   },
+  html: {
+    favicon: './src/assets/vritti.svg',
+    title: 'Vritti Cloud',
+    // admin.vrittiai.com → "Vritti Admin"; cloud.* (and dev) → "Vritti Cloud".
+    // Appended after <title> so it overrides the default, before first paint.
+    tags: [
+      {
+        tag: 'script',
+        head: true,
+        append: true,
+        children: "document.title=location.hostname.split('.')[0]==='admin'?'Vritti Admin':'Vritti Cloud';",
+      },
+    ],
+  },
   resolve: {
     alias: {
       react: require.resolve('react'),
