@@ -22,9 +22,12 @@
   }
 }
 /**
- * @source - Tell Tailwind which files to scan for utility classes
- * Only app source is scanned. quantum-ui ships its own component utilities in
- * @vritti/quantum-ui/index.css (imported above), so scanning its dist is
- * unnecessary — and that scan silently fails under pnpm/CI node_modules layouts.
+ * @source - Tell Tailwind which files to scan for utility classes.
+ * Scans app source AND quantum-ui's dist. The dist scan is REQUIRED: Tailwind
+ * regenerates the utilities layer from these sources, so quantum-ui's component
+ * utilities (incl. variants like focus-visible:/aria-invalid:, which app pages
+ * never write) must be GENERATED here — importing quantum-ui.css doesn't work
+ * because the consumer's Tailwind purges imported utility rules it doesn't see used.
  */
 @source "../src/**/*.{js,ts,jsx,tsx}";
+@source "../node_modules/@vritti/quantum-ui/dist/**/*.js";
