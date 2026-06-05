@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService, TypedDrizzleClient } from '@vritti/api-sdk';
-import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, eq, inArray, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { FeatureType, NewRoleTemplateFeaturePermission } from '@/db/schema';
 import {
   appFeatures,
@@ -135,5 +135,12 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
       appCodes: string[];
       appIds: string[];
     }>;
+  }
+
+  // Returns the subset of the given feature ids that actually exist in the features table.
+  async findExistingFeatureIds(featureIds: string[]): Promise<string[]> {
+    if (featureIds.length === 0) return [];
+    const rows = await this.db.select({ id: features.id }).from(features).where(inArray(features.id, featureIds));
+    return rows.map((row) => row.id);
   }
 }

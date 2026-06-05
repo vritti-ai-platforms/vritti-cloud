@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
-import { inArray } from '@vritti/api-sdk/drizzle-orm';
 import type { FeatureType, NewRoleTemplateFeaturePermission } from '@/db/schema';
-import { features } from '@/db/schema';
 import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/version/role-template/role-template-permission/dto/request/assign-role-template-permissions.dto';
 import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
 import {
@@ -103,12 +101,9 @@ export class RoleTemplatePermissionService {
 
   // Validates that all provided featureIds exist in the features table
   private async validateFeaturesExist(featureIds: string[]): Promise<void> {
-    const existingFeatures = await this.roleTemplateFeaturePermissionRepository.db
-      .select({ id: features.id })
-      .from(features)
-      .where(inArray(features.id, featureIds));
-
-    const existingIds = new Set(existingFeatures.map((f) => f.id));
+    const existingIds = new Set(
+      await this.roleTemplateFeaturePermissionRepository.findExistingFeatureIds(featureIds),
+    );
     const missingIds = featureIds.filter((id) => !existingIds.has(id));
 
     if (missingIds.length > 0) {
