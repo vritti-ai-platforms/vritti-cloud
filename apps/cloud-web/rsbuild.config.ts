@@ -13,7 +13,7 @@ const defaultApiHost = `${protocol}://local.vrittiai.com:3000`;
 
 export default defineConfig({
   output: {
-    assetPrefix: '/cloud-web/',
+    assetPrefix: '/',
   },
   resolve: {
     alias: {

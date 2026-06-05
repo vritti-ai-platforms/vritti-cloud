@@ -28,7 +28,7 @@ const ENV = {
   useHttps: process.env.USE_HTTPS === 'true',
   logProvider: process.env.LOG_PROVIDER,
   port: process.env.PORT ?? 3000,
-  host: 'local.vrittiai.com',
+  host: process.env.APP_HOST ?? 'local.vrittiai.com',
   refreshCookieName: process.env.REFRESH_COOKIE_NAME,
   refreshCookieDomain: process.env.REFRESH_COOKIE_DOMAIN ?? 'local.vrittiai.com',
 } as const;
@@ -40,18 +40,22 @@ const baseUrl = `${protocol}://${ENV.host}:${ENV.port}`;
 // CORS Configuration
 // ============================================================================
 
-const CORS_ORIGINS = [
-  'http://localhost:5173', // Host app
-  'http://localhost:3001', // Auth MF
-  'http://localhost:3012', // Host app main port
-  'http://localhost:5174', // Other possible ports
-  `http://${ENV.host}:3012`,
-  `http://cloud.${ENV.host}:3012`,
-  `http://admin.${ENV.host}:3012`,
-  `https://${ENV.host}:3012`,
-  `https://cloud.${ENV.host}:3012`,
-  `https://admin.${ENV.host}:3012`,
-];
+// In production, set CORS_ORIGINS (comma-separated, e.g. https://cloud.vrittiai.com,https://admin.vrittiai.com).
+// Falls back to local dev origins when unset.
+const CORS_ORIGINS = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
+  : [
+      'http://localhost:5173', // Host app
+      'http://localhost:3001', // Auth MF
+      'http://localhost:3012', // Host app main port
+      'http://localhost:5174', // Other possible ports
+      `http://${ENV.host}:3012`,
+      `http://cloud.${ENV.host}:3012`,
+      `http://admin.${ENV.host}:3012`,
+      `https://${ENV.host}:3012`,
+      `https://cloud.${ENV.host}:3012`,
+      `https://admin.${ENV.host}:3012`,
+    ];
 
 const CORS_CONFIG = {
   origin: CORS_ORIGINS,

@@ -1,5 +1,5 @@
 import { plainToInstance, Transform } from 'class-transformer';
-import { IsBoolean, IsEmail, IsEnum, IsNumber, IsString, Max, Min, validateSync } from 'class-validator';
+import { IsBoolean, IsEmail, IsEnum, IsNumber, IsString, Max, Min, MinLength, validateSync } from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -24,13 +24,16 @@ class EnvironmentVariables {
 
   // Security
   @IsString()
+  @MinLength(32)
   COOKIE_SECRET: string;
 
   @IsString()
+  @MinLength(32)
   HMAC_KEY: string;
 
   // JWT
   @IsString()
+  @MinLength(32)
   JWT_SECRET: string;
 
   @IsString()
@@ -93,9 +96,6 @@ class EnvironmentVariables {
 
   @IsEnum(['require', 'prefer', 'disable', 'no-verify'])
   PRIMARY_DB_SSL_MODE: 'require' | 'prefer' | 'disable' | 'no-verify';
-
-  @IsString()
-  ENCRYPTION_KEY: string;
 
   // Email
   @IsString()
