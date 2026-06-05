@@ -1,3 +1,5 @@
+import { readFileSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import fastifyCookie from '@fastify/cookie';
 import fastifyCsrfProtection from '@fastify/csrf-protection';
 import fastifyMultipart from '@fastify/multipart';
@@ -15,8 +17,6 @@ import {
 } from '@vritti/api-sdk';
 import type { ValidationError } from 'class-validator';
 import fastifyRawBody from 'fastify-raw-body';
-import { readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { AppModule } from './app.module';
 
 // ============================================================================
