@@ -8,6 +8,8 @@ export interface Feature {
   name: string;
   versionId: string;
   icon: IconName;
+  sfSymbol: string;
+  materialSymbol: string;
   description: string | null;
   permissions: string[];
   platforms: string[];
@@ -41,6 +43,8 @@ export const createFeatureSchema = z.object({
   name: z.string().min(1, 'Feature name is required').max(255, 'Name must be 255 characters or less'),
   versionId: z.string().uuid('App version is required'),
   icon: z.string().min(1, 'Icon is required').max(100),
+  sfSymbol: z.string().min(1, 'SF Symbol is required').max(255),
+  materialSymbol: z.string().min(1, 'Material Symbol is required').max(255),
   description: z.string().optional(),
 });
 
@@ -53,6 +57,8 @@ export const updateFeatureSchema = z.object({
     .optional(),
   name: z.string().min(1, 'Feature name is required').max(255).optional(),
   icon: z.string().min(1, 'Icon is required').max(100).optional(),
+  sfSymbol: z.string().min(1, 'SF Symbol is required').max(255).optional(),
+  materialSymbol: z.string().min(1, 'Material Symbol is required').max(255).optional(),
   description: z.string().optional(),
 });
 

@@ -60,6 +60,8 @@ export class FeatureMicrofrontendService {
         microfrontendName: microfrontend.name,
         platform: microfrontend.platform,
         remoteEntry: microfrontend.remoteEntry,
+        remoteEntryAndroid: microfrontend.remoteEntryAndroid,
+        remoteEntryIos: microfrontend.remoteEntryIos,
       }),
     };
   }

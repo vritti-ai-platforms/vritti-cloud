@@ -24,6 +24,8 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
       code: feature.code,
       name: feature.name,
       icon: feature.icon,
+      sfSymbol: feature.sfSymbol,
+      materialSymbol: feature.materialSymbol,
       description: feature.description ?? '',
     },
   });
@@ -42,7 +44,11 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
         <TextField name="code" label="Code" placeholder="e.g. orders" description="Lowercase with hyphens" />
         <TextField name="name" label="Name" placeholder="e.g. Orders" />
       </div>
-      <TextField name="icon" label="Icon" placeholder="e.g. clipboard-list" description="Lucide icon name" />
+      <TextField name="icon" label="Icon" placeholder="e.g. clipboard-list" description="Lucide icon name (web)" />
+      <div className="grid grid-cols-2 gap-4">
+        <TextField name="sfSymbol" label="SF Symbol (iOS)" placeholder="e.g. cart.fill" description="Apple SF Symbol name" />
+        <TextField name="materialSymbol" label="Material Symbol (Android)" placeholder="e.g. shopping_cart" description="Google Material Symbol name" />
+      </div>
       <TextField name="description" label="Description" placeholder="Optional description" />
 
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">

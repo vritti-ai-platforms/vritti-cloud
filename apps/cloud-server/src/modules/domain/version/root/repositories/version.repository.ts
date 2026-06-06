@@ -78,19 +78,33 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
     const roleAppsByRoleId = _.groupBy(roleAppRows, 'roleTemplateId');
     const rolePermsByRoleId = _.groupBy(rolePermRows, 'roleTemplateId');
 
-    // Build features snapshot
+    // Build features snapshot. WEB rows carry remoteEntry; MOBILE rows carry remoteEntryAndroid + remoteEntryIos.
     const snapshotFeatures = featureRows.map((f) => {
-      const mfMap: Record<string, { remoteEntry: string; exposedModule: string; routePrefix: string }> = {};
+      const mfMap: Record<string, Record<string, string | null>> = {};
       for (const jRow of featureMfByFeatureId[f.id] ?? []) {
         const mf = mfById[jRow.microfrontendId];
-        if (mf) {
-          mfMap[mf.platform] = { remoteEntry: mf.remoteEntry, exposedModule: jRow.exposedModule, routePrefix: jRow.routePrefix };
+        if (!mf) continue;
+        if (mf.platform === 'MOBILE') {
+          mfMap[mf.platform] = {
+            remoteEntryAndroid: mf.remoteEntryAndroid,
+            remoteEntryIos: mf.remoteEntryIos,
+            exposedModule: jRow.exposedModule,
+            routePrefix: jRow.routePrefix,
+          };
+        } else {
+          mfMap[mf.platform] = {
+            remoteEntry: mf.remoteEntry,
+            exposedModule: jRow.exposedModule,
+            routePrefix: jRow.routePrefix,
+          };
         }
       }
       return {
         code: f.code,
         name: f.name,
         icon: f.icon,
+        sfSymbol: f.sfSymbol,
+        materialSymbol: f.materialSymbol,
         permissions: permsByFeatureId[f.id] ?? [],
         microfrontends: mfMap,
       };

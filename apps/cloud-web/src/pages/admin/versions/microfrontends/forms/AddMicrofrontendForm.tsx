@@ -5,7 +5,7 @@ import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { type CreateMicrofrontendData, createMicrofrontendSchema } from '@/schemas/admin/microfrontends';
 
 interface AddMicrofrontendFormProps {
@@ -20,6 +20,7 @@ export const AddMicrofrontendForm: React.FC<AddMicrofrontendFormProps> = ({ vers
     defaultValues: { code: '', name: '', platform: 'WEB', remoteEntry: '' },
   });
 
+  const platform = useWatch({ control: form.control, name: 'platform' });
   const createMutation = useCreateMicrofrontend(versionId, { onSuccess });
 
   return (
@@ -46,12 +47,30 @@ export const AddMicrofrontendForm: React.FC<AddMicrofrontendFormProps> = ({ vers
           { value: 'MOBILE', label: 'Mobile' },
         ]}
       />
-      <TextField
-        name="remoteEntry"
-        label="Remote Entry"
-        placeholder="e.g. https://cdn.example.com/remoteEntry.js"
-        description="URL to the remote entry file"
-      />
+      {platform === 'WEB' && (
+        <TextField
+          name="remoteEntry"
+          label="Remote Entry"
+          placeholder="e.g. https://cdn.example.com/remoteEntry.js"
+          description="URL to the remote entry file"
+        />
+      )}
+      {platform === 'MOBILE' && (
+        <>
+          <TextField
+            name="remoteEntryAndroid"
+            label="Android Remote Entry"
+            placeholder="e.g. https://cdn.example.com/android/mf-manifest.json"
+            description="URL to the Android manifest"
+          />
+          <TextField
+            name="remoteEntryIos"
+            label="iOS Remote Entry"
+            placeholder="e.g. https://cdn.example.com/ios/mf-manifest.json"
+            description="URL to the iOS manifest"
+          />
+        </>
+      )}
       <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
         <Button type="button" variant="outline" data-cancel>
           Cancel

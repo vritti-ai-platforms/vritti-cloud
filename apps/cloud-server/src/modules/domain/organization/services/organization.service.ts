@@ -95,6 +95,8 @@ export class OrganizationService {
           code: f.code,
           name: f.name,
           icon: f.icon ?? null,
+          sfSymbol: (f.sfSymbol as string) ?? 'square',
+          materialSymbol: (f.materialSymbol as string) ?? 'square',
           remoteEntry: webMf.remoteEntry,
           exposedModule: webMf.exposedModule,
           routePrefix: webMf.routePrefix,

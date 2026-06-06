@@ -29,11 +29,23 @@ export class CreateFeatureDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ description: 'Lucide icon name', example: 'clipboard-list' })
+  @ApiProperty({ description: 'Lucide icon name (web)', example: 'clipboard-list' })
   @IsString()
   @MinLength(1)
   @MaxLength(255)
   icon: string;
+
+  @ApiProperty({ description: 'iOS SF Symbol name', example: 'cart.fill' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(255)
+  sfSymbol: string;
+
+  @ApiProperty({ description: 'Android Material Symbol name', example: 'shopping_cart' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(255)
+  materialSymbol: string;
 
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })
   @IsOptional()

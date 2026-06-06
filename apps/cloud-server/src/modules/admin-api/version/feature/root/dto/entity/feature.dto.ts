@@ -20,6 +20,12 @@ export class FeatureDto {
   @ApiProperty({ example: 'clipboard-list' })
   icon: string;
 
+  @ApiProperty({ example: 'cart.fill', description: 'iOS SF Symbol name' })
+  sfSymbol: string;
+
+  @ApiProperty({ example: 'shopping_cart', description: 'Android Material Symbol name' })
+  materialSymbol: string;
+
   @ApiProperty({ example: true })
   isActive: boolean;
 
@@ -53,6 +59,8 @@ export class FeatureDto {
     dto.name = feature.name;
     dto.description = feature.description;
     dto.icon = feature.icon;
+    dto.sfSymbol = feature.sfSymbol;
+    dto.materialSymbol = feature.materialSymbol;
     dto.isActive = feature.isActive;
     dto.sortOrder = feature.sortOrder;
     dto.createdAt = feature.createdAt;

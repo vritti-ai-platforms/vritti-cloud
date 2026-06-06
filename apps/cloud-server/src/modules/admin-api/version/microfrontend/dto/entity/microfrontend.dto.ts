@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Microfrontend } from '@/db/schema';
 
 export class MicrofrontendDto {
@@ -17,8 +17,14 @@ export class MicrofrontendDto {
   @ApiProperty({ example: 'WEB' })
   platform: string;
 
-  @ApiProperty({ example: '/order-mf/remoteEntry.js' })
-  remoteEntry: string;
+  @ApiPropertyOptional({ example: '/order-mf/remoteEntry.js', nullable: true, description: 'Set on WEB rows' })
+  remoteEntry: string | null;
+
+  @ApiPropertyOptional({ example: 'https://cdn/.../android/mf-manifest.json', nullable: true, description: 'Set on MOBILE rows' })
+  remoteEntryAndroid: string | null;
+
+  @ApiPropertyOptional({ example: 'https://cdn/.../ios/mf-manifest.json', nullable: true, description: 'Set on MOBILE rows' })
+  remoteEntryIos: string | null;
 
   // Maps a Microfrontend entity to a MicrofrontendDto
   static from(entity: Microfrontend): MicrofrontendDto {
@@ -29,6 +35,8 @@ export class MicrofrontendDto {
     dto.name = entity.name;
     dto.platform = entity.platform;
     dto.remoteEntry = entity.remoteEntry;
+    dto.remoteEntryAndroid = entity.remoteEntryAndroid;
+    dto.remoteEntryIos = entity.remoteEntryIos;
     return dto;
   }
 }

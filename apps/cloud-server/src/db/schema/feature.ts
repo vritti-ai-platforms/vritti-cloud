@@ -14,6 +14,8 @@ export const features = cloudSchema.table(
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
     icon: varchar('icon', { length: 255 }).notNull(),
+    sfSymbol: varchar('sf_symbol', { length: 255 }).notNull().default('square'),
+    materialSymbol: varchar('material_symbol', { length: 255 }).notNull().default('square'),
     isActive: boolean('is_active').notNull().default(true),
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

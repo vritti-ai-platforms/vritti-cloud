@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class FeatureMicrofrontendDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -19,8 +19,14 @@ export class FeatureMicrofrontendDto {
   @ApiProperty({ example: 'WEB' })
   platform: string;
 
-  @ApiProperty({ example: '/order-mf/remoteEntry.js' })
-  remoteEntry: string;
+  @ApiPropertyOptional({ example: '/order-mf/remoteEntry.js', nullable: true, description: 'Set on WEB rows' })
+  remoteEntry: string | null;
+
+  @ApiPropertyOptional({ example: 'https://cdn/.../android/mf-manifest.json', nullable: true, description: 'Set on MOBILE rows' })
+  remoteEntryAndroid: string | null;
+
+  @ApiPropertyOptional({ example: 'https://cdn/.../ios/mf-manifest.json', nullable: true, description: 'Set on MOBILE rows' })
+  remoteEntryIos: string | null;
 
   @ApiProperty({ example: './Orders' })
   exposedModule: string;
@@ -38,7 +44,9 @@ export class FeatureMicrofrontendDto {
     microfrontendCode: string;
     microfrontendName: string;
     platform: string;
-    remoteEntry: string;
+    remoteEntry: string | null;
+    remoteEntryAndroid: string | null;
+    remoteEntryIos: string | null;
   }): FeatureMicrofrontendDto {
     const dto = new FeatureMicrofrontendDto();
     dto.id = row.id;
@@ -48,6 +56,8 @@ export class FeatureMicrofrontendDto {
     dto.microfrontendName = row.microfrontendName;
     dto.platform = row.platform;
     dto.remoteEntry = row.remoteEntry;
+    dto.remoteEntryAndroid = row.remoteEntryAndroid;
+    dto.remoteEntryIos = row.remoteEntryIos;
     dto.exposedModule = row.exposedModule;
     dto.routePrefix = row.routePrefix;
     return dto;

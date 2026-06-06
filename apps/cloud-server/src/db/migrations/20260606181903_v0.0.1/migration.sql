@@ -1,0 +1,2 @@
+ALTER TABLE "cloud"."microfrontends" ADD CONSTRAINT "microfrontend_url_per_platform_chk" CHECK (("platform" = 'WEB' AND "remote_entry" IS NOT NULL AND "remote_entry_android" IS NULL AND "remote_entry_ios" IS NULL)
+       OR ("platform" = 'MOBILE' AND "remote_entry" IS NULL AND "remote_entry_android" IS NOT NULL AND "remote_entry_ios" IS NOT NULL));

@@ -7,33 +7,56 @@ export interface Microfrontend {
   code: string;
   name: string;
   platform: 'WEB' | 'MOBILE';
-  remoteEntry: string;
+  remoteEntry: string | null;
+  remoteEntryAndroid: string | null;
+  remoteEntryIos: string | null;
 }
 
 export type MicrofrontendsTableResponse = TableResponse<Microfrontend>;
 
-export const createMicrofrontendSchema = z.object({
-  code: z
-    .string()
-    .min(1, 'Code is required')
-    .max(100, 'Code must be 100 characters or less')
-    .regex(/^[a-z][a-z0-9-]*$/, 'Lowercase alphanumeric with hyphens'),
-  name: z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less'),
-  platform: z.enum(['WEB', 'MOBILE'], { message: 'Select a platform' }),
-  remoteEntry: z.string().min(1, 'Remote entry URL is required').max(500, 'URL must be 500 characters or less'),
-});
+const codeRule = z
+  .string()
+  .min(1, 'Code is required')
+  .max(100, 'Code must be 100 characters or less')
+  .regex(/^[a-z][a-z0-9-]*$/, 'Lowercase alphanumeric with hyphens');
 
-export const updateMicrofrontendSchema = z.object({
-  code: z
-    .string()
-    .min(1, 'Code is required')
-    .max(100, 'Code must be 100 characters or less')
-    .regex(/^[a-z][a-z0-9-]*$/, 'Lowercase alphanumeric with hyphens')
-    .optional(),
-  name: z.string().min(1, 'Name is required').max(255).optional(),
-  platform: z.enum(['WEB', 'MOBILE']).optional(),
-  remoteEntry: z.string().min(1, 'Remote entry URL is required').max(500).optional(),
-});
+const nameRule = z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less');
+
+const urlRule = z.string().min(1, 'Remote entry URL is required').max(500, 'URL must be 500 characters or less');
+
+// Create: per-platform required URL fields enforced via discriminated union
+export const createMicrofrontendSchema = z.discriminatedUnion('platform', [
+  z.object({
+    platform: z.literal('WEB'),
+    code: codeRule,
+    name: nameRule,
+    remoteEntry: urlRule,
+  }),
+  z.object({
+    platform: z.literal('MOBILE'),
+    code: codeRule,
+    name: nameRule,
+    remoteEntryAndroid: urlRule,
+    remoteEntryIos: urlRule,
+  }),
+]);
+
+// Update: same discriminated shape but everything optional except platform discriminator
+export const updateMicrofrontendSchema = z.discriminatedUnion('platform', [
+  z.object({
+    platform: z.literal('WEB'),
+    code: codeRule.optional(),
+    name: nameRule.optional(),
+    remoteEntry: urlRule.optional(),
+  }),
+  z.object({
+    platform: z.literal('MOBILE'),
+    code: codeRule.optional(),
+    name: nameRule.optional(),
+    remoteEntryAndroid: urlRule.optional(),
+    remoteEntryIos: urlRule.optional(),
+  }),
+]);
 
 export type CreateMicrofrontendData = z.infer<typeof createMicrofrontendSchema>;
 export type UpdateMicrofrontendData = z.infer<typeof updateMicrofrontendSchema>;

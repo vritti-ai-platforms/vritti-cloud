@@ -11381,7 +11381,7 @@
   ],
   "servers": [
     {
-      "url": "https://local.vrittiai.com:3000",
+      "url": "http://local.vrittiai.com:3000",
       "description": "Local Development"
     }
   ],
@@ -14010,15 +14010,24 @@
           },
           "remoteEntry": {
             "type": "string",
-            "description": "Remote entry URL for module federation",
+            "description": "Remote entry URL (required for WEB)",
             "example": "/order-mf/remoteEntry.js"
+          },
+          "remoteEntryAndroid": {
+            "type": "string",
+            "description": "Android remote entry URL (required for MOBILE)",
+            "example": "https://cdn/.../android/mf-manifest.json"
+          },
+          "remoteEntryIos": {
+            "type": "string",
+            "description": "iOS remote entry URL (required for MOBILE)",
+            "example": "https://cdn/.../ios/mf-manifest.json"
           }
         },
         "required": [
           "code",
           "name",
-          "platform",
-          "remoteEntry"
+          "platform"
         ]
       },
       "MicrofrontendDto": {
@@ -14045,8 +14054,22 @@
             "example": "WEB"
           },
           "remoteEntry": {
-            "type": "string",
-            "example": "/order-mf/remoteEntry.js"
+            "type": "object",
+            "example": "/order-mf/remoteEntry.js",
+            "nullable": true,
+            "description": "Set on WEB rows"
+          },
+          "remoteEntryAndroid": {
+            "type": "object",
+            "example": "https://cdn/.../android/mf-manifest.json",
+            "nullable": true,
+            "description": "Set on MOBILE rows"
+          },
+          "remoteEntryIos": {
+            "type": "object",
+            "example": "https://cdn/.../ios/mf-manifest.json",
+            "nullable": true,
+            "description": "Set on MOBILE rows"
           }
         },
         "required": [
@@ -14054,8 +14077,7 @@
           "versionId",
           "code",
           "name",
-          "platform",
-          "remoteEntry"
+          "platform"
         ]
       },
       "MicrofrontendTableResponseDto": {
@@ -14109,8 +14131,18 @@
           },
           "remoteEntry": {
             "type": "string",
-            "description": "Remote entry URL for module federation",
+            "description": "Remote entry URL (WEB only)",
             "example": "/order-mf/remoteEntry.js"
+          },
+          "remoteEntryAndroid": {
+            "type": "string",
+            "description": "Android remote entry URL (MOBILE only)",
+            "example": "https://cdn/.../android/mf-manifest.json"
+          },
+          "remoteEntryIos": {
+            "type": "string",
+            "description": "iOS remote entry URL (MOBILE only)",
+            "example": "https://cdn/.../ios/mf-manifest.json"
           }
         }
       },
@@ -14139,8 +14171,18 @@
           },
           "icon": {
             "type": "string",
-            "description": "Lucide icon name",
+            "description": "Lucide icon name (web)",
             "example": "clipboard-list"
+          },
+          "sfSymbol": {
+            "type": "string",
+            "description": "iOS SF Symbol name",
+            "example": "cart.fill"
+          },
+          "materialSymbol": {
+            "type": "string",
+            "description": "Android Material Symbol name",
+            "example": "shopping_cart"
           },
           "sortOrder": {
             "type": "number",
@@ -14157,7 +14199,9 @@
           "versionId",
           "code",
           "name",
-          "icon"
+          "icon",
+          "sfSymbol",
+          "materialSymbol"
         ]
       },
       "FeatureDto": {
@@ -14187,6 +14231,16 @@
           "icon": {
             "type": "string",
             "example": "clipboard-list"
+          },
+          "sfSymbol": {
+            "type": "string",
+            "example": "cart.fill",
+            "description": "iOS SF Symbol name"
+          },
+          "materialSymbol": {
+            "type": "string",
+            "example": "shopping_cart",
+            "description": "Android Material Symbol name"
           },
           "isActive": {
             "type": "boolean",
@@ -14243,6 +14297,8 @@
           "code",
           "name",
           "icon",
+          "sfSymbol",
+          "materialSymbol",
           "isActive",
           "sortOrder",
           "createdAt",
@@ -14304,8 +14360,18 @@
           },
           "icon": {
             "type": "string",
-            "description": "Lucide icon name",
+            "description": "Lucide icon name (web)",
             "example": "clipboard-list"
+          },
+          "sfSymbol": {
+            "type": "string",
+            "description": "iOS SF Symbol name",
+            "example": "cart.fill"
+          },
+          "materialSymbol": {
+            "type": "string",
+            "description": "Android Material Symbol name",
+            "example": "shopping_cart"
           },
           "sortOrder": {
             "type": "number",
@@ -14397,8 +14463,22 @@
             "example": "WEB"
           },
           "remoteEntry": {
-            "type": "string",
-            "example": "/order-mf/remoteEntry.js"
+            "type": "object",
+            "example": "/order-mf/remoteEntry.js",
+            "nullable": true,
+            "description": "Set on WEB rows"
+          },
+          "remoteEntryAndroid": {
+            "type": "object",
+            "example": "https://cdn/.../android/mf-manifest.json",
+            "nullable": true,
+            "description": "Set on MOBILE rows"
+          },
+          "remoteEntryIos": {
+            "type": "object",
+            "example": "https://cdn/.../ios/mf-manifest.json",
+            "nullable": true,
+            "description": "Set on MOBILE rows"
           },
           "exposedModule": {
             "type": "string",
@@ -14416,7 +14496,6 @@
           "microfrontendCode",
           "microfrontendName",
           "platform",
-          "remoteEntry",
           "exposedModule",
           "routePrefix"
         ]

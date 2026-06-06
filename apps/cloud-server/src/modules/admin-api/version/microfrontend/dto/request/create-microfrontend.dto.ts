@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEnum, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsOptional, IsString, Matches, MaxLength, MinLength, ValidateIf } from 'class-validator';
 import type { AppPlatform } from '@/db/schema';
 import { AppPlatformValues } from '@/db/schema';
 
@@ -23,9 +23,30 @@ export class CreateMicrofrontendDto {
   @IsEnum(AppPlatformValues, { message: 'Platform must be WEB or MOBILE' })
   platform: AppPlatform;
 
-  @ApiProperty({ description: 'Remote entry URL for module federation', example: '/order-mf/remoteEntry.js' })
+  // Required when platform = WEB
+  @ApiPropertyOptional({ description: 'Remote entry URL (required for WEB)', example: '/order-mf/remoteEntry.js' })
+  @ValidateIf((o) => o.platform === AppPlatformValues.WEB)
   @IsString()
   @MinLength(1)
   @MaxLength(500)
-  remoteEntry: string;
+  @IsOptional()
+  remoteEntry?: string;
+
+  // Required when platform = MOBILE
+  @ApiPropertyOptional({ description: 'Android remote entry URL (required for MOBILE)', example: 'https://cdn/.../android/mf-manifest.json' })
+  @ValidateIf((o) => o.platform === AppPlatformValues.MOBILE)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  @IsOptional()
+  remoteEntryAndroid?: string;
+
+  // Required when platform = MOBILE
+  @ApiPropertyOptional({ description: 'iOS remote entry URL (required for MOBILE)', example: 'https://cdn/.../ios/mf-manifest.json' })
+  @ValidateIf((o) => o.platform === AppPlatformValues.MOBILE)
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  @IsOptional()
+  remoteEntryIos?: string;
 }

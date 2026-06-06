@@ -1,0 +1,2 @@
+ALTER TABLE "cloud"."features" ADD COLUMN "sf_symbol" varchar(255) DEFAULT 'square' NOT NULL;--> statement-breakpoint
+ALTER TABLE "cloud"."features" ADD COLUMN "material_symbol" varchar(255) DEFAULT 'square' NOT NULL;

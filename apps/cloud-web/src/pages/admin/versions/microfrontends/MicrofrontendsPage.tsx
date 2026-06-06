@@ -121,9 +121,20 @@ function getColumns({ onDelete }: ColumnActions): ColumnDef<Microfrontend, unkno
     {
       accessorKey: 'remoteEntry',
       header: 'Remote Entry',
-      cell: ({ row }) => (
-        <span className="text-sm text-muted-foreground truncate max-w-64 block">{row.original.remoteEntry}</span>
-      ),
+      cell: ({ row }) => {
+        const mf = row.original;
+        if (mf.platform === 'MOBILE') {
+          return (
+            <div className="text-sm text-muted-foreground max-w-64 space-y-0.5">
+              <div className="truncate"><span className="font-medium">android:</span> {mf.remoteEntryAndroid ?? '—'}</div>
+              <div className="truncate"><span className="font-medium">ios:</span> {mf.remoteEntryIos ?? '—'}</div>
+            </div>
+          );
+        }
+        return (
+          <span className="text-sm text-muted-foreground truncate max-w-64 block">{mf.remoteEntry ?? '—'}</span>
+        );
+      },
     },
     {
       id: 'actions',

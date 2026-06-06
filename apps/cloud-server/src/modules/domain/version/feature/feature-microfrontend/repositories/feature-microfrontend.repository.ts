@@ -14,7 +14,9 @@ export type FeatureMicrofrontendJoinedRow = {
   microfrontendCode: string;
   microfrontendName: string;
   platform: string;
-  remoteEntry: string;
+  remoteEntry: string | null;
+  remoteEntryAndroid: string | null;
+  remoteEntryIos: string | null;
 };
 
 @Injectable()
@@ -36,6 +38,8 @@ export class FeatureMicrofrontendRepository extends PrimaryBaseRepository<typeof
         microfrontendName: microfrontends.name,
         platform: microfrontends.platform,
         remoteEntry: microfrontends.remoteEntry,
+        remoteEntryAndroid: microfrontends.remoteEntryAndroid,
+        remoteEntryIos: microfrontends.remoteEntryIos,
       })
       .from(featureMicrofrontends)
       .innerJoin(microfrontends, eq(featureMicrofrontends.microfrontendId, microfrontends.id))

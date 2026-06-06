@@ -26,10 +26,24 @@ export class UpdateMicrofrontendDto {
   @IsEnum(AppPlatformValues, { message: 'Platform must be WEB or MOBILE' })
   platform?: AppPlatform;
 
-  @ApiPropertyOptional({ description: 'Remote entry URL for module federation', example: '/order-mf/remoteEntry.js' })
+  @ApiPropertyOptional({ description: 'Remote entry URL (WEB only)', example: '/order-mf/remoteEntry.js' })
   @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(500)
   remoteEntry?: string;
+
+  @ApiPropertyOptional({ description: 'Android remote entry URL (MOBILE only)', example: 'https://cdn/.../android/mf-manifest.json' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  remoteEntryAndroid?: string;
+
+  @ApiPropertyOptional({ description: 'iOS remote entry URL (MOBILE only)', example: 'https://cdn/.../ios/mf-manifest.json' })
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  remoteEntryIos?: string;
 }
