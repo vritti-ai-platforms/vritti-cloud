@@ -8,9 +8,19 @@ export interface FeatureCatalogEntry {
   code: unknown;
   name: unknown;
   icon: unknown;
-  remoteEntry: string;
-  exposedModule: string;
-  routePrefix: string;
+  sfSymbol: string;
+  materialSymbol: string;
+  // WEB route — present when the feature publishes a web microfrontend
+  remoteEntry: string | null;
+  exposedModule: string | null;
+  routePrefix: string | null;
+  // MOBILE route — present when the feature publishes a mobile microfrontend
+  mobile: {
+    remoteEntryAndroid: string;
+    remoteEntryIos: string;
+    exposedModule: string;
+    routePrefix: string;
+  } | null;
   appCode: string;
   appName: string;
   appIcon: string | null;
@@ -96,13 +106,17 @@ export class LicenseConfigService {
       }
     }
 
+    // Keep features with at least one route (WEB or MOBILE). Platform selection happens later at SSE time.
     return features
-      .filter(
-        (f) =>
-          featureCodeToApp.has(f.code as string) && f.microfrontends && (f.microfrontends as Record<string, unknown>).WEB,
-      )
+      .filter((f) => {
+        if (!featureCodeToApp.has(f.code as string)) return false;
+        const mfs = (f.microfrontends ?? {}) as Record<string, unknown>;
+        return Boolean(mfs.WEB) || Boolean(mfs.MOBILE);
+      })
       .map((f) => {
-        const webMf = (f.microfrontends as Record<string, Record<string, string>>).WEB;
+        const mfs = (f.microfrontends ?? {}) as Record<string, Record<string, string>>;
+        const webMf = mfs.WEB;
+        const mobileMf = mfs.MOBILE;
         const ownerApp = featureCodeToApp.get(f.code as string)!;
         return {
           code: f.code,
@@ -110,9 +124,17 @@ export class LicenseConfigService {
           icon: f.icon ?? null,
           sfSymbol: (f.sfSymbol as string) ?? 'square',
           materialSymbol: (f.materialSymbol as string) ?? 'square',
-          remoteEntry: webMf.remoteEntry,
-          exposedModule: webMf.exposedModule,
-          routePrefix: webMf.routePrefix,
+          remoteEntry: webMf?.remoteEntry ?? null,
+          exposedModule: webMf?.exposedModule ?? null,
+          routePrefix: webMf?.routePrefix ?? null,
+          mobile: mobileMf
+            ? {
+                remoteEntryAndroid: mobileMf.remoteEntryAndroid,
+                remoteEntryIos: mobileMf.remoteEntryIos,
+                exposedModule: mobileMf.exposedModule,
+                routePrefix: mobileMf.routePrefix,
+              }
+            : null,
           appCode: ownerApp.code,
           appName: ownerApp.name,
           appIcon: ownerApp.icon,

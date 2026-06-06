@@ -88,18 +88,31 @@ export class OrganizationService {
     const features = (snapshot.features ?? []) as Array<Record<string, unknown>>;
 
     const featureCatalog = features
-      .filter((f) => f.microfrontends && (f.microfrontends as Record<string, unknown>).WEB)
+      .filter((f) => {
+        const mfs = (f.microfrontends ?? {}) as Record<string, unknown>;
+        return Boolean(mfs.WEB) || Boolean(mfs.MOBILE);
+      })
       .map((f) => {
-        const webMf = (f.microfrontends as Record<string, Record<string, string>>).WEB;
+        const mfs = (f.microfrontends ?? {}) as Record<string, Record<string, string>>;
+        const webMf = mfs.WEB;
+        const mobileMf = mfs.MOBILE;
         return {
           code: f.code,
           name: f.name,
           icon: f.icon ?? null,
           sfSymbol: (f.sfSymbol as string) ?? 'square',
           materialSymbol: (f.materialSymbol as string) ?? 'square',
-          remoteEntry: webMf.remoteEntry,
-          exposedModule: webMf.exposedModule,
-          routePrefix: webMf.routePrefix,
+          remoteEntry: webMf?.remoteEntry ?? null,
+          exposedModule: webMf?.exposedModule ?? null,
+          routePrefix: webMf?.routePrefix ?? null,
+          mobile: mobileMf
+            ? {
+                remoteEntryAndroid: mobileMf.remoteEntryAndroid,
+                remoteEntryIos: mobileMf.remoteEntryIos,
+                exposedModule: mobileMf.exposedModule,
+                routePrefix: mobileMf.routePrefix,
+              }
+            : null,
         };
       });
 
