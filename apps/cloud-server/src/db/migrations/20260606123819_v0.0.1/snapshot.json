@@ -1,9 +1,9 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "9c55dc32-5c69-45d6-a78b-1b0cc47c3080",
+  "id": "eb31ce7d-e045-4dc3-9015-3b67e0557a14",
   "prevIds": [
-    "91bdcd63-22ed-4902-8e80-a07440fc450c"
+    "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
     {
@@ -949,7 +949,7 @@
     {
       "type": "varchar(50)",
       "typeSchema": null,
-      "notNull": false,
+      "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
@@ -2988,7 +2988,7 @@
       "table": "table_views"
     },
     {
-      "type": "varchar(100)",
+      "type": "varchar(200)",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
@@ -5136,7 +5136,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "deployment_industry_plans_deployment_id_deployments_id_fkey",
+      "name": "deployment_business_plans_deployment_id_deployments_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "deployment_business_plans"
@@ -5153,7 +5153,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
-      "name": "deployment_industry_plans_plan_id_plans_id_fkey",
+      "name": "deployment_business_plans_plan_id_plans_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "deployment_business_plans"
@@ -5170,7 +5170,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
-      "name": "deployment_industry_plans_industry_id_industries_id_fkey",
+      "name": "deployment_business_plans_business_id_businesses_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "deployment_business_plans"
@@ -5221,7 +5221,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
-      "name": "organizations_industry_id_industries_id_fkey",
+      "name": "organizations_business_id_businesses_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "organizations"
@@ -5289,7 +5289,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
-      "name": "prices_industry_id_industries_id_fkey",
+      "name": "prices_business_id_businesses_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "prices"
@@ -5833,7 +5833,7 @@
       ],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
-      "name": "role_templates_industry_id_industries_id_fkey",
+      "name": "role_templates_business_id_businesses_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "role_templates"
@@ -5947,7 +5947,7 @@
         "business_id"
       ],
       "nameExplicit": false,
-      "name": "deployment_industry_plans_pkey",
+      "name": "deployment_business_plans_pkey",
       "entityType": "pks",
       "schema": "cloud",
       "table": "deployment_business_plans"
@@ -5998,7 +5998,7 @@
         "id"
       ],
       "nameExplicit": false,
-      "name": "industries_pkey",
+      "name": "businesses_pkey",
       "schema": "cloud",
       "table": "businesses",
       "entityType": "pks"
@@ -6324,7 +6324,7 @@
         "code"
       ],
       "nullsNotDistinct": false,
-      "name": "industries_code_key",
+      "name": "businesses_code_key",
       "schema": "cloud",
       "table": "businesses",
       "entityType": "uniques"
@@ -6418,12 +6418,5 @@
       "entityType": "uniques"
     }
   ],
-  "renames": [
-    "cloud.industries->cloud.businesses",
-    "cloud.deployment_industry_plans->cloud.deployment_business_plans",
-    "cloud.deployment_business_plans.industry_id->cloud.deployment_business_plans.business_id",
-    "cloud.organizations.industry_id->cloud.organizations.business_id",
-    "cloud.prices.industry_id->cloud.prices.business_id",
-    "cloud.role_templates.industry_id->cloud.role_templates.business_id"
-  ]
+  "renames": []
 }

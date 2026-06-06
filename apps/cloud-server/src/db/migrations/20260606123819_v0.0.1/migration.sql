@@ -1,4 +1,4 @@
-CREATE SCHEMA IF NOT EXISTS "cloud";
+CREATE SCHEMA "cloud";
 --> statement-breakpoint
 CREATE TYPE "cloud"."AccountStatus" AS ENUM('PENDING_VERIFICATION', 'ACTIVE', 'INACTIVE');--> statement-breakpoint
 CREATE TYPE "cloud"."AppPlatform" AS ENUM('WEB', 'MOBILE');--> statement-breakpoint
@@ -57,28 +57,7 @@ CREATE TABLE "cloud"."sessions" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "cloud"."deployments" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-	"name" varchar(255) NOT NULL,
-	"url" varchar(500) NOT NULL,
-	"webhook_secret" varchar(500) NOT NULL,
-	"region_id" uuid NOT NULL,
-	"cloud_provider_id" uuid NOT NULL,
-	"version" varchar(50),
-	"status" "cloud"."DeploymentStatus" DEFAULT 'Provisioning'::"cloud"."DeploymentStatus" NOT NULL,
-	"type" "cloud"."DeploymentType" NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone
-);
---> statement-breakpoint
-CREATE TABLE "cloud"."deployment_industry_plans" (
-	"deployment_id" uuid,
-	"plan_id" uuid,
-	"industry_id" uuid,
-	CONSTRAINT "deployment_industry_plans_pkey" PRIMARY KEY("deployment_id","plan_id","industry_id")
-);
---> statement-breakpoint
-CREATE TABLE "cloud"."industries" (
+CREATE TABLE "cloud"."businesses" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"name" varchar(255) NOT NULL,
 	"code" varchar(100) NOT NULL UNIQUE,
@@ -86,6 +65,27 @@ CREATE TABLE "cloud"."industries" (
 	"recommended_apps" jsonb DEFAULT '[]' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "cloud"."deployments" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+	"name" varchar(255) NOT NULL,
+	"url" varchar(500) NOT NULL,
+	"webhook_secret" varchar(500) NOT NULL,
+	"region_id" uuid NOT NULL,
+	"cloud_provider_id" uuid NOT NULL,
+	"version" varchar(50) NOT NULL,
+	"status" "cloud"."DeploymentStatus" DEFAULT 'Provisioning'::"cloud"."DeploymentStatus" NOT NULL,
+	"type" "cloud"."DeploymentType" NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone
+);
+--> statement-breakpoint
+CREATE TABLE "cloud"."deployment_business_plans" (
+	"deployment_id" uuid,
+	"plan_id" uuid,
+	"business_id" uuid,
+	CONSTRAINT "deployment_business_plans_pkey" PRIMARY KEY("deployment_id","plan_id","business_id")
 );
 --> statement-breakpoint
 CREATE TABLE "cloud"."organization_members" (
@@ -101,7 +101,7 @@ CREATE TABLE "cloud"."organizations" (
 	"name" varchar(255) NOT NULL,
 	"subdomain" varchar(100) NOT NULL UNIQUE,
 	"org_identifier" varchar(100) NOT NULL UNIQUE,
-	"industry_id" uuid NOT NULL,
+	"business_id" uuid NOT NULL,
 	"size" "cloud"."OrgSize" NOT NULL,
 	"media_id" varchar(255),
 	"plan_id" uuid NOT NULL,
@@ -124,7 +124,7 @@ CREATE TABLE "cloud"."plans" (
 CREATE TABLE "cloud"."prices" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"plan_id" uuid NOT NULL,
-	"industry_id" uuid NOT NULL,
+	"business_id" uuid NOT NULL,
 	"region_id" uuid NOT NULL,
 	"cloud_provider_id" uuid NOT NULL,
 	"price" numeric(10,2) NOT NULL,
@@ -281,7 +281,7 @@ CREATE TABLE "cloud"."media" (
 CREATE TABLE "cloud"."table_views" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"user_id" uuid NOT NULL,
-	"table_slug" varchar(100) NOT NULL,
+	"table_slug" varchar(200) NOT NULL,
 	"name" varchar(100) NOT NULL,
 	"state" jsonb NOT NULL,
 	"is_shared" boolean DEFAULT false NOT NULL,
@@ -374,7 +374,7 @@ CREATE TABLE "cloud"."plan_apps" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
 	"plan_id" uuid NOT NULL,
 	"app_code" varchar(100) NOT NULL,
-	"included_feature_codes" text,
+	"included_feature_codes" text[],
 	"sort_order" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -385,7 +385,7 @@ CREATE TABLE "cloud"."role_templates" (
 	"name" varchar(255) NOT NULL,
 	"description" text,
 	"scope" "cloud"."RoleScope" NOT NULL,
-	"industry_id" uuid NOT NULL,
+	"business_id" uuid NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone
 );
@@ -445,16 +445,16 @@ ALTER TABLE "cloud"."oauth_providers" ADD CONSTRAINT "oauth_providers_user_id_us
 ALTER TABLE "cloud"."sessions" ADD CONSTRAINT "sessions_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "cloud"."users"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."deployments" ADD CONSTRAINT "deployments_region_id_regions_id_fkey" FOREIGN KEY ("region_id") REFERENCES "cloud"."regions"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."deployments" ADD CONSTRAINT "deployments_cloud_provider_id_cloud_providers_id_fkey" FOREIGN KEY ("cloud_provider_id") REFERENCES "cloud"."cloud_providers"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "cloud"."deployment_industry_plans" ADD CONSTRAINT "deployment_industry_plans_deployment_id_deployments_id_fkey" FOREIGN KEY ("deployment_id") REFERENCES "cloud"."deployments"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "cloud"."deployment_industry_plans" ADD CONSTRAINT "deployment_industry_plans_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "cloud"."plans"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "cloud"."deployment_industry_plans" ADD CONSTRAINT "deployment_industry_plans_industry_id_industries_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "cloud"."industries"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "cloud"."deployment_business_plans" ADD CONSTRAINT "deployment_business_plans_deployment_id_deployments_id_fkey" FOREIGN KEY ("deployment_id") REFERENCES "cloud"."deployments"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "cloud"."deployment_business_plans" ADD CONSTRAINT "deployment_business_plans_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "cloud"."plans"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "cloud"."deployment_business_plans" ADD CONSTRAINT "deployment_business_plans_business_id_businesses_id_fkey" FOREIGN KEY ("business_id") REFERENCES "cloud"."businesses"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."organization_members" ADD CONSTRAINT "organization_members_organization_id_organizations_id_fkey" FOREIGN KEY ("organization_id") REFERENCES "cloud"."organizations"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."organization_members" ADD CONSTRAINT "organization_members_user_id_users_id_fkey" FOREIGN KEY ("user_id") REFERENCES "cloud"."users"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "cloud"."organizations" ADD CONSTRAINT "organizations_industry_id_industries_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "cloud"."industries"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "cloud"."organizations" ADD CONSTRAINT "organizations_business_id_businesses_id_fkey" FOREIGN KEY ("business_id") REFERENCES "cloud"."businesses"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."organizations" ADD CONSTRAINT "organizations_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "cloud"."plans"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."organizations" ADD CONSTRAINT "organizations_deployment_id_deployments_id_fkey" FOREIGN KEY ("deployment_id") REFERENCES "cloud"."deployments"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."prices" ADD CONSTRAINT "prices_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "cloud"."plans"("id") ON DELETE RESTRICT;--> statement-breakpoint
-ALTER TABLE "cloud"."prices" ADD CONSTRAINT "prices_industry_id_industries_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "cloud"."industries"("id") ON DELETE RESTRICT;--> statement-breakpoint
+ALTER TABLE "cloud"."prices" ADD CONSTRAINT "prices_business_id_businesses_id_fkey" FOREIGN KEY ("business_id") REFERENCES "cloud"."businesses"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."prices" ADD CONSTRAINT "prices_region_id_regions_id_fkey" FOREIGN KEY ("region_id") REFERENCES "cloud"."regions"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."prices" ADD CONSTRAINT "prices_cloud_provider_id_cloud_providers_id_fkey" FOREIGN KEY ("cloud_provider_id") REFERENCES "cloud"."cloud_providers"("id") ON DELETE RESTRICT;--> statement-breakpoint
 ALTER TABLE "cloud"."region_cloud_providers" ADD CONSTRAINT "region_cloud_providers_region_id_regions_id_fkey" FOREIGN KEY ("region_id") REFERENCES "cloud"."regions"("id") ON DELETE CASCADE;--> statement-breakpoint
@@ -486,7 +486,7 @@ ALTER TABLE "cloud"."app_prices" ADD CONSTRAINT "app_prices_region_id_regions_id
 ALTER TABLE "cloud"."app_prices" ADD CONSTRAINT "app_prices_cloud_provider_id_cloud_providers_id_fkey" FOREIGN KEY ("cloud_provider_id") REFERENCES "cloud"."cloud_providers"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."plan_apps" ADD CONSTRAINT "plan_apps_plan_id_plans_id_fkey" FOREIGN KEY ("plan_id") REFERENCES "cloud"."plans"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."role_templates" ADD CONSTRAINT "role_templates_version_id_versions_id_fkey" FOREIGN KEY ("version_id") REFERENCES "cloud"."versions"("id") ON DELETE CASCADE;--> statement-breakpoint
-ALTER TABLE "cloud"."role_templates" ADD CONSTRAINT "role_templates_industry_id_industries_id_fkey" FOREIGN KEY ("industry_id") REFERENCES "cloud"."industries"("id") ON DELETE CASCADE;--> statement-breakpoint
+ALTER TABLE "cloud"."role_templates" ADD CONSTRAINT "role_templates_business_id_businesses_id_fkey" FOREIGN KEY ("business_id") REFERENCES "cloud"."businesses"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."role_template_apps" ADD CONSTRAINT "role_template_apps_version_id_versions_id_fkey" FOREIGN KEY ("version_id") REFERENCES "cloud"."versions"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."role_template_apps" ADD CONSTRAINT "role_template_apps_role_template_id_role_templates_id_fkey" FOREIGN KEY ("role_template_id") REFERENCES "cloud"."role_templates"("id") ON DELETE CASCADE;--> statement-breakpoint
 ALTER TABLE "cloud"."role_template_apps" ADD CONSTRAINT "role_template_apps_app_id_apps_id_fkey" FOREIGN KEY ("app_id") REFERENCES "cloud"."apps"("id") ON DELETE CASCADE;--> statement-breakpoint

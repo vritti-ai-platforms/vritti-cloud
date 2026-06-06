@@ -9,7 +9,11 @@ const dbSchema = process.env.PRIMARY_DB_SCHEMA;
 if (!dbSchema) {
   throw new Error('PRIMARY_DB_SCHEMA environment variable is required');
 }
-const migrationsSchema = process.env.PRIMARY_DB_MIGRATIONS_SCHEMA ?? dbSchema;
+
+const migrationSchema = process.env.PRIMARY_DB_MIGRATION_SCHEMA;
+if (!migrationSchema) {
+  throw new Error('PRIMARY_DB_MIGRATION_SCHEMA environment variable is required');
+}
 
 export default defineConfig({
   schema: './src/db/schema/index.ts',
@@ -21,7 +25,7 @@ export default defineConfig({
   },
   migrations: {
     table: '__drizzle_migrations_cloud',
-    schema: migrationsSchema,
+    schema: migrationSchema,
   },
   verbose: true,
   strict: true,
