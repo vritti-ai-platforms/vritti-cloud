@@ -75,8 +75,8 @@ importers:
         specifier: ^13.2.2
         version: 13.3.0
       '@vritti/api-sdk':
-        specifier: ^0.2.9
-        version: 0.2.9(1e04183797c33645dc0e84c68fc3ed8f)
+        specifier: ^0.2.10
+        version: 0.2.10(1e04183797c33645dc0e84c68fc3ed8f)
       axios:
         specifier: ^1.13.2
         version: 1.13.6
@@ -4384,9 +4384,6 @@ packages:
   '@types/node@22.19.15':
     resolution: {integrity: sha512-F0R/h2+dsy5wJAUe3tAU6oqa2qbWY5TpNfL/RGmo1y38hiyO1w3x2jPtt76wmuaJI4DQnOBu21cNXQ2STIUUWg==}
 
-  '@types/node@22.19.20':
-    resolution: {integrity: sha512-6tELRwSDYWW9EdZhbeZmYGZ1/7Djkt+Ah3/ScEYT9cDord7UJzasR/4D3VONg9tQI5CDp+/CZC1AXj2pCFOvpw==}
-
   '@types/node@25.4.0':
     resolution: {integrity: sha512-9wLpoeWuBlcbBpOY3XmzSTG3oscB6xjBEEtn+pYXTfhyXhIxC5FsBer2KTopBlvKEiW9l13po9fq+SJY/5lkhw==}
 
@@ -4586,8 +4583,8 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@vritti/api-sdk@0.2.9':
-    resolution: {integrity: sha512-DIfSLWNwJZRnWB1dyRHZw1N8pmDz09nn/LzOzslQZ/zQP47glnneG4yLiI/NM7YEQnltU+OZrIDZKOqde0JlNg==}
+  '@vritti/api-sdk@0.2.10':
+    resolution: {integrity: sha512-kAvmuaKLlWbrGhDl64vymnxMQJqtAXMUs51wJNtfhlM9k5fM93TsPWvSephG0oRyIYkGZrlO+9Kyc2QQMM8vPA==}
     peerDependencies:
       '@nestjs/common': ^11.0.0
       '@nestjs/config': ^4.0.0
@@ -14788,7 +14785,7 @@ snapshots:
 
   '@types/mssql@9.1.9(@azure/core-client@1.10.2)':
     dependencies:
-      '@types/node': 22.19.20
+      '@types/node': 25.4.0
       tarn: 3.0.2
       tedious: 19.2.1(@azure/core-client@1.10.2)
     transitivePeerDependencies:
@@ -14799,11 +14796,6 @@ snapshots:
   '@types/node@22.19.15':
     dependencies:
       undici-types: 6.21.0
-
-  '@types/node@22.19.20':
-    dependencies:
-      undici-types: 6.21.0
-    optional: true
 
   '@types/node@25.4.0':
     dependencies:
@@ -14842,7 +14834,7 @@ snapshots:
 
   '@types/readable-stream@4.0.23':
     dependencies:
-      '@types/node': 22.19.20
+      '@types/node': 25.4.0
     optional: true
 
   '@types/send@1.2.1':
@@ -15004,7 +14996,7 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@vritti/api-sdk@0.2.9(1e04183797c33645dc0e84c68fc3ed8f)':
+  '@vritti/api-sdk@0.2.10(1e04183797c33645dc0e84c68fc3ed8f)':
     dependencies:
       '@getbrevo/brevo': 4.0.1
       '@nestjs/common': 11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -19694,7 +19686,7 @@ snapshots:
       '@azure/identity': 4.13.1
       '@azure/keyvault-keys': 4.10.0(@azure/core-client@1.10.2)
       '@js-joda/core': 5.7.0
-      '@types/node': 22.19.20
+      '@types/node': 25.4.0
       bl: 6.1.6
       iconv-lite: 0.6.3
       js-md4: 0.3.2
@@ -19711,7 +19703,7 @@ snapshots:
       '@azure/identity': 4.13.1
       '@azure/keyvault-keys': 4.10.0(@azure/core-client@1.10.2)
       '@js-joda/core': 5.7.0
-      '@types/node': 22.19.20
+      '@types/node': 25.4.0
       bl: 6.1.6
       iconv-lite: 0.7.2
       js-md4: 0.3.2
