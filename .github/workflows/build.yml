@@ -74,5 +74,6 @@ jobs:
       app_name: cloud-web
       build_command: pnpm exec nx build vritti-cloud-web
       output_dir: apps/cloud-web/dist
+      package_json_path: apps/cloud-web/package.json
       production_domain: https://cloud.vrittiai.com
     secrets: inherit
