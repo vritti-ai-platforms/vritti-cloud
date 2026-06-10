@@ -64,8 +64,16 @@ export const updateFeatureSchema = z.object({
 
 export const setFeatureMicrofrontendSchema = z.object({
   microfrontendId: z.string().uuid('Select a microfrontend'),
-  exposedModule: z.string().min(1, 'Exposed module is required').max(100),
-  routePrefix: z.string().min(1, 'Route prefix is required').max(100),
+  exposedModule: z
+    .string()
+    .min(1, 'Exposed module is required')
+    .max(100)
+    .regex(/^\.\//, 'Must start with ./ (e.g. ./Orders)'),
+  routePrefix: z
+    .string()
+    .min(1, 'Route prefix is required')
+    .max(100)
+    .regex(/^\//, 'Must start with / (e.g. /orders)'),
 });
 
 export type CreateFeatureInput = z.input<typeof createFeatureSchema>;

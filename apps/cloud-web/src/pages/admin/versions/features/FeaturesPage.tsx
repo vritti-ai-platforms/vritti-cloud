@@ -159,7 +159,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
         const platforms = row.original.platforms;
         if (!platforms.length) return <span className="text-muted-foreground">—</span>;
         return (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap justify-center gap-1">
             {platforms.map((p) => (
               <Badge key={p} variant="outline" className="text-[10px] font-medium">
                 {p}

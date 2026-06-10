@@ -156,12 +156,12 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Region, unknown>[] {
       header: 'Status',
       cell: ({ row }) =>
         row.original.isActive ? (
-          <div className="flex items-center gap-1.5 text-success text-sm">
+          <div className="flex items-center justify-center gap-1.5 text-success text-sm">
             <CheckCircle2 className="size-4" />
             Active
           </div>
         ) : (
-          <div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+          <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-sm">
             <XCircle className="size-4" />
             Inactive
           </div>

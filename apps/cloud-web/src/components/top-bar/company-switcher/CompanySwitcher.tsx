@@ -3,7 +3,7 @@ import { Select } from '@vritti/quantum-ui/Select';
 import { Separator } from '@vritti/quantum-ui/Separator';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Building2, Check, ChevronsUpDown, Plus } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface CompanySwitcherProps {
   currentOrgId: string;
@@ -13,6 +13,7 @@ interface CompanySwitcherProps {
 // Renders the org switcher dropdown in the top bar breadcrumb
 export const CompanySwitcher = ({ currentOrgId, currentOrgName }: CompanySwitcherProps) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
   return (
     <Select
@@ -77,7 +78,10 @@ export const CompanySwitcher = ({ currentOrgId, currentOrgName }: CompanySwitche
       }
       onOptionSelect={(option) => {
         if (option) {
-          navigate(`/org-${buildSlug(String(option.label), String(option.value))}/overview`);
+          const newOrgSlug = `org-${buildSlug(String(option.label), String(option.value))}`;
+          // Swap only the org segment, preserving the current top-level section (e.g. /users)
+          const section = pathname.split('/')[2] ?? '';
+          navigate(`/${newOrgSlug}${section ? `/${section}` : ''}`);
         }
       }}
     />

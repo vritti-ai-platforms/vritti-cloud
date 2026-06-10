@@ -50,7 +50,6 @@ import { OrgAppsPage } from './pages/cloud/organization/apps/OrgAppsPage';
 import { BUViewPage } from './pages/cloud/organization/business-units/BUViewPage';
 import { BUViewPageSkeleton } from './pages/cloud/organization/business-units/BUViewPageSkeleton';
 import { OrgBusinessUnitsPage } from './pages/cloud/organization/business-units/OrgBusinessUnitsPage';
-import { OverviewPage } from './pages/cloud/organization/OverviewPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
 import { CreateOrgRolePage } from './pages/cloud/organization/roles/CreateOrgRolePage';
 import { EditOrgRolePage } from './pages/cloud/organization/roles/EditOrgRolePage';
@@ -296,11 +295,7 @@ export const cloudRoutes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Navigate to="overview" replace />,
-      },
-      {
-        path: 'overview',
-        element: <OverviewPage />,
+        element: <Navigate to="users" replace />,
       },
       {
         path: 'users',

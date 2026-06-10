@@ -103,7 +103,7 @@ function getColumns(onDelete: (id: string, name: string) => Promise<void>): Colu
       accessorKey: 'name',
       header: 'Provider',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <ProviderLogo provider={row.original} />
           <span>{row.original.name}</span>
         </div>

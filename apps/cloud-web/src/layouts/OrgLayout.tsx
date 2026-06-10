@@ -1,6 +1,6 @@
 import { SidebarLayout } from '@components/sidebar-layout/SidebarLayout';
 import type { SidebarNavGroup } from '@vritti/quantum-ui/Sidebar';
-import { Building2, CreditCard, Eye, Layers, Settings, Shield, Users } from 'lucide-react';
+import { Building2, CreditCard, Layers, Settings, Shield, Users } from 'lucide-react';
 import { useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 
@@ -12,7 +12,6 @@ function useOrgNavGroups(orgSlug?: string): SidebarNavGroup[] {
       {
         label: 'Organization',
         items: [
-          { title: 'Overview', icon: Eye, path: `${base}/overview` },
           { title: 'Users', icon: Users, path: `${base}/users` },
           { title: 'Roles & Permissions', icon: Shield, path: `${base}/roles` },
           { title: 'Business Units', icon: Building2, path: `${base}/business-units` },

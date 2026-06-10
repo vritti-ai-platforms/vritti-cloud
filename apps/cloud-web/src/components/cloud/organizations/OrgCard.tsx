@@ -108,7 +108,7 @@ export const OrgCard: React.FC<{ org: OrgListItem }> = ({ org }) => {
         <Button
           variant="link"
           className="p-0 h-auto text-primary text-sm gap-1"
-          onClick={() => navigate(`/org-${buildSlug(org.name, org.id)}/overview`)}
+          onClick={() => navigate(`/org-${buildSlug(org.name, org.id)}`)}
         >
           View <ArrowRight className="h-3.5 w-3.5" />
         </Button>
