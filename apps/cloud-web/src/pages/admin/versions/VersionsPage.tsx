@@ -80,6 +80,7 @@ export const VersionsPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={GitBranch}
         title="New Version"
         description="Create a new platform version."
         content={(close) => <CreateVersionForm onSuccess={close} onCancel={close} />}

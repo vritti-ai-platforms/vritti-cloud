@@ -1,5 +1,6 @@
 import { useAssignDeploymentPlan } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { PlanSelector } from '@vritti/quantum-ui/selects/plan';
@@ -35,14 +36,14 @@ export const AssignPlanForm: React.FC<AssignPlanFormProps> = ({ deploymentId, on
     <Form form={form} mutation={assignMutation} transformSubmit={(data) => ({ id: deploymentId, data })}>
       <PlanSelector name="planId" label="Plan" placeholder="Select plan" />
       <BusinessSelector name="businessId" label="Business" placeholder="Select business" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" onClick={handleCancel}>
           Cancel
         </Button>
         <Button type="submit" loadingText="Assigning...">
           Assign Plan
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

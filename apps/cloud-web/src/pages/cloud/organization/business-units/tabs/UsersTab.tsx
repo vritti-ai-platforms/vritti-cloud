@@ -5,7 +5,7 @@ import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
-import { Dialog } from '@vritti/quantum-ui/Dialog';
+import { Dialog, DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { Select } from '@vritti/quantum-ui/Select';
@@ -176,6 +176,7 @@ export const UsersTab = ({ orgId, buId }: UsersTabProps) => {
       {/* Assign role dialog */}
       <Dialog
         handle={assignDialog}
+        icon={Users}
         title="Assign Role to User"
         description="Select a user and a role to assign at this business unit."
         content={(close) => (
@@ -239,14 +240,14 @@ const AssignRoleForm = ({ orgId, buId, defaultUserId, defaultRoleIds, onSuccess,
     <Form form={form} mutation={mutation}>
       <Select name="userId" label="User" placeholder="Select user" options={userOptions} searchable />
       <Select name="orgRoleIds" label="Roles" placeholder="Select roles" options={roleOptions} searchable multiple />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" loadingText="Assigning...">
           Assign
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

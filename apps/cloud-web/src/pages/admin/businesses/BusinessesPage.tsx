@@ -83,6 +83,7 @@ export const BusinessesPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={Building2}
         title="Add Business"
         description="Enter the details for the new business classification."
         content={(close) => <AddBusinessForm onSuccess={close} onCancel={close} />}

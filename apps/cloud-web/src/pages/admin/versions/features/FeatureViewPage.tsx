@@ -5,6 +5,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
+import { Blocks } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import { EditFeatureForm } from './forms/EditFeatureForm';
@@ -75,6 +76,7 @@ export const FeatureViewPage = () => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={Blocks}
         title="Edit Feature"
         description="Update the details for this feature."
         content={(close) => <EditFeatureForm feature={feature} onSuccess={close} onCancel={close} />}

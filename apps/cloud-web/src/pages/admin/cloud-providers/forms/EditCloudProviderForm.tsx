@@ -1,6 +1,7 @@
 import { useUpdateCloudProvider } from '@hooks/admin/cloud-providers';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
@@ -67,14 +68,14 @@ export const EditCloudProviderForm: React.FC<EditCloudProviderFormProps> = ({ pr
         />
         <Checkbox name="sameAsLight" label="Same as light mode" />
       </div>
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">
           Save Changes
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

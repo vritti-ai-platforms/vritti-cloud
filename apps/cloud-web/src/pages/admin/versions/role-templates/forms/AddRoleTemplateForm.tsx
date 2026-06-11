@@ -1,5 +1,6 @@
 import { useCreateRoleTemplate } from '@hooks/admin/role-templates';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { AppSelector } from '@vritti/quantum-ui/selects/app';
@@ -49,14 +50,14 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ onSucc
       />
       <AppSelector name="appIds" multiple label="Apps" placeholder="Select apps this role covers" />
       <BusinessSelector name="businessId" label="Business" placeholder="Select business" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">
           Add Role Template
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

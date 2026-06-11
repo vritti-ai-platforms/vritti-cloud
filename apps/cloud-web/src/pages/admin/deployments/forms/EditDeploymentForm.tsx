@@ -1,5 +1,6 @@
 import { useUpdateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
@@ -69,14 +70,14 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
           { value: 'provisioning', label: 'Provisioning' },
         ]}
       />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">
           Save Changes
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

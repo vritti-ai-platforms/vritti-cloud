@@ -163,6 +163,7 @@ export const OverviewPage = () => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={GitBranch}
         title="Edit Version"
         description="Update the version name and number."
         content={(close) => <EditVersionForm version={version} onSuccess={close} onCancel={close} />}

@@ -1,5 +1,6 @@
 import { useOrgBusinessUnits } from '@hooks/cloud/org-business-units';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Check } from 'lucide-react';
 import type React from 'react';
@@ -117,7 +118,7 @@ export const AddonPurchaseDialog: React.FC<AddonPurchaseDialogProps> = ({
       )}
 
       {/* Actions */}
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+      <DialogActions>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
@@ -129,7 +130,7 @@ export const AddonPurchaseDialog: React.FC<AddonPurchaseDialogProps> = ({
         >
           Confirm Purchase
         </Button>
-      </div>
+      </DialogActions>
     </div>
   );
 };

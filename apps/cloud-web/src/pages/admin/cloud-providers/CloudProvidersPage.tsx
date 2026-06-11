@@ -81,6 +81,7 @@ export const CloudProvidersPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={Cloud}
         title="Add Cloud Provider"
         description="Enter the details for the new cloud provider."
         content={(close) => <AddCloudProviderForm onSuccess={close} onCancel={close} />}

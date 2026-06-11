@@ -71,6 +71,7 @@ export const AdminRoleTemplatesPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={Shield}
         title="Add Role Template"
         description="Enter the details for the new role template."
         content={(close) => <AddRoleTemplateForm onSuccess={close} onCancel={close} />}

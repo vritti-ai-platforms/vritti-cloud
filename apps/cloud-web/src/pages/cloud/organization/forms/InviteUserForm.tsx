@@ -1,5 +1,6 @@
 import { useInviteUser } from '@hooks/cloud/organizations/useInviteUser';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { PhoneField } from '@vritti/quantum-ui/PhoneField';
 import { TextField } from '@vritti/quantum-ui/TextField';
@@ -46,14 +47,14 @@ export const InviteUserForm: React.FC<InviteUserFormProps> = ({ orgId, onSuccess
       <TextField name="fullName" label="Full Name" placeholder="e.g. Jane Smith" />
       <TextField name="email" label="Email" placeholder="e.g. jane@example.com" />
       <PhoneField name="phone" label="Phone Number" defaultCountry="IN" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" onClick={handleCancel}>
           Cancel
         </Button>
         <Button type="submit" loadingText="Inviting...">
           Send Invite
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

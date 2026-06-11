@@ -1,5 +1,6 @@
 import { useUpdateMicrofrontend } from '@hooks/admin/microfrontends';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
@@ -83,14 +84,14 @@ export const EditMicrofrontendForm: React.FC<EditMicrofrontendFormProps> = ({ mi
           />
         </>
       )}
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">
           Save Changes
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

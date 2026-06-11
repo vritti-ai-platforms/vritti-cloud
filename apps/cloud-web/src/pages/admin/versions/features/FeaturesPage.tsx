@@ -110,6 +110,7 @@ export const FeaturesPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={Blocks}
         title="Add Feature"
         description="Define a new feature (sidebar item / screen)."
         content={(close) => <AddFeatureForm onSuccess={close} onCancel={close} />}

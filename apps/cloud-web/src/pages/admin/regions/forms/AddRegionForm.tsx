@@ -1,5 +1,6 @@
 import { useCreateRegion } from '@hooks/admin/regions';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Switch } from '@vritti/quantum-ui/Switch';
 import { TextField } from '@vritti/quantum-ui/TextField';
@@ -34,14 +35,14 @@ export const AddRegionForm: React.FC<AddRegionFormProps> = ({ onSuccess, onCance
         description="Short identifier used across the platform"
       />
       <Switch name="isActive" label="Active" description="Make this region available for new deployments" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">
           Add Region
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

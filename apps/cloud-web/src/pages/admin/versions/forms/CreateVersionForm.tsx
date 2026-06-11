@@ -1,5 +1,6 @@
 import { useCreateVersion } from '@hooks/admin/versions';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
@@ -24,14 +25,14 @@ export const CreateVersionForm: React.FC<CreateVersionFormProps> = ({ onSuccess,
     <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="version" label="Version" placeholder="e.g. 1.0.0" description="Semantic version number" />
       <TextField name="name" label="Name" placeholder="e.g. Initial Release" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Creating...">
           Create Version
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

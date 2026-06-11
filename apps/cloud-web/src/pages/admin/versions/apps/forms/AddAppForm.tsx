@@ -1,5 +1,6 @@
 import { useCreateApp } from '@hooks/admin/apps';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
@@ -34,14 +35,14 @@ export const AddAppForm: React.FC<AddAppFormProps> = ({ onSuccess, onCancel }) =
       <TextField name="name" label="App Name" placeholder="e.g. CRM" />
       <TextField name="description" label="Description" placeholder="Optional description" />
       <TextField name="icon" label="Icon" placeholder="e.g. briefcase" description="Lucide icon name" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">
           Add App
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

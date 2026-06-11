@@ -110,6 +110,7 @@ export const OrgBusinessUnitsPage = () => {
       {/* Create dialog */}
       <Dialog
         handle={createDialog}
+        icon={Building2}
         title="Create Business Unit"
         description="Define a new business unit in your organization's hierarchy."
         className="sm:max-w-2xl"

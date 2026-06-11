@@ -6,6 +6,7 @@ import {
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { keyBy } from '@vritti/quantum-ui/lodash';
@@ -251,14 +252,14 @@ const LinkMicrofrontendForm = ({
               description="URL path for this feature"
             />
           </div>
-          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+          <DialogActions>
             <Button type="button" variant="outline" onClick={onCancel}>
               Cancel
             </Button>
             <Button type="submit" loadingText="Saving...">
               Save Configuration
             </Button>
-          </div>
+          </DialogActions>
         </Form>
       </CardContent>
     </Card>

@@ -1,5 +1,6 @@
 import { useCreatePrice } from '@hooks/admin/prices';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
@@ -50,14 +51,14 @@ export const AddPriceForm: React.FC<AddPriceFormProps> = ({ planId, onSuccess, o
       />
       <TextField name="price" label="Price" placeholder="e.g. 2999.00" />
       <CurrencySelector name="currency" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">
           Add Price
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

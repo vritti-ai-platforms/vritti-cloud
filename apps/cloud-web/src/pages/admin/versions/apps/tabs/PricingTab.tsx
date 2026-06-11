@@ -95,6 +95,7 @@ export const PricingTab = ({ appId }: { appId: string }) => {
 
       <Dialog
         handle={addPriceDialog}
+        icon={DollarSign}
         title="Add Price"
         description="Set a price for a region and cloud provider combination."
         content={(close) => <AddAppPriceForm appId={appId} onSuccess={close} onCancel={close} />}

@@ -9,7 +9,7 @@ import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import { OTPField } from '@vritti/quantum-ui/OTPField';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { zodResolver } from '@vritti/quantum-ui/zod';
-import { Eye } from 'lucide-react';
+import { Eye, KeyRound, Smartphone } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import type React from 'react';
 import { useState } from 'react';
@@ -39,14 +39,24 @@ export const TotpSetupDialog: React.FC<Props> = ({ handle }) => {
   // Show backup codes after successful verification
   if (backupCodes) {
     return (
-      <Dialog handle={handle} title="Save Your Backup Codes">
+      <Dialog
+        handle={handle}
+        icon={KeyRound}
+        title="Save Your Backup Codes"
+        description="Store these recovery codes somewhere safe."
+      >
         <BackupCodesView backupCodes={backupCodes.backupCodes} warning={backupCodes.warning} onDone={handle.close} />
       </Dialog>
     );
   }
 
   return (
-    <Dialog handle={handle} title="Set Up Authenticator App">
+    <Dialog
+      handle={handle}
+      icon={Smartphone}
+      title="Set Up Authenticator App"
+      description="Scan the QR code with your authenticator app and enter the code to verify."
+    >
       <div className="space-y-6">
         <Typography variant="body2" intent="muted">
           {totpData

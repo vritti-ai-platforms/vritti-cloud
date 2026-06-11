@@ -8,7 +8,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { useConfirm, useDialog, useSlugParams, useTheme } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { DollarSign, Layers, Link2, Link2Off, Server, ServerOff } from 'lucide-react';
+import { DollarSign, Globe, Layers, Link2, Link2Off, Server, ServerOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EditRegionForm } from './forms/EditRegionForm';
 
@@ -194,6 +194,7 @@ export const RegionViewPage = () => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={Globe}
         title="Edit Region"
         description="Update the details for this region."
         content={(close) => <EditRegionForm region={region} onSuccess={close} onCancel={close} />}

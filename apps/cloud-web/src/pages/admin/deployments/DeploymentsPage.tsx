@@ -58,6 +58,7 @@ export const DeploymentsPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={Server}
         title="Add Deployment"
         description="Configure a new deployment environment."
         content={(close) => <AddDeploymentForm onSuccess={close} onCancel={close} />}

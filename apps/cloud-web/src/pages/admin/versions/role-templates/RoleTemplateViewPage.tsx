@@ -131,6 +131,7 @@ export const RoleTemplateViewPage = () => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={Shield}
         title="Edit Role Template"
         description="Update the details for this role template."
         content={(close) => <EditRoleTemplateForm role={role} onSuccess={close} onCancel={close} />}

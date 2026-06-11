@@ -1,5 +1,6 @@
 import { useCreateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { Select } from '@vritti/quantum-ui/Select';
@@ -55,14 +56,14 @@ export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess,
         ]}
       />
       <VersionSelector name="version" label="Version" placeholder="Select version" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">
           Add Deployment
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

@@ -1,5 +1,6 @@
 import { useUpdatePlanApp } from '@hooks/admin/plan-apps';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Switch } from '@vritti/quantum-ui/Switch';
 import { FeatureSelector } from '@vritti/quantum-ui/selects/feature';
@@ -68,14 +69,14 @@ export const EditPlanAppForm: React.FC<EditPlanAppFormProps> = ({
           fieldKeys={{ valueKey: 'code', labelKey: 'name', descriptionKey: 'code' }}
         />
       )}
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">
           Save
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

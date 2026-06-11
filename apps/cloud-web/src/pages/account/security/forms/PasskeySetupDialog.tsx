@@ -6,7 +6,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import type { AxiosError } from 'axios';
-import { Fingerprint } from 'lucide-react';
+import { Fingerprint, KeyRound } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { BackupCodesView } from './BackupCodesView';
@@ -36,14 +36,24 @@ export const PasskeySetupDialog: React.FC<Props> = ({ handle }) => {
 
   if (backupCodes) {
     return (
-      <Dialog handle={handle} title="Save Your Backup Codes">
+      <Dialog
+        handle={handle}
+        icon={KeyRound}
+        title="Save Your Backup Codes"
+        description="Store these recovery codes somewhere safe."
+      >
         <BackupCodesView backupCodes={backupCodes.backupCodes} warning={backupCodes.warning} onDone={handle.close} />
       </Dialog>
     );
   }
 
   return (
-    <Dialog handle={handle} title="Set Up Passkey">
+    <Dialog
+      handle={handle}
+      icon={Fingerprint}
+      title="Set Up Passkey"
+      description="Register a passkey to sign in with your device's biometrics or security key."
+    >
       <div className="space-y-6">
         <Typography variant="body2" intent="muted">
           Use biometrics or your device PIN to sign in

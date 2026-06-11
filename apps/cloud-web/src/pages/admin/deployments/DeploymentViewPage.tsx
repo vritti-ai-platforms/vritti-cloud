@@ -14,7 +14,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
-import { Tag } from 'lucide-react';
+import { Server, Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { DeploymentPlanAssignment, DeploymentPlanAssignmentBusiness } from '@/schemas/admin/deployments';
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
@@ -124,6 +124,7 @@ export const DeploymentViewPage = () => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={Server}
         title="Edit Deployment"
         description="Update the details for this deployment."
         content={(close) => <EditDeploymentForm deployment={deployment} onSuccess={close} onCancel={close} />}

@@ -71,7 +71,13 @@ export const OverviewTab = ({ orgId, unit, allUnits }: OverviewTabProps) => {
       </Card>
 
       {/* Location card */}
-      {(unit.address || unit.city || unit.state || unit.country || unit.timezone || unit.currencyCode || unit.phone) && (
+      {(unit.address ||
+        unit.city ||
+        unit.state ||
+        unit.country ||
+        unit.timezone ||
+        unit.currencyCode ||
+        unit.phone) && (
         <Card>
           <CardHeader>
             <div className="flex items-center gap-2">
@@ -96,6 +102,7 @@ export const OverviewTab = ({ orgId, unit, allUnits }: OverviewTabProps) => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={Building2}
         title={`Edit ${unit.name}`}
         description="Update the details for this business unit."
         className="sm:max-w-2xl"

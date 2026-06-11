@@ -1,5 +1,6 @@
 import { useUpdateBusiness } from '@hooks/admin/businesses';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { AppCodeSelector } from '@vritti/quantum-ui/selects/app-code';
 import { TextField } from '@vritti/quantum-ui/TextField';
@@ -49,14 +50,14 @@ export const EditBusinessForm: React.FC<EditBusinessFormProps> = ({ business, on
         placeholder="e.g. Hospitals, clinics, and medical services"
       />
       <AppCodeSelector name="recommendedApps" label="Recommended Apps" multiple />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">
           Save Changes
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

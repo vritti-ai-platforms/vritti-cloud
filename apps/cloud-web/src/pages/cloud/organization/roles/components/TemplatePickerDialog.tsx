@@ -5,7 +5,7 @@ import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
-import { FileText, LayoutTemplate } from 'lucide-react';
+import { FileText, LayoutTemplate, Shield } from 'lucide-react';
 import { useState } from 'react';
 import type { RoleTemplate } from '@/schemas/cloud/org-roles';
 
@@ -62,6 +62,7 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
   return (
     <Dialog
       handle={handle}
+      icon={Shield}
       title="Select a Template"
       description="Choose a pre-configured role template to quickly set up permissions."
       className="sm:max-w-2xl"

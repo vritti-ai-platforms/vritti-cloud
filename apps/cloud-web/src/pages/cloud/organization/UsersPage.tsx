@@ -92,6 +92,7 @@ export const UsersPage = () => {
       {/* Invite dialog */}
       <Dialog
         handle={inviteDialog}
+        icon={Users}
         title="Invite User"
         description="Send an invitation to join this organization's portal."
         content={(close) => <InviteUserForm orgId={orgId} onSuccess={close} onCancel={close} />}
@@ -100,6 +101,7 @@ export const UsersPage = () => {
       {/* Edit user dialog */}
       <Dialog
         handle={editDialog}
+        icon={Users}
         title="Edit User"
         description="Update user profile details."
         content={(close) =>

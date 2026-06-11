@@ -1,5 +1,6 @@
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import type { DialogHandle } from '@vritti/quantum-ui/hooks';
+import { User } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { ContactChangeProgressIndicator } from '@/components/account/profile/ContactChangeProgressIndicator';
@@ -32,9 +33,10 @@ export const ContactChangeDialog: React.FC<Props> = ({ handle, contactType, prof
 
   const currentValue = contactType === 'email' ? profile.email : (profile.phone as string);
   const dialogTitle = contactType === 'email' ? 'Change Email' : 'Change Phone';
+  const dialogDescription = `Verify your identity and confirm a new ${contactType} for your account.`;
 
   return (
-    <Dialog handle={handle} title={dialogTitle}>
+    <Dialog handle={handle} icon={User} title={dialogTitle} description={dialogDescription}>
       <div className="space-y-6">
         <ContactChangeProgressIndicator contactType={contactType} currentStep={STEP_MAP[step]} progress={progress} />
 

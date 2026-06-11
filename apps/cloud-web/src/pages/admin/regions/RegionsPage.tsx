@@ -87,6 +87,7 @@ export const RegionsPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={Globe}
         title="Add Region"
         description="Enter the details for the new deployment region."
         content={(close) => <AddRegionForm onSuccess={close} onCancel={close} />}

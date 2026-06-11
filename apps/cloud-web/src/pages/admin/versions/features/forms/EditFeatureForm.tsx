@@ -1,5 +1,6 @@
 import { useUpdateFeature } from '@hooks/admin/features';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
@@ -46,19 +47,29 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
       </div>
       <TextField name="icon" label="Icon" placeholder="e.g. clipboard-list" description="Lucide icon name (web)" />
       <div className="grid grid-cols-2 gap-4">
-        <TextField name="sfSymbol" label="SF Symbol (iOS)" placeholder="e.g. cart.fill" description="Apple SF Symbol name" />
-        <TextField name="materialSymbol" label="Material Symbol (Android)" placeholder="e.g. shopping_cart" description="Google Material Symbol name" />
+        <TextField
+          name="sfSymbol"
+          label="SF Symbol (iOS)"
+          placeholder="e.g. cart.fill"
+          description="Apple SF Symbol name"
+        />
+        <TextField
+          name="materialSymbol"
+          label="Material Symbol (Android)"
+          placeholder="e.g. shopping_cart"
+          description="Google Material Symbol name"
+        />
       </div>
       <TextField name="description" label="Description" placeholder="Optional description" />
 
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">
           Save Changes
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

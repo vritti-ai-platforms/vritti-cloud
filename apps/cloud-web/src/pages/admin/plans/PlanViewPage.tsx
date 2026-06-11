@@ -5,6 +5,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
+import { CreditCard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Plan } from '@/schemas/admin/plans';
 import { EditPlanForm } from './forms/EditPlanForm';
@@ -86,6 +87,7 @@ export const PlanViewPage = () => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={CreditCard}
         title="Edit Plan"
         description="Update the details for this subscription plan."
         content={(close) => <EditPlanForm plan={plan} onSuccess={close} onCancel={close} />}

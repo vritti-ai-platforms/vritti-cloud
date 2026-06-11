@@ -98,6 +98,7 @@ export const AdminAppsPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={AppWindow}
         title="Add App"
         description="Enter the details for the new application."
         content={(close) => <AddAppForm onSuccess={close} onCancel={close} />}

@@ -5,7 +5,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
-import { Cloud, Globe, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Cloud, DollarSign, Globe, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useMemo } from 'react';
 import type { Price } from '@/schemas/admin/prices';
 import { AddPriceForm } from '../forms/AddPriceForm';
@@ -115,6 +115,7 @@ export const PricesTab = () => {
 
       <Dialog
         handle={addPriceDialog}
+        icon={DollarSign}
         title="Add Price"
         description="Set a price for a specific business, region, and cloud provider combination."
         content={(close) => <AddPriceForm planId={planId ?? ''} onSuccess={close} onCancel={close} />}

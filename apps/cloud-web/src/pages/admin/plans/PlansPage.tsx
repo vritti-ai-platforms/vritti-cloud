@@ -75,6 +75,7 @@ export const PlansPage = () => {
 
       <Dialog
         handle={addDialog}
+        icon={CreditCard}
         title="Add Plan"
         description="Enter the details for the new subscription plan."
         content={(close) => <AddPlanForm onSuccess={close} onCancel={close} />}

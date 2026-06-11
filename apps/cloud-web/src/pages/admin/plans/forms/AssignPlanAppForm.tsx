@@ -1,5 +1,6 @@
 import { useAssignPlanApp } from '@hooks/admin/plan-apps';
 import { Button } from '@vritti/quantum-ui/Button';
+import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { AppCodeSelector } from '@vritti/quantum-ui/selects/app-code';
 import { zodResolver } from '@vritti/quantum-ui/zod';
@@ -29,7 +30,7 @@ export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({ planId, on
   return (
     <Form form={form} mutation={assignMutation} transformSubmit={(data) => ({ planId, data })}>
       <AppCodeSelector name="appCode" />
-      <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-4">
+      <DialogActions>
         <Button
           type="button"
           variant="outline"
@@ -43,7 +44,7 @@ export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({ planId, on
         <Button type="submit" loadingText="Assigning...">
           Assign App
         </Button>
-      </div>
+      </DialogActions>
     </Form>
   );
 };

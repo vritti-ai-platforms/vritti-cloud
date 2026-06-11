@@ -5,6 +5,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
+import { AppWindow } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import { EditAppForm } from './forms/EditAppForm';
@@ -79,6 +80,7 @@ export const AppViewPage = () => {
       {/* Edit dialog */}
       <Dialog
         handle={editDialog}
+        icon={AppWindow}
         title="Edit App"
         description="Update the details for this application."
         content={(close) => <EditAppForm app={app} onSuccess={close} onCancel={close} />}
