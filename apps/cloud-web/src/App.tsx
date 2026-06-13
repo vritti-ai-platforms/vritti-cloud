@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ConfirmProvider } from '@vritti/quantum-ui';
+import { ConfirmHost } from '@vritti/quantum-ui/components/ConfirmHost';
 import { Toaster } from '@vritti/quantum-ui/Sonner';
 import { ThemeProvider } from '@vritti/quantum-ui/theme';
 import type React from 'react';
@@ -20,14 +20,13 @@ const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <ConfirmProvider>
-          <BrowserRouter>
-            <AuthProvider>
-              <AppRender />
-            </AuthProvider>
-          </BrowserRouter>
-          <Toaster position="bottom-right" />
-        </ConfirmProvider>
+        <ConfirmHost />
+        <BrowserRouter>
+          <AuthProvider>
+            <AppRender />
+          </AuthProvider>
+        </BrowserRouter>
+        <Toaster position="bottom-right" />
       </ThemeProvider>
     </QueryClientProvider>
   );
