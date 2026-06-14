@@ -2,7 +2,6 @@ import { useCreateBusiness } from '@hooks/admin/businesses';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
-import { AppCodeSelector } from '@vritti/quantum-ui/selects/app-code';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -17,7 +16,7 @@ interface AddBusinessFormProps {
 export const AddBusinessForm: React.FC<AddBusinessFormProps> = ({ onSuccess, onCancel }) => {
   const form = useForm<CreateBusinessData>({
     resolver: zodResolver(createBusinessSchema),
-    defaultValues: { name: '', code: '', description: '', recommendedApps: [] },
+    defaultValues: { name: '', code: '', description: '' },
   });
 
   const createMutation = useCreateBusiness({ onSuccess });
@@ -25,19 +24,12 @@ export const AddBusinessForm: React.FC<AddBusinessFormProps> = ({ onSuccess, onC
   return (
     <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Business Name" placeholder="e.g. Healthcare" />
-      <TextField
-        name="code"
-        label="Code"
-        placeholder="e.g. HLTH"
-        description="Short identifier used across the platform"
-      />
+      <TextField name="code" label="Code" placeholder="e.g. HLTH" />
       <TextField
         name="description"
         label="Description"
         placeholder="e.g. Hospitals, clinics, and medical services"
-        description="Optional"
       />
-      <AppCodeSelector name="recommendedApps" label="Recommended Apps" multiple />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

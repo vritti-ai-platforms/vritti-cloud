@@ -1,6 +1,6 @@
+import type { AuthenticationResponseJSON } from '@domain/mfa/types/webauthn.types';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsObject, IsString, IsUUID } from 'class-validator';
-import type { AuthenticationResponseJSON } from '@domain/mfa/types/webauthn.types';
 
 class AuthenticatorResponseDto {
   @ApiProperty({

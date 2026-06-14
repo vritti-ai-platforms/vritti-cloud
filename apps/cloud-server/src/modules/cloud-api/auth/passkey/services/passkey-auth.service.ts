@@ -1,12 +1,12 @@
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import type { AuthenticationResponseJSON, AuthenticatorTransportFuture } from '@domain/mfa/types/webauthn.types';
+import { SessionService } from '@domain/session/services/session.service';
+import { UserService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
 import type { FastifyRequest } from 'fastify';
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
-import type { AuthenticationResponseJSON, AuthenticatorTransportFuture } from '@domain/mfa/types/webauthn.types';
-import { UserService } from '@domain/user/services/user.service';
-import { SessionService } from '@domain/session/services/session.service';
 import { PasskeyAuthOptionsDto } from '../dto/response/passkey-auth-options.dto';
 import { PasskeyAuthResponseDto } from '../dto/response/passkey-auth-response.dto';
 

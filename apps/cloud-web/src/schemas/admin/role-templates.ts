@@ -1,7 +1,7 @@
 import type { TableResponse } from '@vritti/quantum-ui/api-response';
 import { z } from '@vritti/quantum-ui/zod';
 
-export type RoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
+type RoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
 
 export interface Role {
   id: string;

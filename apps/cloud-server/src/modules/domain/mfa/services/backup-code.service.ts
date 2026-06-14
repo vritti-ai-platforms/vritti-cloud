@@ -1,4 +1,4 @@
-import { Injectable, } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { EncryptionService } from '../../../../services';
 
 @Injectable()
@@ -36,10 +36,7 @@ export class BackupCodeService {
   }
 
   // Validates a backup code against the hashed list and returns the remaining codes
-  async verifyBackupCode(
-    code: string,
-    hashedCodes: string[],
-  ): Promise<{ valid: boolean; remainingHashes: string[] }> {
+  async verifyBackupCode(code: string, hashedCodes: string[]): Promise<{ valid: boolean; remainingHashes: string[] }> {
     for (let i = 0; i < hashedCodes.length; i++) {
       const isMatch = await this.encryptionService.compareOtp(code.toUpperCase(), hashedCodes[i]);
       if (isMatch) {

@@ -1,24 +1,28 @@
-import { Module } from '@nestjs/common';
-import { OrganizationModule } from '../cloud-api/organization/organization.module';
 import { AppCodeDomainModule } from '@domain/app-code/app-code.module';
-import { VersionDomainModule } from '@domain/version/version.module';
-import { CloudProviderDomainModule } from '@domain/cloud-provider/cloud-provider.module';
-import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
 import { BusinessDomainModule } from '@domain/business/business.module';
+import { CloudProviderDomainModule } from '@domain/cloud-provider/cloud-provider.module';
+import { CountryDomainModule } from '@domain/country/country.module';
+import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
+import { MarketDomainModule } from '@domain/market/market.module';
 import { PlanDomainModule } from '@domain/plan/plan.module';
 import { RegionDomainModule } from '@domain/region/region.module';
+import { VersionDomainModule } from '@domain/version/version.module';
+import { Module } from '@nestjs/common';
+import { OrganizationModule } from '../cloud-api/organization/organization.module';
 import { AppCodeSelectController } from './controllers/app-code-select.controller';
 import { AppSelectController } from './controllers/app-select.controller';
-import { VersionSelectController } from './controllers/version-select.controller';
+import { BusinessSelectController } from './controllers/business-select.controller';
 import { CloudProviderSelectController } from './controllers/cloud-provider-select.controller';
+import { CountrySelectController } from './controllers/country-select.controller';
 import { DeploymentSelectController } from './controllers/deployment-select.controller';
 import { FeatureSelectController } from './controllers/feature-select.controller';
-import { BusinessSelectController } from './controllers/business-select.controller';
+import { MarketSelectController } from './controllers/market-select.controller';
 import { MicrofrontendSelectController } from './controllers/microfrontend-select.controller';
 import { OrganizationSelectController } from './controllers/organization-select.controller';
 import { PlanSelectController } from './controllers/plan-select.controller';
 import { RegionSelectController } from './controllers/region-select.controller';
 import { RoleTemplateSelectController } from './controllers/role-template-select.controller';
+import { VersionSelectController } from './controllers/version-select.controller';
 
 @Module({
   imports: [
@@ -27,12 +31,16 @@ import { RoleTemplateSelectController } from './controllers/role-template-select
     CloudProviderDomainModule,
     DeploymentDomainModule,
     BusinessDomainModule,
+    CountryDomainModule,
+    MarketDomainModule,
     PlanDomainModule,
     RegionDomainModule,
     OrganizationModule,
   ],
   controllers: [
     BusinessSelectController,
+    CountrySelectController,
+    MarketSelectController,
     PlanSelectController,
     RegionSelectController,
     CloudProviderSelectController,

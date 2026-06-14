@@ -6,8 +6,6 @@ import {
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { and, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
-import { deploymentBusinessPlans } from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
 import type { DeploymentPlanAssignmentDto } from '@/modules/admin-api/deployment/dto/entity/deployment-plan-assignment.dto';
 import type { AssignDeploymentPlanDto } from '@/modules/admin-api/deployment/dto/request/assign-deployment-plan.dto';
@@ -22,7 +20,7 @@ import type {
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 import { DeploymentRepository } from '../repositories/deployment.repository';
-import { DeploymentBusinessPlanRepository } from '../repositories/deployment-business-plan.repository';
+import { DeploymentPlanRepository } from '../repositories/deployment-plan.repository';
 
 @Injectable()
 export class DeploymentService {
@@ -30,7 +28,7 @@ export class DeploymentService {
 
   constructor(
     private readonly deploymentRepository: DeploymentRepository,
-    private readonly deploymentBusinessPlanRepository: DeploymentBusinessPlanRepository,
+    private readonly deploymentPlanRepository: DeploymentPlanRepository,
   ) {}
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
@@ -117,38 +115,31 @@ export class DeploymentService {
     return { success: true, message: `Deployment "${existing.name}" deleted successfully.` };
   }
 
-  // Assigns a plan+business combination to a deployment; throws NotFoundException if deployment missing
+  // Assigns a plan to a deployment; throws NotFoundException if deployment missing
   async assignPlan(deploymentId: string, dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
     const deployment = await this.deploymentRepository.findById(deploymentId);
     if (!deployment) throw new NotFoundException('Deployment not found.');
-    await this.deploymentBusinessPlanRepository.create({
-      deploymentId,
-      planId: dto.planId,
-      businessId: dto.businessId,
-    });
-    this.logger.log(`Assigned plan ${dto.planId} + business ${dto.businessId} to deployment ${deploymentId}`);
+    const existing = await this.deploymentPlanRepository.findByComposite(deploymentId, dto.planId);
+    if (!existing) {
+      await this.deploymentPlanRepository.create({ deploymentId, planId: dto.planId });
+    }
+    this.logger.log(`Assigned plan ${dto.planId} to deployment ${deploymentId}`);
     return { success: true, message: `Plan assigned to "${deployment.name}" successfully.` };
   }
 
-  // Removes a plan+business assignment from a deployment; throws NotFoundException if deployment missing
+  // Removes a plan assignment from a deployment; throws NotFoundException if deployment missing
   async removePlan(deploymentId: string, dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
     const deployment = await this.deploymentRepository.findById(deploymentId);
     if (!deployment) throw new NotFoundException('Deployment not found.');
-    await this.deploymentBusinessPlanRepository.deleteMany(
-      and(
-        eq(deploymentBusinessPlans.deploymentId, deploymentId),
-        eq(deploymentBusinessPlans.planId, dto.planId),
-        eq(deploymentBusinessPlans.businessId, dto.businessId),
-      ) as SQL,
-    );
-    this.logger.log(`Removed plan ${dto.planId} + business ${dto.businessId} from deployment ${deploymentId}`);
+    await this.deploymentPlanRepository.removeByComposite(deploymentId, dto.planId);
+    this.logger.log(`Removed plan ${dto.planId} from deployment ${deploymentId}`);
     return { success: true, message: `Plan removed from "${deployment.name}" successfully.` };
   }
 
-  // Returns all available plans with prices and assignment status for the deployment
+  // Returns all plans grouped by business with assignment status for the deployment
   getPlanAssignments(deploymentId: string): Promise<DeploymentPlanAssignmentDto[]> {
     this.logger.log(`Fetched plan assignments for deployment: ${deploymentId}`);
-    return this.deploymentBusinessPlanRepository.findPlanAssignmentsForDeployment(deploymentId);
+    return this.deploymentPlanRepository.findPlanAssignmentsForDeployment(deploymentId);
   }
 
   // Returns active deployments for the given region, provider, and business combo

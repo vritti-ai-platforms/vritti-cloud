@@ -1,6 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-
-import type { MfaMethod } from '../../services/mfa-challenge.store';
+import { ApiProperty } from '@nestjs/swagger';
 
 class MfaVerificationUserDto {
   @ApiProperty({
@@ -28,43 +26,11 @@ class MfaVerificationUserDto {
   displayName: string;
 }
 
-export class MfaChallengeDto {
-  @ApiProperty({
-    description: 'Unique session identifier for the MFA challenge. Use this in subsequent MFA verification requests.',
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-  })
-  sessionId: string;
-
-  @ApiProperty({
-    description: 'List of MFA methods available for the user to complete verification',
-    example: ['totp', 'sms', 'passkey'],
-    enum: ['totp', 'sms', 'passkey'],
-    isArray: true,
-  })
-  availableMethods: MfaMethod[];
-
-  @ApiProperty({
-    description: 'The recommended default MFA method for verification. Priority order: TOTP > SMS > Passkey',
-    example: 'totp',
-    enum: ['totp', 'sms', 'passkey'],
-  })
-  defaultMethod: MfaMethod;
-
-  @ApiPropertyOptional({
-    description: 'Masked phone number for SMS OTP verification (only present if SMS is an available method)',
-    example: '+1******7890',
-  })
-  maskedPhone?: string;
-
-  constructor(partial: Partial<MfaChallengeDto>) {
-    Object.assign(this, partial);
-  }
-}
-
 export class MfaVerificationResponseDto {
   @ApiProperty({
     description: 'JWT access token for authenticating subsequent API requests',
-    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
+    example:
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
   })
   accessToken: string;
 
@@ -87,7 +53,8 @@ export class MfaVerificationResponseDto {
 
 export class PasskeyMfaOptionsDto<T = unknown> {
   @ApiProperty({
-    description: 'WebAuthn authentication options to be passed to the browser credentials API (navigator.credentials.get)',
+    description:
+      'WebAuthn authentication options to be passed to the browser credentials API (navigator.credentials.get)',
     example: {
       challenge: 'base64-encoded-challenge-string',
       timeout: 60000,

@@ -1,5 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { type FindForSelectConfig, PrimaryBaseRepository, PrimaryDatabaseService, type SelectQueryResult } from '@vritti/api-sdk';
+import {
+  type FindForSelectConfig,
+  PrimaryBaseRepository,
+  PrimaryDatabaseService,
+  type SelectQueryResult,
+} from '@vritti/api-sdk';
 import { eq } from '@vritti/api-sdk/drizzle-orm';
 import type { Organization } from '@/db/schema';
 import { organizationMembers, organizations, plans } from '@/db/schema';

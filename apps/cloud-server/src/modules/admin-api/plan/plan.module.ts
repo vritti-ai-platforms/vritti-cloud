@@ -1,10 +1,12 @@
-import { Module } from '@nestjs/common';
 import { PlanDomainModule } from '@domain/plan/plan.module';
-import { PlanController } from './root/controllers/plan.controller';
+import { PlanPriceDomainModule } from '@domain/plan-price/plan-price.module';
+import { Module } from '@nestjs/common';
 import { PlanAppController } from './plan-app/controllers/plan-app.controller';
+import { PlanPriceController } from './plan-price/controllers/plan-price.controller';
+import { PlanController } from './root/controllers/plan.controller';
 
 @Module({
-  imports: [PlanDomainModule],
-  controllers: [PlanController, PlanAppController],
+  imports: [PlanDomainModule, PlanPriceDomainModule],
+  controllers: [PlanController, PlanAppController, PlanPriceController],
 })
 export class AdminPlanModule {}

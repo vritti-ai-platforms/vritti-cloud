@@ -1,12 +1,12 @@
-export type AppStatus = 'included' | 'addon' | 'unavailable' | 'enabled';
+type AppStatus = 'included' | 'addon' | 'unavailable' | 'enabled';
 
-export interface OrgAppFeature {
+interface OrgAppFeature {
   code: string;
   name: string;
   type: string;
 }
 
-export interface OrgAppPrice {
+interface OrgAppPrice {
   monthlyPrice: string;
   currency: string;
 }

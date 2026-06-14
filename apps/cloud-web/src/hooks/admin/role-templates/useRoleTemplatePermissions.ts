@@ -9,13 +9,14 @@ export function roleTemplatePermissionsQueryKey(versionId: string, roleId: strin
 
 export function useRoleTemplatePermissions(
   versionId: string,
+  businessId: string,
   roleId: string,
   options?: Omit<UseQueryOptions<GroupedPermission[], AxiosError>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery<GroupedPermission[], AxiosError>({
     queryKey: roleTemplatePermissionsQueryKey(versionId, roleId),
-    queryFn: () => getRoleTemplatePermissions(versionId, roleId),
-    enabled: !!roleId,
+    queryFn: () => getRoleTemplatePermissions(versionId, businessId, roleId),
+    enabled: !!businessId && !!roleId,
     ...options,
   });
 }

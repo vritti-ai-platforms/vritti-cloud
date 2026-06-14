@@ -14,7 +14,8 @@ export class MobileVerificationStatusResponseDto {
   message: string;
 
   @ApiPropertyOptional({
-    description: 'Verification code for QR-based methods (WhatsApp/SMS). User sends this code to complete verification. Not returned for manual OTP method.',
+    description:
+      'Verification code for QR-based methods (WhatsApp/SMS). User sends this code to complete verification. Not returned for manual OTP method.',
     example: 'VRFY-A1B2C3',
   })
   verificationCode?: string;

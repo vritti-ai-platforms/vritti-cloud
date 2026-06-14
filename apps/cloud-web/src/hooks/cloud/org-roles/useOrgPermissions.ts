@@ -3,7 +3,7 @@ import type { AxiosError } from 'axios';
 import type { OrgPermissionGroup } from '@/schemas/cloud/org-roles';
 import { getOrgPermissions } from '../../../services/cloud/org-permissions.service';
 
-export const ORG_PERMISSIONS_QUERY_KEY = (orgId: string) => ['organizations', orgId, 'permissions'] as const;
+const ORG_PERMISSIONS_QUERY_KEY = (orgId: string) => ['organizations', orgId, 'permissions'] as const;
 
 type UseOrgPermissionsOptions = Omit<UseQueryOptions<OrgPermissionGroup[], AxiosError>, 'queryKey' | 'queryFn'>;
 

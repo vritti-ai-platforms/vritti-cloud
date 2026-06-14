@@ -1,3 +1,4 @@
+import { MediaService } from '@domain/media/services/media.service';
 import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserId } from '@vritti/api-sdk';
@@ -5,8 +6,8 @@ import type { FastifyReply, FastifyRequest } from 'fastify';
 import {
   ApiDeleteMedia,
   ApiDownloadMedia,
-  ApiFindById,
   ApiFindByEntity,
+  ApiFindById,
   ApiGetMediaUrl,
   ApiUploadBatch,
   ApiUploadSingle,
@@ -16,7 +17,6 @@ import { MediaQueryDto } from '../dto/request/media-query.dto';
 import { UploadQueryDto } from '../dto/request/upload-query.dto';
 import type { BatchUploadResponseDto } from '../dto/response/batch-upload-response.dto';
 import type { PresignedUrlResponseDto } from '../dto/response/presigned-url-response.dto';
-import { MediaService } from '@domain/media/services/media.service';
 
 @ApiTags('Media')
 @ApiBearerAuth()

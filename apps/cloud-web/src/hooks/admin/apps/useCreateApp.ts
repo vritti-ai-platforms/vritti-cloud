@@ -7,14 +7,14 @@ import { APPS_QUERY_KEY } from './useApps';
 
 type UseCreateAppOptions = Omit<UseMutationOptions<CreateResponse<App>, AxiosError, CreateAppData>, 'mutationFn'>;
 
-// Creates a new app and invalidates the apps list
-export function useCreateApp(versionId: string, options?: UseCreateAppOptions) {
+// Creates a new app and invalidates the apps list for the business
+export function useCreateApp(versionId: string, businessId: string, options?: UseCreateAppOptions) {
   const queryClient = useQueryClient();
   return useMutation<CreateResponse<App>, AxiosError, CreateAppData>({
     ...options,
-    mutationFn: (data) => createApp(versionId, data),
+    mutationFn: (data) => createApp(versionId, businessId, data),
     onSuccess: (result, ...args) => {
-      queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY(versionId) });
+      queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY(versionId, businessId) });
       options?.onSuccess?.(result, ...args);
     },
   });

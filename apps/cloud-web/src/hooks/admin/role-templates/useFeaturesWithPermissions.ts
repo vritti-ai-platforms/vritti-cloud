@@ -9,13 +9,14 @@ export function featuresWithPermissionsQueryKey(versionId: string, roleTemplateI
 
 export function useFeaturesWithPermissions(
   versionId: string,
+  businessId: string,
   roleTemplateId: string,
   options?: Omit<UseQueryOptions<FeatureWithPermissions[], AxiosError>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery<FeatureWithPermissions[], AxiosError>({
     queryKey: featuresWithPermissionsQueryKey(versionId, roleTemplateId),
-    queryFn: () => getFeaturesWithPermissions(versionId, roleTemplateId),
-    enabled: !!versionId && !!roleTemplateId,
+    queryFn: () => getFeaturesWithPermissions(versionId, businessId, roleTemplateId),
+    enabled: !!versionId && !!businessId && !!roleTemplateId,
     ...options,
   });
 }

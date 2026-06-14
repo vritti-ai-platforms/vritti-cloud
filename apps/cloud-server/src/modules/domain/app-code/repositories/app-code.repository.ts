@@ -19,12 +19,7 @@ export class AppCodeRepository extends PrimaryBaseRepository<typeof apps> {
 
     const conditions = [eq(apps.code, appCode)];
     if (options?.search) {
-      conditions.push(
-        or(
-          ilike(features.code, `%${options.search}%`),
-          ilike(features.name, `%${options.search}%`),
-        )!,
-      );
+      conditions.push(or(ilike(features.code, `%${options.search}%`), ilike(features.name, `%${options.search}%`))!);
     }
 
     const rows = await this.db

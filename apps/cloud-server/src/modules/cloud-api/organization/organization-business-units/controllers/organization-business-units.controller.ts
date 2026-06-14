@@ -8,8 +8,8 @@ import {
   ApiListBusinessUnits,
   ApiUpdateBusinessUnit,
 } from '../docs/organization-business-units.docs';
-import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
 import { OrganizationBusinessUnitsService } from '../services/organization-business-units.service';
+import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
 
 @ApiTags('Organization Business Units')
 @ApiBearerAuth()

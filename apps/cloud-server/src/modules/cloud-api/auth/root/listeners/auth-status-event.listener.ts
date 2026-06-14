@@ -42,7 +42,9 @@ export class AuthStatusEventListener {
   // Pushes auth-state { isAuthenticated: false } to the revoked session or all sessions
   @OnEvent(AUTH_STATUS_EVENTS.SESSION_REVOKED)
   handleSessionRevoked(event: SessionRevokedEvent) {
-    this.logger.log(`Handling SESSION_REVOKED for user ${event.userId}${event.sessionId ? `, session ${event.sessionId}` : ' (all sessions)'}`);
+    this.logger.log(
+      `Handling SESSION_REVOKED for user ${event.userId}${event.sessionId ? `, session ${event.sessionId}` : ' (all sessions)'}`,
+    );
 
     const message: MessageEvent = {
       type: 'auth-state',

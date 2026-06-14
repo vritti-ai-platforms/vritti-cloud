@@ -12,13 +12,13 @@ type UseUpdateRoleTemplateOptions = Omit<
   'mutationFn'
 >;
 
-export function useUpdateRoleTemplate(versionId: string, options?: UseUpdateRoleTemplateOptions) {
+export function useUpdateRoleTemplate(versionId: string, businessId: string, options?: UseUpdateRoleTemplateOptions) {
   const queryClient = useQueryClient();
   return useMutation<SuccessResponse, AxiosError, UpdateRoleTemplateVars>({
     ...options,
     mutationFn: (vars) => updateRoleTemplate(versionId, vars),
     onSuccess: (result, vars, ...args) => {
-      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId) });
+      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId, businessId) });
       queryClient.invalidateQueries({ queryKey: roleTemplateQueryKey(versionId, vars.id) });
       options?.onSuccess?.(result, vars, ...args);
     },

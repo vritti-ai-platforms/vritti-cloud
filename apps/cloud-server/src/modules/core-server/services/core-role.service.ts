@@ -46,7 +46,13 @@ export class CoreRoleService {
     roleId: string,
     data: Record<string, unknown>,
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.patch<SuccessResponseDto>(url, webhookSecret, `/organizations/webhook/roles/${roleId}`, data, { orgId });
+    const result = await this.http.patch<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      `/organizations/webhook/roles/${roleId}`,
+      data,
+      { orgId },
+    );
     this.logger.log(`Updated role ${roleId} in core`);
     return result;
   }
@@ -63,7 +69,12 @@ export class CoreRoleService {
 
   // Deletes a role in core
   async deleteOrgRole(url: string, webhookSecret: string, orgId: string, roleId: string): Promise<SuccessResponseDto> {
-    const result = await this.http.delete<SuccessResponseDto>(url, webhookSecret, `/organizations/webhook/roles/${roleId}`, { orgId });
+    const result = await this.http.delete<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      `/organizations/webhook/roles/${roleId}`,
+      { orgId },
+    );
     this.logger.log(`Deleted role ${roleId} in core`);
     return result;
   }

@@ -41,7 +41,11 @@ export class MfaVerificationController {
     @Req() request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto> {
     this.logger.log(`POST /auth/mfa/verify-totp - sessionId: ${dto.sessionId}`);
-    const { refreshToken, ...response } = await this.mfaVerificationService.verifyTotp(dto.sessionId, dto.code, request);
+    const { refreshToken, ...response } = await this.mfaVerificationService.verifyTotp(
+      dto.sessionId,
+      dto.code,
+      request,
+    );
 
     // Set refresh token in httpOnly cookie
     reply.setCookie(cookieName, refreshToken, cookieOptions);
@@ -72,7 +76,11 @@ export class MfaVerificationController {
     @Req() request: FastifyRequest,
   ): Promise<MfaVerificationResponseDto> {
     this.logger.log(`POST /auth/mfa/sms/verify - sessionId: ${dto.sessionId}`);
-    const { refreshToken, ...response } = await this.mfaVerificationService.verifySmsOtp(dto.sessionId, dto.code, request);
+    const { refreshToken, ...response } = await this.mfaVerificationService.verifySmsOtp(
+      dto.sessionId,
+      dto.code,
+      request,
+    );
 
     // Set refresh token in httpOnly cookie
     reply.setCookie(cookieName, refreshToken, cookieOptions);

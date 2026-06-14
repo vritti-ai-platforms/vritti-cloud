@@ -127,8 +127,7 @@ export function ApiVerifyNewTarget() {
   return applyDecorators(
     ApiOperation({
       summary: 'Verify new target OTP and complete change',
-      description:
-        'Verifies the OTP sent to the new email or phone and updates the user contact information.',
+      description: 'Verifies the OTP sent to the new email or phone and updates the user contact information.',
     }),
     ApiBody({ type: VerifyNewTargetDto }),
     ApiResponse({ status: 200, description: 'Contact changed successfully', type: SuccessResponseDto }),

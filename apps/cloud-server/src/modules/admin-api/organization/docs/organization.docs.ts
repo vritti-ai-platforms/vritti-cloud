@@ -6,7 +6,11 @@ import { OrganizationTableResponseDto } from '../dto/response/organizations-resp
 export function ApiFindForTableOrganizations() {
   return applyDecorators(
     ApiOperation({ summary: 'List organizations for data table (server-stored state)' }),
-    ApiResponse({ status: 200, description: 'Organizations retrieved successfully.', type: OrganizationTableResponseDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Organizations retrieved successfully.',
+      type: OrganizationTableResponseDto,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }

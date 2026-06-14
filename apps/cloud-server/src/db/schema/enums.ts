@@ -42,7 +42,6 @@ export const signupMethodEnum = cloudSchema.enum('SignupMethod', ['email', 'oaut
 // Session enums
 export const sessionTypeEnum = cloudSchema.enum('SessionType', ['ONBOARDING', 'CLOUD', 'COMPANY', 'RESET', 'ADMIN']);
 
-// TypeScript type exports for use in DTOs and services
 export type DatabaseType = (typeof databaseTypeEnum.enumValues)[number];
 export type TenantStatus = (typeof tenantStatusEnum.enumValues)[number];
 export type AccountStatus = (typeof accountStatusEnum.enumValues)[number];
@@ -204,4 +203,22 @@ export const RoleScopeValues = {
   GLOBAL: 'GLOBAL' as const,
   SUBTREE: 'SUBTREE' as const,
   SINGLE_BU: 'SINGLE_BU' as const,
+};
+
+// Billing period — how often a plan or app price recurs
+export const billingPeriodEnum = cloudSchema.enum('BillingPeriod', ['monthly', 'annual', 'triennial']);
+export type BillingPeriod = (typeof billingPeriodEnum.enumValues)[number];
+export const BillingPeriodValues = {
+  monthly: 'monthly' as const,
+  annual: 'annual' as const,
+  triennial: 'triennial' as const,
+};
+
+// Tax regime — the indirect tax system a country operates under
+export const taxRegimeEnum = cloudSchema.enum('TaxRegime', ['GST', 'VAT', 'NONE']);
+export type TaxRegime = (typeof taxRegimeEnum.enumValues)[number];
+export const TaxRegimeValues = {
+  GST: 'GST' as const,
+  VAT: 'VAT' as const,
+  NONE: 'NONE' as const,
 };

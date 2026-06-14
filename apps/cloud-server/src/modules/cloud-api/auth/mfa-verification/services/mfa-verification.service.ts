@@ -1,3 +1,11 @@
+import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
+import { TotpService } from '@domain/mfa/services/totp.service';
+import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import type { AuthenticationResponseJSON } from '@domain/mfa/types/webauthn.types';
+import { SessionService } from '@domain/session/services/session.service';
+import { UserService } from '@domain/user/services/user.service';
+import { VerificationService } from '@domain/verification/services/verification.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
 import type { FastifyRequest } from 'fastify';
@@ -9,14 +17,6 @@ import {
   type User,
   VerificationChannelValues,
 } from '@/db/schema';
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
-import { TotpService } from '@domain/mfa/services/totp.service';
-import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
-import type { AuthenticationResponseJSON } from '@domain/mfa/types/webauthn.types';
-import { UserService } from '@domain/user/services/user.service';
-import { VerificationService } from '@domain/verification/services/verification.service';
-import { SessionService } from '@domain/session/services/session.service';
 import { MfaVerificationResponseDto, PasskeyMfaOptionsDto, SmsOtpSentResponseDto } from '../dto';
 import { type MfaChallenge, MfaChallengeStore, type MfaMethod } from './mfa-challenge.store';
 
@@ -37,10 +37,7 @@ export class MfaVerificationService {
   ) {}
 
   // Creates an MFA challenge if the user has MFA enabled, returning null otherwise
-  async createMfaChallenge(
-    user: User,
-    options: { subdomain?: string } = {},
-  ): Promise<MfaChallenge | null> {
+  async createMfaChallenge(user: User, options: { subdomain?: string } = {}): Promise<MfaChallenge | null> {
     // Get all active MFA records for the user
     const mfaRecords = await this.mfaRepo.findAllActiveByUserId(user.id);
 
@@ -89,7 +86,11 @@ export class MfaVerificationService {
   }
 
   // Verifies a TOTP code or backup code against the user's MFA configuration
-  async verifyTotp(sessionId: string, code: string, request: FastifyRequest): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
+  async verifyTotp(
+    sessionId: string,
+    code: string,
+    request: FastifyRequest,
+  ): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
     if (!challenge.availableMethods.includes('totp')) {
@@ -175,7 +176,11 @@ export class MfaVerificationService {
   }
 
   // Verifies the SMS OTP code against the stored hash in the MFA challenge
-  async verifySmsOtp(sessionId: string, code: string, request: FastifyRequest): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
+  async verifySmsOtp(
+    sessionId: string,
+    code: string,
+    request: FastifyRequest,
+  ): Promise<MfaVerificationResponseDto & { refreshToken: string }> {
     const challenge = this.getMfaChallengeOrThrow(sessionId);
 
     if (!challenge.availableMethods.includes('sms')) {

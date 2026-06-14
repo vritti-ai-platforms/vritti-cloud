@@ -1,10 +1,10 @@
-import { numeric, timestamp, uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
-import { cloudSchema } from './cloud-schema';
+import { bigint, timestamp, uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { apps } from './app';
-import { cloudProviders } from './cloud-provider';
-import { regions } from './region';
+import { cloudSchema } from './cloud-schema';
+import { billingPeriodEnum } from './enums';
+import { markets } from './market';
 
-// Addon pricing per region + provider — no row means addon is not available in that region/provider
+// Addon pricing per market + billing period — amount in the market currency's minor units
 export const appPrices = cloudSchema.table(
   'app_prices',
   {
@@ -12,18 +12,15 @@ export const appPrices = cloudSchema.table(
     appId: uuid('app_id')
       .notNull()
       .references(() => apps.id, { onDelete: 'cascade' }),
-    regionId: uuid('region_id')
+    marketId: uuid('market_id')
       .notNull()
-      .references(() => regions.id, { onDelete: 'cascade' }),
-    cloudProviderId: uuid('cloud_provider_id')
-      .notNull()
-      .references(() => cloudProviders.id, { onDelete: 'cascade' }),
-    monthlyPrice: numeric('monthly_price', { precision: 10, scale: 2 }).notNull(),
-    currency: varchar('currency', { length: 3 }).notNull().default('INR'),
+      .references(() => markets.id, { onDelete: 'cascade' }),
+    billingPeriod: billingPeriodEnum('billing_period').notNull(),
+    amount: bigint('amount', { mode: 'number' }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },
-  (table) => [uniqueIndex('app_price_unique_idx').on(table.appId, table.regionId, table.cloudProviderId)],
+  (table) => [uniqueIndex('app_price_unique_idx').on(table.appId, table.marketId, table.billingPeriod)],
 );
 
 export type AppPrice = typeof appPrices.$inferSelect;

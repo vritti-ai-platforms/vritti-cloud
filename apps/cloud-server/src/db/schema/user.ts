@@ -32,6 +32,5 @@ export const users = cloudSchema.table('users', {
   phoneVerifiedAt: timestamp('phone_verified_at', { withTimezone: true }),
 });
 
-// Type exports
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;

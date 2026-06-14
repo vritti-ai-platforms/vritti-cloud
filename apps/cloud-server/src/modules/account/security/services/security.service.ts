@@ -1,9 +1,9 @@
 import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
 import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
 import { TotpService } from '@domain/mfa/services/totp.service';
 import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
 import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@domain/mfa/types/webauthn.types';
+import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
 import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
@@ -15,10 +15,10 @@ import {
   SuccessResponseDto,
   UnauthorizedException,
 } from '@vritti/api-sdk';
+import type { OAuthProviderType } from '@/db/schema';
 import { EncryptionService } from '@/services';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
 import { AUTH_STATUS_EVENTS, SessionRevokedEvent } from '../../../cloud-api/auth/root/events/auth-status.events';
-import type { OAuthProviderType } from '@/db/schema';
 import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
 import { LinkedAccountDto, LinkedAccountsResponseDto } from '../dto/response/linked-account-response.dto';
 import { MfaStatusResponseDto, PasskeyInfoDto } from '../dto/response/mfa-status-response.dto';
@@ -458,9 +458,7 @@ export class SecurityService {
     const userDto = await this.userService.findById(userId);
     const user = await this.userService.findByEmail(userDto.email);
 
-    const accounts = providers.map(
-      (p) => new LinkedAccountDto({ provider: p.provider, createdAt: p.createdAt }),
-    );
+    const accounts = providers.map((p) => new LinkedAccountDto({ provider: p.provider, createdAt: p.createdAt }));
 
     // Can disconnect if user has a password OR has more than one linked provider
     const canDisconnect = !!user?.passwordHash || providers.length > 1;

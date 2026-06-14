@@ -1,7 +1,7 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Separator } from '@vritti/quantum-ui/Separator';
-import { buildSlug, parseSlug } from '@vritti/quantum-ui/slug';
+import { parseSlug } from '@vritti/quantum-ui/slug';
 import { AppWindow, Check, ChevronsUpDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -60,7 +60,7 @@ export const AppSwitcher = ({ versionSlug, currentAppId, currentAppName }: AppSw
             <Button
               variant="ghost"
               className="w-full justify-start h-auto px-2 py-1.5 text-sm font-normal"
-              onClick={() => navigate(`/versions/${versionSlug}/apps`)}
+              onClick={() => navigate(`/versions/${versionSlug}`)}
             >
               All Apps
             </Button>
@@ -69,7 +69,7 @@ export const AppSwitcher = ({ versionSlug, currentAppId, currentAppName }: AppSw
       }
       onOptionSelect={(option) => {
         if (option) {
-          navigate(`/versions/${versionSlug}/apps/app-${buildSlug(String(option.label), String(option.value))}`);
+          navigate(`/versions/${versionSlug}`);
         }
       }}
     />

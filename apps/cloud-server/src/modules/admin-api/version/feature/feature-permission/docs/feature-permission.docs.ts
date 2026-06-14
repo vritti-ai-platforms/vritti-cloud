@@ -9,7 +9,11 @@ export function ApiGetFeaturePermissions() {
   return applyDecorators(
     ApiOperation({ summary: 'Get permission types for a feature' }),
     ApiParam({ name: 'featureId', description: 'Feature UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Permission types retrieved successfully.', type: FeaturePermissionTypesResponseDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Permission types retrieved successfully.',
+      type: FeaturePermissionTypesResponseDto,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Feature not found.' }),
   );

@@ -1,8 +1,8 @@
+import { RoleTemplateService } from '@domain/version/business/role-template/root/services/role-template.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { RoleTemplateService } from '@domain/version/role-template/root/services/role-template.service';
 import { RoleTemplateSelectQueryDto } from '../dto/role-template-select-query.dto';
 
 @ApiTags('Select')

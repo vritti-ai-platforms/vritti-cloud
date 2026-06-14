@@ -15,9 +15,7 @@ import { EmailVerificationService } from '../services/email-verification.service
 export class EmailVerificationController {
   private readonly logger = new Logger(EmailVerificationController.name);
 
-  constructor(
-    private readonly emailVerificationService: EmailVerificationService,
-  ) {}
+  constructor(private readonly emailVerificationService: EmailVerificationService) {}
 
   // Creates a verification record and sends the initial email OTP
   @Post('send-otp')

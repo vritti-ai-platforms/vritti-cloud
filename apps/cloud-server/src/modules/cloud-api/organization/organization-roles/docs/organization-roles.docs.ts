@@ -9,7 +9,11 @@ export function ApiGetOrgRoleTemplates() {
       description: 'Returns role templates from the app version snapshot for the organization deployment.',
     }),
     ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
-    ApiResponse({ status: 200, description: 'Role templates retrieved successfully.', type: RoleTemplateListResponseDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Role templates retrieved successfully.',
+      type: RoleTemplateListResponseDto,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Organization, deployment, or snapshot not found.' }),
   );

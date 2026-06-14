@@ -6,6 +6,7 @@ import type {
   OrgListItem,
   PaginatedResponse,
   SubdomainAvailability,
+  ValidateTaxIdResponse,
 } from '@/schemas/cloud/organizations';
 
 // Fetches paginated organizations the current user belongs to
@@ -22,16 +23,16 @@ export function createOrganization(data: FormData): Promise<OrgListItem> {
     .then((r) => r.data);
 }
 
+// Validates a tax id and derives the matching country + market; throws AxiosError if invalid
+export function validateTaxId(data: { taxId: string; countryId?: string }): Promise<ValidateTaxIdResponse> {
+  return axios.post<ValidateTaxIdResponse>('cloud-api/organizations/validate-tax-id', data).then((r) => r.data);
+}
+
 // Checks if a subdomain is available; throws AxiosError (409) if already taken
 export function checkSubdomain(subdomain: string): Promise<SubdomainAvailability> {
   return axios
     .get<SubdomainAvailability>('cloud-api/organizations/check-subdomain', { params: { subdomain } })
     .then((r) => r.data);
-}
-
-// Fetches all nexus portal users for an organization
-export function getOrgUsers(orgId: string): Promise<NexusUser[]> {
-  return axios.get<NexusUser[]>(`cloud-api/organizations/${orgId}/users`).then((r) => r.data);
 }
 
 // Fetches org users with server-side table state (sort, filter, search, pagination)

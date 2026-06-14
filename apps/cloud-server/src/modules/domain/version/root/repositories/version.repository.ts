@@ -6,6 +6,7 @@ import type { Version } from '@/db/schema';
 import {
   appFeatures,
   apps,
+  businesses,
   featureMicrofrontends,
   featurePermissions,
   features,
@@ -13,6 +14,7 @@ import {
   roleTemplateApps,
   roleTemplateFeaturePermissions,
   roleTemplates,
+  versionBusinesses,
   versions,
 } from '@/db/schema';
 
@@ -51,6 +53,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       roleRows,
       rolePermRows,
       roleAppRows,
+      businessRows,
     ] = await Promise.all([
       this.db.select().from(features).where(eq(features.versionId, versionId)),
       this.db.select().from(featurePermissions).where(eq(featurePermissions.versionId, versionId)),
@@ -64,12 +67,18 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
         .from(roleTemplateFeaturePermissions)
         .where(eq(roleTemplateFeaturePermissions.versionId, versionId)),
       this.db.select().from(roleTemplateApps).where(eq(roleTemplateApps.versionId, versionId)),
+      this.db
+        .select({ id: businesses.id, code: businesses.code })
+        .from(versionBusinesses)
+        .innerJoin(businesses, eq(businesses.id, versionBusinesses.businessId))
+        .where(eq(versionBusinesses.versionId, versionId)),
     ]);
 
     // Index lookup tables
     const mfById = _.keyBy(mfRows, 'id');
     const featureById = _.keyBy(featureRows, 'id');
     const appById = _.keyBy(appRows, 'id');
+    const businessCodeById = _.mapValues(_.keyBy(businessRows, 'id'), (b) => b.code);
 
     // Group junction/relation rows by parent ID
     const featureMfByFeatureId = _.groupBy(featureMfRows, 'featureId');
@@ -110,17 +119,25 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       };
     });
 
-    // Build apps snapshot
-    const snapshotApps = appRows.map((a) => ({
-      code: a.code,
-      name: a.name,
-      icon: a.icon,
-      sortOrder: a.sortOrder,
-      features: (appFeaturesByAppId[a.id] ?? []).map((af) => featureById[af.featureId]?.code).filter(Boolean),
-    }));
+    // Build apps snapshot grouped by business code: { pharmacy: [apps...], salon: [apps...] }
+    const snapshotApps: Record<string, Array<Record<string, unknown>>> = {};
+    for (const a of appRows) {
+      const businessCode = businessCodeById[a.businessId];
+      if (!businessCode) continue;
+      (snapshotApps[businessCode] ??= []).push({
+        code: a.code,
+        name: a.name,
+        icon: a.icon,
+        sortOrder: a.sortOrder,
+        features: (appFeaturesByAppId[a.id] ?? []).map((af) => featureById[af.featureId]?.code).filter(Boolean),
+      });
+    }
 
-    // Build role templates snapshot
-    const snapshotRoleTemplates = roleRows.map((r) => {
+    // Build role templates snapshot grouped by business code
+    const snapshotRoleTemplates: Record<string, Array<Record<string, unknown>>> = {};
+    for (const r of roleRows) {
+      const businessCode = businessCodeById[r.businessId];
+      if (!businessCode) continue;
       const appCodes = (roleAppsByRoleId[r.id] ?? []).map((ra) => appById[ra.appId]?.code).filter(Boolean);
       const featurePerms: Record<string, string[]> = {};
       for (const rp of rolePermsByRoleId[r.id] ?? []) {
@@ -130,8 +147,13 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
           featurePerms[code].push(rp.type);
         }
       }
-      return { name: r.name, scope: r.scope, apps: appCodes, features: featurePerms };
-    });
+      (snapshotRoleTemplates[businessCode] ??= []).push({
+        name: r.name,
+        scope: r.scope,
+        apps: appCodes,
+        features: featurePerms,
+      });
+    }
 
     return { features: snapshotFeatures, apps: snapshotApps, roleTemplates: snapshotRoleTemplates };
   }

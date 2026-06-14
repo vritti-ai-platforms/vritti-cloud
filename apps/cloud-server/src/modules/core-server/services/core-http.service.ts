@@ -44,18 +44,33 @@ export class CoreHttpService {
     path: string,
     options?: { orgId?: string; params?: Record<string, unknown> },
   ): Promise<T> {
-    const response = await axios.get<T>(`${url}${path}`, this.config(webhookSecret, options?.orgId, { params: options?.params }));
+    const response = await axios.get<T>(
+      `${url}${path}`,
+      this.config(webhookSecret, options?.orgId, { params: options?.params }),
+    );
     return response.data;
   }
 
   // Sends a POST request and returns the response body
-  async post<T>(url: string, webhookSecret: string, path: string, data?: unknown, options?: { orgId?: string }): Promise<T> {
+  async post<T>(
+    url: string,
+    webhookSecret: string,
+    path: string,
+    data?: unknown,
+    options?: { orgId?: string },
+  ): Promise<T> {
     const response = await axios.post<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId));
     return response.data;
   }
 
   // Sends a PATCH request and returns the response body
-  async patch<T>(url: string, webhookSecret: string, path: string, data?: unknown, options?: { orgId?: string }): Promise<T> {
+  async patch<T>(
+    url: string,
+    webhookSecret: string,
+    path: string,
+    data?: unknown,
+    options?: { orgId?: string },
+  ): Promise<T> {
     const response = await axios.patch<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId));
     return response.data;
   }

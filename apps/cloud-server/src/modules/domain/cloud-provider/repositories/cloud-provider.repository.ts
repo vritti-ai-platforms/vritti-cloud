@@ -25,7 +25,11 @@ export class CloudProviderRepository extends PrimaryBaseRepository<typeof cloudP
     offset?: number,
   ): Promise<{ rows: Array<CloudProvider & { regionCount: number; deploymentCount: number }>; total: number }> {
     const [countResult, rows] = await Promise.all([
-      this.db.select({ total: count() }).from(cloudProviders).where(where).then((r) => r[0]?.total ?? 0),
+      this.db
+        .select({ total: count() })
+        .from(cloudProviders)
+        .where(where)
+        .then((r) => r[0]?.total ?? 0),
       this.db
         .select({
           id: cloudProviders.id,
@@ -47,7 +51,10 @@ export class CloudProviderRepository extends PrimaryBaseRepository<typeof cloudP
         .limit(limit ?? 20)
         .offset(offset ?? 0),
     ]);
-    return { rows: rows as Array<CloudProvider & { regionCount: number; deploymentCount: number }>, total: Number(countResult) };
+    return {
+      rows: rows as Array<CloudProvider & { regionCount: number; deploymentCount: number }>,
+      total: Number(countResult),
+    };
   }
 
   // Finds a provider by its unique identifier
@@ -60,7 +67,9 @@ export class CloudProviderRepository extends PrimaryBaseRepository<typeof cloudP
   }
 
   // Returns a single provider with region/deployment counts, or undefined if not found
-  async findOneWithCounts(id: string): Promise<(CloudProvider & { regionCount: number; deploymentCount: number }) | undefined> {
+  async findOneWithCounts(
+    id: string,
+  ): Promise<(CloudProvider & { regionCount: number; deploymentCount: number }) | undefined> {
     const [row] = await this.db
       .select({
         id: cloudProviders.id,

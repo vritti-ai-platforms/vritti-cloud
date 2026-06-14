@@ -3,11 +3,19 @@ import { VersionDomainModule } from '@domain/version/version.module';
 import { Module } from '@nestjs/common';
 import { CoreServerModule } from '@/modules/core-server/core-server.module';
 // App Feature
-import { AppFeatureController } from './app/app-feature/controllers/app-feature.controller';
-// App Price
-import { AppPriceController } from './app/app-price/controllers/app-price.controller';
+import { AppFeatureController } from './business/app/app-feature/controllers/app-feature.controller';
 // App
-import { AppController } from './app/root/controllers/app.controller';
+import { AppController } from './business/app/root/controllers/app.controller';
+// Role Template App
+import { RoleTemplateAppController } from './business/role-template/role-template-app/controllers/role-template-app.controller';
+// Role Template Permission
+import { RoleTemplatePermissionController } from './business/role-template/role-template-permission/controllers/role-template-permission.controller';
+// Business Role Template (business-scoped list + create)
+import { BusinessRoleTemplateController } from './business/role-template/root/controllers/business-role-template.controller';
+// Role Template (version-scoped detail/update/delete)
+import { RoleTemplateController } from './business/role-template/root/controllers/role-template.controller';
+// Businesses in a version
+import { VersionBusinessController } from './business/root/controllers/version-business.controller';
 // Feature Microfrontend
 import { FeatureMicrofrontendController } from './feature/feature-microfrontend/controllers/feature-microfrontend.controller';
 // Feature Permission
@@ -16,12 +24,6 @@ import { FeaturePermissionController } from './feature/feature-permission/contro
 import { FeatureController } from './feature/root/controllers/feature.controller';
 // Microfrontend
 import { MicrofrontendController } from './microfrontend/controllers/microfrontend.controller';
-// Role Template App
-import { RoleTemplateAppController } from './role-template/role-template-app/controllers/role-template-app.controller';
-// Role Template Permission
-import { RoleTemplatePermissionController } from './role-template/role-template-permission/controllers/role-template-permission.controller';
-// Role Template
-import { RoleTemplateController } from './role-template/root/controllers/role-template.controller';
 // Version (root)
 import { VersionController } from './root/controllers/version.controller';
 
@@ -29,14 +31,15 @@ import { VersionController } from './root/controllers/version.controller';
   imports: [VersionDomainModule, CoreServerModule, DeploymentDomainModule],
   controllers: [
     VersionController,
+    VersionBusinessController,
     MicrofrontendController,
     FeatureController,
     FeaturePermissionController,
     FeatureMicrofrontendController,
     AppController,
     AppFeatureController,
-    AppPriceController,
     RoleTemplateController,
+    BusinessRoleTemplateController,
     RoleTemplateAppController,
     RoleTemplatePermissionController,
   ],

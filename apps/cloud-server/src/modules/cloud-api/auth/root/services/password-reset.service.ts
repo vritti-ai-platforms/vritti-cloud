@@ -1,12 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { BadRequestException } from '@vritti/api-sdk';
-import type { FastifyRequest } from 'fastify';
-import { OnboardingStepValues, SessionTypeValues, VerificationChannelValues } from '@/db/schema';
-import { EmailService } from '@vritti/api-sdk';
-import { EncryptionService } from '../../../../../services';
+import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { VerificationService } from '@domain/verification/services/verification.service';
-import { SessionService } from '@domain/session/services/session.service';
+import { Injectable, Logger } from '@nestjs/common';
+import { BadRequestException, EmailService } from '@vritti/api-sdk';
+import type { FastifyRequest } from 'fastify';
+import { OnboardingStepValues, SessionTypeValues, VerificationChannelValues } from '@/db/schema';
+import { EncryptionService } from '../../../../../services';
 
 @Injectable()
 export class PasswordResetService {
@@ -118,10 +117,7 @@ export class PasswordResetService {
     sessionType: string;
   }> {
     // Check verification is complete and within the reset window
-    const verification = await this.verificationService.findByUserIdAndChannel(
-      userId,
-      VerificationChannelValues.EMAIL,
-    );
+    const verification = await this.verificationService.findByUserIdAndChannel(userId, VerificationChannelValues.EMAIL);
 
     if (!verification?.isVerified || !verification.verifiedAt) {
       throw new BadRequestException({
@@ -147,9 +143,7 @@ export class PasswordResetService {
     // Determine the correct session type based on onboarding status
     const user = await this.userService.findById(userId);
     const targetSessionType =
-      user.onboardingStep === OnboardingStepValues.COMPLETE
-        ? SessionTypeValues.CLOUD
-        : SessionTypeValues.ONBOARDING;
+      user.onboardingStep === OnboardingStepValues.COMPLETE ? SessionTypeValues.CLOUD : SessionTypeValues.ONBOARDING;
 
     // Invalidate ALL sessions for security (kills any compromised sessions + RESET session)
     await this.sessionService.invalidateAllUserSessions(userId);

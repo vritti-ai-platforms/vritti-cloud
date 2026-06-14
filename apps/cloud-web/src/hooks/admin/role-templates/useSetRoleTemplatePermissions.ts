@@ -7,7 +7,7 @@ import { roleTemplateQueryKey } from './useRoleTemplate';
 import { roleTemplatePermissionsQueryKey } from './useRoleTemplatePermissions';
 import { ROLE_TEMPLATES_QUERY_KEY } from './useRoleTemplates';
 
-type Vars = { versionId: string; roleId: string; data: SetPermissionsData };
+type Vars = { versionId: string; businessId: string; roleId: string; data: SetPermissionsData };
 type UseSetRoleTemplatePermissionsOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, Vars>, 'mutationFn'>;
 
 export function useSetRoleTemplatePermissions(options?: UseSetRoleTemplatePermissionsOptions) {
@@ -18,7 +18,7 @@ export function useSetRoleTemplatePermissions(options?: UseSetRoleTemplatePermis
     onSuccess: (result, vars, ...args) => {
       queryClient.invalidateQueries({ queryKey: roleTemplatePermissionsQueryKey(vars.versionId, vars.roleId) });
       queryClient.invalidateQueries({ queryKey: roleTemplateQueryKey(vars.versionId, vars.roleId) });
-      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(vars.versionId) });
+      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(vars.versionId, vars.businessId) });
       options?.onSuccess?.(result, vars, ...args);
     },
   });

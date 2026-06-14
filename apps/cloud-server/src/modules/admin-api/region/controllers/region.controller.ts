@@ -1,3 +1,4 @@
+import { RegionService } from '@domain/region/services/region.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
@@ -15,7 +16,6 @@ import { RegionDto } from '../dto/entity/region.dto';
 import { CreateRegionDto } from '../dto/request/create-region.dto';
 import { UpdateRegionDto } from '../dto/request/update-region.dto';
 import { RegionTableResponseDto } from '../dto/response/regions-response.dto';
-import { RegionService } from '@domain/region/services/region.service';
 
 @ApiTags('Admin - Regions')
 @ApiBearerAuth()

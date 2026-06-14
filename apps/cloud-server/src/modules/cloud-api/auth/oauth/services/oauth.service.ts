@@ -1,3 +1,6 @@
+import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
+import { SessionService } from '@domain/session/services/session.service';
+import { UserRepository } from '@domain/user/repositories/user.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
@@ -11,8 +14,6 @@ import {
   SignupMethodValues,
   type User,
 } from '@/db/schema';
-import { UserRepository } from '@domain/user/repositories/user.repository';
-import { SessionService } from '@domain/session/services/session.service';
 import type { IOAuthProvider } from '../interfaces/oauth-provider.interface';
 import type { OAuthUserProfile } from '../interfaces/oauth-user-profile.interface';
 import { AppleOAuthProvider } from '../providers/apple-oauth.provider';
@@ -20,7 +21,6 @@ import { FacebookOAuthProvider } from '../providers/facebook-oauth.provider';
 import { GoogleOAuthProvider } from '../providers/google-oauth.provider';
 import { MicrosoftOAuthProvider } from '../providers/microsoft-oauth.provider';
 import { TwitterOAuthProvider } from '../providers/twitter-oauth.provider';
-import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
 import { OAuthCryptoService } from './oauth-crypto.service';
 import { OAuthStateService } from './oauth-state.service';
 
@@ -180,7 +180,14 @@ export class OAuthService {
   ): Promise<{ redirectUrl: string; refreshToken: string }> {
     this.logger.log(`Resuming onboarding for incomplete OAuth user: ${profile.email} (${existingUser.id})`);
     await this.sessionService.deleteOnboardingSessions(existingUser.id);
-    return this.linkProviderAndCreateSession(existingUser, profile, tokens, SessionTypeValues.ONBOARDING, request, true);
+    return this.linkProviderAndCreateSession(
+      existingUser,
+      profile,
+      tokens,
+      SessionTypeValues.ONBOARDING,
+      request,
+      true,
+    );
   }
 
   // Handles existing user with completed onboarding

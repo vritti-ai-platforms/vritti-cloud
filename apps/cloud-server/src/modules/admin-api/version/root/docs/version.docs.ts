@@ -1,10 +1,9 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { VersionDto } from '../dto/entity/version.dto';
 import { CreateVersionDto } from '../dto/request/create-version.dto';
 import { PushArtifactsDto } from '../dto/request/push-artifacts.dto';
-import { VersionSelectResponseDto } from '../dto/response/version-select-response.dto';
 import { VersionTableResponseDto } from '../dto/response/version-table-response.dto';
 
 // Swagger docs for creating a version
@@ -24,22 +23,6 @@ export function ApiFindForTableVersions() {
   return applyDecorators(
     ApiOperation({ summary: 'List versions for data table (server-stored state)' }),
     ApiResponse({ status: 200, description: 'Versions retrieved successfully.', type: VersionTableResponseDto }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-// Swagger docs for fetching version select options
-export function ApiGetVersionSelect() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get versions for select component' }),
-    ApiQuery({ name: 'search', required: false }),
-    ApiQuery({ name: 'limit', required: false, type: Number }),
-    ApiQuery({ name: 'offset', required: false, type: Number }),
-    ApiResponse({
-      status: 200,
-      description: 'Version options retrieved.',
-      type: VersionSelectResponseDto,
-    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }

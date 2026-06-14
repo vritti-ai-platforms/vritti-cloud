@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { asc, count, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
+import { asc, count, countDistinct, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { Plan } from '@/db/schema';
-import { deploymentBusinessPlans, organizations, plans, prices } from '@/db/schema';
+import { businesses, deploymentPlans, organizations, planPrices, plans } from '@/db/schema';
 
-export type PlanRow = Plan & { priceCount: number };
+export type PlanRow = Plan & { priceCount: number; businessName: string; marketCount: number };
 
 @Injectable()
 export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
@@ -22,18 +22,45 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
     return this.model.findFirst({ where: { code } });
   }
 
-  // Returns deployment and organization reference counts for a given plan
-  async getReferenceCountsWithoutPrices(planId: string): Promise<{ deploymentCount: number; orgCount: number }> {
-    const [deploymentRows, orgRows] = await Promise.all([
+  // Returns price, deployment, and organization reference counts plus display meta for a given plan
+  async getReferenceCounts(
+    planId: string,
+  ): Promise<{
+    priceCount: number;
+    deploymentCount: number;
+    orgCount: number;
+    businessName: string;
+    marketCount: number;
+  }> {
+    const [priceRows, deploymentRows, orgRows, businessRows, marketRows] = await Promise.all([
       this.db
-        .select({ n: count(deploymentBusinessPlans.planId) })
-        .from(deploymentBusinessPlans)
-        .where(eq(deploymentBusinessPlans.planId, planId)),
-      this.db.select({ n: count(organizations.id) }).from(organizations).where(eq(organizations.planId, planId)),
+        .select({ n: count(planPrices.id) })
+        .from(planPrices)
+        .where(eq(planPrices.planId, planId)),
+      this.db
+        .select({ n: count(deploymentPlans.planId) })
+        .from(deploymentPlans)
+        .where(eq(deploymentPlans.planId, planId)),
+      this.db
+        .select({ n: count(organizations.id) })
+        .from(organizations)
+        .where(eq(organizations.planId, planId)),
+      this.db
+        .select({ name: businesses.name })
+        .from(plans)
+        .innerJoin(businesses, eq(businesses.id, plans.businessId))
+        .where(eq(plans.id, planId)),
+      this.db
+        .select({ n: countDistinct(planPrices.marketId) })
+        .from(planPrices)
+        .where(eq(planPrices.planId, planId)),
     ]);
     return {
+      priceCount: Number(priceRows[0]?.n ?? 0),
       deploymentCount: Number(deploymentRows[0]?.n ?? 0),
       orgCount: Number(orgRows[0]?.n ?? 0),
+      businessName: businessRows[0]?.name ?? '',
+      marketCount: Number(marketRows[0]?.n ?? 0),
     };
   }
 
@@ -49,28 +76,32 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
       this.db
         .select({ total: count() })
         .from(plans)
-        .leftJoin(prices, eq(prices.planId, plans.id))
-        .groupBy(plans.id)
         .where(where)
-        .then((r) => r.length),
+        .then((r) => r[0]?.total ?? 0),
       this.db
         .select({
           id: plans.id,
+          businessId: plans.businessId,
           name: plans.name,
           code: plans.code,
           content: plans.content,
+          maxBusinessUnits: plans.maxBusinessUnits,
+          usdAnchor: plans.usdAnchor,
           createdAt: plans.createdAt,
           updatedAt: plans.updatedAt,
-          priceCount: count(prices.id),
+          businessName: businesses.name,
+          priceCount: count(planPrices.id),
+          marketCount: countDistinct(planPrices.marketId),
         })
         .from(plans)
-        .leftJoin(prices, eq(prices.planId, plans.id))
-        .groupBy(plans.id)
+        .innerJoin(businesses, eq(businesses.id, plans.businessId))
+        .leftJoin(planPrices, eq(planPrices.planId, plans.id))
+        .groupBy(plans.id, businesses.name)
         .where(where)
         .orderBy(...(orderBy && orderBy.length > 0 ? orderBy : [asc(plans.name)]))
         .limit(limit)
         .offset(offset),
     ]);
-    return { rows: rows as PlanRow[], total: countResult };
+    return { rows: rows as PlanRow[], total: Number(countResult) };
   }
 }

@@ -1,3 +1,5 @@
+import { UserService } from '@domain/user/services/user.service';
+import { VerificationService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger, type MessageEvent } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -6,8 +8,6 @@ import { concat, finalize, Observable, of } from 'rxjs';
 import { type Verification } from '@/db/schema';
 import { type VerificationChannel, VerificationChannelValues } from '@/db/schema/enums';
 import { SmsService } from '@/services';
-import { UserService } from '@domain/user/services/user.service';
-import { VerificationService } from '@domain/verification/services/verification.service';
 import { InitiateMobileVerificationDto } from '../dto/request/initiate-mobile-verification.dto';
 import { MobileVerificationStatusResponseDto } from '../dto/response/mobile-verification-status-response.dto';
 import { MobileVerificationEvent, VERIFICATION_EVENTS } from '../events/verification.events';

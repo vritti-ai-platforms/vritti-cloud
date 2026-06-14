@@ -11,11 +11,7 @@ export class PlanAppTableRowDto {
   sortOrder: number;
 
   // Maps a raw row to a PlanAppTableRowDto
-  static from(row: {
-    appCode: string;
-    includedFeatureCodes: string[] | null;
-    sortOrder: number;
-  }): PlanAppTableRowDto {
+  static from(row: { appCode: string; includedFeatureCodes: string[] | null; sortOrder: number }): PlanAppTableRowDto {
     const dto = new PlanAppTableRowDto();
     dto.appCode = row.appCode;
     dto.includedFeatureCodes = row.includedFeatureCodes;

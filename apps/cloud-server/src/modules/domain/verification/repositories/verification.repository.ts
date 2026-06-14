@@ -65,10 +65,7 @@ export class VerificationRepository extends PrimaryBaseRepository<typeof verific
       condition = and(condition, ne(verifications.userId, excludeUserId));
     }
 
-    const count = await this.db
-      .select({ count: sql<number>`count(*)` })
-      .from(verifications)
-      .where(condition);
+    const count = await this.db.select({ count: sql<number>`count(*)` }).from(verifications).where(condition);
 
     return Number(count[0]?.count) > 0;
   }

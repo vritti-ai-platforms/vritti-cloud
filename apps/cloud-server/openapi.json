@@ -3142,6 +3142,49 @@
         ]
       }
     },
+    "/cloud-api/organizations/validate-tax-id": {
+      "post": {
+        "operationId": "OrganizationController_validateTaxId",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateTaxIdDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Tax id validated.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TaxIdValidationResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid tax id or unmapped country."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Validate a tax id and derive its country + market",
+        "tags": [
+          "Organizations"
+        ]
+      }
+    },
     "/cloud-api/organizations": {
       "post": {
         "description": "Creates an organization and adds the authenticated user as Owner. Accepts multipart/form-data with optional file upload for organization logo.",
@@ -5452,6 +5495,203 @@
         ]
       }
     },
+    "/admin-api/versions/{versionId}/businesses/table": {
+      "get": {
+        "operationId": "VersionBusinessController_findForTable",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "Version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Businesses retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionBusinessTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List businesses assigned to a version for the data table (server-stored state)",
+        "tags": [
+          "Admin - Businesses"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/businesses": {
+      "get": {
+        "operationId": "VersionBusinessController_findForVersion",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "Version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Businesses retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/VersionBusinessDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List businesses assigned to a version with per-business app counts",
+        "tags": [
+          "Admin - Businesses"
+        ]
+      },
+      "post": {
+        "operationId": "VersionBusinessController_assign",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "Version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignVersionBusinessDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Business assigned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VersionBusinessDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Version or business not found."
+          },
+          "409": {
+            "description": "Business already assigned to this version."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a business to a version",
+        "tags": [
+          "Admin - Businesses"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/businesses/{businessId}": {
+      "delete": {
+        "operationId": "VersionBusinessController_unassign",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "Version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "description": "Business UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440001",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Business unassigned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Business not assigned to this version."
+          },
+          "409": {
+            "description": "Business has apps or role templates in this version."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Unassign a business from a version",
+        "tags": [
+          "Admin - Businesses"
+        ]
+      }
+    },
     "/admin-api/versions/{versionId}/microfrontends": {
       "post": {
         "operationId": "MicrofrontendController_create",
@@ -6284,7 +6524,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps": {
       "post": {
         "operationId": "AppController_create",
         "parameters": [],
@@ -6330,10 +6570,27 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/table": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps/table": {
       "get": {
         "operationId": "AppController_findForTable",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Apps retrieved successfully.",
@@ -6360,7 +6617,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/import": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps/import": {
       "post": {
         "operationId": "AppController_importApps",
         "parameters": [
@@ -6369,6 +6626,14 @@
             "required": true,
             "in": "path",
             "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
             "schema": {
               "type": "string"
             }
@@ -6396,7 +6661,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/export/{format}": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps/export/{format}": {
       "get": {
         "operationId": "AppController_exportApps",
         "parameters": [
@@ -6405,6 +6670,14 @@
             "required": true,
             "in": "path",
             "description": "App version UUID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
             "schema": {
               "type": "string"
             }
@@ -6429,7 +6702,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/{id}": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps/{id}": {
       "get": {
         "operationId": "AppController_findById",
         "parameters": [
@@ -6576,7 +6849,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/{appId}/features/table": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps/{appId}/features/table": {
       "get": {
         "operationId": "AppFeatureController_findForTable",
         "parameters": [
@@ -6628,7 +6901,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/{appId}/features": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps/{appId}/features": {
       "get": {
         "operationId": "AppFeatureController_findByApp",
         "parameters": [
@@ -6665,7 +6938,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/apps/{appId}/features/{featureId}": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/apps/{appId}/features/{featureId}": {
       "post": {
         "operationId": "AppFeatureController_assignFeature",
         "parameters": [
@@ -6717,6 +6990,61 @@
           }
         ],
         "summary": "Assign a feature to an app",
+        "tags": [
+          "Admin - App Features"
+        ]
+      },
+      "put": {
+        "operationId": "AppFeatureController_toggleFeature",
+        "parameters": [
+          {
+            "name": "appId",
+            "required": true,
+            "in": "path",
+            "description": "App UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "featureId",
+            "required": true,
+            "in": "path",
+            "description": "Feature UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Feature assignment toggled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Feature has no permissions defined."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "App or feature not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Toggle a feature assignment for an app (assign if absent, remove if present)",
         "tags": [
           "Admin - App Features"
         ]
@@ -6774,303 +7102,6 @@
         "summary": "Remove a feature from an app",
         "tags": [
           "Admin - App Features"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/apps/{appId}/prices": {
-      "get": {
-        "operationId": "AppPriceController_findByApp",
-        "parameters": [
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "App UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Prices retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/AppPriceDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "App not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List addon prices for an app",
-        "tags": [
-          "Admin - App Prices"
-        ]
-      },
-      "post": {
-        "operationId": "AppPriceController_create",
-        "parameters": [
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "App UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAppPriceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "App price created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/AppPriceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "App not found."
-          },
-          "409": {
-            "description": "Price for this region and provider already exists."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create addon price for region + provider",
-        "tags": [
-          "Admin - App Prices"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/apps/{appId}/prices/{priceId}": {
-      "patch": {
-        "operationId": "AppPriceController_update",
-        "parameters": [
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "App UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "priceId",
-            "required": true,
-            "in": "path",
-            "description": "Price UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateAppPriceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "App price updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "App price not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update an addon price",
-        "tags": [
-          "Admin - App Prices"
-        ]
-      },
-      "delete": {
-        "operationId": "AppPriceController_delete",
-        "parameters": [
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "App UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "priceId",
-            "required": true,
-            "in": "path",
-            "description": "Price UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "App price deleted successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "App price not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete an addon price",
-        "tags": [
-          "Admin - App Prices"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/role-templates": {
-      "post": {
-        "operationId": "RoleTemplateController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateRoleTemplateDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Role template created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoleTemplateDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a new role template",
-        "tags": [
-          "Admin - Role Templates"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/role-templates/table": {
-      "get": {
-        "operationId": "RoleTemplateController_findForTable",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Role templates retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/RoleTemplateTableResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List role templates for data table (server-stored state)",
-        "tags": [
-          "Admin - Role Templates"
         ]
       }
     },
@@ -7218,7 +7249,98 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/apps/table": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates": {
+      "post": {
+        "operationId": "BusinessRoleTemplateController_create",
+        "parameters": [
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRoleTemplateDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role template created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleTemplateDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new role template",
+        "tags": [
+          "Admin - Role Templates"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/table": {
+      "get": {
+        "operationId": "BusinessRoleTemplateController_findForTable",
+        "parameters": [
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role templates retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RoleTemplateTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List role templates for data table (server-stored state)",
+        "tags": [
+          "Admin - Role Templates"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/{roleTemplateId}/apps/table": {
       "get": {
         "operationId": "RoleTemplateAppController_findForTable",
         "parameters": [
@@ -7267,7 +7389,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/apps/{appId}": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/{roleTemplateId}/apps/{appId}": {
       "post": {
         "operationId": "RoleTemplateAppController_addApp",
         "parameters": [
@@ -7384,7 +7506,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/permissions": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/{roleTemplateId}/permissions": {
       "get": {
         "operationId": "RoleTemplatePermissionController_findByRoleTemplate",
         "parameters": [
@@ -7476,7 +7598,7 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/role-templates/{roleTemplateId}/permissions/features": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/{roleTemplateId}/permissions/features": {
       "get": {
         "operationId": "RoleTemplatePermissionController_findAvailableFeatures",
         "parameters": [
@@ -7998,6 +8120,160 @@
         "summary": "Remove an app from a plan",
         "tags": [
           "Admin - Plan Apps"
+        ]
+      }
+    },
+    "/admin-api/plans/{planId}/prices": {
+      "get": {
+        "operationId": "PlanPriceController_findByPlan",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plan prices retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanPriceDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List prices for a plan across markets and billing periods",
+        "tags": [
+          "Admin - Plan Prices"
+        ]
+      },
+      "post": {
+        "operationId": "PlanPriceController_upsert",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPlanPriceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Plan price saved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanPriceDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create or update a plan price for a market + billing period",
+        "tags": [
+          "Admin - Plan Prices"
+        ]
+      },
+      "delete": {
+        "operationId": "PlanPriceController_remove",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "Plan UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpsertPlanPriceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Plan price deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Plan price not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a plan price for a market + billing period",
+        "tags": [
+          "Admin - Plan Prices"
         ]
       }
     },
@@ -9045,6 +9321,611 @@
         ]
       }
     },
+    "/admin-api/countries": {
+      "post": {
+        "operationId": "CountryController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Country created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "409": {
+            "description": "Country with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new country",
+        "tags": [
+          "Admin - Countries"
+        ]
+      }
+    },
+    "/admin-api/countries/table": {
+      "get": {
+        "operationId": "CountryController_findForTable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Countries retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List countries for data table (server-stored state)",
+        "tags": [
+          "Admin - Countries"
+        ]
+      }
+    },
+    "/admin-api/countries/{id}": {
+      "get": {
+        "operationId": "CountryController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Country UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Country retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CountryDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Country not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a country by ID",
+        "tags": [
+          "Admin - Countries"
+        ]
+      },
+      "patch": {
+        "operationId": "CountryController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Country UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Country updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Country not found."
+          },
+          "409": {
+            "description": "Country with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a country",
+        "tags": [
+          "Admin - Countries"
+        ]
+      },
+      "delete": {
+        "operationId": "CountryController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Country UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Country deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Country not found."
+          },
+          "409": {
+            "description": "Country is assigned to one or more markets."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a country",
+        "tags": [
+          "Admin - Countries"
+        ]
+      }
+    },
+    "/admin-api/markets": {
+      "post": {
+        "operationId": "MarketController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMarketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Market created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "409": {
+            "description": "Market with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new market",
+        "tags": [
+          "Admin - Markets"
+        ]
+      }
+    },
+    "/admin-api/markets/table": {
+      "get": {
+        "operationId": "MarketController_findForTable",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Markets retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketTableResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List markets for data table (server-stored state)",
+        "tags": [
+          "Admin - Markets"
+        ]
+      }
+    },
+    "/admin-api/markets/{id}": {
+      "get": {
+        "operationId": "MarketController_findById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Market UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Market retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Market not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get a market by ID",
+        "tags": [
+          "Admin - Markets"
+        ]
+      },
+      "patch": {
+        "operationId": "MarketController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Market UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateMarketDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Market updated successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Market not found."
+          },
+          "409": {
+            "description": "Market with this code already exists."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a market",
+        "tags": [
+          "Admin - Markets"
+        ]
+      },
+      "delete": {
+        "operationId": "MarketController_delete",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Market UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Market deleted successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Market not found."
+          },
+          "409": {
+            "description": "Market is in use and cannot be deleted."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a market",
+        "tags": [
+          "Admin - Markets"
+        ]
+      }
+    },
+    "/admin-api/markets/{marketId}/countries": {
+      "get": {
+        "operationId": "MarketCountryController_findByMarket",
+        "parameters": [
+          {
+            "name": "marketId",
+            "required": true,
+            "in": "path",
+            "description": "Market UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Market countries retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MarketCountryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Market not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List countries assigned to a market",
+        "tags": [
+          "Admin - Market Countries"
+        ]
+      },
+      "post": {
+        "operationId": "MarketCountryController_assign",
+        "parameters": [
+          {
+            "name": "marketId",
+            "required": true,
+            "in": "path",
+            "description": "Market UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignMarketCountryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Country assigned to market successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MarketCountryDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Market not found."
+          },
+          "409": {
+            "description": "Country already assigned to a market."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a country to a market",
+        "tags": [
+          "Admin - Market Countries"
+        ]
+      }
+    },
+    "/admin-api/markets/{marketId}/countries/{countryId}": {
+      "delete": {
+        "operationId": "MarketCountryController_remove",
+        "parameters": [
+          {
+            "name": "marketId",
+            "required": true,
+            "in": "path",
+            "description": "Market UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "countryId",
+            "required": true,
+            "in": "path",
+            "description": "Country UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Country removed from market successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Market or country assignment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a country from a market",
+        "tags": [
+          "Admin - Market Countries"
+        ]
+      }
+    },
     "/admin-api/organizations/table": {
       "get": {
         "operationId": "OrganizationController_findForTable",
@@ -9185,192 +10066,6 @@
         ],
         "tags": [
           "Admin - Organizations"
-        ]
-      }
-    },
-    "/admin-api/prices": {
-      "post": {
-        "operationId": "PriceController_create",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreatePriceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Price created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PriceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed or invalid reference ID."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "409": {
-            "description": "Price for this combination already exists."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a new price entry",
-        "tags": [
-          "Admin - Prices"
-        ]
-      }
-    },
-    "/admin-api/prices/plan/{planId}/table": {
-      "get": {
-        "operationId": "PriceController_findForTable",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "description": "Plan UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Prices retrieved.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PricesTableResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List prices for a plan in data table format",
-        "tags": [
-          "Admin - Prices"
-        ]
-      }
-    },
-    "/admin-api/prices/{id}": {
-      "patch": {
-        "operationId": "PriceController_update",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Price UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePriceDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Price updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PriceDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed or invalid reference ID."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Price not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update a price",
-        "tags": [
-          "Admin - Prices"
-        ]
-      },
-      "delete": {
-        "operationId": "PriceController_delete",
-        "parameters": [
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Price UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Price deleted successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PriceDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Price not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Delete a price",
-        "tags": [
-          "Admin - Prices"
         ]
       }
     },
@@ -9527,6 +10222,335 @@
                 "asc",
                 "desc"
               ]
+            }
+          },
+          {
+            "name": "notInVersion",
+            "required": false,
+            "in": "query",
+            "description": "Exclude businesses already assigned to this version",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Select"
+        ]
+      }
+    },
+    "/select-api/countries": {
+      "get": {
+        "operationId": "CountrySelectController_findForSelect",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "additionalKeys",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated column names to include in option.additionals",
+            "schema": {
+              "example": "locationName,availableQuantity",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderByKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name to sort options by",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderDirection",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction for options",
+            "schema": {
+              "default": "asc",
+              "example": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter by active status",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Select"
+        ]
+      }
+    },
+    "/select-api/markets": {
+      "get": {
+        "operationId": "MarketSelectController_findForSelect",
+        "parameters": [
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term to filter by label",
+            "schema": {
+              "example": "united",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Maximum number of results",
+            "schema": {
+              "default": 20,
+              "example": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Number of results to skip",
+            "schema": {
+              "default": 0,
+              "example": 0,
+              "type": "number"
+            }
+          },
+          {
+            "name": "values",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated values to fetch specific options",
+            "schema": {
+              "example": "1,2,3",
+              "type": "string"
+            }
+          },
+          {
+            "name": "excludeIds",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated IDs to exclude from results (already selected)",
+            "schema": {
+              "example": "5,10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "valueKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option value",
+            "schema": {
+              "default": "id",
+              "example": "id",
+              "type": "string"
+            }
+          },
+          {
+            "name": "labelKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option label",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "descriptionKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for option description",
+            "schema": {
+              "example": "description",
+              "type": "string"
+            }
+          },
+          {
+            "name": "additionalKeys",
+            "required": false,
+            "in": "query",
+            "description": "Comma-separated column names to include in option.additionals",
+            "schema": {
+              "example": "locationName,availableQuantity",
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupIdKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name for group ID",
+            "schema": {
+              "example": "regionId",
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderByKey",
+            "required": false,
+            "in": "query",
+            "description": "Column name to sort options by",
+            "schema": {
+              "default": "name",
+              "example": "name",
+              "type": "string"
+            }
+          },
+          {
+            "name": "orderDirection",
+            "required": false,
+            "in": "query",
+            "description": "Sort direction for options",
+            "schema": {
+              "default": "asc",
+              "example": "asc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter by active status",
+            "schema": {
+              "example": true,
+              "type": "boolean"
             }
           }
         ],
@@ -12926,6 +13950,52 @@
           "available"
         ]
       },
+      "ValidateTaxIdDto": {
+        "type": "object",
+        "properties": {
+          "countryId": {
+            "type": "string",
+            "description": "Country UUID the tax id belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Tax identifier (GSTIN for India, TRN for UAE)",
+            "example": "29ABCDE1234F1Z5"
+          }
+        },
+        "required": [
+          "countryId",
+          "taxId"
+        ]
+      },
+      "TaxIdValidationResponseDto": {
+        "type": "object",
+        "properties": {
+          "valid": {
+            "type": "boolean",
+            "example": true
+          },
+          "countryId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "countryCode": {
+            "type": "string",
+            "example": "IN"
+          },
+          "marketId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          }
+        },
+        "required": [
+          "valid",
+          "countryId",
+          "countryCode",
+          "marketId"
+        ]
+      },
       "CreateOrganizationResponseDto": {
         "type": "object",
         "properties": {
@@ -13986,6 +15056,79 @@
           "artifacts"
         ]
       },
+      "VersionBusinessDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Pharmacy"
+          },
+          "code": {
+            "type": "string",
+            "example": "pharmacy"
+          },
+          "description": {
+            "type": "object",
+            "example": "Pharmacy and medical retail",
+            "nullable": true
+          },
+          "appCount": {
+            "type": "number",
+            "example": 4,
+            "description": "Number of apps defined for this business in the version"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "code",
+          "appCount"
+        ]
+      },
+      "VersionBusinessTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VersionBusinessDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "AssignVersionBusinessDto": {
+        "type": "object",
+        "properties": {
+          "businessId": {
+            "type": "string",
+            "description": "Business (vertical) UUID to assign to the version",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          }
+        },
+        "required": [
+          "businessId"
+        ]
+      },
       "CreateMicrofrontendDto": {
         "type": "object",
         "properties": {
@@ -14527,6 +15670,11 @@
             "description": "App version UUID this app belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
+          "businessId": {
+            "type": "string",
+            "description": "Business (vertical) UUID this app belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
+          },
           "code": {
             "type": "string",
             "description": "Unique app code (lowercase, alphanumeric with hyphens)",
@@ -14555,6 +15703,7 @@
         },
         "required": [
           "versionId",
+          "businessId",
           "code",
           "name",
           "icon"
@@ -14570,6 +15719,10 @@
           "versionId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "businessId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
           },
           "code": {
             "type": "string",
@@ -14622,6 +15775,7 @@
         "required": [
           "id",
           "versionId",
+          "businessId",
           "code",
           "name",
           "icon",
@@ -14667,6 +15821,11 @@
             "type": "string",
             "description": "App version UUID this app belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "businessId": {
+            "type": "string",
+            "description": "Business (vertical) UUID this app belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
           },
           "code": {
             "type": "string",
@@ -14754,131 +15913,6 @@
           "state"
         ]
       },
-      "AppPriceDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "appId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "regionId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "regionName": {
-            "type": "string",
-            "example": "Mumbai"
-          },
-          "cloudProviderId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "providerName": {
-            "type": "string",
-            "example": "AWS"
-          },
-          "monthlyPrice": {
-            "type": "string",
-            "example": "499.00"
-          },
-          "currency": {
-            "type": "string",
-            "example": "INR"
-          }
-        },
-        "required": [
-          "id",
-          "appId",
-          "regionId",
-          "regionName",
-          "cloudProviderId",
-          "providerName",
-          "monthlyPrice",
-          "currency"
-        ]
-      },
-      "CreateAppPriceDto": {
-        "type": "object",
-        "properties": {
-          "regionId": {
-            "type": "string",
-            "description": "Region UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "cloudProviderId": {
-            "type": "string",
-            "description": "Cloud provider UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "monthlyPrice": {
-            "type": "number",
-            "description": "Monthly addon price",
-            "example": 499
-          },
-          "currency": {
-            "type": "string",
-            "description": "ISO 4217 currency code",
-            "example": "INR"
-          }
-        },
-        "required": [
-          "regionId",
-          "cloudProviderId",
-          "monthlyPrice"
-        ]
-      },
-      "CreateRoleTemplateDto": {
-        "type": "object",
-        "properties": {
-          "versionId": {
-            "type": "string",
-            "description": "App version UUID this role template belongs to",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name of the role template",
-            "example": "Chef"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional description of the role template",
-            "example": "Kitchen staff responsible for food preparation"
-          },
-          "scope": {
-            "type": "string",
-            "enum": [
-              "GLOBAL",
-              "SUBTREE",
-              "SINGLE_BU"
-            ],
-            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
-          },
-          "businessId": {
-            "type": "string",
-            "description": "Business this role template belongs to",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "appIds": {
-            "description": "App IDs this role template covers",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "versionId",
-          "name",
-          "scope",
-          "businessId",
-          "appIds"
-        ]
-      },
       "RoleTemplateDto": {
         "type": "object",
         "properties": {
@@ -14924,6 +15958,84 @@
           "scope",
           "businessId",
           "createdAt"
+        ]
+      },
+      "UpdateRoleTemplateDto": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "description": "App version UUID this role template belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the role template",
+            "example": "Chef"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the role template",
+            "example": "Kitchen staff responsible for food preparation"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "SUBTREE",
+              "SINGLE_BU"
+            ],
+            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
+          },
+          "appIds": {
+            "description": "App IDs this role template covers",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateRoleTemplateDto": {
+        "type": "object",
+        "properties": {
+          "versionId": {
+            "type": "string",
+            "description": "App version UUID this role template belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the role template",
+            "example": "Chef"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the role template",
+            "example": "Kitchen staff responsible for food preparation"
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "GLOBAL",
+              "SUBTREE",
+              "SINGLE_BU"
+            ],
+            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
+          },
+          "appIds": {
+            "description": "App IDs this role template covers",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "versionId",
+          "name",
+          "scope",
+          "appIds"
         ]
       },
       "RoleTemplateTableRowDto": {
@@ -15009,47 +16121,6 @@
           "count",
           "state"
         ]
-      },
-      "UpdateRoleTemplateDto": {
-        "type": "object",
-        "properties": {
-          "versionId": {
-            "type": "string",
-            "description": "App version UUID this role template belongs to",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name of the role template",
-            "example": "Chef"
-          },
-          "description": {
-            "type": "string",
-            "description": "Optional description of the role template",
-            "example": "Kitchen staff responsible for food preparation"
-          },
-          "scope": {
-            "type": "string",
-            "enum": [
-              "GLOBAL",
-              "SUBTREE",
-              "SINGLE_BU"
-            ],
-            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
-          },
-          "businessId": {
-            "type": "string",
-            "description": "Business this role template belongs to",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "appIds": {
-            "description": "App IDs this role template covers",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
       },
       "RoleTemplateAppTableRowDto": {
         "type": "object",
@@ -15156,6 +16227,11 @@
       "CreatePlanDto": {
         "type": "object",
         "properties": {
+          "businessId": {
+            "type": "string",
+            "description": "Vertical (business) UUID this plan belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
           "name": {
             "type": "string",
             "description": "Display name of the plan",
@@ -15166,6 +16242,16 @@
             "description": "Unique code identifier for the plan",
             "example": "pro"
           },
+          "maxBusinessUnits": {
+            "type": "number",
+            "description": "Maximum business units allowed on this plan",
+            "example": 50
+          },
+          "usdAnchor": {
+            "type": "number",
+            "description": "USD anchor amount in minor units, reference only",
+            "example": 9900
+          },
           "content": {
             "type": "string",
             "description": "Rich content stored as Lexical JSON",
@@ -15173,6 +16259,7 @@
           }
         },
         "required": [
+          "businessId",
           "name",
           "code"
         ]
@@ -15184,6 +16271,14 @@
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
+          "businessId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "businessName": {
+            "type": "string",
+            "example": "Pharmacy"
+          },
           "name": {
             "type": "string",
             "example": "Pro"
@@ -15191,6 +16286,17 @@
           "code": {
             "type": "string",
             "example": "pro"
+          },
+          "maxBusinessUnits": {
+            "type": "object",
+            "example": 50,
+            "nullable": true
+          },
+          "usdAnchor": {
+            "type": "object",
+            "example": 9900,
+            "description": "USD anchor in minor units, reference only",
+            "nullable": true
           },
           "createdAt": {
             "type": "string",
@@ -15205,11 +16311,7 @@
             "type": "number",
             "example": 2
           },
-          "regionCount": {
-            "type": "number",
-            "example": 3
-          },
-          "providerCount": {
+          "marketCount": {
             "type": "number",
             "example": 2
           },
@@ -15228,12 +16330,13 @@
         },
         "required": [
           "id",
+          "businessId",
+          "businessName",
           "name",
           "code",
           "createdAt",
           "priceCount",
-          "regionCount",
-          "providerCount",
+          "marketCount",
           "orgCount",
           "canDelete"
         ]
@@ -15268,6 +16371,11 @@
       "UpdatePlanDto": {
         "type": "object",
         "properties": {
+          "businessId": {
+            "type": "string",
+            "description": "Vertical (business) UUID this plan belongs to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
           "name": {
             "type": "string",
             "description": "Display name of the plan",
@@ -15277,6 +16385,16 @@
             "type": "string",
             "description": "Unique code identifier for the plan",
             "example": "pro"
+          },
+          "maxBusinessUnits": {
+            "type": "number",
+            "description": "Maximum business units allowed on this plan",
+            "example": 50
+          },
+          "usdAnchor": {
+            "type": "number",
+            "description": "USD anchor amount in minor units, reference only",
+            "example": 9900
           },
           "content": {
             "type": "string",
@@ -15430,6 +16548,89 @@
           }
         }
       },
+      "PlanPriceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "planId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "marketId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "marketName": {
+            "type": "string",
+            "example": "India"
+          },
+          "marketCode": {
+            "type": "string",
+            "example": "IN"
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "INR"
+          },
+          "billingPeriod": {
+            "type": "string",
+            "example": "monthly",
+            "enum": [
+              "monthly",
+              "annual",
+              "triennial"
+            ]
+          },
+          "amount": {
+            "type": "number",
+            "example": 99900,
+            "description": "Amount in the market currency minor units"
+          }
+        },
+        "required": [
+          "id",
+          "planId",
+          "marketId",
+          "marketName",
+          "marketCode",
+          "currencyCode",
+          "billingPeriod",
+          "amount"
+        ]
+      },
+      "UpsertPlanPriceDto": {
+        "type": "object",
+        "properties": {
+          "marketId": {
+            "type": "string",
+            "description": "Market UUID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "billingPeriod": {
+            "type": "string",
+            "description": "Billing period",
+            "enum": [
+              "monthly",
+              "annual",
+              "triennial"
+            ],
+            "example": "monthly"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Amount in the market currency minor units",
+            "example": 99900
+          }
+        },
+        "required": [
+          "marketId",
+          "billingPeriod",
+          "amount"
+        ]
+      },
       "CreateDeploymentDto": {
         "type": "object",
         "properties": {
@@ -15556,16 +16757,10 @@
             "type": "string",
             "description": "Plan UUID",
             "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "businessId": {
-            "type": "string",
-            "description": "Business UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
           }
         },
         "required": [
-          "planId",
-          "businessId"
+          "planId"
         ]
       },
       "CreateRegionDto": {
@@ -15941,15 +17136,6 @@
             "type": "string",
             "description": "Optional description of the business",
             "example": "Healthcare and medical services"
-          },
-          "recommendedApps": {
-            "example": [
-              "order-management"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
@@ -15986,20 +17172,10 @@
             "format": "date-time",
             "nullable": true
           },
-          "recommendedApps": {
-            "example": [
-              "order-management",
-              "kitchen-operations"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
           "canDelete": {
             "type": "boolean",
             "example": true,
-            "description": "False when the business is referenced by organizations, prices, or deployment plans"
+            "description": "False when the business is referenced by organizations, plans, apps, or role templates"
           }
         },
         "required": [
@@ -16007,7 +17183,6 @@
           "name",
           "code",
           "createdAt",
-          "recommendedApps",
           "canDelete"
         ]
       },
@@ -16055,17 +17230,390 @@
             "type": "string",
             "description": "Optional description of the business",
             "example": "Healthcare and medical services"
-          },
-          "recommendedApps": {
-            "example": [
-              "order-management"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
+      },
+      "CreateCountryDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code",
+            "example": "IN"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the country",
+            "example": "India"
+          },
+          "defaultCurrency": {
+            "type": "string",
+            "description": "ISO 4217 default currency code",
+            "example": "INR"
+          },
+          "taxRegime": {
+            "type": "string",
+            "description": "Tax regime of the country",
+            "enum": [
+              "GST",
+              "VAT",
+              "NONE"
+            ],
+            "example": "GST"
+          },
+          "taxIdLabel": {
+            "type": "string",
+            "description": "Label for the tax identifier",
+            "example": "GSTIN"
+          },
+          "taxIdPattern": {
+            "type": "string",
+            "description": "Validation pattern for the tax identifier"
+          },
+          "callingCode": {
+            "type": "string",
+            "description": "International calling code",
+            "example": "+91"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the country is active",
+            "default": true
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "defaultCurrency",
+          "taxRegime"
+        ]
+      },
+      "CountryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "IN"
+          },
+          "name": {
+            "type": "string",
+            "example": "India"
+          },
+          "defaultCurrency": {
+            "type": "string",
+            "example": "INR"
+          },
+          "taxRegime": {
+            "type": "string",
+            "example": "GST",
+            "enum": [
+              "GST",
+              "VAT",
+              "NONE"
+            ]
+          },
+          "taxIdLabel": {
+            "type": "object",
+            "example": "GSTIN",
+            "nullable": true
+          },
+          "taxIdPattern": {
+            "type": "object",
+            "example": "^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$",
+            "nullable": true
+          },
+          "callingCode": {
+            "type": "object",
+            "example": "+91",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "canDelete": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "defaultCurrency",
+          "taxRegime",
+          "isActive",
+          "createdAt",
+          "canDelete"
+        ]
+      },
+      "CountryTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CountryDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "UpdateCountryDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "ISO 3166-1 alpha-2 country code",
+            "example": "IN"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the country",
+            "example": "India"
+          },
+          "defaultCurrency": {
+            "type": "string",
+            "description": "ISO 4217 default currency code",
+            "example": "INR"
+          },
+          "taxRegime": {
+            "type": "string",
+            "description": "Tax regime of the country",
+            "enum": [
+              "GST",
+              "VAT",
+              "NONE"
+            ],
+            "example": "GST"
+          },
+          "taxIdLabel": {
+            "type": "string",
+            "description": "Label for the tax identifier",
+            "example": "GSTIN"
+          },
+          "taxIdPattern": {
+            "type": "string",
+            "description": "Validation pattern for the tax identifier"
+          },
+          "callingCode": {
+            "type": "string",
+            "description": "International calling code",
+            "example": "+91"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the country is active",
+            "default": true
+          }
+        }
+      },
+      "CreateMarketDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Unique code identifier for the market",
+            "example": "in"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the market",
+            "example": "India"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "ISO 4217 currency code",
+            "example": "INR"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the market is active",
+            "default": true
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "currencyCode"
+        ]
+      },
+      "MarketDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "in"
+          },
+          "name": {
+            "type": "string",
+            "example": "India"
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "INR"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "countryCount": {
+            "type": "number",
+            "example": 3
+          },
+          "canDelete": {
+            "type": "boolean",
+            "example": true
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "currencyCode",
+          "isActive",
+          "createdAt",
+          "countryCount",
+          "canDelete"
+        ]
+      },
+      "MarketTableResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MarketDto"
+            }
+          },
+          "count": {
+            "type": "number"
+          },
+          "state": {
+            "type": "object",
+            "description": "Current active filter/sort/visibility state"
+          },
+          "activeViewId": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "result",
+          "count",
+          "state"
+        ]
+      },
+      "UpdateMarketDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Unique code identifier for the market",
+            "example": "in"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name of the market",
+            "example": "India"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "ISO 4217 currency code",
+            "example": "INR"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Whether the market is active",
+            "default": true
+          }
+        }
+      },
+      "MarketCountryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "marketId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "countryId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "countryCode": {
+            "type": "string",
+            "example": "IN"
+          },
+          "countryName": {
+            "type": "string",
+            "example": "India"
+          }
+        },
+        "required": [
+          "id",
+          "marketId",
+          "countryId",
+          "countryCode",
+          "countryName"
+        ]
+      },
+      "AssignMarketCountryDto": {
+        "type": "object",
+        "properties": {
+          "countryId": {
+            "type": "string",
+            "description": "Country UUID to assign to this market",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          }
+        },
+        "required": [
+          "countryId"
+        ]
       },
       "OrganizationDto": {
         "type": "object",
@@ -16350,235 +17898,6 @@
           "count",
           "state"
         ]
-      },
-      "CreatePriceDto": {
-        "type": "object",
-        "properties": {
-          "planId": {
-            "type": "string",
-            "description": "Plan UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "businessId": {
-            "type": "string",
-            "description": "Business UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "regionId": {
-            "type": "string",
-            "description": "Region UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "providerId": {
-            "type": "string",
-            "description": "Provider UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "price": {
-            "type": "string",
-            "description": "Price amount",
-            "example": "99.99"
-          },
-          "currency": {
-            "type": "string",
-            "description": "ISO 4217 currency code",
-            "example": "INR"
-          }
-        },
-        "required": [
-          "planId",
-          "businessId",
-          "regionId",
-          "providerId",
-          "price",
-          "currency"
-        ]
-      },
-      "PriceDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "planId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "businessId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "regionId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "providerId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "price": {
-            "type": "string",
-            "example": "99.99"
-          },
-          "currency": {
-            "type": "string",
-            "example": "INR"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "planId",
-          "businessId",
-          "regionId",
-          "providerId",
-          "price",
-          "currency",
-          "createdAt"
-        ]
-      },
-      "PriceDetailDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "planId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "businessId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "regionId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "regionName": {
-            "type": "string",
-            "example": "Mumbai"
-          },
-          "regionCode": {
-            "type": "string",
-            "example": "ap-south-1"
-          },
-          "providerId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "providerName": {
-            "type": "string",
-            "example": "Amazon Web Services"
-          },
-          "providerCode": {
-            "type": "string",
-            "example": "AWS"
-          },
-          "price": {
-            "type": "string",
-            "example": "99.99"
-          },
-          "currency": {
-            "type": "string",
-            "example": "INR"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "planId",
-          "businessId",
-          "regionId",
-          "regionName",
-          "regionCode",
-          "providerId",
-          "providerName",
-          "providerCode",
-          "price",
-          "currency",
-          "createdAt"
-        ]
-      },
-      "PricesTableResponseDto": {
-        "type": "object",
-        "properties": {
-          "result": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PriceDetailDto"
-            }
-          },
-          "count": {
-            "type": "number"
-          },
-          "state": {
-            "type": "object",
-            "description": "Current active filter/sort/visibility state"
-          },
-          "activeViewId": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "result",
-          "count",
-          "state"
-        ]
-      },
-      "UpdatePriceDto": {
-        "type": "object",
-        "properties": {
-          "planId": {
-            "type": "string",
-            "description": "Plan UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "businessId": {
-            "type": "string",
-            "description": "Business UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "regionId": {
-            "type": "string",
-            "description": "Region UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "providerId": {
-            "type": "string",
-            "description": "Provider UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "price": {
-            "type": "string",
-            "description": "Price amount",
-            "example": "99.99"
-          },
-          "currency": {
-            "type": "string",
-            "description": "ISO 4217 currency code",
-            "example": "INR"
-          }
-        }
       }
     }
   }

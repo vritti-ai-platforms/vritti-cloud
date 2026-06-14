@@ -33,7 +33,6 @@ export const changePasswordSchema = z
 
 export type ChangePasswordFormData = z.infer<typeof changePasswordSchema>;
 
-// Account status enumeration matching backend
 export enum AccountStatus {
   PENDING = 'PENDING',
   ACTIVE = 'ACTIVE',

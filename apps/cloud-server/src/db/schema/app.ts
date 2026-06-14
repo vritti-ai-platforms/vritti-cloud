@@ -1,8 +1,9 @@
 import { boolean, integer, text, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
 import { versions } from './version';
 
-// Curated feature bundles scoped to an app version
+// Curated feature bundles scoped to an app version and business
 export const apps = cloudSchema.table(
   'apps',
   {
@@ -10,6 +11,9 @@ export const apps = cloudSchema.table(
     versionId: uuid('version_id')
       .notNull()
       .references(() => versions.id, { onDelete: 'cascade' }),
+    businessId: uuid('business_id')
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
     code: varchar('code', { length: 100 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
@@ -19,7 +23,7 @@ export const apps = cloudSchema.table(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },
-  (table) => [uniqueIndex('app_version_code_idx').on(table.versionId, table.code)],
+  (table) => [uniqueIndex('app_version_business_code_idx').on(table.versionId, table.businessId, table.code)],
 );
 
 export type App = typeof apps.$inferSelect;

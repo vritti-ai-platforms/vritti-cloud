@@ -4,17 +4,12 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
-import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
-import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { buildSlug } from '@vritti/quantum-ui/slug';
+import { DateCell } from '@vritti/quantum-ui/DataTable';
+import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { Typography } from '@vritti/quantum-ui/Typography';
-import { Calendar, Camera, GitBranch, Pencil } from 'lucide-react';
-import { useEffect } from 'react';
+import { Calendar, Camera, GitBranch } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { VersionStatus } from '@/schemas/admin/versions';
-import { EditVersionForm } from '../forms/EditVersionForm';
 import { SnapshotView } from './components/SnapshotView';
 
 // Maps version status to badge variant
@@ -29,19 +24,11 @@ function statusVariant(status: VersionStatus): 'secondary' | 'outline' | 'defaul
   }
 }
 
-export const OverviewPage = () => {
-  const { versionId } = useVersionContext();
+export const OverviewPage = ({ versionId }: { versionId: string }) => {
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const editDialog = useDialog();
 
   const { data: version } = useVersion(versionId);
-
-  // Keep URL slug in sync when version name changes after edit
-  useEffect(() => {
-    const expectedSlug = `ver-${buildSlug(version.name, version.id)}`;
-    navigate(`/versions/${expectedSlug}/overview`, { replace: true });
-  }, [version.name, version.id, navigate]);
 
   const snapshotMutation = useCreateSnapshot();
   const deleteMutation = useDeleteVersion({
@@ -73,30 +60,7 @@ export const OverviewPage = () => {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header */}
-      <PageHeader
-        title={version.name}
-        description={`Version ${version.version}`}
-        actions={
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              startAdornment={<Pencil className="size-4" />}
-              onClick={editDialog.open}
-            >
-              Edit
-            </Button>
-            {!version.snapshot && (
-              <Button size="sm" startAdornment={<Camera className="size-4" />} onClick={handleCreateSnapshot}>
-                Create Snapshot
-              </Button>
-            )}
-          </div>
-        }
-      />
-
+    <div className="flex flex-col gap-6 pt-4">
       {/* Info cards */}
       <div className="grid grid-cols-2 gap-4">
         <Card>
@@ -123,15 +87,20 @@ export const OverviewPage = () => {
               <Typography variant="body2" intent="muted">
                 Created
               </Typography>
-              <Typography variant="body1" className="font-semibold">
-                {new Date(version.createdAt).toLocaleDateString()}
-              </Typography>
+              <DateCell value={version.createdAt} className="font-semibold" />
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Snapshot sync status */}
+      {!version.snapshot && (
+        <div className="flex justify-end">
+          <Button size="sm" startAdornment={<Camera className="size-4" />} onClick={handleCreateSnapshot}>
+            Create Snapshot
+          </Button>
+        </div>
+      )}
       {version.snapshot && (
         <Alert
           variant={version.isSnapshotStale ? 'warning' : 'success'}
@@ -159,15 +128,6 @@ export const OverviewPage = () => {
           onClick={handleDelete}
         />
       )}
-
-      {/* Edit dialog */}
-      <Dialog
-        handle={editDialog}
-        icon={GitBranch}
-        title="Edit Version"
-        description="Update the version name and number."
-        content={(close) => <EditVersionForm version={version} onSuccess={close} onCancel={close} />}
-      />
     </div>
   );
 };

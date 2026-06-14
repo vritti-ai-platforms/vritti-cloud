@@ -55,7 +55,7 @@ export const RoleTemplateSwitcher = ({ versionSlug, currentRoleId, currentRoleNa
             <Button
               variant="ghost"
               className="w-full justify-start h-auto px-2 py-1.5 text-sm font-normal"
-              onClick={() => navigate(`/versions/${versionSlug}/role-templates`)}
+              onClick={() => navigate(`/versions/${versionSlug}`)}
             >
               All Role Templates
             </Button>

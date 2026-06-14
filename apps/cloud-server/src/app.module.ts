@@ -18,11 +18,12 @@ import { validate } from './config/env.validation';
 import { AccountModule } from './modules/account/account.module';
 import { AdminBusinessModule } from './modules/admin-api/business/business.module';
 import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
+import { AdminCountryModule } from './modules/admin-api/country/country.module';
 import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
 import { AdminEnumModule } from './modules/admin-api/enum/enum.module';
+import { AdminMarketModule } from './modules/admin-api/market/market.module';
 import { AdminOrganizationModule } from './modules/admin-api/organization/organization.module';
 import { AdminPlanModule } from './modules/admin-api/plan/plan.module';
-import { AdminPriceModule } from './modules/admin-api/price/price.module';
 import { AdminRegionModule } from './modules/admin-api/region/region.module';
 import { AdminVersionModule } from './modules/admin-api/version/version.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
@@ -135,8 +136,9 @@ import { ServicesModule } from './services/services.module';
     AdminRegionModule,
     AdminCloudProviderModule,
     AdminBusinessModule,
+    AdminCountryModule,
+    AdminMarketModule,
     AdminOrganizationModule,
-    AdminPriceModule,
     AdminEnumModule,
     // Select API module
     SelectModule,
@@ -161,8 +163,9 @@ import { ServicesModule } from './services/services.module';
           AdminRegionModule,
           AdminCloudProviderModule,
           AdminBusinessModule,
+          AdminCountryModule,
+          AdminMarketModule,
           AdminOrganizationModule,
-          AdminPriceModule,
           AdminEnumModule,
         ],
       },

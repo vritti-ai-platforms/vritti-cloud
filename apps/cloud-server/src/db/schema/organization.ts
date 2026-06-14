@@ -1,8 +1,10 @@
 import { jsonb, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
+import { countries } from './country';
 import { deployments } from './deployment';
 import { orgMemberRoleEnum, orgSizeEnum } from './enums';
+import { markets } from './market';
 import { plans } from './plan';
 import { users } from './user';
 
@@ -15,6 +17,14 @@ export const organizations = cloudSchema.table('organizations', {
   businessId: uuid('business_id')
     .notNull()
     .references(() => businesses.id, { onDelete: 'restrict' }),
+  countryId: uuid('country_id')
+    .notNull()
+    .references(() => countries.id, { onDelete: 'restrict' }),
+  marketId: uuid('market_id')
+    .notNull()
+    .references(() => markets.id, { onDelete: 'restrict' }),
+  taxId: varchar('tax_id', { length: 50 }),
+  taxIdCountry: varchar('tax_id_country', { length: 2 }),
   size: orgSizeEnum('size').notNull(),
   mediaId: varchar('media_id', { length: 255 }),
   planId: uuid('plan_id')
@@ -45,7 +55,6 @@ export const organizationMembers = cloudSchema.table(
   (table) => [uniqueIndex('org_member_unique_idx').on(table.organizationId, table.userId)],
 );
 
-// Type exports
 export type Organization = typeof organizations.$inferSelect;
 export type NewOrganization = typeof organizations.$inferInsert;
 export type OrganizationMember = typeof organizationMembers.$inferSelect;

@@ -1,6 +1,6 @@
-import { Module } from '@nestjs/common';
 import { OrganizationDomainModule } from '@domain/organization/organization.module';
 import { OrganizationMemberDomainModule } from '@domain/organization-member/organization-member.module';
+import { Module } from '@nestjs/common';
 import { OrganizationController } from './controllers/organization.controller';
 
 @Module({

@@ -1,6 +1,6 @@
 import { z } from '@vritti/quantum-ui/zod';
 
-export type OrgRoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
+type OrgRoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
 
 export interface OrgRole {
   id: string;
@@ -14,7 +14,6 @@ export interface OrgRole {
   updatedAt: string;
 }
 
-// Template for pre-configured roles
 export interface RoleTemplate {
   name: string;
   description?: string;
@@ -22,14 +21,12 @@ export interface RoleTemplate {
   features: Record<string, string[]>;
 }
 
-// Single feature entry with its available permission types
-export interface OrgPermissionFeature {
+interface OrgPermissionFeature {
   code: string;
   name: string;
   permissions: string[];
 }
 
-// Permission data grouped by app for the permission picker
 export interface OrgPermissionGroup {
   appCode: string;
   appName: string;
@@ -48,11 +45,9 @@ export const updateOrgRoleSchema = z.object({
   scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU']).optional(),
 });
 
-// Form field types (features are managed separately in state)
 export type CreateOrgRoleFormData = z.infer<typeof createOrgRoleSchema>;
-export type UpdateOrgRoleFormData = z.infer<typeof updateOrgRoleSchema>;
+type UpdateOrgRoleFormData = z.infer<typeof updateOrgRoleSchema>;
 
-// API payload types include features
 export interface CreateOrgRoleData extends CreateOrgRoleFormData {
   features: Record<string, string[]>;
 }

@@ -1,11 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsEnum, IsOptional, IsString, IsUrl, IsUUID, MaxLength, MinLength } from 'class-validator';
-import {
-  type DeploymentStatus,
-  type DeploymentType,
-  DeploymentStatusValues,
-  DeploymentTypeValues,
-} from '@/db/schema';
+import { type DeploymentStatus, DeploymentStatusValues, type DeploymentType, DeploymentTypeValues } from '@/db/schema';
 
 export class CreateDeploymentDto {
   @ApiProperty({ description: 'Display name of the deployment', example: 'US East Production' })

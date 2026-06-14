@@ -1,0 +1,141 @@
+import { Injectable, Logger } from '@nestjs/common';
+import {
+  ConflictException,
+  CreateResponseDto,
+  DataTableStateService,
+  type FieldMap,
+  FilterProcessor,
+  NotFoundException,
+  SelectOptionsQueryDto,
+  type SelectQueryResult,
+  SuccessResponseDto,
+} from '@vritti/api-sdk';
+import { and } from '@vritti/api-sdk/drizzle-orm';
+import { countries } from '@/db/schema';
+import { CountryDto } from '@/modules/admin-api/country/dto/entity/country.dto';
+import type { CreateCountryDto } from '@/modules/admin-api/country/dto/request/create-country.dto';
+import type { UpdateCountryDto } from '@/modules/admin-api/country/dto/request/update-country.dto';
+import { CountryTableResponseDto } from '@/modules/admin-api/country/dto/response/countries-response.dto';
+import { CountryRepository } from '../repositories/country.repository';
+
+@Injectable()
+export class CountryService {
+  private readonly logger = new Logger(CountryService.name);
+
+  private static readonly FIELD_MAP: FieldMap = {
+    code: { column: countries.code, type: 'string' },
+    name: { column: countries.name, type: 'string' },
+    defaultCurrency: { column: countries.defaultCurrency, type: 'string' },
+    taxRegime: { column: countries.taxRegime, type: 'string' },
+    isActive: { column: countries.isActive, type: 'boolean' },
+  };
+
+  constructor(
+    private readonly countryRepository: CountryRepository,
+    private readonly dataTableStateService: DataTableStateService,
+  ) {}
+
+  // Returns paginated country options for the select component
+  findForSelect(query: SelectOptionsQueryDto & { isActive?: boolean }): Promise<SelectQueryResult> {
+    this.logger.log(
+      `Fetched country select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
+    return this.countryRepository.findForSelect({
+      value: query.valueKey || 'id',
+      label: query.labelKey || 'name',
+      description: query.descriptionKey,
+      groupIdKey: query.groupIdKey,
+      search: query.search,
+      limit: query.limit,
+      offset: query.offset,
+      values: query.values,
+      excludeIds: query.excludeIds,
+      where: query.isActive !== undefined ? { isActive: query.isActive } : undefined,
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  // Creates a new country; throws ConflictException on duplicate code
+  async create(dto: CreateCountryDto): Promise<CreateResponseDto<CountryDto>> {
+    const existing = await this.countryRepository.findByCode(dto.code);
+    if (existing) {
+      throw new ConflictException('Country with this code already exists.');
+    }
+    const country = await this.countryRepository.create(dto);
+    this.logger.log(`Created country: ${country.name} (${country.id})`);
+    return {
+      success: true,
+      message: `Country "${country.name}" created successfully.`,
+      data: CountryDto.from(country),
+    };
+  }
+
+  // Returns all countries with server-stored filter/sort/search/pagination state
+  async findForTable(userId: string): Promise<CountryTableResponseDto> {
+    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'countries');
+    const where = and(
+      FilterProcessor.buildWhere(state.filters, CountryService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, CountryService.FIELD_MAP),
+    );
+    const { limit = 20, offset = 0 } = state.pagination ?? {};
+    const { rows, total } = await this.countryRepository.findAllWithCount({
+      where,
+      orderBy: FilterProcessor.buildOrderBy(state.sort, CountryService.FIELD_MAP),
+      limit,
+      offset,
+    });
+    const result = rows.map((country) => CountryDto.from(country));
+    this.logger.log(`Fetched countries table (${total} results, limit: ${limit}, offset: ${offset})`);
+    return { result, count: total, state, activeViewId };
+  }
+
+  // Finds a country by ID with canDelete flag; throws NotFoundException if not found
+  async findById(id: string): Promise<CountryDto> {
+    const country = await this.countryRepository.findById(id);
+    if (!country) {
+      throw new NotFoundException('Country not found.');
+    }
+    const marketReferences = await this.countryRepository.countMarketReferences(id);
+    this.logger.log(`Fetched country: ${id}`);
+    return CountryDto.from(country, marketReferences === 0);
+  }
+
+  // Updates a country by ID; throws NotFoundException if not found, ConflictException on duplicate code
+  async update(id: string, dto: UpdateCountryDto): Promise<SuccessResponseDto> {
+    const existing = await this.countryRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundException('Country not found.');
+    }
+
+    if (dto.code) {
+      const existingCode = await this.countryRepository.findByCode(dto.code);
+      if (existingCode && existingCode.id !== id) {
+        throw new ConflictException('Country with this code already exists.');
+      }
+    }
+
+    const country = await this.countryRepository.update(id, dto);
+    this.logger.log(`Updated country: ${country.name} (${country.id})`);
+    return { success: true, message: `Country "${country.name}" updated successfully.` };
+  }
+
+  // Deletes a country by ID; throws NotFoundException if not found, ConflictException if market references exist
+  async delete(id: string): Promise<SuccessResponseDto> {
+    const existing = await this.countryRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundException('Country not found.');
+    }
+
+    const marketReferences = await this.countryRepository.countMarketReferences(id);
+    if (marketReferences > 0) {
+      throw new ConflictException({
+        label: 'Country In Use',
+        detail: `This country cannot be deleted because it is assigned to ${marketReferences} market(s). Remove those assignments first.`,
+      });
+    }
+
+    await this.countryRepository.delete(id);
+    this.logger.log(`Deleted country: ${existing.name} (${existing.id})`);
+    return { success: true, message: `Country "${existing.name}" deleted successfully.` };
+  }
+}

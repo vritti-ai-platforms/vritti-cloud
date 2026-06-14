@@ -28,12 +28,7 @@ export const AddRegionForm: React.FC<AddRegionFormProps> = ({ onSuccess, onCance
       <TextField name="city" label="City" placeholder="e.g. Mumbai" />
       <TextField name="state" label="State" placeholder="e.g. Maharashtra" />
       <TextField name="country" label="Country" placeholder="e.g. India" />
-      <TextField
-        name="code"
-        label="Code"
-        placeholder="e.g. ap-south-1"
-        description="Short identifier used across the platform"
-      />
+      <TextField name="code" label="Code" placeholder="e.g. ap-south-1" />
       <Switch name="isActive" label="Active" description="Make this region available for new deployments" />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

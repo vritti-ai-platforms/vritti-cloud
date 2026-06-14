@@ -1,9 +1,9 @@
+import { DeploymentService } from '@domain/deployment/services/deployment.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import { DeploymentSelectQueryDto } from '../../admin-api/deployment/dto/request/deployment-select-query.dto';
-import { DeploymentService } from '@domain/deployment/services/deployment.service';
 
 @ApiTags('Select')
 @ApiBearerAuth()

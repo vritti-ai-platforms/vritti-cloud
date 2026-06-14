@@ -34,7 +34,7 @@ export const EditVersionForm: React.FC<EditVersionFormProps> = ({ version, onSuc
       onCancel={onCancel}
       transformSubmit={(data) => ({ id: version.id, data })}
     >
-      <TextField name="version" label="Version" placeholder="e.g. 1.0.0" description="Semver format" />
+      <TextField name="version" label="Version" placeholder="e.g. 1.0.0" />
       <TextField name="name" label="Name" placeholder="e.g. Restaurant Suite v1" />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

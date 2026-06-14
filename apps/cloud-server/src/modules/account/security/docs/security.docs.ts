@@ -2,11 +2,11 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
-import { LinkedAccountsResponseDto } from '../dto/response/linked-account-response.dto';
 import { ChangePasswordDto } from '../dto/request/change-password.dto';
 import { VerifyPasskeySetupDto } from '../dto/request/verify-passkey-setup.dto';
 import { VerifyTotpSetupDto } from '../dto/request/verify-totp-setup.dto';
 import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
+import { LinkedAccountsResponseDto } from '../dto/response/linked-account-response.dto';
 import { MfaStatusResponseDto, PasskeyInfoDto } from '../dto/response/mfa-status-response.dto';
 import { TotpSetupResponseDto } from '../dto/response/totp-setup-response.dto';
 
@@ -63,7 +63,8 @@ export function ApiGetMfaStatus() {
   return applyDecorators(
     ApiOperation({
       summary: 'Get MFA status',
-      description: 'Returns the current multi-factor authentication status including method, backup codes remaining, and registered passkeys.',
+      description:
+        'Returns the current multi-factor authentication status including method, backup codes remaining, and registered passkeys.',
     }),
     ApiResponse({ status: 200, description: 'MFA status retrieved.', type: MfaStatusResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
@@ -74,7 +75,8 @@ export function ApiSetupTotp() {
   return applyDecorators(
     ApiOperation({
       summary: 'Initiate TOTP setup',
-      description: 'Generates a TOTP secret and returns the QR code URI for the authenticator app. Deletes any previous pending setup.',
+      description:
+        'Generates a TOTP secret and returns the QR code URI for the authenticator app. Deletes any previous pending setup.',
     }),
     ApiResponse({ status: 200, description: 'TOTP setup initiated.', type: TotpSetupResponseDto }),
     ApiResponse({ status: 400, description: 'MFA is already enabled.' }),
@@ -124,7 +126,8 @@ export function ApiGetPasskeySetupOptions() {
   return applyDecorators(
     ApiOperation({
       summary: 'Get passkey setup options',
-      description: 'Generates WebAuthn registration options for passkey setup. Returns PublicKeyCredentialCreationOptions.',
+      description:
+        'Generates WebAuthn registration options for passkey setup. Returns PublicKeyCredentialCreationOptions.',
     }),
     ApiResponse({ status: 200, description: 'Passkey registration options generated.' }),
     ApiResponse({ status: 400, description: 'MFA is already enabled with a different method.' }),

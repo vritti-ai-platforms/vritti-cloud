@@ -5,7 +5,6 @@ import {
   useDeploymentPlanAssignments,
   useRemoveDeploymentPlan,
 } from '@hooks/admin/deployments';
-import { cn } from '@vritti/quantum-ui';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
@@ -16,7 +15,7 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Server, Tag } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { DeploymentPlanAssignment, DeploymentPlanAssignmentBusiness } from '@/schemas/admin/deployments';
+import type { DeploymentPlanAssignment } from '@/schemas/admin/deployments';
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
 
 export const DeploymentViewPage = () => {
@@ -36,13 +35,12 @@ export const DeploymentViewPage = () => {
     onSuccess: () => navigate('/deployments'),
   });
 
-  const handleChipToggle = (planId: string, businessId: string) => {
-    const plan = planAssignments.find((p) => p.planId === planId);
-    const isAssigned = plan?.businesses.find((b) => b.businessId === businessId)?.isAssigned ?? false;
-    if (isAssigned) {
-      removeMutation.mutate({ id: id ?? '', data: { planId, businessId } });
+  const handleToggle = (plan: DeploymentPlanAssignment) => {
+    const data = { planId: plan.planId };
+    if (plan.isAssigned) {
+      removeMutation.mutate({ id: id ?? '', data });
     } else {
-      assignMutation.mutate({ id: id ?? '', data: { planId, businessId } });
+      assignMutation.mutate({ id: id ?? '', data });
     }
   };
 
@@ -70,10 +68,10 @@ export const DeploymentViewPage = () => {
         }
       />
 
-      {/* Plans & Prices section */}
+      {/* Provisioned plans section */}
       <div className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-foreground">Plans &amp; Prices</h2>
+          <h2 className="text-sm font-semibold text-foreground">Provisioned Plans</h2>
           {planAssignments.length > 0 && (
             <span className="text-xs text-muted-foreground">
               {planAssignments.length} plan{planAssignments.length !== 1 ? 's' : ''} available
@@ -92,9 +90,7 @@ export const DeploymentViewPage = () => {
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <Tag className="size-8 text-muted-foreground mb-3" />
               <p className="text-sm font-medium text-foreground">No plans available</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                No pricing configured for this region and cloud provider.
-              </p>
+              <p className="text-xs text-muted-foreground mt-1">Create plans to provision them on this deployment.</p>
             </CardContent>
           </Card>
         )}
@@ -102,7 +98,7 @@ export const DeploymentViewPage = () => {
         {!plansLoading && planAssignments.length > 0 && (
           <div className="flex flex-col gap-4">
             {planAssignments.map((plan: DeploymentPlanAssignment) => (
-              <PlanCard key={plan.planId} plan={plan} onToggle={handleChipToggle} />
+              <PlanCard key={plan.planId} plan={plan} onToggle={handleToggle} />
             ))}
           </div>
         )}
@@ -135,7 +131,7 @@ export const DeploymentViewPage = () => {
 
 interface PlanCardProps {
   plan: DeploymentPlanAssignment;
-  onToggle: (planId: string, businessId: string) => void;
+  onToggle: (plan: DeploymentPlanAssignment) => void;
 }
 
 const PlanCard = ({ plan, onToggle }: PlanCardProps) => (
@@ -147,40 +143,12 @@ const PlanCard = ({ plan, onToggle }: PlanCardProps) => (
           {plan.planCode}
         </Badge>
       </div>
-      <p className="text-xs text-muted-foreground">
-        {plan.businesses.length} business{plan.businesses.length !== 1 ? 'es' : ''}
-      </p>
+      <p className="text-xs text-muted-foreground">{plan.businessName}</p>
     </CardHeader>
     <CardContent className="pt-0">
-      <div className="flex flex-wrap gap-2">
-        {plan.businesses.map((business: DeploymentPlanAssignmentBusiness) => (
-          <Button
-            key={business.businessId}
-            variant="ghost"
-            size="sm"
-            onClick={() => onToggle(plan.planId, business.businessId)}
-            className={cn(
-              'h-auto rounded-full border px-3 py-1.5 text-sm transition-colors',
-              business.isAssigned
-                ? 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'
-                : 'border-border bg-muted/30 text-foreground hover:bg-muted hover:border-primary/40',
-            )}
-          >
-            <span>{business.businessName}</span>
-            {business.price ? (
-              <span
-                className={cn('font-semibold', business.isAssigned ? 'text-primary-foreground/80' : 'text-primary')}
-              >
-                · {business.currency} {business.price}
-              </span>
-            ) : (
-              <span className={business.isAssigned ? 'text-primary-foreground/60' : 'text-muted-foreground'}>
-                · No price
-              </span>
-            )}
-          </Button>
-        ))}
-      </div>
+      <Button variant={plan.isAssigned ? 'default' : 'outline'} size="sm" onClick={() => onToggle(plan)}>
+        {plan.isAssigned ? 'Provisioned' : 'Provision'}
+      </Button>
     </CardContent>
   </Card>
 );

@@ -8,17 +8,14 @@ export interface App {
   description: string | null;
   icon: string;
   versionId: string;
+  businessId: string;
+  isActive: boolean;
+  sortOrder: number;
   featureCount: number;
   planCount: number;
   createdAt: string;
   updatedAt: string | null;
   canDelete: boolean;
-}
-
-export interface AppFeature {
-  id: string;
-  code: string;
-  name: string;
 }
 
 export interface AppFeatureTableRow {
@@ -27,23 +24,6 @@ export interface AppFeatureTableRow {
   name: string;
   icon: string;
   isAssigned: boolean;
-}
-
-export interface AppPrice {
-  id: string;
-  appId: string;
-  regionId: string;
-  regionName: string;
-  cloudProviderId: string;
-  providerName: string;
-  monthlyPrice: string;
-  currency: string;
-}
-
-export interface AppSelectOption {
-  id: string;
-  code: string;
-  name: string;
 }
 
 export type AppsTableResponse = TableResponse<App>;
@@ -59,6 +39,7 @@ export const createAppSchema = z.object({
   description: z.string().optional(),
   icon: z.string().min(1, 'Icon is required').max(255),
   versionId: z.string().uuid('App version is required'),
+  businessId: z.string().uuid('Business is required'),
 });
 
 export const updateAppSchema = z.object({
@@ -73,19 +54,5 @@ export const updateAppSchema = z.object({
   icon: z.string().min(1, 'Icon is required').max(255).optional(),
 });
 
-export const addAppPriceSchema = z.object({
-  regionId: z.string().uuid('Please select a region'),
-  cloudProviderId: z.string().uuid('Please select a provider'),
-  monthlyPrice: z.coerce.number().positive('Price must be greater than 0'),
-  currency: z.string().length(3, 'Currency must be exactly 3 characters'),
-});
-
-export const updateAppPriceSchema = z.object({
-  monthlyPrice: z.coerce.number().positive('Price must be greater than 0').optional(),
-  currency: z.string().length(3, 'Currency must be exactly 3 characters').optional(),
-});
-
 export type CreateAppData = z.infer<typeof createAppSchema>;
 export type UpdateAppData = z.infer<typeof updateAppSchema>;
-export type AddAppPriceData = z.infer<typeof addAppPriceSchema>;
-export type UpdateAppPriceData = z.infer<typeof updateAppPriceSchema>;

@@ -5,7 +5,6 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
-import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Boxes, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import type { Microfrontend } from '@/schemas/admin/microfrontends';
@@ -47,10 +46,7 @@ export const MicrofrontendsPage = () => {
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Header */}
-      <PageHeader title="Microfrontends" description="Manage microfrontend bundles for this version" />
-
+    <div>
       {/* Table */}
       <DataTable
         table={table}
@@ -62,7 +58,7 @@ export const MicrofrontendsPage = () => {
           ],
           searchAll: true,
         }}
-        filters={[]}
+        mode="tab"
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>

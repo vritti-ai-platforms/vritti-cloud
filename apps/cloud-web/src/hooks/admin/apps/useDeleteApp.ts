@@ -6,13 +6,13 @@ import { APPS_QUERY_KEY } from './useApps';
 type UseDeleteAppOptions = Omit<UseMutationOptions<void, AxiosError, string>, 'mutationFn'>;
 
 // Deletes an app and invalidates the apps list
-export function useDeleteApp(versionId: string, options?: UseDeleteAppOptions) {
+export function useDeleteApp(versionId: string, businessId: string, options?: UseDeleteAppOptions) {
   const queryClient = useQueryClient();
   return useMutation<void, AxiosError, string>({
     ...options,
-    mutationFn: (id) => deleteApp(versionId, id),
+    mutationFn: (id) => deleteApp(versionId, businessId, id),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY(versionId) });
+      queryClient.invalidateQueries({ queryKey: APPS_QUERY_KEY(versionId, businessId) });
       options?.onSuccess?.(...args);
     },
   });

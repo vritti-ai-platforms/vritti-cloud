@@ -37,6 +37,9 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   const regionName = form.getValues('regionName');
   const cloudProviderName = form.getValues('cloudProviderName');
   const deploymentName = form.getValues('deploymentName');
+  const countryName = form.getValues('countryName');
+  const marketName = form.getValues('marketName');
+  const taxId = form.getValues('taxId');
 
   const priceDisplay = planPrice ? `${planCurrency === 'INR' ? '₹' : planCurrency}${planPrice}/month` : null;
 
@@ -96,6 +99,21 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         ))}
       </div>
 
+      {/* Tax & market summary */}
+      <div className="rounded-lg border p-4 space-y-3">
+        <Typography variant="subtitle2">Tax & Market</Typography>
+        {[
+          { label: 'Tax ID', value: taxId ?? '—' },
+          { label: 'Country', value: countryName ?? '—' },
+          { label: 'Market', value: marketName ?? '—' },
+        ].map(({ label, value }) => (
+          <div key={label} className="flex justify-between text-sm">
+            <span className="text-muted-foreground">{label}</span>
+            <span className="font-medium">{value}</span>
+          </div>
+        ))}
+      </div>
+
       {/* Plan summary */}
       <div className="rounded-lg border p-4">
         <div className="flex items-center justify-between">
@@ -126,6 +144,8 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           if (data.planId != null) formData.append('planId', data.planId);
           if (data.deploymentId != null) formData.append('deploymentId', data.deploymentId);
           if (data.businessId != null) formData.append('businessId', data.businessId);
+          formData.append('taxId', data.taxId);
+          if (data.countryId) formData.append('countryId', data.countryId);
           if (data.logo) formData.append('file', data.logo);
           return formData;
         }}

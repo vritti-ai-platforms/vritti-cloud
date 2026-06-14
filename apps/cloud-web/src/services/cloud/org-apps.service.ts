@@ -31,18 +31,3 @@ export function purchaseAddon({
     .post<SuccessResponse>(`cloud-api/organizations/${orgId}/apps/${appId}/purchase`, data)
     .then((r) => r.data);
 }
-
-// Cancels an addon app for a specific business unit
-export function cancelAddon({
-  orgId,
-  appId,
-  businessUnitId,
-}: {
-  orgId: string;
-  appId: string;
-  businessUnitId: string;
-}): Promise<SuccessResponse> {
-  return axios
-    .delete<SuccessResponse>(`cloud-api/organizations/${orgId}/apps/${appId}/business-units/${businessUnitId}`)
-    .then((r) => r.data);
-}

@@ -1,6 +1,6 @@
 import { z } from '@vritti/quantum-ui/zod';
 
-export type BusinessUnitType = 'ORGANIZATION' | 'REGION' | 'FRANCHISEE' | 'BRANCH' | 'TEAM' | 'DEPARTMENT' | 'CUSTOM';
+type BusinessUnitType = 'ORGANIZATION' | 'REGION' | 'FRANCHISEE' | 'BRANCH' | 'TEAM' | 'DEPARTMENT' | 'CUSTOM';
 
 export interface BusinessUnit {
   id: string;

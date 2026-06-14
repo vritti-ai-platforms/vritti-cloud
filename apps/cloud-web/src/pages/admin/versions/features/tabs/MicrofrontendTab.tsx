@@ -51,7 +51,6 @@ export const MicrofrontendTab = ({ featureId }: MicrofrontendTabProps) => {
   );
 };
 
-// Section for a single platform (WEB or MOBILE)
 interface PlatformSectionProps {
   platform: Platform;
   featureId: string;
@@ -191,7 +190,6 @@ const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) =>
   );
 };
 
-// Form for linking/editing a microfrontend on a platform
 interface LinkMicrofrontendFormProps {
   platform: Platform;
   featureId: string;

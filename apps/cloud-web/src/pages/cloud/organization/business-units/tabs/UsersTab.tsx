@@ -194,7 +194,6 @@ export const UsersTab = ({ orgId, buId }: UsersTabProps) => {
   );
 };
 
-// Form for assigning a role to a user
 interface AssignRoleFormProps {
   orgId: string;
   buId: string;

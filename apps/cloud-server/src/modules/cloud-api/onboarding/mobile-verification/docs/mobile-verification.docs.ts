@@ -8,7 +8,8 @@ export function ApiInitiateManualMobileVerification() {
   return applyDecorators(
     ApiOperation({
       summary: 'Initiate manual OTP mobile verification',
-      description: 'Sends an OTP via SMS to the provided phone number for manual entry. Use the SSE endpoints for QR-based WhatsApp or SMS verification.',
+      description:
+        'Sends an OTP via SMS to the provided phone number for manual entry. Use the SSE endpoints for QR-based WhatsApp or SMS verification.',
     }),
     ApiBody({ type: InitiateMobileVerificationDto, description: 'Mobile verification initiation payload' }),
     ApiResponse({

@@ -11,7 +11,11 @@ export function ApiFindForTablePlanApps() {
   return applyDecorators(
     ApiOperation({ summary: 'Get plan apps for data table with server-stored state' }),
     ApiParam({ name: 'planId', description: 'Plan UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Plan apps table data retrieved successfully.', type: PlanAppTableResponseDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Plan apps table data retrieved successfully.',
+      type: PlanAppTableResponseDto,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Plan not found.' }),
   );

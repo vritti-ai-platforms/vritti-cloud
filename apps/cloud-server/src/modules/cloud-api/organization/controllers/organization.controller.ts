@@ -1,4 +1,17 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import type { FastifyRequest } from 'fastify';
@@ -8,13 +21,16 @@ import {
   ApiGetMyOrgs,
   ApiGetOrganization,
   ApiUpdateOrganization,
+  ApiValidateTaxId,
 } from '../docs/organization.docs';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CheckSubdomainDto } from '../dto/request/check-subdomain.dto';
 import { GetMyOrgsDto } from '../dto/request/get-my-orgs.dto';
+import { ValidateTaxIdDto } from '../dto/request/validate-tax-id.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
 import { SubdomainAvailabilityResponseDto } from '../dto/response/subdomain-availability-response.dto';
+import { TaxIdValidationResponseDto } from '../dto/response/tax-id-validation-response.dto';
 import { OrganizationService } from '../services/organization.service';
 
 @ApiTags('Organizations')
@@ -31,6 +47,15 @@ export class OrganizationController {
   async checkSubdomain(@Query() dto: CheckSubdomainDto): Promise<SubdomainAvailabilityResponseDto> {
     this.logger.log(`GET /organizations/check-subdomain - subdomain: ${dto.subdomain}`);
     return this.organizationService.checkSubdomainAvailable(dto.subdomain);
+  }
+
+  // Validates a tax id and returns the derived country code + market
+  @Post('validate-tax-id')
+  @HttpCode(HttpStatus.OK)
+  @ApiValidateTaxId()
+  async validateTaxId(@Body() dto: ValidateTaxIdDto): Promise<TaxIdValidationResponseDto> {
+    this.logger.log('POST /organizations/validate-tax-id');
+    return this.organizationService.validateTaxId(dto.countryId, dto.taxId);
   }
 
   // Creates a new organization with the authenticated user as Owner

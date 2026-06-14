@@ -1,14 +1,12 @@
-import { Injectable, Logger } from '@nestjs/common';
-import {
-  ForbiddenException,
-  NotFoundException,
-  type SuccessResponseDto,
-} from '@vritti/api-sdk';
-import { AppFeatureRepository } from '@domain/version/app/app-feature/repositories/app-feature.repository';
-import { AppPriceRepository } from '@domain/version/app/app-price/repositories/app-price.repository';
-import { AppRepository } from '@domain/version/app/root/repositories/app.repository';
-import { FeaturePermissionRepository } from '@domain/version/feature/feature-permission/repositories/feature-permission.repository';
 import { PlanAppRepository } from '@domain/plan/repositories/plan-app.repository';
+import { AppFeatureRepository } from '@domain/version/business/app/app-feature/repositories/app-feature.repository';
+import { AppPriceRepository } from '@domain/version/business/app/app-price/repositories/app-price.repository';
+import { AppRepository } from '@domain/version/business/app/root/repositories/app.repository';
+import { FeaturePermissionRepository } from '@domain/version/feature/feature-permission/repositories/feature-permission.repository';
+import { VersionRepository } from '@domain/version/root/repositories/version.repository';
+import { Injectable, Logger } from '@nestjs/common';
+import { ForbiddenException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import { type App, BillingPeriodValues, type Deployment } from '@/db/schema';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import type { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';
 import type {
@@ -28,35 +26,36 @@ export class OrganizationAppsService {
     private readonly appFeatureRepository: AppFeatureRepository,
     private readonly appPriceRepository: AppPriceRepository,
     private readonly featurePermissionRepository: FeaturePermissionRepository,
+    private readonly versionRepository: VersionRepository,
   ) {}
 
-  // Lists all catalog apps with their status relative to the organization's plan and region
+  // Lists the vertical-scoped catalog apps with their status relative to the organization's plan and market
   async listApps(orgId: string): Promise<OrgAppListResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const versionId = await this.resolveVersionId(deployment);
 
-    // Fetch plan apps, app prices for region+provider, and all active catalog apps
-    const [orgPlanApps, regionPrices, allApps] = await Promise.all([
+    // Fetch plan apps, market addon prices (monthly), and the apps defined for this vertical
+    const [orgPlanApps, marketPrices, verticalApps] = await Promise.all([
       this.planAppRepository.findByPlanId(org.planId),
-      this.appPriceRepository.findByRegionAndProvider(deployment.regionId, deployment.cloudProviderId),
-      this.appRepository.findAllActive(),
+      this.appPriceRepository.findByMarketAndPeriod(org.marketId, BillingPeriodValues.monthly),
+      this.appRepository.findActiveByBusiness(versionId, org.businessId),
     ]);
 
     const planAppMap = new Map(orgPlanApps.map((pa) => [pa.appCode, pa]));
-    const priceMap = new Map(regionPrices.map((p) => [p.appId, p]));
+    const priceMap = new Map(marketPrices.map((p) => [p.appId, p]));
 
-    // Build app features for all apps in a single query
-    const allAppFeatures = await this.findAppFeaturesGrouped(allApps.map((a) => a.id));
+    // Build app features for all vertical apps in a single query
+    const allAppFeatures = await this.findAppFeaturesGrouped(verticalApps.map((a) => a.id));
 
-    const appItems: OrgAppItemResponseDto[] = allApps.map((app) => {
+    const appItems: OrgAppItemResponseDto[] = verticalApps.map((app) => {
       const planApp = planAppMap.get(app.code);
       const appPrice = priceMap.get(app.id);
       const appFeaturesForApp = allAppFeatures.get(app.id) ?? [];
 
       // Filter features by includedFeatureCodes when plan-included
-      const filteredFeatures =
-        planApp?.includedFeatureCodes
-          ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
-          : appFeaturesForApp;
+      const filteredFeatures = planApp?.includedFeatureCodes
+        ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
+        : appFeaturesForApp;
 
       let status: OrgAppItemResponseDto['status'];
       if (planApp) {
@@ -74,7 +73,7 @@ export class OrganizationAppsService {
         description: app.description,
         icon: app.icon,
         status,
-        price: appPrice ? { monthlyPrice: appPrice.monthlyPrice, currency: appPrice.currency } : null,
+        price: appPrice ? { monthlyPrice: String(appPrice.amount), currency: appPrice.currencyCode } : null,
         features: filteredFeatures.map((f) => ({ code: f.code, name: f.name })),
       };
     });
@@ -113,7 +112,7 @@ export class OrganizationAppsService {
 
   // Purchases an addon app for specific business units
   async purchaseAddon(orgId: string, appId: string, _dto: PurchaseAddonDto): Promise<SuccessResponseDto> {
-    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const app = await this.appRepository.findById(appId);
     if (!app) throw new NotFoundException('App not found.');
@@ -127,16 +126,12 @@ export class OrganizationAppsService {
       });
     }
 
-    // Verify addon pricing exists for this region+provider
-    const appPrice = await this.appPriceRepository.findByUniqueKey(
-      appId,
-      deployment.regionId,
-      deployment.cloudProviderId,
-    );
+    // Verify addon pricing exists for this market + monthly period
+    const appPrice = await this.appPriceRepository.findByComposite(appId, org.marketId, BillingPeriodValues.monthly);
     if (!appPrice) {
       throw new ForbiddenException({
         label: 'Addon Not Available',
-        detail: 'This addon is not available in the organization deployment region.',
+        detail: 'This addon is not available in the organization market.',
       });
     }
 
@@ -153,20 +148,21 @@ export class OrganizationAppsService {
     return { success: true, message: `Addon '${app.name}' cancelled for business unit.` };
   }
 
-  // Returns all features grouped by app for the organization's enabled apps (used for role form)
+  // Returns all features grouped by app for the organization's vertical-scoped enabled apps (used for role form)
   async getPermissions(orgId: string): Promise<OrgPermissionsResponseDto> {
-    const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const versionId = await this.resolveVersionId(deployment);
 
     const orgPlanApps = await this.planAppRepository.findByPlanId(org.planId);
     if (orgPlanApps.length === 0) return { apps: [] };
 
-    // Resolve app codes to actual app records
-    const allApps = await this.appRepository.findAllActive();
-    const appByCode = new Map(allApps.map((a) => [a.code, a]));
+    // Resolve plan app codes to actual app records scoped to the vertical
+    const verticalApps = await this.appRepository.findActiveByBusiness(versionId, org.businessId);
+    const appByCode = new Map(verticalApps.map((a) => [a.code, a]));
 
     const matchedApps = orgPlanApps
       .map((pa) => ({ planApp: pa, app: appByCode.get(pa.appCode) }))
-      .filter((entry): entry is { planApp: typeof orgPlanApps[0]; app: NonNullable<typeof entry.app> } => !!entry.app);
+      .filter((entry): entry is { planApp: (typeof orgPlanApps)[0]; app: App } => !!entry.app);
 
     const appIds = matchedApps.map((e) => e.app.id);
     const allAppFeatures = await this.findAppFeaturesGrouped(appIds);
@@ -174,10 +170,9 @@ export class OrganizationAppsService {
     const result = matchedApps.map(({ planApp, app }) => {
       const appFeaturesForApp = allAppFeatures.get(app.id) ?? [];
 
-      const filteredFeatures =
-        planApp.includedFeatureCodes
-          ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
-          : appFeaturesForApp;
+      const filteredFeatures = planApp.includedFeatureCodes
+        ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
+        : appFeaturesForApp;
 
       return {
         appId: app.id,
@@ -189,6 +184,15 @@ export class OrganizationAppsService {
 
     this.logger.log(`Resolved permissions for ${result.length} apps in org ${orgId}`);
     return { apps: result };
+  }
+
+  // Resolves the app version UUID from a deployment's version string
+  private async resolveVersionId(deployment: Deployment): Promise<string> {
+    const version = await this.versionRepository.findByVersion(deployment.version);
+    if (!version) {
+      throw new NotFoundException('App version not found for this deployment.');
+    }
+    return version.id;
   }
 
   // Fetches features for multiple apps with their permission types, grouped by app ID

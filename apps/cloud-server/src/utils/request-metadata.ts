@@ -25,8 +25,5 @@ export function extractDeviceInfo(request: FastifyRequest): DeviceInfo {
 
 // Extracts client IP from request headers
 export function extractIpAddress(request: FastifyRequest): string {
-  return (
-    (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-    request.ip
-  );
+  return (request.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() || request.ip;
 }

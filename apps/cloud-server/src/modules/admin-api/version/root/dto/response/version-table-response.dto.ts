@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TableResponseDto } from '@vritti/api-sdk';
 import type { TableViewState } from '@vritti/api-sdk';
+import { TableResponseDto } from '@vritti/api-sdk';
 import { VersionDto } from '../entity/version.dto';
 
 export class VersionTableResponseDto extends TableResponseDto<VersionDto> {

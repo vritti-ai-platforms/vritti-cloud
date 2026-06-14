@@ -1,7 +1,10 @@
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { OrganizationMemberRepository } from '@domain/cloud-organization/repositories/organization-member.repository';
+import { CountryRepository } from '@domain/country/repositories/country.repository';
 import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
+import { MarketCountryRepository } from '@domain/market/repositories/market-country.repository';
 import { MediaService } from '@domain/media/services/media.service';
+import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   BadRequestException,
@@ -19,6 +22,7 @@ import type { FastifyRequest } from 'fastify';
 import { OrgMemberRoleValues } from '@/db/schema';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
+import { isValidTaxId } from '@/utils/tax-id';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CreateOrganizationDto } from '../dto/request/create-organization.dto';
 import type { GetMyOrgsDto } from '../dto/request/get-my-orgs.dto';
@@ -26,6 +30,7 @@ import { UpdateOrganizationDto } from '../dto/request/update-organization.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
 import { SubdomainAvailabilityResponseDto } from '../dto/response/subdomain-availability-response.dto';
+import type { TaxIdValidationResponseDto } from '../dto/response/tax-id-validation-response.dto';
 
 @Injectable()
 export class OrganizationService {
@@ -38,6 +43,9 @@ export class OrganizationService {
     private readonly coreOrganizationService: CoreOrganizationService,
     private readonly deploymentRepository: DeploymentRepository,
     private readonly coreVersionRepository: CoreVersionRepository,
+    private readonly countryRepository: CountryRepository,
+    private readonly marketCountryRepository: MarketCountryRepository,
+    private readonly planRepository: PlanRepository,
   ) {}
 
   // Checks if a subdomain is available; throws ConflictException if already taken
@@ -76,6 +84,26 @@ export class OrganizationService {
       });
     }
 
+    // Ensure the selected plan belongs to the chosen vertical
+    const plan = await this.planRepository.findById(dto.planId);
+    if (!plan) {
+      throw new BadRequestException({
+        label: 'Invalid Plan',
+        detail: 'The specified plan does not exist.',
+        errors: [{ field: 'planId', message: 'Not found' }],
+      });
+    }
+    if (plan.businessId !== dto.businessId) {
+      throw new BadRequestException({
+        label: 'Plan Mismatch',
+        detail: 'The selected plan does not belong to the chosen vertical.',
+        errors: [{ field: 'planId', message: 'Wrong vertical' }],
+      });
+    }
+
+    // Validate the tax id and derive country code + market from the selected country
+    const { marketId, taxIdCountry } = await this.resolveTaxIdMarket(dto.countryId, dto.taxId);
+
     // Upload logo to public bucket if provided, to get permanent URL for core-server
     let logoUrl: string | undefined;
     if (file) {
@@ -107,7 +135,10 @@ export class OrganizationService {
 
     // Insert organization and owner membership atomically
     const org = await this.orgRepository.transaction(async (tx) => {
-      const createdOrg = await this.orgRepository.create({ ...dto, orgIdentifier: nexusOrg.id }, tx);
+      const createdOrg = await this.orgRepository.create(
+        { ...dto, marketId, taxIdCountry, orgIdentifier: nexusOrg.id },
+        tx,
+      );
       await this.orgMemberRepository.create(
         {
           organizationId: createdOrg.id,
@@ -133,6 +164,44 @@ export class OrganizationService {
     );
 
     return { ...OrgListItemDto.from(org, OrgMemberRoleValues.Owner), message: 'Organization created successfully' };
+  }
+
+  // Validates a tax id against a country and returns the derived country code + market
+  async validateTaxId(countryId: string, taxId: string): Promise<TaxIdValidationResponseDto> {
+    const { marketId, taxIdCountry } = await this.resolveTaxIdMarket(countryId, taxId);
+    this.logger.log(`Validated tax id for country ${countryId} → market ${marketId}`);
+    return { valid: true, countryId, countryCode: taxIdCountry, marketId };
+  }
+
+  // Validates the tax id format for the country's regime and resolves the country's pricing market
+  private async resolveTaxIdMarket(
+    countryId: string,
+    taxId: string,
+  ): Promise<{ marketId: string; taxIdCountry: string }> {
+    const country = await this.countryRepository.findById(countryId);
+    if (!country) {
+      throw new BadRequestException({
+        label: 'Invalid Country',
+        detail: 'The specified country does not exist.',
+        errors: [{ field: 'countryId', message: 'Not found' }],
+      });
+    }
+    if (!isValidTaxId(taxId, country.taxRegime)) {
+      throw new BadRequestException({
+        label: 'Invalid Tax ID',
+        detail: `The ${country.taxIdLabel ?? 'tax id'} you entered is not valid for ${country.name}.`,
+        errors: [{ field: 'taxId', message: 'Invalid format' }],
+      });
+    }
+    const marketCountry = await this.marketCountryRepository.findByCountryId(countryId);
+    if (!marketCountry) {
+      throw new BadRequestException({
+        label: 'Market Unavailable',
+        detail: `${country.name} is not mapped to a pricing market yet. Please contact support.`,
+        errors: [{ field: 'countryId', message: 'No market' }],
+      });
+    }
+    return { marketId: marketCountry.marketId, taxIdCountry: country.code };
   }
 
   // Returns paginated organizations for the authenticated user

@@ -14,16 +14,21 @@ export class CreateCloudProviderDto {
   @MaxLength(100)
   code: string;
 
-  @ApiPropertyOptional({ description: 'URL to the provider logo for light mode', example: 'https://cdn.vritti.io/providers/aws-light.svg' })
+  @ApiPropertyOptional({
+    description: 'URL to the provider logo for light mode',
+    example: 'https://cdn.vritti.io/providers/aws-light.svg',
+  })
   @IsOptional()
   @IsUrl()
   @MaxLength(500)
   logoUrl?: string;
 
-  @ApiPropertyOptional({ description: 'URL to the provider logo for dark mode', example: 'https://cdn.vritti.io/providers/aws-dark.svg' })
+  @ApiPropertyOptional({
+    description: 'URL to the provider logo for dark mode',
+    example: 'https://cdn.vritti.io/providers/aws-dark.svg',
+  })
   @IsOptional()
   @IsUrl()
   @MaxLength(500)
   logoDarkUrl?: string;
-
 }

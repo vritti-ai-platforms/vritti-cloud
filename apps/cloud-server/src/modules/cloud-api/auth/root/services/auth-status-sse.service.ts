@@ -77,7 +77,9 @@ export class AuthStatusSseService implements OnModuleDestroy {
       }
     }
 
-    this.logger.log(`Sent auth-status event to ${sentCount} session connection(s) for user ${userId}, session ${sessionId}`);
+    this.logger.log(
+      `Sent auth-status event to ${sentCount} session connection(s) for user ${userId}, session ${sessionId}`,
+    );
     return sentCount > 0;
   }
 

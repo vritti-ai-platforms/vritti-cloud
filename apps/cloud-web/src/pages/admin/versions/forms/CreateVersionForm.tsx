@@ -23,7 +23,7 @@ export const CreateVersionForm: React.FC<CreateVersionFormProps> = ({ onSuccess,
 
   return (
     <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
-      <TextField name="version" label="Version" placeholder="e.g. 1.0.0" description="Semantic version number" />
+      <TextField name="version" label="Version" placeholder="e.g. 1.0.0" />
       <TextField name="name" label="Name" placeholder="e.g. Initial Release" />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

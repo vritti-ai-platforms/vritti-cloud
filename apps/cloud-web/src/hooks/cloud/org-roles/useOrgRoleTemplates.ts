@@ -3,7 +3,7 @@ import type { AxiosError } from 'axios';
 import type { RoleTemplate } from '@/schemas/cloud/org-roles';
 import { getOrgRoleTemplates } from '../../../services/cloud/org-roles.service';
 
-export const ORG_ROLE_TEMPLATES_QUERY_KEY = (orgId: string) => ['organizations', orgId, 'role-templates'] as const;
+const ORG_ROLE_TEMPLATES_QUERY_KEY = (orgId: string) => ['organizations', orgId, 'role-templates'] as const;
 
 type UseOrgRoleTemplatesOptions = Omit<UseQueryOptions<RoleTemplate[], AxiosError>, 'queryKey' | 'queryFn'>;
 

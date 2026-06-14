@@ -6,7 +6,7 @@ import { featuresWithPermissionsQueryKey } from './useFeaturesWithPermissions';
 import { roleTemplateQueryKey } from './useRoleTemplate';
 import { roleTemplateAppsTableKey } from './useRoleTemplateAppsTable';
 
-type Vars = { versionId: string; roleTemplateId: string; appId: string };
+type Vars = { versionId: string; businessId: string; roleTemplateId: string; appId: string };
 type UseRemoveRoleTemplateAppOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, Vars>, 'mutationFn'>;
 
 // Removes an app from a role template and invalidates the features + detail queries

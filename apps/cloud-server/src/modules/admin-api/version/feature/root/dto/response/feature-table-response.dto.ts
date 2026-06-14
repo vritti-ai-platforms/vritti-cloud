@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TableResponseDto } from '@vritti/api-sdk';
 import type { TableViewState } from '@vritti/api-sdk';
+import { TableResponseDto } from '@vritti/api-sdk';
 import { FeatureDto } from '../entity/feature.dto';
 
 export class FeatureTableResponseDto extends TableResponseDto<FeatureDto> {

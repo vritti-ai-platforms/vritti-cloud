@@ -6,11 +6,14 @@ export * from './cloud-schema';
 export * from './enums';
 // Export all tables
 export * from './business';
+export * from './country';
+export * from './market';
+export * from './market-country';
 export * from './deployment';
-export * from './deployment-business-plan';
+export * from './deployment-plan';
 export * from './organization';
 export * from './plan';
-export * from './price';
+export * from './plan-price';
 export * from './cloud-provider';
 export * from './region';
 export * from './region-provider';
@@ -20,6 +23,7 @@ export * from './media';
 export * from './table-view';
 // RBAC tables
 export * from './version';
+export * from './version-business';
 export * from './microfrontend';
 export * from './feature';
 export * from './feature-microfrontend';

@@ -2,7 +2,10 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsInt, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateFeatureDto {
-  @ApiProperty({ description: 'App version UUID this feature belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiProperty({
+    description: 'App version UUID this feature belongs to',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
   @IsUUID()
   versionId: string;
 
@@ -24,7 +27,10 @@ export class CreateFeatureDto {
   @MaxLength(255)
   name: string;
 
-  @ApiPropertyOptional({ description: 'Optional description of the feature', example: 'Allows creating a new dine-in order' })
+  @ApiPropertyOptional({
+    description: 'Optional description of the feature',
+    example: 'Allows creating a new dine-in order',
+  })
   @IsOptional()
   @IsString()
   description?: string;

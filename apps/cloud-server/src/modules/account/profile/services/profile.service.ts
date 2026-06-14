@@ -17,10 +17,7 @@ import type { FastifyRequest } from 'fastify';
 import type { VerificationChannel } from '@/db/schema';
 import { VerificationChannelValues } from '@/db/schema';
 import { SmsService } from '@/services';
-import {
-  AUTH_STATUS_EVENTS,
-  ProfileUpdatedEvent,
-} from '../../../cloud-api/auth/root/events/auth-status.events';
+import { AUTH_STATUS_EVENTS, ProfileUpdatedEvent } from '../../../cloud-api/auth/root/events/auth-status.events';
 import { UserDto } from '../../../cloud-api/user/dto/entity/user.dto';
 import type { UpdateUserDto } from '../../../cloud-api/user/dto/request/update-user.dto';
 import { UpdateProfileDto } from '../dto/request/update-profile.dto';

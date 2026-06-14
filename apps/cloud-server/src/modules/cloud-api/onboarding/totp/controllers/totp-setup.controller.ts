@@ -2,10 +2,10 @@ import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/co
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { ApiInitiateTotpSetup, ApiVerifyTotpSetup } from '../docs/totp-setup.docs';
-import { VerifyTotpDto } from '../dto/request/verify-totp.dto';
 import type { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
 import type { TotpSetupResponseDto } from '../../../../account/security/dto/response/totp-setup-response.dto';
+import { ApiInitiateTotpSetup, ApiVerifyTotpSetup } from '../docs/totp-setup.docs';
+import { VerifyTotpDto } from '../dto/request/verify-totp.dto';
 import { TotpSetupService } from '../services/totp-setup.service';
 
 @ApiTags('Onboarding - TOTP')
@@ -31,10 +31,7 @@ export class TotpSetupController {
   @RequireSession(SessionTypeValues.ONBOARDING)
   @HttpCode(HttpStatus.OK)
   @ApiVerifyTotpSetup()
-  async verifyTotpSetup(
-    @UserId() userId: string,
-    @Body() dto: VerifyTotpDto,
-  ): Promise<BackupCodesResponseDto> {
+  async verifyTotpSetup(@UserId() userId: string, @Body() dto: VerifyTotpDto): Promise<BackupCodesResponseDto> {
     this.logger.log(`POST /onboarding/mfa/totp/verify - User: ${userId}`);
     return this.totpSetupService.verifySetup(userId, dto.code);
   }

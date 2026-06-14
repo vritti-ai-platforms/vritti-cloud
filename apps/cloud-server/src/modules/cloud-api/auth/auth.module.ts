@@ -1,3 +1,4 @@
+import { MediaDomainModule } from '@domain/media/media.module';
 import { MfaModule } from '@domain/mfa/mfa.module';
 import { OAuthDomainModule } from '@domain/oauth/oauth.module';
 import { SessionModule } from '@domain/session/session.module';
@@ -6,7 +7,6 @@ import { VerificationModule } from '@domain/verification/verification.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { MediaDomainModule } from '@domain/media/media.module';
 // MFA verification submodule
 import { MfaVerificationController } from './mfa-verification/controllers/mfa-verification.controller';
 import { MfaChallengeStore } from './mfa-verification/services/mfa-challenge.store';

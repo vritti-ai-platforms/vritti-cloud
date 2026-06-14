@@ -1,7 +1,12 @@
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { ForbiddenException, NotFoundException, ServiceUnavailableException, type SuccessResponseDto } from '@vritti/api-sdk';
+import {
+  ForbiddenException,
+  NotFoundException,
+  ServiceUnavailableException,
+  type SuccessResponseDto,
+} from '@vritti/api-sdk';
 import type { Deployment, Organization } from '@/db/schema';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
 import { CoreConfigService } from '@/modules/core-server/services/core-config.service';
@@ -143,7 +148,12 @@ export class OrganizationBusinessUnitsService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      return await this.coreBusinessUnitService.getRoleAssignments(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId);
+      return await this.coreBusinessUnitService.getRoleAssignments(
+        deployment.url,
+        deployment.webhookSecret,
+        org.orgIdentifier,
+        buId,
+      );
     } catch (error: unknown) {
       this.logger.error(`Failed to fetch role assignments for BU ${buId}: ${error}`);
       throw new ServiceUnavailableException({
@@ -154,7 +164,11 @@ export class OrganizationBusinessUnitsService {
   }
 
   // Assigns a role to a user at a business unit
-  async assignRole(orgId: string, buId: string, data: { userId: string; orgRoleId: string }): Promise<SuccessResponseDto> {
+  async assignRole(
+    orgId: string,
+    buId: string,
+    data: { userId: string; orgRoleId: string },
+  ): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
@@ -213,9 +227,15 @@ export class OrganizationBusinessUnitsService {
     await this.organizationRepository.update(orgId, { buAppAssignments: assignments });
 
     try {
-      const result = await this.coreBusinessUnitService.updateBuApps(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId, {
-        appCodes,
-      });
+      const result = await this.coreBusinessUnitService.updateBuApps(
+        deployment.url,
+        deployment.webhookSecret,
+        org.orgIdentifier,
+        buId,
+        {
+          appCodes,
+        },
+      );
       // Invalidate config cache so core-server fetches fresh catalogs
       await this.coreConfigService.invalidateOrg(deployment.url, deployment.webhookSecret, org.orgIdentifier);
       this.logger.log(`Updated apps for BU ${buId} in org ${orgId}: [${appCodes.join(', ')}]`);
@@ -234,7 +254,12 @@ export class OrganizationBusinessUnitsService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      return await this.coreRoleService.getCompatibleRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId);
+      return await this.coreRoleService.getCompatibleRoles(
+        deployment.url,
+        deployment.webhookSecret,
+        org.orgIdentifier,
+        buId,
+      );
     } catch (error: unknown) {
       this.logger.error(`Failed to fetch compatible roles for BU ${buId}: ${error}`);
       throw new ServiceUnavailableException({

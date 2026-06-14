@@ -45,12 +45,7 @@ export const AddCloudProviderForm: React.FC<AddCloudProviderFormProps> = ({ onSu
       })}
     >
       <TextField name="name" label="Provider Name" placeholder="e.g. Amazon Web Services" />
-      <TextField
-        name="code"
-        label="Code"
-        placeholder="e.g. AWS"
-        description="Short identifier used across the platform"
-      />
+      <TextField name="code" label="Code" placeholder="e.g. AWS" />
       <TextField name="logoUrl" label="Logo URL (Light Mode)" placeholder="https://cdn.example.com/aws-light.svg" />
       <div className="space-y-2">
         <TextField

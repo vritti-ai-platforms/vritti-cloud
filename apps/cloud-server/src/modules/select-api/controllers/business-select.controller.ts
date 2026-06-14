@@ -1,8 +1,9 @@
+import { BusinessService } from '@domain/business/services/business.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { BusinessService } from '@domain/business/services/business.service';
+import { BusinessSelectQueryDto } from '../dto/business-select-query.dto';
 
 @ApiTags('Select')
 @ApiBearerAuth()
@@ -13,10 +14,10 @@ export class BusinessSelectController {
 
   constructor(private readonly businessService: BusinessService) {}
 
-  // Returns paginated business options for the select component
+  // Returns paginated business options for the select component, optionally excluding businesses already assigned to a version
   @Get()
-  findForSelect(@Query() query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+  findForSelect(@Query() query: BusinessSelectQueryDto): Promise<SelectQueryResult> {
     this.logger.log('GET /select-api/businesses');
-    return this.businessService.findForSelect(query);
+    return this.businessService.findForSelect(query, query.notInVersion);
   }
 }

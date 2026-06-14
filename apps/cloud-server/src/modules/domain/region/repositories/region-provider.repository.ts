@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryDatabaseService } from '@vritti/api-sdk';
-import { eq, and } from '@vritti/api-sdk/drizzle-orm';
+import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import type { CloudProvider } from '@/db/schema';
 import { cloudProviders, regionCloudProviders } from '@/db/schema';
 
@@ -10,7 +10,10 @@ export class RegionProviderRepository {
 
   // Inserts a single region-cloud-provider pair; skips if already assigned
   async insertOne(regionId: string, providerId: string): Promise<void> {
-    await this.database.drizzleClient.insert(regionCloudProviders).values({ regionId, providerId }).onConflictDoNothing();
+    await this.database.drizzleClient
+      .insert(regionCloudProviders)
+      .values({ regionId, providerId })
+      .onConflictDoNothing();
   }
 
   // JOINs regionCloudProviders with cloudProviders to return provider rows for a region

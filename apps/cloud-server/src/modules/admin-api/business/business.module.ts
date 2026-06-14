@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common';
 import { BusinessDomainModule } from '@domain/business/business.module';
+import { Module } from '@nestjs/common';
 import { BusinessController } from './root/controllers/business.controller';
 
 @Module({

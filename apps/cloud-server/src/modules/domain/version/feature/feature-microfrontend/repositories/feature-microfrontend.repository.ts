@@ -4,7 +4,6 @@ import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import type { FeatureMicrofrontend } from '@/db/schema';
 import { featureMicrofrontends, microfrontends } from '@/db/schema';
 
-// Joined row shape returned by findByFeatureId
 export type FeatureMicrofrontendJoinedRow = {
   id: string;
   featureId: string;
@@ -77,7 +76,9 @@ export class FeatureMicrofrontendRepository extends PrimaryBaseRepository<typeof
   async deleteByFeatureAndMf(featureId: string, microfrontendId: string): Promise<boolean> {
     const result = await this.db
       .delete(featureMicrofrontends)
-      .where(and(eq(featureMicrofrontends.featureId, featureId), eq(featureMicrofrontends.microfrontendId, microfrontendId)))
+      .where(
+        and(eq(featureMicrofrontends.featureId, featureId), eq(featureMicrofrontends.microfrontendId, microfrontendId)),
+      )
       .returning();
     return result.length > 0;
   }

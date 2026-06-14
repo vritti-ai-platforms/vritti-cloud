@@ -7,14 +7,14 @@ import {
   ServiceUnavailableException,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { type Column, and, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, type Column, sql } from '@vritti/api-sdk/drizzle-orm';
 import { businesses, deployments, organizations, plans } from '@/db/schema';
-import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
-import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
-import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
 import { OrganizationDto } from '@/modules/admin-api/organization/dto/entity/organization.dto';
 import { OrganizationDetailDto } from '@/modules/admin-api/organization/dto/entity/organization-detail.dto';
 import { OrganizationTableResponseDto } from '@/modules/admin-api/organization/dto/response/organizations-response.dto';
+import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
+import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
+import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
 import { OrganizationRepository } from '../repositories/organization.repository';
 
 @Injectable()
@@ -31,7 +31,8 @@ export class OrganizationService {
     planId: { column: organizations.planId, type: 'string' },
     businessId: { column: organizations.businessId, type: 'string' },
     memberCount: {
-      column: sql<number>`(SELECT count(*) FROM cloud.organization_members WHERE organization_id = ${organizations.id})` as unknown as Column,
+      column:
+        sql<number>`(SELECT count(*) FROM cloud.organization_members WHERE organization_id = ${organizations.id})` as unknown as Column,
       type: 'number',
     },
   };
@@ -115,7 +116,6 @@ export class OrganizationService {
             : null,
         };
       });
-
 
     try {
       await this.coreOrganizationService.updateOrganization(

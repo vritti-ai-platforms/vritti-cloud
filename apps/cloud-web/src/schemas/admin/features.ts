@@ -69,11 +69,7 @@ export const setFeatureMicrofrontendSchema = z.object({
     .min(1, 'Exposed module is required')
     .max(100)
     .regex(/^\.\//, 'Must start with ./ (e.g. ./Orders)'),
-  routePrefix: z
-    .string()
-    .min(1, 'Route prefix is required')
-    .max(100)
-    .regex(/^\//, 'Must start with / (e.g. /orders)'),
+  routePrefix: z.string().min(1, 'Route prefix is required').max(100).regex(/^\//, 'Must start with / (e.g. /orders)'),
 });
 
 export type CreateFeatureInput = z.input<typeof createFeatureSchema>;

@@ -7,11 +7,6 @@ export function getPlanAppsTable(planId: string): Promise<PlanAppsTableResponse>
   return axios.get<PlanAppsTableResponse>(`admin-api/plans/${planId}/apps/table`).then((r) => r.data);
 }
 
-// Fetches apps assigned to a plan
-export function getPlanApps(planId: string): Promise<PlanApp[]> {
-  return axios.get<PlanApp[]>(`admin-api/plans/${planId}/apps`).then((r) => r.data);
-}
-
 // Assigns an app to a plan
 export function assignPlanApp({ planId, data }: { planId: string; data: AssignPlanAppData }): Promise<PlanApp> {
   return axios.post<PlanApp>(`admin-api/plans/${planId}/apps`, data).then((r) => r.data);

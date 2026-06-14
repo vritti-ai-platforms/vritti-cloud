@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateResponseDto, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
-import { FeatureRepository } from '../../root/repositories/feature.repository';
-import { MicrofrontendRepository } from '../../../microfrontend/repositories/microfrontend.repository';
 import { FeatureMicrofrontendDto } from '@/modules/admin-api/version/feature/feature-microfrontend/dto/entity/feature-microfrontend.dto';
 import type { SetFeatureMicrofrontendDto } from '@/modules/admin-api/version/feature/feature-microfrontend/dto/request/set-feature-microfrontend.dto';
+import { MicrofrontendRepository } from '../../../microfrontend/repositories/microfrontend.repository';
+import { FeatureRepository } from '../../root/repositories/feature.repository';
 import { FeatureMicrofrontendRepository } from '../repositories/feature-microfrontend.repository';
 
 @Injectable()
@@ -28,7 +28,11 @@ export class FeatureMicrofrontendService {
   }
 
   // Sets or updates a microfrontend link for a feature (idempotent upsert)
-  async set(featureId: string, microfrontendId: string, dto: SetFeatureMicrofrontendDto): Promise<CreateResponseDto<FeatureMicrofrontendDto>> {
+  async set(
+    featureId: string,
+    microfrontendId: string,
+    dto: SetFeatureMicrofrontendDto,
+  ): Promise<CreateResponseDto<FeatureMicrofrontendDto>> {
     const feature = await this.featureRepository.findById(featureId);
     if (!feature) {
       throw new NotFoundException('Feature not found.');

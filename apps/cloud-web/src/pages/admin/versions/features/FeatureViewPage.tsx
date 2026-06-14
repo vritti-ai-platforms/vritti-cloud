@@ -23,7 +23,7 @@ export const FeatureViewPage = () => {
   const { data: feature } = useFeature(versionId, id);
 
   const deleteMutation = useDeleteFeature(versionId, {
-    onSuccess: () => navigate('../features'),
+    onSuccess: () => navigate('../..'),
   });
 
   // Prompt confirmation then delete

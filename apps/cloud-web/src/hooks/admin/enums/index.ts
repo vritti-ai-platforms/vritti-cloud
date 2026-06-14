@@ -1,1 +1,1 @@
-export { PERMISSION_TYPES_KEY, usePermissionTypes } from './usePermissionTypes';
+export { usePermissionTypes } from './usePermissionTypes';

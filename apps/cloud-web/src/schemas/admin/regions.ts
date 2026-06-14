@@ -28,14 +28,6 @@ export interface Region {
   updatedAt: string | null;
 }
 
-export interface RegionCloudProvider {
-  id: string;
-  name: string;
-  code: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export interface RegionsResponse {
   result: Region[];
   state: TableViewState;

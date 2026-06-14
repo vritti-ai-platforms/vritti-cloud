@@ -70,7 +70,6 @@ export const oauthStates = cloudSchema.table(
   ],
 );
 
-// Type exports
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type OAuthProvider = typeof oauthProviders.$inferSelect;

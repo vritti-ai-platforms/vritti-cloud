@@ -1,8 +1,8 @@
+import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
 import { MicrofrontendSelectQueryDto } from '../dto/microfrontend-select-query.dto';
 
 @ApiTags('Select')

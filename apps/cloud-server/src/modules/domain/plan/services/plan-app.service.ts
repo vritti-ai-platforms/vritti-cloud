@@ -10,12 +10,12 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { planApps } from '@/db/schema';
-import { PlanRepository } from '../repositories/plan.repository';
 import { PlanAppDto } from '@/modules/admin-api/plan/plan-app/dto/entity/plan-app.dto';
 import { PlanAppTableRowDto } from '@/modules/admin-api/plan/plan-app/dto/entity/plan-app-table-row.dto';
-import type { PlanAppTableResponseDto } from '@/modules/admin-api/plan/plan-app/dto/response/plan-app-table-response.dto';
 import type { AssignPlanAppDto } from '@/modules/admin-api/plan/plan-app/dto/request/assign-plan-app.dto';
 import type { UpdatePlanAppDto } from '@/modules/admin-api/plan/plan-app/dto/request/update-plan-app.dto';
+import type { PlanAppTableResponseDto } from '@/modules/admin-api/plan/plan-app/dto/response/plan-app-table-response.dto';
+import { PlanRepository } from '../repositories/plan.repository';
 import { PlanAppRepository } from '../repositories/plan-app.repository';
 
 @Injectable()
@@ -42,7 +42,9 @@ export class PlanAppService {
     const orderBy = FilterProcessor.buildOrderBy(state.sort, PlanAppService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.planAppRepository.findAllForTable(planId, where, orderBy, limit, offset);
-    this.logger.log(`Fetched plan apps table for plan: ${planId} (${total} results, limit: ${limit}, offset: ${offset})`);
+    this.logger.log(
+      `Fetched plan apps table for plan: ${planId} (${total} results, limit: ${limit}, offset: ${offset})`,
+    );
     return { result: rows.map(PlanAppTableRowDto.from), count: total, state, activeViewId };
   }
 
@@ -52,7 +54,14 @@ export class PlanAppService {
     const rows = await this.planAppRepository.findByPlanId(planId);
     this.logger.log(`Fetched ${rows.length} apps for plan: ${planId}`);
     return rows.map((row) => {
-      const planApp = { id: row.id, planId: row.planId, appCode: row.appCode, includedFeatureCodes: row.includedFeatureCodes, sortOrder: row.sortOrder, createdAt: new Date() };
+      const planApp = {
+        id: row.id,
+        planId: row.planId,
+        appCode: row.appCode,
+        includedFeatureCodes: row.includedFeatureCodes,
+        sortOrder: row.sortOrder,
+        createdAt: new Date(),
+      };
       return PlanAppDto.from(planApp);
     });
   }

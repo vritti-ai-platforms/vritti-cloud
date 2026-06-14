@@ -22,7 +22,8 @@ export class BackupCodesResponseDto {
 
   @ApiProperty({
     description: 'Warning about storing backup codes securely',
-    example: 'Save these backup codes in a secure location. Each code can only be used once and they will not be shown again.',
+    example:
+      'Save these backup codes in a secure location. Each code can only be used once and they will not be shown again.',
   })
   warning: string;
 

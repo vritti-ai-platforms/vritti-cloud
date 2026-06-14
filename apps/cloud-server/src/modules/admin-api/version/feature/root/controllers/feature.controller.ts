@@ -106,5 +106,4 @@ export class FeatureController {
     this.logger.log(`DELETE /admin-api/features/${id}`);
     return this.featureService.delete(id);
   }
-
 }

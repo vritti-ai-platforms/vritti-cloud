@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
 import type { FeatureType, NewFeaturePermission } from '@/db/schema';
-import { FeatureRepository } from '../../root/repositories/feature.repository';
 import type { SetFeaturePermissionsDto } from '@/modules/admin-api/version/feature/feature-permission/dto/request/set-feature-permissions.dto';
+import { FeatureRepository } from '../../root/repositories/feature.repository';
 import { FeaturePermissionRepository } from '../repositories/feature-permission.repository';
 
 @Injectable()
@@ -45,6 +45,9 @@ export class FeaturePermissionService {
     });
 
     this.logger.log(`Set ${dto.types.length} permissions for feature: ${featureId}`);
-    return { success: true, message: `Permissions for "${feature.name}" updated successfully (${dto.types.length} types).` };
+    return {
+      success: true,
+      message: `Permissions for "${feature.name}" updated successfully (${dto.types.length} types).`,
+    };
   }
 }

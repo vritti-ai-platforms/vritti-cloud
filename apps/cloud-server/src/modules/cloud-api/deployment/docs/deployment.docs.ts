@@ -17,7 +17,12 @@ export function ApiGetDeployments() {
     ApiQuery({ name: 'regionId', description: 'Region UUID', required: true }),
     ApiQuery({ name: 'cloudProviderId', description: 'Cloud provider UUID', required: true }),
     ApiQuery({ name: 'businessId', description: 'Business UUID', required: true }),
-    ApiResponse({ status: 200, description: 'Deployments retrieved successfully.', type: DeploymentOptionDto, isArray: true }),
+    ApiResponse({
+      status: 200,
+      description: 'Deployments retrieved successfully.',
+      type: DeploymentOptionDto,
+      isArray: true,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }

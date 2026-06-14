@@ -86,11 +86,7 @@ export class OAuthProviderRepository extends PrimaryBaseRepository<typeof oauthP
   async setActiveProfilePictureProvider(userId: string, providerId: string): Promise<void> {
     // First, set all providers for this user to false
     const allProviders = await this.findByUserId(userId);
-    await Promise.all(
-      allProviders.map((provider) =>
-        this.update(provider.id, { useProfilePictureUrl: false }),
-      ),
-    );
+    await Promise.all(allProviders.map((provider) => this.update(provider.id, { useProfilePictureUrl: false })));
 
     // Then set the target provider to true
     const targetProvider = allProviders.find((p) => p.id === providerId);

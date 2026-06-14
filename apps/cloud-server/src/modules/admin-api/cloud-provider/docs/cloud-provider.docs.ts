@@ -1,10 +1,9 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { CloudProviderDto } from '../dto/entity/cloud-provider.dto';
 import { CreateCloudProviderDto } from '../dto/request/create-cloud-provider.dto';
 import { UpdateCloudProviderDto } from '../dto/request/update-cloud-provider.dto';
-import { CloudProviderSelectResponseDto } from '../dto/response/cloud-provider-select-response.dto';
 import { CloudProviderTableResponseDto } from '../dto/response/cloud-providers-response.dto';
 
 export function ApiCreateCloudProvider() {
@@ -15,22 +14,6 @@ export function ApiCreateCloudProvider() {
     ApiResponse({ status: 400, description: 'Validation failed.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 409, description: 'Cloud provider with this code already exists.' }),
-  );
-}
-
-export function ApiFindCloudProvidersSelect() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get cloud providers for select component' }),
-    ApiQuery({ name: 'search', required: false }),
-    ApiQuery({ name: 'limit', required: false, type: Number }),
-    ApiQuery({ name: 'offset', required: false, type: Number }),
-    ApiQuery({ name: 'regionId', required: false, description: 'Filter by region ID' }),
-    ApiResponse({
-      status: 200,
-      description: 'Cloud provider options retrieved.',
-      type: CloudProviderSelectResponseDto,
-    }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
 

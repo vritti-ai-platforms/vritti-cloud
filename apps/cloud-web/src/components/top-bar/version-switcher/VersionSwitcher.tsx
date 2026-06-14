@@ -66,8 +66,9 @@ export const VersionSwitcher = ({ currentVersionId, currentVersionName }: Versio
         </>
       }
       onOptionSelect={(option) => {
-        if (option) {
-          navigate(`/versions/ver-${buildSlug(String(option.label), String(option.value))}/microfrontends`);
+        // Skip the on-mount initial-resolve fire (same version) — only navigate on a real switch
+        if (option && String(option.value) !== currentVersionId) {
+          navigate(`/versions/ver-${buildSlug(String(option.label), String(option.value))}`);
         }
       }}
     />

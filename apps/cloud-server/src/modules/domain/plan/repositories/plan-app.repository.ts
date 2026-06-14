@@ -38,12 +38,11 @@ export class PlanAppRepository extends PrimaryBaseRepository<typeof planApps> {
   }
 
   // Updates included feature codes and sort order for a plan-app row
-  async updateIncludedFeatureCodes(id: string, data: { includedFeatureCodes?: string[] | null; sortOrder?: number }): Promise<PlanApp> {
-    const result = await this.db
-      .update(planApps)
-      .set(data)
-      .where(eq(planApps.id, id))
-      .returning();
+  async updateIncludedFeatureCodes(
+    id: string,
+    data: { includedFeatureCodes?: string[] | null; sortOrder?: number },
+  ): Promise<PlanApp> {
+    const result = await this.db.update(planApps).set(data).where(eq(planApps.id, id)).returning();
     return result[0] as PlanApp;
   }
 
@@ -81,10 +80,7 @@ export class PlanAppRepository extends PrimaryBaseRepository<typeof planApps> {
         .orderBy(...(orderBy ?? []))
         .limit(limit)
         .offset(offset),
-      this.db
-        .select({ count: count() })
-        .from(planApps)
-        .where(baseWhere),
+      this.db.select({ count: count() }).from(planApps).where(baseWhere),
     ]);
 
     return { rows, total: Number(totalResult[0]?.count ?? 0) };

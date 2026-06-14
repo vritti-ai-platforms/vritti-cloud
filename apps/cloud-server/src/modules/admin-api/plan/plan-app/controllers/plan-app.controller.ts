@@ -1,3 +1,4 @@
+import { PlanAppService } from '@domain/plan/services/plan-app.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
@@ -13,7 +14,6 @@ import { PlanAppDto } from '../dto/entity/plan-app.dto';
 import { AssignPlanAppDto } from '../dto/request/assign-plan-app.dto';
 import { UpdatePlanAppDto } from '../dto/request/update-plan-app.dto';
 import { PlanAppTableResponseDto } from '../dto/response/plan-app-table-response.dto';
-import { PlanAppService } from '@domain/plan/services/plan-app.service';
 
 @ApiTags('Admin - Plan Apps')
 @ApiBearerAuth()
@@ -27,10 +27,7 @@ export class PlanAppController {
   // Returns plan apps for the data table with server-stored state
   @Get('table')
   @ApiFindForTablePlanApps()
-  findForTable(
-    @UserId() userId: string,
-    @Param('planId') planId: string,
-  ): Promise<PlanAppTableResponseDto> {
+  findForTable(@UserId() userId: string, @Param('planId') planId: string): Promise<PlanAppTableResponseDto> {
     this.logger.log(`GET /admin-api/plans/${planId}/apps/table`);
     return this.planAppService.findForTable(userId, planId);
   }

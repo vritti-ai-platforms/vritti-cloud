@@ -40,23 +40,26 @@ export class BusinessService {
     return businessList.map((business) => CloudBusinessDto.from(business));
   }
 
-  // Returns paginated business options for the select component
-  findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+  // Returns paginated business options for the select component, optionally excluding those assigned to a version
+  findForSelect(query: SelectOptionsQueryDto, notInVersion?: string): Promise<SelectQueryResult> {
     this.logger.log(
-      `Fetched business select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+      `Fetched business select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search}, notInVersion: ${notInVersion})`,
     );
-    return this.businessRepository.findForSelect({
-      value: query.valueKey || 'id',
-      label: query.labelKey || 'name',
-      description: query.descriptionKey,
-      groupIdKey: query.groupIdKey,
-      search: query.search,
-      limit: query.limit,
-      offset: query.offset,
-      values: query.values,
-      excludeIds: query.excludeIds,
-      orderBy: { name: 'asc' },
-    });
+    return this.businessRepository.findForSelectExcludingVersion(
+      {
+        value: query.valueKey || 'id',
+        label: query.labelKey || 'name',
+        description: query.descriptionKey,
+        groupIdKey: query.groupIdKey,
+        search: query.search,
+        limit: query.limit,
+        offset: query.offset,
+        values: query.values,
+        excludeIds: query.excludeIds,
+        orderBy: { name: 'asc' },
+      },
+      notInVersion,
+    );
   }
 
   // Creates a new business; throws ConflictException on duplicate code
@@ -124,9 +127,9 @@ export class BusinessService {
     const refs = await this.businessRepository.countReferences(id);
     const parts: string[] = [];
     if (refs.organizations > 0) parts.push(`${refs.organizations} organization${refs.organizations > 1 ? 's' : ''}`);
-    if (refs.prices > 0) parts.push(`${refs.prices} price${refs.prices > 1 ? 's' : ''}`);
-    if (refs.deploymentPlans > 0)
-      parts.push(`${refs.deploymentPlans} deployment plan${refs.deploymentPlans > 1 ? 's' : ''}`);
+    if (refs.plans > 0) parts.push(`${refs.plans} plan${refs.plans > 1 ? 's' : ''}`);
+    if (refs.apps > 0) parts.push(`${refs.apps} app${refs.apps > 1 ? 's' : ''}`);
+    if (refs.roleTemplates > 0) parts.push(`${refs.roleTemplates} role template${refs.roleTemplates > 1 ? 's' : ''}`);
     if (parts.length > 0) {
       throw new ConflictException({
         label: 'Business In Use',

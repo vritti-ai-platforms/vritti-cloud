@@ -19,7 +19,11 @@ export class CreateMicrofrontendDto {
   @MaxLength(255)
   name: string;
 
-  @ApiProperty({ description: 'Target platform', enum: [AppPlatformValues.WEB, AppPlatformValues.MOBILE], example: 'WEB' })
+  @ApiProperty({
+    description: 'Target platform',
+    enum: [AppPlatformValues.WEB, AppPlatformValues.MOBILE],
+    example: 'WEB',
+  })
   @IsEnum(AppPlatformValues, { message: 'Platform must be WEB or MOBILE' })
   platform: AppPlatform;
 
@@ -33,7 +37,10 @@ export class CreateMicrofrontendDto {
   remoteEntry?: string;
 
   // Required when platform = MOBILE
-  @ApiPropertyOptional({ description: 'Android remote entry URL (required for MOBILE)', example: 'https://cdn/.../android/mf-manifest.json' })
+  @ApiPropertyOptional({
+    description: 'Android remote entry URL (required for MOBILE)',
+    example: 'https://cdn/.../android/mf-manifest.json',
+  })
   @ValidateIf((o) => o.platform === AppPlatformValues.MOBILE)
   @IsString()
   @MinLength(1)
@@ -42,7 +49,10 @@ export class CreateMicrofrontendDto {
   remoteEntryAndroid?: string;
 
   // Required when platform = MOBILE
-  @ApiPropertyOptional({ description: 'iOS remote entry URL (required for MOBILE)', example: 'https://cdn/.../ios/mf-manifest.json' })
+  @ApiPropertyOptional({
+    description: 'iOS remote entry URL (required for MOBILE)',
+    example: 'https://cdn/.../ios/mf-manifest.json',
+  })
   @ValidateIf((o) => o.platform === AppPlatformValues.MOBILE)
   @IsString()
   @MinLength(1)

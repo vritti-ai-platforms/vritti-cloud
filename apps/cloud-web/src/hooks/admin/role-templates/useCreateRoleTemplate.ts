@@ -10,13 +10,13 @@ type UseCreateRoleTemplateOptions = Omit<
   'mutationFn'
 >;
 
-export function useCreateRoleTemplate(versionId: string, options?: UseCreateRoleTemplateOptions) {
+export function useCreateRoleTemplate(versionId: string, businessId: string, options?: UseCreateRoleTemplateOptions) {
   const queryClient = useQueryClient();
   return useMutation<CreateResponse<Role>, AxiosError, CreateRoleTemplateData>({
     ...options,
-    mutationFn: (data) => createRoleTemplate(versionId, data),
+    mutationFn: (data) => createRoleTemplate(versionId, businessId, data),
     onSuccess: (result, ...args) => {
-      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId) });
+      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId, businessId) });
       options?.onSuccess?.(result, ...args);
     },
   });

@@ -72,14 +72,6 @@ export interface BackupCodesResponse {
   warning: string;
 }
 
-export interface TwoFactorStatusResponse {
-  isEnabled: boolean;
-  method: string | null;
-  backupCodesRemaining: number;
-  lastUsedAt: string | null;
-  createdAt: string | null;
-}
-
 // Initiates TOTP setup and returns QR code for authenticator apps
 export function initiateTotpSetup(): Promise<TotpSetupResponse> {
   return axios.post<TotpSetupResponse>('onboarding/mfa/totp/setup').then((r) => r.data);
@@ -93,11 +85,6 @@ export function verifyTotpSetup(code: string): Promise<BackupCodesResponse> {
 // Skips MFA setup and completes onboarding without MFA
 export function skipMFASetup(): Promise<{ success: boolean; message: string }> {
   return axios.post<{ success: boolean; message: string }>('onboarding/mfa/skip').then((r) => r.data);
-}
-
-// Gets current MFA status for the authenticated user
-export function getMFAStatus(): Promise<TwoFactorStatusResponse> {
-  return axios.get<TwoFactorStatusResponse>('onboarding/mfa/status').then((r) => r.data);
 }
 
 // ============================================================================

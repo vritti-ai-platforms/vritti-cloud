@@ -10,7 +10,10 @@ class OrganizationSelectOptionDto {
   @ApiPropertyOptional({ example: 'free' })
   description?: string;
 
-  @ApiPropertyOptional({ example: '550e8400-e29b-41d4-a716-446655440000', oneOf: [{ type: 'string' }, { type: 'number' }] })
+  @ApiPropertyOptional({
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    oneOf: [{ type: 'string' }, { type: 'number' }],
+  })
   groupId?: string | number;
 }
 

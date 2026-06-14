@@ -33,7 +33,8 @@ export function ApiCompleteOnboarding() {
   return applyDecorators(
     ApiOperation({
       summary: 'Complete onboarding',
-      description: 'Upgrades session from ONBOARDING to CLOUD and rotates tokens. Call this when the user clicks Go to Dashboard.',
+      description:
+        'Upgrades session from ONBOARDING to CLOUD and rotates tokens. Call this when the user clicks Go to Dashboard.',
     }),
     ApiResponse({ status: 200, description: 'Session upgraded successfully.', type: TokenResponse }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),

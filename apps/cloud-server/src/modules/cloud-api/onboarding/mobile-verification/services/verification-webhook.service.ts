@@ -68,11 +68,7 @@ export class VerificationWebhookService {
   }
 
   // Validates WhatsApp signature and fires async processing
-  private handleWhatsAppWebhook(
-    rawBody: string,
-    signature: string,
-    payload: WhatsAppWebhookDto,
-  ): { status: string } {
+  private handleWhatsAppWebhook(rawBody: string, signature: string, payload: WhatsAppWebhookDto): { status: string } {
     if (!this.whatsappService.validateWebhookSignature(rawBody, signature)) {
       throw new UnauthorizedException('Invalid WhatsApp webhook signature');
     }
@@ -87,11 +83,7 @@ export class VerificationWebhookService {
   }
 
   // Validates SMS signature and fires async processing
-  private handleSmsWebhook(
-    rawBody: string,
-    signature: string,
-    payload: TwilioSmsWebhookDto,
-  ): { status: string } {
+  private handleSmsWebhook(rawBody: string, signature: string, payload: TwilioSmsWebhookDto): { status: string } {
     if (!this.smsService.validateWebhookSignature(rawBody, signature)) {
       throw new UnauthorizedException('Invalid SMS webhook signature');
     }
@@ -182,5 +174,4 @@ export class VerificationWebhookService {
     const match = messageText.match(/VER-?([A-Z0-9]{6})/i);
     return match ? `VER${match[1].toUpperCase()}` : null;
   }
-
 }

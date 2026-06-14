@@ -2,7 +2,11 @@ import { ApiProperty } from '@nestjs/swagger';
 import type { OAuthProviderType } from '@/db/schema';
 
 export class LinkedAccountDto {
-  @ApiProperty({ description: 'OAuth provider type', example: 'GOOGLE', enum: ['GOOGLE', 'MICROSOFT', 'APPLE', 'FACEBOOK', 'X'] })
+  @ApiProperty({
+    description: 'OAuth provider type',
+    example: 'GOOGLE',
+    enum: ['GOOGLE', 'MICROSOFT', 'APPLE', 'FACEBOOK', 'X'],
+  })
   provider: OAuthProviderType;
 
   @ApiProperty({ description: 'When the provider was linked', type: String, format: 'date-time' })

@@ -1,6 +1,6 @@
 import { axios } from '@vritti/quantum-ui/axios';
 
-export enum OnboardingStep {
+enum OnboardingStep {
   EMAIL_VERIFICATION = 'EMAIL_VERIFICATION',
   PHONE_VERIFICATION = 'PHONE_VERIFICATION',
   SET_PASSWORD = 'SET_PASSWORD',
@@ -165,18 +165,6 @@ export interface AuthenticationResponseJSON {
   authenticatorAttachment?: 'platform' | 'cross-platform';
   clientExtensionResults: Record<string, unknown>;
   type: 'public-key';
-}
-
-// Starts passkey authentication flow
-export function startPasskeyLogin(email?: string): Promise<PasskeyAuthOptionsResponse> {
-  return axios.post<PasskeyAuthOptionsResponse>('auth/passkey/start', { email }, { public: true }).then((r) => r.data);
-}
-
-// Verifies passkey authentication and logs in the user
-export function verifyPasskeyLogin(sessionId: string, credential: AuthenticationResponseJSON): Promise<LoginResponse> {
-  return axios
-    .post<LoginResponse>('auth/passkey/verify', { sessionId, credential }, { public: true })
-    .then((r) => r.data);
 }
 
 export interface SuccessResponse {

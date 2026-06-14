@@ -13,7 +13,11 @@ export function ApiSkipMfaSetup() {
 export function ApiGetMfaStatus() {
   return applyDecorators(
     ApiOperation({ summary: 'Get current MFA status' }),
-    ApiResponse({ status: 200, description: 'Returns the current MFA configuration status', type: MfaStatusResponseDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Returns the current MFA configuration status',
+      type: MfaStatusResponseDto,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized - Invalid or missing onboarding token' }),
   );
 }

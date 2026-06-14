@@ -2,7 +2,6 @@ import { AdminLayout } from '@layouts/AdminLayout';
 import { AppLayout } from '@layouts/AppLayout';
 import { AuthLayout } from '@layouts/AuthLayout';
 import { OrgLayout } from '@layouts/OrgLayout';
-import { VersionLayout } from '@layouts/VersionLayout';
 import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
 import { Suspense } from 'react';
 import type { RouteObject } from 'react-router-dom';
@@ -13,9 +12,13 @@ import { ProfilePage } from './pages/account/profile/ProfilePage';
 import { SecurityPage } from './pages/account/security/SecurityPage';
 import { BusinessesPage } from './pages/admin/businesses/BusinessesPage';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
+import { CountriesPage } from './pages/admin/countries/CountriesPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
 import { DeploymentViewPageSkeleton } from './pages/admin/deployments/DeploymentViewPageSkeleton';
+import { MarketsPage } from './pages/admin/markets/MarketsPage';
+import { MarketViewPage } from './pages/admin/markets/MarketViewPage';
+import { MarketViewPageSkeleton } from './pages/admin/markets/MarketViewPageSkeleton';
 import { OrganizationsPage as AdminOrganizationsPage } from './pages/admin/organizations/OrganizationsPage';
 import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/organizations/OrganizationViewPage';
 import { OrganizationViewPageSkeleton } from './pages/admin/organizations/OrganizationViewPageSkeleton';
@@ -25,18 +28,15 @@ import { PlanViewPageSkeleton } from './pages/admin/plans/PlanViewPageSkeleton';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
 import { RegionViewPageSkeleton } from './pages/admin/regions/RegionViewPageSkeleton';
-import { AdminAppsPage } from './pages/admin/versions/apps/AdminAppsPage';
-import { AppViewPage } from './pages/admin/versions/apps/AppViewPage';
-import { AppViewPageSkeleton } from './pages/admin/versions/apps/AppViewPageSkeleton';
-import { FeaturesPage } from './pages/admin/versions/features/FeaturesPage';
+import { BusinessAppPage } from './pages/admin/versions/businesses/BusinessAppPage';
+import { BusinessAppPageSkeleton } from './pages/admin/versions/businesses/BusinessAppPageSkeleton';
+import { BusinessDetailPage } from './pages/admin/versions/businesses/BusinessDetailPage';
 import { FeatureViewPage } from './pages/admin/versions/features/FeatureViewPage';
 import { FeatureViewPageSkeleton } from './pages/admin/versions/features/FeatureViewPageSkeleton';
-import { MicrofrontendsPage } from './pages/admin/versions/microfrontends/MicrofrontendsPage';
-import { OverviewPage as VersionOverviewPage } from './pages/admin/versions/overview/OverviewPage';
-import { OverviewPageSkeleton as VersionOverviewPageSkeleton } from './pages/admin/versions/overview/OverviewPageSkeleton';
-import { AdminRoleTemplatesPage } from './pages/admin/versions/role-templates/AdminRoleTemplatesPage';
-import { RoleTemplateViewPage } from './pages/admin/versions/role-templates/RoleTemplateViewPage';
-import { RoleTemplateViewPageSkeleton } from './pages/admin/versions/role-templates/RoleTemplateViewPageSkeleton';
+import { RoleTemplateViewPage } from './pages/admin/versions/businesses/role-templates/RoleTemplateViewPage';
+import { RoleTemplateViewPageSkeleton } from './pages/admin/versions/businesses/role-templates/RoleTemplateViewPageSkeleton';
+import { VersionDetailPage } from './pages/admin/versions/VersionDetailPage';
+import { VersionDetailPageSkeleton } from './pages/admin/versions/VersionDetailPageSkeleton';
 import { VersionsPage } from './pages/admin/versions/VersionsPage';
 import { AuthErrorPage } from './pages/auth/AuthErrorPage';
 import { AuthSuccessPage } from './pages/auth/AuthSuccessPage';
@@ -176,6 +176,22 @@ export const adminRoutes: RouteObject[] = [
         ),
       },
       {
+        path: 'markets',
+        element: <MarketsPage />,
+      },
+      {
+        path: 'markets/:marketSlug',
+        element: (
+          <Suspense fallback={<MarketViewPageSkeleton />}>
+            <MarketViewPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'countries',
+        element: <CountriesPage />,
+      },
+      {
         path: 'deployments',
         element: <DeploymentsPage />,
       },
@@ -201,30 +217,22 @@ export const adminRoutes: RouteObject[] = [
       },
     ],
   },
-  // Version-scoped routes with their own sidebar layout
+  // Version-scoped tabbed detail pages (no sidebar layout)
   {
     path: '/versions/:versionSlug',
-    element: <VersionLayout />,
+    element: <AdminLayout />,
     children: [
       {
         index: true,
         element: <Navigate to="overview" replace />,
       },
       {
-        path: 'overview',
+        path: ':versionTab',
         element: (
-          <Suspense fallback={<VersionOverviewPageSkeleton />}>
-            <VersionOverviewPage />
+          <Suspense fallback={<VersionDetailPageSkeleton />}>
+            <VersionDetailPage />
           </Suspense>
         ),
-      },
-      {
-        path: 'microfrontends',
-        element: <MicrofrontendsPage />,
-      },
-      {
-        path: 'features',
-        element: <FeaturesPage />,
       },
       {
         path: 'features/:featureSlug',
@@ -235,26 +243,22 @@ export const adminRoutes: RouteObject[] = [
         ),
       },
       {
-        path: 'apps',
-        element: <AdminAppsPage />,
-      },
-      {
-        path: 'apps/:appSlug',
-        element: (
-          <Suspense fallback={<AppViewPageSkeleton />}>
-            <AppViewPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'role-templates',
-        element: <AdminRoleTemplatesPage />,
-      },
-      {
         path: 'role-templates/:roleTemplateSlug',
         element: (
           <Suspense fallback={<RoleTemplateViewPageSkeleton />}>
             <RoleTemplateViewPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'businesses/:businessSlug',
+        element: <BusinessDetailPage />,
+      },
+      {
+        path: 'businesses/:businessSlug/:appSlug',
+        element: (
+          <Suspense fallback={<BusinessAppPageSkeleton />}>
+            <BusinessAppPage />
           </Suspense>
         ),
       },

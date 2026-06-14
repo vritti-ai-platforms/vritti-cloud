@@ -27,13 +27,21 @@ export class OrgListItemDto {
   })
   size: OrgSize;
 
-  @ApiPropertyOptional({ description: 'Media asset ID for the organization logo', example: '550e8400-e29b-41d4-a716-446655440000', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Media asset ID for the organization logo',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+    nullable: true,
+  })
   mediaId: string | null;
 
   @ApiPropertyOptional({ description: 'Plan ID', example: '550e8400-e29b-41d4-a716-446655440003', nullable: true })
   planId: string | null;
 
-  @ApiPropertyOptional({ description: 'Deployment ID', example: '550e8400-e29b-41d4-a716-446655440004', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Deployment ID',
+    example: '550e8400-e29b-41d4-a716-446655440004',
+    nullable: true,
+  })
   deploymentId: string | null;
 
   @ApiProperty({
@@ -46,7 +54,12 @@ export class OrgListItemDto {
   @ApiProperty({ description: 'Timestamp when the organization was created', type: 'string', format: 'date-time' })
   createdAt: Date;
 
-  @ApiPropertyOptional({ description: 'Timestamp when the organization was last updated', type: 'string', format: 'date-time', nullable: true })
+  @ApiPropertyOptional({
+    description: 'Timestamp when the organization was last updated',
+    type: 'string',
+    format: 'date-time',
+    nullable: true,
+  })
   updatedAt: Date | null;
 
   constructor(partial: Partial<OrgListItemDto>) {

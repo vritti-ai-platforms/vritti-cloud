@@ -27,11 +27,6 @@ export function createSnapshot(id: string): Promise<SuccessResponse> {
   return axios.post<SuccessResponse>(`admin-api/versions/${id}/snapshot`).then((r) => r.data);
 }
 
-// Pushes build artifacts for a version
-export function pushArtifacts(id: string, data: Record<string, unknown>): Promise<SuccessResponse> {
-  return axios.post<SuccessResponse>(`admin-api/versions/${id}/artifacts`, data).then((r) => r.data);
-}
-
 // Deletes a version by ID
 export function deleteVersion(id: string): Promise<void> {
   return axios.delete(`admin-api/versions/${id}`).then(() => undefined);

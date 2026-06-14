@@ -9,13 +9,14 @@ export function roleTemplateAppsTableKey(versionId: string, roleTemplateId: stri
 
 export function useRoleTemplateAppsTable(
   versionId: string,
+  businessId: string,
   roleTemplateId: string,
   options?: Omit<UseQueryOptions<RoleTemplateAppsTableResponse, AxiosError>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery<RoleTemplateAppsTableResponse, AxiosError>({
     queryKey: roleTemplateAppsTableKey(versionId, roleTemplateId),
-    queryFn: () => getRoleTemplateAppsTable(versionId, roleTemplateId),
-    enabled: !!versionId && !!roleTemplateId,
+    queryFn: () => getRoleTemplateAppsTable(versionId, businessId, roleTemplateId),
+    enabled: !!versionId && !!businessId && !!roleTemplateId,
     ...options,
   });
 }

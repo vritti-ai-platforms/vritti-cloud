@@ -8,7 +8,7 @@ import { useForgotPassword } from './useForgotPassword';
 import { useResetPassword } from './useResetPassword';
 import { useVerifyResetOtp } from './useVerifyResetOtp';
 
-export type Step = 'email' | 'otp' | 'reset';
+type Step = 'email' | 'otp' | 'reset';
 
 export function usePasswordResetFlow() {
   const [step, setStep] = useState<Step>('email');

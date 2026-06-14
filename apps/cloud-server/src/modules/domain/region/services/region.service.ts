@@ -18,7 +18,6 @@ import type { UpdateRegionDto } from '@/modules/admin-api/region/dto/request/upd
 import { RegionTableResponseDto } from '@/modules/admin-api/region/dto/response/regions-response.dto';
 import { CloudProviderRepository } from '@/modules/domain/cloud-provider/repositories/cloud-provider.repository';
 import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
-import { PriceRepository } from '@/modules/domain/price/repositories/price.repository';
 import { RegionRepository } from '../repositories/region.repository';
 import { RegionProviderRepository } from '../repositories/region-provider.repository';
 
@@ -45,7 +44,6 @@ export class RegionService {
     private readonly cloudProviderRepository: CloudProviderRepository,
     private readonly dataTableStateService: DataTableStateService,
     private readonly deploymentRepository: DeploymentRepository,
-    private readonly priceRepository: PriceRepository,
   ) {}
 
   // Returns paginated region options for the select component
@@ -104,11 +102,10 @@ export class RegionService {
     if (!region) {
       throw new NotFoundException('Region not found.');
     }
-    const [allProviders, assignedProviders, deploymentCount, priceCount, providerDeploymentCounts] = await Promise.all([
+    const [allProviders, assignedProviders, deploymentCount, providerDeploymentCounts] = await Promise.all([
       this.cloudProviderRepository.findAll(),
       this.regionProviderRepository.findProvidersByRegionId(id),
       this.deploymentRepository.countByRegionId(id),
-      this.priceRepository.countByRegionId(id),
       this.deploymentRepository.countByRegionGroupedByProvider(id),
     ]);
     const assignedIds = new Set(assignedProviders.map((p) => p.id));
@@ -122,7 +119,7 @@ export class RegionService {
       deploymentCount: providerDeploymentCounts.get(p.id) ?? 0,
     }));
     this.logger.log(`Fetched region: ${id}`);
-    return RegionDto.from(region, assignedIds.size, providerItems, deploymentCount, priceCount);
+    return RegionDto.from(region, assignedIds.size, providerItems, deploymentCount);
   }
 
   // Updates a region by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -151,15 +148,12 @@ export class RegionService {
       throw new NotFoundException('Region not found.');
     }
 
-    const [deploymentCount, priceCount] = await Promise.all([
-      this.deploymentRepository.countByRegionId(id),
-      this.priceRepository.countByRegionId(id),
-    ]);
+    const deploymentCount = await this.deploymentRepository.countByRegionId(id);
 
-    if (deploymentCount > 0 || priceCount > 0) {
+    if (deploymentCount > 0) {
       throw new ConflictException({
         label: 'Region In Use',
-        detail: `This region cannot be deleted because it has ${deploymentCount} deployment(s) and ${priceCount} price(s) associated with it. Remove those first.`,
+        detail: `This region cannot be deleted because it has ${deploymentCount} deployment(s) associated with it. Remove those first.`,
       });
     }
 

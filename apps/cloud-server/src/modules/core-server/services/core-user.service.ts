@@ -32,14 +32,19 @@ export class CoreUserService {
     webhookSecret: string,
     data: { orgId: string; email: string; fullName: string; phone?: string; phoneCountry?: string },
   ): Promise<CoreSuccessDto> {
-    const result = await this.http.post<CoreSuccessDto>(url, webhookSecret, '/users/webhook', data, { orgId: data.orgId });
+    const result = await this.http.post<CoreSuccessDto>(url, webhookSecret, '/users/webhook', data, {
+      orgId: data.orgId,
+    });
     this.logger.log(`Invited user in core: ${data.email}`);
     return result;
   }
 
   // Fetches all portal users for an organization from core
   async getUsers(url: string, webhookSecret: string, orgId: string): Promise<CoreUserDto[]> {
-    const result = await this.http.get<CoreUserDto[]>(url, webhookSecret, '/users/webhook', { orgId, params: { orgId } });
+    const result = await this.http.get<CoreUserDto[]>(url, webhookSecret, '/users/webhook', {
+      orgId,
+      params: { orgId },
+    });
     this.logger.log(`Fetched ${result.length} users from core for org: ${orgId}`);
     return result;
   }
@@ -52,7 +57,9 @@ export class CoreUserService {
     userId: string,
     data: { email?: string; fullName?: string; status?: string; locale?: string; timezone?: string },
   ): Promise<CoreSuccessDto> {
-    const result = await this.http.patch<CoreSuccessDto>(url, webhookSecret, `/users/webhook/${userId}`, data, { orgId });
+    const result = await this.http.patch<CoreSuccessDto>(url, webhookSecret, `/users/webhook/${userId}`, data, {
+      orgId,
+    });
     this.logger.log(`Updated user in core: ${userId}`);
     return result;
   }

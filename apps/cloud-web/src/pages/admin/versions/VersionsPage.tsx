@@ -34,7 +34,7 @@ export const VersionsPage = () => {
 
   const { table } = useDataTable({
     columns: getColumns({
-      onView: (version) => navigate(`/versions/ver-${buildSlug(version.name, version.id)}/overview`),
+      onView: (version) => navigate(`/versions/ver-${buildSlug(version.name, version.id)}`),
     }),
     slug: TABLE_SLUG,
     label: 'version',

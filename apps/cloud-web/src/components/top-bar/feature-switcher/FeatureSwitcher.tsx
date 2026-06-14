@@ -60,7 +60,7 @@ export const FeatureSwitcher = ({ versionSlug, currentFeatureId, currentFeatureN
             <Button
               variant="ghost"
               className="w-full justify-start h-auto px-2 py-1.5 text-sm font-normal"
-              onClick={() => navigate(`/versions/${versionSlug}/features`)}
+              onClick={() => navigate(`/versions/${versionSlug}`)}
             >
               All Features
             </Button>

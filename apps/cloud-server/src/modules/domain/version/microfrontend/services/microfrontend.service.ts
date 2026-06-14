@@ -11,15 +11,22 @@ import {
 } from '@vritti/api-sdk';
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { type AppPlatform, AppPlatformValues, microfrontends } from '@/db/schema';
-import type { MicrofrontendSelectQueryDto } from '@/modules/select-api/dto/microfrontend-select-query.dto';
 import { MicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/entity/microfrontend.dto';
 import type { CreateMicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/request/create-microfrontend.dto';
 import type { UpdateMicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/request/update-microfrontend.dto';
 import type { MicrofrontendTableResponseDto } from '@/modules/admin-api/version/microfrontend/dto/response/microfrontend-table-response.dto';
+import type { MicrofrontendSelectQueryDto } from '@/modules/select-api/dto/microfrontend-select-query.dto';
 import { MicrofrontendRepository } from '../repositories/microfrontend.repository';
 
 // Clears URL columns not relevant to the row's platform so the DB never carries inconsistent state
-function normalizeMfUrls<T extends { platform?: AppPlatform; remoteEntry?: string | null; remoteEntryAndroid?: string | null; remoteEntryIos?: string | null }>(dto: T): T {
+function normalizeMfUrls<
+  T extends {
+    platform?: AppPlatform;
+    remoteEntry?: string | null;
+    remoteEntryAndroid?: string | null;
+    remoteEntryIos?: string | null;
+  },
+>(dto: T): T {
   if (dto.platform === AppPlatformValues.WEB) {
     return { ...dto, remoteEntryAndroid: null, remoteEntryIos: null };
   }
@@ -61,7 +68,11 @@ export class MicrofrontendService {
     try {
       const microfrontend = await this.microfrontendRepository.create(normalizeMfUrls(dto));
       this.logger.log(`Created microfrontend: ${microfrontend.code} (${microfrontend.id})`);
-      return { success: true, message: `Microfrontend "${microfrontend.name}" created successfully.`, data: MicrofrontendDto.from(microfrontend) };
+      return {
+        success: true,
+        message: `Microfrontend "${microfrontend.name}" created successfully.`,
+        data: MicrofrontendDto.from(microfrontend),
+      };
     } catch (error) {
       const err = error as Error & { cause?: Error; code?: string; detail?: string };
       this.logger.error(`Failed to create microfrontend: ${err.message}`);
@@ -73,7 +84,10 @@ export class MicrofrontendService {
 
   // Returns microfrontends for the data table filtered by app version
   async findForTable(userId: string, versionId: string): Promise<MicrofrontendTableResponseDto> {
-    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, `microfrontends-${versionId}`);
+    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(
+      userId,
+      `microfrontends-${versionId}`,
+    );
     const filterWhere = FilterProcessor.buildWhere(state.filters, MicrofrontendService.FIELD_MAP);
     const searchWhere = FilterProcessor.buildSearch(state.search, MicrofrontendService.FIELD_MAP);
     const versionWhere = eq(microfrontends.versionId, versionId);
@@ -87,7 +101,9 @@ export class MicrofrontendService {
 
   // Returns microfrontend options for a select component, optionally grouped by version
   findForSelect(query: MicrofrontendSelectQueryDto): Promise<SelectQueryResult> {
-    this.logger.log(`Fetched microfrontend select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`);
+    this.logger.log(
+      `Fetched microfrontend select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
+    );
     return this.microfrontendRepository.findMicrofrontendSelectOptions(query);
   }
 
@@ -124,7 +140,10 @@ export class MicrofrontendService {
       }
     }
     const effectivePlatform = dto.platform ?? existing.platform;
-    const microfrontend = await this.microfrontendRepository.update(id, normalizeMfUrls({ ...dto, platform: effectivePlatform }));
+    const microfrontend = await this.microfrontendRepository.update(
+      id,
+      normalizeMfUrls({ ...dto, platform: effectivePlatform }),
+    );
     this.logger.log(`Updated microfrontend: ${microfrontend.code} (${microfrontend.id})`);
     return { success: true, message: `Microfrontend "${existing.name}" updated successfully.` };
   }

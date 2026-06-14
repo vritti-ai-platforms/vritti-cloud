@@ -35,10 +35,7 @@ export class AuthService {
   }
 
   // Creates a new user or sets password for OAuth users without one
-  async signup(
-    dto: SignupDto,
-    request: FastifyRequest,
-  ): Promise<SignupResponseDto & { refreshToken: string }> {
+  async signup(dto: SignupDto, request: FastifyRequest): Promise<SignupResponseDto & { refreshToken: string }> {
     const existingUser = await this.userService.findByEmail(dto.email);
 
     if (existingUser) {
@@ -109,11 +106,7 @@ export class AuthService {
 
       await this.sessionService.deleteOnboardingSessions(user.id);
 
-      const { refreshToken } = await this.sessionService.createSession(
-        user.id,
-        SessionTypeValues.ONBOARDING,
-        request,
-      );
+      const { refreshToken } = await this.sessionService.createSession(user.id, SessionTypeValues.ONBOARDING, request);
 
       return {
         ...new LoginResponse({ requiresOnboarding: true }),
@@ -159,11 +152,7 @@ export class AuthService {
 
     // No MFA — create session based on subdomain
     const sessionType = isAdminLogin ? SessionTypeValues.ADMIN : SessionTypeValues.CLOUD;
-    const { accessToken, refreshToken } = await this.sessionService.createSession(
-      user.id,
-      sessionType,
-      request,
-    );
+    const { accessToken, refreshToken } = await this.sessionService.createSession(user.id, sessionType, request);
 
     // Delete all onboarding sessions (user has completed onboarding)
     await this.sessionService.deleteOnboardingSessions(user.id);
@@ -255,5 +244,4 @@ export class AuthService {
 
     return user;
   }
-
 }

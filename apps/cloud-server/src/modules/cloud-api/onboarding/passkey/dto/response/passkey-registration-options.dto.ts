@@ -11,7 +11,11 @@ export class PasskeyRegistrationOptionsDto<T = unknown> {
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
       timeout: 60000,
       attestation: 'none',
-      authenticatorSelection: { authenticatorAttachment: 'platform', requireResidentKey: false, userVerification: 'preferred' },
+      authenticatorSelection: {
+        authenticatorAttachment: 'platform',
+        requireResidentKey: false,
+        userVerification: 'preferred',
+      },
     },
   })
   options: T;

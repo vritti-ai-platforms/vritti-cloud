@@ -20,10 +20,10 @@ export class BusinessDto {
   @ApiPropertyOptional({ type: 'string', format: 'date-time', nullable: true })
   updatedAt: Date | null;
 
-  @ApiProperty({ type: [String], example: ['order-management', 'kitchen-operations'] })
-  recommendedApps: string[];
-
-  @ApiProperty({ example: true, description: 'False when the business is referenced by organizations, prices, or deployment plans' })
+  @ApiProperty({
+    example: true,
+    description: 'False when the business is referenced by organizations, plans, apps, or role templates',
+  })
   canDelete: boolean;
 
   static from(business: Business, canDelete = true): BusinessDto {
@@ -34,7 +34,6 @@ export class BusinessDto {
     dto.description = business.description;
     dto.createdAt = business.createdAt;
     dto.updatedAt = business.updatedAt;
-    dto.recommendedApps = (business.recommendedApps as string[]) ?? [];
     dto.canDelete = canDelete;
     return dto;
   }

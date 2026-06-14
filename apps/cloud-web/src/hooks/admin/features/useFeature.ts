@@ -3,7 +3,7 @@ import type { AxiosError } from 'axios';
 import type { Feature } from '@/schemas/admin/features';
 import { getFeature } from '../../../services/admin/features.service';
 
-export function featureQueryKey(versionId: string, id: string) {
+function featureQueryKey(versionId: string, id: string) {
   return ['admin', 'versions', versionId, 'features', id] as const;
 }
 

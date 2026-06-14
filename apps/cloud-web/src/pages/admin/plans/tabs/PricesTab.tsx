@@ -1,167 +1,172 @@
-import { pricesTableQueryKey, useDeletePrice, usePricesTable } from '@hooks/admin/prices';
-import { useQueryClient } from '@tanstack/react-query';
-import { Badge } from '@vritti/quantum-ui/Badge';
-import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
-import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
-import { Cloud, DollarSign, Globe, Pencil, Plus, Trash2 } from 'lucide-react';
-import { useMemo } from 'react';
-import type { Price } from '@/schemas/admin/prices';
-import { AddPriceForm } from '../forms/AddPriceForm';
-import { EditPriceForm } from '../forms/EditPriceForm';
+import { useMarkets } from '@hooks/admin/markets';
+import { useDeletePlanPrice, usePlanPrices, useUpsertPlanPrice } from '@hooks/admin/plan-prices';
+import { cn } from '@vritti/quantum-ui';
+import { Card, CardContent } from '@vritti/quantum-ui/Card';
+import { useSlugParams } from '@vritti/quantum-ui/hooks';
+import { majorToMinor, minorToMajor } from '@vritti/quantum-ui/money';
+import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { DollarSign } from 'lucide-react';
+import { useCallback } from 'react';
+import {
+  BILLING_PERIOD_LABELS,
+  BILLING_PERIODS,
+  type BillingPeriod,
+  type PlanPrice,
+} from '@/schemas/admin/plan-prices';
 
-// Prices DataTable — self-contained with its own data fetching
+// Builds a lookup keyed by `${marketId}:${billingPeriod}` for fast cell access
+function indexPrices(prices: PlanPrice[]): Map<string, PlanPrice> {
+  const map = new Map<string, PlanPrice>();
+  for (const price of prices) {
+    map.set(`${price.marketId}:${price.billingPeriod}`, price);
+  }
+  return map;
+}
+
+// Prices grid — markets (rows) × billing periods (columns), amounts in market currency
 export const PricesTab = () => {
   const { id: planId } = useSlugParams('planSlug');
-  const queryClient = useQueryClient();
-  const { data: response, isLoading } = usePricesTable(planId ?? '');
-  const addPriceDialog = useDialog();
+  const planIdValue = planId ?? '';
 
-  const columns = useMemo<ColumnDef<Price, unknown>[]>(
-    () => [
-      {
-        accessorKey: 'regionName',
-        header: 'Region',
-        enableSorting: false,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <Globe className="size-4 text-muted-foreground" />
-            <span>{row.original.regionName}</span>
-            <Badge variant="outline" className="font-mono text-xs">
-              {row.original.regionCode}
-            </Badge>
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'providerName',
-        header: 'Provider',
-        enableSorting: false,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            <Cloud className="size-4 text-muted-foreground" />
-            <span>{row.original.providerName}</span>
-            <Badge variant="secondary" className="font-mono text-xs">
-              {row.original.providerCode}
-            </Badge>
-          </div>
-        ),
-      },
-      {
-        accessorKey: 'price',
-        header: 'Price',
-        enableSorting: true,
-      },
-      {
-        accessorKey: 'currency',
-        header: 'Currency',
-        cell: ({ row }) => <Badge variant="outline">{row.original.currency}</Badge>,
-        enableSorting: false,
-      },
-      {
-        id: 'actions',
-        header: '',
-        cell: ({ row }) => <PriceActions price={row.original} planId={planId ?? ''} />,
-        enableSorting: false,
-        enableHiding: false,
-      },
-    ],
-    [planId],
+  const { data: marketsResponse, isLoading: marketsLoading } = useMarkets();
+  const { data: prices = [], isLoading: pricesLoading } = usePlanPrices(planIdValue);
+
+  const upsertMutation = useUpsertPlanPrice();
+  const deleteMutation = useDeletePlanPrice();
+
+  const priceIndex = indexPrices(prices);
+
+  // Persists a single cell — upsert when an amount is entered, delete when cleared
+  const handleSave = useCallback(
+    (marketId: string, currencyCode: string, billingPeriod: BillingPeriod, rawValue: string) => {
+      const existing = priceIndex.get(`${marketId}:${billingPeriod}`);
+      const trimmed = rawValue.trim();
+
+      if (!trimmed) {
+        if (existing) deleteMutation.mutate({ planId: planIdValue, priceId: existing.id });
+        return;
+      }
+      if (!/^\d+(\.\d{1,4})?$/.test(trimmed)) return;
+
+      let amount: number;
+      try {
+        amount = Number(majorToMinor(trimmed, currencyCode));
+      } catch {
+        return;
+      }
+      if (existing && existing.amount === amount) return;
+
+      upsertMutation.mutate({ planId: planIdValue, data: { marketId, billingPeriod, amount } });
+    },
+    [priceIndex, planIdValue, deleteMutation, upsertMutation],
   );
 
-  const { table } = useDataTable({
-    columns,
-    slug: `prices-${planId}`,
-    label: 'price',
-    serverState: response,
-    enableSorting: true,
-    enableMultiSort: false,
-    enableRowSelection: false,
-    onStatePush: () => queryClient.invalidateQueries({ queryKey: pricesTableQueryKey(planId ?? '') }),
-  });
+  if (marketsLoading || pricesLoading) {
+    return (
+      <div className="pt-4 flex flex-col gap-2">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-14 w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  const markets = marketsResponse?.result ?? [];
+
+  if (markets.length === 0) {
+    return (
+      <div className="pt-4">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+            <DollarSign className="size-8 text-muted-foreground mb-3" />
+            <p className="text-sm font-medium text-foreground">No markets configured</p>
+            <p className="text-xs text-muted-foreground mt-1">Add markets before setting plan prices.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
-    <div className="pt-4">
-      <DataTable
-        table={table}
-        mode="compact"
-        isLoading={isLoading}
-        searchConfig={{
-          columns: [
-            { id: 'regionName', label: 'Region' },
-            { id: 'providerName', label: 'Provider' },
-            { id: 'currency', label: 'Currency' },
-          ],
-          searchAll: true,
-        }}
-        toolbarActions={{
-          actions: (
-            <Button
-              size="sm"
-              variant="default"
-              startAdornment={<Plus className="size-4" />}
-              onClick={addPriceDialog.open}
-            >
-              Add Price
-            </Button>
-          ),
-        }}
-        emptyStateConfig={{
-          title: 'No prices configured',
-          description: 'Add a price for a specific business, region, and cloud provider combination.',
-        }}
-      />
+    <div className="pt-4 flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        Set prices per market and billing period. Amounts are shown in each market's currency. Clear a cell to remove
+        its price.
+      </p>
 
-      <Dialog
-        handle={addPriceDialog}
-        icon={DollarSign}
-        title="Add Price"
-        description="Set a price for a specific business, region, and cloud provider combination."
-        content={(close) => <AddPriceForm planId={planId ?? ''} onSuccess={close} onCancel={close} />}
-      />
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b bg-muted/50">
+              <th className="px-4 py-3 text-left font-medium">Market</th>
+              {BILLING_PERIODS.map((period) => (
+                <th key={period} className="px-4 py-3 text-left font-medium">
+                  {BILLING_PERIOD_LABELS[period]}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {markets.map((market) => (
+              <tr key={market.id} className="bg-card">
+                <td className="px-4 py-3 align-top">
+                  <div className="flex flex-col">
+                    <span className="font-medium">{market.name}</span>
+                    <span className="text-xs text-muted-foreground font-mono">{market.currencyCode}</span>
+                  </div>
+                </td>
+                {BILLING_PERIODS.map((period) => (
+                  <PriceCell
+                    key={period}
+                    marketId={market.id}
+                    currencyCode={market.currencyCode}
+                    billingPeriod={period}
+                    price={priceIndex.get(`${market.id}:${period}`)}
+                    onSave={handleSave}
+                  />
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
 
-// Inline actions for each price row
-const PriceActions = ({ price, planId }: { price: Price; planId: string }) => {
-  const confirm = useConfirm();
-  const deleteMutation = useDeletePrice();
-  const isDeleting = deleteMutation.isPending && deleteMutation.variables?.id === price.id;
+interface PriceCellProps {
+  marketId: string;
+  currencyCode: string;
+  billingPeriod: BillingPeriod;
+  price: PlanPrice | undefined;
+  onSave: (marketId: string, currencyCode: string, billingPeriod: BillingPeriod, rawValue: string) => void;
+}
 
-  async function handleDelete() {
-    const confirmed = await confirm({
-      title: 'Delete price?',
-      description: 'This price entry will be permanently removed. This action cannot be undone.',
-      confirmLabel: 'Delete',
-      variant: 'destructive',
-    });
-    if (confirmed) deleteMutation.mutate({ id: price.id, planId });
+// Converts a stored minor-unit amount to its major-unit string for editing
+function toMajorInput(price: PlanPrice | undefined, currencyCode: string): string {
+  if (!price) return '';
+  try {
+    return minorToMajor(String(price.amount), currencyCode);
+  } catch {
+    return '';
   }
+}
 
-  return (
-    <RowActions
-      actions={[
-        {
-          id: 'edit',
-          icon: Pencil,
-          label: 'Edit',
-          dialog: {
-            title: 'Edit Price',
-            description: 'Update the price and currency for this combination.',
-            content: (close) => <EditPriceForm price={price} onSuccess={close} onCancel={close} />,
-          },
-        },
-        {
-          id: 'delete',
-          icon: Trash2,
-          label: 'Delete',
-          variant: 'destructive',
-          disabled: isDeleting,
-          onClick: handleDelete,
-        },
-      ]}
-    />
-  );
-};
+const PriceCell = ({ marketId, currencyCode, billingPeriod, price, onSave }: PriceCellProps) => (
+  <td className="px-4 py-2 align-top">
+    <div className="flex items-center gap-1.5">
+      <span className="text-xs text-muted-foreground font-mono shrink-0">{currencyCode}</span>
+      <input
+        type="text"
+        inputMode="decimal"
+        defaultValue={toMajorInput(price, currencyCode)}
+        placeholder="—"
+        onBlur={(e) => onSave(marketId, currencyCode, billingPeriod, e.target.value)}
+        className={cn(
+          'w-28 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        )}
+      />
+    </div>
+  </td>
+);

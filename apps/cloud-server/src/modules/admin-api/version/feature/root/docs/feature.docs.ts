@@ -1,10 +1,9 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiOperation, ApiParam, ApiProduces, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { FeatureDto } from '../dto/entity/feature.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
-import { FeatureSelectResponseDto } from '../dto/response/feature-select-response.dto';
 import { FeatureTableResponseDto } from '../dto/response/feature-table-response.dto';
 
 // Swagger docs for creating a feature
@@ -24,22 +23,6 @@ export function ApiFindForTableFeatures() {
   return applyDecorators(
     ApiOperation({ summary: 'List features for data table (server-stored state)' }),
     ApiResponse({ status: 200, description: 'Features retrieved successfully.', type: FeatureTableResponseDto }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-// Swagger docs for fetching feature select options
-export function ApiFindFeaturesSelect() {
-  return applyDecorators(
-    ApiOperation({ summary: 'Get features for select component' }),
-    ApiQuery({ name: 'search', required: false }),
-    ApiQuery({ name: 'limit', required: false, type: Number }),
-    ApiQuery({ name: 'offset', required: false, type: Number }),
-    ApiResponse({
-      status: 200,
-      description: 'Feature options retrieved.',
-      type: FeatureSelectResponseDto,
-    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
@@ -102,4 +85,3 @@ export function ApiExportFeatures() {
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
-

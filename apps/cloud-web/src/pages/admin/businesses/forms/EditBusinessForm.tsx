@@ -2,7 +2,6 @@ import { useUpdateBusiness } from '@hooks/admin/businesses';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
-import { AppCodeSelector } from '@vritti/quantum-ui/selects/app-code';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -23,7 +22,6 @@ export const EditBusinessForm: React.FC<EditBusinessFormProps> = ({ business, on
       name: business.name,
       code: business.code,
       description: business.description ?? '',
-      recommendedApps: business.recommendedApps,
     },
   });
 
@@ -38,18 +36,12 @@ export const EditBusinessForm: React.FC<EditBusinessFormProps> = ({ business, on
       transformSubmit={(data) => ({ id: business.id, data })}
     >
       <TextField name="name" label="Business Name" placeholder="e.g. Healthcare" />
-      <TextField
-        name="code"
-        label="Code"
-        placeholder="e.g. HLTH"
-        description="Short identifier used across the platform"
-      />
+      <TextField name="code" label="Code" placeholder="e.g. HLTH" />
       <TextField
         name="description"
         label="Description (Optional)"
         placeholder="e.g. Hospitals, clinics, and medical services"
       />
-      <AppCodeSelector name="recommendedApps" label="Recommended Apps" multiple />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

@@ -21,7 +21,11 @@ export class UpdateMicrofrontendDto {
   @MaxLength(255)
   name?: string;
 
-  @ApiPropertyOptional({ description: 'Target platform', enum: [AppPlatformValues.WEB, AppPlatformValues.MOBILE], example: 'WEB' })
+  @ApiPropertyOptional({
+    description: 'Target platform',
+    enum: [AppPlatformValues.WEB, AppPlatformValues.MOBILE],
+    example: 'WEB',
+  })
   @IsOptional()
   @IsEnum(AppPlatformValues, { message: 'Platform must be WEB or MOBILE' })
   platform?: AppPlatform;
@@ -33,14 +37,20 @@ export class UpdateMicrofrontendDto {
   @MaxLength(500)
   remoteEntry?: string;
 
-  @ApiPropertyOptional({ description: 'Android remote entry URL (MOBILE only)', example: 'https://cdn/.../android/mf-manifest.json' })
+  @ApiPropertyOptional({
+    description: 'Android remote entry URL (MOBILE only)',
+    example: 'https://cdn/.../android/mf-manifest.json',
+  })
   @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(500)
   remoteEntryAndroid?: string;
 
-  @ApiPropertyOptional({ description: 'iOS remote entry URL (MOBILE only)', example: 'https://cdn/.../ios/mf-manifest.json' })
+  @ApiPropertyOptional({
+    description: 'iOS remote entry URL (MOBILE only)',
+    example: 'https://cdn/.../ios/mf-manifest.json',
+  })
   @IsOptional()
   @IsString()
   @MinLength(1)

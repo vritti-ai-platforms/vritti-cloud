@@ -56,8 +56,7 @@ export function ApiRefreshTokens() {
   return applyDecorators(
     ApiOperation({
       summary: 'Refresh access token',
-      description:
-        'Generates a new access token and rotates the refresh token for enhanced security.',
+      description: 'Generates a new access token and rotates the refresh token for enhanced security.',
     }),
     ApiResponse({ status: 201, description: 'Token refreshed successfully.', type: TokenResponse }),
     ApiResponse({ status: 401, description: 'Invalid or expired refresh token.' }),
@@ -72,18 +71,6 @@ export function ApiLogout() {
       description: 'Invalidates the current session and clears the refresh token cookie.',
     }),
     ApiResponse({ status: 201, description: 'Successfully logged out.', type: MessageResponse }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-export function ApiLogoutAll() {
-  return applyDecorators(
-    ApiBearerAuth(),
-    ApiOperation({
-      summary: 'Logout from all devices',
-      description: 'Invalidates all active sessions for the current user across all devices.',
-    }),
-    ApiResponse({ status: 201, description: 'Successfully logged out from all devices.', type: MessageResponse }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }
@@ -109,7 +96,11 @@ export function ApiForgotPassword() {
         'Sends a password reset OTP to the provided email and creates a RESET session. Always returns success to prevent email enumeration.',
     }),
     ApiBody({ type: ForgotPasswordDto }),
-    ApiResponse({ status: 200, description: 'Password reset email sent (if account exists).', type: ForgotPasswordResponseDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Password reset email sent (if account exists).',
+      type: ForgotPasswordResponseDto,
+    }),
     ApiResponse({ status: 400, description: 'Invalid input data.' }),
   );
 }

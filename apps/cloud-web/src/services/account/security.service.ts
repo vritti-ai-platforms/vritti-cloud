@@ -125,19 +125,6 @@ export function verifyPasskeySetup(data: { credential: any }): Promise<BackupCod
     .then((r) => r.data);
 }
 
-export function listPasskeys(): Promise<PasskeyData[]> {
-  return axios.get<PasskeyData[]>('account/security/mfa/passkeys', { showSuccessToast: false }).then((r) => r.data);
-}
-
-export function removePasskey(passkeyId: string): Promise<SuccessResponse> {
-  return axios
-    .delete<SuccessResponse>(`account/security/mfa/passkey/${passkeyId}`, {
-      loadingMessage: 'Removing passkey...',
-      successMessage: 'Passkey removed successfully',
-    })
-    .then((r) => r.data);
-}
-
 // Backup Codes
 
 export function regenerateBackupCodes(): Promise<BackupCodesResponse> {
@@ -150,7 +137,7 @@ export function regenerateBackupCodes(): Promise<BackupCodesResponse> {
 
 // Linked Accounts
 
-export interface LinkedAccountData {
+interface LinkedAccountData {
   provider: string;
   createdAt: string;
 }

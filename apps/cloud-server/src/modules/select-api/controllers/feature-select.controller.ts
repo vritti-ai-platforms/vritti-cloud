@@ -1,9 +1,9 @@
+import { AppCodeService } from '@domain/app-code/services/app-code.service';
+import { FeatureService } from '@domain/version/feature/root/services/feature.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { AppCodeService } from '@domain/app-code/services/app-code.service';
-import { FeatureService } from '@domain/version/feature/root/services/feature.service';
 import { FeatureSelectQueryDto } from '../dto/feature-select-query.dto';
 
 @ApiTags('Select')

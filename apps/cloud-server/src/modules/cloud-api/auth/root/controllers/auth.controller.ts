@@ -24,9 +24,9 @@ import {
   Subdomain,
   UserId,
 } from '@vritti/api-sdk';
-import { SessionTypeValues } from '@/db/schema';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { NEVER, type Observable, concat, merge, of } from 'rxjs';
+import { concat, merge, NEVER, type Observable, of } from 'rxjs';
+import { SessionTypeValues } from '@/db/schema';
 import {
   ApiForgotPassword,
   ApiGetAccessToken,

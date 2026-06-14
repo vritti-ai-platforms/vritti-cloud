@@ -34,7 +34,10 @@ export function ApiVerifyEmail() {
 
 export function ApiChangeEmail() {
   return applyDecorators(
-    ApiOperation({ summary: 'Change email during onboarding', description: 'Updates the user email and sends a new OTP to it.' }),
+    ApiOperation({
+      summary: 'Change email during onboarding',
+      description: 'Updates the user email and sends a new OTP to it.',
+    }),
     ApiBody({ type: ChangeEmailDto }),
     ApiResponse({ status: 200, description: 'Email updated and new OTP sent.', type: ResendEmailOtpResponseDto }),
     ApiResponse({ status: 400, description: 'Same email or validation error' }),

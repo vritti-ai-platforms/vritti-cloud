@@ -6,7 +6,14 @@ import { cloudProviders, regionCloudProviders, regions } from '@/db/schema';
 
 type RegionWithProviders = Region & {
   providerCount: number;
-  providers: Array<{ id: string; name: string; code: string; logoUrl: string | null; logoDarkUrl: string | null; isAssigned: boolean }>;
+  providers: Array<{
+    id: string;
+    name: string;
+    code: string;
+    logoUrl: string | null;
+    logoDarkUrl: string | null;
+    isAssigned: boolean;
+  }>;
 };
 
 @Injectable()
@@ -46,7 +53,16 @@ export class RegionRepository extends PrimaryBaseRepository<typeof regions> {
           createdAt: regions.createdAt,
           updatedAt: regions.updatedAt,
           providerCount: count(regionCloudProviders.providerId),
-          providers: sql<Array<{ id: string; name: string; code: string; logoUrl: string | null; logoDarkUrl: string | null; isAssigned: boolean }>>`
+          providers: sql<
+            Array<{
+              id: string;
+              name: string;
+              code: string;
+              logoUrl: string | null;
+              logoDarkUrl: string | null;
+              isAssigned: boolean;
+            }>
+          >`
             json_agg(
               json_build_object(
                 'id', ${cloudProviders.id},

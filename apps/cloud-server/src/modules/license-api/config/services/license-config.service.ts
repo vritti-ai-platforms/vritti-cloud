@@ -1,8 +1,9 @@
+import { BusinessRepository } from '@domain/business/repositories/business.repository';
+import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException } from '@vritti/api-sdk';
-import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
-import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
+import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 
 export interface FeatureCatalogEntry {
   code: unknown;
@@ -35,6 +36,7 @@ export class LicenseConfigService {
     private readonly organizationRepository: OrganizationRepository,
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly coreVersionRepository: CoreVersionRepository,
+    private readonly businessRepository: BusinessRepository,
   ) {}
 
   // Builds the full license config for an org: per-BU feature catalogs from snapshot
@@ -61,13 +63,13 @@ export class LicenseConfigService {
     }
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const apps = (snapshot.apps ?? []) as Array<{
-      code: string;
-      name: string;
-      icon: string | null;
-      sortOrder: number;
-      features: string[];
-    }>;
+    // Apps are grouped by business code in the snapshot — select this org's vertical
+    const business = await this.businessRepository.findById(org.businessId);
+    const appsByBusiness = (snapshot.apps ?? {}) as Record<
+      string,
+      Array<{ code: string; name: string; icon: string | null; sortOrder: number; features: string[] }>
+    >;
+    const apps = business ? (appsByBusiness[business.code] ?? []) : [];
     const features = (snapshot.features ?? []) as Array<Record<string, unknown>>;
 
     // Build per-BU feature catalogs

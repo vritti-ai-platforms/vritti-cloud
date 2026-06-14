@@ -10,13 +10,12 @@ import {
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { type Column, and, sql } from '@vritti/api-sdk/drizzle-orm';
-import { plans, prices } from '@/db/schema';
+import { and, type Column, sql } from '@vritti/api-sdk/drizzle-orm';
+import { planPrices, plans } from '@/db/schema';
 import { PlanDto } from '@/modules/admin-api/plan/root/dto/entity/plan.dto';
 import type { CreatePlanDto } from '@/modules/admin-api/plan/root/dto/request/create-plan.dto';
 import type { UpdatePlanDto } from '@/modules/admin-api/plan/root/dto/request/update-plan.dto';
 import { PlansTableResponseDto } from '@/modules/admin-api/plan/root/dto/response/plans-table-response.dto';
-import { PriceService } from '@/modules/domain/price/services/price.service';
 import { PlanRepository } from '../repositories/plan.repository';
 
 @Injectable()
@@ -26,20 +25,20 @@ export class PlanService {
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: plans.name, type: 'string' },
     code: { column: plans.code, type: 'string' },
+    businessId: { column: plans.businessId, type: 'string' },
     priceCount: {
-      column: sql<number>`count(${prices.id})` as unknown as Column,
+      column: sql<number>`count(${planPrices.id})` as unknown as Column,
       type: 'number',
     },
   };
 
   constructor(
     private readonly planRepository: PlanRepository,
-    private readonly priceService: PriceService,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
   // Returns paginated plan options for the select component
-  findForSelect(query: SelectOptionsQueryDto): Promise<SelectQueryResult> {
+  findForSelect(query: SelectOptionsQueryDto & { businessId?: string }): Promise<SelectQueryResult> {
     this.logger.log(
       `Fetched plan select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
     );
@@ -54,6 +53,7 @@ export class PlanService {
       values: query.values,
       excludeIds: query.excludeIds,
       orderBy: { name: 'asc' },
+      ...(query.businessId ? { where: { businessId: query.businessId } } : {}),
     });
   }
 
@@ -86,7 +86,13 @@ export class PlanService {
       limit,
       offset,
     });
-    const result = rows.map((plan) => PlanDto.from(plan, { priceCount: plan.priceCount }));
+    const result = rows.map((plan) =>
+      PlanDto.from(plan, {
+        priceCount: plan.priceCount,
+        marketCount: plan.marketCount,
+        businessName: plan.businessName,
+      }),
+    );
     this.logger.log(`Fetched plans table (${total} results, limit: ${limit}, offset: ${offset})`);
     return { result, count: total, state, activeViewId };
   }
@@ -97,15 +103,11 @@ export class PlanService {
     if (!plan) {
       throw new NotFoundException('Plan not found.');
     }
-    const [priceCounts, refCounts] = await Promise.all([
-      this.priceService.getCountsForPlan(id),
-      this.planRepository.getReferenceCountsWithoutPrices(id),
-    ]);
-    const { priceCount, regionCount, providerCount } = priceCounts;
-    const { deploymentCount, orgCount } = refCounts;
+    const { priceCount, deploymentCount, orgCount, businessName, marketCount } =
+      await this.planRepository.getReferenceCounts(id);
     const canDelete = priceCount === 0 && deploymentCount === 0 && orgCount === 0;
     this.logger.log(`Fetched plan: ${id}`);
-    return PlanDto.from(plan, { priceCount, regionCount, providerCount, orgCount }, canDelete);
+    return PlanDto.from(plan, { priceCount, orgCount, marketCount, businessName }, canDelete);
   }
 
   // Updates a plan by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -135,11 +137,8 @@ export class PlanService {
     if (!existing) {
       throw new NotFoundException('Plan not found.');
     }
-    const [priceCounts, refCounts] = await Promise.all([
-      this.priceService.getCountsForPlan(id),
-      this.planRepository.getReferenceCountsWithoutPrices(id),
-    ]);
-    if (priceCounts.priceCount > 0 || refCounts.deploymentCount > 0 || refCounts.orgCount > 0) {
+    const { priceCount, deploymentCount, orgCount } = await this.planRepository.getReferenceCounts(id);
+    if (priceCount > 0 || deploymentCount > 0 || orgCount > 0) {
       throw new ConflictException({
         label: 'Plan In Use',
         detail: `Cannot delete "${existing.name}" — it has prices or deployment assignments. Remove those first.`,

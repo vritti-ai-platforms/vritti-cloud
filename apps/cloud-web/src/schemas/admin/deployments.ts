@@ -1,7 +1,7 @@
 import { z } from '@vritti/quantum-ui/zod';
 
-export type DeploymentStatus = 'active' | 'stopped' | 'provisioning';
-export type DeploymentType = 'shared' | 'dedicated';
+type DeploymentStatus = 'active' | 'stopped' | 'provisioning';
+type DeploymentType = 'shared' | 'dedicated';
 
 export interface Deployment {
   id: string;
@@ -44,24 +44,17 @@ export const updateDeploymentSchema = z.object({
 
 export const assignPlanSchema = z.object({
   planId: z.string().uuid('Please select a plan'),
-  businessId: z.string().uuid('Please select a business'),
 });
 
 export type CreateDeploymentData = z.infer<typeof createDeploymentSchema>;
 export type UpdateDeploymentData = z.infer<typeof updateDeploymentSchema>;
 export type AssignPlanData = z.infer<typeof assignPlanSchema>;
 
-export interface DeploymentPlanAssignmentBusiness {
-  businessId: string;
-  businessName: string;
-  price: string | null;
-  currency: string | null;
-  isAssigned: boolean;
-}
-
 export interface DeploymentPlanAssignment {
   planId: string;
   planName: string;
   planCode: string;
-  businesses: DeploymentPlanAssignmentBusiness[];
+  businessId: string;
+  businessName: string;
+  isAssigned: boolean;
 }

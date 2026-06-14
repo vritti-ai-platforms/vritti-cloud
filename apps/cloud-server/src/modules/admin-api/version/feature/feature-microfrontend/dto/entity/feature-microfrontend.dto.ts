@@ -22,10 +22,18 @@ export class FeatureMicrofrontendDto {
   @ApiPropertyOptional({ example: '/order-mf/remoteEntry.js', nullable: true, description: 'Set on WEB rows' })
   remoteEntry: string | null;
 
-  @ApiPropertyOptional({ example: 'https://cdn/.../android/mf-manifest.json', nullable: true, description: 'Set on MOBILE rows' })
+  @ApiPropertyOptional({
+    example: 'https://cdn/.../android/mf-manifest.json',
+    nullable: true,
+    description: 'Set on MOBILE rows',
+  })
   remoteEntryAndroid: string | null;
 
-  @ApiPropertyOptional({ example: 'https://cdn/.../ios/mf-manifest.json', nullable: true, description: 'Set on MOBILE rows' })
+  @ApiPropertyOptional({
+    example: 'https://cdn/.../ios/mf-manifest.json',
+    nullable: true,
+    description: 'Set on MOBILE rows',
+  })
   remoteEntryIos: string | null;
 
   @ApiProperty({ example: './Orders' })

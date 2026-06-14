@@ -7,7 +7,6 @@ import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable
 
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
-import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Blocks, Eye, Plus } from 'lucide-react';
 import { DynamicIcon } from 'lucide-react/dynamic';
@@ -27,7 +26,7 @@ export const FeaturesPage = () => {
 
   const { table } = useDataTable({
     columns: getColumns({
-      onView: (feature) => navigate(`feat-${buildSlug(feature.name, feature.id)}`),
+      onView: (feature) => navigate(`feat-${buildSlug(feature.name, feature.id)}`, { relative: 'path' }),
     }),
     slug: TABLE_SLUG,
     label: 'feature',
@@ -39,9 +38,7 @@ export const FeaturesPage = () => {
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      <PageHeader title="Features" description="Manage features — each feature represents a sidebar item / screen" />
-
+    <div>
       <DataTable
         table={table}
         isLoading={isLoading}
@@ -95,6 +92,7 @@ export const FeaturesPage = () => {
             </Button>
           ),
         }}
+        mode="tab"
         emptyStateConfig={{
           icon: Blocks,
           title: 'No features found',

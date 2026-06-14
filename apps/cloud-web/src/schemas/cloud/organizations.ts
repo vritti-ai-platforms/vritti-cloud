@@ -53,6 +53,12 @@ export const createOrganizationSchema = z.object({
   cloudProviderName: z.string().optional(),
   deploymentId: z.string({ message: 'Please select a deployment' }).optional(),
   deploymentName: z.string().optional(),
+  taxId: z.string().min(1, 'Tax ID is required'),
+  countryId: z.string().optional(),
+  countryCode: z.string().optional(),
+  countryName: z.string().optional(),
+  marketId: z.string().optional(),
+  marketName: z.string().optional(),
   planId: z.string({ message: 'Please select a plan' }).optional(),
   planName: z.string().optional(),
   planPrice: z.string().optional(),
@@ -64,6 +70,15 @@ export const createOrganizationSchema = z.object({
 });
 
 export type CreateOrgFormData = z.output<typeof createOrganizationSchema>;
+
+export interface ValidateTaxIdResponse {
+  valid: boolean;
+  countryId: string;
+  countryCode: string;
+  marketId: string;
+  countryName?: string;
+  marketName?: string;
+}
 
 export interface SubdomainAvailability {
   available: boolean;

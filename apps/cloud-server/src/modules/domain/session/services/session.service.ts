@@ -72,7 +72,11 @@ export class SessionService {
     expiresIn: number;
   }> {
     const session = await this.validateRefreshToken(refreshToken);
-    const newRefreshToken = this.tokenService.generateRefreshToken({ userId: session.userId, sessionId: session.id, sessionType: session.type });
+    const newRefreshToken = this.tokenService.generateRefreshToken({
+      userId: session.userId,
+      sessionId: session.id,
+      sessionType: session.type,
+    });
     const { accessToken, expiresIn } = this.generateAccessTokenForSession(session, newRefreshToken);
 
     await this.sessionRepository.rotateTokens(
@@ -121,7 +125,10 @@ export class SessionService {
     session: Session,
     refreshToken: string,
   ): { accessToken: string; expiresIn: number } {
-    const accessToken = this.tokenService.generateAccessToken({ userId: session.userId, sessionId: session.id, sessionType: session.type }, refreshToken);
+    const accessToken = this.tokenService.generateAccessToken(
+      { userId: session.userId, sessionId: session.id, sessionType: session.type },
+      refreshToken,
+    );
     const expiresIn = this.tokenService.getExpiryInSeconds(TokenType.ACCESS);
     return { accessToken, expiresIn };
   }

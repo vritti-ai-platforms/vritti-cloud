@@ -138,7 +138,6 @@ export const changeRequestRateLimits = cloudSchema.table(
   ],
 );
 
-// Type exports
 export type Verification = typeof verifications.$inferSelect;
 export type NewVerification = typeof verifications.$inferInsert;
 export type MfaAuth = typeof mfaAuth.$inferSelect;

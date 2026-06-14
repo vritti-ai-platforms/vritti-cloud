@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { CloudProvider, Deployment, Region } from '@/db/schema';
-import { deploymentBusinessPlans, deployments, organizations, plans, prices } from '@/db/schema';
+import { deploymentPlans, deployments, organizations, plans } from '@/db/schema';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 
@@ -76,13 +76,8 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
         type: deployments.type,
       })
       .from(deployments)
-      .innerJoin(
-        deploymentBusinessPlans,
-        and(
-          eq(deploymentBusinessPlans.deploymentId, deployments.id),
-          eq(deploymentBusinessPlans.businessId, businessId),
-        ),
-      )
+      .innerJoin(deploymentPlans, eq(deploymentPlans.deploymentId, deployments.id))
+      .innerJoin(plans, and(eq(plans.id, deploymentPlans.planId), eq(plans.businessId, businessId)))
       .where(
         and(
           eq(deployments.regionId, regionId),
@@ -93,54 +88,26 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
     return rows as DeploymentOptionDto[];
   }
 
-  // Returns plans for a deployment+business combo with price info from pricing matrix
+  // Returns plans provisioned on a deployment for the given business (pricing resolved by market elsewhere)
   async findPlansForDeployment(deploymentId: string, businessId: string): Promise<PlanOptionDto[]> {
-    const deployment = await this.db
-      .select({
-        regionId: deployments.regionId,
-        cloudProviderId: deployments.cloudProviderId,
-      })
-      .from(deployments)
-      .where(eq(deployments.id, deploymentId))
-      .limit(1);
-
-    if (!deployment[0]) return [];
-    const { regionId, cloudProviderId } = deployment[0];
-
     const rows = await this.db
       .select({
         id: plans.id,
         name: plans.name,
         code: plans.code,
         content: plans.content,
-        price: prices.price,
-        currency: prices.currency,
       })
-      .from(deploymentBusinessPlans)
-      .innerJoin(plans, eq(deploymentBusinessPlans.planId, plans.id))
-      .leftJoin(
-        prices,
-        and(
-          eq(prices.planId, plans.id),
-          eq(prices.businessId, businessId),
-          eq(prices.regionId, regionId),
-          eq(prices.providerId, cloudProviderId),
-        ),
-      )
-      .where(
-        and(
-          eq(deploymentBusinessPlans.deploymentId, deploymentId),
-          eq(deploymentBusinessPlans.businessId, businessId),
-        ),
-      );
+      .from(deploymentPlans)
+      .innerJoin(plans, eq(deploymentPlans.planId, plans.id))
+      .where(and(eq(deploymentPlans.deploymentId, deploymentId), eq(plans.businessId, businessId)));
 
     return rows.map((r) => ({
       id: r.id,
       name: r.name,
       code: r.code,
       content: r.content ?? null,
-      price: r.price ?? null,
-      currency: r.currency ?? null,
+      price: null,
+      currency: null,
     }));
   }
 }

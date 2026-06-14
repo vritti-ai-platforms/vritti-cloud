@@ -39,11 +39,7 @@ export class OrganizationRolesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {
-      const roles = await this.coreRoleService.getOrgRoles(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-      );
+      const roles = await this.coreRoleService.getOrgRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier);
       this.logger.log(`Fetched roles for org ${orgId}`);
       return roles;
     } catch (error: any) {

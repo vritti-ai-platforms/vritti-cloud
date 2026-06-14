@@ -45,7 +45,11 @@ export function ApiStartPasskeyMfa() {
   return applyDecorators(
     ApiOperation({ summary: 'Start passkey authentication for MFA' }),
     ApiBody({ type: StartPasskeyMfaDto }),
-    ApiResponse({ status: 200, description: 'Passkey authentication options generated successfully', type: PasskeyMfaOptionsDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Passkey authentication options generated successfully',
+      type: PasskeyMfaOptionsDto,
+    }),
     ApiResponse({ status: 400, description: 'Invalid request or no passkeys registered' }),
     ApiResponse({ status: 401, description: 'MFA session expired or invalid' }),
   );

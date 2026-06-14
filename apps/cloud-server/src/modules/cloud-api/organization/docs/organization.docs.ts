@@ -2,10 +2,21 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
+import { ValidateTaxIdDto } from '../dto/request/validate-tax-id.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
-import { OrganizationSelectResponseDto } from '../dto/response/organization-select-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
 import { SubdomainAvailabilityResponseDto } from '../dto/response/subdomain-availability-response.dto';
+import { TaxIdValidationResponseDto } from '../dto/response/tax-id-validation-response.dto';
+
+export function ApiValidateTaxId() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Validate a tax id and derive its country + market' }),
+    ApiBody({ type: ValidateTaxIdDto }),
+    ApiResponse({ status: 200, description: 'Tax id validated.', type: TaxIdValidationResponseDto }),
+    ApiResponse({ status: 400, description: 'Invalid tax id or unmapped country.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
 
 export function ApiCheckSubdomain() {
   return applyDecorators(
@@ -67,18 +78,6 @@ export function ApiGetMyOrgs() {
       description: 'Paginated list of organizations retrieved successfully.',
       type: PaginatedOrgsResponseDto,
     }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-export function ApiGetOrganizationsSelect() {
-  return applyDecorators(
-    ApiOperation({
-      summary: 'Get organizations for select component',
-      description:
-        "Returns the authenticated user's organizations as paginated options for quantum-ui Select, grouped by plan.",
-    }),
-    ApiResponse({ status: 200, description: 'Organization select options retrieved.', type: OrganizationSelectResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }

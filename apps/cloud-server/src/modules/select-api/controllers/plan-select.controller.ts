@@ -1,8 +1,8 @@
+import { PlanService } from '@domain/plan/services/plan.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { PlanService } from '@domain/plan/services/plan.service';
 
 @ApiTags('Select')
 @ApiBearerAuth()

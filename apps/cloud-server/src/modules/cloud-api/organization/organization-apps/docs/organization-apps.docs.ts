@@ -2,10 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';
-import {
-  OrgAppListResponseDto,
-  OrgPermissionsResponseDto,
-} from '../dto/response/org-app-list.response.dto';
+import { OrgAppListResponseDto, OrgPermissionsResponseDto } from '../dto/response/org-app-list.response.dto';
 
 export function ApiListOrgApps() {
   return applyDecorators(

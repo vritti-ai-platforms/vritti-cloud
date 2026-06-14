@@ -1,6 +1,6 @@
+import type { OrganizationDetail } from '@domain/organization/repositories/organization.repository';
 import { ApiProperty } from '@nestjs/swagger';
 import { DeploymentTypeValues } from '@/db/schema';
-import type { OrganizationDetail } from '@domain/organization/repositories/organization.repository';
 
 export class OrganizationDetailDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })

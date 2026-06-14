@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
-import { CoreVersionRepository } from './repositories/core-version.repository';
 import { CoreDeploymentRepository } from './repositories/core-deployment.repository';
 import { CoreOrganizationRepository } from './repositories/core-organization.repository';
+import { CoreVersionRepository } from './repositories/core-version.repository';
 import { CoreBusinessUnitService } from './services/core-business-unit.service';
 import { CoreConfigService } from './services/core-config.service';
 import { CoreDeploymentService } from './services/core-deployment.service';

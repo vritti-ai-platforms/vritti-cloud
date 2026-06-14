@@ -5,13 +5,13 @@ import { ROLE_TEMPLATES_QUERY_KEY } from './useRoleTemplates';
 
 type UseDeleteRoleTemplateOptions = Omit<UseMutationOptions<void, AxiosError, string>, 'mutationFn'>;
 
-export function useDeleteRoleTemplate(versionId: string, options?: UseDeleteRoleTemplateOptions) {
+export function useDeleteRoleTemplate(versionId: string, businessId: string, options?: UseDeleteRoleTemplateOptions) {
   const queryClient = useQueryClient();
   return useMutation<void, AxiosError, string>({
     ...options,
     mutationFn: (id) => deleteRoleTemplate(versionId, id),
     onSuccess: (...args) => {
-      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId) });
+      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId, businessId) });
       options?.onSuccess?.(...args);
     },
   });

@@ -43,7 +43,7 @@ export function ApiUpdateOrgUser() {
   return applyDecorators(
     ApiOperation({
       summary: 'Update a user',
-      description: 'Updates a portal user\'s email or name in the nexus deployment.',
+      description: "Updates a portal user's email or name in the nexus deployment.",
     }),
     ApiBody({ type: UpdateOrgUserDto }),
     ApiResponse({ status: 200, description: 'User updated successfully.', type: SuccessResponseDto }),

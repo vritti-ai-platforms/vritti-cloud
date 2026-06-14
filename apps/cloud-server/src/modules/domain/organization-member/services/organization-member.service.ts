@@ -36,7 +36,9 @@ export class OrganizationMemberService {
       offset,
     });
     const result = rows.map(OrganizationMemberDto.from);
-    this.logger.log(`Fetched members table for org: ${organizationId} (${total} results, limit: ${limit}, offset: ${offset})`);
+    this.logger.log(
+      `Fetched members table for org: ${organizationId} (${total} results, limit: ${limit}, offset: ${offset})`,
+    );
     return { result, count: total, state, activeViewId };
   }
 }

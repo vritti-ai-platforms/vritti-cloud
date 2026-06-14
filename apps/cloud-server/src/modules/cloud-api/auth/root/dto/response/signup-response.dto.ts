@@ -23,11 +23,7 @@ export class SignupResponseDto {
   }
 
   // Builds signup response from user DTO and session tokens
-  static from(
-    user: UserDto,
-    accessToken: string,
-    expiresIn: number,
-  ): SignupResponseDto {
+  static from(user: UserDto, accessToken: string, expiresIn: number): SignupResponseDto {
     return new SignupResponseDto({
       accessToken,
       expiresIn,

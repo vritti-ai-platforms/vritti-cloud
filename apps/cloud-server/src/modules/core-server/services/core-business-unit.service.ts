@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
-import type { BuRoleAssignment, CoreBusinessUnit } from '@/modules/cloud-api/organization/organization-business-units/types';
+import type {
+  BuRoleAssignment,
+  CoreBusinessUnit,
+} from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreHttpService } from './core-http.service';
 
 // Proxies business unit management calls to core-server. Every call passes `orgId` so core-server
@@ -28,14 +31,22 @@ export class CoreBusinessUnitService {
     orgId: string,
     buData: Record<string, unknown>,
   ): Promise<CoreBusinessUnit> {
-    const result = await this.http.post<CoreBusinessUnit>(url, webhookSecret, '/business-units/webhook', { orgId, ...buData }, { orgId });
+    const result = await this.http.post<CoreBusinessUnit>(
+      url,
+      webhookSecret,
+      '/business-units/webhook',
+      { orgId, ...buData },
+      { orgId },
+    );
     this.logger.log(`Created business unit for org ${orgId} in core`);
     return result;
   }
 
   // Fetches a single business unit and its subtree from core
   async getBusinessUnit(url: string, webhookSecret: string, orgId: string, buId: string): Promise<CoreBusinessUnit[]> {
-    const result = await this.http.get<CoreBusinessUnit[]>(url, webhookSecret, `/business-units/webhook/${buId}`, { orgId });
+    const result = await this.http.get<CoreBusinessUnit[]>(url, webhookSecret, `/business-units/webhook/${buId}`, {
+      orgId,
+    });
     this.logger.log(`Fetched business unit ${buId} from core`);
     return result;
   }
@@ -48,14 +59,30 @@ export class CoreBusinessUnitService {
     buId: string,
     data: Record<string, unknown>,
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.patch<SuccessResponseDto>(url, webhookSecret, `/business-units/webhook/${buId}`, data, { orgId });
+    const result = await this.http.patch<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      `/business-units/webhook/${buId}`,
+      data,
+      { orgId },
+    );
     this.logger.log(`Updated business unit ${buId} in core`);
     return result;
   }
 
   // Fetches role assignments for a business unit from core
-  async getRoleAssignments(url: string, webhookSecret: string, orgId: string, buId: string): Promise<BuRoleAssignment[]> {
-    const result = await this.http.get<BuRoleAssignment[]>(url, webhookSecret, `/business-units/webhook/${buId}/role-assignments`, { orgId });
+  async getRoleAssignments(
+    url: string,
+    webhookSecret: string,
+    orgId: string,
+    buId: string,
+  ): Promise<BuRoleAssignment[]> {
+    const result = await this.http.get<BuRoleAssignment[]>(
+      url,
+      webhookSecret,
+      `/business-units/webhook/${buId}/role-assignments`,
+      { orgId },
+    );
     this.logger.log(`Fetched ${result.length} role assignments for BU ${buId} from core`);
     return result;
   }
@@ -68,7 +95,13 @@ export class CoreBusinessUnitService {
     userId: string,
     data: { orgRoleId: string; businessUnitId: string },
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.post<SuccessResponseDto>(url, webhookSecret, `/users/webhook/${userId}/roles`, data, { orgId });
+    const result = await this.http.post<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      `/users/webhook/${userId}/roles`,
+      data,
+      { orgId },
+    );
     this.logger.log(`Assigned role to user ${userId} in core`);
     return result;
   }
@@ -81,7 +114,12 @@ export class CoreBusinessUnitService {
     userId: string,
     assignmentId: string,
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.delete<SuccessResponseDto>(url, webhookSecret, `/users/webhook/${userId}/roles/${assignmentId}`, { orgId });
+    const result = await this.http.delete<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      `/users/webhook/${userId}/roles/${assignmentId}`,
+      { orgId },
+    );
     this.logger.log(`Removed role assignment ${assignmentId} in core`);
     return result;
   }
@@ -94,14 +132,27 @@ export class CoreBusinessUnitService {
     buId: string,
     data: { appCodes: string[] },
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.patch<SuccessResponseDto>(url, webhookSecret, `/business-units/webhook/${buId}/apps`, data, { orgId });
+    const result = await this.http.patch<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      `/business-units/webhook/${buId}/apps`,
+      data,
+      { orgId },
+    );
     this.logger.log(`Updated apps for business unit ${buId} in core`);
     return result;
   }
 
   // Deletes a business unit in core
-  async deleteBusinessUnit(url: string, webhookSecret: string, orgId: string, buId: string): Promise<SuccessResponseDto> {
-    const result = await this.http.delete<SuccessResponseDto>(url, webhookSecret, `/business-units/webhook/${buId}`, { orgId });
+  async deleteBusinessUnit(
+    url: string,
+    webhookSecret: string,
+    orgId: string,
+    buId: string,
+  ): Promise<SuccessResponseDto> {
+    const result = await this.http.delete<SuccessResponseDto>(url, webhookSecret, `/business-units/webhook/${buId}`, {
+      orgId,
+    });
     this.logger.log(`Deleted business unit ${buId} in core`);
     return result;
   }
