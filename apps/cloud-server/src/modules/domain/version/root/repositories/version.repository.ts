@@ -124,7 +124,8 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
     for (const a of appRows) {
       const businessCode = businessCodeById[a.businessId];
       if (!businessCode) continue;
-      (snapshotApps[businessCode] ??= []).push({
+      if (!snapshotApps[businessCode]) snapshotApps[businessCode] = [];
+      snapshotApps[businessCode].push({
         code: a.code,
         name: a.name,
         icon: a.icon,
@@ -147,7 +148,8 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
           featurePerms[code].push(rp.type);
         }
       }
-      (snapshotRoleTemplates[businessCode] ??= []).push({
+      if (!snapshotRoleTemplates[businessCode]) snapshotRoleTemplates[businessCode] = [];
+      snapshotRoleTemplates[businessCode].push({
         name: r.name,
         scope: r.scope,
         apps: appCodes,
