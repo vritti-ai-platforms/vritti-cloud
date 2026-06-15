@@ -117,7 +117,7 @@ export const OverviewPage = ({ versionId }: { versionId: string }) => {
       )}
 
       {/* Snapshot visualization */}
-      <SnapshotView snapshot={version.snapshot ?? { apps: [], features: [], roleTemplates: [] }} />
+      <SnapshotView snapshot={version.snapshot ?? { apps: {}, features: [], roleTemplates: {} }} />
 
       {/* Danger zone — PROD versions cannot be deleted */}
       {version.status !== 'PROD' && (

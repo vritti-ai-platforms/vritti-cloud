@@ -27,8 +27,8 @@ export interface SnapshotRoleTemplate {
 
 export interface VersionSnapshot {
   features: SnapshotFeature[];
-  apps: SnapshotApp[];
-  roleTemplates: SnapshotRoleTemplate[];
+  apps: Record<string, SnapshotApp[]>;
+  roleTemplates: Record<string, SnapshotRoleTemplate[]>;
 }
 
 export interface Version {

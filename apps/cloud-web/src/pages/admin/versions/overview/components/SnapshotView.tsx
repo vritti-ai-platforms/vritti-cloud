@@ -1,3 +1,4 @@
+import { Badge } from '@vritti/quantum-ui/Badge';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { Empty } from '@vritti/quantum-ui/Empty';
@@ -39,6 +40,17 @@ const StatPill = ({
   </Card>
 );
 
+function BusinessLabel({ code, count }: { code: string; count: number }) {
+  return (
+    <div className="flex items-center gap-2">
+      <Badge variant="outline" className="font-mono text-[10px] font-medium uppercase">
+        {code}
+      </Badge>
+      <span className="text-xs text-muted-foreground">{count}</span>
+    </div>
+  );
+}
+
 function EmptySection({ icon: Icon, title }: { icon: React.FC<{ className?: string }>; title: string }) {
   return (
     <Empty
@@ -50,7 +62,13 @@ function EmptySection({ icon: Icon, title }: { icon: React.FC<{ className?: stri
 }
 
 export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
-  const { apps = [], features = [], roleTemplates = [] } = snapshot;
+  const { features = [] } = snapshot;
+  const appsByBusiness = snapshot.apps ?? {};
+  const rolesByBusiness = snapshot.roleTemplates ?? {};
+  const apps = Object.values(appsByBusiness).flat();
+  const roleTemplates = Object.values(rolesByBusiness).flat();
+  const appBusinesses = Object.keys(appsByBusiness).sort();
+  const roleBusinesses = Object.keys(rolesByBusiness).sort();
   const featureByCode = keyBy(features, 'code');
 
   // Reverse map: featureCode → app (for deriving role→app relationships)
@@ -90,9 +108,16 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
         trigger={<SectionHeader icon={Layers} title="Applications" count={apps.length} color="text-primary" />}
       >
         {apps.length > 0 ? (
-          <div className="space-y-3 mt-3">
-            {apps.map((app) => (
-              <AppNode key={app.code} app={app} featureByCode={featureByCode} />
+          <div className="space-y-4 mt-3">
+            {appBusinesses.map((biz) => (
+              <div key={biz} className="space-y-2">
+                <BusinessLabel code={biz} count={appsByBusiness[biz].length} />
+                <div className="space-y-3">
+                  {appsByBusiness[biz].map((app) => (
+                    <AppNode key={`${biz}-${app.code}`} app={app} featureByCode={featureByCode} />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         ) : (
@@ -137,9 +162,21 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
         }
       >
         {roleTemplates.length > 0 ? (
-          <div className="space-y-3 mt-3">
-            {roleTemplates.map((role) => (
-              <RoleNode key={role.name} role={role} featureByCode={featureByCode} featureToApp={featureToApp} />
+          <div className="space-y-4 mt-3">
+            {roleBusinesses.map((biz) => (
+              <div key={biz} className="space-y-2">
+                <BusinessLabel code={biz} count={rolesByBusiness[biz].length} />
+                <div className="space-y-3">
+                  {rolesByBusiness[biz].map((role) => (
+                    <RoleNode
+                      key={`${biz}-${role.name}`}
+                      role={role}
+                      featureByCode={featureByCode}
+                      featureToApp={featureToApp}
+                    />
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         ) : (
