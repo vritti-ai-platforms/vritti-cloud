@@ -1,10 +1,10 @@
-import { timestamp, uuid, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
-import { cloudSchema } from './cloud-schema';
-import { versions } from './version';
+import { timestamp, uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { apps } from './app';
+import { cloudSchema } from './cloud-schema';
 import { roleTemplates } from './role-template';
+import { versions } from './version';
 
-// Links a role template to the apps it covers within an app version
+// Links a role template to the apps it covers within an app version (drives compatible-role suggestions per BU)
 export const roleTemplateApps = cloudSchema.table(
   'role_template_apps',
   {

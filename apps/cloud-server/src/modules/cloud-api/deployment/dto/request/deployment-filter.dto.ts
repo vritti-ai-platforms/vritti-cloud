@@ -26,4 +26,12 @@ export class DeploymentPlanQueryDto {
   @IsOptional()
   @IsUUID()
   businessId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Country UUID to resolve plan pricing',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsOptional()
+  @IsUUID()
+  countryId?: string;
 }

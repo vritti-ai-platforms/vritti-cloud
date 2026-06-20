@@ -7,12 +7,13 @@ export const ORGANIZATION_MEMBERS_QUERY_KEY_FN = (id: string) => ['admin', 'orga
 
 // Fetches organization members — server applies filter/sort state
 export function useOrganizationMembers(
+  deploymentId: string,
   id: string,
   options?: Omit<UseQueryOptions<OrganizationMembersResponse, AxiosError>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery<OrganizationMembersResponse, AxiosError>({
     queryKey: ORGANIZATION_MEMBERS_QUERY_KEY_FN(id),
-    queryFn: () => getOrganizationMembers(id),
+    queryFn: () => getOrganizationMembers(deploymentId, id),
     ...options,
   });
 }

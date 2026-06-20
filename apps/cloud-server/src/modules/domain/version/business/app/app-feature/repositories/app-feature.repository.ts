@@ -1,13 +1,75 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, count, eq, inArray, type SQL } from '@vritti/api-sdk/drizzle-orm';
+import { PrimaryBaseRepository, PrimaryDatabaseService, type TypedDrizzleClient } from '@vritti/api-sdk';
+import { and, asc, count, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppFeature } from '@/db/schema';
-import { appFeatures, features, roleTemplateFeaturePermissions } from '@/db/schema';
+import {
+  appFeatures,
+  apps,
+  featurePermissions,
+  features,
+  permissionBusinesses,
+  roleTemplateFeaturePermissions,
+} from '@/db/schema';
+
+export interface BusinessFeatureApp {
+  id: string;
+  name: string;
+}
+
+export interface BusinessFeatureRow {
+  id: string;
+  code: string;
+  name: string;
+  icon: string;
+  apps: BusinessFeatureApp[];
+  permissionCount: number;
+}
 
 @Injectable()
 export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatures> {
   constructor(database: PrimaryDatabaseService) {
     super(database, appFeatures);
+  }
+
+  // Returns the features a business's apps include (grouped by feature) for the data table.
+  // Membership comes from app_features (scoped to the business's apps); each row carries its business apps
+  // and a count of its applicable permissions (the permission list is fetched separately).
+  async findBusinessFeaturesForTable(
+    versionId: string,
+    businessId: string,
+    options: { where?: SQL; orderBy?: SQL[]; limit: number; offset: number },
+  ): Promise<{ result: BusinessFeatureRow[]; count: number }> {
+    const conditions: SQL[] = [eq(appFeatures.versionId, versionId), eq(apps.businessId, businessId)];
+    if (options.where) {
+      conditions.push(options.where);
+    }
+
+    return this.findAllAndCount<BusinessFeatureRow>({
+      select: {
+        id: features.id,
+        code: features.code,
+        name: features.name,
+        icon: features.icon,
+        apps: sql<
+          BusinessFeatureApp[]
+        >`coalesce(jsonb_agg(distinct jsonb_build_object('id', ${apps.id}, 'name', ${apps.name})), '[]'::jsonb)`,
+        permissionCount: sql<number>`coalesce((
+          select count(*)::int
+          from ${featurePermissions} fp
+          where fp.feature_id = ${features.id}
+            and (fp.is_global = true or exists (select 1 from ${permissionBusinesses} pb where pb.feature_permission_id = fp.id and pb.business_id = ${businessId}))
+        ), 0)`,
+      },
+      leftJoins: [
+        { table: apps, on: eq(apps.id, appFeatures.appId) },
+        { table: features, on: eq(features.id, appFeatures.featureId) },
+      ],
+      where: and(...conditions),
+      groupBy: [features.id],
+      orderBy: options.orderBy && options.orderBy.length > 0 ? options.orderBy : [asc(features.sortOrder)],
+      limit: options.limit,
+      offset: options.offset,
+    });
   }
 
   // Lists all features assigned to an app with feature details
@@ -56,12 +118,35 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
     await this.db.delete(appFeatures).where(and(eq(appFeatures.appId, appId), eq(appFeatures.featureId, featureId)));
   }
 
-  // Counts how many role_template_feature_permissions reference a given feature
+  // Replaces a feature's app links within a business — clears links to the business's apps, then inserts the given ones
+  async setFeatureApps(
+    versionId: string,
+    featureId: string,
+    businessAppIds: string[],
+    appIds: string[],
+    tx?: TypedDrizzleClient,
+  ): Promise<void> {
+    const db = tx ?? this.db;
+    if (businessAppIds.length > 0) {
+      await db
+        .delete(appFeatures)
+        .where(and(eq(appFeatures.featureId, featureId), inArray(appFeatures.appId, businessAppIds)));
+    }
+    if (appIds.length > 0) {
+      await db
+        .insert(appFeatures)
+        .values(appIds.map((appId) => ({ versionId, appId, featureId })))
+        .onConflictDoNothing({ target: [appFeatures.appId, appFeatures.featureId] });
+    }
+  }
+
+  // Counts how many role_template_feature_permissions reference a given feature (via its permissions)
   async countRoleReferences(featureId: string): Promise<number> {
     const result = await this.db
       .select({ count: count() })
       .from(roleTemplateFeaturePermissions)
-      .where(eq(roleTemplateFeaturePermissions.featureId, featureId));
+      .innerJoin(featurePermissions, eq(featurePermissions.id, roleTemplateFeaturePermissions.featurePermissionId))
+      .where(eq(featurePermissions.featureId, featureId));
     return Number(result[0]?.count ?? 0);
   }
 

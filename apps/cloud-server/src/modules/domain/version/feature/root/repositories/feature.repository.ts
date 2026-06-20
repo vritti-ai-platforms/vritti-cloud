@@ -1,13 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, countDistinct, eq, exists, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import {
+  type FindForSelectConfig,
+  PrimaryBaseRepository,
+  PrimaryDatabaseService,
+  type SelectQueryResult,
+} from '@vritti/api-sdk';
+import { countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
-import { appFeatures, featureMicrofrontends, featurePermissions, features, microfrontends } from '@/db/schema';
+import {
+  appFeatures,
+  apps,
+  featureMicrofrontends,
+  featurePermissions,
+  features,
+  microfrontends,
+  permissionBusinesses,
+} from '@/db/schema';
 
 export type FeatureTableRow = Feature & {
   permissions: string[];
   platforms: string[];
   appFeatureCount: number;
+  businessCount: number;
 };
 
 @Injectable()
@@ -42,60 +56,21 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
     return this.model.findMany({ where: { versionId } });
   }
 
-  // Counts how many app_features reference a given feature
-  // Returns all features for a version with permissions — single query for export
+  // Returns all features for a version — single query for export (permissions authored separately)
   async findAllForExport(
     versionId: string,
-  ): Promise<{ code: string; name: string; icon: string; description: string | null; permissions: string[] }[]> {
+  ): Promise<{ code: string; name: string; icon: string; description: string | null }[]> {
     const rows = await this.db
       .select({
         code: features.code,
         name: features.name,
         icon: features.icon,
         description: features.description,
-        permissions: sql<string[]>`array_remove(array_agg(distinct ${featurePermissions.type}), null)`.mapWith({
-          mapFromDriverValue: (value: string) => (value === '{}' || !value ? [] : value.slice(1, -1).split(',')),
-        }),
       })
       .from(features)
-      .leftJoin(featurePermissions, eq(featurePermissions.featureId, features.id))
       .where(eq(features.versionId, versionId))
-      .groupBy(features.id)
       .orderBy(features.sortOrder);
-    return rows as { code: string; name: string; icon: string; description: string | null; permissions: string[] }[];
-  }
-
-  // Returns all features for a version with assignment status for a given app (excludes features with no permissions)
-  async findAllWithAssignment(
-    appId: string,
-    options: {
-      where?: SQL;
-      orderBy?: SQL[];
-      limit: number;
-      offset: number;
-    },
-  ): Promise<{
-    result: Array<{ featureId: string; code: string; name: string; icon: string; isAssigned: boolean }>;
-    count: number;
-  }> {
-    const hasPermissions = exists(
-      this.database.drizzleClient
-        .select({ one: sql`1` })
-        .from(featurePermissions)
-        .where(eq(featurePermissions.featureId, features.id)),
-    );
-    return this.findAllAndCount({
-      select: {
-        featureId: features.id,
-        code: features.code,
-        name: features.name,
-        icon: features.icon,
-        isAssigned: sql<boolean>`${appFeatures.id} is not null`,
-      },
-      leftJoin: { table: appFeatures, on: and(eq(appFeatures.featureId, features.id), eq(appFeatures.appId, appId)) },
-      ...options,
-      where: and(options.where, hasPermissions),
-    });
+    return rows;
   }
 
   async countAppFeatureReferences(featureId: string): Promise<number> {
@@ -125,19 +100,23 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
         sortOrder: features.sortOrder,
         createdAt: features.createdAt,
         updatedAt: features.updatedAt,
-        permissions: sql<string[]>`array_remove(array_agg(distinct ${featurePermissions.type}), null)`.mapWith({
-          mapFromDriverValue: (value: string) => (value === '{}' || !value ? [] : value.slice(1, -1).split(',')),
+        permissions: sql<string[]>`array_remove(array_agg(distinct ${featurePermissions.code}), null)`.mapWith({
+          mapFromDriverValue: (value: unknown) =>
+            Array.isArray(value) ? value : value === '{}' || !value ? [] : String(value).slice(1, -1).split(','),
         }),
         platforms: sql<string[]>`array_remove(array_agg(distinct ${microfrontends.platform}), null)`.mapWith({
-          mapFromDriverValue: (value: string) => (value === '{}' || !value ? [] : value.slice(1, -1).split(',')),
+          mapFromDriverValue: (value: unknown) =>
+            Array.isArray(value) ? value : value === '{}' || !value ? [] : String(value).slice(1, -1).split(','),
         }),
         appFeatureCount: countDistinct(appFeatures.id),
+        businessCount: countDistinct(apps.businessId),
       },
       leftJoins: [
         { table: featurePermissions, on: eq(featurePermissions.featureId, features.id) },
         { table: featureMicrofrontends, on: eq(featureMicrofrontends.featureId, features.id) },
         { table: microfrontends, on: eq(microfrontends.id, featureMicrofrontends.microfrontendId) },
         { table: appFeatures, on: eq(appFeatures.featureId, features.id) },
+        { table: apps, on: eq(apps.id, appFeatures.appId) },
       ],
       groupBy: [features.id],
       where: options.where,
@@ -145,6 +124,26 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
       limit: options.limit,
       offset: options.offset,
     });
+  }
+
+  // Returns feature select options available to add to a business: features that have a permission applicable to
+  // the business (global or business-linked) and are not already assigned to any of the business's apps
+  async findForSelectForBusiness(config: FindForSelectConfig, businessId: string): Promise<SelectQueryResult> {
+    const available = sql`
+      exists (
+        select 1 from ${featurePermissions} fp
+        where fp.feature_id = ${features.id}
+          and (fp.is_global = true or exists (
+            select 1 from ${permissionBusinesses} pb
+            where pb.feature_permission_id = fp.id and pb.business_id = ${businessId}
+          ))
+      )
+      and not exists (
+        select 1 from ${appFeatures} af
+        join ${apps} a on a.id = af.app_id
+        where af.feature_id = ${features.id} and a.business_id = ${businessId}
+      )`;
+    return this.findForSelect({ ...config, conditions: [...(config.conditions ?? []), available] });
   }
 
   // Returns a set of feature IDs that have at least one app_feature reference (cannot be deleted)

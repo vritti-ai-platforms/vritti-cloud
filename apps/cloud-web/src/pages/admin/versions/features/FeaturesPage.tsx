@@ -148,7 +148,11 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
     {
       accessorKey: 'permissions',
       header: 'Permissions',
-      cell: ({ row }) => <Badge variant="secondary">{row.original.permissions.length} permissions</Badge>,
+      cell: ({ row }) => (
+        <Badge variant={row.original.permissions.length === 0 ? 'destructive' : 'secondary'}>
+          {row.original.permissions.length} permissions
+        </Badge>
+      ),
       enableSorting: false,
     },
     {
@@ -170,9 +174,13 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
       enableSorting: false,
     },
     {
-      accessorKey: 'appCount',
-      header: 'Apps',
-      cell: ({ row }) => <Badge variant="secondary">{row.original.appCount} apps</Badge>,
+      accessorKey: 'businessCount',
+      header: 'Businesses',
+      cell: ({ row }) => (
+        <Badge variant={row.original.businessCount === 0 ? 'destructive' : 'secondary'}>
+          {row.original.businessCount} businesses
+        </Badge>
+      ),
     },
     {
       id: 'actions',

@@ -49,7 +49,7 @@ export class PlanAppController {
     return this.planAppService.assign(planId, dto);
   }
 
-  // Updates included feature codes for a plan-app assignment
+  // Updates the sort order for a plan-app assignment
   @Patch(':appCode')
   @ApiUpdatePlanApp()
   update(
@@ -58,7 +58,7 @@ export class PlanAppController {
     @Body() dto: UpdatePlanAppDto,
   ): Promise<SuccessResponseDto> {
     this.logger.log(`PATCH /admin-api/plans/${planId}/apps/${appCode}`);
-    return this.planAppService.updateFeatureCodes(planId, appCode, dto);
+    return this.planAppService.updateSortOrder(planId, appCode, dto);
   }
 
   // Removes an app from a plan

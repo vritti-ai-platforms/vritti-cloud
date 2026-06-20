@@ -4,27 +4,58 @@ import type { CreatePlanData, Plan, UpdatePlanData } from '@/schemas/admin/plans
 
 export type PlansResponse = TableResponse<Plan>;
 
-// Fetches plans for the data table — server applies filter/sort state
-export function getPlans(): Promise<PlansResponse> {
-  return axios.get<PlansResponse>('admin-api/plans/table').then((r) => r.data);
+// Plans are version + business scoped
+function base(versionId: string, businessId: string): string {
+  return `admin-api/versions/${versionId}/businesses/${businessId}/plans`;
+}
+
+// Fetches plans for a version + business data table — server applies filter/sort state
+export function getPlans(versionId: string, businessId: string): Promise<PlansResponse> {
+  return axios.get<PlansResponse>(`${base(versionId, businessId)}/table`).then((r) => r.data);
 }
 
 // Fetches a single plan by ID
-export function getPlan(id: string): Promise<Plan> {
-  return axios.get<Plan>(`admin-api/plans/${id}`).then((r) => r.data);
+export function getPlan(versionId: string, businessId: string, id: string): Promise<Plan> {
+  return axios.get<Plan>(`${base(versionId, businessId)}/${id}`).then((r) => r.data);
 }
 
-// Creates a new plan
-export function createPlan(data: CreatePlanData): Promise<CreateResponse<Plan>> {
-  return axios.post<CreateResponse<Plan>>('admin-api/plans', data).then((r) => r.data);
+// Creates a new plan under the version + business
+export function createPlan({
+  versionId,
+  businessId,
+  data,
+}: {
+  versionId: string;
+  businessId: string;
+  data: CreatePlanData;
+}): Promise<CreateResponse<Plan>> {
+  return axios.post<CreateResponse<Plan>>(base(versionId, businessId), data).then((r) => r.data);
 }
 
 // Updates an existing plan by ID
-export function updatePlan({ id, data }: { id: string; data: UpdatePlanData }): Promise<SuccessResponse> {
-  return axios.patch<SuccessResponse>(`admin-api/plans/${id}`, data).then((r) => r.data);
+export function updatePlan({
+  versionId,
+  businessId,
+  id,
+  data,
+}: {
+  versionId: string;
+  businessId: string;
+  id: string;
+  data: UpdatePlanData;
+}): Promise<SuccessResponse> {
+  return axios.patch<SuccessResponse>(`${base(versionId, businessId)}/${id}`, data).then((r) => r.data);
 }
 
 // Deletes a plan by ID
-export function deletePlan(id: string): Promise<void> {
-  return axios.delete(`admin-api/plans/${id}`).then(() => undefined);
+export function deletePlan({
+  versionId,
+  businessId,
+  id,
+}: {
+  versionId: string;
+  businessId: string;
+  id: string;
+}): Promise<void> {
+  return axios.delete(`${base(versionId, businessId)}/${id}`).then(() => undefined);
 }

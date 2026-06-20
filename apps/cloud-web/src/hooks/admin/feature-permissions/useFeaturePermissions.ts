@@ -1,21 +1,15 @@
-import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
-import type { AxiosError } from 'axios';
-import { getFeaturePermissions } from '../../../services/admin/feature-permissions.service';
+import { useQuery } from '@tanstack/react-query';
+import type { FeaturePermissionsTableResponse } from '@/schemas/admin/feature-permissions';
+import { getFeaturePermissionsTable } from '../../../services/admin/feature-permissions.service';
 
-export function featurePermissionsKey(versionId: string, featureId: string) {
-  return ['admin', 'versions', versionId, 'feature-permissions', featureId] as const;
-}
+export const FEATURE_PERMISSIONS_TABLE_KEY = (versionId: string, featureId: string) =>
+  ['admin', 'versions', versionId, 'features', featureId, 'permissions', 'table'] as const;
 
-// Fetches the permission types for a feature
-export function useFeaturePermissions(
-  versionId: string,
-  featureId: string,
-  options?: Omit<UseQueryOptions<{ types: string[] }, AxiosError>, 'queryKey' | 'queryFn'>,
-) {
-  return useQuery<{ types: string[] }, AxiosError>({
-    queryKey: featurePermissionsKey(versionId, featureId),
-    queryFn: () => getFeaturePermissions(versionId, featureId),
-    enabled: !!featureId,
-    ...options,
+// Fetches a feature's permissions data table (server-stored filter/sort/pagination state)
+export function useFeaturePermissions(versionId: string, featureId: string) {
+  return useQuery<FeaturePermissionsTableResponse>({
+    queryKey: FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId),
+    queryFn: () => getFeaturePermissionsTable(versionId, featureId),
+    enabled: !!versionId && !!featureId,
   });
 }

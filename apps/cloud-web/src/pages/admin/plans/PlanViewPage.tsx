@@ -6,11 +6,12 @@ import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { CreditCard } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import type { Plan } from '@/schemas/admin/plans';
 import { EditPlanForm } from './forms/EditPlanForm';
 import { AppsTab } from './tabs/AppsTab';
 import { ContentTab } from './tabs/ContentTab';
+import { FeaturesTab } from './tabs/FeaturesTab';
 import { PlanStats } from './tabs/PlanStats';
 import { PricesTab } from './tabs/PricesTab';
 
@@ -24,16 +25,19 @@ function buildDeleteWarning(plan: Plan): string {
 }
 
 export const PlanViewPage = () => {
+  const { id: versionId } = useSlugParams('versionSlug');
+  const { id: businessId } = useSlugParams('businessSlug');
   const { id } = useSlugParams('planSlug');
+  const { versionSlug, businessSlug } = useParams();
   const navigate = useNavigate();
 
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: plan } = usePlan(id);
+  const { data: plan } = usePlan(versionId ?? '', businessId ?? '', id ?? '');
 
-  const deleteMutation = useDeletePlan({
-    onSuccess: () => navigate('/plans'),
+  const deleteMutation = useDeletePlan(versionId ?? '', businessId ?? '', {
+    onSuccess: () => navigate(`/versions/${versionSlug}/businesses/${businessSlug}/plans`),
   });
 
   // Prompt confirmation then delete
@@ -53,7 +57,11 @@ export const PlanViewPage = () => {
       {/* Header */}
       <PageHeader
         title={plan.name}
-        description="Manage content, apps, and pricing for this plan"
+        description={
+          plan.isCustom
+            ? `Custom plan attached to ${plan.attachedOrgName ?? 'an organization'}`
+            : 'Manage content, apps, and pricing for this plan'
+        }
         actions={
           <Button variant="outline" size="sm" onClick={editDialog.open}>
             Edit
@@ -71,6 +79,7 @@ export const PlanViewPage = () => {
         tabs={[
           { value: 'content', label: 'Content', content: <ContentTab plan={plan} /> },
           { value: 'apps', label: 'Apps', content: <AppsTab planId={id ?? ''} /> },
+          { value: 'features', label: 'Features', content: <FeaturesTab planId={id ?? ''} /> },
           { value: 'prices', label: 'Prices', content: <PricesTab /> },
         ]}
       />
@@ -90,7 +99,15 @@ export const PlanViewPage = () => {
         icon={CreditCard}
         title="Edit Plan"
         description="Update the details for this subscription plan."
-        content={(close) => <EditPlanForm plan={plan} onSuccess={close} onCancel={close} />}
+        content={(close) => (
+          <EditPlanForm
+            plan={plan}
+            versionId={versionId ?? ''}
+            businessId={businessId ?? ''}
+            onSuccess={close}
+            onCancel={close}
+          />
+        )}
       />
     </div>
   );

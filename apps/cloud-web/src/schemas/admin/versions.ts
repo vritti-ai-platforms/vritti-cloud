@@ -3,12 +3,29 @@ import { z } from '@vritti/quantum-ui/zod';
 
 export type VersionStatus = 'ALPHA' | 'BETA' | 'PROD';
 
+export interface SnapshotFeaturePermission {
+  code: string;
+  label: string;
+  isGlobal: boolean;
+  businesses: string[];
+}
+
+export interface SnapshotMicrofrontend {
+  code: string;
+  name: string;
+  remoteEntry?: string | null;
+  remoteEntryAndroid?: string | null;
+  remoteEntryIos?: string | null;
+  exposedModule: string | null;
+  routePrefix: string | null;
+}
+
 export interface SnapshotFeature {
   code: string;
   name: string;
   icon: string;
-  permissions: string[];
-  microfrontends: Record<string, { remoteEntry: string; exposedModule: string; routePrefix: string }>;
+  permissions: SnapshotFeaturePermission[];
+  microfrontends: Record<string, SnapshotMicrofrontend>;
 }
 
 export interface SnapshotApp {
@@ -21,14 +38,20 @@ export interface SnapshotApp {
 export interface SnapshotRoleTemplate {
   name: string;
   scope: string;
+  sourceRoleId: string;
   apps: string[];
   features: Record<string, string[]>;
 }
 
+export interface SnapshotBusiness {
+  name: string;
+  apps: SnapshotApp[];
+  roleTemplates: SnapshotRoleTemplate[];
+}
+
 export interface VersionSnapshot {
-  features: SnapshotFeature[];
-  apps: Record<string, SnapshotApp[]>;
-  roleTemplates: Record<string, SnapshotRoleTemplate[]>;
+  features: Record<string, SnapshotFeature>;
+  businesses: Record<string, SnapshotBusiness>;
 }
 
 export interface Version {

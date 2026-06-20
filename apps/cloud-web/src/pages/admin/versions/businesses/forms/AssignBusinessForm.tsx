@@ -28,7 +28,11 @@ export const AssignBusinessForm: React.FC<AssignBusinessFormProps> = ({ versionI
   });
 
   return (
-    <Form form={form} mutation={assignMutation} transformSubmit={(data) => ({ versionId, businessId: data.businessId })}>
+    <Form
+      form={form}
+      mutation={assignMutation}
+      transformSubmit={(data) => ({ versionId, businessId: data.businessId })}
+    >
       <BusinessSelector name="businessId" params={{ notInVersion: versionId }} />
       <DialogActions>
         <Button

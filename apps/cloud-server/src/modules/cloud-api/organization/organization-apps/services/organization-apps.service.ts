@@ -1,3 +1,4 @@
+import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { PlanAppRepository } from '@domain/plan/repositories/plan-app.repository';
 import { AppFeatureRepository } from '@domain/version/business/app/app-feature/repositories/app-feature.repository';
 import { AppPriceRepository } from '@domain/version/business/app/app-price/repositories/app-price.repository';
@@ -6,7 +7,7 @@ import { FeaturePermissionRepository } from '@domain/version/feature/feature-per
 import { VersionRepository } from '@domain/version/root/repositories/version.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { ForbiddenException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
-import { type App, BillingPeriodValues, type Deployment } from '@/db/schema';
+import { type App, BillingPeriodValues, type Deployment, type Organization } from '@/db/schema';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import type { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';
 import type {
@@ -21,6 +22,7 @@ export class OrganizationAppsService {
 
   constructor(
     private readonly coreDeploymentService: CoreDeploymentService,
+    private readonly planRepository: PlanRepository,
     private readonly planAppRepository: PlanAppRepository,
     private readonly appRepository: AppRepository,
     private readonly appFeatureRepository: AppFeatureRepository,
@@ -29,33 +31,29 @@ export class OrganizationAppsService {
     private readonly versionRepository: VersionRepository,
   ) {}
 
-  // Lists the vertical-scoped catalog apps with their status relative to the organization's plan and market
+  // Lists the business-scoped catalog apps with their status relative to the organization's plan and country
   async listApps(orgId: string): Promise<OrgAppListResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const versionId = await this.resolveVersionId(deployment);
+    const planId = await this.resolveOrgPlanId(org, versionId);
 
-    // Fetch plan apps, market addon prices (monthly), and the apps defined for this vertical
-    const [orgPlanApps, marketPrices, verticalApps] = await Promise.all([
-      this.planAppRepository.findByPlanId(org.planId),
-      this.appPriceRepository.findByMarketAndPeriod(org.marketId, BillingPeriodValues.monthly),
-      this.appRepository.findActiveByBusiness(versionId, org.businessId),
+    // Fetch plan apps, country addon prices (monthly), and the apps defined for this business
+    const [orgPlanApps, countryPrices, businessApps] = await Promise.all([
+      planId ? this.planAppRepository.findByPlanId(planId) : Promise.resolve([]),
+      this.appPriceRepository.findByCountryAndPeriod(org.countryId, BillingPeriodValues.monthly),
+      this.appRepository.findByBusiness(versionId, org.businessId),
     ]);
 
     const planAppMap = new Map(orgPlanApps.map((pa) => [pa.appCode, pa]));
-    const priceMap = new Map(marketPrices.map((p) => [p.appId, p]));
+    const priceMap = new Map(countryPrices.map((p) => [p.appId, p]));
 
-    // Build app features for all vertical apps in a single query
-    const allAppFeatures = await this.findAppFeaturesGrouped(verticalApps.map((a) => a.id));
+    // Build app features for all business apps in a single query
+    const allAppFeatures = await this.findAppFeaturesGrouped(businessApps.map((a) => a.id));
 
-    const appItems: OrgAppItemResponseDto[] = verticalApps.map((app) => {
+    const appItems: OrgAppItemResponseDto[] = businessApps.map((app) => {
       const planApp = planAppMap.get(app.code);
       const appPrice = priceMap.get(app.id);
       const appFeaturesForApp = allAppFeatures.get(app.id) ?? [];
-
-      // Filter features by includedFeatureCodes when plan-included
-      const filteredFeatures = planApp?.includedFeatureCodes
-        ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
-        : appFeaturesForApp;
 
       let status: OrgAppItemResponseDto['status'];
       if (planApp) {
@@ -74,7 +72,7 @@ export class OrganizationAppsService {
         icon: app.icon,
         status,
         price: appPrice ? { monthlyPrice: String(appPrice.amount), currency: appPrice.currencyCode } : null,
-        features: filteredFeatures.map((f) => ({ code: f.code, name: f.name })),
+        features: appFeaturesForApp.map((f) => ({ code: f.code, name: f.name })),
       };
     });
 
@@ -84,12 +82,14 @@ export class OrganizationAppsService {
 
   // Enables a plan-included app for the organization
   async enableApp(orgId: string, appId: string): Promise<SuccessResponseDto> {
-    const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const versionId = await this.resolveVersionId(deployment);
+    const planId = await this.resolveOrgPlanId(org, versionId);
 
     const app = await this.appRepository.findById(appId);
     if (!app) throw new NotFoundException('App not found.');
 
-    const planApp = await this.planAppRepository.findByPlanAndAppCode(org.planId, app.code);
+    const planApp = planId ? await this.planAppRepository.findByPlanAndAppCode(planId, app.code) : undefined;
     if (!planApp) {
       throw new ForbiddenException({
         label: 'App Not In Plan',
@@ -112,13 +112,15 @@ export class OrganizationAppsService {
 
   // Purchases an addon app for specific business units
   async purchaseAddon(orgId: string, appId: string, _dto: PurchaseAddonDto): Promise<SuccessResponseDto> {
-    const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const versionId = await this.resolveVersionId(deployment);
+    const planId = await this.resolveOrgPlanId(org, versionId);
 
     const app = await this.appRepository.findById(appId);
     if (!app) throw new NotFoundException('App not found.');
 
     // Verify app is NOT in planApps (addons are not plan-included)
-    const planApp = await this.planAppRepository.findByPlanAndAppCode(org.planId, app.code);
+    const planApp = planId ? await this.planAppRepository.findByPlanAndAppCode(planId, app.code) : undefined;
     if (planApp) {
       throw new ForbiddenException({
         label: 'App Already In Plan',
@@ -126,12 +128,12 @@ export class OrganizationAppsService {
       });
     }
 
-    // Verify addon pricing exists for this market + monthly period
-    const appPrice = await this.appPriceRepository.findByComposite(appId, org.marketId, BillingPeriodValues.monthly);
+    // Verify addon pricing exists for this country + monthly period
+    const appPrice = await this.appPriceRepository.findByComposite(appId, org.countryId, BillingPeriodValues.monthly);
     if (!appPrice) {
       throw new ForbiddenException({
         label: 'Addon Not Available',
-        detail: 'This addon is not available in the organization market.',
+        detail: 'This addon is not available in the organization country.',
       });
     }
 
@@ -148,17 +150,18 @@ export class OrganizationAppsService {
     return { success: true, message: `Addon '${app.name}' cancelled for business unit.` };
   }
 
-  // Returns all features grouped by app for the organization's vertical-scoped enabled apps (used for role form)
+  // Returns all features grouped by app for the organization's business-scoped enabled apps (used for role form)
   async getPermissions(orgId: string): Promise<OrgPermissionsResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const versionId = await this.resolveVersionId(deployment);
+    const planId = await this.resolveOrgPlanId(org, versionId);
 
-    const orgPlanApps = await this.planAppRepository.findByPlanId(org.planId);
+    const orgPlanApps = planId ? await this.planAppRepository.findByPlanId(planId) : [];
     if (orgPlanApps.length === 0) return { apps: [] };
 
-    // Resolve plan app codes to actual app records scoped to the vertical
-    const verticalApps = await this.appRepository.findActiveByBusiness(versionId, org.businessId);
-    const appByCode = new Map(verticalApps.map((a) => [a.code, a]));
+    // Resolve plan app codes to actual app records scoped to the business
+    const businessApps = await this.appRepository.findByBusiness(versionId, org.businessId);
+    const appByCode = new Map(businessApps.map((a) => [a.code, a]));
 
     const matchedApps = orgPlanApps
       .map((pa) => ({ planApp: pa, app: appByCode.get(pa.appCode) }))
@@ -167,23 +170,24 @@ export class OrganizationAppsService {
     const appIds = matchedApps.map((e) => e.app.id);
     const allAppFeatures = await this.findAppFeaturesGrouped(appIds);
 
-    const result = matchedApps.map(({ planApp, app }) => {
+    const result = matchedApps.map(({ app }) => {
       const appFeaturesForApp = allAppFeatures.get(app.id) ?? [];
-
-      const filteredFeatures = planApp.includedFeatureCodes
-        ? appFeaturesForApp.filter((f) => planApp.includedFeatureCodes?.includes(f.code))
-        : appFeaturesForApp;
-
       return {
         appId: app.id,
         appCode: app.code,
         appName: app.name,
-        features: filteredFeatures.map((f) => ({ code: f.code, name: f.name, permissions: f.permissions })),
+        features: appFeaturesForApp.map((f) => ({ code: f.code, name: f.name, permissions: f.permissions })),
       };
     });
 
     this.logger.log(`Resolved permissions for ${result.length} apps in org ${orgId}`);
     return { apps: result };
+  }
+
+  // Resolves the org's plan id from (version, business, planCode); undefined if the plan can't be resolved
+  private async resolveOrgPlanId(org: Organization, versionId: string): Promise<string | undefined> {
+    const plan = await this.planRepository.findByVersionBusinessCode(versionId, org.businessId, org.planCode);
+    return plan?.id;
   }
 
   // Resolves the app version UUID from a deployment's version string
@@ -206,11 +210,11 @@ export class OrganizationAppsService {
     const featureIds = [...new Set(rows.map((r) => r.featureId))];
     const permissionRows = await this.featurePermissionRepository.findByFeatureIds(featureIds);
 
-    // Group permission types by featureId
+    // Group permission codes by featureId
     const permissionsByFeature = new Map<string, string[]>();
     for (const row of permissionRows) {
       const existing = permissionsByFeature.get(row.featureId) ?? [];
-      existing.push(row.type);
+      existing.push(row.code);
       permissionsByFeature.set(row.featureId, existing);
     }
 

@@ -1,6 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { SelectOptionsQueryDto } from '@vritti/api-sdk';
-import { IsOptional, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class DeploymentSelectQueryDto extends SelectOptionsQueryDto {
   @ApiPropertyOptional({ description: 'Filter by region ID' })
@@ -12,4 +12,9 @@ export class DeploymentSelectQueryDto extends SelectOptionsQueryDto {
   @IsOptional()
   @IsUUID()
   cloudProviderId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by app version string' })
+  @IsOptional()
+  @IsString()
+  version?: string;
 }

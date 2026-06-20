@@ -13,7 +13,7 @@ export interface Feature {
   description: string | null;
   permissions: string[];
   platforms: string[];
-  appCount: number;
+  businessCount: number;
   sortOrder: number;
   createdAt: string;
   updatedAt: string | null;

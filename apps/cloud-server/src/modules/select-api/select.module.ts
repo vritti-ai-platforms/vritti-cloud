@@ -3,7 +3,6 @@ import { BusinessDomainModule } from '@domain/business/business.module';
 import { CloudProviderDomainModule } from '@domain/cloud-provider/cloud-provider.module';
 import { CountryDomainModule } from '@domain/country/country.module';
 import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
-import { MarketDomainModule } from '@domain/market/market.module';
 import { PlanDomainModule } from '@domain/plan/plan.module';
 import { RegionDomainModule } from '@domain/region/region.module';
 import { VersionDomainModule } from '@domain/version/version.module';
@@ -16,7 +15,6 @@ import { CloudProviderSelectController } from './controllers/cloud-provider-sele
 import { CountrySelectController } from './controllers/country-select.controller';
 import { DeploymentSelectController } from './controllers/deployment-select.controller';
 import { FeatureSelectController } from './controllers/feature-select.controller';
-import { MarketSelectController } from './controllers/market-select.controller';
 import { MicrofrontendSelectController } from './controllers/microfrontend-select.controller';
 import { OrganizationSelectController } from './controllers/organization-select.controller';
 import { PlanSelectController } from './controllers/plan-select.controller';
@@ -32,7 +30,6 @@ import { VersionSelectController } from './controllers/version-select.controller
     DeploymentDomainModule,
     BusinessDomainModule,
     CountryDomainModule,
-    MarketDomainModule,
     PlanDomainModule,
     RegionDomainModule,
     OrganizationModule,
@@ -40,7 +37,6 @@ import { VersionSelectController } from './controllers/version-select.controller
   controllers: [
     BusinessSelectController,
     CountrySelectController,
-    MarketSelectController,
     PlanSelectController,
     RegionSelectController,
     CloudProviderSelectController,

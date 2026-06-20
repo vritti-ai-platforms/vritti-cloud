@@ -22,7 +22,7 @@ export interface OrgListItem {
   businessId: string;
   size: OrgSize;
   mediaId: string | null;
-  planId: string | null;
+  planCode: string;
   deploymentId: string | null;
   role: OrgMemberRole;
   createdAt: string;
@@ -47,21 +47,17 @@ export const createOrganizationSchema = z.object({
   size: z.enum(Object.values(OrgSize) as [OrgSize, ...OrgSize[]], { message: 'Please select a size' }),
   businessId: z.string({ message: 'Please select a business' }),
   businessName: z.string().optional(),
-  regionId: z.string({ message: 'Please select a region' }).optional(),
-  regionName: z.string().optional(),
-  cloudProviderId: z.string({ message: 'Please select a provider' }).optional(),
-  cloudProviderName: z.string().optional(),
+  version: z.string({ message: 'Please select a version' }).optional(),
+  versionName: z.string().optional(),
   deploymentId: z.string({ message: 'Please select a deployment' }).optional(),
   deploymentName: z.string().optional(),
-  taxId: z.string().min(1, 'Tax ID is required'),
+  taxId: z.string().optional(),
   countryId: z.string().optional(),
   countryCode: z.string().optional(),
   countryName: z.string().optional(),
-  marketId: z.string().optional(),
-  marketName: z.string().optional(),
-  planId: z.string({ message: 'Please select a plan' }).optional(),
+  planCode: z.string({ message: 'Please select a plan' }).optional(),
   planName: z.string().optional(),
-  planPrice: z.string().optional(),
+  planAmount: z.number().optional(),
   planCurrency: z.string().optional(),
   logo: z
     .instanceof(File)
@@ -75,9 +71,7 @@ export interface ValidateTaxIdResponse {
   valid: boolean;
   countryId: string;
   countryCode: string;
-  marketId: string;
   countryName?: string;
-  marketName?: string;
 }
 
 export interface SubdomainAvailability {

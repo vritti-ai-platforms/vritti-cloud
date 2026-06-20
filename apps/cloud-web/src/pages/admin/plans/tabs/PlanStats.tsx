@@ -11,7 +11,7 @@ export const PlanStats = ({ plan }: { plan: Plan }) => (
           <Briefcase className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Vertical</p>
+          <p className="text-sm text-muted-foreground">Business</p>
           <p className="text-lg font-semibold truncate max-w-36">{plan.businessName}</p>
         </div>
       </CardContent>
@@ -33,8 +33,8 @@ export const PlanStats = ({ plan }: { plan: Plan }) => (
           <Globe className="h-6 w-6 text-primary" />
         </div>
         <div>
-          <p className="text-sm text-muted-foreground">Markets Covered</p>
-          <p className="text-2xl font-semibold">{plan.marketCount}</p>
+          <p className="text-sm text-muted-foreground">Countries Covered</p>
+          <p className="text-2xl font-semibold">{plan.countryCount}</p>
         </div>
       </CardContent>
     </Card>

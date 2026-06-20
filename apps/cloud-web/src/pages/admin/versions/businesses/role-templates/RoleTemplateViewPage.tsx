@@ -5,26 +5,25 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { Boxes, Factory, GitBranch, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
 import { EditRoleTemplateForm } from './forms/EditRoleTemplateForm';
 import { RoleTemplatePermissionForm } from './forms/RoleTemplatePermissionForm';
-import { AppsTab } from './tabs/AppsTab';
 
 export const RoleTemplateViewPage = () => {
   const { id } = useSlugParams('roleTemplateSlug');
+  const { id: businessId } = useSlugParams('businessSlug');
   const navigate = useNavigate();
   const { versionId } = useVersionContext();
 
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: role } = useRoleTemplate(versionId, id);
+  const { data: role } = useRoleTemplate(versionId, businessId, id);
 
-  const deleteMutation = useDeleteRoleTemplate(versionId, role.businessId, {
-    onSuccess: () => navigate('../..'),
+  const deleteMutation = useDeleteRoleTemplate(versionId, businessId, {
+    onSuccess: () => navigate('..', { relative: 'path' }),
   });
 
   // Prompt confirmation then delete
@@ -100,26 +99,8 @@ export const RoleTemplateViewPage = () => {
         </Card>
       </div>
 
-      {/* Tabs */}
-      <Tabs
-        defaultValue="apps"
-        tabs={[
-          {
-            value: 'apps',
-            label: 'Apps',
-            content: <AppsTab businessId={role.businessId} roleId={role.id} />,
-          },
-          {
-            value: 'permissions',
-            label: 'Permissions',
-            content: (
-              <div className="pt-4">
-                <RoleTemplatePermissionForm businessId={role.businessId} roleId={role.id} />
-              </div>
-            ),
-          },
-        ]}
-      />
+      {/* Permissions */}
+      <RoleTemplatePermissionForm businessId={businessId} roleId={role.id} />
 
       <DangerZone
         title="Delete this role template"

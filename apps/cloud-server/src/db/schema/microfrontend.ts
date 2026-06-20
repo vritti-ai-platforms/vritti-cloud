@@ -1,5 +1,5 @@
-import { check, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { sql } from '@vritti/api-sdk/drizzle-orm';
+import { check, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { appPlatformEnum } from './enums';
 import { versions } from './version';

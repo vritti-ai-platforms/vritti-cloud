@@ -7,6 +7,7 @@ export function roleTemplatePermissionsQueryKey(versionId: string, roleId: strin
   return ['admin', 'versions', versionId, 'role-templates', roleId, 'permissions'] as const;
 }
 
+// Fetches a role template's granted permissions grouped by feature
 export function useRoleTemplatePermissions(
   versionId: string,
   businessId: string,

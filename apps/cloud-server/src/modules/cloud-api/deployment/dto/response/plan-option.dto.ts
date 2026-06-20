@@ -10,8 +10,8 @@ export class PlanOptionDto {
   @ApiProperty({ example: 'pro' })
   code: string;
 
-  @ApiPropertyOptional({ example: '2999.00', nullable: true })
-  price: string | null;
+  @ApiPropertyOptional({ example: 299900, nullable: true, description: "Amount in the country's currency minor units" })
+  amount: number | null;
 
   @ApiPropertyOptional({ example: 'INR', nullable: true })
   currency: string | null;

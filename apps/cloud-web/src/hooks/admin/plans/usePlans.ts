@@ -1,15 +1,22 @@
 import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { PlansResponse } from '../../../services/admin/plans.service';
-import { getPlans } from '../../../services/admin/plans.service';
+import type { PlansResponse } from '@/services/admin/plans.service';
+import { getPlans } from '@/services/admin/plans.service';
 
-export const PLANS_QUERY_KEY = ['admin', 'plans'] as const;
+export function plansQueryKey(versionId: string, businessId: string) {
+  return ['admin', 'versions', versionId, 'businesses', businessId, 'plans'] as const;
+}
 
-// Fetches all plans
-export function usePlans(options?: Omit<UseQueryOptions<PlansResponse, AxiosError>, 'queryKey' | 'queryFn'>) {
+// Fetches plans for a version + business
+export function usePlans(
+  versionId: string,
+  businessId: string,
+  options?: Omit<UseQueryOptions<PlansResponse, AxiosError>, 'queryKey' | 'queryFn'>,
+) {
   return useQuery<PlansResponse, AxiosError>({
-    queryKey: PLANS_QUERY_KEY,
-    queryFn: getPlans,
+    queryKey: plansQueryKey(versionId, businessId),
+    queryFn: () => getPlans(versionId, businessId),
+    enabled: !!versionId && !!businessId,
     ...options,
   });
 }

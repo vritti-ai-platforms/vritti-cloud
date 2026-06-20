@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."plans" DROP COLUMN "usd_anchor";

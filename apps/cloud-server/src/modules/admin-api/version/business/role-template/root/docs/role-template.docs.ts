@@ -35,7 +35,11 @@ export function ApiFindForTableRoleTemplates() {
 export function ApiGetRoleTemplateById() {
   return applyDecorators(
     ApiOperation({ summary: 'Get a role template by ID with permissions grouped by app' }),
-    ApiParam({ name: 'id', description: 'Role template UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({
+      name: 'roleTemplateId',
+      description: 'Role template UUID',
+      example: '550e8400-e29b-41d4-a716-446655440000',
+    }),
     ApiResponse({ status: 200, description: 'Role template retrieved successfully.', type: RoleTemplateDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Role template not found.' }),
@@ -46,7 +50,11 @@ export function ApiGetRoleTemplateById() {
 export function ApiUpdateRoleTemplate() {
   return applyDecorators(
     ApiOperation({ summary: 'Update a role template' }),
-    ApiParam({ name: 'id', description: 'Role template UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({
+      name: 'roleTemplateId',
+      description: 'Role template UUID',
+      example: '550e8400-e29b-41d4-a716-446655440000',
+    }),
     ApiBody({ type: UpdateRoleTemplateDto }),
     ApiResponse({ status: 200, description: 'Role template updated successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
@@ -59,7 +67,11 @@ export function ApiUpdateRoleTemplate() {
 export function ApiDeleteRoleTemplate() {
   return applyDecorators(
     ApiOperation({ summary: 'Delete a role template' }),
-    ApiParam({ name: 'id', description: 'Role template UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({
+      name: 'roleTemplateId',
+      description: 'Role template UUID',
+      example: '550e8400-e29b-41d4-a716-446655440000',
+    }),
     ApiResponse({ status: 200, description: 'Role template deleted successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Role template not found.' }),

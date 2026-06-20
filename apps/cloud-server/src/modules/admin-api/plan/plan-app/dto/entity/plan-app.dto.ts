@@ -11,9 +11,6 @@ export class PlanAppDto {
   @ApiProperty({ example: 'crm' })
   appCode: string;
 
-  @ApiPropertyOptional({ type: [String], nullable: true, example: ['contacts.view', 'contacts.edit'] })
-  includedFeatureCodes: string[] | null;
-
   @ApiProperty({ example: 0 })
   sortOrder: number;
 
@@ -23,7 +20,6 @@ export class PlanAppDto {
     dto.id = planApp.id;
     dto.planId = planApp.planId;
     dto.appCode = planApp.appCode;
-    dto.includedFeatureCodes = planApp.includedFeatureCodes;
     dto.sortOrder = planApp.sortOrder;
     return dto;
   }

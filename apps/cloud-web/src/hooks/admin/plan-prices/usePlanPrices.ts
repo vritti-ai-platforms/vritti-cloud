@@ -7,7 +7,7 @@ export function planPricesQueryKey(planId: string) {
   return ['admin', 'plans', planId, 'prices'] as const;
 }
 
-// Fetches all price entries for a plan across markets and billing periods
+// Fetches all price entries for a plan across countries and billing periods
 export function usePlanPrices(
   planId: string,
   options?: Omit<UseQueryOptions<PlanPrice[], AxiosError>, 'queryKey' | 'queryFn'>,

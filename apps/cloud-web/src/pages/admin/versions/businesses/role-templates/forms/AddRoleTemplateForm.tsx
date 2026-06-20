@@ -4,7 +4,6 @@ import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
 import { AppSelector } from '@vritti/quantum-ui/selects/app';
-import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -27,7 +26,6 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ busine
       name: '',
       description: '',
       scope: 'GLOBAL',
-      businessId,
       appIds: [],
       versionId: versionId ?? '',
     },
@@ -49,8 +47,13 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ busine
           { value: 'SINGLE_BU', label: 'Single Business Unit' },
         ]}
       />
-      <AppSelector name="appIds" multiple label="Apps" placeholder="Select apps this role covers" />
-      <BusinessSelector name="businessId" label="Business" placeholder="Select business" />
+      <AppSelector
+        name="appIds"
+        multiple
+        label="Apps"
+        placeholder="Select apps this role covers"
+        params={{ versionId, businessId }}
+      />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

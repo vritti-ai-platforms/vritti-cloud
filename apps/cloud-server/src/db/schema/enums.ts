@@ -156,29 +156,6 @@ export const DeploymentTypeValues = {
   dedicated: 'dedicated' as const,
 };
 
-// Feature permission type — what kind of access a permission grants
-export const featureTypeEnum = cloudSchema.enum('FeatureType', [
-  'VIEW',
-  'CREATE',
-  'EDIT',
-  'DELETE',
-  'EXPORT',
-  'IMPORT',
-  'APPROVE',
-  'MANAGE',
-]);
-export type FeatureType = (typeof featureTypeEnum.enumValues)[number];
-export const FeatureTypeValues = {
-  VIEW: 'VIEW' as const,
-  CREATE: 'CREATE' as const,
-  EDIT: 'EDIT' as const,
-  DELETE: 'DELETE' as const,
-  EXPORT: 'EXPORT' as const,
-  IMPORT: 'IMPORT' as const,
-  APPROVE: 'APPROVE' as const,
-  MANAGE: 'MANAGE' as const,
-};
-
 // Version lifecycle status
 export const versionStatusEnum = cloudSchema.enum('AppVersionStatus', ['ALPHA', 'BETA', 'PROD']);
 export type VersionStatus = (typeof versionStatusEnum.enumValues)[number];

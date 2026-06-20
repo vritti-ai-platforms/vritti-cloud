@@ -46,10 +46,6 @@ export const relations = defineRelations(schema, (r) => ({
   // Organization relations
   organizations: {
     members: r.many.organizationMembers(),
-    plan: r.one.plans({
-      from: r.organizations.planId,
-      to: r.plans.id,
-    }),
     business: r.one.businesses({
       from: r.organizations.businessId,
       to: r.businesses.id,
@@ -57,10 +53,6 @@ export const relations = defineRelations(schema, (r) => ({
     country: r.one.countries({
       from: r.organizations.countryId,
       to: r.countries.id,
-    }),
-    market: r.one.markets({
-      from: r.organizations.marketId,
-      to: r.markets.id,
     }),
     deployment: r.one.deployments({
       from: r.organizations.deploymentId,
@@ -88,28 +80,28 @@ export const relations = defineRelations(schema, (r) => ({
     apps: r.many.apps(),
     roleTemplates: r.many.roleTemplates(),
     roleTemplateApps: r.many.roleTemplateApps(),
+    plans: r.many.plans(),
     featurePermissions: r.many.featurePermissions(),
-    roleTemplateFeaturePermissions: r.many.roleTemplateFeaturePermissions(),
     appFeatures: r.many.appFeatures(),
     versionBusinesses: r.many.versionBusinesses(),
   },
 
   // Plan relations
   plans: {
-    organizations: r.many.organizations(),
     planPrices: r.many.planPrices(),
     planApps: r.many.planApps(),
+    planFeaturePermissions: r.many.planFeaturePermissions(),
+    version: r.one.versions({
+      from: r.plans.versionId,
+      to: r.versions.id,
+    }),
     business: r.one.businesses({
       from: r.plans.businessId,
       to: r.businesses.id,
     }),
-    markets: r.many.markets({
+    countries: r.many.countries({
       from: r.plans.id.through(r.planPrices.planId),
-      to: r.markets.id.through(r.planPrices.marketId),
-    }),
-    deployments: r.many.deployments({
-      from: r.plans.id.through(r.deploymentPlans.planId),
-      to: r.deployments.id.through(r.deploymentPlans.deploymentId),
+      to: r.countries.id.through(r.planPrices.countryId),
     }),
   },
 
@@ -137,44 +129,17 @@ export const relations = defineRelations(schema, (r) => ({
   // Country relations
   countries: {
     organizations: r.many.organizations(),
-    marketCountry: r.one.marketCountries({
-      from: r.countries.id,
-      to: r.marketCountries.countryId,
-    }),
-  },
-
-  // Market relations
-  markets: {
-    organizations: r.many.organizations(),
-    marketCountries: r.many.marketCountries(),
     planPrices: r.many.planPrices(),
     appPrices: r.many.appPrices(),
     plans: r.many.plans({
-      from: r.markets.id.through(r.planPrices.marketId),
+      from: r.countries.id.through(r.planPrices.countryId),
       to: r.plans.id.through(r.planPrices.planId),
-    }),
-  },
-
-  // Market-Country join table relations
-  marketCountries: {
-    market: r.one.markets({
-      from: r.marketCountries.marketId,
-      to: r.markets.id,
-    }),
-    country: r.one.countries({
-      from: r.marketCountries.countryId,
-      to: r.countries.id,
     }),
   },
 
   // Deployment relations
   deployments: {
     organizations: r.many.organizations(),
-    deploymentPlans: r.many.deploymentPlans(),
-    plans: r.many.plans({
-      from: r.deployments.id.through(r.deploymentPlans.deploymentId),
-      to: r.plans.id.through(r.deploymentPlans.planId),
-    }),
     region: r.one.regions({
       from: r.deployments.regionId,
       to: r.regions.id,
@@ -207,21 +172,9 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.planPrices.planId,
       to: r.plans.id,
     }),
-    market: r.one.markets({
-      from: r.planPrices.marketId,
-      to: r.markets.id,
-    }),
-  },
-
-  // Deployment-Plan join table relations
-  deploymentPlans: {
-    deployment: r.one.deployments({
-      from: r.deploymentPlans.deploymentId,
-      to: r.deployments.id,
-    }),
-    plan: r.one.plans({
-      from: r.deploymentPlans.planId,
-      to: r.plans.id,
+    country: r.one.countries({
+      from: r.planPrices.countryId,
+      to: r.countries.id,
     }),
   },
 
@@ -246,7 +199,6 @@ export const relations = defineRelations(schema, (r) => ({
     featureMicrofrontends: r.many.featureMicrofrontends(),
     featurePermissions: r.many.featurePermissions(),
     appFeatures: r.many.appFeatures(),
-    roleTemplateFeaturePermissions: r.many.roleTemplateFeaturePermissions(),
   },
 
   // Microfrontend relations
@@ -309,17 +261,44 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.featurePermissions.featureId,
       to: r.features.id,
     }),
+    permissionBusinesses: r.many.permissionBusinesses(),
+    roleTemplateFeaturePermissions: r.many.roleTemplateFeaturePermissions(),
+  },
+
+  // Permission-business junction relations
+  permissionBusinesses: {
+    appVersion: r.one.versions({
+      from: r.permissionBusinesses.versionId,
+      to: r.versions.id,
+    }),
+    featurePermission: r.one.featurePermissions({
+      from: r.permissionBusinesses.featurePermissionId,
+      to: r.featurePermissions.id,
+    }),
+    business: r.one.businesses({
+      from: r.permissionBusinesses.businessId,
+      to: r.businesses.id,
+    }),
   },
 
   // App-Price relations
   appPrices: {
     app: r.one.apps({ from: r.appPrices.appId, to: r.apps.id }),
-    market: r.one.markets({ from: r.appPrices.marketId, to: r.markets.id }),
+    country: r.one.countries({ from: r.appPrices.countryId, to: r.countries.id }),
   },
 
   // Plan-App junction relations
   planApps: {
     plan: r.one.plans({ from: r.planApps.planId, to: r.plans.id }),
+  },
+
+  // Plan-Feature-Permission junction relations (the plan's unlocked permission set)
+  planFeaturePermissions: {
+    plan: r.one.plans({ from: r.planFeaturePermissions.planId, to: r.plans.id }),
+    featurePermission: r.one.featurePermissions({
+      from: r.planFeaturePermissions.featurePermissionId,
+      to: r.featurePermissions.id,
+    }),
   },
 
   // Role template relations
@@ -350,9 +329,9 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.roleTemplateFeaturePermissions.roleTemplateId,
       to: r.roleTemplates.id,
     }),
-    feature: r.one.features({
-      from: r.roleTemplateFeaturePermissions.featureId,
-      to: r.features.id,
+    featurePermission: r.one.featurePermissions({
+      from: r.roleTemplateFeaturePermissions.featurePermissionId,
+      to: r.featurePermissions.id,
     }),
   },
 }));

@@ -95,9 +95,9 @@ export class CountryService {
     if (!country) {
       throw new NotFoundException('Country not found.');
     }
-    const marketReferences = await this.countryRepository.countMarketReferences(id);
+    const priceReferences = await this.countryRepository.countPriceReferences(id);
     this.logger.log(`Fetched country: ${id}`);
-    return CountryDto.from(country, marketReferences === 0);
+    return CountryDto.from(country, priceReferences === 0);
   }
 
   // Updates a country by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -126,11 +126,11 @@ export class CountryService {
       throw new NotFoundException('Country not found.');
     }
 
-    const marketReferences = await this.countryRepository.countMarketReferences(id);
-    if (marketReferences > 0) {
+    const priceReferences = await this.countryRepository.countPriceReferences(id);
+    if (priceReferences > 0) {
       throw new ConflictException({
         label: 'Country In Use',
-        detail: `This country cannot be deleted because it is assigned to ${marketReferences} market(s). Remove those assignments first.`,
+        detail: `This country cannot be deleted because it has ${priceReferences} plan/app price(s). Remove those prices first.`,
       });
     }
 

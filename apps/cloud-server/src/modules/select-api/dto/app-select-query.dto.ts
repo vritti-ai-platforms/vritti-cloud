@@ -7,4 +7,9 @@ export class AppSelectQueryDto extends SelectOptionsQueryDto {
   @IsOptional()
   @IsUUID()
   versionId?: string;
+
+  @ApiPropertyOptional({ description: 'Filter by business ID' })
+  @IsOptional()
+  @IsUUID()
+  businessId?: string;
 }

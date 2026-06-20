@@ -1,4 +1,4 @@
-import { boolean, integer, text, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { integer, text, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
 import { versions } from './version';
@@ -18,7 +18,6 @@ export const apps = cloudSchema.table(
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
     icon: varchar('icon', { length: 255 }).notNull(),
-    isActive: boolean('is_active').notNull().default(true),
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),

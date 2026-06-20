@@ -57,9 +57,4 @@ export class CreateFeatureDto {
   @IsOptional()
   @IsInt()
   sortOrder?: number;
-
-  @ApiPropertyOptional({ description: 'Comma-separated permission types for import', example: 'VIEW,CREATE,EDIT' })
-  @IsOptional()
-  @IsString()
-  permissions?: string;
 }

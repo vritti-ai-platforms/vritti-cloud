@@ -7,10 +7,11 @@ export interface Plan {
   content: string | null;
   businessId: string;
   businessName: string;
-  usdAnchor: number | null;
   priceCount: number;
-  marketCount: number;
+  countryCount: number;
   orgCount: number;
+  isCustom: boolean;
+  attachedOrgName: string | null;
   canDelete: boolean;
   createdAt: string;
   updatedAt: string | null;
@@ -19,9 +20,13 @@ export interface Plan {
 export const createPlanSchema = z.object({
   name: z.string().min(1, 'Plan name is required').max(100, 'Name must be 100 characters or less'),
   code: z.string().min(1, 'Plan code is required').max(100, 'Code must be 100 characters or less'),
-  businessId: z.string().uuid('Please select a vertical'),
-  // Optional USD reference anchor in minor units (cents).
-  usdAnchor: z.number().int().nonnegative().nullable().optional(),
+  isCustom: z.boolean().optional(),
+  // Required for standard plans; for custom plans the business is derived from the attached org.
+  businessId: z.string().uuid().optional(),
+  // Required when isCustom — the org this bespoke plan is attached to.
+  organizationId: z.string().uuid().optional(),
+  // Blank = unlimited.
+  maxBusinessUnits: z.number().int().nonnegative().optional(),
   content: z.string().optional(),
 });
 

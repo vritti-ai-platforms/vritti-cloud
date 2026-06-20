@@ -6,6 +6,7 @@ import { getRoleTemplates } from '../../../services/admin/role-templates.service
 export const ROLE_TEMPLATES_QUERY_KEY = (versionId: string, businessId: string) =>
   ['admin', 'versions', versionId, 'businesses', businessId, 'role-templates'] as const;
 
+// Fetches a business's role templates for the data table
 export function useRoleTemplates(
   versionId: string,
   businessId: string,

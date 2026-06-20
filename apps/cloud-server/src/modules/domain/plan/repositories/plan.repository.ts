@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { asc, count, countDistinct, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
+import { and, asc, count, countDistinct, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { Plan } from '@/db/schema';
-import { businesses, deploymentPlans, organizations, planPrices, plans } from '@/db/schema';
+import { businesses, organizations, planPrices, plans } from '@/db/schema';
 
-export type PlanRow = Plan & { priceCount: number; businessName: string; marketCount: number };
+export type PlanRow = Plan & { priceCount: number; businessName: string; countryCount: number };
 
 @Injectable()
 export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
@@ -17,50 +17,71 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
     return this.model.findFirst({ where: { id } });
   }
 
-  // Finds a plan by its unique code
-  async findByCode(code: string): Promise<Plan | undefined> {
-    return this.model.findFirst({ where: { code } });
+  // Finds a plan by version + business + code (the version-scoped unique identity)
+  async findByVersionBusinessCode(versionId: string, businessId: string, code: string): Promise<Plan | undefined> {
+    return this.model.findFirst({ where: { versionId, businessId, code } });
   }
 
-  // Returns price, deployment, and organization reference counts plus display meta for a given plan
+  // Returns the org's id, business, and name for attaching a custom plan
+  async findOrgForAttach(orgId: string): Promise<{ id: string; businessId: string; name: string } | undefined> {
+    const rows = await this.db
+      .select({ id: organizations.id, businessId: organizations.businessId, name: organizations.name })
+      .from(organizations)
+      .where(eq(organizations.id, orgId))
+      .limit(1);
+    return rows[0];
+  }
+
+  // Points an organization at a plan by code (attaches a custom plan to its org)
+  async setOrgPlanCode(orgId: string, planCode: string): Promise<void> {
+    await this.db.update(organizations).set({ planCode }).where(eq(organizations.id, orgId));
+  }
+
+  // Returns the name of an organization on this (business, planCode), if any
+  async findAttachedOrgName(businessId: string, planCode: string): Promise<string | null> {
+    const rows = await this.db
+      .select({ name: organizations.name })
+      .from(organizations)
+      .where(and(eq(organizations.businessId, businessId), eq(organizations.planCode, planCode)))
+      .limit(1);
+    return rows[0]?.name ?? null;
+  }
+
+  // Returns price and organization reference counts plus display meta for a given plan
   async getReferenceCounts(
     planId: string,
+    businessId: string,
+    planCode: string,
   ): Promise<{
     priceCount: number;
-    deploymentCount: number;
     orgCount: number;
     businessName: string;
-    marketCount: number;
+    countryCount: number;
   }> {
-    const [priceRows, deploymentRows, orgRows, businessRows, marketRows] = await Promise.all([
+    const [priceRows, orgRows, businessRows, countryRows] = await Promise.all([
       this.db
         .select({ n: count(planPrices.id) })
         .from(planPrices)
         .where(eq(planPrices.planId, planId)),
       this.db
-        .select({ n: count(deploymentPlans.planId) })
-        .from(deploymentPlans)
-        .where(eq(deploymentPlans.planId, planId)),
-      this.db
         .select({ n: count(organizations.id) })
         .from(organizations)
-        .where(eq(organizations.planId, planId)),
+        .where(and(eq(organizations.businessId, businessId), eq(organizations.planCode, planCode))),
       this.db
         .select({ name: businesses.name })
         .from(plans)
         .innerJoin(businesses, eq(businesses.id, plans.businessId))
         .where(eq(plans.id, planId)),
       this.db
-        .select({ n: countDistinct(planPrices.marketId) })
+        .select({ n: countDistinct(planPrices.countryId) })
         .from(planPrices)
         .where(eq(planPrices.planId, planId)),
     ]);
     return {
       priceCount: Number(priceRows[0]?.n ?? 0),
-      deploymentCount: Number(deploymentRows[0]?.n ?? 0),
       orgCount: Number(orgRows[0]?.n ?? 0),
       businessName: businessRows[0]?.name ?? '',
-      marketCount: Number(marketRows[0]?.n ?? 0),
+      countryCount: Number(countryRows[0]?.n ?? 0),
     };
   }
 
@@ -86,12 +107,12 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
           code: plans.code,
           content: plans.content,
           maxBusinessUnits: plans.maxBusinessUnits,
-          usdAnchor: plans.usdAnchor,
           createdAt: plans.createdAt,
           updatedAt: plans.updatedAt,
+          isCustom: plans.isCustom,
           businessName: businesses.name,
           priceCount: count(planPrices.id),
-          marketCount: countDistinct(planPrices.marketId),
+          countryCount: countDistinct(planPrices.countryId),
         })
         .from(plans)
         .innerJoin(businesses, eq(businesses.id, plans.businessId))

@@ -1,13 +1,30 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
+import { IsBoolean, IsInt, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
 
 export class CreatePlanDto {
-  @ApiProperty({
-    description: 'Vertical (business) UUID this plan belongs to',
+  @ApiPropertyOptional({
+    description: 'Business UUID. Required for standard plans; derived from the org for custom plans.',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
+  @IsOptional()
   @IsUUID()
-  businessId: string;
+  businessId?: string;
+
+  @ApiPropertyOptional({
+    description: 'Whether this is a bespoke plan attached to a single organization',
+    example: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  isCustom?: boolean;
+
+  @ApiPropertyOptional({
+    description: 'Organization UUID to attach this custom plan to (required when isCustom is true)',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  })
+  @IsOptional()
+  @IsUUID()
+  organizationId?: string;
 
   @ApiProperty({ description: 'Display name of the plan', example: 'Pro' })
   @IsString()
@@ -26,12 +43,6 @@ export class CreatePlanDto {
   @IsInt()
   @Min(0)
   maxBusinessUnits?: number;
-
-  @ApiPropertyOptional({ description: 'USD anchor amount in minor units, reference only', example: 9900 })
-  @IsOptional()
-  @IsInt()
-  @Min(0)
-  usdAnchor?: number;
 
   @ApiPropertyOptional({ description: 'Rich content stored as Lexical JSON', nullable: true })
   @IsOptional()

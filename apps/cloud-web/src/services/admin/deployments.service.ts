@@ -1,12 +1,6 @@
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
-import type {
-  AssignPlanData,
-  CreateDeploymentData,
-  Deployment,
-  DeploymentPlanAssignment,
-  UpdateDeploymentData,
-} from '@/schemas/admin/deployments';
+import type { CreateDeploymentData, Deployment, UpdateDeploymentData } from '@/schemas/admin/deployments';
 
 export interface DeploymentsResponse {
   result: Deployment[];
@@ -36,21 +30,4 @@ export function updateDeployment({ id, data }: { id: string; data: UpdateDeploym
 // Deletes a deployment by ID
 export function deleteDeployment(id: string): Promise<void> {
   return axios.delete(`admin-api/deployments/${id}`).then(() => undefined);
-}
-
-// Assigns a plan+business combo to a deployment
-export function assignDeploymentPlan({ id, data }: { id: string; data: AssignPlanData }): Promise<SuccessResponse> {
-  return axios.post<SuccessResponse>(`admin-api/deployments/${id}/plans`, data).then((r) => r.data);
-}
-
-// Removes a plan+business assignment from a deployment
-export function removeDeploymentPlan({ id, data }: { id: string; data: AssignPlanData }): Promise<SuccessResponse> {
-  return axios.delete<SuccessResponse>(`admin-api/deployments/${id}/plans`, { data }).then((r) => r.data);
-}
-
-// Fetches all plan+business combos with assignment status for a deployment
-export function getDeploymentPlanAssignments(deploymentId: string): Promise<DeploymentPlanAssignment[]> {
-  return axios
-    .get<DeploymentPlanAssignment[]>(`admin-api/deployments/${deploymentId}/plan-assignments`)
-    .then((r) => r.data);
 }

@@ -42,19 +42,5 @@ export const updateDeploymentSchema = z.object({
   version: z.string().max(50).optional().or(z.literal('')),
 });
 
-export const assignPlanSchema = z.object({
-  planId: z.string().uuid('Please select a plan'),
-});
-
 export type CreateDeploymentData = z.infer<typeof createDeploymentSchema>;
 export type UpdateDeploymentData = z.infer<typeof updateDeploymentSchema>;
-export type AssignPlanData = z.infer<typeof assignPlanSchema>;
-
-export interface DeploymentPlanAssignment {
-  planId: string;
-  planName: string;
-  planCode: string;
-  businessId: string;
-  businessName: string;
-  isAssigned: boolean;
-}

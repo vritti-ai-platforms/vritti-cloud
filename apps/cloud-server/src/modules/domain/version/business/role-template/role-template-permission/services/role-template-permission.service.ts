@@ -1,17 +1,24 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
-import type { FeatureType, NewRoleTemplateFeaturePermission } from '@/db/schema';
+import type { NewRoleTemplateFeaturePermission } from '@/db/schema';
 import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/version/business/role-template/role-template-permission/dto/request/assign-role-template-permissions.dto';
 import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
 import {
+  type AvailableFeature,
   RoleTemplateFeaturePermissionRepository,
   type RoleTemplateFeaturePermissionWithDetails,
 } from '../repositories/role-template-feature-permission.repository';
 
+export interface GroupedPermissionEntry {
+  featurePermissionId: string;
+  code: string;
+  label: string;
+}
+
 export interface GroupedPermission {
   featureCode: string;
   featureName: string;
-  types: FeatureType[];
+  permissions: GroupedPermissionEntry[];
 }
 
 @Injectable()
@@ -35,7 +42,7 @@ export class RoleTemplatePermissionService {
     return this.groupByFeature(rows);
   }
 
-  // Replaces all permissions for a role template with the given set
+  // Replaces all grants for a role template with the given set of feature-permission IDs
   async setPermissions(
     roleTemplateId: string,
     dto: AssignRoleTemplatePermissionsDto,
@@ -45,18 +52,15 @@ export class RoleTemplatePermissionService {
       throw new NotFoundException('Role template not found.');
     }
 
-    // Validate all featureIds exist
-    const allFeatureIds = [...new Set(dto.permissions.map((p) => p.featureId))];
-    if (allFeatureIds.length > 0) {
-      await this.validateFeaturesExist(allFeatureIds);
+    const ids = [...new Set(dto.featurePermissionIds)];
+    if (ids.length > 0) {
+      await this.validatePermissionsExist(ids);
     }
 
-    // Full replace: delete all existing, then bulk insert
-    const entries: NewRoleTemplateFeaturePermission[] = dto.permissions.map((perm) => ({
+    const entries: NewRoleTemplateFeaturePermission[] = ids.map((featurePermissionId) => ({
       versionId: roleTemplate.versionId,
       roleTemplateId,
-      featureId: perm.featureId,
-      type: perm.type,
+      featurePermissionId,
     }));
 
     await this.roleTemplateFeaturePermissionRepository.transaction(async (tx) => {
@@ -71,46 +75,46 @@ export class RoleTemplatePermissionService {
     };
   }
 
-  // Returns features available for permission assignment (only from apps linked to this role template)
-  async findAvailableFeatures(
-    roleTemplateId: string,
-  ): Promise<
-    Array<{ id: string; code: string; name: string; icon: string; permissions: string[]; appCodes: string[] }>
-  > {
+  // Returns features available for permission assignment (only from apps linked to this role template),
+  // scoped to the role template's business so only global + business-specific permissions are offered
+  async findAvailableFeatures(roleTemplateId: string): Promise<AvailableFeature[]> {
     const roleTemplate = await this.roleTemplateRepository.findById(roleTemplateId);
     if (!roleTemplate) {
       throw new NotFoundException('Role template not found.');
     }
-    const rows = await this.roleTemplateFeaturePermissionRepository.findAvailableFeatures(roleTemplateId);
+    const rows = await this.roleTemplateFeaturePermissionRepository.findAvailableFeatures(
+      roleTemplateId,
+      roleTemplate.businessId,
+    );
     this.logger.log(`Fetched ${rows.length} available features for role template: ${roleTemplateId}`);
     return rows;
   }
 
-  // Groups flat role-template-feature-permission rows by feature
+  // Groups flat grant rows by feature
   private groupByFeature(rows: RoleTemplateFeaturePermissionWithDetails[]): GroupedPermission[] {
     const map = new Map<string, GroupedPermission>();
 
     for (const row of rows) {
       let group = map.get(row.featureId);
       if (!group) {
-        group = { featureCode: row.featureCode, featureName: row.featureName, types: [] };
+        group = { featureCode: row.featureCode, featureName: row.featureName, permissions: [] };
         map.set(row.featureId, group);
       }
-      group.types.push(row.type);
+      group.permissions.push({ featurePermissionId: row.featurePermissionId, code: row.code, label: row.label });
     }
 
     return Array.from(map.values());
   }
 
-  // Validates that all provided featureIds exist in the features table
-  private async validateFeaturesExist(featureIds: string[]): Promise<void> {
-    const existingIds = new Set(await this.roleTemplateFeaturePermissionRepository.findExistingFeatureIds(featureIds));
-    const missingIds = featureIds.filter((id) => !existingIds.has(id));
+  // Validates that all provided feature-permission IDs exist
+  private async validatePermissionsExist(ids: string[]): Promise<void> {
+    const existing = new Set(await this.roleTemplateFeaturePermissionRepository.findExistingFeaturePermissionIds(ids));
+    const missing = ids.filter((id) => !existing.has(id));
 
-    if (missingIds.length > 0) {
+    if (missing.length > 0) {
       throw new BadRequestException({
-        label: 'Invalid Features',
-        detail: `The following feature IDs do not exist: ${missingIds.join(', ')}`,
+        label: 'Invalid Permissions',
+        detail: `The following permission IDs do not exist: ${missing.join(', ')}`,
       });
     }
   }

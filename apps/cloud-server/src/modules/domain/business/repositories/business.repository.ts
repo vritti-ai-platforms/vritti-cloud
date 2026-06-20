@@ -20,17 +20,28 @@ export class BusinessRepository extends PrimaryBaseRepository<typeof businesses>
     return this.model.findMany({ orderBy: { name: 'asc' } });
   }
 
-  // Returns business select options, optionally excluding those already assigned to a version
-  async findForSelectExcludingVersion(config: FindForSelectConfig, notInVersion?: string): Promise<SelectQueryResult> {
-    if (!notInVersion) {
-      return this.findForSelect(config);
+  // Returns business select options, optionally filtered to (or excluded from) a version's assignments
+  async findForSelectByVersion(
+    config: FindForSelectConfig,
+    notInVersion?: string,
+    inVersion?: string,
+  ): Promise<SelectQueryResult> {
+    const conditions = [...(config.conditions ?? [])];
+    if (notInVersion) {
+      conditions.push(sql`not exists (
+        select 1 from ${versionBusinesses}
+        where ${versionBusinesses.businessId} = ${businesses.id}
+          and ${versionBusinesses.versionId} = ${notInVersion}
+      )`);
     }
-    const condition = sql`not exists (
-      select 1 from ${versionBusinesses}
-      where ${versionBusinesses.businessId} = ${businesses.id}
-        and ${versionBusinesses.versionId} = ${notInVersion}
-    )`;
-    return this.findForSelect({ ...config, conditions: [...(config.conditions ?? []), condition] });
+    if (inVersion) {
+      conditions.push(sql`exists (
+        select 1 from ${versionBusinesses}
+        where ${versionBusinesses.businessId} = ${businesses.id}
+          and ${versionBusinesses.versionId} = ${inVersion}
+      )`);
+    }
+    return this.findForSelect({ ...config, conditions });
   }
 
   // Finds a business by its unique identifier

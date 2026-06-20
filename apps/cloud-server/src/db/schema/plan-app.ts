@@ -1,8 +1,8 @@
-import { integer, text, timestamp, uuid, varchar, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
+import { integer, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { plans } from './plan';
 
-// Links plan to apps by code string — null includedFeatureCodes means all features
+// Links a plan to the apps it includes (by code); the unlocked permission set lives in plan_feature_permissions
 export const planApps = cloudSchema.table(
   'plan_apps',
   {
@@ -11,7 +11,6 @@ export const planApps = cloudSchema.table(
       .notNull()
       .references(() => plans.id, { onDelete: 'cascade' }),
     appCode: varchar('app_code', { length: 100 }).notNull(),
-    includedFeatureCodes: text('included_feature_codes').array(),
     sortOrder: integer('sort_order').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

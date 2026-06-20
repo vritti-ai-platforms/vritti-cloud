@@ -7,8 +7,6 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
-import type { DeploymentPlanAssignmentDto } from '@/modules/admin-api/deployment/dto/entity/deployment-plan-assignment.dto';
-import type { AssignDeploymentPlanDto } from '@/modules/admin-api/deployment/dto/request/assign-deployment-plan.dto';
 import type { CreateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/create-deployment.dto';
 import type { DeploymentSelectQueryDto } from '@/modules/admin-api/deployment/dto/request/deployment-select-query.dto';
 import type { UpdateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/update-deployment.dto';
@@ -20,16 +18,12 @@ import type {
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 import { DeploymentRepository } from '../repositories/deployment.repository';
-import { DeploymentPlanRepository } from '../repositories/deployment-plan.repository';
 
 @Injectable()
 export class DeploymentService {
   private readonly logger = new Logger(DeploymentService.name);
 
-  constructor(
-    private readonly deploymentRepository: DeploymentRepository,
-    private readonly deploymentPlanRepository: DeploymentPlanRepository,
-  ) {}
+  constructor(private readonly deploymentRepository: DeploymentRepository) {}
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
   findForSelect(query: DeploymentSelectQueryDto): Promise<SelectQueryResult> {
@@ -50,6 +44,7 @@ export class DeploymentService {
       where: {
         ...(query.regionId ? { regionId: query.regionId } : {}),
         ...(query.cloudProviderId ? { cloudProviderId: query.cloudProviderId } : {}),
+        ...(query.version ? { version: query.version } : {}),
       },
     });
   }
@@ -115,33 +110,6 @@ export class DeploymentService {
     return { success: true, message: `Deployment "${existing.name}" deleted successfully.` };
   }
 
-  // Assigns a plan to a deployment; throws NotFoundException if deployment missing
-  async assignPlan(deploymentId: string, dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
-    const deployment = await this.deploymentRepository.findById(deploymentId);
-    if (!deployment) throw new NotFoundException('Deployment not found.');
-    const existing = await this.deploymentPlanRepository.findByComposite(deploymentId, dto.planId);
-    if (!existing) {
-      await this.deploymentPlanRepository.create({ deploymentId, planId: dto.planId });
-    }
-    this.logger.log(`Assigned plan ${dto.planId} to deployment ${deploymentId}`);
-    return { success: true, message: `Plan assigned to "${deployment.name}" successfully.` };
-  }
-
-  // Removes a plan assignment from a deployment; throws NotFoundException if deployment missing
-  async removePlan(deploymentId: string, dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
-    const deployment = await this.deploymentRepository.findById(deploymentId);
-    if (!deployment) throw new NotFoundException('Deployment not found.');
-    await this.deploymentPlanRepository.removeByComposite(deploymentId, dto.planId);
-    this.logger.log(`Removed plan ${dto.planId} from deployment ${deploymentId}`);
-    return { success: true, message: `Plan removed from "${deployment.name}" successfully.` };
-  }
-
-  // Returns all plans grouped by business with assignment status for the deployment
-  getPlanAssignments(deploymentId: string): Promise<DeploymentPlanAssignmentDto[]> {
-    this.logger.log(`Fetched plan assignments for deployment: ${deploymentId}`);
-    return this.deploymentPlanRepository.findPlanAssignmentsForDeployment(deploymentId);
-  }
-
   // Returns active deployments for the given region, provider, and business combo
   findActive(query: DeploymentFilterDto): Promise<DeploymentOptionDto[]> {
     this.logger.log(
@@ -150,10 +118,12 @@ export class DeploymentService {
     return this.deploymentRepository.findActive(query.regionId, query.cloudProviderId, query.businessId);
   }
 
-  // Returns plans available on a deployment for the given business, with price included
+  // Returns plans available on a deployment for the given business, priced for the given country
   findPlansForDeployment(deploymentId: string, query: DeploymentPlanQueryDto): Promise<PlanOptionDto[]> {
     if (!query.businessId) return Promise.resolve([]);
-    this.logger.log(`Fetched plans for deployment: ${deploymentId} (business: ${query.businessId})`);
-    return this.deploymentRepository.findPlansForDeployment(deploymentId, query.businessId);
+    this.logger.log(
+      `Fetched plans for deployment: ${deploymentId} (business: ${query.businessId}, country: ${query.countryId})`,
+    );
+    return this.deploymentRepository.findPlansForDeployment(deploymentId, query.businessId, query.countryId);
   }
 }

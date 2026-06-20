@@ -1,3 +1,4 @@
+import { BusinessRepository } from '@domain/business/repositories/business.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException, ServiceUnavailableException } from '@vritti/api-sdk';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
@@ -13,11 +14,12 @@ export class OrganizationRolesService {
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly coreRoleService: CoreRoleService,
     private readonly coreVersionRepository: CoreVersionRepository,
+    private readonly businessRepository: BusinessRepository,
   ) {}
 
-  // Returns role templates from the deployment's app version snapshot
+  // Returns role templates from the deployment's app version snapshot, scoped to the org's business
   async getTemplates(orgId: string): Promise<RoleTemplateListResponseDto> {
-    const { deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     if (!deployment.version) {
       throw new NotFoundException('No app version linked to this deployment.');
@@ -28,7 +30,12 @@ export class OrganizationRolesService {
     }
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const roleTemplates = (snapshot.roleTemplates ?? []) as RoleTemplateListResponseDto['result'];
+    const businesses = (snapshot.businesses ?? {}) as Record<
+      string,
+      { roleTemplates: RoleTemplateListResponseDto['result'] }
+    >;
+    const business = await this.businessRepository.findById(org.businessId);
+    const roleTemplates = business ? (businesses[business.code]?.roleTemplates ?? []) : [];
 
     this.logger.log(`Fetched ${roleTemplates.length} role templates for org ${orgId}`);
     return { result: roleTemplates };

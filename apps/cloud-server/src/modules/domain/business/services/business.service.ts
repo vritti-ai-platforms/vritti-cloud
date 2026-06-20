@@ -40,12 +40,12 @@ export class BusinessService {
     return businessList.map((business) => CloudBusinessDto.from(business));
   }
 
-  // Returns paginated business options for the select component, optionally excluding those assigned to a version
-  findForSelect(query: SelectOptionsQueryDto, notInVersion?: string): Promise<SelectQueryResult> {
+  // Returns paginated business options for the select component, optionally filtered by version membership
+  findForSelect(query: SelectOptionsQueryDto, notInVersion?: string, inVersion?: string): Promise<SelectQueryResult> {
     this.logger.log(
-      `Fetched business select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search}, notInVersion: ${notInVersion})`,
+      `Fetched business select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search}, notInVersion: ${notInVersion}, inVersion: ${inVersion})`,
     );
-    return this.businessRepository.findForSelectExcludingVersion(
+    return this.businessRepository.findForSelectByVersion(
       {
         value: query.valueKey || 'id',
         label: query.labelKey || 'name',
@@ -59,6 +59,7 @@ export class BusinessService {
         orderBy: { name: 'asc' },
       },
       notInVersion,
+      inVersion,
     );
   }
 

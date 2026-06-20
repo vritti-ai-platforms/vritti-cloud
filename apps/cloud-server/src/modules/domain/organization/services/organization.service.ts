@@ -7,11 +7,11 @@ import {
   ServiceUnavailableException,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { and, type Column, sql } from '@vritti/api-sdk/drizzle-orm';
-import { businesses, deployments, organizations, plans } from '@/db/schema';
-import { OrganizationDto } from '@/modules/admin-api/organization/dto/entity/organization.dto';
-import { OrganizationDetailDto } from '@/modules/admin-api/organization/dto/entity/organization-detail.dto';
-import { OrganizationTableResponseDto } from '@/modules/admin-api/organization/dto/response/organizations-response.dto';
+import { and, type Column, eq, sql } from '@vritti/api-sdk/drizzle-orm';
+import { businesses, deployments, organizations } from '@/db/schema';
+import { OrganizationDto } from '@/modules/admin-api/deployment/organization/dto/entity/organization.dto';
+import { OrganizationDetailDto } from '@/modules/admin-api/deployment/organization/dto/entity/organization-detail.dto';
+import { OrganizationTableResponseDto } from '@/modules/admin-api/deployment/organization/dto/response/organizations-response.dto';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
 import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
@@ -25,10 +25,9 @@ export class OrganizationService {
     name: { column: organizations.name, type: 'string' },
     subdomain: { column: organizations.subdomain, type: 'string' },
     size: { column: organizations.size, type: 'string' },
-    planName: { column: plans.name, type: 'string' },
+    planCode: { column: organizations.planCode, type: 'string' },
     businessName: { column: businesses.name, type: 'string' },
     deploymentName: { column: deployments.name, type: 'string' },
-    planId: { column: organizations.planId, type: 'string' },
     businessId: { column: organizations.businessId, type: 'string' },
     memberCount: {
       column:
@@ -46,11 +45,12 @@ export class OrganizationService {
   ) {}
 
   // Returns all organizations with counts, applying server-stored filter/sort/search/pagination state
-  async findForTable(userId: string): Promise<OrganizationTableResponseDto> {
+  async findForTable(userId: string, deploymentId?: string): Promise<OrganizationTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'organizations');
     const where = and(
       FilterProcessor.buildWhere(state.filters, OrganizationService.FIELD_MAP),
       FilterProcessor.buildSearch(state.search, OrganizationService.FIELD_MAP),
+      deploymentId ? eq(organizations.deploymentId, deploymentId) : undefined,
     );
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.organizationRepository.findAllWithCounts({
@@ -86,7 +86,7 @@ export class OrganizationService {
     if (!appVersion?.snapshot) throw new NotFoundException('App version snapshot not found.');
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const features = (snapshot.features ?? []) as Array<Record<string, unknown>>;
+    const features = Object.values((snapshot.features ?? {}) as Record<string, Record<string, unknown>>);
 
     const featureCatalog = features
       .filter((f) => {

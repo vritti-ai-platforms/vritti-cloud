@@ -1,11 +1,10 @@
-import { uuid, uniqueIndex } from '@vritti/api-sdk/drizzle-pg-core';
+import { uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
-import { versions } from './version';
+import { featurePermissions } from './feature-permission';
 import { roleTemplates } from './role-template';
-import { features } from './feature';
-import { featureTypeEnum } from './enums';
+import { versions } from './version';
 
-// Role-level permission grants — maps a role template to specific feature permission types
+// Role-level permission grants — maps a role template to a concrete feature permission row
 export const roleTemplateFeaturePermissions = cloudSchema.table(
   'role_template_feature_permissions',
   {
@@ -16,12 +15,13 @@ export const roleTemplateFeaturePermissions = cloudSchema.table(
     roleTemplateId: uuid('role_template_id')
       .notNull()
       .references(() => roleTemplates.id, { onDelete: 'cascade' }),
-    featureId: uuid('feature_id')
+    featurePermissionId: uuid('feature_permission_id')
       .notNull()
-      .references(() => features.id, { onDelete: 'cascade' }),
-    type: featureTypeEnum('type').notNull(),
+      .references(() => featurePermissions.id, { onDelete: 'cascade' }),
   },
-  (table) => [uniqueIndex('role_template_feature_permission_unique_idx').on(table.roleTemplateId, table.featureId, table.type)],
+  (table) => [
+    uniqueIndex('role_template_feature_permission_unique_idx').on(table.roleTemplateId, table.featurePermissionId),
+  ],
 );
 
 export type RoleTemplateFeaturePermission = typeof roleTemplateFeaturePermissions.$inferSelect;

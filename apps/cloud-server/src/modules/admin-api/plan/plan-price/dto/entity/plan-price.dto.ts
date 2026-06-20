@@ -1,4 +1,4 @@
-import type { PlanPriceWithMarket } from '@domain/plan-price/repositories/plan-price.repository';
+import type { PlanPriceWithCountry } from '@domain/plan-price/repositories/plan-price.repository';
 import { ApiProperty } from '@nestjs/swagger';
 import type { BillingPeriod } from '@/db/schema';
 
@@ -10,13 +10,13 @@ export class PlanPriceDto {
   planId: string;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  marketId: string;
+  countryId: string;
 
   @ApiProperty({ example: 'India' })
-  marketName: string;
+  countryName: string;
 
   @ApiProperty({ example: 'IN' })
-  marketCode: string;
+  countryCode: string;
 
   @ApiProperty({ example: 'INR' })
   currencyCode: string;
@@ -24,17 +24,17 @@ export class PlanPriceDto {
   @ApiProperty({ example: 'monthly', enum: ['monthly', 'annual', 'triennial'] })
   billingPeriod: BillingPeriod;
 
-  @ApiProperty({ example: 99900, description: 'Amount in the market currency minor units' })
+  @ApiProperty({ example: 99900, description: "Amount in the country's default-currency minor units" })
   amount: number;
 
-  // Maps a plan price joined with market data to a PlanPriceDto
-  static from(row: PlanPriceWithMarket): PlanPriceDto {
+  // Maps a plan price joined with country data to a PlanPriceDto
+  static from(row: PlanPriceWithCountry): PlanPriceDto {
     const dto = new PlanPriceDto();
     dto.id = row.id;
     dto.planId = row.planId;
-    dto.marketId = row.marketId;
-    dto.marketName = row.marketName;
-    dto.marketCode = row.marketCode;
+    dto.countryId = row.countryId;
+    dto.countryName = row.countryName;
+    dto.countryCode = row.countryCode;
     dto.currencyCode = row.currencyCode;
     dto.billingPeriod = row.billingPeriod;
     dto.amount = row.amount;

@@ -13,16 +13,10 @@ import { AppFilter } from '@vritti/quantum-ui/selects/app';
 import { Layers, Shield } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVersionContext } from '@/hooks/admin/versions/useVersionContext';
-import type { PermissionEntry } from '@/schemas/admin/role-templates';
 
 interface RoleTemplatePermissionFormProps {
   businessId: string;
   roleId: string;
-}
-
-// Capitalize first letter of a permission type: VIEW -> View
-function typeLabel(type: string): string {
-  return type.charAt(0) + type.slice(1).toLowerCase();
 }
 
 // Format app code into display name: "order-management" -> "Order Management"
@@ -33,14 +27,9 @@ function appLabel(code: string): string {
     .join(' ');
 }
 
-// Serialize a Map<string, Set<string>> into a stable string for comparison
-function serializeSelected(map: Map<string, Set<string>>): string {
-  const entries: string[] = [];
-  for (const [featureId, types] of map) {
-    const sorted = [...types].sort();
-    entries.push(`${featureId}:${sorted.join(',')}`);
-  }
-  return entries.sort().join('|');
+// Serialize a Set of ids into a stable string for dirty comparison
+function serializeSelected(ids: Set<string>): string {
+  return [...ids].sort().join('|');
 }
 
 export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProps> = ({ businessId, roleId }) => {
@@ -53,23 +42,22 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
     roleId,
   );
 
-  const [selected, setSelected] = useState<Map<string, Set<string>>>(new Map());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [appFilter, setAppFilter] = useState<string[]>([]);
   const initialRef = useRef<string>('');
 
   const saveMutation = useSetRoleTemplatePermissions();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  // Initialize from server data
+  // Initialize from server data — flatten each feature group's granted permission IDs
   useEffect(() => {
     if (!rolePermissions || features.length === 0) return;
-    const map = new Map<string, Set<string>>();
-    for (const perm of rolePermissions) {
-      const feature = features.find((f) => f.code === perm.featureCode);
-      if (feature) map.set(feature.id, new Set(perm.types));
+    const ids = new Set<string>();
+    for (const group of rolePermissions) {
+      for (const perm of group.permissions) ids.add(perm.featurePermissionId);
     }
-    setSelected(map);
-    initialRef.current = serializeSelected(map);
+    setSelected(ids);
+    initialRef.current = serializeSelected(ids);
   }, [rolePermissions, features]);
 
   // Filter features by selected app IDs (empty = show all)
@@ -78,28 +66,25 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
     return features.filter((f) => f.appIds.some((id) => appFilter.includes(id)));
   }, [features, appFilter]);
 
-  // Toggle a single permission type
-  const toggleType = useCallback((featureId: string, type: string) => {
+  // Toggle a single permission
+  const togglePermission = useCallback((featurePermissionId: string) => {
     setSelected((prev) => {
-      const next = new Map(prev);
-      const types = new Set(next.get(featureId) ?? []);
-      if (types.has(type)) types.delete(type);
-      else types.add(type);
-      if (types.size === 0) next.delete(featureId);
-      else next.set(featureId, types);
+      const next = new Set(prev);
+      if (next.has(featurePermissionId)) next.delete(featurePermissionId);
+      else next.add(featurePermissionId);
       return next;
     });
   }, []);
 
-  // Toggle all permission types for a feature
-  const toggleAllFeatureTypes = useCallback((featureId: string, availableTypes: string[]) => {
+  // Toggle all permissions for a feature
+  const toggleAllFeaturePermissions = useCallback((permissionIds: string[]) => {
     setSelected((prev) => {
-      const next = new Map(prev);
-      const current = next.get(featureId);
-      if (current && current.size === availableTypes.length) {
-        next.delete(featureId);
+      const next = new Set(prev);
+      const allSelected = permissionIds.every((id) => next.has(id));
+      if (allSelected) {
+        for (const id of permissionIds) next.delete(id);
       } else {
-        next.set(featureId, new Set(availableTypes));
+        for (const id of permissionIds) next.add(id);
       }
       return next;
     });
@@ -116,21 +101,10 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
   }, []);
 
   const isDirty = serializeSelected(selected) !== initialRef.current;
-
-  const totalSelected = useMemo(() => {
-    let count = 0;
-    for (const types of selected.values()) count += types.size;
-    return count;
-  }, [selected]);
+  const totalSelected = selected.size;
 
   const handleSave = () => {
-    const permissions: PermissionEntry[] = [];
-    for (const [featureId, types] of selected) {
-      for (const type of types) {
-        permissions.push({ featureId, type });
-      }
-    }
-    saveMutation.mutate({ versionId, businessId, roleId, data: { permissions } });
+    saveMutation.mutate({ versionId, businessId, roleId, data: { featurePermissionIds: [...selected] } });
   };
 
   // Loading state
@@ -160,30 +134,27 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
           <Layers className="size-8 text-muted-foreground mb-3" />
           <p className="text-sm font-medium text-foreground">No apps linked</p>
-          <p className="text-xs text-muted-foreground mt-1">Add apps in the Apps tab to start assigning permissions.</p>
+          <p className="text-xs text-muted-foreground mt-1">Assign apps via Edit to start assigning permissions.</p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-4 min-h-100">
       {/* Header with app filter and actions */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <AppFilter
-            multiple
-            onChange={(result) => {
-              if (!result) {
-                setAppFilter([]);
-                return;
-              }
-              const val = result.value;
-              setAppFilter(Array.isArray(val) ? val : [String(val)]);
-            }}
-          />
-          <p className="text-xs text-muted-foreground">{totalSelected} permission(s) selected</p>
-        </div>
+        <AppFilter
+          multiple
+          onChange={(result) => {
+            if (!result) {
+              setAppFilter([]);
+              return;
+            }
+            const val = result.value;
+            setAppFilter(Array.isArray(val) ? val : [String(val)]);
+          }}
+        />
         <Button
           size="sm"
           onClick={handleSave}
@@ -198,10 +169,10 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
       {/* Feature accordions */}
       <div className="border rounded-lg divide-y">
         {visibleFeatures.map((feature) => {
-          const featureTypes = selected.get(feature.id);
-          const selectedCount = featureTypes?.size ?? 0;
+          const permissionIds = feature.permissions.map((p) => p.featurePermissionId);
+          const selectedCount = permissionIds.filter((id) => selected.has(id)).length;
           const totalCount = feature.permissions.length;
-          const isAllSelected = selectedCount === totalCount;
+          const isAllSelected = totalCount > 0 && selectedCount === totalCount;
           const isPartial = selectedCount > 0 && !isAllSelected;
           const isExpanded = expanded.has(feature.id);
 
@@ -215,7 +186,7 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
               leading={
                 <Checkbox
                   checked={isAllSelected ? true : isPartial ? 'indeterminate' : false}
-                  onCheckedChange={() => toggleAllFeatureTypes(feature.id, feature.permissions)}
+                  onCheckedChange={() => toggleAllFeaturePermissions(permissionIds)}
                 />
               }
               trailing={
@@ -236,12 +207,12 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
             >
               <div className="border-t bg-muted/20 px-12 py-3">
                 <div className="flex flex-wrap gap-4">
-                  {feature.permissions.map((type) => (
+                  {feature.permissions.map((permission) => (
                     <Checkbox
-                      key={type}
-                      label={typeLabel(type)}
-                      checked={featureTypes?.has(type) ?? false}
-                      onCheckedChange={() => toggleType(feature.id, type)}
+                      key={permission.featurePermissionId}
+                      label={permission.label}
+                      checked={selected.has(permission.featurePermissionId)}
+                      onCheckedChange={() => togglePermission(permission.featurePermissionId)}
                     />
                   ))}
                 </div>
@@ -252,11 +223,9 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
       </div>
 
       {/* Footer */}
-      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="mt-auto flex items-center gap-2 text-xs text-muted-foreground">
         <Shield className="size-3.5" />
-        <span>
-          {totalSelected} permission(s) across {selected.size} feature(s)
-        </span>
+        <span>{totalSelected} permission(s) selected</span>
       </div>
     </div>
   );

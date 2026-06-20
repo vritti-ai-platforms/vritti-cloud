@@ -7,4 +7,9 @@ export class BusinessSelectQueryDto extends SelectOptionsQueryDto {
   @IsOptional()
   @IsUUID()
   notInVersion?: string;
+
+  @ApiPropertyOptional({ description: 'Only include businesses assigned to this version' })
+  @IsOptional()
+  @IsUUID()
+  inVersion?: string;
 }

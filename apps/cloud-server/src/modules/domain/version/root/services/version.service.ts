@@ -20,6 +20,7 @@ import type { PushArtifactsDto } from '@/modules/admin-api/version/root/dto/requ
 import type { UpdateVersionDto } from '@/modules/admin-api/version/root/dto/request/update-version.dto';
 import type { VersionTableResponseDto } from '@/modules/admin-api/version/root/dto/response/version-table-response.dto';
 import { VersionRepository } from '../repositories/version.repository';
+import { buildVersionSnapshot } from './version-snapshot.builder';
 
 @Injectable()
 export class VersionService {
@@ -98,7 +99,7 @@ export class VersionService {
     }
     let isSnapshotStale = false;
     if (version.snapshot) {
-      const currentSnapshot = await this.versionRepository.buildSnapshot(id);
+      const currentSnapshot = await this.buildSnapshot(id);
       isSnapshotStale = !_.isEqual(version.snapshot, currentSnapshot);
     }
     this.logger.log(`Fetched version: ${id} (snapshotStale: ${isSnapshotStale})`);
@@ -111,10 +112,16 @@ export class VersionService {
     if (!version) {
       throw new NotFoundException('Version not found.');
     }
-    const snapshot = await this.versionRepository.buildSnapshot(id);
+    const snapshot = await this.buildSnapshot(id);
     await this.versionRepository.update(id, { snapshot });
     this.logger.log(`Created snapshot for version: ${version.version} (${id})`);
     return { success: true, message: `Snapshot created for "${version.name}" (${version.version}).` };
+  }
+
+  // Fetches the version's data and assembles the snapshot document
+  private async buildSnapshot(id: string) {
+    const data = await this.versionRepository.findSnapshotData(id);
+    return buildVersionSnapshot(data);
   }
 
   // Stores CI artifacts on a version

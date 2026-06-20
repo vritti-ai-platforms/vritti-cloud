@@ -1,3 +1,4 @@
+import type { RoleItem } from '@domain/catalog/catalog.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
 import type { CoreOrgRole } from '@/modules/cloud-api/organization/organization-business-units/types';
@@ -54,6 +55,24 @@ export class CoreRoleService {
       { orgId },
     );
     this.logger.log(`Updated role ${roleId} in core`);
+    return result;
+  }
+
+  // Provisions role templates for an organization in core (idempotent — core skips existing by sourceRoleId)
+  async provisionRoles(
+    url: string,
+    webhookSecret: string,
+    orgId: string,
+    roles: RoleItem[],
+  ): Promise<SuccessResponseDto> {
+    const result = await this.http.post<SuccessResponseDto>(
+      url,
+      webhookSecret,
+      '/organizations/webhook/roles',
+      { orgId, roles },
+      { orgId },
+    );
+    this.logger.log(`Provisioned ${roles.length} role template(s) for org ${orgId} in core`);
     return result;
   }
 

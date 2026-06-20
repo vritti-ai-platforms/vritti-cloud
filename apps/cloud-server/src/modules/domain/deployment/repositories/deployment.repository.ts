@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { CloudProvider, Deployment, Region } from '@/db/schema';
-import { deploymentPlans, deployments, organizations, plans } from '@/db/schema';
+import { countries, deployments, organizations, planPrices, plans, versions } from '@/db/schema';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 
@@ -67,7 +67,7 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
     return map;
   }
 
-  // Returns active deployments that have at least one plan assigned for the given region, provider, and business
+  // Returns active deployments whose version has at least one plan for the given region, provider, and business
   async findActive(regionId: string, cloudProviderId: string, businessId: string): Promise<DeploymentOptionDto[]> {
     const rows = await this.db
       .selectDistinct({
@@ -76,8 +76,8 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
         type: deployments.type,
       })
       .from(deployments)
-      .innerJoin(deploymentPlans, eq(deploymentPlans.deploymentId, deployments.id))
-      .innerJoin(plans, and(eq(plans.id, deploymentPlans.planId), eq(plans.businessId, businessId)))
+      .innerJoin(versions, eq(versions.version, deployments.version))
+      .innerJoin(plans, and(eq(plans.versionId, versions.id), eq(plans.businessId, businessId)))
       .where(
         and(
           eq(deployments.regionId, regionId),
@@ -88,26 +88,44 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
     return rows as DeploymentOptionDto[];
   }
 
-  // Returns plans provisioned on a deployment for the given business (pricing resolved by market elsewhere)
-  async findPlansForDeployment(deploymentId: string, businessId: string): Promise<PlanOptionDto[]> {
+  // Returns plans for the deployment's version + business, priced for the given country (monthly)
+  async findPlansForDeployment(
+    deploymentId: string,
+    businessId: string,
+    countryId?: string,
+  ): Promise<PlanOptionDto[]> {
     const rows = await this.db
       .select({
         id: plans.id,
         name: plans.name,
         code: plans.code,
         content: plans.content,
+        amount: planPrices.amount,
+        currency: countries.defaultCurrency,
       })
-      .from(deploymentPlans)
-      .innerJoin(plans, eq(deploymentPlans.planId, plans.id))
-      .where(and(eq(deploymentPlans.deploymentId, deploymentId), eq(plans.businessId, businessId)));
+      .from(deployments)
+      .innerJoin(versions, eq(versions.version, deployments.version))
+      .innerJoin(plans, and(eq(plans.versionId, versions.id), eq(plans.businessId, businessId)))
+      .leftJoin(
+        planPrices,
+        countryId
+          ? and(
+              eq(planPrices.planId, plans.id),
+              eq(planPrices.countryId, countryId),
+              eq(planPrices.billingPeriod, 'monthly'),
+            )
+          : sql`false`,
+      )
+      .leftJoin(countries, countryId ? eq(countries.id, countryId) : sql`false`)
+      .where(eq(deployments.id, deploymentId));
 
     return rows.map((r) => ({
       id: r.id,
       name: r.name,
       code: r.code,
       content: r.content ?? null,
-      price: null,
-      currency: null,
+      amount: r.amount ?? null,
+      currency: r.amount != null ? (r.currency ?? null) : null,
     }));
   }
 }

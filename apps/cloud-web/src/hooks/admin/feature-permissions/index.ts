@@ -1,2 +1,7 @@
-export { useFeaturePermissions } from './useFeaturePermissions';
-export { useSetFeaturePermissions } from './useSetFeaturePermissions';
+export { FEATURE_PERMISSIONS_TABLE_KEY, useFeaturePermissions } from './useFeaturePermissions';
+export {
+  useBulkCreatePermissions,
+  useCreatePermission,
+  useDeletePermission,
+  useUpdatePermission,
+} from './usePermissionMutations';

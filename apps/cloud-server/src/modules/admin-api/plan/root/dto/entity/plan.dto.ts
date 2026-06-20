@@ -20,9 +20,6 @@ export class PlanDto {
   @ApiPropertyOptional({ example: 50, nullable: true })
   maxBusinessUnits: number | null;
 
-  @ApiPropertyOptional({ example: 9900, description: 'USD anchor in minor units, reference only', nullable: true })
-  usdAnchor: number | null;
-
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
 
@@ -33,10 +30,20 @@ export class PlanDto {
   priceCount: number;
 
   @ApiProperty({ example: 2 })
-  marketCount: number;
+  countryCount: number;
 
   @ApiProperty({ example: 1 })
   orgCount: number;
+
+  @ApiProperty({ example: false, description: 'Bespoke plan attached to a single organization' })
+  isCustom: boolean;
+
+  @ApiPropertyOptional({
+    example: 'Acme Corp',
+    nullable: true,
+    description: 'Organization a custom plan is attached to',
+  })
+  attachedOrgName: string | null;
 
   @ApiProperty({ example: true })
   canDelete: boolean;
@@ -46,7 +53,13 @@ export class PlanDto {
 
   static from(
     plan: Plan,
-    counts: { priceCount?: number; orgCount?: number; marketCount?: number; businessName?: string } = {},
+    counts: {
+      priceCount?: number;
+      orgCount?: number;
+      countryCount?: number;
+      businessName?: string;
+      attachedOrgName?: string | null;
+    } = {},
     canDelete = true,
   ): PlanDto {
     const dto = new PlanDto();
@@ -55,13 +68,14 @@ export class PlanDto {
     dto.businessName = counts.businessName ?? '';
     dto.name = plan.name;
     dto.code = plan.code;
+    dto.isCustom = plan.isCustom;
+    dto.attachedOrgName = counts.attachedOrgName ?? null;
     dto.maxBusinessUnits = plan.maxBusinessUnits ?? null;
-    dto.usdAnchor = plan.usdAnchor ?? null;
     dto.content = plan.content ?? null;
     dto.createdAt = plan.createdAt;
     dto.updatedAt = plan.updatedAt;
     dto.priceCount = counts.priceCount ?? 0;
-    dto.marketCount = counts.marketCount ?? 0;
+    dto.countryCount = counts.countryCount ?? 0;
     dto.orgCount = counts.orgCount ?? 0;
     dto.canDelete = canDelete;
     return dto;

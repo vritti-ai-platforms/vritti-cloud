@@ -1,6 +1,7 @@
 import { useDeploymentPlans } from '@hooks/cloud/infrastructure';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
+import { formatCurrencyMajor, minorToMajor } from '@vritti/quantum-ui/money';
 import { RichTextEditor } from '@vritti/quantum-ui/RichTextEditor';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Typography } from '@vritti/quantum-ui/Typography';
@@ -20,6 +21,12 @@ function safeParse(value: string | null | undefined) {
   }
 }
 
+// Formats a minor-unit amount in its currency, or null when no price is configured
+function formatPlanPrice(amount: number | null, currency: string | null): string | null {
+  if (amount == null || !currency) return null;
+  return formatCurrencyMajor(Number(minorToMajor(String(amount), currency)), currency);
+}
+
 interface ChoosePlanStepProps {
   form: UseFormReturn<CreateOrgFormData>;
   selectedPlanId: string | undefined;
@@ -37,8 +44,9 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
 }) => {
   const deploymentId = form.watch('deploymentId') ?? '';
   const businessId = form.watch('businessId') ?? '';
+  const countryId = form.watch('countryId') ?? '';
 
-  const { data: plans = [], isLoading } = useDeploymentPlans(deploymentId, businessId);
+  const { data: plans = [], isLoading } = useDeploymentPlans(deploymentId, businessId, countryId);
 
   return (
     <Form form={form} onSubmit={onContinue} resetOnSuccess={false}>
@@ -63,6 +71,7 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {plans.map((plan) => {
               const isSelected = selectedPlanId === plan.id;
+              const priceLabel = formatPlanPrice(plan.amount, plan.currency);
               return (
                 // biome-ignore lint/a11y/useSemanticElements: large clickable plan card region, not a native button
                 <div
@@ -97,12 +106,9 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
 
                   {/* Price */}
                   <div className="mt-3 flex items-baseline gap-1">
-                    {plan.price ? (
+                    {priceLabel ? (
                       <>
-                        <span className="text-2xl font-bold text-primary">
-                          {plan.currency === 'INR' ? '₹' : plan.currency}
-                          {plan.price}
-                        </span>
+                        <span className="text-2xl font-bold text-primary">{priceLabel}</span>
                         <span className="text-sm text-muted-foreground">/month</span>
                       </>
                     ) : (

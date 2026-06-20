@@ -4,8 +4,6 @@ import { cloudSchema } from './cloud-schema';
 import { countries } from './country';
 import { deployments } from './deployment';
 import { orgMemberRoleEnum, orgSizeEnum } from './enums';
-import { markets } from './market';
-import { plans } from './plan';
 import { users } from './user';
 
 // Organizations table - workspace entities created by users
@@ -20,16 +18,12 @@ export const organizations = cloudSchema.table('organizations', {
   countryId: uuid('country_id')
     .notNull()
     .references(() => countries.id, { onDelete: 'restrict' }),
-  marketId: uuid('market_id')
-    .notNull()
-    .references(() => markets.id, { onDelete: 'restrict' }),
   taxId: varchar('tax_id', { length: 50 }),
   taxIdCountry: varchar('tax_id_country', { length: 2 }),
   size: orgSizeEnum('size').notNull(),
   mediaId: varchar('media_id', { length: 255 }),
-  planId: uuid('plan_id')
-    .notNull()
-    .references(() => plans.id, { onDelete: 'restrict' }),
+  // Plan reference by code so it resolves across version upgrades: (deployment.version, businessId, planCode)
+  planCode: varchar('plan_code', { length: 100 }).notNull(),
   deploymentId: uuid('deployment_id')
     .notNull()
     .references(() => deployments.id, { onDelete: 'restrict' }),

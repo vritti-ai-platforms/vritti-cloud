@@ -12,27 +12,35 @@ import { PlansTableResponseDto } from '../dto/response/plans-table-response.dto'
 @ApiTags('Admin - Plans')
 @ApiBearerAuth()
 @RequireSession(SessionTypeValues.ADMIN)
-@Controller('plans')
+@Controller('versions/:versionId/businesses/:businessId/plans')
 export class PlanController {
   private readonly logger = new Logger(PlanController.name);
 
   constructor(private readonly planService: PlanService) {}
 
-  // Creates a new plan
+  // Creates a new plan under the version + business
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatePlan()
-  create(@Body() dto: CreatePlanDto): Promise<CreateResponseDto<PlanDto>> {
-    this.logger.log('POST /admin-api/plans');
-    return this.planService.create(dto);
+  create(
+    @Param('versionId') versionId: string,
+    @Param('businessId') businessId: string,
+    @Body() dto: CreatePlanDto,
+  ): Promise<CreateResponseDto<PlanDto>> {
+    this.logger.log(`POST /admin-api/versions/${versionId}/businesses/${businessId}/plans`);
+    return this.planService.create(versionId, businessId, dto);
   }
 
-  // Returns plans for the data table with server-stored filter/sort/search/pagination state
+  // Returns plans for the version + business data table with server-stored state
   @Get('table')
   @ApiFindForTablePlans()
-  findForTable(@UserId() userId: string): Promise<PlansTableResponseDto> {
-    this.logger.log('GET /admin-api/plans/table');
-    return this.planService.findForTable(userId);
+  findForTable(
+    @UserId() userId: string,
+    @Param('versionId') versionId: string,
+    @Param('businessId') businessId: string,
+  ): Promise<PlansTableResponseDto> {
+    this.logger.log(`GET /admin-api/versions/${versionId}/businesses/${businessId}/plans/table`);
+    return this.planService.findForTable(userId, versionId, businessId);
   }
 
   // Returns a single plan by ID

@@ -1,3 +1,4 @@
+import type { AvailableFeature } from '@domain/version/business/role-template/role-template-permission/repositories/role-template-feature-permission.repository';
 import {
   type GroupedPermission,
   RoleTemplatePermissionService,
@@ -33,11 +34,7 @@ export class RoleTemplatePermissionController {
   // Returns features available for permission assignment (from apps linked to this role template)
   @Get('features')
   @ApiAvailableFeatures()
-  findAvailableFeatures(
-    @Param('roleTemplateId') roleTemplateId: string,
-  ): Promise<
-    Array<{ id: string; code: string; name: string; icon: string; permissions: string[]; appCodes: string[] }>
-  > {
+  findAvailableFeatures(@Param('roleTemplateId') roleTemplateId: string): Promise<AvailableFeature[]> {
     this.logger.log(`GET /admin-api/role-templates/${roleTemplateId}/permissions/features`);
     return this.roleTemplatePermissionService.findAvailableFeatures(roleTemplateId);
   }

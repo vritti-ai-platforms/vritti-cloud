@@ -8,6 +8,11 @@ export class FeatureSelectQueryDto extends SelectOptionsQueryDto {
   @IsUUID()
   versionId?: string;
 
+  @ApiPropertyOptional({ description: 'Restrict to features available to add to this business' })
+  @IsOptional()
+  @IsUUID()
+  businessId?: string;
+
   @ApiPropertyOptional({ description: 'Filter by app code' })
   @IsOptional()
   @IsString()

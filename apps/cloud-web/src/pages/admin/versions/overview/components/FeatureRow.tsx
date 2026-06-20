@@ -44,10 +44,11 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
           <div className="flex items-center gap-0.5 shrink-0 ml-1">
             {feature.permissions.slice(0, 4).map((perm) => (
               <span
-                key={perm}
+                key={perm.code}
+                title={perm.label}
                 className="inline-flex items-center justify-center h-5 px-1.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground"
               >
-                {perm.slice(0, 3)}
+                {perm.code.slice(0, 3)}
               </span>
             ))}
             {feature.permissions.length > 4 && (

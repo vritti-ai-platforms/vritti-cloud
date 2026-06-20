@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."plans" ADD COLUMN "is_custom" boolean DEFAULT false NOT NULL;

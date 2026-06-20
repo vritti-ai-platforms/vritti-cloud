@@ -1,10 +1,7 @@
-export { useAddRoleTemplateApp } from './useAddRoleTemplateApp';
 export { useCreateRoleTemplate } from './useCreateRoleTemplate';
 export { useDeleteRoleTemplate } from './useDeleteRoleTemplate';
 export { useFeaturesWithPermissions } from './useFeaturesWithPermissions';
-export { useRemoveRoleTemplateApp } from './useRemoveRoleTemplateApp';
 export { useRoleTemplate } from './useRoleTemplate';
-export { roleTemplateAppsTableKey, useRoleTemplateAppsTable } from './useRoleTemplateAppsTable';
 export { useRoleTemplatePermissions } from './useRoleTemplatePermissions';
 export { ROLE_TEMPLATES_QUERY_KEY, useRoleTemplates } from './useRoleTemplates';
 export { useSetRoleTemplatePermissions } from './useSetRoleTemplatePermissions';

@@ -8,8 +8,9 @@ import {
   type SuccessResponseDto,
 } from '@vritti/api-sdk';
 import type { Deployment, Organization } from '@/db/schema';
+import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
+import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
-import { CoreConfigService } from '@/modules/core-server/services/core-config.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
 import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
@@ -22,8 +23,9 @@ export class OrganizationBusinessUnitsService {
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly organizationRepository: OrganizationRepository,
     private readonly planRepository: PlanRepository,
+    private readonly coreVersionRepository: CoreVersionRepository,
     private readonly coreBusinessUnitService: CoreBusinessUnitService,
-    private readonly coreConfigService: CoreConfigService,
+    private readonly catalogSyncService: CatalogSyncService,
     private readonly coreRoleService: CoreRoleService,
   ) {}
 
@@ -62,6 +64,8 @@ export class OrganizationBusinessUnitsService {
         org.orgIdentifier,
         this.packMetadata(data),
       );
+      // Seed the org's business role templates (idempotent — core skips already-provisioned ones)
+      await this.catalogSyncService.syncRoles(orgId);
       this.logger.log(`Created business unit for org ${orgId}`);
       return result;
     } catch (error: unknown) {
@@ -213,11 +217,11 @@ export class OrganizationBusinessUnitsService {
     }
   }
 
-  // Updates the assigned apps for a business unit and invalidates the config cache
+  // Updates the assigned apps for a business unit and pushes the recomputed feature catalog to core
   async updateBuApps(orgId: string, buId: string, appCodes: string[]): Promise<SuccessResponseDto> {
-    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    // Persist BU app assignment on cloud for license config endpoint
+    // Persist BU app assignment on cloud — the source of truth the catalog is derived from
     const assignments = (org.buAppAssignments ?? {}) as Record<string, string[]>;
     if (appCodes.length > 0) {
       assignments[buId] = appCodes;
@@ -227,19 +231,9 @@ export class OrganizationBusinessUnitsService {
     await this.organizationRepository.update(orgId, { buAppAssignments: assignments });
 
     try {
-      const result = await this.coreBusinessUnitService.updateBuApps(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        buId,
-        {
-          appCodes,
-        },
-      );
-      // Invalidate config cache so core-server fetches fresh catalogs
-      await this.coreConfigService.invalidateOrg(deployment.url, deployment.webhookSecret, org.orgIdentifier);
+      await this.catalogSyncService.syncBuApps(orgId, buId, appCodes);
       this.logger.log(`Updated apps for BU ${buId} in org ${orgId}: [${appCodes.join(', ')}]`);
-      return result;
+      return { success: true, message: 'Business unit apps updated successfully.' };
     } catch (error: unknown) {
       this.logger.error(`Failed to update apps for BU ${buId} in org ${orgId}: ${error}`);
       throw new ServiceUnavailableException({
@@ -284,7 +278,10 @@ export class OrganizationBusinessUnitsService {
 
   // Checks if the organization has reached its plan's max business unit limit
   private async checkBusinessUnitLimit(org: Organization, deployment: Deployment): Promise<void> {
-    const plan = await this.planRepository.findById(org.planId);
+    const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
+    const plan = appVersion
+      ? await this.planRepository.findByVersionBusinessCode(appVersion.id, org.businessId, org.planCode)
+      : undefined;
     if (!plan) throw new NotFoundException('Plan not found.');
 
     // null maxBusinessUnits means unlimited

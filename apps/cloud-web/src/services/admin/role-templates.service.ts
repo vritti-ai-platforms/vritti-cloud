@@ -1,29 +1,31 @@
-import type { CreateResponse, SuccessResponse, TableResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type {
   CreateRoleTemplateData,
   FeatureWithPermissions,
   GroupedPermission,
   Role,
-  RoleTemplateAppTableRow,
   RoleTemplateDetail,
   RoleTemplatesTableResponse,
   SetPermissionsData,
   UpdateRoleTemplateData,
 } from '@/schemas/admin/role-templates';
 
+// Fetches a business's role templates for the data table
 export function getRoleTemplates(versionId: string, businessId: string): Promise<RoleTemplatesTableResponse> {
   return axios
-    .get<RoleTemplatesTableResponse>(
-      `admin-api/versions/${versionId}/businesses/${businessId}/role-templates/table`,
-    )
+    .get<RoleTemplatesTableResponse>(`admin-api/versions/${versionId}/businesses/${businessId}/role-templates/table`)
     .then((r) => r.data);
 }
 
-export function getRoleTemplate(versionId: string, id: string): Promise<RoleTemplateDetail> {
-  return axios.get<RoleTemplateDetail>(`admin-api/versions/${versionId}/role-templates/${id}`).then((r) => r.data);
+// Fetches a single role template with its detail (counts + apps)
+export function getRoleTemplate(versionId: string, businessId: string, id: string): Promise<RoleTemplateDetail> {
+  return axios
+    .get<RoleTemplateDetail>(`admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${id}`)
+    .then((r) => r.data);
 }
 
+// Creates a role template for a business
 export function createRoleTemplate(
   versionId: string,
   businessId: string,
@@ -34,17 +36,25 @@ export function createRoleTemplate(
     .then((r) => r.data);
 }
 
+// Updates a role template (details + apps)
 export function updateRoleTemplate(
   versionId: string,
+  businessId: string,
   { id, data }: { id: string; data: UpdateRoleTemplateData },
 ): Promise<SuccessResponse> {
-  return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/role-templates/${id}`, data).then((r) => r.data);
+  return axios
+    .patch<SuccessResponse>(`admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${id}`, data)
+    .then((r) => r.data);
 }
 
-export function deleteRoleTemplate(versionId: string, id: string): Promise<void> {
-  return axios.delete(`admin-api/versions/${versionId}/role-templates/${id}`).then(() => undefined);
+// Deletes a role template
+export function deleteRoleTemplate(versionId: string, businessId: string, id: string): Promise<void> {
+  return axios
+    .delete(`admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${id}`)
+    .then(() => undefined);
 }
 
+// Fetches the features (with their permissions) available to a role template
 export function getFeaturesWithPermissions(
   versionId: string,
   businessId: string,
@@ -57,6 +67,7 @@ export function getFeaturesWithPermissions(
     .then((r) => r.data);
 }
 
+// Fetches a role template's granted permissions grouped by feature
 export function getRoleTemplatePermissions(
   versionId: string,
   businessId: string,
@@ -69,54 +80,7 @@ export function getRoleTemplatePermissions(
     .then((r) => r.data);
 }
 
-export function getRoleTemplateAppsTable(
-  versionId: string,
-  businessId: string,
-  roleTemplateId: string,
-): Promise<TableResponse<RoleTemplateAppTableRow>> {
-  return axios
-    .get<TableResponse<RoleTemplateAppTableRow>>(
-      `admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${roleTemplateId}/apps/table`,
-    )
-    .then((r) => r.data);
-}
-
-export function addRoleTemplateApp({
-  versionId,
-  businessId,
-  roleTemplateId,
-  appId,
-}: {
-  versionId: string;
-  businessId: string;
-  roleTemplateId: string;
-  appId: string;
-}): Promise<SuccessResponse> {
-  return axios
-    .post<SuccessResponse>(
-      `admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${roleTemplateId}/apps/${appId}`,
-    )
-    .then((r) => r.data);
-}
-
-export function removeRoleTemplateApp({
-  versionId,
-  businessId,
-  roleTemplateId,
-  appId,
-}: {
-  versionId: string;
-  businessId: string;
-  roleTemplateId: string;
-  appId: string;
-}): Promise<SuccessResponse> {
-  return axios
-    .delete<SuccessResponse>(
-      `admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${roleTemplateId}/apps/${appId}`,
-    )
-    .then((r) => r.data);
-}
-
+// Replaces a role template's granted permissions (full set of featurePermissionIds)
 export function setRoleTemplatePermissions({
   versionId,
   businessId,

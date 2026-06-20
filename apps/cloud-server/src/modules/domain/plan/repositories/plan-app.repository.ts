@@ -8,7 +8,6 @@ export type PlanAppRow = {
   id: string;
   planId: string;
   appCode: string;
-  includedFeatureCodes: string[] | null;
   sortOrder: number;
 };
 
@@ -25,7 +24,6 @@ export class PlanAppRepository extends PrimaryBaseRepository<typeof planApps> {
         id: planApps.id,
         planId: planApps.planId,
         appCode: planApps.appCode,
-        includedFeatureCodes: planApps.includedFeatureCodes,
         sortOrder: planApps.sortOrder,
       })
       .from(planApps)
@@ -37,12 +35,9 @@ export class PlanAppRepository extends PrimaryBaseRepository<typeof planApps> {
     return this.model.findFirst({ where: { planId, appCode } });
   }
 
-  // Updates included feature codes and sort order for a plan-app row
-  async updateIncludedFeatureCodes(
-    id: string,
-    data: { includedFeatureCodes?: string[] | null; sortOrder?: number },
-  ): Promise<PlanApp> {
-    const result = await this.db.update(planApps).set(data).where(eq(planApps.id, id)).returning();
+  // Updates the sort order for a plan-app row
+  async updateSortOrder(id: string, sortOrder: number): Promise<PlanApp> {
+    const result = await this.db.update(planApps).set({ sortOrder }).where(eq(planApps.id, id)).returning();
     return result[0] as PlanApp;
   }
 
@@ -58,23 +53,12 @@ export class PlanAppRepository extends PrimaryBaseRepository<typeof planApps> {
     orderBy: SQL[] | undefined,
     limit: number,
     offset: number,
-  ): Promise<{
-    rows: Array<{
-      appCode: string;
-      includedFeatureCodes: string[] | null;
-      sortOrder: number;
-    }>;
-    total: number;
-  }> {
+  ): Promise<{ rows: Array<{ appCode: string; sortOrder: number }>; total: number }> {
     const baseWhere = where ? and(eq(planApps.planId, planId), where) : eq(planApps.planId, planId);
 
     const [rows, totalResult] = await Promise.all([
       this.db
-        .select({
-          appCode: planApps.appCode,
-          includedFeatureCodes: planApps.includedFeatureCodes,
-          sortOrder: planApps.sortOrder,
-        })
+        .select({ appCode: planApps.appCode, sortOrder: planApps.sortOrder })
         .from(planApps)
         .where(baseWhere)
         .orderBy(...(orderBy ?? []))

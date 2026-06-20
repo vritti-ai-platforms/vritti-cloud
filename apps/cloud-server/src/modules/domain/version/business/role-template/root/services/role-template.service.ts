@@ -101,12 +101,13 @@ export class RoleTemplateService {
     });
   }
 
-  // Finds a role template by ID with business name, permission count, and app count
+  // Finds a role template by ID within a business with business name, permission count, and app count
   async findById(
+    businessId: string,
     id: string,
-  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number; appCount: number }> {
+  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number; appCount: number; appIds: string[] }> {
     const roleTemplate = await this.roleTemplateRepository.findById(id);
-    if (!roleTemplate) {
+    if (!roleTemplate || roleTemplate.businessId !== businessId) {
       throw new NotFoundException('Role template not found.');
     }
     const [permissionCount, appIds] = await Promise.all([
@@ -119,13 +120,14 @@ export class RoleTemplateService {
       businessName: roleTemplate.businessName,
       permissionCount,
       appCount: appIds.length,
+      appIds,
     };
   }
 
-  // Updates a role template by ID and optionally replaces linked apps
-  async update(id: string, dto: UpdateRoleTemplateDto): Promise<SuccessResponseDto> {
+  // Updates a role template by ID within a business and optionally replaces linked apps
+  async update(businessId: string, id: string, dto: UpdateRoleTemplateDto): Promise<SuccessResponseDto> {
     const existing = await this.roleTemplateRepository.findById(id);
-    if (!existing) {
+    if (!existing || existing.businessId !== businessId) {
       throw new NotFoundException('Role template not found.');
     }
     const { appIds, ...roleTemplateData } = dto;
@@ -140,10 +142,10 @@ export class RoleTemplateService {
     return { success: true, message: `Role template "${roleTemplate.name}" updated successfully.` };
   }
 
-  // Deletes a role template by ID
-  async delete(id: string): Promise<SuccessResponseDto> {
+  // Deletes a role template by ID within a business
+  async delete(businessId: string, id: string): Promise<SuccessResponseDto> {
     const existing = await this.roleTemplateRepository.findById(id);
-    if (!existing) {
+    if (!existing || existing.businessId !== businessId) {
       throw new NotFoundException('Role template not found.');
     }
     await this.roleTemplateRepository.delete(id);

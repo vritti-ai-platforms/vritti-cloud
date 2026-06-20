@@ -7,6 +7,7 @@ export function featuresWithPermissionsQueryKey(versionId: string, roleTemplateI
   return ['admin', 'versions', versionId, 'role-templates', roleTemplateId, 'permissions', 'features'] as const;
 }
 
+// Fetches the features (with permissions) available to a role template
 export function useFeaturesWithPermissions(
   versionId: string,
   businessId: string,

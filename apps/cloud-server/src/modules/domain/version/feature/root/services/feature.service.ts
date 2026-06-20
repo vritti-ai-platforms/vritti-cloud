@@ -13,17 +13,14 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
-import { type FeatureType, FeatureTypeValues, features, type NewFeaturePermission } from '@/db/schema';
+import { features } from '@/db/schema';
 import { FeatureDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature.dto';
 import { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
 import type { UpdateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '@/modules/admin-api/version/feature/root/dto/response/feature-table-response.dto';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
 import { validateImportRows } from '@/utils/validate-import-rows';
-import { FeaturePermissionRepository } from '../../feature-permission/repositories/feature-permission.repository';
 import { FeatureRepository } from '../repositories/feature.repository';
-
-const VALID_PERMISSIONS = Object.keys(FeatureTypeValues);
 
 @Injectable()
 export class FeatureService {
@@ -36,7 +33,6 @@ export class FeatureService {
 
   constructor(
     private readonly featureRepository: FeatureRepository,
-    private readonly featurePermissionRepository: FeaturePermissionRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -70,19 +66,22 @@ export class FeatureService {
     const { result, count } = await this.featureRepository.findAllForTable({ where, orderBy, limit, offset });
     this.logger.log(`Fetched features table (${count} results, limit: ${limit}, offset: ${offset})`);
     return {
-      result: result.map((r) => FeatureDto.from(r, r.appFeatureCount, r.permissions, r.platforms)),
+      result: result.map((r) => FeatureDto.from(r, r.businessCount, r.permissions, r.platforms, r.appFeatureCount)),
       count,
       state,
       activeViewId,
     };
   }
 
-  // Returns paginated feature options for the select component
-  findForSelect(query: SelectOptionsQueryDto & { versionId?: string }): Promise<SelectQueryResult> {
+  // Returns paginated feature options for the select component; when businessId is given, restricts to
+  // features available to add to that business (applicable permission, not already assigned to its apps)
+  findForSelect(
+    query: SelectOptionsQueryDto & { versionId?: string; businessId?: string },
+  ): Promise<SelectQueryResult> {
     this.logger.log(
       `Fetched feature select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
     );
-    return this.featureRepository.findForSelect({
+    const config = {
       value: query.valueKey || 'id',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
@@ -92,9 +91,13 @@ export class FeatureService {
       offset: query.offset,
       values: query.values,
       excludeIds: query.excludeIds,
-      orderBy: { name: 'asc' },
+      orderBy: { name: 'asc' as const },
       ...(query.versionId ? { where: { versionId: query.versionId } } : {}),
-    });
+    };
+    if (query.businessId) {
+      return this.featureRepository.findForSelectForBusiness(config, query.businessId);
+    }
+    return this.featureRepository.findForSelect(config);
   }
 
   // Finds a feature by ID; throws NotFoundException if not found
@@ -105,7 +108,7 @@ export class FeatureService {
     }
     const refs = await this.featureRepository.countAppFeatureReferences(id);
     this.logger.log(`Fetched feature: ${id}`);
-    return FeatureDto.from(feature, refs);
+    return FeatureDto.from(feature, 0, [], [], refs);
   }
 
   // Updates a feature by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -147,24 +150,10 @@ export class FeatureService {
     return { success: true, message: `Feature "${existing.name}" deleted successfully.` };
   }
 
-  // Validates and imports features from a spreadsheet buffer (all-or-nothing)
+  // Validates and imports features from a spreadsheet buffer (all-or-nothing). Permissions are authored separately.
   async importFromFile(buffer: Buffer, versionId: string): Promise<ImportResponseDto> {
     const rows = parseSpreadsheet(buffer);
     const result = await validateImportRows(rows, CreateFeatureDto, { versionId });
-
-    for (const row of result.rows) {
-      if (!row.valid) continue;
-      if (row.data.permissions) {
-        const types = row.data.permissions.split(',').map((t) => t.trim().toUpperCase());
-        const invalid = types.filter((t) => !VALID_PERMISSIONS.includes(t));
-        if (invalid.length > 0) {
-          row.valid = false;
-          row.errors.push(`Invalid permission(s): ${invalid.join(', ')}. Valid: ${VALID_PERMISSIONS.join(', ')}`);
-          result.summary.valid--;
-          result.summary.invalid++;
-        }
-      }
-    }
 
     if (result.summary.invalid > 0) {
       this.logger.log(
@@ -178,13 +167,8 @@ export class FeatureService {
     let skipped = 0;
     for (const row of result.rows) {
       const existing = await this.featureRepository.findByCode(row.data.code);
-      let featureId: string;
 
       if (existing) {
-        featureId = existing.id;
-        let changed = false;
-
-        // Check if feature fields changed
         const incomingDesc = row.data.description || null;
         if (
           existing.name !== row.data.name ||
@@ -196,54 +180,19 @@ export class FeatureService {
             icon: row.data.icon,
             description: incomingDesc ?? undefined,
           } as UpdateFeatureDto);
-          changed = true;
+          updated++;
+        } else {
+          skipped++;
         }
-
-        // Check if permissions changed
-        if (row.data.permissions) {
-          const incomingTypes = row.data.permissions
-            .split(',')
-            .map((t) => t.trim().toUpperCase())
-            .sort();
-          const existingPerms = await this.featurePermissionRepository.findByFeatureId(featureId);
-          const existingTypes = existingPerms.map((p) => p.type).sort();
-
-          if (incomingTypes.join(',') !== existingTypes.join(',')) {
-            const permissionRows: NewFeaturePermission[] = incomingTypes.map((type) => ({
-              versionId,
-              featureId,
-              type: type as FeatureType,
-            }));
-            await this.featurePermissionRepository.transaction(async (tx) => {
-              await this.featurePermissionRepository.deleteByFeatureId(featureId, tx);
-              await this.featurePermissionRepository.bulkCreate(permissionRows, tx);
-            });
-            changed = true;
-          }
-        }
-
-        if (changed) updated++;
-        else skipped++;
       } else {
-        const feature = await this.featureRepository.create({
+        await this.featureRepository.create({
           versionId,
           code: row.data.code,
           name: row.data.name,
           icon: row.data.icon,
           description: row.data.description || null,
         });
-        featureId = feature.id;
         created++;
-
-        if (row.data.permissions) {
-          const types = row.data.permissions.split(',').map((t) => t.trim().toUpperCase());
-          const permissionRows: NewFeaturePermission[] = types.map((type) => ({
-            versionId,
-            featureId,
-            type: type as FeatureType,
-          }));
-          await this.featurePermissionRepository.bulkCreate(permissionRows);
-        }
       }
     }
 
@@ -260,7 +209,6 @@ export class FeatureService {
       name: r.name,
       icon: r.icon,
       description: r.description ?? '',
-      permissions: r.permissions.join(','),
     }));
 
     this.logger.log(`Exported ${rows.length} feature(s) for version ${versionId} as ${format}`);

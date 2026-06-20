@@ -34,8 +34,8 @@ export class OrgListItemDto {
   })
   mediaId: string | null;
 
-  @ApiPropertyOptional({ description: 'Plan ID', example: '550e8400-e29b-41d4-a716-446655440003', nullable: true })
-  planId: string | null;
+  @ApiProperty({ description: 'Plan code', example: 'pro' })
+  planCode: string;
 
   @ApiPropertyOptional({
     description: 'Deployment ID',
@@ -75,7 +75,7 @@ export class OrgListItemDto {
       businessId: org.businessId ?? null,
       size: org.size,
       mediaId: org.mediaId ?? null,
-      planId: org.planId ?? null,
+      planCode: org.planCode,
       deploymentId: org.deploymentId ?? null,
       role,
       createdAt: org.createdAt,

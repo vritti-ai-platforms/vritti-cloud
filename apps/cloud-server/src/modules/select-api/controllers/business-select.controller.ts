@@ -18,6 +18,6 @@ export class BusinessSelectController {
   @Get()
   findForSelect(@Query() query: BusinessSelectQueryDto): Promise<SelectQueryResult> {
     this.logger.log('GET /select-api/businesses');
-    return this.businessService.findForSelect(query, query.notInVersion);
+    return this.businessService.findForSelect(query, query.notInVersion, query.inVersion);
   }
 }

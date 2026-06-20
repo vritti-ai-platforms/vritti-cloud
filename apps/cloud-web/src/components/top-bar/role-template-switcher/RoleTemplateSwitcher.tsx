@@ -7,18 +7,25 @@ import { useNavigate } from 'react-router-dom';
 
 interface RoleTemplateSwitcherProps {
   versionSlug: string;
+  businessSlug: string;
   currentRoleId: string;
   currentRoleName?: string;
 }
 
-export const RoleTemplateSwitcher = ({ versionSlug, currentRoleId, currentRoleName }: RoleTemplateSwitcherProps) => {
+export const RoleTemplateSwitcher = ({
+  versionSlug,
+  businessSlug,
+  currentRoleId,
+  currentRoleName,
+}: RoleTemplateSwitcherProps) => {
   const navigate = useNavigate();
   const versionId = parseSlug(versionSlug)?.id ?? '';
+  const businessId = parseSlug(businessSlug)?.id ?? '';
 
   return (
     <Select
       optionsEndpoint="select-api/role-templates"
-      params={{ versionId }}
+      params={{ versionId, businessId }}
       fieldKeys={{ valueKey: 'id', labelKey: 'name' }}
       value={currentRoleId}
       searchable
@@ -55,7 +62,7 @@ export const RoleTemplateSwitcher = ({ versionSlug, currentRoleId, currentRoleNa
             <Button
               variant="ghost"
               className="w-full justify-start h-auto px-2 py-1.5 text-sm font-normal"
-              onClick={() => navigate(`/versions/${versionSlug}`)}
+              onClick={() => navigate(`/versions/${versionSlug}/businesses/${businessSlug}/role-templates`)}
             >
               All Role Templates
             </Button>
@@ -65,7 +72,7 @@ export const RoleTemplateSwitcher = ({ versionSlug, currentRoleId, currentRoleNa
       onOptionSelect={(option) => {
         if (option) {
           navigate(
-            `/versions/${versionSlug}/role-templates/rt-${buildSlug(String(option.label), String(option.value))}`,
+            `/versions/${versionSlug}/businesses/${businessSlug}/role-templates/rt-${buildSlug(String(option.label), String(option.value))}`,
           );
         }
       }}

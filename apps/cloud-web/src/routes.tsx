@@ -16,25 +16,18 @@ import { CountriesPage } from './pages/admin/countries/CountriesPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
 import { DeploymentViewPageSkeleton } from './pages/admin/deployments/DeploymentViewPageSkeleton';
-import { MarketsPage } from './pages/admin/markets/MarketsPage';
-import { MarketViewPage } from './pages/admin/markets/MarketViewPage';
-import { MarketViewPageSkeleton } from './pages/admin/markets/MarketViewPageSkeleton';
-import { OrganizationsPage as AdminOrganizationsPage } from './pages/admin/organizations/OrganizationsPage';
-import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/organizations/OrganizationViewPage';
-import { OrganizationViewPageSkeleton } from './pages/admin/organizations/OrganizationViewPageSkeleton';
-import { PlansPage } from './pages/admin/plans/PlansPage';
+import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/deployments/organizations/OrganizationViewPage';
+import { OrganizationViewPageSkeleton } from './pages/admin/deployments/organizations/OrganizationViewPageSkeleton';
 import { PlanViewPage } from './pages/admin/plans/PlanViewPage';
 import { PlanViewPageSkeleton } from './pages/admin/plans/PlanViewPageSkeleton';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
 import { RegionViewPageSkeleton } from './pages/admin/regions/RegionViewPageSkeleton';
-import { BusinessAppPage } from './pages/admin/versions/businesses/BusinessAppPage';
-import { BusinessAppPageSkeleton } from './pages/admin/versions/businesses/BusinessAppPageSkeleton';
 import { BusinessDetailPage } from './pages/admin/versions/businesses/BusinessDetailPage';
-import { FeatureViewPage } from './pages/admin/versions/features/FeatureViewPage';
-import { FeatureViewPageSkeleton } from './pages/admin/versions/features/FeatureViewPageSkeleton';
 import { RoleTemplateViewPage } from './pages/admin/versions/businesses/role-templates/RoleTemplateViewPage';
 import { RoleTemplateViewPageSkeleton } from './pages/admin/versions/businesses/role-templates/RoleTemplateViewPageSkeleton';
+import { FeatureViewPage } from './pages/admin/versions/features/FeatureViewPage';
+import { FeatureViewPageSkeleton } from './pages/admin/versions/features/FeatureViewPageSkeleton';
 import { VersionDetailPage } from './pages/admin/versions/VersionDetailPage';
 import { VersionDetailPageSkeleton } from './pages/admin/versions/VersionDetailPageSkeleton';
 import { VersionsPage } from './pages/admin/versions/VersionsPage';
@@ -152,18 +145,6 @@ export const adminRoutes: RouteObject[] = [
         element: <BusinessesPage />,
       },
       {
-        path: 'plans',
-        element: <PlansPage />,
-      },
-      {
-        path: 'plans/:planSlug',
-        element: (
-          <Suspense fallback={<PlanViewPageSkeleton />}>
-            <PlanViewPage />
-          </Suspense>
-        ),
-      },
-      {
         path: 'regions',
         element: <RegionsPage />,
       },
@@ -172,18 +153,6 @@ export const adminRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<RegionViewPageSkeleton />}>
             <RegionViewPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'markets',
-        element: <MarketsPage />,
-      },
-      {
-        path: 'markets/:marketSlug',
-        element: (
-          <Suspense fallback={<MarketViewPageSkeleton />}>
-            <MarketViewPage />
           </Suspense>
         ),
       },
@@ -204,11 +173,7 @@ export const adminRoutes: RouteObject[] = [
         ),
       },
       {
-        path: 'organizations',
-        element: <AdminOrganizationsPage />,
-      },
-      {
-        path: 'organizations/:orgSlug',
+        path: 'deployments/:deploymentSlug/organizations/:orgSlug',
         element: (
           <Suspense fallback={<OrganizationViewPageSkeleton />}>
             <AdminOrganizationViewPage />
@@ -243,7 +208,19 @@ export const adminRoutes: RouteObject[] = [
         ),
       },
       {
-        path: 'role-templates/:roleTemplateSlug',
+        path: 'businesses/:businessSlug',
+        element: <Navigate to="apps" replace />,
+      },
+      {
+        path: 'businesses/:businessSlug/plans/:planSlug',
+        element: (
+          <Suspense fallback={<PlanViewPageSkeleton />}>
+            <PlanViewPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'businesses/:businessSlug/role-templates/:roleTemplateSlug',
         element: (
           <Suspense fallback={<RoleTemplateViewPageSkeleton />}>
             <RoleTemplateViewPage />
@@ -251,16 +228,8 @@ export const adminRoutes: RouteObject[] = [
         ),
       },
       {
-        path: 'businesses/:businessSlug',
+        path: 'businesses/:businessSlug/:businessTab',
         element: <BusinessDetailPage />,
-      },
-      {
-        path: 'businesses/:businessSlug/:appSlug',
-        element: (
-          <Suspense fallback={<BusinessAppPageSkeleton />}>
-            <BusinessAppPage />
-          </Suspense>
-        ),
       },
     ],
   },

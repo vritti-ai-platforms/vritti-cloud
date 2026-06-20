@@ -1,9 +1,12 @@
+import { BusinessDomainModule } from '@domain/business/business.module';
+import { CloudOrganizationDomainModule } from '@domain/cloud-organization/cloud-organization.module';
+import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
 import { Module } from '@nestjs/common';
 import { CoreDeploymentRepository } from './repositories/core-deployment.repository';
 import { CoreOrganizationRepository } from './repositories/core-organization.repository';
 import { CoreVersionRepository } from './repositories/core-version.repository';
+import { CatalogSyncService } from './services/catalog-sync.service';
 import { CoreBusinessUnitService } from './services/core-business-unit.service';
-import { CoreConfigService } from './services/core-config.service';
 import { CoreDeploymentService } from './services/core-deployment.service';
 import { CoreHttpService } from './services/core-http.service';
 import { CoreOrganizationService } from './services/core-organization.service';
@@ -12,6 +15,7 @@ import { CoreUserService } from './services/core-user.service';
 
 // HTTP client module for proxying calls to core-server deployments
 @Module({
+  imports: [DeploymentDomainModule, CloudOrganizationDomainModule, BusinessDomainModule],
   providers: [
     // Repositories
     CoreOrganizationRepository,
@@ -26,7 +30,8 @@ import { CoreUserService } from './services/core-user.service';
     CoreUserService,
     CoreRoleService,
     CoreBusinessUnitService,
-    CoreConfigService,
+    // Catalog + role push orchestration
+    CatalogSyncService,
   ],
   exports: [
     CoreVersionRepository,
@@ -35,7 +40,7 @@ import { CoreUserService } from './services/core-user.service';
     CoreUserService,
     CoreRoleService,
     CoreBusinessUnitService,
-    CoreConfigService,
+    CatalogSyncService,
   ],
 })
 export class CoreServerModule {}

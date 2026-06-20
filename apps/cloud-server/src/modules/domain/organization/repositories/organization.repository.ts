@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { asc, count, eq, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { Business, CloudProvider, Deployment, Organization, Plan, Region } from '@/db/schema';
-import { businesses, deployments, organizations, plans } from '@/db/schema';
+import type { Business, CloudProvider, Deployment, Organization, Region } from '@/db/schema';
+import { businesses, deployments, organizations } from '@/db/schema';
 
 export type OrganizationRow = {
   id: string;
@@ -10,7 +10,6 @@ export type OrganizationRow = {
   subdomain: string;
   orgIdentifier: string;
   size: string;
-  planName: string;
   planCode: string;
   deploymentName: string;
   deploymentUrl: string;
@@ -21,7 +20,6 @@ export type OrganizationRow = {
 };
 
 export type OrganizationDetail = Organization & {
-  plan: Plan;
   deployment: Deployment & { region: Region; cloudProvider: CloudProvider };
   business: Business;
 };
@@ -53,8 +51,7 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
           subdomain: organizations.subdomain,
           orgIdentifier: organizations.orgIdentifier,
           size: organizations.size,
-          planName: plans.name,
-          planCode: plans.code,
+          planCode: organizations.planCode,
           deploymentName: deployments.name,
           deploymentUrl: deployments.url,
           businessName: businesses.name,
@@ -63,7 +60,6 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
           updatedAt: organizations.updatedAt,
         })
         .from(organizations)
-        .innerJoin(plans, eq(plans.id, organizations.planId))
         .innerJoin(deployments, eq(deployments.id, organizations.deploymentId))
         .innerJoin(businesses, eq(businesses.id, organizations.businessId))
         .where(where)
@@ -79,7 +75,6 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
     return this.model.findFirst({
       where: { id },
       with: {
-        plan: true,
         deployment: { with: { region: true, cloudProvider: true } },
         business: true,
       },

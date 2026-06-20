@@ -2,7 +2,6 @@ import { OrganizationRepository } from '@domain/cloud-organization/repositories/
 import { OrganizationMemberRepository } from '@domain/cloud-organization/repositories/organization-member.repository';
 import { CountryRepository } from '@domain/country/repositories/country.repository';
 import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
-import { MarketCountryRepository } from '@domain/market/repositories/market-country.repository';
 import { MediaService } from '@domain/media/services/media.service';
 import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { Injectable, Logger } from '@nestjs/common';
@@ -44,7 +43,6 @@ export class OrganizationService {
     private readonly deploymentRepository: DeploymentRepository,
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly countryRepository: CountryRepository,
-    private readonly marketCountryRepository: MarketCountryRepository,
     private readonly planRepository: PlanRepository,
   ) {}
 
@@ -84,25 +82,26 @@ export class OrganizationService {
       });
     }
 
-    // Ensure the selected plan belongs to the chosen vertical
-    const plan = await this.planRepository.findById(dto.planId);
+    // Resolve the plan by code within the deployment's version + chosen business (org references plans by code)
+    const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
+    if (!appVersion) {
+      throw new BadRequestException({
+        label: 'Invalid Deployment Version',
+        detail: 'The deployment is not pinned to a known app version.',
+        errors: [{ field: 'deploymentId', message: 'No version' }],
+      });
+    }
+    const plan = await this.planRepository.findByVersionBusinessCode(appVersion.id, dto.businessId, dto.planCode);
     if (!plan) {
       throw new BadRequestException({
         label: 'Invalid Plan',
-        detail: 'The specified plan does not exist.',
-        errors: [{ field: 'planId', message: 'Not found' }],
-      });
-    }
-    if (plan.businessId !== dto.businessId) {
-      throw new BadRequestException({
-        label: 'Plan Mismatch',
-        detail: 'The selected plan does not belong to the chosen vertical.',
-        errors: [{ field: 'planId', message: 'Wrong vertical' }],
+        detail: 'The specified plan does not exist for this version and business.',
+        errors: [{ field: 'planCode', message: 'Not found' }],
       });
     }
 
-    // Validate the tax id and derive country code + market from the selected country
-    const { marketId, taxIdCountry } = await this.resolveTaxIdMarket(dto.countryId, dto.taxId);
+    // Validate the tax id and derive the country code from the selected country
+    const { taxIdCountry } = await this.resolveTaxIdCountry(dto.countryId, dto.taxId);
 
     // Upload logo to public bucket if provided, to get permanent URL for core-server
     let logoUrl: string | undefined;
@@ -135,10 +134,7 @@ export class OrganizationService {
 
     // Insert organization and owner membership atomically
     const org = await this.orgRepository.transaction(async (tx) => {
-      const createdOrg = await this.orgRepository.create(
-        { ...dto, marketId, taxIdCountry, orgIdentifier: nexusOrg.id },
-        tx,
-      );
+      const createdOrg = await this.orgRepository.create({ ...dto, taxIdCountry, orgIdentifier: nexusOrg.id }, tx);
       await this.orgMemberRepository.create(
         {
           organizationId: createdOrg.id,
@@ -166,18 +162,15 @@ export class OrganizationService {
     return { ...OrgListItemDto.from(org, OrgMemberRoleValues.Owner), message: 'Organization created successfully' };
   }
 
-  // Validates a tax id against a country and returns the derived country code + market
+  // Validates a tax id against a country and returns the derived country code
   async validateTaxId(countryId: string, taxId: string): Promise<TaxIdValidationResponseDto> {
-    const { marketId, taxIdCountry } = await this.resolveTaxIdMarket(countryId, taxId);
-    this.logger.log(`Validated tax id for country ${countryId} → market ${marketId}`);
-    return { valid: true, countryId, countryCode: taxIdCountry, marketId };
+    const { taxIdCountry } = await this.resolveTaxIdCountry(countryId, taxId);
+    this.logger.log(`Validated tax id for country ${countryId}`);
+    return { valid: true, countryId, countryCode: taxIdCountry };
   }
 
-  // Validates the tax id format for the country's regime and resolves the country's pricing market
-  private async resolveTaxIdMarket(
-    countryId: string,
-    taxId: string,
-  ): Promise<{ marketId: string; taxIdCountry: string }> {
+  // Resolves the country code from countryId; validates the tax id format only when one is provided
+  private async resolveTaxIdCountry(countryId: string, taxId?: string): Promise<{ taxIdCountry: string }> {
     const country = await this.countryRepository.findById(countryId);
     if (!country) {
       throw new BadRequestException({
@@ -186,22 +179,14 @@ export class OrganizationService {
         errors: [{ field: 'countryId', message: 'Not found' }],
       });
     }
-    if (!isValidTaxId(taxId, country.taxRegime)) {
+    if (taxId && !isValidTaxId(taxId, country.taxRegime)) {
       throw new BadRequestException({
         label: 'Invalid Tax ID',
         detail: `The ${country.taxIdLabel ?? 'tax id'} you entered is not valid for ${country.name}.`,
         errors: [{ field: 'taxId', message: 'Invalid format' }],
       });
     }
-    const marketCountry = await this.marketCountryRepository.findByCountryId(countryId);
-    if (!marketCountry) {
-      throw new BadRequestException({
-        label: 'Market Unavailable',
-        detail: `${country.name} is not mapped to a pricing market yet. Please contact support.`,
-        errors: [{ field: 'countryId', message: 'No market' }],
-      });
-    }
-    return { marketId: marketCountry.marketId, taxIdCountry: country.code };
+    return { taxIdCountry: country.code };
   }
 
   // Returns paginated organizations for the authenticated user
@@ -319,7 +304,7 @@ export class OrganizationService {
     if (!appVersion?.snapshot) return undefined;
 
     const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const features = (snapshot.features ?? []) as Array<Record<string, unknown>>;
+    const features = Object.values((snapshot.features ?? {}) as Record<string, Record<string, unknown>>);
 
     return features
       .filter((f) => {

@@ -9,7 +9,6 @@ export interface App {
   icon: string;
   versionId: string;
   businessId: string;
-  isActive: boolean;
   sortOrder: number;
   featureCount: number;
   planCount: number;
@@ -18,16 +17,7 @@ export interface App {
   canDelete: boolean;
 }
 
-export interface AppFeatureTableRow {
-  featureId: string;
-  code: string;
-  name: string;
-  icon: string;
-  isAssigned: boolean;
-}
-
 export type AppsTableResponse = TableResponse<App>;
-export type AppFeaturesTableResponse = TableResponse<AppFeatureTableRow>;
 
 export const createAppSchema = z.object({
   code: z

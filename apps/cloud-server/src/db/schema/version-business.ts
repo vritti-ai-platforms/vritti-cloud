@@ -3,7 +3,7 @@ import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
 import { versions } from './version';
 
-// Assigns a globally-defined business to a specific version (subset of verticals per version)
+// Assigns a globally-defined business to a specific version (subset of businesses per version)
 export const versionBusinesses = cloudSchema.table(
   'version_businesses',
   {

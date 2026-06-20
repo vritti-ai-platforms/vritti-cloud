@@ -4,6 +4,7 @@ import { SuccessResponseDto } from '@vritti/api-sdk';
 import { VersionDto } from '../dto/entity/version.dto';
 import { CreateVersionDto } from '../dto/request/create-version.dto';
 import { PushArtifactsDto } from '../dto/request/push-artifacts.dto';
+import { UpdateVersionDto } from '../dto/request/update-version.dto';
 import { VersionTableResponseDto } from '../dto/response/version-table-response.dto';
 
 // Swagger docs for creating a version
@@ -35,6 +36,20 @@ export function ApiGetVersionById() {
     ApiResponse({ status: 200, description: 'Version retrieved successfully.', type: VersionDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Version not found.' }),
+  );
+}
+
+// Swagger docs for updating a version
+export function ApiUpdateVersion() {
+  return applyDecorators(
+    ApiOperation({ summary: "Update a version's name and/or version string" }),
+    ApiParam({ name: 'id', description: 'Version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiBody({ type: UpdateVersionDto }),
+    ApiResponse({ status: 200, description: 'Version updated successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Version not found.' }),
+    ApiResponse({ status: 409, description: 'Version string already exists.' }),
   );
 }
 

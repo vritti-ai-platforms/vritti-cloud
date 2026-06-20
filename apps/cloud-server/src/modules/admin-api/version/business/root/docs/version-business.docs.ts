@@ -10,7 +10,11 @@ export function ApiFindForTableVersionBusinesses() {
   return applyDecorators(
     ApiOperation({ summary: 'List businesses assigned to a version for the data table (server-stored state)' }),
     ApiParam({ name: 'versionId', description: 'Version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Businesses retrieved successfully.', type: VersionBusinessTableResponseDto }),
+    ApiResponse({
+      status: 200,
+      description: 'Businesses retrieved successfully.',
+      type: VersionBusinessTableResponseDto,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }

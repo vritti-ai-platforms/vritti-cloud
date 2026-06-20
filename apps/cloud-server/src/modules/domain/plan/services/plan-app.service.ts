@@ -53,17 +53,15 @@ export class PlanAppService {
     await this.ensurePlanExists(planId);
     const rows = await this.planAppRepository.findByPlanId(planId);
     this.logger.log(`Fetched ${rows.length} apps for plan: ${planId}`);
-    return rows.map((row) => {
-      const planApp = {
+    return rows.map((row) =>
+      PlanAppDto.from({
         id: row.id,
         planId: row.planId,
         appCode: row.appCode,
-        includedFeatureCodes: row.includedFeatureCodes,
         sortOrder: row.sortOrder,
         createdAt: new Date(),
-      };
-      return PlanAppDto.from(planApp);
-    });
+      }),
+    );
   }
 
   // Assigns an app to a plan by code; validates plan exists and no duplicate
@@ -80,29 +78,23 @@ export class PlanAppService {
     const planApp = await this.planAppRepository.create({
       planId,
       appCode: dto.appCode,
-      includedFeatureCodes: dto.includedFeatureCodes ?? null,
       sortOrder: dto.sortOrder ?? 0,
     });
     this.logger.log(`Assigned app ${dto.appCode} to plan ${planId}`);
     return { success: true, message: 'Plan app assigned successfully.', data: PlanAppDto.from(planApp) };
   }
 
-  // Updates included feature codes for a plan-app assignment
-  async updateFeatureCodes(planId: string, appCode: string, dto: UpdatePlanAppDto): Promise<SuccessResponseDto> {
+  // Updates the sort order for a plan-app assignment
+  async updateSortOrder(planId: string, appCode: string, dto: UpdatePlanAppDto): Promise<SuccessResponseDto> {
     await this.ensurePlanExists(planId);
     const planApp = await this.planAppRepository.findByPlanAndAppCode(planId, appCode);
     if (!planApp) {
       throw new NotFoundException('App is not assigned to this plan.');
     }
-    const updateData: { includedFeatureCodes?: string[] | null; sortOrder?: number } = {};
-    if (dto.includedFeatureCodes !== undefined) {
-      updateData.includedFeatureCodes = dto.includedFeatureCodes;
-    }
     if (dto.sortOrder !== undefined) {
-      updateData.sortOrder = dto.sortOrder;
+      await this.planAppRepository.updateSortOrder(planApp.id, dto.sortOrder);
     }
-    await this.planAppRepository.updateIncludedFeatureCodes(planApp.id, updateData);
-    this.logger.log(`Updated plan-app assignment for plan ${planId}, app ${appCode}`);
+    this.logger.log(`Updated plan-app sort order for plan ${planId}, app ${appCode}`);
     return { success: true, message: 'Plan app updated successfully.' };
   }
 

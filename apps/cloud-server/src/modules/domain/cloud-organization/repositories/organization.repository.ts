@@ -25,6 +25,11 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
     return this.model.findFirst({ where: { orgIdentifier } });
   }
 
+  // Returns all organizations hosted on a deployment
+  async findByDeploymentId(deploymentId: string): Promise<Organization[]> {
+    return this.model.findMany({ where: { deploymentId } });
+  }
+
   // Returns user's organizations as select options with plan code as description
   findForSelectByUser(
     userId: string,
@@ -32,10 +37,7 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
   ): Promise<SelectQueryResult> {
     return this.findForSelect({
       ...config,
-      joins: [
-        { table: organizationMembers, on: eq(organizations.id, organizationMembers.organizationId) },
-        { table: plans, on: eq(organizations.planId, plans.id) },
-      ],
+      joins: [{ table: organizationMembers, on: eq(organizations.id, organizationMembers.organizationId) }],
       conditions: [eq(organizationMembers.userId, userId)],
     });
   }

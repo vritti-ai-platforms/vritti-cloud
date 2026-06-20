@@ -2,7 +2,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { type StepDef, StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
 import { zodResolver } from '@vritti/quantum-ui/zod';
-import { Building2, ClipboardList, CreditCard, Receipt, Server } from 'lucide-react';
+import { Building2, ClipboardList, CreditCard, Globe, Server } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -19,8 +19,8 @@ import { TaxStep } from './steps/TaxStep';
 
 const CREATE_ORG_STEPS: StepDef[] = [
   { label: 'Basic Info', icon: <Building2 className="h-4 w-4" /> },
-  { label: 'Infrastructure', icon: <Server className="h-4 w-4" /> },
-  { label: 'Tax Details', icon: <Receipt className="h-4 w-4" /> },
+  { label: 'Deployment', icon: <Server className="h-4 w-4" /> },
+  { label: 'Country', icon: <Globe className="h-4 w-4" /> },
   { label: 'Choose Plan', icon: <CreditCard className="h-4 w-4" /> },
   { label: 'Review', icon: <ClipboardList className="h-4 w-4" /> },
 ];
@@ -41,13 +41,13 @@ export const CreateOrganizationPage: React.FC = () => {
     onSuccess: () => navigate('/'),
   });
 
-  const selectedPlanId = form.watch('planId');
+  const selectedPlanId = form.watch('planCode');
 
   // Stores selected plan data into form fields
   const handleSelectPlan = (plan: PlanOption) => {
-    form.setValue('planId', plan.id);
+    form.setValue('planCode', plan.code);
     form.setValue('planName', plan.name);
-    form.setValue('planPrice', plan.price ?? undefined);
+    form.setValue('planAmount', plan.amount ?? undefined);
     form.setValue('planCurrency', plan.currency ?? undefined);
   };
 

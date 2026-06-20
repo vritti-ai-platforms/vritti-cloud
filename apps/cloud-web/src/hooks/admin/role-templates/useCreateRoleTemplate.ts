@@ -10,6 +10,7 @@ type UseCreateRoleTemplateOptions = Omit<
   'mutationFn'
 >;
 
+// Creates a role template and refreshes the business's role templates table
 export function useCreateRoleTemplate(versionId: string, businessId: string, options?: UseCreateRoleTemplateOptions) {
   const queryClient = useQueryClient();
   return useMutation<CreateResponse<Role>, AxiosError, CreateRoleTemplateData>({

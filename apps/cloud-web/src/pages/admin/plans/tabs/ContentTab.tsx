@@ -1,6 +1,7 @@
 import { useUpdatePlan } from '@hooks/admin/plans';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
+import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { RichTextEditor } from '@vritti/quantum-ui/RichTextEditor';
 import { useEffect, useRef, useState } from 'react';
 import type { Plan } from '@/schemas/admin/plans';
@@ -17,6 +18,8 @@ function safeParse(value: string | null | undefined) {
 
 // Inline rich-text editor for plan content
 export const ContentTab = ({ plan }: { plan: Plan }) => {
+  const { id: versionId } = useSlugParams('versionSlug');
+  const { id: businessId } = useSlugParams('businessSlug');
   const [isEditing, setIsEditing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const contentRef = useRef<string | undefined>(plan.content ?? undefined);
@@ -27,7 +30,7 @@ export const ContentTab = ({ plan }: { plan: Plan }) => {
     setMounted(true);
   }, []);
 
-  const updateMutation = useUpdatePlan();
+  const updateMutation = useUpdatePlan(versionId ?? '', businessId ?? '');
 
   // Use savedContent (optimistic) until query cache catches up
   const displayContent = savedContent ?? plan.content;

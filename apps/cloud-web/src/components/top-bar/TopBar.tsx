@@ -3,8 +3,8 @@ import { Breadcrumb } from '@vritti/quantum-ui/Breadcrumb';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Bell, ChevronRight, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { AppSwitcher } from './app-switcher';
 import { BUSwitcher } from './bu-switcher/BUSwitcher';
+import { BusinessSwitcher } from './business-switcher';
 import { CompanySwitcher } from './company-switcher';
 import { FeatureSwitcher } from './feature-switcher';
 import { RoleTemplateSwitcher } from './role-template-switcher';
@@ -17,10 +17,10 @@ const ORG_SLUG_PREFIX = 'org-';
 const VERSION_SLUG_PREFIX = 'ver-';
 // BU slugs use the `bu-` prefix (e.g., bu-north-america~uuid)
 const BU_SLUG_PREFIX = 'bu-';
-// App slugs use the `app-` prefix (e.g., app-catalog-management~uuid)
-const APP_SLUG_PREFIX = 'app-';
 // Feature slugs use the `feat-` prefix (e.g., feat-products~uuid)
 const FEATURE_SLUG_PREFIX = 'feat-';
+// Business slugs use the `biz-` prefix (e.g., biz-pharmacy~uuid)
+const BUSINESS_SLUG_PREFIX = 'biz-';
 // Role template slugs use the `rt-` prefix (e.g., rt-admin~uuid) — `role-` collides with `role-templates` route
 const ROLE_SLUG_PREFIX = 'rt-';
 
@@ -81,19 +81,6 @@ export const TopBar = () => {
                   );
                 }
 
-                // App switcher — under /versions/:versionSlug/apps/:appSlug
-                if (segment.raw.startsWith(APP_SLUG_PREFIX)) {
-                  const versionSlug = segment.path.split('/')[2] ?? '';
-                  return (
-                    <AppSwitcher
-                      key={segment.raw}
-                      versionSlug={versionSlug}
-                      currentAppId={segment.id ?? segment.raw}
-                      currentAppName={segment.slug ? segment.label : undefined}
-                    />
-                  );
-                }
-
                 // Feature switcher — under /versions/:versionSlug/features/:featureSlug
                 if (segment.raw.startsWith(FEATURE_SLUG_PREFIX)) {
                   const versionSlug = segment.path.split('/')[2] ?? '';
@@ -107,13 +94,29 @@ export const TopBar = () => {
                   );
                 }
 
-                // Role template switcher — under /versions/:versionSlug/role-templates/:roleTemplateSlug
-                if (segment.raw.startsWith(ROLE_SLUG_PREFIX)) {
+                // Business switcher — under /versions/:versionSlug/businesses/:businessSlug
+                if (segment.raw.startsWith(BUSINESS_SLUG_PREFIX)) {
                   const versionSlug = segment.path.split('/')[2] ?? '';
+                  return (
+                    <BusinessSwitcher
+                      key={segment.raw}
+                      versionSlug={versionSlug}
+                      currentBusinessId={segment.id ?? segment.raw}
+                      currentBusinessName={segment.slug ? segment.label : undefined}
+                    />
+                  );
+                }
+
+                // Role template switcher — under /versions/:versionSlug/businesses/:businessSlug/role-templates/:roleTemplateSlug
+                if (segment.raw.startsWith(ROLE_SLUG_PREFIX)) {
+                  const parts = segment.path.split('/');
+                  const versionSlug = parts[2] ?? '';
+                  const businessSlug = parts[4] ?? '';
                   return (
                     <RoleTemplateSwitcher
                       key={segment.raw}
                       versionSlug={versionSlug}
+                      businessSlug={businessSlug}
                       currentRoleId={segment.id ?? segment.raw}
                       currentRoleName={segment.slug ? segment.label : undefined}
                     />

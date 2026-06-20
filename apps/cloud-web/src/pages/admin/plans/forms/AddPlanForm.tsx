@@ -2,39 +2,45 @@ import { useCreatePlan } from '@hooks/admin/plans';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
-import { majorToMinor } from '@vritti/quantum-ui/money';
-import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
+import { Select } from '@vritti/quantum-ui/Select';
+import { Switch } from '@vritti/quantum-ui/Switch';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { z, zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 
-const addPlanFormSchema = z.object({
-  name: z.string().min(1, 'Plan name is required').max(100, 'Name must be 100 characters or less'),
-  code: z.string().min(1, 'Plan code is required').max(100, 'Code must be 100 characters or less'),
-  businessId: z.string().uuid('Please select a vertical'),
-  // Major USD reference price (optional) — converted to minor units on submit.
-  usdAnchorMajor: z
-    .string()
-    .regex(/^\d+(\.\d{1,2})?$/, 'Enter a valid amount (e.g. 49.99)')
-    .optional()
-    .or(z.literal('')),
-});
+const addPlanFormSchema = z
+  .object({
+    name: z.string().min(1, 'Plan name is required').max(100, 'Name must be 100 characters or less'),
+    code: z.string().min(1, 'Plan code is required').max(100, 'Code must be 100 characters or less'),
+    isCustom: z.boolean().optional(),
+    organizationId: z.string().optional(),
+    // Blank = unlimited business units.
+    maxBusinessUnits: z.string().regex(/^\d+$/, 'Enter a whole number').optional().or(z.literal('')),
+  })
+  .superRefine((data, ctx) => {
+    if (data.isCustom && !data.organizationId) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Please select an organization', path: ['organizationId'] });
+    }
+  });
 
 type AddPlanFormData = z.infer<typeof addPlanFormSchema>;
 
 interface AddPlanFormProps {
+  versionId: string;
+  businessId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel }) => {
+export const AddPlanForm: React.FC<AddPlanFormProps> = ({ versionId, businessId, onSuccess, onCancel }) => {
   const form = useForm<AddPlanFormData>({
     resolver: zodResolver(addPlanFormSchema),
-    defaultValues: { name: '', code: '', businessId: '', usdAnchorMajor: '' },
+    defaultValues: { name: '', code: '', isCustom: false, organizationId: '', maxBusinessUnits: '' },
   });
 
-  const createMutation = useCreatePlan({ onSuccess });
+  const isCustom = useWatch({ control: form.control, name: 'isCustom' });
+  const createMutation = useCreatePlan(versionId, businessId, { onSuccess });
 
   return (
     <Form
@@ -45,18 +51,29 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
       transformSubmit={(data) => ({
         name: data.name,
         code: data.code,
-        businessId: data.businessId,
-        usdAnchor: data.usdAnchorMajor ? Number(majorToMinor(data.usdAnchorMajor, 'USD')) : null,
+        isCustom: !!data.isCustom,
+        ...(data.isCustom ? { organizationId: data.organizationId } : {}),
+        maxBusinessUnits: data.maxBusinessUnits ? Number(data.maxBusinessUnits) : undefined,
       })}
     >
       <TextField name="name" label="Plan Name" placeholder="e.g. Pro" />
       <TextField name="code" label="Code" placeholder="e.g. pro" />
-      <BusinessSelector name="businessId" label="Vertical" placeholder="Select vertical" />
+      <Switch name="isCustom" label="Custom plan" description="Bespoke plan attached to a single organization" />
+      {isCustom && (
+        <Select
+          name="organizationId"
+          label="Organization"
+          placeholder="Select organization"
+          searchable
+          optionsEndpoint="select-api/organizations"
+          fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'code' }}
+        />
+      )}
       <TextField
-        name="usdAnchorMajor"
-        label="USD Anchor (optional)"
-        placeholder="e.g. 49.99"
-        description="Reference price in USD used to anchor market prices"
+        name="maxBusinessUnits"
+        label="Max Business Units"
+        placeholder="Blank = unlimited"
+        description="Leave blank for unlimited business units"
       />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

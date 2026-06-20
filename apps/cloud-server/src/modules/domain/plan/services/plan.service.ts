@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  BadRequestException,
   ConflictException,
   CreateResponseDto,
   DataTableStateService,
@@ -10,7 +11,7 @@ import {
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { and, type Column, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, type Column, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import { planPrices, plans } from '@/db/schema';
 import { PlanDto } from '@/modules/admin-api/plan/root/dto/entity/plan.dto';
 import type { CreatePlanDto } from '@/modules/admin-api/plan/root/dto/request/create-plan.dto';
@@ -37,13 +38,15 @@ export class PlanService {
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
-  // Returns paginated plan options for the select component
-  findForSelect(query: SelectOptionsQueryDto & { businessId?: string }): Promise<SelectQueryResult> {
+  // Returns paginated plan options for the select component (scoped to a version + business)
+  findForSelect(
+    query: SelectOptionsQueryDto & { versionId?: string; businessId?: string },
+  ): Promise<SelectQueryResult> {
     this.logger.log(
       `Fetched plan select options (limit: ${query.limit}, offset: ${query.offset}, search: ${query.search})`,
     );
     return this.planRepository.findForSelect({
-      value: query.valueKey || 'id',
+      value: query.valueKey || 'code',
       label: query.labelKey || 'name',
       description: query.descriptionKey,
       groupIdKey: query.groupIdKey,
@@ -53,29 +56,80 @@ export class PlanService {
       values: query.values,
       excludeIds: query.excludeIds,
       orderBy: { name: 'asc' },
-      ...(query.businessId ? { where: { businessId: query.businessId } } : {}),
+      // Custom plans are bespoke to one org and never offered in the public selector
+      where: {
+        isCustom: false,
+        ...(query.versionId ? { versionId: query.versionId } : {}),
+        ...(query.businessId ? { businessId: query.businessId } : {}),
+      },
     });
   }
 
-  // Creates a new plan; throws ConflictException on duplicate code
-  async create(dto: CreatePlanDto): Promise<CreateResponseDto<PlanDto>> {
-    const existing = await this.planRepository.findByCode(dto.code);
+  // Creates a version+business-scoped plan; custom plans also set org.planCode on the attached org
+  async create(versionId: string, businessId: string, dto: CreatePlanDto): Promise<CreateResponseDto<PlanDto>> {
+    const existing = await this.planRepository.findByVersionBusinessCode(versionId, businessId, dto.code);
     if (existing) {
       throw new ConflictException({
         label: 'Code Already Exists',
-        detail: 'A plan with this code already exists. Please choose a different code.',
+        detail: 'A plan with this code already exists for this version and business.',
         errors: [{ field: 'code', message: 'Duplicate code' }],
       });
     }
-    const plan = await this.planRepository.create(dto);
-    this.logger.log(`Created plan: ${plan.name} (${plan.id})`);
+
+    let attachOrgId: string | undefined;
+    if (dto.isCustom) {
+      if (!dto.organizationId) {
+        throw new BadRequestException({
+          label: 'Organization Required',
+          detail: 'A custom plan must be attached to an organization.',
+          errors: [{ field: 'organizationId', message: 'Required' }],
+        });
+      }
+      const org = await this.planRepository.findOrgForAttach(dto.organizationId);
+      if (!org) {
+        throw new BadRequestException({
+          label: 'Invalid Organization',
+          detail: 'The specified organization does not exist.',
+          errors: [{ field: 'organizationId', message: 'Not found' }],
+        });
+      }
+      if (org.businessId !== businessId) {
+        throw new BadRequestException({
+          label: 'Business Mismatch',
+          detail: "The organization's business does not match this plan's business.",
+          errors: [{ field: 'organizationId', message: 'Wrong business' }],
+        });
+      }
+      attachOrgId = org.id;
+    }
+
+    const plan = await this.planRepository.create({
+      versionId,
+      businessId,
+      name: dto.name,
+      code: dto.code,
+      content: dto.content,
+      maxBusinessUnits: dto.maxBusinessUnits,
+      isCustom: dto.isCustom ?? false,
+    });
+
+    if (attachOrgId) {
+      await this.planRepository.setOrgPlanCode(attachOrgId, plan.code);
+    }
+
+    this.logger.log(`Created ${plan.isCustom ? 'custom ' : ''}plan: ${plan.name} (${plan.id})`);
     return { success: true, message: `Plan "${plan.name}" created successfully.`, data: PlanDto.from(plan) };
   }
 
-  // Returns plans for the data table with server-stored filter/sort/search/pagination state
-  async findForTable(userId: string): Promise<PlansTableResponseDto> {
-    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'plans');
+  // Returns plans for a version + business with server-stored filter/sort/search/pagination state
+  async findForTable(userId: string, versionId: string, businessId: string): Promise<PlansTableResponseDto> {
+    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(
+      userId,
+      `plans-${versionId}-${businessId}`,
+    );
     const where = and(
+      eq(plans.versionId, versionId),
+      eq(plans.businessId, businessId),
       FilterProcessor.buildWhere(state.filters, PlanService.FIELD_MAP),
       FilterProcessor.buildSearch(state.search, PlanService.FIELD_MAP),
     );
@@ -89,7 +143,7 @@ export class PlanService {
     const result = rows.map((plan) =>
       PlanDto.from(plan, {
         priceCount: plan.priceCount,
-        marketCount: plan.marketCount,
+        countryCount: plan.countryCount,
         businessName: plan.businessName,
       }),
     );
@@ -103,11 +157,17 @@ export class PlanService {
     if (!plan) {
       throw new NotFoundException('Plan not found.');
     }
-    const { priceCount, deploymentCount, orgCount, businessName, marketCount } =
-      await this.planRepository.getReferenceCounts(id);
-    const canDelete = priceCount === 0 && deploymentCount === 0 && orgCount === 0;
+    const { priceCount, orgCount, businessName, countryCount } = await this.planRepository.getReferenceCounts(
+      id,
+      plan.businessId,
+      plan.code,
+    );
+    const canDelete = priceCount === 0 && orgCount === 0;
+    const attachedOrgName = plan.isCustom
+      ? await this.planRepository.findAttachedOrgName(plan.businessId, plan.code)
+      : null;
     this.logger.log(`Fetched plan: ${id}`);
-    return PlanDto.from(plan, { priceCount, orgCount, marketCount, businessName }, canDelete);
+    return PlanDto.from(plan, { priceCount, orgCount, countryCount, businessName, attachedOrgName }, canDelete);
   }
 
   // Updates a plan by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -117,11 +177,15 @@ export class PlanService {
       throw new NotFoundException('Plan not found.');
     }
     if (dto.code) {
-      const existingCode = await this.planRepository.findByCode(dto.code);
+      const existingCode = await this.planRepository.findByVersionBusinessCode(
+        existing.versionId,
+        existing.businessId,
+        dto.code,
+      );
       if (existingCode && existingCode.id !== id) {
         throw new ConflictException({
           label: 'Code Already Exists',
-          detail: 'A plan with this code already exists. Please choose a different code.',
+          detail: 'A plan with this code already exists for this version and business.',
           errors: [{ field: 'code', message: 'Duplicate code' }],
         });
       }
@@ -137,11 +201,15 @@ export class PlanService {
     if (!existing) {
       throw new NotFoundException('Plan not found.');
     }
-    const { priceCount, deploymentCount, orgCount } = await this.planRepository.getReferenceCounts(id);
-    if (priceCount > 0 || deploymentCount > 0 || orgCount > 0) {
+    const { priceCount, orgCount } = await this.planRepository.getReferenceCounts(
+      id,
+      existing.businessId,
+      existing.code,
+    );
+    if (priceCount > 0 || orgCount > 0) {
       throw new ConflictException({
         label: 'Plan In Use',
-        detail: `Cannot delete "${existing.name}" — it has prices or deployment assignments. Remove those first.`,
+        detail: `Cannot delete "${existing.name}" — it has prices or attached organizations. Remove those first.`,
       });
     }
     await this.planRepository.delete(id);

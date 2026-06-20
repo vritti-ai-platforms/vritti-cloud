@@ -4,18 +4,13 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateResponseDto, RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
-  ApiAssignDeploymentPlan,
   ApiCreateDeployment,
   ApiDeleteDeployment,
   ApiFindAllDeployments,
   ApiFindDeploymentById,
-  ApiGetDeploymentPlanAssignments,
-  ApiRemoveDeploymentPlan,
   ApiUpdateDeployment,
 } from '../docs/deployment.docs';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
-import type { DeploymentPlanAssignmentDto } from '../dto/entity/deployment-plan-assignment.dto';
-import { AssignDeploymentPlanDto } from '../dto/request/assign-deployment-plan.dto';
 import { CreateDeploymentDto } from '../dto/request/create-deployment.dto';
 import { UpdateDeploymentDto } from '../dto/request/update-deployment.dto';
 import { DeploymentsResponseDto } from '../dto/response/deployments-response.dto';
@@ -69,31 +64,5 @@ export class DeploymentController {
   delete(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`DELETE /admin-api/deployments/${id}`);
     return this.deploymentService.delete(id);
-  }
-
-  // Returns all available plans with prices and assignment status for the deployment
-  @Get(':id/plan-assignments')
-  @ApiGetDeploymentPlanAssignments()
-  getPlanAssignments(@Param('id') id: string): Promise<DeploymentPlanAssignmentDto[]> {
-    this.logger.log(`GET /admin-api/deployments/${id}/plan-assignments`);
-    return this.deploymentService.getPlanAssignments(id);
-  }
-
-  // Assigns a plan+business to a deployment
-  @Post(':id/plans')
-  @HttpCode(HttpStatus.CREATED)
-  @ApiAssignDeploymentPlan()
-  assignPlan(@Param('id') id: string, @Body() dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
-    this.logger.log(`POST /admin-api/deployments/${id}/plans`);
-    return this.deploymentService.assignPlan(id, dto);
-  }
-
-  // Removes a plan+business assignment from a deployment
-  @Delete(':id/plans')
-  @HttpCode(HttpStatus.OK)
-  @ApiRemoveDeploymentPlan()
-  removePlan(@Param('id') id: string, @Body() dto: AssignDeploymentPlanDto): Promise<SuccessResponseDto> {
-    this.logger.log(`DELETE /admin-api/deployments/${id}/plans`);
-    return this.deploymentService.removePlan(id, dto);
   }
 }

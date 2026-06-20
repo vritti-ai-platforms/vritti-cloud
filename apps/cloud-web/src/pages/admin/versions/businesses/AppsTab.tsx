@@ -5,10 +5,8 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
-import { buildSlug } from '@vritti/quantum-ui/slug';
-import { AppWindow, CheckCircle2, Eye, Pencil, Plus, Trash2, XCircle } from 'lucide-react';
+import { AppWindow, Pencil, Plus, Trash2 } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
-import { useNavigate } from 'react-router-dom';
 import type { App } from '@/schemas/admin/apps';
 import { AddAppForm } from './apps/forms/AddAppForm';
 import { EditAppForm } from './apps/forms/EditAppForm';
@@ -19,7 +17,6 @@ interface AppsTabProps {
 }
 
 export const AppsTab = ({ versionId, businessId }: AppsTabProps) => {
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useApps(versionId, businessId);
   const addDialog = useDialog();
@@ -41,7 +38,6 @@ export const AppsTab = ({ versionId, businessId }: AppsTabProps) => {
     columns: getColumns({
       versionId,
       businessId,
-      onView: (app) => navigate(buildSlug(app.name, app.id)),
       onDelete: handleDelete,
     }),
     slug: `business-apps-${businessId}`,
@@ -123,11 +119,10 @@ export const AppsTab = ({ versionId, businessId }: AppsTabProps) => {
 interface ColumnActions {
   versionId: string;
   businessId: string;
-  onView: (app: App) => void;
   onDelete: (app: App) => void;
 }
 
-function getColumns({ versionId, businessId, onView, onDelete }: ColumnActions): ColumnDef<App, unknown>[] {
+function getColumns({ versionId, businessId, onDelete }: ColumnActions): ColumnDef<App, unknown>[] {
   return [
     {
       accessorKey: 'icon',
@@ -156,28 +151,11 @@ function getColumns({ versionId, businessId, onView, onDelete }: ColumnActions):
       cell: ({ row }) => <Badge variant="secondary">{row.original.featureCount} features</Badge>,
     },
     {
-      accessorKey: 'isActive',
-      header: 'Status',
-      cell: ({ row }) =>
-        row.original.isActive ? (
-          <div className="flex items-center justify-center gap-1.5 text-success text-sm">
-            <CheckCircle2 className="size-4" />
-            Active
-          </div>
-        ) : (
-          <div className="flex items-center justify-center gap-1.5 text-muted-foreground text-sm">
-            <XCircle className="size-4" />
-            Inactive
-          </div>
-        ),
-    },
-    {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
         <RowActions
           actions={[
-            { id: 'view', icon: Eye, label: 'View', onClick: () => onView(row.original) },
             {
               id: 'edit',
               icon: Pencil,

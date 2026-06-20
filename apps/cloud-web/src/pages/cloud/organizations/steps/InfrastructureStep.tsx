@@ -1,8 +1,7 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { DeploymentSelector } from '@vritti/quantum-ui/selects/deployment';
-import { RegionSelector } from '@vritti/quantum-ui/selects/region';
+import { VersionSelector } from '@vritti/quantum-ui/selects/version';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -16,41 +15,22 @@ interface InfrastructureStepProps {
 }
 
 export const InfrastructureStep: React.FC<InfrastructureStepProps> = ({ form, onBack, onContinue }) => {
-  const regionId = useWatch({ control: form.control, name: 'regionId' });
-  const cloudProviderId = useWatch({ control: form.control, name: 'cloudProviderId' });
+  const version = useWatch({ control: form.control, name: 'version' });
+  const deploymentId = useWatch({ control: form.control, name: 'deploymentId' });
 
-  const canContinue = !!(regionId && cloudProviderId && form.getValues('deploymentId'));
+  const canContinue = !!(version && deploymentId);
 
   return (
     <Form form={form} onSubmit={onContinue} resetOnSuccess={false}>
       <div className="flex flex-col gap-6">
-        {/* Region */}
+        {/* Version */}
         <div>
-          <RegionSelector
-            name="regionId"
-            label="Region"
-            placeholder="Select a region"
-            params={{ isActive: true }}
+          <VersionSelector
+            name="version"
+            label="Version"
+            placeholder="Select a version"
             onOptionSelect={(opt) => {
-              form.setValue('regionName', opt?.label ?? '');
-              form.setValue('cloudProviderId', '');
-              form.setValue('cloudProviderName', '');
-              form.setValue('deploymentId', '');
-              form.setValue('deploymentName', '');
-            }}
-          />
-        </div>
-
-        {/* Cloud Provider */}
-        <div>
-          <CloudProviderSelector
-            name="cloudProviderId"
-            label="Cloud Provider"
-            placeholder={regionId ? 'Select a cloud provider' : 'Select a region first'}
-            disabled={!regionId}
-            params={regionId ? { regionId: String(regionId) } : undefined}
-            onOptionSelect={(opt) => {
-              form.setValue('cloudProviderName', opt?.label ?? '');
+              form.setValue('versionName', opt?.label ?? '');
               form.setValue('deploymentId', '');
               form.setValue('deploymentName', '');
             }}
@@ -62,16 +42,12 @@ export const InfrastructureStep: React.FC<InfrastructureStepProps> = ({ form, on
           <DeploymentSelector
             name="deploymentId"
             label="Deployment"
-            placeholder={cloudProviderId ? 'Select a deployment' : 'Select a cloud provider first'}
-            disabled={!cloudProviderId}
-            params={
-              regionId && cloudProviderId
-                ? { regionId: String(regionId), cloudProviderId: String(cloudProviderId) }
-                : undefined
-            }
+            placeholder={version ? 'Select a deployment' : 'Select a version first'}
+            disabled={!version}
+            params={version ? { version: String(version) } : undefined}
             onOptionSelect={(opt) => {
               form.setValue('deploymentName', opt?.label ?? '');
-              form.setValue('planId', '');
+              form.setValue('planCode', '');
               form.setValue('planName', '');
             }}
           />

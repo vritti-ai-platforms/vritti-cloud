@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."apps" DROP COLUMN "is_active";

@@ -191,11 +191,18 @@ export class AppService {
         await this.appRepository.update(existing.id, {
           name: row.data.name,
           icon: row.data.icon,
-          description: row.data.description || undefined,
-        } as UpdateAppDto);
+          description: row.data.description ?? null,
+        });
         updated++;
       } else {
-        await this.appRepository.create({ ...row.data, versionId, businessId } as unknown as CreateAppDto);
+        await this.appRepository.create({
+          versionId,
+          businessId,
+          code: row.data.code,
+          name: row.data.name,
+          icon: row.data.icon,
+          description: row.data.description ?? null,
+        });
         created++;
       }
     }

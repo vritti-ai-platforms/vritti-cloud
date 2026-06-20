@@ -2,7 +2,6 @@ import { CardSkeleton } from '@vritti/quantum-ui/Card';
 import { DangerZoneSkeleton } from '@vritti/quantum-ui/DangerZone';
 import { PageHeaderSkeleton } from '@vritti/quantum-ui/PageHeader';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
-import { TabsSkeleton } from '@vritti/quantum-ui/Tabs';
 
 export const RoleTemplateViewPageSkeleton = () => (
   <div className="flex flex-col gap-6">
@@ -21,7 +20,21 @@ export const RoleTemplateViewPageSkeleton = () => (
       </CardSkeleton>
     </div>
 
-    <TabsSkeleton count={2} tabWidths={['w-14', 'w-24']} />
+    {/* Permission matrix */}
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
+        <Skeleton className="h-9 w-48" />
+        <Skeleton className="h-9 w-36" />
+      </div>
+      <div className="border rounded-lg divide-y">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="px-4 py-3 flex items-center gap-3">
+            <Skeleton className="size-4 rounded" />
+            <Skeleton className="h-4 flex-1" />
+          </div>
+        ))}
+      </div>
+    </div>
 
     <DangerZoneSkeleton />
   </div>

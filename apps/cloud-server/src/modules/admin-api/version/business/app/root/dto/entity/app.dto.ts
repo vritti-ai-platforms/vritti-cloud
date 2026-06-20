@@ -23,9 +23,6 @@ export class AppDto {
   @ApiProperty({ example: 'shopping-cart' })
   icon: string;
 
-  @ApiProperty({ example: true })
-  isActive: boolean;
-
   @ApiProperty({ example: 0 })
   sortOrder: number;
 
@@ -57,7 +54,6 @@ export class AppDto {
     dto.name = app.name;
     dto.description = app.description;
     dto.icon = app.icon;
-    dto.isActive = app.isActive;
     dto.sortOrder = app.sortOrder;
     dto.createdAt = app.createdAt;
     dto.updatedAt = app.updatedAt;

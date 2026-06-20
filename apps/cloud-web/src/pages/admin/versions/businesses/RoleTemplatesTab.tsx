@@ -24,7 +24,7 @@ export const RoleTemplatesTab = ({ versionId, businessId }: RoleTemplatesTabProp
 
   const { table } = useDataTable({
     columns: getColumns({
-      onView: (role) => navigate(`../../role-templates/rt-${buildSlug(role.name, role.id)}`),
+      onView: (role) => navigate(`rt-${buildSlug(role.name, role.id)}`, { relative: 'path' }),
     }),
     slug: `business-role-templates-${businessId}`,
     label: 'role template',

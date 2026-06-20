@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, asc, count, eq } from '@vritti/api-sdk/drizzle-orm';
 import type { BillingPeriod, PlanPrice } from '@/db/schema';
-import { markets, planPrices } from '@/db/schema';
+import { countries, planPrices, plans } from '@/db/schema';
 
-export type PlanPriceWithMarket = PlanPrice & { marketName: string; marketCode: string; currencyCode: string };
+export type PlanPriceWithCountry = PlanPrice & { countryName: string; countryCode: string; currencyCode: string };
 
 @Injectable()
 export class PlanPriceRepository extends PrimaryBaseRepository<typeof planPrices> {
@@ -17,35 +17,41 @@ export class PlanPriceRepository extends PrimaryBaseRepository<typeof planPrices
     return this.model.findFirst({ where: { id } });
   }
 
-  // Lists all prices for a plan joined with market name and currency
-  async findByPlanWithMarket(planId: string): Promise<PlanPriceWithMarket[]> {
+  // Checks whether the parent plan exists
+  async planExists(planId: string): Promise<boolean> {
+    const rows = await this.db.select({ id: plans.id }).from(plans).where(eq(plans.id, planId)).limit(1);
+    return rows.length > 0;
+  }
+
+  // Lists all prices for a plan joined with country name and its default currency
+  async findByPlanWithCountry(planId: string): Promise<PlanPriceWithCountry[]> {
     const rows = await this.db
       .select({
         id: planPrices.id,
         planId: planPrices.planId,
-        marketId: planPrices.marketId,
+        countryId: planPrices.countryId,
         billingPeriod: planPrices.billingPeriod,
         amount: planPrices.amount,
         createdAt: planPrices.createdAt,
         updatedAt: planPrices.updatedAt,
-        marketName: markets.name,
-        marketCode: markets.code,
-        currencyCode: markets.currencyCode,
+        countryName: countries.name,
+        countryCode: countries.code,
+        currencyCode: countries.defaultCurrency,
       })
       .from(planPrices)
-      .innerJoin(markets, eq(markets.id, planPrices.marketId))
+      .innerJoin(countries, eq(countries.id, planPrices.countryId))
       .where(eq(planPrices.planId, planId))
-      .orderBy(asc(markets.name), asc(planPrices.billingPeriod));
-    return rows as PlanPriceWithMarket[];
+      .orderBy(asc(countries.name), asc(planPrices.billingPeriod));
+    return rows as PlanPriceWithCountry[];
   }
 
-  // Finds a plan price matching the exact plan + market + billing period combination
+  // Finds a plan price matching the exact plan + country + billing period combination
   async findByComposite(
     planId: string,
-    marketId: string,
+    countryId: string,
     billingPeriod: BillingPeriod,
   ): Promise<PlanPrice | undefined> {
-    return this.model.findFirst({ where: { planId, marketId, billingPeriod } });
+    return this.model.findFirst({ where: { planId, countryId, billingPeriod } });
   }
 
   // Updates the amount on an existing plan price row
@@ -54,14 +60,14 @@ export class PlanPriceRepository extends PrimaryBaseRepository<typeof planPrices
     return result[0] as PlanPrice;
   }
 
-  // Deletes a plan price by plan + market + billing period
-  async removeByComposite(planId: string, marketId: string, billingPeriod: BillingPeriod): Promise<void> {
+  // Deletes a plan price by plan + country + billing period
+  async removeByComposite(planId: string, countryId: string, billingPeriod: BillingPeriod): Promise<void> {
     await this.db
       .delete(planPrices)
       .where(
         and(
           eq(planPrices.planId, planId),
-          eq(planPrices.marketId, marketId),
+          eq(planPrices.countryId, countryId),
           eq(planPrices.billingPeriod, billingPeriod),
         ),
       );
@@ -73,9 +79,9 @@ export class PlanPriceRepository extends PrimaryBaseRepository<typeof planPrices
     return Number(result[0]?.count ?? 0);
   }
 
-  // Returns the number of prices referencing the given market
-  async countByMarketId(marketId: string): Promise<number> {
-    const result = await this.db.select({ count: count() }).from(planPrices).where(eq(planPrices.marketId, marketId));
+  // Returns the number of prices referencing the given country
+  async countByCountryId(countryId: string): Promise<number> {
+    const result = await this.db.select({ count: count() }).from(planPrices).where(eq(planPrices.countryId, countryId));
     return Number(result[0]?.count ?? 0);
   }
 }

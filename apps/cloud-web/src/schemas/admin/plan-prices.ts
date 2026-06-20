@@ -12,13 +12,13 @@ export const BILLING_PERIOD_LABELS: Record<BillingPeriod, string> = {
 export interface PlanPrice {
   id: string;
   planId: string;
-  marketId: string;
+  countryId: string;
   billingPeriod: BillingPeriod;
   amount: number;
 }
 
 export const upsertPlanPriceSchema = z.object({
-  marketId: z.string().uuid('Please select a market'),
+  countryId: z.string().uuid('Please select a country'),
   billingPeriod: z.enum(BILLING_PERIODS, { message: 'Please select a billing period' }),
   amount: z.number().int('Amount must be a whole number of minor units').nonnegative('Amount must be 0 or more'),
 });

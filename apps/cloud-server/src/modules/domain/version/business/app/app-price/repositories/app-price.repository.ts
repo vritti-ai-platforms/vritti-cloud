@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, asc, eq } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPrice, BillingPeriod } from '@/db/schema';
-import { appPrices, markets } from '@/db/schema';
+import { appPrices, countries } from '@/db/schema';
 
-export type AppPriceWithMarket = AppPrice & { marketName: string; marketCode: string; currencyCode: string };
+export type AppPriceWithCountry = AppPrice & { countryName: string; countryCode: string; currencyCode: string };
 
 @Injectable()
 export class AppPriceRepository extends PrimaryBaseRepository<typeof appPrices> {
@@ -12,26 +12,26 @@ export class AppPriceRepository extends PrimaryBaseRepository<typeof appPrices> 
     super(database, appPrices);
   }
 
-  // Lists all prices for an app joined with market name and currency
-  async findByAppWithMarket(appId: string): Promise<AppPriceWithMarket[]> {
+  // Lists all prices for an app joined with country name and its default currency
+  async findByAppWithCountry(appId: string): Promise<AppPriceWithCountry[]> {
     const rows = await this.db
       .select({
         id: appPrices.id,
         appId: appPrices.appId,
-        marketId: appPrices.marketId,
+        countryId: appPrices.countryId,
         billingPeriod: appPrices.billingPeriod,
         amount: appPrices.amount,
         createdAt: appPrices.createdAt,
         updatedAt: appPrices.updatedAt,
-        marketName: markets.name,
-        marketCode: markets.code,
-        currencyCode: markets.currencyCode,
+        countryName: countries.name,
+        countryCode: countries.code,
+        currencyCode: countries.defaultCurrency,
       })
       .from(appPrices)
-      .innerJoin(markets, eq(markets.id, appPrices.marketId))
+      .innerJoin(countries, eq(countries.id, appPrices.countryId))
       .where(eq(appPrices.appId, appId))
-      .orderBy(asc(markets.name), asc(appPrices.billingPeriod));
-    return rows as AppPriceWithMarket[];
+      .orderBy(asc(countries.name), asc(appPrices.billingPeriod));
+    return rows as AppPriceWithCountry[];
   }
 
   // Finds a price by its unique identifier
@@ -39,9 +39,9 @@ export class AppPriceRepository extends PrimaryBaseRepository<typeof appPrices> 
     return this.model.findFirst({ where: { id } });
   }
 
-  // Finds a price matching the exact app + market + billing period combination
-  async findByComposite(appId: string, marketId: string, billingPeriod: BillingPeriod): Promise<AppPrice | undefined> {
-    return this.model.findFirst({ where: { appId, marketId, billingPeriod } });
+  // Finds a price matching the exact app + country + billing period combination
+  async findByComposite(appId: string, countryId: string, billingPeriod: BillingPeriod): Promise<AppPrice | undefined> {
+    return this.model.findFirst({ where: { appId, countryId, billingPeriod } });
   }
 
   // Updates the amount on an existing app price row
@@ -50,24 +50,24 @@ export class AppPriceRepository extends PrimaryBaseRepository<typeof appPrices> 
     return result[0] as AppPrice;
   }
 
-  // Deletes an app price by app + market + billing period
-  async removeByComposite(appId: string, marketId: string, billingPeriod: BillingPeriod): Promise<void> {
+  // Deletes an app price by app + country + billing period
+  async removeByComposite(appId: string, countryId: string, billingPeriod: BillingPeriod): Promise<void> {
     await this.db
       .delete(appPrices)
       .where(
-        and(eq(appPrices.appId, appId), eq(appPrices.marketId, marketId), eq(appPrices.billingPeriod, billingPeriod)),
+        and(eq(appPrices.appId, appId), eq(appPrices.countryId, countryId), eq(appPrices.billingPeriod, billingPeriod)),
       );
   }
 
-  // Returns addon prices for a specific market and billing period, with the market currency
-  async findByMarketAndPeriod(
-    marketId: string,
+  // Returns addon prices for a specific country and billing period, with the country's default currency
+  async findByCountryAndPeriod(
+    countryId: string,
     billingPeriod: BillingPeriod,
   ): Promise<Array<{ appId: string; amount: number; currencyCode: string }>> {
     return this.db
-      .select({ appId: appPrices.appId, amount: appPrices.amount, currencyCode: markets.currencyCode })
+      .select({ appId: appPrices.appId, amount: appPrices.amount, currencyCode: countries.defaultCurrency })
       .from(appPrices)
-      .innerJoin(markets, eq(markets.id, appPrices.marketId))
-      .where(and(eq(appPrices.marketId, marketId), eq(appPrices.billingPeriod, billingPeriod)));
+      .innerJoin(countries, eq(countries.id, appPrices.countryId))
+      .where(and(eq(appPrices.countryId, countryId), eq(appPrices.billingPeriod, billingPeriod)));
   }
 }

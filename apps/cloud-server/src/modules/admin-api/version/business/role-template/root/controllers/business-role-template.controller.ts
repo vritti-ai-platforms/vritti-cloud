@@ -1,11 +1,18 @@
 import { RoleTemplateService } from '@domain/version/business/role-template/root/services/role-template.service';
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CreateResponseDto, RequireSession, UserId } from '@vritti/api-sdk';
+import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { ApiCreateRoleTemplate, ApiFindForTableRoleTemplates } from '../docs/role-template.docs';
+import {
+  ApiCreateRoleTemplate,
+  ApiDeleteRoleTemplate,
+  ApiFindForTableRoleTemplates,
+  ApiGetRoleTemplateById,
+  ApiUpdateRoleTemplate,
+} from '../docs/role-template.docs';
 import { RoleTemplateDto } from '../dto/entity/role-template.dto';
 import { CreateRoleTemplateDto } from '../dto/request/create-role-template.dto';
+import { UpdateRoleTemplateDto } from '../dto/request/update-role-template.dto';
 import { RoleTemplateTableResponseDto } from '../dto/response/role-template-table-response.dto';
 
 @ApiTags('Admin - Role Templates')
@@ -38,5 +45,40 @@ export class BusinessRoleTemplateController {
   ): Promise<RoleTemplateTableResponseDto> {
     this.logger.log('GET /admin-api/versions/:versionId/businesses/:businessId/role-templates/table');
     return this.roleTemplateService.findForTable(userId, businessId);
+  }
+
+  // Returns a single role template by ID with counts
+  @Get(':roleTemplateId')
+  @ApiGetRoleTemplateById()
+  findById(
+    @Param('businessId') businessId: string,
+    @Param('roleTemplateId') roleTemplateId: string,
+  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number; appCount: number; appIds: string[] }> {
+    this.logger.log('GET /admin-api/versions/:versionId/businesses/:businessId/role-templates/:roleTemplateId');
+    return this.roleTemplateService.findById(businessId, roleTemplateId);
+  }
+
+  // Updates a role template by ID
+  @Patch(':roleTemplateId')
+  @ApiUpdateRoleTemplate()
+  update(
+    @Param('businessId') businessId: string,
+    @Param('roleTemplateId') roleTemplateId: string,
+    @Body() dto: UpdateRoleTemplateDto,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log('PATCH /admin-api/versions/:versionId/businesses/:businessId/role-templates/:roleTemplateId');
+    return this.roleTemplateService.update(businessId, roleTemplateId, dto);
+  }
+
+  // Deletes a role template by ID
+  @Delete(':roleTemplateId')
+  @HttpCode(HttpStatus.OK)
+  @ApiDeleteRoleTemplate()
+  delete(
+    @Param('businessId') businessId: string,
+    @Param('roleTemplateId') roleTemplateId: string,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log('DELETE /admin-api/versions/:versionId/businesses/:businessId/role-templates/:roleTemplateId');
+    return this.roleTemplateService.delete(businessId, roleTemplateId);
   }
 }

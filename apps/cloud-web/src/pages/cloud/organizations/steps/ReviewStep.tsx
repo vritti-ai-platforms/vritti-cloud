@@ -2,6 +2,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { FilePreview } from '@vritti/quantum-ui/FilePreview';
 import { Form } from '@vritti/quantum-ui/Form';
+import { formatCurrencyMajor, minorToMajor } from '@vritti/quantum-ui/money';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { ArrowLeft, Check } from 'lucide-react';
 import type React from 'react';
@@ -32,16 +33,17 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
 }) => {
   const logo = form.getValues('logo');
   const planName = form.getValues('planName');
-  const planPrice = form.getValues('planPrice');
+  const planAmount = form.getValues('planAmount');
   const planCurrency = form.getValues('planCurrency');
-  const regionName = form.getValues('regionName');
-  const cloudProviderName = form.getValues('cloudProviderName');
+  const versionName = form.getValues('versionName');
   const deploymentName = form.getValues('deploymentName');
   const countryName = form.getValues('countryName');
-  const marketName = form.getValues('marketName');
   const taxId = form.getValues('taxId');
 
-  const priceDisplay = planPrice ? `${planCurrency === 'INR' ? '₹' : planCurrency}${planPrice}/month` : null;
+  const priceDisplay =
+    planAmount != null && planCurrency
+      ? `${formatCurrencyMajor(Number(minorToMajor(String(planAmount), planCurrency)), planCurrency)}/month`
+      : null;
 
   return (
     <div className="space-y-4">
@@ -82,14 +84,13 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
       {/* Infrastructure summary */}
       <div className="rounded-lg border p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <Typography variant="subtitle2">Infrastructure</Typography>
+          <Typography variant="subtitle2">Deployment</Typography>
           <Button variant="link" className="p-0 h-auto" onClick={onChangeInfrastructure}>
             Change
           </Button>
         </div>
         {[
-          { label: 'Region', value: regionName ?? '—' },
-          { label: 'Provider', value: cloudProviderName ?? '—' },
+          { label: 'Version', value: versionName ?? '—' },
           { label: 'Deployment', value: deploymentName ?? '—' },
         ].map(({ label, value }) => (
           <div key={label} className="flex justify-between text-sm">
@@ -99,13 +100,12 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
         ))}
       </div>
 
-      {/* Tax & market summary */}
+      {/* Country summary */}
       <div className="rounded-lg border p-4 space-y-3">
-        <Typography variant="subtitle2">Tax & Market</Typography>
+        <Typography variant="subtitle2">Country & Tax</Typography>
         {[
-          { label: 'Tax ID', value: taxId ?? '—' },
           { label: 'Country', value: countryName ?? '—' },
-          { label: 'Market', value: marketName ?? '—' },
+          { label: 'Tax ID', value: taxId || '—' },
         ].map(({ label, value }) => (
           <div key={label} className="flex justify-between text-sm">
             <span className="text-muted-foreground">{label}</span>
@@ -141,10 +141,10 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           formData.append('subdomain', data.subdomain);
           formData.append('orgIdentifier', data.subdomain);
           formData.append('size', data.size);
-          if (data.planId != null) formData.append('planId', data.planId);
+          if (data.planCode != null) formData.append('planCode', data.planCode);
           if (data.deploymentId != null) formData.append('deploymentId', data.deploymentId);
           if (data.businessId != null) formData.append('businessId', data.businessId);
-          formData.append('taxId', data.taxId);
+          if (data.taxId) formData.append('taxId', data.taxId);
           if (data.countryId) formData.append('countryId', data.countryId);
           if (data.logo) formData.append('file', data.logo);
           return formData;

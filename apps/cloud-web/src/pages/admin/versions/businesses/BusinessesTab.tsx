@@ -85,7 +85,7 @@ export const BusinessesTab = ({ versionId }: { versionId: string }) => {
 
   const { table } = useDataTable({
     columns: getColumns({
-      onView: (business) => navigate(buildSlug(business.name, business.id), { relative: 'path' }),
+      onView: (business) => navigate(`biz-${buildSlug(business.name, business.id)}`, { relative: 'path' }),
       onRemove: handleRemove,
     }),
     slug: `version-businesses-${versionId}`,
@@ -120,7 +120,7 @@ export const BusinessesTab = ({ versionId }: { versionId: string }) => {
         emptyStateConfig={{
           icon: Briefcase,
           title: 'No businesses assigned to this version yet',
-          description: 'Assign a business (vertical) to make it available in this version.',
+          description: 'Assign a business to make it available in this version.',
           action: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={assignDialog.open}>
               Assign Business

@@ -15,4 +15,4 @@ onlyBuiltDependencies:
 
 overrides:
   # '@vritti/api-sdk': link:../api-sdk
-  # '@vritti/quantum-ui': link:../quantum-ui
+  '@vritti/quantum-ui': link:../quantum-ui

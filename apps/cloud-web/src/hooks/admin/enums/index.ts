@@ -1,1 +1,0 @@
-export { usePermissionTypes } from './usePermissionTypes';

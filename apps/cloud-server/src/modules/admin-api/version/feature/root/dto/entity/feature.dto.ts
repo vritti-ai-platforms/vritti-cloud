@@ -44,14 +44,20 @@ export class FeatureDto {
   @ApiProperty({ example: ['WEB', 'MOBILE'], type: [String] })
   platforms: string[];
 
-  @ApiProperty({ example: 2, description: 'Number of apps this feature is assigned to' })
-  appCount: number;
+  @ApiProperty({ example: 2, description: 'Number of businesses whose apps include this feature' })
+  businessCount: number;
 
   @ApiProperty({ example: true, description: 'False when the feature is referenced by app_features' })
   canDelete: boolean;
 
-  // Maps a Feature entity to a FeatureDto
-  static from(feature: Feature, appCount = 0, permissions: string[] = [], platforms: string[] = []): FeatureDto {
+  // Maps a Feature entity to a FeatureDto. businessCount drives the display; appRefCount (app_features count) drives canDelete.
+  static from(
+    feature: Feature,
+    businessCount = 0,
+    permissions: string[] = [],
+    platforms: string[] = [],
+    appRefCount = 0,
+  ): FeatureDto {
     const dto = new FeatureDto();
     dto.id = feature.id;
     dto.versionId = feature.versionId;
@@ -67,8 +73,8 @@ export class FeatureDto {
     dto.updatedAt = feature.updatedAt;
     dto.permissions = permissions;
     dto.platforms = platforms;
-    dto.appCount = appCount;
-    dto.canDelete = appCount === 0;
+    dto.businessCount = businessCount;
+    dto.canDelete = appRefCount === 0;
     return dto;
   }
 }

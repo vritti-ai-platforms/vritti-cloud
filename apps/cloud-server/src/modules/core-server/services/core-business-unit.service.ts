@@ -1,3 +1,4 @@
+import type { FeatureCatalogEntry } from '@domain/catalog/catalog.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
 import type {
@@ -124,13 +125,13 @@ export class CoreBusinessUnitService {
     return result;
   }
 
-  // Updates the assigned app codes for a business unit in core
+  // Updates the assigned app codes and derived feature catalog for a business unit in core
   async updateBuApps(
     url: string,
     webhookSecret: string,
     orgId: string,
     buId: string,
-    data: { appCodes: string[] },
+    data: { appCodes: string[]; featureCatalog: FeatureCatalogEntry[] },
   ): Promise<SuccessResponseDto> {
     const result = await this.http.patch<SuccessResponseDto>(
       url,

@@ -259,10 +259,10 @@ export const OrganizationSettingsPage: React.FC = () => {
               </div>
               <div>
                 <Typography variant="body2" intent="muted" className="mb-1">
-                  Plan ID
+                  Plan
                 </Typography>
                 <Typography variant="body1" className="font-mono text-sm">
-                  {org.planId || 'Not assigned'}
+                  {org.planCode || 'Not assigned'}
                 </Typography>
               </div>
             </div>

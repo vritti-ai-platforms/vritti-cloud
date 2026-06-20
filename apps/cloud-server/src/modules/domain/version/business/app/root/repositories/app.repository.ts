@@ -15,7 +15,7 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     return this.model.findFirst({ where: { id } });
   }
 
-  // Finds an app by version + business + code (apps are per-vertical so code is only unique within a business)
+  // Finds an app by version + business + code (apps are per-business so code is only unique within a business)
   async findByVersionBusinessCode(versionId: string, businessId: string, code: string): Promise<App | undefined> {
     return this.model.findFirst({ where: { versionId, businessId, code } });
   }
@@ -42,7 +42,6 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
           name: apps.name,
           description: apps.description,
           icon: apps.icon,
-          isActive: apps.isActive,
           sortOrder: apps.sortOrder,
           createdAt: apps.createdAt,
           updatedAt: apps.updatedAt,
@@ -79,7 +78,6 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
         name: apps.name,
         description: apps.description,
         icon: apps.icon,
-        isActive: apps.isActive,
         sortOrder: apps.sortOrder,
         createdAt: apps.createdAt,
         updatedAt: apps.updatedAt,
@@ -112,10 +110,10 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     return Number(result[0]?.count ?? 0);
   }
 
-  // Returns all active apps for a given business ordered by sort order
-  async findActiveByBusiness(versionId: string, businessId: string): Promise<App[]> {
+  // Returns all apps for a given business ordered by sort order
+  async findByBusiness(versionId: string, businessId: string): Promise<App[]> {
     return this.model.findMany({
-      where: { versionId, businessId, isActive: true },
+      where: { versionId, businessId },
       orderBy: { sortOrder: 'asc' },
     });
   }

@@ -26,10 +26,10 @@ export class CreateOrganizationDto {
   @IsEnum(OrgSizeValues)
   size: OrgSize;
 
-  @ApiProperty({ description: 'Plan ID for the organization', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiProperty({ description: 'Plan code for the organization', example: 'pro' })
   @IsNotEmpty()
-  @IsUUID()
-  planId: string;
+  @IsString()
+  planCode: string;
 
   @ApiProperty({ description: 'Business ID for the organization', example: '550e8400-e29b-41d4-a716-446655440001' })
   @IsNotEmpty()
@@ -41,10 +41,10 @@ export class CreateOrganizationDto {
   @IsUUID()
   deploymentId: string;
 
-  @ApiProperty({ description: 'Tax identifier (GSTIN for India, TRN for UAE)', example: '29ABCDE1234F1Z5' })
-  @IsNotEmpty()
+  @ApiPropertyOptional({ description: 'Tax identifier (GSTIN for India, TRN for UAE)', example: '29ABCDE1234F1Z5' })
+  @IsOptional()
   @IsString()
-  taxId: string;
+  taxId?: string;
 
   @ApiProperty({ description: 'Country UUID the tax id belongs to', example: '550e8400-e29b-41d4-a716-446655440003' })
   @IsNotEmpty()

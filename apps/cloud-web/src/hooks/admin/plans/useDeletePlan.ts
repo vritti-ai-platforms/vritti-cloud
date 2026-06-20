@@ -1,18 +1,18 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { deletePlan } from '../../../services/admin/plans.service';
-import { PLANS_QUERY_KEY } from './usePlans';
+import { deletePlan } from '@/services/admin/plans.service';
+import { plansQueryKey } from './usePlans';
 
 type UseDeletePlanOptions = Omit<UseMutationOptions<void, AxiosError, string>, 'mutationFn'>;
 
 // Deletes a plan and invalidates the plans list
-export function useDeletePlan(options?: UseDeletePlanOptions) {
+export function useDeletePlan(versionId: string, businessId: string, options?: UseDeletePlanOptions) {
   const queryClient = useQueryClient();
   return useMutation<void, AxiosError, string>({
     ...options,
-    mutationFn: deletePlan,
+    mutationFn: (id) => deletePlan({ versionId, businessId, id }),
     onSuccess: (result, ...args) => {
-      queryClient.invalidateQueries({ queryKey: PLANS_QUERY_KEY });
+      queryClient.invalidateQueries({ queryKey: plansQueryKey(versionId, businessId) });
       options?.onSuccess?.(result, ...args);
     },
   });

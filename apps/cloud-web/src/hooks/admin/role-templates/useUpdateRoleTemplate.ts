@@ -12,14 +12,15 @@ type UseUpdateRoleTemplateOptions = Omit<
   'mutationFn'
 >;
 
+// Updates a role template and refreshes its detail + the role templates table
 export function useUpdateRoleTemplate(versionId: string, businessId: string, options?: UseUpdateRoleTemplateOptions) {
   const queryClient = useQueryClient();
   return useMutation<SuccessResponse, AxiosError, UpdateRoleTemplateVars>({
     ...options,
-    mutationFn: (vars) => updateRoleTemplate(versionId, vars),
+    mutationFn: (vars) => updateRoleTemplate(versionId, businessId, vars),
     onSuccess: (result, vars, ...args) => {
       queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId, businessId) });
-      queryClient.invalidateQueries({ queryKey: roleTemplateQueryKey(versionId, vars.id) });
+      queryClient.invalidateQueries({ queryKey: roleTemplateQueryKey(versionId, businessId, vars.id) });
       options?.onSuccess?.(result, vars, ...args);
     },
   });

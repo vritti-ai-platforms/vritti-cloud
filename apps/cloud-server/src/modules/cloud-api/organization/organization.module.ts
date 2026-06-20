@@ -1,7 +1,7 @@
+import { BusinessDomainModule } from '@domain/business/business.module';
 import { CloudOrganizationDomainModule } from '@domain/cloud-organization/cloud-organization.module';
 import { CountryDomainModule } from '@domain/country/country.module';
 import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
-import { MarketDomainModule } from '@domain/market/market.module';
 import { MediaDomainModule } from '@domain/media/media.module';
 import { PlanDomainModule } from '@domain/plan/plan.module';
 import { VersionDomainModule } from '@domain/version/version.module';
@@ -31,7 +31,7 @@ import { OrganizationUsersService } from './services/organization-users.service'
     MediaDomainModule,
     CloudOrganizationDomainModule,
     CountryDomainModule,
-    MarketDomainModule,
+    BusinessDomainModule,
   ],
   controllers: [
     OrganizationController,

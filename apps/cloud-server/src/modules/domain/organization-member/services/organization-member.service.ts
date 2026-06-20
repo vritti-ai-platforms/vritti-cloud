@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { DataTableStateService, type FieldMap, FilterProcessor } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { users } from '@/db/schema';
-import { OrganizationMemberDto } from '@/modules/admin-api/organization-member/dto/entity/organization-member.dto';
-import { OrganizationMemberTableResponseDto } from '@/modules/admin-api/organization-member/dto/response/organization-members-response.dto';
+import { OrganizationMemberDto } from '@/modules/admin-api/deployment/organization/member/dto/entity/organization-member.dto';
+import { OrganizationMemberTableResponseDto } from '@/modules/admin-api/deployment/organization/member/dto/response/organization-members-response.dto';
 import { OrganizationMemberRepository } from '../repositories/organization-member.repository';
 
 @Injectable()

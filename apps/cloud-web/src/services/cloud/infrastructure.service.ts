@@ -5,13 +5,17 @@ export interface PlanOption {
   name: string;
   code: string;
   content: string | null;
-  price: string | null;
+  amount: number | null;
   currency: string | null;
 }
 
-// Fetches plans for a deployment+business combo with pricing
-export function getDeploymentPlans(deploymentId: string, businessId: string): Promise<PlanOption[]> {
+// Fetches plans for a deployment+business combo, priced for the given country
+export function getDeploymentPlans(
+  deploymentId: string,
+  businessId: string,
+  countryId: string,
+): Promise<PlanOption[]> {
   return axios
-    .get<PlanOption[]>(`cloud-api/deployments/${deploymentId}/plans`, { params: { businessId } })
+    .get<PlanOption[]>(`cloud-api/deployments/${deploymentId}/plans`, { params: { businessId, countryId } })
     .then((r) => r.data);
 }

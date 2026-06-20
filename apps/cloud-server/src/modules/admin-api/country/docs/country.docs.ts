@@ -55,6 +55,6 @@ export function ApiDeleteCountry() {
     ApiResponse({ status: 200, description: 'Country deleted successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Country not found.' }),
-    ApiResponse({ status: 409, description: 'Country is assigned to one or more markets.' }),
+    ApiResponse({ status: 409, description: 'Country has one or more plan/app prices.' }),
   );
 }
