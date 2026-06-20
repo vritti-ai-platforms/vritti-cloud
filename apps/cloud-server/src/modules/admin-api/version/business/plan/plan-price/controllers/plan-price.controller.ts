@@ -10,7 +10,7 @@ import { UpsertPlanPriceDto } from '../dto/request/upsert-plan-price.dto';
 @ApiTags('Admin - Plan Prices')
 @ApiBearerAuth()
 @RequireSession(SessionTypeValues.ADMIN)
-@Controller('plans/:planId/prices')
+@Controller('versions/:versionId/businesses/:businessId/plans/:planId/prices')
 export class PlanPriceController {
   private readonly logger = new Logger(PlanPriceController.name);
 
@@ -20,7 +20,7 @@ export class PlanPriceController {
   @Get()
   @ApiListPlanPrices()
   findByPlan(@Param('planId') planId: string): Promise<PlanPriceDto[]> {
-    this.logger.log(`GET /admin-api/plans/${planId}/prices`);
+    this.logger.log(`GET /admin-api/versions/:v/businesses/:b/plans/${planId}/prices`);
     return this.planPriceService.findByPlan(planId);
   }
 
@@ -29,7 +29,7 @@ export class PlanPriceController {
   @HttpCode(HttpStatus.OK)
   @ApiUpsertPlanPrice()
   upsert(@Param('planId') planId: string, @Body() dto: UpsertPlanPriceDto): Promise<CreateResponseDto<PlanPriceDto>> {
-    this.logger.log(`POST /admin-api/plans/${planId}/prices`);
+    this.logger.log(`POST /admin-api/versions/:v/businesses/:b/plans/${planId}/prices`);
     return this.planPriceService.upsert(planId, dto);
   }
 
@@ -38,7 +38,7 @@ export class PlanPriceController {
   @HttpCode(HttpStatus.OK)
   @ApiDeletePlanPrice()
   remove(@Param('planId') planId: string, @Body() dto: UpsertPlanPriceDto): Promise<SuccessResponseDto> {
-    this.logger.log(`DELETE /admin-api/plans/${planId}/prices`);
+    this.logger.log(`DELETE /admin-api/versions/:v/businesses/:b/plans/${planId}/prices`);
     return this.planPriceService.remove(planId, dto);
   }
 }

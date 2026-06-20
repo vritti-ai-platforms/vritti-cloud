@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateResponseDto, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
-import { PlanPriceDto } from '@/modules/admin-api/plan/plan-price/dto/entity/plan-price.dto';
-import type { UpsertPlanPriceDto } from '@/modules/admin-api/plan/plan-price/dto/request/upsert-plan-price.dto';
+import { PlanPriceDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/entity/plan-price.dto';
+import type { UpsertPlanPriceDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/request/upsert-plan-price.dto';
 import { PlanPriceRepository } from '../repositories/plan-price.repository';
 
 @Injectable()

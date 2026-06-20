@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
-import { VersionBusinessDto } from '@/modules/admin-api/business/root/dto/entity/version-business.dto';
+import { VersionBusinessDto } from '@/modules/admin-api/business/dto/entity/version-business.dto';
 import { AssignVersionBusinessDto } from '../dto/request/assign-version-business.dto';
 import { VersionBusinessTableResponseDto } from '../dto/response/version-business-table-response.dto';
 

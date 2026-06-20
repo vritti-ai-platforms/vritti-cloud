@@ -78,7 +78,11 @@ export const PlanViewPage = () => {
         contentClassName="min-h-[500px]"
         tabs={[
           { value: 'content', label: 'Content', content: <ContentTab plan={plan} /> },
-          { value: 'apps', label: 'Apps', content: <AppsTab planId={id ?? ''} /> },
+          {
+            value: 'apps',
+            label: 'Apps',
+            content: <AppsTab versionId={versionId ?? ''} businessId={businessId ?? ''} planId={id ?? ''} />,
+          },
           { value: 'features', label: 'Features', content: <FeaturesTab planId={id ?? ''} /> },
           { value: 'prices', label: 'Prices', content: <PricesTab /> },
         ]}

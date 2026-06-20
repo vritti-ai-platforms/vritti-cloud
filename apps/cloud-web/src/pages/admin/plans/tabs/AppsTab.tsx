@@ -11,12 +11,14 @@ import { AssignPlanAppForm } from '../forms/AssignPlanAppForm';
 import { EditPlanAppForm } from '../forms/EditPlanAppForm';
 
 interface ColumnActions {
+  versionId: string;
+  businessId: string;
   planId: string;
   onRemove: (row: PlanAppTableRow) => void;
 }
 
 // Builds column definitions for the plan apps data table
-function getColumns({ planId, onRemove }: ColumnActions): ColumnDef<PlanAppTableRow, unknown>[] {
+function getColumns({ versionId, businessId, planId, onRemove }: ColumnActions): ColumnDef<PlanAppTableRow, unknown>[] {
   return [
     {
       accessorKey: 'appCode',
@@ -57,6 +59,8 @@ function getColumns({ planId, onRemove }: ColumnActions): ColumnDef<PlanAppTable
                 description: `Choose which features from ${row.original.appCode} are included in this plan.`,
                 content: (close) => (
                   <EditPlanAppForm
+                    versionId={versionId}
+                    businessId={businessId}
                     planId={planId}
                     appCode={row.original.appCode}
                     currentFeatureCodes={row.original.includedFeatureCodes}
@@ -83,9 +87,17 @@ function getColumns({ planId, onRemove }: ColumnActions): ColumnDef<PlanAppTable
 }
 
 // Apps tab — data table of apps assigned to a plan with assign + configure + remove
-export const AppsTab = ({ planId }: { planId: string }) => {
+export const AppsTab = ({
+  versionId,
+  businessId,
+  planId,
+}: {
+  versionId: string;
+  businessId: string;
+  planId: string;
+}) => {
   const queryClient = useQueryClient();
-  const { data: response, isLoading } = usePlanAppsTable(planId);
+  const { data: response, isLoading } = usePlanAppsTable(versionId, businessId, planId);
   const confirm = useConfirm();
   const assignDialog = useDialog();
   const removeMutation = useRemovePlanApp();
@@ -97,11 +109,11 @@ export const AppsTab = ({ planId }: { planId: string }) => {
       confirmLabel: 'Remove',
       variant: 'destructive',
     });
-    if (confirmed) removeMutation.mutate({ planId, appId: row.appCode });
+    if (confirmed) removeMutation.mutate({ versionId, businessId, planId, appId: row.appCode });
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ planId, onRemove: handleRemove }),
+    columns: getColumns({ versionId, businessId, planId, onRemove: handleRemove }),
     slug: `plan-apps-${planId}`,
     label: 'app',
     serverState: response,
@@ -146,7 +158,15 @@ export const AppsTab = ({ planId }: { planId: string }) => {
         icon={AppWindow}
         title="Assign App"
         description="Select an app to assign to this plan."
-        content={(close) => <AssignPlanAppForm planId={planId} onSuccess={close} onCancel={close} />}
+        content={(close) => (
+          <AssignPlanAppForm
+            versionId={versionId}
+            businessId={businessId}
+            planId={planId}
+            onSuccess={close}
+            onCancel={close}
+          />
+        )}
       />
     </div>
   );

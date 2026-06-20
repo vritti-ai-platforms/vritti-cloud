@@ -9,13 +9,15 @@ export function planPricesQueryKey(planId: string) {
 
 // Fetches all price entries for a plan across countries and billing periods
 export function usePlanPrices(
+  versionId: string,
+  businessId: string,
   planId: string,
   options?: Omit<UseQueryOptions<PlanPrice[], AxiosError>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery<PlanPrice[], AxiosError>({
     queryKey: planPricesQueryKey(planId),
-    queryFn: () => getPlanPrices(planId),
-    enabled: !!planId,
+    queryFn: () => getPlanPrices(versionId, businessId, planId),
+    enabled: !!(versionId && businessId && planId),
     ...options,
   });
 }

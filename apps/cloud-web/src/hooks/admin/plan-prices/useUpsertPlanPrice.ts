@@ -5,7 +5,7 @@ import type { UpsertPlanPriceData } from '@/schemas/admin/plan-prices';
 import { upsertPlanPrice } from '@/services/admin/plan-prices.service';
 import { planPricesQueryKey } from './usePlanPrices';
 
-type Vars = { planId: string; data: UpsertPlanPriceData };
+type Vars = { versionId: string; businessId: string; planId: string; data: UpsertPlanPriceData };
 type UseUpsertPlanPriceOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, Vars>, 'mutationFn'>;
 
 export function useUpsertPlanPrice(options?: UseUpsertPlanPriceOptions) {

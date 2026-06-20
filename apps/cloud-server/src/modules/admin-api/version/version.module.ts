@@ -1,8 +1,15 @@
+import { PlanDomainModule } from '@domain/plan/plan.module';
+import { PlanPriceDomainModule } from '@domain/plan-price/plan-price.module';
 import { VersionDomainModule } from '@domain/version/version.module';
 import { Module } from '@nestjs/common';
 import { CoreServerModule } from '@/modules/core-server/core-server.module';
 // App
-import { AppController } from './business/app/root/controllers/app.controller';
+import { AppController } from './business/app/controllers/app.controller';
+// Plan (version + business scoped)
+import { PlanAppController } from './business/plan/plan-app/controllers/plan-app.controller';
+import { PlanFeaturePermissionController } from './business/plan/plan-feature-permission/controllers/plan-feature-permission.controller';
+import { PlanPriceController } from './business/plan/plan-price/controllers/plan-price.controller';
+import { PlanController } from './business/plan/root/controllers/plan.controller';
 // Business Features (feature ↔ app assignment + permissions overview)
 import { BusinessFeatureController } from './business/feature/controllers/business-feature.controller';
 // Business Permissions
@@ -28,7 +35,7 @@ import { VersionController } from './root/controllers/version.controller';
 import { VersionSnapshotService } from './root/services/version-snapshot.service';
 
 @Module({
-  imports: [VersionDomainModule, CoreServerModule],
+  imports: [VersionDomainModule, CoreServerModule, PlanDomainModule, PlanPriceDomainModule],
   providers: [VersionSnapshotService],
   controllers: [
     VersionController,
@@ -43,6 +50,10 @@ import { VersionSnapshotService } from './root/services/version-snapshot.service
     BusinessFeatureController,
     BusinessRoleTemplateController,
     RoleTemplatePermissionController,
+    PlanController,
+    PlanAppController,
+    PlanPriceController,
+    PlanFeaturePermissionController,
   ],
   exports: [VersionDomainModule],
 })

@@ -6,7 +6,7 @@ import { updatePlanApp } from '../../../services/admin/plan-apps.service';
 import { planAppsQueryKey } from './usePlanApps';
 import { PLAN_APPS_TABLE_KEY } from './usePlanAppsTable';
 
-type Vars = { planId: string; appId: string; data: UpdatePlanAppData };
+type Vars = { versionId: string; businessId: string; planId: string; appId: string; data: UpdatePlanAppData };
 type UseUpdatePlanAppOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, Vars>, 'mutationFn'>;
 
 // Updates a plan-app assignment and invalidates caches

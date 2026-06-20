@@ -9,12 +9,20 @@ import { useForm } from 'react-hook-form';
 import { type AssignPlanAppData, assignPlanAppSchema } from '@/schemas/admin/plan-apps';
 
 interface AssignPlanAppFormProps {
+  versionId: string;
+  businessId: string;
   planId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({ planId, onSuccess, onCancel }) => {
+export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({
+  versionId,
+  businessId,
+  planId,
+  onSuccess,
+  onCancel,
+}) => {
   const form = useForm<AssignPlanAppData>({
     resolver: zodResolver(assignPlanAppSchema),
     defaultValues: { appCode: '' },
@@ -28,7 +36,7 @@ export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({ planId, on
   });
 
   return (
-    <Form form={form} mutation={assignMutation} transformSubmit={(data) => ({ planId, data })}>
+    <Form form={form} mutation={assignMutation} transformSubmit={(data) => ({ versionId, businessId, planId, data })}>
       <AppCodeSelector name="appCode" />
       <DialogActions>
         <Button

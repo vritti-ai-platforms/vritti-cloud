@@ -16,6 +16,8 @@ const editPlanAppSchema = z.object({
 type EditPlanAppFormData = z.infer<typeof editPlanAppSchema>;
 
 interface EditPlanAppFormProps {
+  versionId: string;
+  businessId: string;
   planId: string;
   appCode: string;
   currentFeatureCodes: string[] | null;
@@ -24,6 +26,8 @@ interface EditPlanAppFormProps {
 }
 
 export const EditPlanAppForm: React.FC<EditPlanAppFormProps> = ({
+  versionId,
+  businessId,
   planId,
   appCode,
   currentFeatureCodes,
@@ -47,6 +51,8 @@ export const EditPlanAppForm: React.FC<EditPlanAppFormProps> = ({
       mutation={updateMutation}
       resetOnSuccess={false}
       transformSubmit={(data) => ({
+        versionId,
+        businessId,
         planId,
         appId: appCode,
         data: {

@@ -7953,7 +7953,7 @@
         ]
       }
     },
-    "/admin-api/plans/{planId}/apps/table": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/apps/table": {
       "get": {
         "operationId": "PlanAppController_findForTable",
         "parameters": [
@@ -7997,7 +7997,7 @@
         ]
       }
     },
-    "/admin-api/plans/{planId}/apps": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/apps": {
       "get": {
         "operationId": "PlanAppController_findByPlan",
         "parameters": [
@@ -8102,7 +8102,7 @@
         ]
       }
     },
-    "/admin-api/plans/{planId}/apps/{appCode}": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/apps/{appCode}": {
       "patch": {
         "operationId": "PlanAppController_update",
         "parameters": [
@@ -8221,7 +8221,7 @@
         ]
       }
     },
-    "/admin-api/plans/{planId}/prices": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/prices": {
       "get": {
         "operationId": "PlanPriceController_findByPlan",
         "parameters": [

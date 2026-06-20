@@ -5,7 +5,7 @@ import { assignPlanApp } from '../../../services/admin/plan-apps.service';
 import { planAppsQueryKey } from './usePlanApps';
 import { PLAN_APPS_TABLE_KEY } from './usePlanAppsTable';
 
-type Vars = { planId: string; data: AssignPlanAppData };
+type Vars = { versionId: string; businessId: string; planId: string; data: AssignPlanAppData };
 type UseAssignPlanAppOptions = Omit<UseMutationOptions<PlanApp, AxiosError, Vars>, 'mutationFn'>;
 
 // Assigns an app to a plan and invalidates the plan apps list and table

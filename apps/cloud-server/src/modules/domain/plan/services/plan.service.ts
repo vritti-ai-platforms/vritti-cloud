@@ -13,10 +13,10 @@ import {
 } from '@vritti/api-sdk';
 import { and, type Column, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import { planPrices, plans } from '@/db/schema';
-import { PlanDto } from '@/modules/admin-api/plan/root/dto/entity/plan.dto';
-import type { CreatePlanDto } from '@/modules/admin-api/plan/root/dto/request/create-plan.dto';
-import type { UpdatePlanDto } from '@/modules/admin-api/plan/root/dto/request/update-plan.dto';
-import { PlansTableResponseDto } from '@/modules/admin-api/plan/root/dto/response/plans-table-response.dto';
+import { PlanDto } from '@/modules/admin-api/version/business/plan/root/dto/entity/plan.dto';
+import type { CreatePlanDto } from '@/modules/admin-api/version/business/plan/root/dto/request/create-plan.dto';
+import type { UpdatePlanDto } from '@/modules/admin-api/version/business/plan/root/dto/request/update-plan.dto';
+import { PlansTableResponseDto } from '@/modules/admin-api/version/business/plan/root/dto/response/plans-table-response.dto';
 import { PlanRepository } from '../repositories/plan.repository';
 
 @Injectable()

@@ -25,11 +25,15 @@ function indexPrices(prices: PlanPrice[]): Map<string, PlanPrice> {
 
 // Prices grid — countries (rows) × billing periods (columns), amounts in each country's default currency
 export const PricesTab = () => {
+  const { id: versionId } = useSlugParams('versionSlug');
+  const { id: businessId } = useSlugParams('businessSlug');
   const { id: planId } = useSlugParams('planSlug');
+  const versionIdValue = versionId ?? '';
+  const businessIdValue = businessId ?? '';
   const planIdValue = planId ?? '';
 
   const { data: countriesResponse, isLoading: countriesLoading } = useCountries();
-  const { data: prices = [], isLoading: pricesLoading } = usePlanPrices(planIdValue);
+  const { data: prices = [], isLoading: pricesLoading } = usePlanPrices(versionIdValue, businessIdValue, planIdValue);
 
   const upsertMutation = useUpsertPlanPrice();
   const deleteMutation = useDeletePlanPrice();
@@ -41,9 +45,10 @@ export const PricesTab = () => {
     (countryId: string, currencyCode: string, billingPeriod: BillingPeriod, rawValue: string) => {
       const existing = priceIndex.get(`${countryId}:${billingPeriod}`);
       const trimmed = rawValue.trim();
+      const scope = { versionId: versionIdValue, businessId: businessIdValue, planId: planIdValue };
 
       if (!trimmed) {
-        if (existing) deleteMutation.mutate({ planId: planIdValue, priceId: existing.id });
+        if (existing) deleteMutation.mutate({ ...scope, priceId: existing.id });
         return;
       }
       if (!/^\d+(\.\d{1,4})?$/.test(trimmed)) return;
@@ -56,9 +61,9 @@ export const PricesTab = () => {
       }
       if (existing && existing.amount === amount) return;
 
-      upsertMutation.mutate({ planId: planIdValue, data: { countryId, billingPeriod, amount } });
+      upsertMutation.mutate({ ...scope, data: { countryId, billingPeriod, amount } });
     },
-    [priceIndex, planIdValue, deleteMutation, upsertMutation],
+    [priceIndex, versionIdValue, businessIdValue, planIdValue, deleteMutation, upsertMutation],
   );
 
   if (countriesLoading || pricesLoading) {

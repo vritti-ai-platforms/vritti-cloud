@@ -4,7 +4,7 @@ import { removePlanApp } from '../../../services/admin/plan-apps.service';
 import { planAppsQueryKey } from './usePlanApps';
 import { PLAN_APPS_TABLE_KEY } from './usePlanAppsTable';
 
-type Vars = { planId: string; appId: string };
+type Vars = { versionId: string; businessId: string; planId: string; appId: string };
 type UseRemovePlanAppOptions = Omit<UseMutationOptions<void, AxiosError, Vars>, 'mutationFn'>;
 
 // Removes an app from a plan and invalidates the plan apps list and table

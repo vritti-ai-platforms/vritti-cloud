@@ -3,7 +3,7 @@ import type { AxiosError } from 'axios';
 import { deletePlanPrice } from '@/services/admin/plan-prices.service';
 import { planPricesQueryKey } from './usePlanPrices';
 
-type Vars = { planId: string; priceId: string };
+type Vars = { versionId: string; businessId: string; planId: string; priceId: string };
 type UseDeletePlanPriceOptions = Omit<UseMutationOptions<void, AxiosError, Vars>, 'mutationFn'>;
 
 export function useDeletePlanPrice(options?: UseDeletePlanPriceOptions) {

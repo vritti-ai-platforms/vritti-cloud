@@ -10,7 +10,7 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { businesses } from '@/db/schema';
-import { VersionBusinessDto } from '@/modules/admin-api/business/root/dto/entity/version-business.dto';
+import { VersionBusinessDto } from '@/modules/admin-api/business/dto/entity/version-business.dto';
 import { VersionBusinessTableResponseDto } from '@/modules/admin-api/version/business/root/dto/response/version-business-table-response.dto';
 import { VersionBusinessRepository } from '../repositories/version-business.repository';
 

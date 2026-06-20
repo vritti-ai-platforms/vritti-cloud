@@ -15,10 +15,10 @@ import {
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
 import { apps } from '@/db/schema';
-import { AppDto } from '@/modules/admin-api/version/business/app/root/dto/entity/app.dto';
-import { CreateAppDto } from '@/modules/admin-api/version/business/app/root/dto/request/create-app.dto';
-import type { UpdateAppDto } from '@/modules/admin-api/version/business/app/root/dto/request/update-app.dto';
-import { AppTableResponseDto } from '@/modules/admin-api/version/business/app/root/dto/response/app-table-response.dto';
+import { AppDto } from '@/modules/admin-api/version/business/app/dto/entity/app.dto';
+import { CreateAppDto } from '@/modules/admin-api/version/business/app/dto/request/create-app.dto';
+import type { UpdateAppDto } from '@/modules/admin-api/version/business/app/dto/request/update-app.dto';
+import { AppTableResponseDto } from '@/modules/admin-api/version/business/app/dto/response/app-table-response.dto';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
 import { validateImportRows } from '@/utils/validate-import-rows';
 import { AppRepository } from '../repositories/app.repository';

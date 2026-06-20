@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
-import type { SetPlanUnlockedDto } from '@/modules/admin-api/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
+import type { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
 import {
   type AvailablePlanFeature,
   PlanFeaturePermissionRepository,

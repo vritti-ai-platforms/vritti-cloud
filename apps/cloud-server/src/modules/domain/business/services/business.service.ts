@@ -12,10 +12,10 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { businesses } from '@/db/schema';
-import { BusinessDto } from '@/modules/admin-api/business/root/dto/entity/business.dto';
-import type { CreateBusinessDto } from '@/modules/admin-api/business/root/dto/request/create-business.dto';
-import type { UpdateBusinessDto } from '@/modules/admin-api/business/root/dto/request/update-business.dto';
-import { BusinessTableResponseDto } from '@/modules/admin-api/business/root/dto/response/businesses-response.dto';
+import { BusinessDto } from '@/modules/admin-api/business/dto/entity/business.dto';
+import type { CreateBusinessDto } from '@/modules/admin-api/business/dto/request/create-business.dto';
+import type { UpdateBusinessDto } from '@/modules/admin-api/business/dto/request/update-business.dto';
+import { BusinessTableResponseDto } from '@/modules/admin-api/business/dto/response/businesses-response.dto';
 import { CloudBusinessDto } from '@/modules/cloud-api/business/dto/entity/business.dto';
 import { BusinessRepository } from '../repositories/business.repository';
 

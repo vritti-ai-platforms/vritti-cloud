@@ -10,11 +10,11 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { planApps } from '@/db/schema';
-import { PlanAppDto } from '@/modules/admin-api/plan/plan-app/dto/entity/plan-app.dto';
-import { PlanAppTableRowDto } from '@/modules/admin-api/plan/plan-app/dto/entity/plan-app-table-row.dto';
-import type { AssignPlanAppDto } from '@/modules/admin-api/plan/plan-app/dto/request/assign-plan-app.dto';
-import type { UpdatePlanAppDto } from '@/modules/admin-api/plan/plan-app/dto/request/update-plan-app.dto';
-import type { PlanAppTableResponseDto } from '@/modules/admin-api/plan/plan-app/dto/response/plan-app-table-response.dto';
+import { PlanAppDto } from '@/modules/admin-api/version/business/plan/plan-app/dto/entity/plan-app.dto';
+import { PlanAppTableRowDto } from '@/modules/admin-api/version/business/plan/plan-app/dto/entity/plan-app-table-row.dto';
+import type { AssignPlanAppDto } from '@/modules/admin-api/version/business/plan/plan-app/dto/request/assign-plan-app.dto';
+import type { UpdatePlanAppDto } from '@/modules/admin-api/version/business/plan/plan-app/dto/request/update-plan-app.dto';
+import type { PlanAppTableResponseDto } from '@/modules/admin-api/version/business/plan/plan-app/dto/response/plan-app-table-response.dto';
 import { PlanRepository } from '../repositories/plan.repository';
 import { PlanAppRepository } from '../repositories/plan-app.repository';
 

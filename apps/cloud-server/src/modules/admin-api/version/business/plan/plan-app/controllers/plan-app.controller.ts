@@ -18,7 +18,7 @@ import { PlanAppTableResponseDto } from '../dto/response/plan-app-table-response
 @ApiTags('Admin - Plan Apps')
 @ApiBearerAuth()
 @RequireSession(SessionTypeValues.ADMIN)
-@Controller('plans/:planId/apps')
+@Controller('versions/:versionId/businesses/:businessId/plans/:planId/apps')
 export class PlanAppController {
   private readonly logger = new Logger(PlanAppController.name);
 
@@ -28,7 +28,7 @@ export class PlanAppController {
   @Get('table')
   @ApiFindForTablePlanApps()
   findForTable(@UserId() userId: string, @Param('planId') planId: string): Promise<PlanAppTableResponseDto> {
-    this.logger.log(`GET /admin-api/plans/${planId}/apps/table`);
+    this.logger.log(`GET /admin-api/versions/:v/businesses/:b/plans/${planId}/apps/table`);
     return this.planAppService.findForTable(userId, planId);
   }
 
@@ -36,7 +36,7 @@ export class PlanAppController {
   @Get()
   @ApiGetPlanApps()
   findByPlan(@Param('planId') planId: string): Promise<PlanAppDto[]> {
-    this.logger.log(`GET /admin-api/plans/${planId}/apps`);
+    this.logger.log(`GET /admin-api/versions/:v/businesses/:b/plans/${planId}/apps`);
     return this.planAppService.findByPlan(planId);
   }
 
@@ -45,7 +45,7 @@ export class PlanAppController {
   @HttpCode(HttpStatus.CREATED)
   @ApiAssignPlanApp()
   assign(@Param('planId') planId: string, @Body() dto: AssignPlanAppDto): Promise<CreateResponseDto<PlanAppDto>> {
-    this.logger.log(`POST /admin-api/plans/${planId}/apps`);
+    this.logger.log(`POST /admin-api/versions/:v/businesses/:b/plans/${planId}/apps`);
     return this.planAppService.assign(planId, dto);
   }
 
@@ -57,7 +57,7 @@ export class PlanAppController {
     @Param('appCode') appCode: string,
     @Body() dto: UpdatePlanAppDto,
   ): Promise<SuccessResponseDto> {
-    this.logger.log(`PATCH /admin-api/plans/${planId}/apps/${appCode}`);
+    this.logger.log(`PATCH /admin-api/versions/:v/businesses/:b/plans/${planId}/apps/${appCode}`);
     return this.planAppService.updateSortOrder(planId, appCode, dto);
   }
 
@@ -66,7 +66,7 @@ export class PlanAppController {
   @HttpCode(HttpStatus.OK)
   @ApiRemovePlanApp()
   remove(@Param('planId') planId: string, @Param('appCode') appCode: string): Promise<SuccessResponseDto> {
-    this.logger.log(`DELETE /admin-api/plans/${planId}/apps/${appCode}`);
+    this.logger.log(`DELETE /admin-api/versions/:v/businesses/:b/plans/${planId}/apps/${appCode}`);
     return this.planAppService.remove(planId, appCode);
   }
 }

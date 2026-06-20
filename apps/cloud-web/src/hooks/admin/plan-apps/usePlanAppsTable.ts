@@ -7,13 +7,15 @@ export const PLAN_APPS_TABLE_KEY = (planId: string) => ['admin', 'plans', planId
 
 // Fetches plan apps for the data table — server applies filter/sort state
 export function usePlanAppsTable(
+  versionId: string,
+  businessId: string,
   planId: string,
   options?: Omit<UseQueryOptions<PlanAppsTableResponse, AxiosError>, 'queryKey' | 'queryFn'>,
 ) {
   return useQuery<PlanAppsTableResponse, AxiosError>({
     queryKey: PLAN_APPS_TABLE_KEY(planId),
-    queryFn: () => getPlanAppsTable(planId),
-    enabled: !!planId,
+    queryFn: () => getPlanAppsTable(versionId, businessId, planId),
+    enabled: !!(versionId && businessId && planId),
     ...options,
   });
 }

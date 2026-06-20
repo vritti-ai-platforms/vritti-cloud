@@ -1,6 +1,6 @@
 import { BusinessDomainModule } from '@domain/business/business.module';
 import { Module } from '@nestjs/common';
-import { BusinessController } from './root/controllers/business.controller';
+import { BusinessController } from './controllers/business.controller';
 
 @Module({
   imports: [BusinessDomainModule],

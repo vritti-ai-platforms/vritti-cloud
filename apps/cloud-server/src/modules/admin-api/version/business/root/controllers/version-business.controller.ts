@@ -3,7 +3,7 @@ import { Body, Controller, Delete, Get, Logger, Param, Post } from '@nestjs/comm
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { type CreateResponseDto, RequireSession, type SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { VersionBusinessDto } from '@/modules/admin-api/business/root/dto/entity/version-business.dto';
+import { VersionBusinessDto } from '@/modules/admin-api/business/dto/entity/version-business.dto';
 import {
   ApiAssignVersionBusiness,
   ApiFindForTableVersionBusinesses,

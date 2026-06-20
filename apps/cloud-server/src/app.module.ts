@@ -20,7 +20,6 @@ import { AdminBusinessModule } from './modules/admin-api/business/business.modul
 import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
 import { AdminCountryModule } from './modules/admin-api/country/country.module';
 import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
-import { AdminPlanModule } from './modules/admin-api/plan/plan.module';
 import { AdminRegionModule } from './modules/admin-api/region/region.module';
 import { AdminVersionModule } from './modules/admin-api/version/version.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
@@ -127,7 +126,6 @@ import { ServicesModule } from './services/services.module';
     CloudDeploymentModule,
     // Admin API modules
     AdminVersionModule,
-    AdminPlanModule,
     AdminDeploymentModule,
     AdminRegionModule,
     AdminCloudProviderModule,
@@ -149,7 +147,6 @@ import { ServicesModule } from './services/services.module';
         path: 'admin-api',
         children: [
           AdminVersionModule,
-          AdminPlanModule,
           AdminDeploymentModule,
           AdminRegionModule,
           AdminCloudProviderModule,
