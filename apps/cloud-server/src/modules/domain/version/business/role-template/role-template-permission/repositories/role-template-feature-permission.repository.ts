@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService, TypedDrizzleClient } from '@vritti/api-sdk';
 import { and, eq, exists, inArray, or, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { NewRoleTemplateFeaturePermission } from '@/db/schema';
+import type { AppPlatform, NewRoleTemplateFeaturePermission } from '@/db/schema';
 import {
   appFeatures,
   apps,
+  featureMicrofrontends,
   featurePermissions,
   features,
+  microfrontends,
   permissionBusinesses,
   roleTemplateApps,
   roleTemplateFeaturePermissions,
@@ -24,19 +26,23 @@ export interface AvailableFeature {
   name: string;
   icon: string;
   permissions: AvailableFeaturePermission[];
-  appCodes: string[];
-  appIds: string[];
+  // Platforms this feature has a route on — drives which Web/Mobile columns the matrix shows
+  platforms: AppPlatform[];
 }
 
-export interface RoleTemplateFeaturePermissionWithDetails {
+// An app (layer 1 of the matrix) with the features it owns (layer 2)
+export interface AvailableApp {
   id: string;
-  roleTemplateId: string;
-  featurePermissionId: string;
-  featureId: string;
-  featureCode: string;
-  featureName: string;
   code: string;
-  label: string;
+  name: string;
+  icon: string;
+  features: AvailableFeature[];
+}
+
+// A single platform-scoped grant on a role template
+export interface RoleTemplateGrant {
+  featurePermissionId: string;
+  platform: AppPlatform;
 }
 
 @Injectable()
@@ -47,25 +53,15 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
     super(database, roleTemplateFeaturePermissions);
   }
 
-  // Finds all grants for a role template, joining the permission and its feature
-  async findByRoleTemplateId(roleTemplateId: string): Promise<RoleTemplateFeaturePermissionWithDetails[]> {
-    const rows = await this.db
+  // Returns the platform-scoped grant pairs for a role template
+  async findGrantsByRoleTemplateId(roleTemplateId: string): Promise<RoleTemplateGrant[]> {
+    return this.db
       .select({
-        id: roleTemplateFeaturePermissions.id,
-        roleTemplateId: roleTemplateFeaturePermissions.roleTemplateId,
         featurePermissionId: roleTemplateFeaturePermissions.featurePermissionId,
-        featureId: featurePermissions.featureId,
-        featureCode: features.code,
-        featureName: features.name,
-        code: featurePermissions.code,
-        label: featurePermissions.label,
+        platform: roleTemplateFeaturePermissions.platform,
       })
       .from(roleTemplateFeaturePermissions)
-      .innerJoin(featurePermissions, eq(roleTemplateFeaturePermissions.featurePermissionId, featurePermissions.id))
-      .innerJoin(features, eq(featurePermissions.featureId, features.id))
       .where(eq(roleTemplateFeaturePermissions.roleTemplateId, roleTemplateId));
-
-    return rows;
   }
 
   // Deletes all grants for a given role template
@@ -98,20 +94,24 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
       );
   }
 
-  // Counts the number of grants for a given role template
+  // Counts the distinct permissions granted to a role template (ignores the per-platform fan-out)
   async countByRoleTemplateId(roleTemplateId: string): Promise<number> {
     const result = await this.db
-      .select({ count: sql<number>`count(*)` })
+      .select({ count: sql<number>`count(distinct ${roleTemplateFeaturePermissions.featurePermissionId})` })
       .from(roleTemplateFeaturePermissions)
       .where(eq(roleTemplateFeaturePermissions.roleTemplateId, roleTemplateId));
     return Number(result[0]?.count ?? 0);
   }
 
-  // Returns features from apps linked to a role template, with the business-scoped permissions, app codes, and app IDs.
+  // Returns the role template's apps (each with the features it owns + business-scoped permissions) — the matrix source.
   // Permissions are limited to global ones plus those explicitly granted to the given business.
-  async findAvailableFeatures(roleTemplateId: string, businessId: string): Promise<AvailableFeature[]> {
+  async findAvailableApps(roleTemplateId: string, businessId: string): Promise<AvailableApp[]> {
     const rows = await this.db
       .select({
+        appId: apps.id,
+        appCode: apps.code,
+        appName: apps.name,
+        appIcon: apps.icon,
         featureId: features.id,
         featureCode: features.code,
         featureName: features.name,
@@ -119,14 +119,15 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
-        appCode: apps.code,
-        appId: apps.id,
+        platform: microfrontends.platform,
       })
       .from(roleTemplateApps)
       .innerJoin(apps, eq(apps.id, roleTemplateApps.appId))
       .innerJoin(appFeatures, eq(appFeatures.appId, apps.id))
       .innerJoin(features, eq(features.id, appFeatures.featureId))
       .innerJoin(featurePermissions, eq(featurePermissions.featureId, features.id))
+      .leftJoin(featureMicrofrontends, eq(featureMicrofrontends.featureId, features.id))
+      .leftJoin(microfrontends, eq(microfrontends.id, featureMicrofrontends.microfrontendId))
       .where(
         and(
           eq(roleTemplateApps.roleTemplateId, roleTemplateId),
@@ -146,11 +147,18 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           ),
         ),
       )
-      .orderBy(features.sortOrder, featurePermissions.sortOrder);
+      .orderBy(apps.sortOrder, features.sortOrder, featurePermissions.sortOrder);
 
-    const map = new Map<string, AvailableFeature>();
+    const appMap = new Map<string, AvailableApp>();
+    const featureMap = new Map<string, AvailableFeature>();
     for (const row of rows) {
-      let feature = map.get(row.featureId);
+      let app = appMap.get(row.appId);
+      if (!app) {
+        app = { id: row.appId, code: row.appCode, name: row.appName, icon: row.appIcon, features: [] };
+        appMap.set(row.appId, app);
+      }
+      const featureKey = `${row.appId}:${row.featureId}`;
+      let feature = featureMap.get(featureKey);
       if (!feature) {
         feature = {
           id: row.featureId,
@@ -158,10 +166,10 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           name: row.featureName,
           icon: row.featureIcon,
           permissions: [],
-          appCodes: [],
-          appIds: [],
+          platforms: [],
         };
-        map.set(row.featureId, feature);
+        featureMap.set(featureKey, feature);
+        app.features.push(feature);
       }
       if (!feature.permissions.some((p) => p.featurePermissionId === row.featurePermissionId)) {
         feature.permissions.push({
@@ -170,10 +178,9 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           label: row.permissionLabel,
         });
       }
-      if (!feature.appCodes.includes(row.appCode)) feature.appCodes.push(row.appCode);
-      if (!feature.appIds.includes(row.appId)) feature.appIds.push(row.appId);
+      if (row.platform && !feature.platforms.includes(row.platform)) feature.platforms.push(row.platform);
     }
-    return Array.from(map.values());
+    return Array.from(appMap.values());
   }
 
   // Returns the subset of the given feature-permission ids that actually exist

@@ -2,10 +2,9 @@ import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-res
 import { axios } from '@vritti/quantum-ui/axios';
 import type {
   CreateRoleTemplateData,
-  FeatureWithPermissions,
-  GroupedPermission,
   Role,
   RoleTemplateDetail,
+  RoleTemplatePermissionsResponse,
   RoleTemplatesTableResponse,
   SetPermissionsData,
   UpdateRoleTemplateData,
@@ -54,27 +53,14 @@ export function deleteRoleTemplate(versionId: string, businessId: string, id: st
     .then(() => undefined);
 }
 
-// Fetches the features (with their permissions) available to a role template
-export function getFeaturesWithPermissions(
-  versionId: string,
-  businessId: string,
-  roleTemplateId: string,
-): Promise<FeatureWithPermissions[]> {
-  return axios
-    .get<FeatureWithPermissions[]>(
-      `admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${roleTemplateId}/permissions/features`,
-    )
-    .then((r) => r.data);
-}
-
-// Fetches a role template's granted permissions grouped by feature
+// Fetches the role-template permission matrix — the role's apps (each with its features) + the full grant set
 export function getRoleTemplatePermissions(
   versionId: string,
   businessId: string,
   roleId: string,
-): Promise<GroupedPermission[]> {
+): Promise<RoleTemplatePermissionsResponse> {
   return axios
-    .get<GroupedPermission[]>(
+    .get<RoleTemplatePermissionsResponse>(
       `admin-api/versions/${versionId}/businesses/${businessId}/role-templates/${roleId}/permissions`,
     )
     .then((r) => r.data);

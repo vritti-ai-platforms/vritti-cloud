@@ -32,8 +32,8 @@ export class OrgAppItemResponseDto {
   @ApiPropertyOptional({ example: 'briefcase' })
   icon?: string | null;
 
-  @ApiProperty({ example: 'included', enum: ['included', 'addon', 'unavailable', 'enabled'] })
-  status: 'included' | 'addon' | 'unavailable' | 'enabled';
+  @ApiProperty({ example: 'included', enum: ['included', 'locked'] })
+  status: 'included' | 'locked';
 
   @ApiPropertyOptional({ type: OrgAppPriceDto })
   price?: OrgAppPriceDto | null;

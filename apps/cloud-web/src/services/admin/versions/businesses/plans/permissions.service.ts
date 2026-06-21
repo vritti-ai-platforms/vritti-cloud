@@ -12,21 +12,28 @@ export interface AvailablePlanFeature {
   code: string;
   name: string;
   icon: string;
-  appCode: string;
   permissions: AvailablePlanPermission[];
+}
+
+export interface AvailablePlanApp {
+  id: string;
+  code: string;
+  name: string;
+  icon: string;
+  features: AvailablePlanFeature[];
 }
 
 function base(versionId: string, businessId: string, planId: string): string {
   return `admin-api/versions/${versionId}/businesses/${businessId}/plans/${planId}/permissions`;
 }
 
-// Fetches the unlock-matrix source (features + permissions from the plan's apps)
-export function getPlanAvailableFeatures(
+// Fetches the unlock-matrix source (the business's apps, each with its features + permissions)
+export function getPlanAvailableApps(
   versionId: string,
   businessId: string,
   planId: string,
-): Promise<AvailablePlanFeature[]> {
-  return axios.get<AvailablePlanFeature[]>(`${base(versionId, businessId, planId)}/features`).then((r) => r.data);
+): Promise<AvailablePlanApp[]> {
+  return axios.get<AvailablePlanApp[]>(`${base(versionId, businessId, planId)}/apps`).then((r) => r.data);
 }
 
 // Fetches the plan's currently unlocked feature-permission ids
@@ -35,9 +42,7 @@ export function getPlanUnlocked(
   businessId: string,
   planId: string,
 ): Promise<{ featurePermissionIds: string[] }> {
-  return axios
-    .get<{ featurePermissionIds: string[] }>(base(versionId, businessId, planId))
-    .then((r) => r.data);
+  return axios.get<{ featurePermissionIds: string[] }>(base(versionId, businessId, planId)).then((r) => r.data);
 }
 
 // Replaces the plan's unlocked set

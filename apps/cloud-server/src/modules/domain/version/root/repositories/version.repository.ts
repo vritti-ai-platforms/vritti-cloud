@@ -11,7 +11,6 @@ import {
   features,
   microfrontends,
   permissionBusinesses,
-  planApps,
   planFeaturePermissions,
   plans,
   roleTemplateApps,
@@ -46,7 +45,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
 
   // Fetches every versioned table for one version (raw rows; assembly happens in the snapshot builder)
   async findSnapshotData(versionId: string): Promise<SnapshotData> {
-    // Plans are version-scoped; plan_apps + plan_feature_permissions hang off plan ids
+    // Plans are version-scoped; plan_feature_permissions (the unlocked set) hangs off plan ids
     const planRows = await this.db.select().from(plans).where(eq(plans.versionId, versionId));
     const planIds = planRows.map((p) => p.id);
 
@@ -62,7 +61,6 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       roleAppRows,
       businessRows,
       permissionBusinessRows,
-      planAppRows,
       planFpRows,
     ] = await Promise.all([
       this.db.select().from(features).where(eq(features.versionId, versionId)),
@@ -89,7 +87,6 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
         })
         .from(permissionBusinesses)
         .where(eq(permissionBusinesses.versionId, versionId)),
-      planIds.length ? this.db.select().from(planApps).where(inArray(planApps.planId, planIds)) : Promise.resolve([]),
       planIds.length
         ? this.db.select().from(planFeaturePermissions).where(inArray(planFeaturePermissions.planId, planIds))
         : Promise.resolve([]),
@@ -106,7 +103,6 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       roleTemplatePermissions: rolePermRows,
       roleTemplateApps: roleAppRows,
       plans: planRows,
-      planApps: planAppRows,
       planFeaturePermissions: planFpRows,
       businesses: businessRows,
       permissionBusinesses: permissionBusinessRows,

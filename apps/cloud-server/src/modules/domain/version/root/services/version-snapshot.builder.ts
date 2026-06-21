@@ -7,7 +7,6 @@ import type {
   FeaturePermission,
   Microfrontend,
   Plan,
-  PlanApp,
   PlanFeaturePermission,
   RoleTemplate,
   RoleTemplateApp,
@@ -26,7 +25,6 @@ export interface SnapshotData {
   roleTemplatePermissions: RoleTemplateFeaturePermission[];
   roleTemplateApps: RoleTemplateApp[];
   plans: Plan[];
-  planApps: PlanApp[];
   planFeaturePermissions: PlanFeaturePermission[];
   businesses: Array<{ id: string; code: string; name: string }>;
   permissionBusinesses: Array<{ featurePermissionId: string; businessId: string }>;
@@ -69,15 +67,15 @@ export interface SnapshotRoleTemplate {
   scope: string;
   sourceRoleId: string;
   apps: string[];
-  features: Record<string, string[]>;
+  // featureCode -> { web?: [permCode…], mobile?: [permCode…] } — grants split per platform
+  features: Record<string, { web?: string[]; mobile?: string[] }>;
 }
-// A plan is a lock overlay: which apps + feature-permissions it UNLOCKS (everything else renders locked)
+// A plan is a lock overlay: the feature-permissions it UNLOCKS (everything else renders locked). Apps are derived from these.
 export interface SnapshotPlan {
   code: string;
   name: string;
   isCustom: boolean;
   maxBusinessUnits: number | null;
-  unlockedAppCodes: string[];
   unlockedPermissions: Record<string, string[]>;
 }
 export interface SnapshotBusiness {
@@ -110,7 +108,6 @@ function buildIndex(data: SnapshotData) {
     appFeaturesByAppId: _.groupBy(data.appFeatures, 'appId'),
     roleAppsByRoleId: _.groupBy(data.roleTemplateApps, 'roleTemplateId'),
     rolePermsByRoleId: _.groupBy(data.roleTemplatePermissions, 'roleTemplateId'),
-    planAppsByPlanId: _.groupBy(data.planApps, 'planId'),
     planPermsByPlanId: _.groupBy(data.planFeaturePermissions, 'planId'),
   };
 }
@@ -171,14 +168,18 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
 }
 
 // A role's grants: { featureCode: [permissionCode...] }
-function buildRoleFeatures(roleId: string, index: SnapshotIndex): Record<string, string[]> {
-  const featurePerms: Record<string, string[]> = {};
+function buildRoleFeatures(
+  roleId: string,
+  index: SnapshotIndex,
+): Record<string, { web?: string[]; mobile?: string[] }> {
+  const featurePerms: Record<string, { web?: string[]; mobile?: string[] }> = {};
   for (const rp of index.rolePermsByRoleId[roleId] ?? []) {
     const perm = index.permissionById[rp.featurePermissionId];
     const featureCode = perm && index.featureById[perm.featureId]?.code;
     if (!featureCode) continue;
-    if (!featurePerms[featureCode]) featurePerms[featureCode] = [];
-    featurePerms[featureCode].push(perm.code);
+    const key = rp.platform === 'WEB' ? 'web' : 'mobile';
+    const bucket = (featurePerms[featureCode] ??= {});
+    (bucket[key] ??= []).push(perm.code);
   }
   return featurePerms;
 }
@@ -242,7 +243,6 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
       name: p.name,
       isCustom: p.isCustom,
       maxBusinessUnits: p.maxBusinessUnits ?? null,
-      unlockedAppCodes: (index.planAppsByPlanId[p.id] ?? []).map((pa) => pa.appCode),
       unlockedPermissions: buildPlanUnlockedPermissions(p.id, index),
     };
   }

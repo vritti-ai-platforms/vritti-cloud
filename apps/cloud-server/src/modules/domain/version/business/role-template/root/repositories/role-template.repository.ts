@@ -61,7 +61,9 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
         createdAt: roleTemplates.createdAt,
         updatedAt: roleTemplates.updatedAt,
         businessName: businesses.name,
-        permissionCount: sql<number>`count(${roleTemplateFeaturePermissions.id})`.as('permission_count'),
+        permissionCount: sql<number>`count(distinct ${roleTemplateFeaturePermissions.featurePermissionId})`.as(
+          'permission_count',
+        ),
       })
       .from(roleTemplates)
       .innerJoin(businesses, eq(roleTemplates.businessId, businesses.id))

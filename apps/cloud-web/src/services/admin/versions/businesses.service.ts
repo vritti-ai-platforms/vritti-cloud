@@ -35,7 +35,5 @@ export function unassignVersionBusiness({
   versionId: string;
   businessId: string;
 }): Promise<SuccessResponse> {
-  return axios
-    .delete<SuccessResponse>(`admin-api/versions/${versionId}/businesses/${businessId}`)
-    .then((r) => r.data);
+  return axios.delete<SuccessResponse>(`admin-api/versions/${versionId}/businesses/${businessId}`).then((r) => r.data);
 }

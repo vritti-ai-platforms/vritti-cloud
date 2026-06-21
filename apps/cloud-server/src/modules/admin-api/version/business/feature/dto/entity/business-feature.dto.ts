@@ -22,8 +22,8 @@ export class BusinessFeatureDto {
   @ApiProperty({ example: 'package' })
   icon: string;
 
-  @ApiProperty({ type: [BusinessFeatureAppDto] })
-  apps: BusinessFeatureAppDto[];
+  @ApiProperty({ type: BusinessFeatureAppDto })
+  app: BusinessFeatureAppDto;
 
   @ApiProperty({ example: 4, description: 'Number of permissions applicable to this business' })
   permissionCount: number;
@@ -35,7 +35,7 @@ export class BusinessFeatureDto {
     dto.code = row.code;
     dto.name = row.name;
     dto.icon = row.icon;
-    dto.apps = row.apps;
+    dto.app = row.app;
     dto.permissionCount = row.permissionCount;
     return dto;
   }

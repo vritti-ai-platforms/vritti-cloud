@@ -1,4 +1,4 @@
-import { useSetBusinessFeatureApps } from '@hooks/admin/versions/businesses/features';
+import { useSetBusinessFeatureApp } from '@hooks/admin/versions/businesses/features';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -21,11 +21,11 @@ export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({ 
     resolver: zodResolver(addBusinessFeatureSchema),
     defaultValues: {
       featureId: '',
-      appIds: [],
+      appId: '',
     },
   });
 
-  const mutation = useSetBusinessFeatureApps({ onSuccess });
+  const mutation = useSetBusinessFeatureApp({ onSuccess });
 
   return (
     <Form
@@ -37,7 +37,7 @@ export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({ 
         versionId,
         businessId,
         featureId: data.featureId,
-        data: { appIds: data.appIds },
+        data: { appId: data.appId },
       })}
     >
       <FeatureSelector
@@ -47,10 +47,9 @@ export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({ 
         params={{ versionId, businessId }}
       />
       <AppSelector
-        name="appIds"
-        multiple
-        label="Apps"
-        placeholder="Select the apps this feature belongs to"
+        name="appId"
+        label="App"
+        placeholder="Select the app this feature belongs to"
         params={{ versionId, businessId }}
       />
       <DialogActions>

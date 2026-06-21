@@ -6,10 +6,10 @@ import { SessionTypeValues } from '@/db/schema';
 import {
   ApiFindBusinessFeaturePermissions,
   ApiFindForTableBusinessFeatures,
-  ApiSetFeatureApps,
+  ApiSetFeatureApp,
 } from '../docs/business-feature.docs';
 import { BusinessFeaturePermissionDto } from '../dto/entity/business-feature-permission.dto';
-import { SetFeatureAppsDto } from '../dto/request/set-feature-apps.dto';
+import { SetFeatureAppDto } from '../dto/request/set-feature-app.dto';
 import { BusinessFeatureTableResponseDto } from '../dto/response/business-feature-table-response.dto';
 
 @ApiTags('Admin - Business Features')
@@ -45,17 +45,17 @@ export class BusinessFeatureController {
     return this.businessFeatureService.findPermissions(versionId, businessId, featureId);
   }
 
-  // Replaces the apps a feature is assigned to within a business
-  @Put(':featureId/apps')
+  // Pins a feature to a single app within a business (appId null removes it from the business)
+  @Put(':featureId/app')
   @HttpCode(HttpStatus.OK)
-  @ApiSetFeatureApps()
-  setApps(
+  @ApiSetFeatureApp()
+  setApp(
     @Param('versionId') versionId: string,
     @Param('businessId') businessId: string,
     @Param('featureId') featureId: string,
-    @Body() dto: SetFeatureAppsDto,
+    @Body() dto: SetFeatureAppDto,
   ): Promise<SuccessResponseDto> {
-    this.logger.log(`PUT /admin-api/versions/${versionId}/businesses/${businessId}/features/${featureId}/apps`);
-    return this.businessFeatureService.setApps(versionId, businessId, featureId, dto.appIds);
+    this.logger.log(`PUT /admin-api/versions/${versionId}/businesses/${businessId}/features/${featureId}/app`);
+    return this.businessFeatureService.setApp(versionId, businessId, featureId, dto.appId);
   }
 }

@@ -89,7 +89,6 @@ export const relations = defineRelations(schema, (r) => ({
   // Plan relations
   plans: {
     planPrices: r.many.planPrices(),
-    planApps: r.many.planApps(),
     planFeaturePermissions: r.many.planFeaturePermissions(),
     version: r.one.versions({
       from: r.plans.versionId,
@@ -110,6 +109,7 @@ export const relations = defineRelations(schema, (r) => ({
     organizations: r.many.organizations(),
     plans: r.many.plans(),
     apps: r.many.apps(),
+    appFeatures: r.many.appFeatures(),
     roleTemplates: r.many.roleTemplates(),
     versionBusinesses: r.many.versionBusinesses(),
   },
@@ -247,6 +247,7 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.appFeatures.versionId,
       to: r.versions.id,
     }),
+    business: r.one.businesses({ from: r.appFeatures.businessId, to: r.businesses.id }),
     app: r.one.apps({ from: r.appFeatures.appId, to: r.apps.id }),
     feature: r.one.features({ from: r.appFeatures.featureId, to: r.features.id }),
   },
@@ -285,11 +286,6 @@ export const relations = defineRelations(schema, (r) => ({
   appPrices: {
     app: r.one.apps({ from: r.appPrices.appId, to: r.apps.id }),
     country: r.one.countries({ from: r.appPrices.countryId, to: r.countries.id }),
-  },
-
-  // Plan-App junction relations
-  planApps: {
-    plan: r.one.plans({ from: r.planApps.planId, to: r.plans.id }),
   },
 
   // Plan-Feature-Permission junction relations (the plan's unlocked permission set)

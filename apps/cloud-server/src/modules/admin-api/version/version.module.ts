@@ -5,15 +5,14 @@ import { Module } from '@nestjs/common';
 import { CoreServerModule } from '@/modules/core-server/core-server.module';
 // App
 import { AppController } from './business/app/controllers/app.controller';
-// Plan (version + business scoped)
-import { PlanAppController } from './business/plan/plan-app/controllers/plan-app.controller';
-import { PlanFeaturePermissionController } from './business/plan/plan-feature-permission/controllers/plan-feature-permission.controller';
-import { PlanPriceController } from './business/plan/plan-price/controllers/plan-price.controller';
-import { PlanController } from './business/plan/root/controllers/plan.controller';
 // Business Features (feature ↔ app assignment + permissions overview)
 import { BusinessFeatureController } from './business/feature/controllers/business-feature.controller';
 // Business Permissions
 import { BusinessPermissionController } from './business/permission/controllers/business-permission.controller';
+// Plan (version + business scoped)
+import { PlanFeaturePermissionController } from './business/plan/plan-feature-permission/controllers/plan-feature-permission.controller';
+import { PlanPriceController } from './business/plan/plan-price/controllers/plan-price.controller';
+import { PlanController } from './business/plan/root/controllers/plan.controller';
 // Role Template Permission
 import { RoleTemplatePermissionController } from './business/role-template/role-template-permission/controllers/role-template-permission.controller';
 // Business Role Template (business-scoped CRUD)
@@ -51,7 +50,6 @@ import { VersionSnapshotService } from './root/services/version-snapshot.service
     BusinessRoleTemplateController,
     RoleTemplatePermissionController,
     PlanController,
-    PlanAppController,
     PlanPriceController,
     PlanFeaturePermissionController,
   ],

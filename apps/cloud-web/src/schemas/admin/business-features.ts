@@ -18,21 +18,22 @@ export interface BusinessFeature {
   code: string;
   name: string;
   icon: string;
-  apps: BusinessFeatureApp[];
+  app: BusinessFeatureApp;
   permissionCount: number;
 }
 
 export type BusinessFeaturesTableResponse = TableResponse<BusinessFeature>;
 
-export const setFeatureAppsSchema = z.object({
-  appIds: z.array(z.string().uuid()),
+// A feature pins to a single app within a business; appId null removes it from the business
+export const setFeatureAppSchema = z.object({
+  appId: z.string().uuid('Select an app'),
 });
 
-export type SetFeatureAppsData = z.infer<typeof setFeatureAppsSchema>;
+export type SetFeatureAppData = z.infer<typeof setFeatureAppSchema>;
 
 export const addBusinessFeatureSchema = z.object({
   featureId: z.string().uuid('Please select a feature'),
-  appIds: z.array(z.string().uuid()).min(1, 'Select at least one app'),
+  appId: z.string().uuid('Select an app'),
 });
 
 export type AddBusinessFeatureData = z.infer<typeof addBusinessFeatureSchema>;

@@ -10,7 +10,6 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Plan } from '@/schemas/admin/plans';
 import { EditPlanForm } from './forms/EditPlanForm';
-import { AppsTab } from './tabs/AppsTab';
 import { ContentTab } from './tabs/ContentTab';
 import { FeaturesTab } from './tabs/FeaturesTab';
 import { PlanStats } from './tabs/PlanStats';
@@ -59,7 +58,7 @@ export const PlanViewPage = () => {
         description={
           plan.isCustom
             ? `Custom plan attached to ${plan.attachedOrgName ?? 'an organization'}`
-            : 'Manage content, apps, and pricing for this plan'
+            : 'Manage content, features, and pricing for this plan'
         }
         actions={
           <Button variant="outline" size="sm" onClick={editDialog.open}>
@@ -77,7 +76,6 @@ export const PlanViewPage = () => {
         contentClassName="min-h-[500px]"
         tabs={[
           { value: 'content', label: 'Content', content: <ContentTab plan={plan} /> },
-          { value: 'apps', label: 'Apps', content: <AppsTab /> },
           { value: 'features', label: 'Features', content: <FeaturesTab /> },
           { value: 'prices', label: 'Prices', content: <PricesTab /> },
         ]}

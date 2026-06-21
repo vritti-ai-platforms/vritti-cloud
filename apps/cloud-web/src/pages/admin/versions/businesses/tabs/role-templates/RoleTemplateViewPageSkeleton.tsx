@@ -2,7 +2,9 @@ import { CardSkeleton } from '@vritti/quantum-ui/Card';
 import { DangerZoneSkeleton } from '@vritti/quantum-ui/DangerZone';
 import { PageHeaderSkeleton } from '@vritti/quantum-ui/PageHeader';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { PermissionMatrixSkeleton } from './forms/permission-matrix/PermissionMatrixSkeleton';
 
+// Mirrors the real page layout: header → cards → permission matrix → danger zone.
 export const RoleTemplateViewPageSkeleton = () => (
   <div className="flex flex-col gap-6">
     <PageHeaderSkeleton />
@@ -20,20 +22,13 @@ export const RoleTemplateViewPageSkeleton = () => (
       </CardSkeleton>
     </div>
 
-    {/* Permission matrix */}
+    {/* Permission matrix — toolbar + collapsibles */}
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between">
         <Skeleton className="h-9 w-48" />
         <Skeleton className="h-9 w-36" />
       </div>
-      <div className="border rounded-lg divide-y">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="px-4 py-3 flex items-center gap-3">
-            <Skeleton className="size-4 rounded" />
-            <Skeleton className="h-4 flex-1" />
-          </div>
-        ))}
-      </div>
+      <PermissionMatrixSkeleton />
     </div>
 
     <DangerZoneSkeleton />

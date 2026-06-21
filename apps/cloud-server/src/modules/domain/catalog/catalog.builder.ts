@@ -38,7 +38,7 @@ export interface RoleItem {
   sourceRoleId: string;
   isLocked: boolean;
   appCodes: string[];
-  features: Record<string, string[]>;
+  features: Record<string, { web?: string[]; mobile?: string[] }>;
 }
 
 // Builds the FULL business catalog with per-permission lock flags from the org's plan (nothing is hidden).
@@ -53,17 +53,19 @@ export function buildBuCatalog(
   const plan = planCode ? business.plans?.[planCode] : undefined;
 
   const catalog: FeatureCatalogEntry[] = [];
-  const seen = new Set<string>();
   for (const app of business.apps) {
-    for (const featureCode of app.features) {
-      if (seen.has(featureCode)) continue;
-      const feature = snapshot.features?.[featureCode];
-      if (!feature) continue;
+    // The app's renderable features (each feature pins to exactly one app)
+    const appFeatures = app.features
+      .map((code) => snapshot.features?.[code])
+      .filter((f): f is SnapshotFeature => !!f && !!(f.microfrontends?.WEB || f.microfrontends?.MOBILE));
+
+    // Apps are DERIVED: include this app only if the plan unlocks at least one of its features
+    const appHasUnlock = appFeatures.some((f) => (plan?.unlockedPermissions?.[f.code]?.length ?? 0) > 0);
+    if (!appHasUnlock) continue;
+
+    for (const feature of appFeatures) {
       const web = feature.microfrontends?.WEB;
       const mobile = feature.microfrontends?.MOBILE;
-      // Keep only features with at least one platform route
-      if (!web && !mobile) continue;
-      seen.add(featureCode);
 
       const unlocked = plan?.unlockedPermissions?.[feature.code] ?? [];
       const permissions = buildPermissions(feature, businessCode, unlocked);

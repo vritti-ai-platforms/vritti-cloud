@@ -3,7 +3,7 @@ import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, type SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import type { AvailablePlanFeature } from '@/modules/domain/plan/repositories/plan-feature-permission.repository';
+import type { AvailablePlanApp } from '@/modules/domain/plan/repositories/plan-feature-permission.repository';
 import { SetPlanUnlockedDto } from '../dto/request/set-plan-unlocked.dto';
 
 @ApiTags('Admin - Plan Permissions')
@@ -15,11 +15,11 @@ export class PlanFeaturePermissionController {
 
   constructor(private readonly service: PlanFeaturePermissionService) {}
 
-  // Returns the unlock matrix source — features + permissions from the plan's apps
-  @Get('features')
-  getAvailableFeatures(@Param('planId') planId: string): Promise<AvailablePlanFeature[]> {
-    this.logger.log(`GET .../plans/${planId}/permissions/features`);
-    return this.service.getAvailableFeatures(planId);
+  // Returns the unlock matrix source — the business's apps, each with the features + permissions it owns
+  @Get('apps')
+  getAvailableApps(@Param('planId') planId: string): Promise<AvailablePlanApp[]> {
+    this.logger.log(`GET .../plans/${planId}/permissions/apps`);
+    return this.service.getAvailableApps(planId);
   }
 
   // Returns the plan's currently unlocked feature-permission ids

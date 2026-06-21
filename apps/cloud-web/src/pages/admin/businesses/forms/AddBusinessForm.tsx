@@ -25,11 +25,7 @@ export const AddBusinessForm: React.FC<AddBusinessFormProps> = ({ onSuccess, onC
     <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Business Name" placeholder="e.g. Healthcare" />
       <TextField name="code" label="Code" placeholder="e.g. HLTH" />
-      <TextField
-        name="description"
-        label="Description"
-        placeholder="e.g. Hospitals, clinics, and medical services"
-      />
+      <TextField name="description" label="Description" placeholder="e.g. Hospitals, clinics, and medical services" />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

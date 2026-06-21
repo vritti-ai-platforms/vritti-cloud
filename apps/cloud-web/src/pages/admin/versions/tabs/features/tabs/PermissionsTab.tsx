@@ -132,8 +132,7 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
     enableRowSelection: true,
     enableSorting: true,
     enableMultiSort: false,
-    onStatePush: () =>
-      queryClient.invalidateQueries({ queryKey: FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId) }),
+    onStatePush: () => queryClient.invalidateQueries({ queryKey: FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId) }),
   });
 
   return (
@@ -150,7 +149,12 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
         }}
         mode="tab"
         selectActions={(rows) => (
-          <Button variant="destructive" size="sm" startAdornment={<Trash2 className="size-4" />} onClick={() => handleBulkDelete(rows)}>
+          <Button
+            variant="destructive"
+            size="sm"
+            startAdornment={<Trash2 className="size-4" />}
+            onClick={() => handleBulkDelete(rows)}
+          >
             Delete {rows.length}
           </Button>
         )}
@@ -188,9 +192,7 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
         icon={KeyRound}
         title="Add Permission"
         description="Define a permission and the businesses it applies to."
-        content={(close) => (
-          <AddPermissionForm featureId={featureId} onSuccess={close} onCancel={close} />
-        )}
+        content={(close) => <AddPermissionForm featureId={featureId} onSuccess={close} onCancel={close} />}
       />
 
       <Dialog

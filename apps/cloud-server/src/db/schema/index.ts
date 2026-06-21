@@ -30,7 +30,6 @@ export * from './permission-business';
 export * from './app';
 export * from './app-feature';
 export * from './app-price';
-export * from './plan-app';
 export * from './role-template';
 export * from './role-template-app';
 export * from './role-template-feature-permission';

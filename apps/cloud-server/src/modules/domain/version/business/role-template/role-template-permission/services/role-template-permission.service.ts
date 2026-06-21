@@ -4,21 +4,15 @@ import type { NewRoleTemplateFeaturePermission } from '@/db/schema';
 import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/version/business/role-template/role-template-permission/dto/request/assign-role-template-permissions.dto';
 import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
 import {
-  type AvailableFeature,
+  type AvailableApp,
   RoleTemplateFeaturePermissionRepository,
-  type RoleTemplateFeaturePermissionWithDetails,
+  type RoleTemplateGrant,
 } from '../repositories/role-template-feature-permission.repository';
 
-export interface GroupedPermissionEntry {
-  featurePermissionId: string;
-  code: string;
-  label: string;
-}
-
-export interface GroupedPermission {
-  featureCode: string;
-  featureName: string;
-  permissions: GroupedPermissionEntry[];
+// The full matrix payload: the assignable apps (each with its features) + the complete current grant set
+export interface RoleTemplatePermissionsResponse {
+  apps: AvailableApp[];
+  grants: RoleTemplateGrant[];
 }
 
 @Injectable()
@@ -30,19 +24,23 @@ export class RoleTemplatePermissionService {
     private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionRepository,
   ) {}
 
-  // Returns permissions for a role template grouped by feature
-  async findByRoleTemplate(roleTemplateId: string): Promise<GroupedPermission[]> {
+  // Returns the matrix source — the role template's apps (each with its features) plus the full grant set.
+  async getPermissions(roleTemplateId: string): Promise<RoleTemplatePermissionsResponse> {
     const roleTemplate = await this.roleTemplateRepository.findById(roleTemplateId);
     if (!roleTemplate) {
       throw new NotFoundException('Role template not found.');
     }
-
-    const rows = await this.roleTemplateFeaturePermissionRepository.findByRoleTemplateId(roleTemplateId);
-    this.logger.log(`Fetched permissions for role template: ${roleTemplateId} (${rows.length} entries)`);
-    return this.groupByFeature(rows);
+    const [apps, grants] = await Promise.all([
+      this.roleTemplateFeaturePermissionRepository.findAvailableApps(roleTemplateId, roleTemplate.businessId),
+      this.roleTemplateFeaturePermissionRepository.findGrantsByRoleTemplateId(roleTemplateId),
+    ]);
+    this.logger.log(
+      `Fetched permissions for role template ${roleTemplateId} (${apps.length} apps, ${grants.length} grants)`,
+    );
+    return { apps, grants };
   }
 
-  // Replaces all grants for a role template with the given set of feature-permission IDs
+  // Replaces all grants for a role template with the given set of (permission, platform) pairs
   async setPermissions(
     roleTemplateId: string,
     dto: AssignRoleTemplatePermissionsDto,
@@ -52,15 +50,25 @@ export class RoleTemplatePermissionService {
       throw new NotFoundException('Role template not found.');
     }
 
-    const ids = [...new Set(dto.featurePermissionIds)];
+    // De-duplicate (featurePermissionId, platform) pairs
+    const seen = new Set<string>();
+    const grants = dto.grants.filter((g) => {
+      const key = `${g.featurePermissionId}:${g.platform}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+    const ids = [...new Set(grants.map((g) => g.featurePermissionId))];
     if (ids.length > 0) {
       await this.validatePermissionsExist(ids);
     }
 
-    const entries: NewRoleTemplateFeaturePermission[] = ids.map((featurePermissionId) => ({
+    const entries: NewRoleTemplateFeaturePermission[] = grants.map((g) => ({
       versionId: roleTemplate.versionId,
       roleTemplateId,
-      featurePermissionId,
+      featurePermissionId: g.featurePermissionId,
+      platform: g.platform,
     }));
 
     await this.roleTemplateFeaturePermissionRepository.transaction(async (tx) => {
@@ -68,42 +76,11 @@ export class RoleTemplatePermissionService {
       await this.roleTemplateFeaturePermissionRepository.bulkCreate(entries, tx);
     });
 
-    this.logger.log(`Set ${entries.length} permissions for role template: ${roleTemplate.name} (${roleTemplateId})`);
+    this.logger.log(`Set ${entries.length} grants for role template: ${roleTemplate.name} (${roleTemplateId})`);
     return {
       success: true,
       message: `Permissions for "${roleTemplate.name}" updated successfully (${entries.length} grants).`,
     };
-  }
-
-  // Returns features available for permission assignment (only from apps linked to this role template),
-  // scoped to the role template's business so only global + business-specific permissions are offered
-  async findAvailableFeatures(roleTemplateId: string): Promise<AvailableFeature[]> {
-    const roleTemplate = await this.roleTemplateRepository.findById(roleTemplateId);
-    if (!roleTemplate) {
-      throw new NotFoundException('Role template not found.');
-    }
-    const rows = await this.roleTemplateFeaturePermissionRepository.findAvailableFeatures(
-      roleTemplateId,
-      roleTemplate.businessId,
-    );
-    this.logger.log(`Fetched ${rows.length} available features for role template: ${roleTemplateId}`);
-    return rows;
-  }
-
-  // Groups flat grant rows by feature
-  private groupByFeature(rows: RoleTemplateFeaturePermissionWithDetails[]): GroupedPermission[] {
-    const map = new Map<string, GroupedPermission>();
-
-    for (const row of rows) {
-      let group = map.get(row.featureId);
-      if (!group) {
-        group = { featureCode: row.featureCode, featureName: row.featureName, permissions: [] };
-        map.set(row.featureId, group);
-      }
-      group.permissions.push({ featurePermissionId: row.featurePermissionId, code: row.code, label: row.label });
-    }
-
-    return Array.from(map.values());
   }
 
   // Validates that all provided feature-permission IDs exist

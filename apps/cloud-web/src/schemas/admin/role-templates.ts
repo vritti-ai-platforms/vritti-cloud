@@ -20,26 +20,43 @@ export interface RoleTemplateDetail extends Role {
   appIds: string[];
 }
 
+export type Platform = 'WEB' | 'MOBILE';
+
 export interface FeaturePermissionOption {
   featurePermissionId: string;
   code: string;
   label: string;
 }
 
-export interface FeatureWithPermissions {
+// One feature row in the matrix (layer 2) — its permissions + the platforms it has a route on
+export interface RoleTemplateFeature {
   id: string;
   code: string;
   name: string;
   icon: string | null;
   permissions: FeaturePermissionOption[];
-  appCodes: string[];
-  appIds: string[];
+  platforms: Platform[];
 }
 
-export interface GroupedPermission {
-  featureCode: string;
-  featureName: string;
-  permissions: FeaturePermissionOption[];
+// One app (layer 1) with the features it owns
+export interface RoleTemplateApp {
+  id: string;
+  code: string;
+  name: string;
+  icon: string | null;
+  features: RoleTemplateFeature[];
+}
+
+// One platform-scoped grant
+export interface RoleTemplateGrant {
+  featurePermissionId: string;
+  platform: Platform;
+}
+
+// The full matrix payload: the role's apps (each with its features) + the complete current grant set
+export interface RoleTemplatePermissionsResponse {
+  apps: RoleTemplateApp[];
+  grants: RoleTemplateGrant[];
 }
 
 export type RoleTemplatesTableResponse = TableResponse<Role>;
@@ -60,7 +77,12 @@ export const updateRoleTemplateSchema = z.object({
 });
 
 export const setPermissionsSchema = z.object({
-  featurePermissionIds: z.array(z.string().uuid()),
+  grants: z.array(
+    z.object({
+      featurePermissionId: z.string().uuid(),
+      platform: z.enum(['WEB', 'MOBILE']),
+    }),
+  ),
 });
 
 export type CreateRoleTemplateData = z.infer<typeof createRoleTemplateSchema>;

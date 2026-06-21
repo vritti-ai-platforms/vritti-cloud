@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService, type TypedDrizzleClient } from '@vritti/api-sdk';
 import { and, asc, count, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { AppFeature } from '@/db/schema';
 import {
   appFeatures,
   apps,
@@ -21,7 +20,7 @@ export interface BusinessFeatureRow {
   code: string;
   name: string;
   icon: string;
-  apps: BusinessFeatureApp[];
+  app: BusinessFeatureApp;
   permissionCount: number;
 }
 
@@ -39,20 +38,19 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
     businessId: string,
     options: { where?: SQL; orderBy?: SQL[]; limit: number; offset: number },
   ): Promise<{ result: BusinessFeatureRow[]; count: number }> {
-    const conditions: SQL[] = [eq(appFeatures.versionId, versionId), eq(apps.businessId, businessId)];
+    const conditions: SQL[] = [eq(appFeatures.versionId, versionId), eq(appFeatures.businessId, businessId)];
     if (options.where) {
       conditions.push(options.where);
     }
 
+    // Each feature pins to exactly one app within a business, so the app is a single object (no aggregation)
     return this.findAllAndCount<BusinessFeatureRow>({
       select: {
         id: features.id,
         code: features.code,
         name: features.name,
         icon: features.icon,
-        apps: sql<
-          BusinessFeatureApp[]
-        >`coalesce(jsonb_agg(distinct jsonb_build_object('id', ${apps.id}, 'name', ${apps.name})), '[]'::jsonb)`,
+        app: sql<BusinessFeatureApp>`jsonb_build_object('id', ${apps.id}, 'name', ${apps.name})`,
         permissionCount: sql<number>`coalesce((
           select count(*)::int
           from ${featurePermissions} fp
@@ -65,7 +63,7 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
         { table: features, on: eq(features.id, appFeatures.featureId) },
       ],
       where: and(...conditions),
-      groupBy: [features.id],
+      groupBy: [features.id, apps.id, apps.name],
       orderBy: options.orderBy && options.orderBy.length > 0 ? options.orderBy : [asc(features.sortOrder)],
       limit: options.limit,
       offset: options.offset,
@@ -95,48 +93,23 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
       .where(eq(appFeatures.appId, appId));
   }
 
-  // Finds an app-feature row by appId + featureId
-  async findByAppAndFeature(appId: string, featureId: string): Promise<AppFeature | undefined> {
-    return this.model.findFirst({ where: { appId, featureId } });
-  }
-
-  // Upserts app-feature rows using on-conflict update
-  async upsertMany(
-    rows: Array<{ versionId: string; appId: string; featureId: string; sortOrder?: number }>,
-  ): Promise<void> {
-    if (rows.length === 0) return;
-    await this.db
-      .insert(appFeatures)
-      .values(rows)
-      .onConflictDoNothing({
-        target: [appFeatures.appId, appFeatures.featureId],
-      });
-  }
-
-  // Deletes an app-feature by appId + featureId
-  async removeByAppAndFeature(appId: string, featureId: string): Promise<void> {
-    await this.db.delete(appFeatures).where(and(eq(appFeatures.appId, appId), eq(appFeatures.featureId, featureId)));
-  }
-
-  // Replaces a feature's app links within a business — clears links to the business's apps, then inserts the given ones
-  async setFeatureApps(
+  // Pins a feature to a single app within a business (one-to-one) — clears the existing link, then sets the new one
+  async setFeatureApp(
     versionId: string,
+    businessId: string,
     featureId: string,
-    businessAppIds: string[],
-    appIds: string[],
+    appId: string | null,
     tx?: TypedDrizzleClient,
   ): Promise<void> {
     const db = tx ?? this.db;
-    if (businessAppIds.length > 0) {
-      await db
-        .delete(appFeatures)
-        .where(and(eq(appFeatures.featureId, featureId), inArray(appFeatures.appId, businessAppIds)));
-    }
-    if (appIds.length > 0) {
+    await db
+      .delete(appFeatures)
+      .where(and(eq(appFeatures.businessId, businessId), eq(appFeatures.featureId, featureId)));
+    if (appId) {
       await db
         .insert(appFeatures)
-        .values(appIds.map((appId) => ({ versionId, appId, featureId })))
-        .onConflictDoNothing({ target: [appFeatures.appId, appFeatures.featureId] });
+        .values({ versionId, businessId, appId, featureId })
+        .onConflictDoNothing({ target: [appFeatures.businessId, appFeatures.featureId] });
     }
   }
 

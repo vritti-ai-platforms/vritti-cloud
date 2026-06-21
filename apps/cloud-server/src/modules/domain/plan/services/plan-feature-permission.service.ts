@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
 import type { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
+import { PlanRepository } from '../repositories/plan.repository';
 import {
-  type AvailablePlanFeature,
+  type AvailablePlanApp,
   PlanFeaturePermissionRepository,
 } from '../repositories/plan-feature-permission.repository';
-import { PlanRepository } from '../repositories/plan.repository';
 
 @Injectable()
 export class PlanFeaturePermissionService {
@@ -16,10 +16,10 @@ export class PlanFeaturePermissionService {
     private readonly planRepository: PlanRepository,
   ) {}
 
-  // Returns the unlock matrix source — features + permissions available to the plan via its apps
-  async getAvailableFeatures(planId: string): Promise<AvailablePlanFeature[]> {
+  // Returns the unlock matrix source — the business's apps, each with the features + permissions it owns
+  async getAvailableApps(planId: string): Promise<AvailablePlanApp[]> {
     const plan = await this.ensurePlan(planId);
-    return this.planFeaturePermissionRepository.findAvailableFeatures(planId, plan.versionId, plan.businessId);
+    return this.planFeaturePermissionRepository.findAvailableApps(plan.versionId, plan.businessId);
   }
 
   // Returns the plan's currently unlocked feature-permission ids

@@ -7,7 +7,6 @@ import {
   featurePermissions,
   features,
   permissionBusinesses,
-  planApps,
   planFeaturePermissions,
 } from '@/db/schema';
 
@@ -22,8 +21,16 @@ export interface AvailablePlanFeature {
   code: string;
   name: string;
   icon: string;
-  appCode: string;
   permissions: AvailablePlanPermission[];
+}
+
+// An app (layer 1 of the unlock matrix) with the features it owns (layer 2)
+export interface AvailablePlanApp {
+  id: string;
+  code: string;
+  name: string;
+  icon: string;
+  features: AvailablePlanFeature[];
 }
 
 @Injectable()
@@ -46,7 +53,9 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
     await this.database.drizzleClient.transaction(async (tx) => {
       await tx.delete(planFeaturePermissions).where(eq(planFeaturePermissions.planId, planId));
       if (featurePermissionIds.length > 0) {
-        await tx.insert(planFeaturePermissions).values(featurePermissionIds.map((id) => ({ planId, featurePermissionId: id })));
+        await tx
+          .insert(planFeaturePermissions)
+          .values(featurePermissionIds.map((id) => ({ planId, featurePermissionId: id })));
       }
     });
   }
@@ -61,14 +70,15 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
     return rows.map((r) => r.id);
   }
 
-  // Returns the features (+ business-scoped permissions) available to a plan via its apps — the unlock matrix source
-  async findAvailableFeatures(
-    planId: string,
-    versionId: string,
-    businessId: string,
-  ): Promise<AvailablePlanFeature[]> {
+  // Returns the business's apps (each with the features it owns + business-scoped permissions) — the unlock matrix source.
+  // The plan no longer scopes apps; the plan can unlock any of the business's feature-permissions.
+  async findAvailableApps(versionId: string, businessId: string): Promise<AvailablePlanApp[]> {
     const rows = await this.db
       .select({
+        appId: apps.id,
+        appCode: apps.code,
+        appName: apps.name,
+        appIcon: apps.icon,
         featureId: features.id,
         featureCode: features.code,
         featureName: features.name,
@@ -76,19 +86,15 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
-        appCode: apps.code,
       })
-      .from(planApps)
-      .innerJoin(
-        apps,
-        and(eq(apps.code, planApps.appCode), eq(apps.versionId, versionId), eq(apps.businessId, businessId)),
-      )
-      .innerJoin(appFeatures, eq(appFeatures.appId, apps.id))
+      .from(appFeatures)
+      .innerJoin(apps, and(eq(apps.id, appFeatures.appId), eq(apps.businessId, businessId)))
       .innerJoin(features, eq(features.id, appFeatures.featureId))
       .innerJoin(featurePermissions, eq(featurePermissions.featureId, features.id))
       .where(
         and(
-          eq(planApps.planId, planId),
+          eq(appFeatures.versionId, versionId),
+          eq(appFeatures.businessId, businessId),
           or(
             eq(featurePermissions.isGlobal, true),
             exists(
@@ -105,21 +111,28 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
           ),
         ),
       )
-      .orderBy(features.sortOrder, featurePermissions.sortOrder);
+      .orderBy(apps.sortOrder, features.sortOrder, featurePermissions.sortOrder);
 
-    const map = new Map<string, AvailablePlanFeature>();
+    const appMap = new Map<string, AvailablePlanApp>();
+    const featureMap = new Map<string, AvailablePlanFeature>();
     for (const row of rows) {
-      let feature = map.get(row.featureId);
+      let app = appMap.get(row.appId);
+      if (!app) {
+        app = { id: row.appId, code: row.appCode, name: row.appName, icon: row.appIcon, features: [] };
+        appMap.set(row.appId, app);
+      }
+      const featureKey = `${row.appId}:${row.featureId}`;
+      let feature = featureMap.get(featureKey);
       if (!feature) {
         feature = {
           id: row.featureId,
           code: row.featureCode,
           name: row.featureName,
           icon: row.featureIcon,
-          appCode: row.appCode,
           permissions: [],
         };
-        map.set(row.featureId, feature);
+        featureMap.set(featureKey, feature);
+        app.features.push(feature);
       }
       if (!feature.permissions.some((p) => p.featurePermissionId === row.featurePermissionId)) {
         feature.permissions.push({
@@ -129,6 +142,6 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
         });
       }
     }
-    return Array.from(map.values());
+    return Array.from(appMap.values());
   }
 }

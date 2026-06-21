@@ -7234,9 +7234,9 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/businesses/{businessId}/features/{featureId}/apps": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/features/{featureId}/app": {
       "put": {
-        "operationId": "BusinessFeatureController_setApps",
+        "operationId": "BusinessFeatureController_setApp",
         "parameters": [
           {
             "name": "versionId",
@@ -7274,14 +7274,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SetFeatureAppsDto"
+                "$ref": "#/components/schemas/SetFeatureAppDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Apps updated successfully.",
+            "description": "App updated successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -7291,7 +7291,7 @@
             }
           },
           "400": {
-            "description": "Validation failed or invalid apps."
+            "description": "Validation failed or invalid app."
           },
           "401": {
             "description": "Unauthorized."
@@ -7305,7 +7305,7 @@
             "bearer": []
           }
         ],
-        "summary": "Replace a feature's app assignments within a business",
+        "summary": "Set a feature's app within a business (null removes it from the business)",
         "tags": [
           "Admin - Business Features"
         ]
@@ -7572,7 +7572,8 @@
     },
     "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/{roleTemplateId}/permissions": {
       "get": {
-        "operationId": "RoleTemplatePermissionController_findByRoleTemplate",
+        "description": "Returns the role template's apps (each with its features) plus the complete current grant set.",
+        "operationId": "RoleTemplatePermissionController_getPermissions",
         "parameters": [
           {
             "name": "roleTemplateId",
@@ -7587,7 +7588,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Permissions retrieved successfully."
+            "description": "Permission matrix retrieved successfully."
           },
           "401": {
             "description": "Unauthorized."
@@ -7601,7 +7602,7 @@
             "bearer": []
           }
         ],
-        "summary": "List permissions for a role template grouped by app",
+        "summary": "Get the role-template permission matrix",
         "tags": [
           "Admin - Role Templates"
         ]
@@ -7657,43 +7658,6 @@
           }
         ],
         "summary": "Set permissions for a role template (full replace)",
-        "tags": [
-          "Admin - Role Templates"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/{roleTemplateId}/permissions/features": {
-      "get": {
-        "operationId": "RoleTemplatePermissionController_findAvailableFeatures",
-        "parameters": [
-          {
-            "name": "roleTemplateId",
-            "required": true,
-            "in": "path",
-            "description": "Role template UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Available features retrieved successfully."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Role template not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List features available for permission assignment from linked apps",
         "tags": [
           "Admin - Role Templates"
         ]
@@ -7953,274 +7917,6 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/apps/table": {
-      "get": {
-        "operationId": "PlanAppController_findForTable",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "description": "Plan UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plan apps table data retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlanAppTableResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Plan not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get plan apps for data table with server-stored state",
-        "tags": [
-          "Admin - Plan Apps"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/apps": {
-      "get": {
-        "operationId": "PlanAppController_findByPlan",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "description": "Plan UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plan apps retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PlanAppDto"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Plan not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List apps assigned to a plan",
-        "tags": [
-          "Admin - Plan Apps"
-        ]
-      },
-      "post": {
-        "operationId": "PlanAppController_assign",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "description": "Plan UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/AssignPlanAppDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "App assigned to plan successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PlanAppDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Plan or app not found."
-          },
-          "409": {
-            "description": "App already assigned to this plan."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Assign an app to a plan",
-        "tags": [
-          "Admin - Plan Apps"
-        ]
-      }
-    },
-    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/apps/{appCode}": {
-      "patch": {
-        "operationId": "PlanAppController_update",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "description": "Plan UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "appCode",
-            "required": true,
-            "in": "path",
-            "description": "App code string",
-            "schema": {
-              "example": "crm",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/UpdatePlanAppDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Plan app updated successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Plan or plan-app assignment not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Update included feature codes for a plan-app assignment",
-        "tags": [
-          "Admin - Plan Apps"
-        ]
-      },
-      "delete": {
-        "operationId": "PlanAppController_remove",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "description": "Plan UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "appCode",
-            "required": true,
-            "in": "path",
-            "description": "App code string",
-            "schema": {
-              "example": "crm",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "App removed from plan successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Plan or plan-app assignment not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Remove an app from a plan",
-        "tags": [
-          "Admin - Plan Apps"
-        ]
-      }
-    },
     "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/prices": {
       "get": {
         "operationId": "PlanPriceController_findByPlan",
@@ -8375,9 +8071,9 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/permissions/features": {
+    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/permissions/apps": {
       "get": {
-        "operationId": "PlanFeaturePermissionController_getAvailableFeatures",
+        "operationId": "PlanFeaturePermissionController_getAvailableApps",
         "parameters": [
           {
             "name": "planId",
@@ -13946,9 +13642,7 @@
             "example": "included",
             "enum": [
               "included",
-              "addon",
-              "unavailable",
-              "enabled"
+              "locked"
             ]
           },
           "price": {
@@ -15437,14 +15131,10 @@
             "type": "number",
             "example": 5
           },
-          "planCount": {
-            "type": "number",
-            "example": 2
-          },
           "canDelete": {
             "type": "boolean",
             "example": true,
-            "description": "False when the app is referenced by plans, businesses, or role templates"
+            "description": "False when the app is referenced by role templates"
           }
         },
         "required": [
@@ -15457,7 +15147,6 @@
           "sortOrder",
           "createdAt",
           "featureCount",
-          "planCount",
           "canDelete"
         ]
       },
@@ -15564,11 +15253,8 @@
             "type": "string",
             "example": "package"
           },
-          "apps": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/BusinessFeatureAppDto"
-            }
+          "app": {
+            "$ref": "#/components/schemas/BusinessFeatureAppDto"
           },
           "permissionCount": {
             "type": "number",
@@ -15581,7 +15267,7 @@
           "code",
           "name",
           "icon",
-          "apps",
+          "app",
           "permissionCount"
         ]
       },
@@ -15639,23 +15325,16 @@
           "isGlobal"
         ]
       },
-      "SetFeatureAppsDto": {
+      "SetFeatureAppDto": {
         "type": "object",
         "properties": {
-          "appIds": {
-            "description": "Apps (of this business) the feature should be assigned to",
-            "example": [
-              "550e8400-e29b-41d4-a716-446655440000"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "appId": {
+            "type": "string",
+            "nullable": true,
+            "description": "App (of this business) the feature belongs to; null to remove the feature from this business",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
           }
-        },
-        "required": [
-          "appIds"
-        ]
+        }
       },
       "CreateRoleTemplateDto": {
         "type": "object",
@@ -15866,22 +15545,42 @@
           }
         }
       },
+      "RoleTemplateGrantDto": {
+        "type": "object",
+        "properties": {
+          "featurePermissionId": {
+            "type": "string",
+            "description": "Feature permission ID to grant",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform this grant applies to",
+            "enum": [
+              "WEB",
+              "MOBILE"
+            ],
+            "example": "WEB"
+          }
+        },
+        "required": [
+          "featurePermissionId",
+          "platform"
+        ]
+      },
       "AssignRoleTemplatePermissionsDto": {
         "type": "object",
         "properties": {
-          "featurePermissionIds": {
-            "description": "Feature permission IDs to grant to the role template (full replace)",
-            "example": [
-              "550e8400-e29b-41d4-a716-446655440000"
-            ],
+          "grants": {
+            "description": "Platform-scoped permission grants for the role template (full replace)",
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/RoleTemplateGrantDto"
             }
           }
         },
         "required": [
-          "featurePermissionIds"
+          "grants"
         ]
       },
       "CreatePlanDto": {
@@ -16075,105 +15774,6 @@
             "type": "string",
             "description": "Rich content stored as Lexical JSON",
             "nullable": true
-          }
-        }
-      },
-      "PlanAppTableRowDto": {
-        "type": "object",
-        "properties": {
-          "appCode": {
-            "type": "string",
-            "example": "crm"
-          },
-          "sortOrder": {
-            "type": "number",
-            "example": 0
-          }
-        },
-        "required": [
-          "appCode",
-          "sortOrder"
-        ]
-      },
-      "PlanAppTableResponseDto": {
-        "type": "object",
-        "properties": {
-          "result": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PlanAppTableRowDto"
-            }
-          },
-          "count": {
-            "type": "number"
-          },
-          "state": {
-            "type": "object",
-            "description": "Current active filter/sort/visibility state"
-          },
-          "activeViewId": {
-            "type": "object",
-            "nullable": true
-          }
-        },
-        "required": [
-          "result",
-          "count",
-          "state"
-        ]
-      },
-      "PlanAppDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "planId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "appCode": {
-            "type": "string",
-            "example": "crm"
-          },
-          "sortOrder": {
-            "type": "number",
-            "example": 0
-          }
-        },
-        "required": [
-          "id",
-          "planId",
-          "appCode",
-          "sortOrder"
-        ]
-      },
-      "AssignPlanAppDto": {
-        "type": "object",
-        "properties": {
-          "appCode": {
-            "type": "string",
-            "description": "App code to assign to this plan",
-            "example": "crm"
-          },
-          "sortOrder": {
-            "type": "number",
-            "description": "Display order within the plan",
-            "example": 0
-          }
-        },
-        "required": [
-          "appCode"
-        ]
-      },
-      "UpdatePlanAppDto": {
-        "type": "object",
-        "properties": {
-          "sortOrder": {
-            "type": "number",
-            "description": "Display order within the plan",
-            "example": 0
           }
         }
       },

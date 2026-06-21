@@ -89,11 +89,7 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
   }
 
   // Returns plans for the deployment's version + business, priced for the given country (monthly)
-  async findPlansForDeployment(
-    deploymentId: string,
-    businessId: string,
-    countryId?: string,
-  ): Promise<PlanOptionDto[]> {
+  async findPlansForDeployment(deploymentId: string, businessId: string, countryId?: string): Promise<PlanOptionDto[]> {
     const rows = await this.db
       .select({
         id: plans.id,

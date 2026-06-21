@@ -285,18 +285,12 @@ export function validate(config: Record<string, unknown>): Record<string, unknow
     MEDIA_MAX_FILE_SIZE_MB: config.MEDIA_MAX_FILE_SIZE_MB
       ? parseInt(config.MEDIA_MAX_FILE_SIZE_MB as string, 10)
       : undefined,
-    MEDIA_MAX_BATCH_SIZE: config.MEDIA_MAX_BATCH_SIZE
-      ? parseInt(config.MEDIA_MAX_BATCH_SIZE as string, 10)
-      : undefined,
+    MEDIA_MAX_BATCH_SIZE: config.MEDIA_MAX_BATCH_SIZE ? parseInt(config.MEDIA_MAX_BATCH_SIZE as string, 10) : undefined,
     MEDIA_SIGNED_URL_EXPIRY: config.MEDIA_SIGNED_URL_EXPIRY
       ? parseInt(config.MEDIA_SIGNED_URL_EXPIRY as string, 10)
       : undefined,
-    TABLE_STATE_CACHE_TTL: config.TABLE_STATE_CACHE_TTL
-      ? parseInt(config.TABLE_STATE_CACHE_TTL as string, 10)
-      : 3600,
-    TABLE_VIEWS_CACHE_TTL: config.TABLE_VIEWS_CACHE_TTL
-      ? parseInt(config.TABLE_VIEWS_CACHE_TTL as string, 10)
-      : 86400,
+    TABLE_STATE_CACHE_TTL: config.TABLE_STATE_CACHE_TTL ? parseInt(config.TABLE_STATE_CACHE_TTL as string, 10) : 3600,
+    TABLE_VIEWS_CACHE_TTL: config.TABLE_VIEWS_CACHE_TTL ? parseInt(config.TABLE_VIEWS_CACHE_TTL as string, 10) : 86400,
   };
 
   const validatedConfig = plainToInstance(EnvironmentVariables, processedConfig, {

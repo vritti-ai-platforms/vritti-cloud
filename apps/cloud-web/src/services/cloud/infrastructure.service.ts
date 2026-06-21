@@ -10,11 +10,7 @@ export interface PlanOption {
 }
 
 // Fetches plans for a deployment+business combo, priced for the given country
-export function getDeploymentPlans(
-  deploymentId: string,
-  businessId: string,
-  countryId: string,
-): Promise<PlanOption[]> {
+export function getDeploymentPlans(deploymentId: string, businessId: string, countryId: string): Promise<PlanOption[]> {
   return axios
     .get<PlanOption[]>(`cloud-api/deployments/${deploymentId}/plans`, { params: { businessId, countryId } })
     .then((r) => r.data);

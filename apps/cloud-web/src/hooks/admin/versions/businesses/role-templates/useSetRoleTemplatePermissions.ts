@@ -4,7 +4,7 @@ import type { AxiosError } from 'axios';
 import type { SetPermissionsData } from '@/schemas/admin/role-templates';
 import { setRoleTemplatePermissions } from '@/services/admin/versions/businesses/role-templates.service';
 import { roleTemplateQueryKey } from './useRoleTemplate';
-import { roleTemplatePermissionsQueryKey } from './useRoleTemplatePermissions';
+import { roleTemplatePermissionsPrefixKey } from './useRoleTemplatePermissions';
 import { ROLE_TEMPLATES_QUERY_KEY } from './useRoleTemplates';
 
 type Vars = { versionId: string; businessId: string; roleId: string; data: SetPermissionsData };
@@ -17,7 +17,7 @@ export function useSetRoleTemplatePermissions(options?: UseSetRoleTemplatePermis
     ...options,
     mutationFn: setRoleTemplatePermissions,
     onSuccess: (result, vars, ...args) => {
-      queryClient.invalidateQueries({ queryKey: roleTemplatePermissionsQueryKey(vars.versionId, vars.roleId) });
+      queryClient.invalidateQueries({ queryKey: roleTemplatePermissionsPrefixKey(vars.versionId, vars.roleId) });
       queryClient.invalidateQueries({ queryKey: roleTemplateQueryKey(vars.versionId, vars.businessId, vars.roleId) });
       queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(vars.versionId, vars.businessId) });
       options?.onSuccess?.(result, vars, ...args);

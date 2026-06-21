@@ -1,5 +1,4 @@
 import { AdminLayout } from '@layouts/AdminLayout';
-import { VersionScopeProvider } from '@/context/VersionScopeContext';
 import { AppLayout } from '@layouts/AppLayout';
 import { AuthLayout } from '@layouts/AuthLayout';
 import { OrgLayout } from '@layouts/OrgLayout';
@@ -7,6 +6,7 @@ import { NotFoundErrorPage } from '@vritti/quantum-ui/ErrorBoundary';
 import { Suspense } from 'react';
 import type { RouteObject } from 'react-router-dom';
 import { Navigate, useNavigate } from 'react-router-dom';
+import { VersionScopeProvider } from '@/context/VersionScopeContext';
 import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import './index.css';
 import { ProfilePage } from './pages/account/profile/ProfilePage';
@@ -19,12 +19,12 @@ import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage
 import { DeploymentViewPageSkeleton } from './pages/admin/deployments/DeploymentViewPageSkeleton';
 import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/deployments/organizations/OrganizationViewPage';
 import { OrganizationViewPageSkeleton } from './pages/admin/deployments/organizations/OrganizationViewPageSkeleton';
-import { PlanViewPage } from './pages/admin/versions/businesses/tabs/plans/PlanViewPage';
-import { PlanViewPageSkeleton } from './pages/admin/versions/businesses/tabs/plans/PlanViewPageSkeleton';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
 import { RegionViewPageSkeleton } from './pages/admin/regions/RegionViewPageSkeleton';
 import { BusinessDetailPage } from './pages/admin/versions/businesses/BusinessDetailPage';
+import { PlanViewPage } from './pages/admin/versions/businesses/tabs/plans/PlanViewPage';
+import { PlanViewPageSkeleton } from './pages/admin/versions/businesses/tabs/plans/PlanViewPageSkeleton';
 import { RoleTemplateViewPage } from './pages/admin/versions/businesses/tabs/role-templates/RoleTemplateViewPage';
 import { RoleTemplateViewPageSkeleton } from './pages/admin/versions/businesses/tabs/role-templates/RoleTemplateViewPageSkeleton';
 import { FeatureViewPage } from './pages/admin/versions/tabs/features/FeatureViewPage';

@@ -76,36 +76,36 @@ export class BusinessFeatureService {
     return permissions.map(BusinessFeaturePermissionDto.from);
   }
 
-  // Replaces the apps a feature is assigned to within a business
-  async setApps(
+  // Pins a feature to a single app within a business (appId null removes it from the business)
+  async setApp(
     versionId: string,
     businessId: string,
     featureId: string,
-    appIds: string[],
+    appId: string | null,
   ): Promise<SuccessResponseDto> {
     const feature = await this.featureRepository.findByIdWithPermissionCheck(featureId);
     if (!feature || feature.feature.versionId !== versionId) {
       throw new NotFoundException('Feature not found.');
     }
-    if (appIds.length > 0 && !feature.hasPermissions) {
+    if (appId && !feature.hasPermissions) {
       throw new BadRequestException({
         label: 'Missing Permissions',
         detail: 'This feature must have at least one permission before it can be assigned to an app.',
       });
     }
 
-    const businessApps = await this.appRepository.findAllByVersionAndBusiness(versionId, businessId);
-    const businessAppIds = businessApps.map((app) => app.id);
-    const invalid = appIds.filter((id) => !businessAppIds.includes(id));
-    if (invalid.length > 0) {
-      throw new BadRequestException({
-        label: 'Invalid Apps',
-        detail: 'One or more selected apps do not belong to this business.',
-      });
+    if (appId) {
+      const app = await this.appRepository.findById(appId);
+      if (!app || app.versionId !== versionId || app.businessId !== businessId) {
+        throw new BadRequestException({
+          label: 'Invalid App',
+          detail: 'The selected app does not belong to this business.',
+        });
+      }
     }
 
-    await this.appFeatureRepository.setFeatureApps(versionId, featureId, businessAppIds, appIds);
-    this.logger.log(`Set ${appIds.length} app(s) for feature ${featureId} in business: ${businessId}`);
-    return { success: true, message: `Apps for "${feature.feature.name}" updated successfully.` };
+    await this.appFeatureRepository.setFeatureApp(versionId, businessId, featureId, appId);
+    this.logger.log(`Set app ${appId ?? 'none'} for feature ${featureId} in business: ${businessId}`);
+    return { success: true, message: `App for "${feature.feature.name}" updated successfully.` };
   }
 }

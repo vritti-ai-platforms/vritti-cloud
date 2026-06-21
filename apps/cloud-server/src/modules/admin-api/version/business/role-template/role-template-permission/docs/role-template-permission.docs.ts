@@ -3,31 +3,19 @@ import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { AssignRoleTemplatePermissionsDto } from '../dto/request/assign-role-template-permissions.dto';
 
-// Swagger docs for listing permissions for a role template
+// Swagger docs for the role-template permission matrix (the role's apps, each with its features, + the full grant set)
 export function ApiGetRoleTemplatePermissions() {
   return applyDecorators(
-    ApiOperation({ summary: 'List permissions for a role template grouped by app' }),
+    ApiOperation({
+      summary: 'Get the role-template permission matrix',
+      description: "Returns the role template's apps (each with its features) plus the complete current grant set.",
+    }),
     ApiParam({
       name: 'roleTemplateId',
       description: 'Role template UUID',
       example: '550e8400-e29b-41d4-a716-446655440000',
     }),
-    ApiResponse({ status: 200, description: 'Permissions retrieved successfully.' }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Role template not found.' }),
-  );
-}
-
-// Swagger docs for listing features available for permission assignment
-export function ApiAvailableFeatures() {
-  return applyDecorators(
-    ApiOperation({ summary: 'List features available for permission assignment from linked apps' }),
-    ApiParam({
-      name: 'roleTemplateId',
-      description: 'Role template UUID',
-      example: '550e8400-e29b-41d4-a716-446655440000',
-    }),
-    ApiResponse({ status: 200, description: 'Available features retrieved successfully.' }),
+    ApiResponse({ status: 200, description: 'Permission matrix retrieved successfully.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Role template not found.' }),
   );

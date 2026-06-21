@@ -1,21 +1,15 @@
-import { usePlanAvailableFeatures, usePlanUnlocked, useSetPlanUnlocked } from '@hooks/admin/versions/businesses/plans/permissions';
-import { Badge } from '@vritti/quantum-ui/Badge';
+import {
+  usePlanAvailableApps,
+  usePlanUnlocked,
+  useSetPlanUnlocked,
+} from '@hooks/admin/versions/businesses/plans/permissions';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
-import { Checkbox } from '@vritti/quantum-ui/Checkbox';
-import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Layers, Lock } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useVersionContext } from '@/context/VersionScopeContext';
-
-// Format app code into display name: "order-management" -> "Order Management"
-function appLabel(code: string): string {
-  return code
-    .split('-')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-    .join(' ');
-}
+import { PlanAppCard } from './features/PlanAppCard';
 
 // Serialize a Set of ids into a stable string for dirty comparison
 function serializeSelected(ids: Set<string>): string {
@@ -25,106 +19,92 @@ function serializeSelected(ids: Set<string>): string {
 export const FeaturesTab: React.FC = () => {
   const { versionId, businessId, planId } = useVersionContext();
 
-  const { data: features = [], isLoading: featuresLoading } = usePlanAvailableFeatures(versionId, businessId, planId);
+  const { data: apps = [], isLoading: appsLoading } = usePlanAvailableApps(versionId, businessId, planId);
   const { data: unlocked, isLoading: unlockedLoading } = usePlanUnlocked(versionId, businessId, planId);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const initialRef = useRef<string>('');
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
+  const seededRef = useRef(false);
 
   const saveMutation = useSetPlanUnlocked(versionId, businessId, planId);
 
-  // Initialize from server data — the plan's currently unlocked feature-permission ids
+  // Seed from the plan's currently unlocked ids; expand every app by default so the grids are visible
   useEffect(() => {
-    if (!unlocked || features.length === 0) return;
+    if (!unlocked || apps.length === 0 || seededRef.current) return;
     const ids = new Set<string>(unlocked.featurePermissionIds);
     setSelected(ids);
     initialRef.current = serializeSelected(ids);
-  }, [unlocked, features]);
+    setExpandedApps(new Set(apps.map((a) => a.id)));
+    seededRef.current = true;
+  }, [unlocked, apps]);
 
   // Toggle a single permission
-  const togglePermission = useCallback((featurePermissionId: string) => {
+  const togglePermission = useCallback((id: string) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (next.has(featurePermissionId)) next.delete(featurePermissionId);
-      else next.add(featurePermissionId);
+      next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   }, []);
 
-  // Toggle all permissions for a feature
-  const toggleAllFeaturePermissions = useCallback((permissionIds: string[]) => {
+  // Toggle a whole feature (its permission ids) — clear when fully on, otherwise select all
+  const toggleFeature = useCallback((ids: string[]) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      const allSelected = permissionIds.every((id) => next.has(id));
-      if (allSelected) {
-        for (const id of permissionIds) next.delete(id);
-      } else {
-        for (const id of permissionIds) next.add(id);
-      }
+      const allOn = ids.length > 0 && ids.every((id) => next.has(id));
+      for (const id of ids) allOn ? next.delete(id) : next.add(id);
       return next;
     });
   }, []);
 
-  // Toggle feature expansion
-  const toggleExpanded = useCallback((featureId: string) => {
-    setExpanded((prev) => {
+  const toggleApp = useCallback((id: string) => {
+    setExpandedApps((prev) => {
       const next = new Set(prev);
-      if (next.has(featureId)) next.delete(featureId);
-      else next.add(featureId);
+      next.has(id) ? next.delete(id) : next.add(id);
       return next;
     });
   }, []);
 
   const isDirty = serializeSelected(selected) !== initialRef.current;
-  const totalSelected = selected.size;
 
-  const handleSave = () => {
-    saveMutation.mutate([...selected]);
-  };
-
-  // Loading state
-  if (featuresLoading || unlockedLoading) {
+  if (appsLoading || unlockedLoading) {
     return (
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3">
         <div className="flex items-center justify-end">
           <Skeleton className="h-9 w-36" />
         </div>
-        <div className="border rounded-lg divide-y">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="px-4 py-3 flex items-center gap-3">
-              <Skeleton className="size-4 rounded" />
-              <Skeleton className="h-4 flex-1" />
-            </div>
-          ))}
-        </div>
+        {[1, 2].map((i) => (
+          <Skeleton key={i} className="h-14 w-full rounded-lg" />
+        ))}
       </div>
     );
   }
 
-  // Empty state
-  if (features.length === 0) {
+  if (apps.length === 0) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-          <Layers className="size-8 text-muted-foreground mb-3" />
-          <p className="text-sm font-medium text-foreground">No apps assigned</p>
-          <p className="text-xs text-muted-foreground mt-1">Assign apps to this plan to unlock their permissions.</p>
+          <Layers className="mb-3 size-8 text-muted-foreground" />
+          <p className="text-sm font-medium text-foreground">No features available</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Assign features to this business’s apps to unlock their permissions here.
+          </p>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <div className="flex flex-col gap-4 min-h-100">
-      {/* Header with actions */}
+    <div className="flex min-h-100 flex-col gap-4">
+      {/* Toolbar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           Check the permissions this plan unlocks. Unchecked permissions stay visible but locked for upsell.
         </p>
         <Button
           size="sm"
-          onClick={handleSave}
+          onClick={() => saveMutation.mutate([...selected])}
           disabled={!isDirty}
           isLoading={saveMutation.isPending}
           loadingText="Saving..."
@@ -133,64 +113,25 @@ export const FeaturesTab: React.FC = () => {
         </Button>
       </div>
 
-      {/* Feature accordions */}
-      <div className="border rounded-lg divide-y">
-        {features.map((feature) => {
-          const permissionIds = feature.permissions.map((p) => p.featurePermissionId);
-          const selectedCount = permissionIds.filter((id) => selected.has(id)).length;
-          const totalCount = feature.permissions.length;
-          const isAllSelected = totalCount > 0 && selectedCount === totalCount;
-          const isPartial = selectedCount > 0 && !isAllSelected;
-          const isExpanded = expanded.has(feature.id);
-
-          return (
-            <Collapsible
-              key={feature.id}
-              open={isExpanded}
-              onOpenChange={() => toggleExpanded(feature.id)}
-              headerClassName="px-4 py-3"
-              triggerClassName="hover:text-foreground/80 transition-colors"
-              leading={
-                <Checkbox
-                  checked={isAllSelected ? true : isPartial ? 'indeterminate' : false}
-                  onCheckedChange={() => toggleAllFeaturePermissions(permissionIds)}
-                />
-              }
-              trailing={
-                <span className="text-xs text-muted-foreground tabular-nums shrink-0">
-                  {selectedCount} / {totalCount}
-                </span>
-              }
-              trigger={
-                <>
-                  <span className="text-sm font-medium">{feature.name}</span>
-                  <Badge variant="secondary" className="text-[10px]">
-                    {appLabel(feature.appCode)}
-                  </Badge>
-                </>
-              }
-            >
-              <div className="border-t bg-muted/20 px-12 py-3">
-                <div className="flex flex-wrap gap-4">
-                  {feature.permissions.map((permission) => (
-                    <Checkbox
-                      key={permission.featurePermissionId}
-                      label={permission.label}
-                      checked={selected.has(permission.featurePermissionId)}
-                      onCheckedChange={() => togglePermission(permission.featurePermissionId)}
-                    />
-                  ))}
-                </div>
-              </div>
-            </Collapsible>
-          );
-        })}
+      {/* App cards (layer 1) → feature unlock grids (layer 2) */}
+      <div className="flex flex-col gap-3">
+        {apps.map((app) => (
+          <PlanAppCard
+            key={app.id}
+            app={app}
+            selected={selected}
+            expanded={expandedApps.has(app.id)}
+            onToggleExpanded={() => toggleApp(app.id)}
+            onTogglePermission={togglePermission}
+            onToggleFeature={toggleFeature}
+          />
+        ))}
       </div>
 
       {/* Footer */}
       <div className="mt-auto flex items-center gap-2 text-xs text-muted-foreground">
         <Lock className="size-3.5" />
-        <span>{totalSelected} permission(s) unlocked</span>
+        <span>{selected.size} permission(s) unlocked</span>
       </div>
     </div>
   );

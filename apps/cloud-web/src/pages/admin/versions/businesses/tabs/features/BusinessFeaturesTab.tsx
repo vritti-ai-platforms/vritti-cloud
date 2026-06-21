@@ -2,7 +2,7 @@ import {
   BUSINESS_FEATURES_TABLE_KEY,
   useBusinessFeaturePermissions,
   useBusinessFeatures,
-  useSetBusinessFeatureApps,
+  useSetBusinessFeatureApp,
 } from '@hooks/admin/versions/businesses/features';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
@@ -18,7 +18,7 @@ import { useState } from 'react';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { BusinessFeature } from '@/schemas/admin/business-features';
 import { AddBusinessFeatureForm } from './forms/AddBusinessFeatureForm';
-import { EditBusinessFeatureAppsForm } from './forms/EditBusinessFeatureAppsForm';
+import { EditBusinessFeatureAppForm } from './forms/EditBusinessFeatureAppForm';
 
 interface ColumnActions {
   onView: (feature: BusinessFeature) => void;
@@ -49,19 +49,16 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeat
       ),
     },
     {
-      id: 'apps',
-      header: 'Apps',
+      id: 'app',
+      header: 'App',
       cell: ({ row }) => (
-        <div className="flex flex-wrap items-center justify-center gap-1">
-          {row.original.apps.slice(0, 2).map((app) => (
-            <Badge key={app.id} variant="secondary" className="text-[10px]">
-              {app.name}
+        <div className="flex items-center justify-center">
+          {row.original.app ? (
+            <Badge variant="secondary" className="text-[10px]">
+              {row.original.app.name}
             </Badge>
-          ))}
-          {row.original.apps.length > 2 && (
-            <Badge variant="outline" className="text-[10px]">
-              +{row.original.apps.length - 2}
-            </Badge>
+          ) : (
+            <span className="text-[10px] text-muted-foreground">—</span>
           )}
         </div>
       ),
@@ -87,12 +84,12 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeat
             {
               id: 'edit',
               icon: Pencil,
-              label: 'Edit apps',
+              label: 'Edit app',
               dialog: {
-                title: `Edit apps — ${row.original.name}`,
-                description: 'Choose which apps this feature belongs to in this business.',
+                title: `Edit app — ${row.original.name}`,
+                description: 'Choose which app this feature belongs to in this business.',
                 content: (close) => (
-                  <EditBusinessFeatureAppsForm feature={row.original} onSuccess={close} onCancel={close} />
+                  <EditBusinessFeatureAppForm feature={row.original} onSuccess={close} onCancel={close} />
                 ),
               },
             },
@@ -121,7 +118,7 @@ export const BusinessFeaturesTab = () => {
   const permissionsDialog = useDialog();
   const [selected, setSelected] = useState<BusinessFeature | null>(null);
 
-  const removeMutation = useSetBusinessFeatureApps();
+  const removeMutation = useSetBusinessFeatureApp();
   const { data: permissions = [], isLoading: permissionsLoading } = useBusinessFeaturePermissions(
     versionId,
     businessId,
@@ -142,7 +139,7 @@ export const BusinessFeaturesTab = () => {
       confirmLabel: 'Remove',
       variant: 'destructive',
     });
-    if (confirmed) removeMutation.mutate({ versionId, businessId, featureId: feature.id, data: { appIds: [] } });
+    if (confirmed) removeMutation.mutate({ versionId, businessId, featureId: feature.id, data: { appId: null } });
   }
 
   const { table } = useDataTable({
@@ -203,9 +200,9 @@ export const BusinessFeaturesTab = () => {
         title={selected ? `${selected.name} permissions` : 'Permissions'}
         description="Permissions available to this business for the feature."
         content={() => (
-          <div className="flex flex-col gap-2 px-6 pb-2 min-h-80">
+          <div className="flex flex-col gap-2 px-6 py-2">
             {permissionsLoading ? (
-              [1, 2, 3].map((i) => <Skeleton key={i} className="h-12 w-full rounded-md" />)
+              [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 w-full rounded-md" />)
             ) : permissions.length ? (
               permissions.map((permission) => (
                 <div key={permission.id} className="flex items-center gap-3 rounded-md border px-3 py-2">

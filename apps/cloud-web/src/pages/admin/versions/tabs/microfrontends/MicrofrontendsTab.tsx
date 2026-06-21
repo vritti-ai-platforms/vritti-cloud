@@ -1,4 +1,8 @@
-import { microfrontendsTableKey, useDeleteMicrofrontend, useMicrofrontendsTable } from '@hooks/admin/versions/microfrontends';
+import {
+  microfrontendsTableKey,
+  useDeleteMicrofrontend,
+  useMicrofrontendsTable,
+} from '@hooks/admin/versions/microfrontends';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';

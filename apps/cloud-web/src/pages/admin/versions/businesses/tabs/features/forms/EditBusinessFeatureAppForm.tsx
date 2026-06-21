@@ -1,4 +1,4 @@
-import { useSetBusinessFeatureApps } from '@hooks/admin/versions/businesses/features';
+import { useSetBusinessFeatureApp } from '@hooks/admin/versions/businesses/features';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -7,29 +7,29 @@ import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { useVersionContext } from '@/context/VersionScopeContext';
-import type { BusinessFeature, SetFeatureAppsData } from '@/schemas/admin/business-features';
-import { setFeatureAppsSchema } from '@/schemas/admin/business-features';
+import type { BusinessFeature, SetFeatureAppData } from '@/schemas/admin/business-features';
+import { setFeatureAppSchema } from '@/schemas/admin/business-features';
 
-interface EditBusinessFeatureAppsFormProps {
+interface EditBusinessFeatureAppFormProps {
   feature: BusinessFeature;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const EditBusinessFeatureAppsForm: React.FC<EditBusinessFeatureAppsFormProps> = ({
+export const EditBusinessFeatureAppForm: React.FC<EditBusinessFeatureAppFormProps> = ({
   feature,
   onSuccess,
   onCancel,
 }) => {
   const { versionId, businessId } = useVersionContext();
-  const form = useForm<SetFeatureAppsData>({
-    resolver: zodResolver(setFeatureAppsSchema),
+  const form = useForm<SetFeatureAppData>({
+    resolver: zodResolver(setFeatureAppSchema),
     defaultValues: {
-      appIds: feature.apps.map((app) => app.id),
+      appId: feature.app?.id ?? '',
     },
   });
 
-  const mutation = useSetBusinessFeatureApps({ onSuccess });
+  const mutation = useSetBusinessFeatureApp({ onSuccess });
 
   return (
     <Form
@@ -40,10 +40,9 @@ export const EditBusinessFeatureAppsForm: React.FC<EditBusinessFeatureAppsFormPr
       transformSubmit={(data) => ({ versionId, businessId, featureId: feature.id, data })}
     >
       <AppSelector
-        name="appIds"
-        multiple
-        label="Apps"
-        placeholder="Select the apps this feature belongs to"
+        name="appId"
+        label="App"
+        placeholder="Select the app this feature belongs to"
         params={{ versionId, businessId }}
       />
       <DialogActions>
@@ -51,7 +50,7 @@ export const EditBusinessFeatureAppsForm: React.FC<EditBusinessFeatureAppsFormPr
           Cancel
         </Button>
         <Button type="submit" loadingText="Saving...">
-          Save Apps
+          Save App
         </Button>
       </DialogActions>
     </Form>

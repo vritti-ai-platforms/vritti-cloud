@@ -2,7 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { BusinessFeaturePermissionDto } from '../dto/entity/business-feature-permission.dto';
-import { SetFeatureAppsDto } from '../dto/request/set-feature-apps.dto';
+import { SetFeatureAppDto } from '../dto/request/set-feature-app.dto';
 import { BusinessFeatureTableResponseDto } from '../dto/response/business-feature-table-response.dto';
 
 // Swagger docs for listing a business's features (with permissions and apps) in a data table
@@ -39,16 +39,16 @@ export function ApiFindBusinessFeaturePermissions() {
   );
 }
 
-// Swagger docs for replacing the apps a feature is assigned to within a business
-export function ApiSetFeatureApps() {
+// Swagger docs for pinning a feature to a single app within a business
+export function ApiSetFeatureApp() {
   return applyDecorators(
-    ApiOperation({ summary: "Replace a feature's app assignments within a business" }),
+    ApiOperation({ summary: "Set a feature's app within a business (null removes it from the business)" }),
     ApiParam({ name: 'versionId', description: 'Version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiParam({ name: 'businessId', description: 'Business UUID', example: '550e8400-e29b-41d4-a716-446655440001' }),
     ApiParam({ name: 'featureId', description: 'Feature UUID', example: '550e8400-e29b-41d4-a716-446655440002' }),
-    ApiBody({ type: SetFeatureAppsDto }),
-    ApiResponse({ status: 200, description: 'Apps updated successfully.', type: SuccessResponseDto }),
-    ApiResponse({ status: 400, description: 'Validation failed or invalid apps.' }),
+    ApiBody({ type: SetFeatureAppDto }),
+    ApiResponse({ status: 200, description: 'App updated successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Validation failed or invalid app.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Feature not found.' }),
   );
