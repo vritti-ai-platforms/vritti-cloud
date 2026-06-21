@@ -8,11 +8,15 @@ import { Form } from '@vritti/quantum-ui/Form';
 import { Layers, Shield } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import {
+  AppCard,
+  grantKey,
+  grantsToKeySet,
+  keySetToGrants,
+  PermissionMatrixSkeleton,
+} from '@/components/permission-matrix';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Platform, RoleTemplateFeature, RoleTemplateGrant } from '@/schemas/admin/role-templates';
-import { AppCard } from './permission-matrix/AppCard';
-import { PermissionMatrixSkeleton } from './permission-matrix/PermissionMatrixSkeleton';
-import { grantKey, grantsToKeySet, keySetToGrants } from './permission-matrix/utils';
 
 interface RoleTemplatePermissionFormProps {
   roleId: string;
@@ -113,8 +117,10 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12 text-center">
               <Layers className="mb-3 size-8 text-muted-foreground" />
-              <p className="text-sm font-medium text-foreground">No apps available</p>
-              <p className="mt-1 text-xs text-muted-foreground">Assign apps via Edit to start assigning permissions.</p>
+              <p className="text-sm font-medium text-foreground">No features available</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Add features to this business’s apps to start assigning permissions.
+              </p>
             </CardContent>
           </Card>
         ) : (

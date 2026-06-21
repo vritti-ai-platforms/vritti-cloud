@@ -1,4 +1,4 @@
-import type { Platform, RoleTemplateApp, RoleTemplateGrant } from '@/schemas/admin/role-templates';
+import type { MatrixApp, MatrixGrant, Platform } from '@/schemas/admin/permission-matrix';
 
 export const PLATFORM_LABEL: Record<Platform, string> = { WEB: 'Web', MOBILE: 'Mobile' };
 export const PLATFORM_ORDER: Platform[] = ['WEB', 'MOBILE'];
@@ -9,16 +9,16 @@ export function grantKey(featurePermissionId: string, platform: Platform): strin
 }
 
 // The platforms any of an app's features support, in stable Web→Mobile order — the matrix's fixed columns
-export function appPlatforms(app: RoleTemplateApp): Platform[] {
+export function appPlatforms(app: MatrixApp): Platform[] {
   return PLATFORM_ORDER.filter((p) => app.features.some((f) => f.platforms.includes(p)));
 }
 
 // grants[] ⇄ Set<grantKey> for fast lookup in the matrix
-export function grantsToKeySet(grants: RoleTemplateGrant[]): Set<string> {
+export function grantsToKeySet(grants: MatrixGrant[]): Set<string> {
   return new Set(grants.map((g) => grantKey(g.featurePermissionId, g.platform)));
 }
 
-export function keySetToGrants(keys: Set<string>): RoleTemplateGrant[] {
+export function keySetToGrants(keys: Set<string>): MatrixGrant[] {
   return [...keys].map((key) => {
     const [featurePermissionId, platform] = key.split(':');
     return { featurePermissionId, platform: platform as Platform };

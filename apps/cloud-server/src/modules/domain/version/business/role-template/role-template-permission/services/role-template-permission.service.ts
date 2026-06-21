@@ -31,7 +31,7 @@ export class RoleTemplatePermissionService {
       throw new NotFoundException('Role template not found.');
     }
     const [apps, grants] = await Promise.all([
-      this.roleTemplateFeaturePermissionRepository.findAvailableApps(roleTemplateId, roleTemplate.businessId),
+      this.roleTemplateFeaturePermissionRepository.findAvailableApps(roleTemplate.versionId, roleTemplate.businessId),
       this.roleTemplateFeaturePermissionRepository.findGrantsByRoleTemplateId(roleTemplateId),
     ]);
     this.logger.log(

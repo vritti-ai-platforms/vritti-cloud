@@ -10,7 +10,6 @@ import {
   features,
   microfrontends,
   permissionBusinesses,
-  roleTemplateApps,
   roleTemplateFeaturePermissions,
 } from '@/db/schema';
 
@@ -103,9 +102,9 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
     return Number(result[0]?.count ?? 0);
   }
 
-  // Returns the role template's apps (each with the features it owns + business-scoped permissions) — the matrix source.
-  // Permissions are limited to global ones plus those explicitly granted to the given business.
-  async findAvailableApps(roleTemplateId: string, businessId: string): Promise<AvailableApp[]> {
+  // Returns the business's apps (each with its features + business-scoped permissions + platforms) — the matrix source.
+  // A role can grant any of the business's feature-permissions; its apps are derived from what it grants.
+  async findAvailableApps(versionId: string, businessId: string): Promise<AvailableApp[]> {
     const rows = await this.db
       .select({
         appId: apps.id,
@@ -121,16 +120,16 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
         permissionLabel: featurePermissions.label,
         platform: microfrontends.platform,
       })
-      .from(roleTemplateApps)
-      .innerJoin(apps, eq(apps.id, roleTemplateApps.appId))
-      .innerJoin(appFeatures, eq(appFeatures.appId, apps.id))
+      .from(appFeatures)
+      .innerJoin(apps, and(eq(apps.id, appFeatures.appId), eq(apps.businessId, businessId)))
       .innerJoin(features, eq(features.id, appFeatures.featureId))
       .innerJoin(featurePermissions, eq(featurePermissions.featureId, features.id))
       .leftJoin(featureMicrofrontends, eq(featureMicrofrontends.featureId, features.id))
       .leftJoin(microfrontends, eq(microfrontends.id, featureMicrofrontends.microfrontendId))
       .where(
         and(
-          eq(roleTemplateApps.roleTemplateId, roleTemplateId),
+          eq(appFeatures.versionId, versionId),
+          eq(appFeatures.businessId, businessId),
           or(
             eq(featurePermissions.isGlobal, true),
             exists(

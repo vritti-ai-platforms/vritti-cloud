@@ -79,7 +79,6 @@ export const relations = defineRelations(schema, (r) => ({
     featureMicrofrontends: r.many.featureMicrofrontends(),
     apps: r.many.apps(),
     roleTemplates: r.many.roleTemplates(),
-    roleTemplateApps: r.many.roleTemplateApps(),
     plans: r.many.plans(),
     featurePermissions: r.many.featurePermissions(),
     appFeatures: r.many.appFeatures(),
@@ -238,7 +237,6 @@ export const relations = defineRelations(schema, (r) => ({
     }),
     appFeatures: r.many.appFeatures(),
     appPrices: r.many.appPrices(),
-    roleTemplateApps: r.many.roleTemplateApps(),
   },
 
   // App-Feature junction relations
@@ -305,14 +303,6 @@ export const relations = defineRelations(schema, (r) => ({
     }),
     business: r.one.businesses({ from: r.roleTemplates.businessId, to: r.businesses.id }),
     roleTemplateFeaturePermissions: r.many.roleTemplateFeaturePermissions(),
-    roleTemplateApps: r.many.roleTemplateApps(),
-  },
-
-  // Role-Template-App junction relations
-  roleTemplateApps: {
-    appVersion: r.one.versions({ from: r.roleTemplateApps.versionId, to: r.versions.id }),
-    roleTemplate: r.one.roleTemplates({ from: r.roleTemplateApps.roleTemplateId, to: r.roleTemplates.id }),
-    app: r.one.apps({ from: r.roleTemplateApps.appId, to: r.apps.id }),
   },
 
   // Role-Template-Feature-Permission junction relations

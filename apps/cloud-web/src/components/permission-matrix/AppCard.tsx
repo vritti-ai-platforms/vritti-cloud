@@ -1,24 +1,20 @@
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
-import type { Platform, RoleTemplateApp, RoleTemplateFeature } from '@/schemas/admin/role-templates';
+import type { MatrixApp, MatrixFeature, Platform } from '@/schemas/admin/permission-matrix';
 import { FeatureGroup } from './FeatureGroup';
 import { appPlatforms, grantKey, PLATFORM_LABEL } from './utils';
 
 interface AppCardProps {
-  app: RoleTemplateApp;
+  app: MatrixApp;
   selected: Set<string>;
   expanded: boolean;
   onToggleExpanded: () => void;
   onTogglePermission: (featurePermissionId: string, platform: Platform) => void;
-  onToggleFeatureColumn: (feature: RoleTemplateFeature, platform: Platform) => void;
+  onToggleFeatureColumn: (feature: MatrixFeature, platform: Platform) => void;
 }
 
 // Granted / total permission count for one platform across all of an app's features
-function platformCounts(
-  app: RoleTemplateApp,
-  platform: Platform,
-  selected: Set<string>,
-): { count: number; total: number } {
+function platformCounts(app: MatrixApp, platform: Platform, selected: Set<string>): { count: number; total: number } {
   let count = 0;
   let total = 0;
   for (const feature of app.features) {

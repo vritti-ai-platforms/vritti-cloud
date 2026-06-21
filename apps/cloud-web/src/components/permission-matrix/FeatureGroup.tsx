@@ -1,17 +1,17 @@
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
-import type { Platform, RoleTemplateFeature } from '@/schemas/admin/role-templates';
+import type { MatrixFeature, Platform } from '@/schemas/admin/permission-matrix';
 import { grantKey } from './utils';
 
 interface FeatureGroupProps {
-  feature: RoleTemplateFeature;
+  feature: MatrixFeature;
   // The app's platform columns (fixed slots so every cell lines up)
   columns: Platform[];
   selected: Set<string>;
   onTogglePermission: (featurePermissionId: string, platform: Platform) => void;
-  onToggleColumn: (feature: RoleTemplateFeature, platform: Platform) => void;
+  onToggleColumn: (feature: MatrixFeature, platform: Platform) => void;
 }
 
-// A feature as a parent/child group: a bold master row (tri-state "grant whole feature" per platform)
+// A feature as a parent/child group: a bold master row (tri-state per platform "grant whole feature")
 // followed by indented, muted permission rows with individual checkboxes.
 export const FeatureGroup: React.FC<FeatureGroupProps> = ({
   feature,
@@ -29,7 +29,7 @@ export const FeatureGroup: React.FC<FeatureGroupProps> = ({
           if (!feature.platforms.includes(pf)) return <div key={pf} className="w-24" />;
           const keys = feature.permissions.map((p) => grantKey(p.featurePermissionId, pf));
           const allOn = keys.length > 0 && keys.every((k) => selected.has(k));
-          const someOn = keys.some((k) => selected.has(k));
+          const someOn = keys.some((k) => selected.has(k)) && !allOn;
           return (
             <div key={pf} className="flex w-24 flex-col items-center gap-0.5">
               <Checkbox

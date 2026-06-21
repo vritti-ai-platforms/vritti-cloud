@@ -1,0 +1,1 @@
+DROP TABLE "cloud"."role_template_apps";

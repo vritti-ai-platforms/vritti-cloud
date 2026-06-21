@@ -15134,7 +15134,7 @@
           "canDelete": {
             "type": "boolean",
             "example": true,
-            "description": "False when the app is referenced by role templates"
+            "description": "Whether the app can be deleted"
           }
         },
         "required": [
@@ -15362,20 +15362,12 @@
               "SINGLE_BU"
             ],
             "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
-          },
-          "appIds": {
-            "description": "App IDs this role template covers",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         },
         "required": [
           "versionId",
           "name",
-          "scope",
-          "appIds"
+          "scope"
         ]
       },
       "RoleTemplateDto": {
@@ -15535,13 +15527,6 @@
               "SINGLE_BU"
             ],
             "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
-          },
-          "appIds": {
-            "description": "App IDs this role template covers",
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
           }
         }
       },
@@ -15860,19 +15845,42 @@
           "amount"
         ]
       },
+      "PlanUnlockGrantDto": {
+        "type": "object",
+        "properties": {
+          "featurePermissionId": {
+            "type": "string",
+            "description": "Feature permission ID to unlock",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform this unlock applies to",
+            "enum": [
+              "WEB",
+              "MOBILE"
+            ],
+            "example": "WEB"
+          }
+        },
+        "required": [
+          "featurePermissionId",
+          "platform"
+        ]
+      },
       "SetPlanUnlockedDto": {
         "type": "object",
         "properties": {
-          "featurePermissionIds": {
-            "description": "The feature-permission ids this plan unlocks",
+          "grants": {
+            "description": "Platform-scoped permission unlocks for the plan (full replace)",
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/PlanUnlockGrantDto"
             }
           }
         },
         "required": [
-          "featurePermissionIds"
+          "grants"
         ]
       },
       "CreateDeploymentDto": {

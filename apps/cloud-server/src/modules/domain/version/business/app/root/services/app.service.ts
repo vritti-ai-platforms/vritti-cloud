@@ -71,7 +71,7 @@ export class AppService {
     const orderBy = FilterProcessor.buildOrderBy(state.sort, AppService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.appRepository.findAllWithCounts(where, orderBy, limit, offset);
-    const result = rows.map((row) => AppDto.from(row, row.featureCount, row.roleCount));
+    const result = rows.map((row) => AppDto.from(row, row.featureCount));
     this.logger.log(
       `Fetched apps table (version: ${versionId}, business: ${businessId}, ${total} results, limit: ${limit}, offset: ${offset})`,
     );
@@ -110,7 +110,7 @@ export class AppService {
       throw new NotFoundException('App not found.');
     }
     this.logger.log(`Fetched app: ${id}`);
-    return AppDto.from(row, row.featureCount, row.roleCount);
+    return AppDto.from(row, row.featureCount);
   }
 
   // Updates an app by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -138,18 +138,11 @@ export class AppService {
     return { success: true, message: `App "${existing.name}" updated successfully.` };
   }
 
-  // Deletes an app by ID; rejects if referenced by any role_template_apps
+  // Deletes an app by ID (its feature links cascade; role grants are on feature-permissions, not the app)
   async delete(id: string): Promise<SuccessResponseDto> {
     const existing = await this.appRepository.findById(id);
     if (!existing) {
       throw new NotFoundException('App not found.');
-    }
-    const roleRefs = await this.appRepository.countRoleTemplateReferences(existing.id);
-    if (roleRefs > 0) {
-      throw new ConflictException({
-        label: 'App In Use',
-        detail: `Cannot delete "${existing.name}" — it is referenced by ${roleRefs} role template${roleRefs > 1 ? 's' : ''}. Remove those references first.`,
-      });
     }
     await this.appRepository.delete(id);
     this.logger.log(`Deleted app: ${existing.name} (${existing.id})`);

@@ -17,7 +17,6 @@ import { RoleTemplateTableRowDto } from '@/modules/admin-api/version/business/ro
 import type { CreateRoleTemplateDto } from '@/modules/admin-api/version/business/role-template/root/dto/request/create-role-template.dto';
 import type { UpdateRoleTemplateDto } from '@/modules/admin-api/version/business/role-template/root/dto/request/update-role-template.dto';
 import { RoleTemplateTableResponseDto } from '@/modules/admin-api/version/business/role-template/root/dto/response/role-template-table-response.dto';
-import { RoleTemplateAppRepository } from '../../role-template-app/repositories/role-template-app.repository';
 import { RoleTemplateFeaturePermissionRepository } from '../../role-template-permission/repositories/role-template-feature-permission.repository';
 import { RoleTemplateRepository } from '../repositories/role-template.repository';
 
@@ -33,20 +32,14 @@ export class RoleTemplateService {
 
   constructor(
     private readonly roleTemplateRepository: RoleTemplateRepository,
-    private readonly roleTemplateAppRepository: RoleTemplateAppRepository,
     private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
-  // Creates a new role template and links it to selected apps
+  // Creates a new role template (its apps are derived from the permissions it later grants)
   async create(businessId: string, dto: CreateRoleTemplateDto): Promise<CreateResponseDto<RoleTemplateDto>> {
-    const { appIds, ...roleTemplateData } = dto;
-    const roleTemplate = await this.roleTemplateRepository.transaction(async (tx) => {
-      const created = await this.roleTemplateRepository.create({ ...roleTemplateData, businessId }, tx);
-      await this.roleTemplateAppRepository.setApps(created.id, dto.versionId, appIds, tx);
-      return created;
-    });
-    this.logger.log(`Created role template: ${roleTemplate.name} (${roleTemplate.id}) with ${appIds.length} app(s)`);
+    const roleTemplate = await this.roleTemplateRepository.create({ ...dto, businessId });
+    this.logger.log(`Created role template: ${roleTemplate.name} (${roleTemplate.id})`);
     return {
       success: true,
       message: `Role template "${roleTemplate.name}" created successfully.`,
@@ -101,43 +94,31 @@ export class RoleTemplateService {
     });
   }
 
-  // Finds a role template by ID within a business with business name, permission count, and app count
+  // Finds a role template by ID within a business with business name and permission count
   async findById(
     businessId: string,
     id: string,
-  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number; appCount: number; appIds: string[] }> {
+  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number }> {
     const roleTemplate = await this.roleTemplateRepository.findById(id);
     if (!roleTemplate || roleTemplate.businessId !== businessId) {
       throw new NotFoundException('Role template not found.');
     }
-    const [permissionCount, appIds] = await Promise.all([
-      this.roleTemplateFeaturePermissionRepository.countByRoleTemplateId(id),
-      this.roleTemplateAppRepository.findByRoleTemplateId(id),
-    ]);
+    const permissionCount = await this.roleTemplateFeaturePermissionRepository.countByRoleTemplateId(id);
     this.logger.log(`Fetched role template: ${id}`);
     return {
       ...RoleTemplateDto.from(roleTemplate),
       businessName: roleTemplate.businessName,
       permissionCount,
-      appCount: appIds.length,
-      appIds,
     };
   }
 
-  // Updates a role template by ID within a business and optionally replaces linked apps
+  // Updates a role template by ID within a business
   async update(businessId: string, id: string, dto: UpdateRoleTemplateDto): Promise<SuccessResponseDto> {
     const existing = await this.roleTemplateRepository.findById(id);
     if (!existing || existing.businessId !== businessId) {
       throw new NotFoundException('Role template not found.');
     }
-    const { appIds, ...roleTemplateData } = dto;
-    const roleTemplate = await this.roleTemplateRepository.transaction(async (tx) => {
-      const updated = await this.roleTemplateRepository.update(id, roleTemplateData, tx);
-      if (appIds) {
-        await this.roleTemplateAppRepository.setApps(id, existing.versionId, appIds, tx);
-      }
-      return updated;
-    });
+    const roleTemplate = await this.roleTemplateRepository.update(id, dto);
     this.logger.log(`Updated role template: ${roleTemplate.name} (${roleTemplate.id})`);
     return { success: true, message: `Role template "${roleTemplate.name}" updated successfully.` };
   }

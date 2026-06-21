@@ -53,7 +53,7 @@ export class BusinessRoleTemplateController {
   findById(
     @Param('businessId') businessId: string,
     @Param('roleTemplateId') roleTemplateId: string,
-  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number; appCount: number; appIds: string[] }> {
+  ): Promise<RoleTemplateDto & { businessName: string; permissionCount: number }> {
     this.logger.log('GET /admin-api/versions/:versionId/businesses/:businessId/role-templates/:roleTemplateId');
     return this.roleTemplateService.findById(businessId, roleTemplateId);
   }

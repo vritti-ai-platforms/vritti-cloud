@@ -5,6 +5,7 @@ import {
   type AvailablePlanApp,
   getPlanAvailableApps,
   getPlanUnlocked,
+  type PlanUnlockGrant,
   setPlanUnlocked,
 } from '@/services/admin/versions/businesses/plans/permissions.service';
 
@@ -24,20 +25,20 @@ export function usePlanAvailableApps(versionId: string, businessId: string, plan
   });
 }
 
-// Fetches the plan's currently unlocked feature-permission ids
+// Fetches the plan's currently unlocked (feature-permission, platform) grants
 export function usePlanUnlocked(versionId: string, businessId: string, planId: string) {
-  return useQuery<{ featurePermissionIds: string[] }, AxiosError>({
+  return useQuery<{ grants: PlanUnlockGrant[] }, AxiosError>({
     queryKey: unlockedKey(planId),
     queryFn: () => getPlanUnlocked(versionId, businessId, planId),
     enabled: !!versionId && !!businessId && !!planId,
   });
 }
 
-// Saves the plan's unlocked set
+// Saves the plan's unlocked grants
 export function useSetPlanUnlocked(versionId: string, businessId: string, planId: string) {
   const queryClient = useQueryClient();
-  return useMutation<SuccessResponse, AxiosError, string[]>({
-    mutationFn: (featurePermissionIds) => setPlanUnlocked({ versionId, businessId, planId, featurePermissionIds }),
+  return useMutation<SuccessResponse, AxiosError, PlanUnlockGrant[]>({
+    mutationFn: (grants) => setPlanUnlocked({ versionId, businessId, planId, grants }),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: unlockedKey(planId) }),
   });
 }

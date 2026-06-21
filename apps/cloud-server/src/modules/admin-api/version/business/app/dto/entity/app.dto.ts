@@ -35,14 +35,11 @@ export class AppDto {
   @ApiProperty({ example: 5 })
   featureCount: number;
 
-  @ApiProperty({
-    example: true,
-    description: 'False when the app is referenced by role templates',
-  })
+  @ApiProperty({ example: true, description: 'Whether the app can be deleted' })
   canDelete: boolean;
 
   // Maps an App entity to an AppDto with counts
-  static from(app: App, featureCount = 0, roleCount = 0): AppDto {
+  static from(app: App, featureCount = 0): AppDto {
     const dto = new AppDto();
     dto.id = app.id;
     dto.versionId = app.versionId;
@@ -55,7 +52,7 @@ export class AppDto {
     dto.createdAt = app.createdAt;
     dto.updatedAt = app.updatedAt;
     dto.featureCount = featureCount;
-    dto.canDelete = roleCount === 0;
+    dto.canDelete = true;
     return dto;
   }
 }

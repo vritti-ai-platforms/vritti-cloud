@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, exists, inArray, or } from '@vritti/api-sdk/drizzle-orm';
+import type { AppPlatform } from '@/db/schema';
 import {
   appFeatures,
   apps,
+  featureMicrofrontends,
   featurePermissions,
   features,
+  microfrontends,
   permissionBusinesses,
   planFeaturePermissions,
 } from '@/db/schema';
@@ -22,6 +25,8 @@ export interface AvailablePlanFeature {
   name: string;
   icon: string;
   permissions: AvailablePlanPermission[];
+  // Platforms this feature has a route on — drives which Web/Mobile columns the matrix shows
+  platforms: AppPlatform[];
 }
 
 // An app (layer 1 of the unlock matrix) with the features it owns (layer 2)
@@ -33,29 +38,50 @@ export interface AvailablePlanApp {
   features: AvailablePlanFeature[];
 }
 
+// A single platform-scoped unlock on a plan
+export interface PlanUnlockGrant {
+  featurePermissionId: string;
+  platform: AppPlatform;
+}
+
 @Injectable()
 export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeof planFeaturePermissions> {
   constructor(database: PrimaryDatabaseService) {
     super(database, planFeaturePermissions);
   }
 
-  // Returns the unlocked feature-permission ids for a plan
-  async findByPlanId(planId: string): Promise<string[]> {
+  // Returns the plan's platform-scoped unlock pairs (the admin matrix source)
+  async findGrantsByPlanId(planId: string): Promise<PlanUnlockGrant[]> {
+    return this.db
+      .select({
+        featurePermissionId: planFeaturePermissions.featurePermissionId,
+        platform: planFeaturePermissions.platform,
+      })
+      .from(planFeaturePermissions)
+      .where(eq(planFeaturePermissions.planId, planId));
+  }
+
+  // Returns the distinct feature-permission ids a plan unlocks on ANY platform (for "is it purchased" checks)
+  async findUnlockedFeaturePermissionIds(planId: string): Promise<string[]> {
     const rows = await this.db
-      .select({ id: planFeaturePermissions.featurePermissionId })
+      .selectDistinct({ id: planFeaturePermissions.featurePermissionId })
       .from(planFeaturePermissions)
       .where(eq(planFeaturePermissions.planId, planId));
     return rows.map((r) => r.id);
   }
 
-  // Replaces a plan's unlocked set with the given feature-permission ids
-  async setUnlocked(planId: string, featurePermissionIds: string[]): Promise<void> {
+  // Replaces a plan's unlocked set with the given (feature-permission, platform) grants
+  async setUnlocked(planId: string, grants: PlanUnlockGrant[]): Promise<void> {
     await this.database.drizzleClient.transaction(async (tx) => {
       await tx.delete(planFeaturePermissions).where(eq(planFeaturePermissions.planId, planId));
-      if (featurePermissionIds.length > 0) {
-        await tx
-          .insert(planFeaturePermissions)
-          .values(featurePermissionIds.map((id) => ({ planId, featurePermissionId: id })));
+      if (grants.length > 0) {
+        await tx.insert(planFeaturePermissions).values(
+          grants.map((g) => ({
+            planId,
+            featurePermissionId: g.featurePermissionId,
+            platform: g.platform,
+          })),
+        );
       }
     });
   }
@@ -70,8 +96,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
     return rows.map((r) => r.id);
   }
 
-  // Returns the business's apps (each with the features it owns + business-scoped permissions) — the unlock matrix source.
-  // The plan no longer scopes apps; the plan can unlock any of the business's feature-permissions.
+  // Returns the business's apps (each with its features + business-scoped permissions + supported platforms) — the unlock matrix source.
   async findAvailableApps(versionId: string, businessId: string): Promise<AvailablePlanApp[]> {
     const rows = await this.db
       .select({
@@ -86,11 +111,14 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
+        platform: microfrontends.platform,
       })
       .from(appFeatures)
       .innerJoin(apps, and(eq(apps.id, appFeatures.appId), eq(apps.businessId, businessId)))
       .innerJoin(features, eq(features.id, appFeatures.featureId))
       .innerJoin(featurePermissions, eq(featurePermissions.featureId, features.id))
+      .leftJoin(featureMicrofrontends, eq(featureMicrofrontends.featureId, features.id))
+      .leftJoin(microfrontends, eq(microfrontends.id, featureMicrofrontends.microfrontendId))
       .where(
         and(
           eq(appFeatures.versionId, versionId),
@@ -130,6 +158,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
           name: row.featureName,
           icon: row.featureIcon,
           permissions: [],
+          platforms: [],
         };
         featureMap.set(featureKey, feature);
         app.features.push(feature);
@@ -141,6 +170,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
           label: row.permissionLabel,
         });
       }
+      if (row.platform && !feature.platforms.includes(row.platform)) feature.platforms.push(row.platform);
     }
     return Array.from(appMap.values());
   }

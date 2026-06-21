@@ -1,33 +1,16 @@
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { MatrixApp, MatrixGrant } from '@/schemas/admin/permission-matrix';
 
-export interface AvailablePlanPermission {
-  featurePermissionId: string;
-  code: string;
-  label: string;
-}
-
-export interface AvailablePlanFeature {
-  id: string;
-  code: string;
-  name: string;
-  icon: string;
-  permissions: AvailablePlanPermission[];
-}
-
-export interface AvailablePlanApp {
-  id: string;
-  code: string;
-  name: string;
-  icon: string;
-  features: AvailablePlanFeature[];
-}
+// The unlock matrix shares the role-template matrix shapes (app → feature → permission, per platform)
+export type AvailablePlanApp = MatrixApp;
+export type PlanUnlockGrant = MatrixGrant;
 
 function base(versionId: string, businessId: string, planId: string): string {
   return `admin-api/versions/${versionId}/businesses/${businessId}/plans/${planId}/permissions`;
 }
 
-// Fetches the unlock-matrix source (the business's apps, each with its features + permissions)
+// Fetches the unlock-matrix source (the business's apps, each with its features + permissions + platforms)
 export function getPlanAvailableApps(
   versionId: string,
   businessId: string,
@@ -36,13 +19,13 @@ export function getPlanAvailableApps(
   return axios.get<AvailablePlanApp[]>(`${base(versionId, businessId, planId)}/apps`).then((r) => r.data);
 }
 
-// Fetches the plan's currently unlocked feature-permission ids
+// Fetches the plan's currently unlocked (feature-permission, platform) grants
 export function getPlanUnlocked(
   versionId: string,
   businessId: string,
   planId: string,
-): Promise<{ featurePermissionIds: string[] }> {
-  return axios.get<{ featurePermissionIds: string[] }>(base(versionId, businessId, planId)).then((r) => r.data);
+): Promise<{ grants: PlanUnlockGrant[] }> {
+  return axios.get<{ grants: PlanUnlockGrant[] }>(base(versionId, businessId, planId)).then((r) => r.data);
 }
 
 // Replaces the plan's unlocked set
@@ -50,12 +33,12 @@ export function setPlanUnlocked({
   versionId,
   businessId,
   planId,
-  featurePermissionIds,
+  grants,
 }: {
   versionId: string;
   businessId: string;
   planId: string;
-  featurePermissionIds: string[];
+  grants: PlanUnlockGrant[];
 }): Promise<SuccessResponse> {
-  return axios.put<SuccessResponse>(base(versionId, businessId, planId), { featurePermissionIds }).then((r) => r.data);
+  return axios.put<SuccessResponse>(base(versionId, businessId, planId), { grants }).then((r) => r.data);
 }

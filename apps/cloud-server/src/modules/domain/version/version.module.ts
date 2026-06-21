@@ -8,8 +8,6 @@ import { AppRepository } from './business/app/root/repositories/app.repository';
 import { AppService } from './business/app/root/services/app.service';
 // Business Feature (feature ↔ app assignment within a business)
 import { BusinessFeatureService } from './business/feature/services/business-feature.service';
-// Role Template App
-import { RoleTemplateAppRepository } from './business/role-template/role-template-app/repositories/role-template-app.repository';
 // Role Template Permission
 import { RoleTemplateFeaturePermissionRepository } from './business/role-template/role-template-permission/repositories/role-template-feature-permission.repository';
 import { RoleTemplatePermissionService } from './business/role-template/role-template-permission/services/role-template-permission.service';
@@ -67,8 +65,6 @@ import { VersionService } from './root/services/version.service';
     // Role Template
     RoleTemplateService,
     RoleTemplateRepository,
-    // Role Template App
-    RoleTemplateAppRepository,
     // Role Template Permission
     RoleTemplatePermissionService,
     RoleTemplateFeaturePermissionRepository,
@@ -85,7 +81,6 @@ import { VersionService } from './root/services/version.service';
     AppFeatureRepository,
     AppPriceRepository,
     RoleTemplateRepository,
-    RoleTemplateAppRepository,
     RoleTemplateFeaturePermissionRepository,
     // Services
     VersionService,

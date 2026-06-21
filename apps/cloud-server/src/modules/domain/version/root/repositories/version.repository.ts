@@ -13,7 +13,6 @@ import {
   permissionBusinesses,
   planFeaturePermissions,
   plans,
-  roleTemplateApps,
   roleTemplateFeaturePermissions,
   roleTemplates,
   versionBusinesses,
@@ -58,7 +57,6 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       appFeatureRows,
       roleRows,
       rolePermRows,
-      roleAppRows,
       businessRows,
       permissionBusinessRows,
       planFpRows,
@@ -74,7 +72,6 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
         .select()
         .from(roleTemplateFeaturePermissions)
         .where(eq(roleTemplateFeaturePermissions.versionId, versionId)),
-      this.db.select().from(roleTemplateApps).where(eq(roleTemplateApps.versionId, versionId)),
       this.db
         .select({ id: businesses.id, code: businesses.code, name: businesses.name })
         .from(versionBusinesses)
@@ -101,7 +98,6 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       appFeatures: appFeatureRows,
       roleTemplates: roleRows,
       roleTemplatePermissions: rolePermRows,
-      roleTemplateApps: roleAppRows,
       plans: planRows,
       planFeaturePermissions: planFpRows,
       businesses: businessRows,

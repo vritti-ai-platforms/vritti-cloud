@@ -59,15 +59,16 @@ export function buildBuCatalog(
       .map((code) => snapshot.features?.[code])
       .filter((f): f is SnapshotFeature => !!f && !!(f.microfrontends?.WEB || f.microfrontends?.MOBILE));
 
-    // Apps are DERIVED: include this app only if the plan unlocks at least one of its features
-    const appHasUnlock = appFeatures.some((f) => (plan?.unlockedPermissions?.[f.code]?.length ?? 0) > 0);
+    // Apps are DERIVED: include this app only if the plan unlocks at least one of its features (on any platform)
+    const appHasUnlock = appFeatures.some((f) => unlockedCodes(plan?.unlockedPermissions?.[f.code]).length > 0);
     if (!appHasUnlock) continue;
 
     for (const feature of appFeatures) {
       const web = feature.microfrontends?.WEB;
       const mobile = feature.microfrontends?.MOBILE;
 
-      const unlocked = plan?.unlockedPermissions?.[feature.code] ?? [];
+      // Flatten per-platform unlocks until core resolution becomes platform-aware (locked = locked on every platform)
+      const unlocked = unlockedCodes(plan?.unlockedPermissions?.[feature.code]);
       const permissions = buildPermissions(feature, businessCode, unlocked);
       const locked = permissions.length === 0 ? true : permissions.every((p) => p.locked);
 
@@ -98,6 +99,12 @@ export function buildBuCatalog(
     }
   }
   return catalog;
+}
+
+// Flattens a feature's per-platform unlock entry into the union of unlocked permission codes
+function unlockedCodes(entry: { web?: string[]; mobile?: string[] } | undefined): string[] {
+  if (!entry) return [];
+  return [...new Set([...(entry.web ?? []), ...(entry.mobile ?? [])])];
 }
 
 // A feature's business-scoped permissions, each tagged locked against the plan's unlocked set

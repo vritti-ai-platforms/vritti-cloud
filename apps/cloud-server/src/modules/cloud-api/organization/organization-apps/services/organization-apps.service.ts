@@ -122,10 +122,10 @@ export class OrganizationAppsService {
     return { apps };
   }
 
-  // Returns the plan's unlocked feature-permission ids as a set (empty when the plan can't be resolved)
+  // Returns the plan's unlocked feature-permission ids (unlocked on any platform) as a set
   private async resolveUnlockedSet(planId: string | undefined): Promise<Set<string>> {
     if (!planId) return new Set();
-    const ids = await this.planFeaturePermissionRepository.findByPlanId(planId);
+    const ids = await this.planFeaturePermissionRepository.findUnlockedFeaturePermissionIds(planId);
     return new Set(ids);
   }
 

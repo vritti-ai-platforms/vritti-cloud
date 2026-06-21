@@ -5,16 +5,17 @@ import {
 } from '@hooks/admin/versions/businesses/plans/permissions';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
-import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Layers, Lock } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  AppCard,
+  grantKey,
+  grantsToKeySet,
+  keySetToGrants,
+  PermissionMatrixSkeleton,
+} from '@/components/permission-matrix';
 import { useVersionContext } from '@/context/VersionScopeContext';
-import { PlanAppCard } from './features/PlanAppCard';
-
-// Serialize a Set of ids into a stable string for dirty comparison
-function serializeSelected(ids: Set<string>): string {
-  return [...ids].sort().join('|');
-}
+import type { MatrixFeature, MatrixGrant, Platform } from '@/schemas/admin/permission-matrix';
 
 export const FeaturesTab: React.FC = () => {
   const { versionId, businessId, planId } = useVersionContext();
@@ -29,31 +30,33 @@ export const FeaturesTab: React.FC = () => {
 
   const saveMutation = useSetPlanUnlocked(versionId, businessId, planId);
 
-  // Seed from the plan's currently unlocked ids; expand every app by default so the grids are visible
+  // Seed once from the plan's current grants; expand every app by default
   useEffect(() => {
     if (!unlocked || apps.length === 0 || seededRef.current) return;
-    const ids = new Set<string>(unlocked.featurePermissionIds);
-    setSelected(ids);
-    initialRef.current = serializeSelected(ids);
+    const keys = grantsToKeySet(unlocked.grants);
+    setSelected(keys);
+    initialRef.current = [...keys].sort().join('|');
     setExpandedApps(new Set(apps.map((a) => a.id)));
     seededRef.current = true;
   }, [unlocked, apps]);
 
-  // Toggle a single permission
-  const togglePermission = useCallback((id: string) => {
+  // Toggle one permission on one platform
+  const togglePermission = useCallback((featurePermissionId: string, platform: Platform) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      const key = grantKey(featurePermissionId, platform);
+      next.has(key) ? next.delete(key) : next.add(key);
       return next;
     });
   }, []);
 
-  // Toggle a whole feature (its permission ids) — clear when fully on, otherwise select all
-  const toggleFeature = useCallback((ids: string[]) => {
+  // Toggle a whole feature for one platform (the feature's master checkbox)
+  const toggleFeatureColumn = useCallback((feature: MatrixFeature, platform: Platform) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      const allOn = ids.length > 0 && ids.every((id) => next.has(id));
-      for (const id of ids) allOn ? next.delete(id) : next.add(id);
+      const keys = feature.permissions.map((p) => grantKey(p.featurePermissionId, platform));
+      const allOn = keys.every((k) => next.has(k));
+      for (const k of keys) allOn ? next.delete(k) : next.add(k);
       return next;
     });
   }, []);
@@ -66,19 +69,11 @@ export const FeaturesTab: React.FC = () => {
     });
   }, []);
 
-  const isDirty = serializeSelected(selected) !== initialRef.current;
+  const isDirty = useMemo(() => [...selected].sort().join('|') !== initialRef.current, [selected]);
+  const grants: MatrixGrant[] = useMemo(() => keySetToGrants(selected), [selected]);
 
   if (appsLoading || unlockedLoading) {
-    return (
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-end">
-          <Skeleton className="h-9 w-36" />
-        </div>
-        {[1, 2].map((i) => (
-          <Skeleton key={i} className="h-14 w-full rounded-lg" />
-        ))}
-      </div>
-    );
+    return <PermissionMatrixSkeleton />;
   }
 
   if (apps.length === 0) {
@@ -100,11 +95,12 @@ export const FeaturesTab: React.FC = () => {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Check the permissions this plan unlocks. Unchecked permissions stay visible but locked for upsell.
+          Check the permissions this plan unlocks per platform. Unchecked permissions stay visible but locked for
+          upsell.
         </p>
         <Button
           size="sm"
-          onClick={() => saveMutation.mutate([...selected])}
+          onClick={() => saveMutation.mutate(grants)}
           disabled={!isDirty}
           isLoading={saveMutation.isPending}
           loadingText="Saving..."
@@ -116,14 +112,14 @@ export const FeaturesTab: React.FC = () => {
       {/* App cards (layer 1) → feature unlock grids (layer 2) */}
       <div className="flex flex-col gap-3">
         {apps.map((app) => (
-          <PlanAppCard
+          <AppCard
             key={app.id}
             app={app}
             selected={selected}
             expanded={expandedApps.has(app.id)}
             onToggleExpanded={() => toggleApp(app.id)}
             onTogglePermission={togglePermission}
-            onToggleFeature={toggleFeature}
+            onToggleFeatureColumn={toggleFeatureColumn}
           />
         ))}
       </div>
@@ -131,7 +127,7 @@ export const FeaturesTab: React.FC = () => {
       {/* Footer */}
       <div className="mt-auto flex items-center gap-2 text-xs text-muted-foreground">
         <Lock className="size-3.5" />
-        <span>{selected.size} permission(s) unlocked</span>
+        <span>{selected.size} unlock(s) selected</span>
       </div>
     </div>
   );
