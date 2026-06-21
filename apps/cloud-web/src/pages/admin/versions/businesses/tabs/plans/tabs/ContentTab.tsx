@@ -1,9 +1,9 @@
 import { useUpdatePlan } from '@hooks/admin/versions/businesses/plans';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
-import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { RichTextEditor } from '@vritti/quantum-ui/RichTextEditor';
 import { useEffect, useRef, useState } from 'react';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Plan } from '@/schemas/admin/plans';
 
 // Returns undefined if value is falsy or not valid JSON
@@ -18,8 +18,7 @@ function safeParse(value: string | null | undefined) {
 
 // Inline rich-text editor for plan content
 export const ContentTab = ({ plan }: { plan: Plan }) => {
-  const { id: versionId } = useSlugParams('versionSlug');
-  const { id: businessId } = useSlugParams('businessSlug');
+  const { versionId, businessId } = useVersionContext();
   const [isEditing, setIsEditing] = useState(false);
   const [mounted, setMounted] = useState(false);
   const contentRef = useRef<string | undefined>(plan.content ?? undefined);
@@ -30,7 +29,7 @@ export const ContentTab = ({ plan }: { plan: Plan }) => {
     setMounted(true);
   }, []);
 
-  const updateMutation = useUpdatePlan(versionId ?? '', businessId ?? '');
+  const updateMutation = useUpdatePlan(versionId, businessId);
 
   // Use savedContent (optimistic) until query cache catches up
   const displayContent = savedContent ?? plan.content;

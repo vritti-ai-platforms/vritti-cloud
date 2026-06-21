@@ -2,7 +2,6 @@ import { useCountries } from '@hooks/admin/countries';
 import { useDeletePlanPrice, usePlanPrices, useUpsertPlanPrice } from '@hooks/admin/versions/businesses/plans/prices';
 import { cn } from '@vritti/quantum-ui';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
-import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { majorToMinor, minorToMajor } from '@vritti/quantum-ui/money';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { DollarSign } from 'lucide-react';
@@ -13,6 +12,7 @@ import {
   type BillingPeriod,
   type PlanPrice,
 } from '@/schemas/admin/plan-prices';
+import { useVersionContext } from '@/context/VersionScopeContext';
 
 // Builds a lookup keyed by `${countryId}:${billingPeriod}` for fast cell access
 function indexPrices(prices: PlanPrice[]): Map<string, PlanPrice> {
@@ -25,12 +25,7 @@ function indexPrices(prices: PlanPrice[]): Map<string, PlanPrice> {
 
 // Prices grid — countries (rows) × billing periods (columns), amounts in each country's default currency
 export const PricesTab = () => {
-  const { id: versionId } = useSlugParams('versionSlug');
-  const { id: businessId } = useSlugParams('businessSlug');
-  const { id: planId } = useSlugParams('planSlug');
-  const versionIdValue = versionId ?? '';
-  const businessIdValue = businessId ?? '';
-  const planIdValue = planId ?? '';
+  const { versionId: versionIdValue, businessId: businessIdValue, planId: planIdValue } = useVersionContext();
 
   const { data: countriesResponse, isLoading: countriesLoading } = useCountries();
   const { data: prices = [], isLoading: pricesLoading } = usePlanPrices(versionIdValue, businessIdValue, planIdValue);

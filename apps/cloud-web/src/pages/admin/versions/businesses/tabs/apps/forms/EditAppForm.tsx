@@ -6,18 +6,18 @@ import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { App } from '@/schemas/admin/apps';
 import { type UpdateAppData, updateAppSchema } from '@/schemas/admin/apps';
 
 interface EditAppFormProps {
   app: App;
-  versionId: string;
-  businessId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const EditAppForm: React.FC<EditAppFormProps> = ({ app, versionId, businessId, onSuccess, onCancel }) => {
+export const EditAppForm: React.FC<EditAppFormProps> = ({ app, onSuccess, onCancel }) => {
+  const { versionId, businessId } = useVersionContext();
   const form = useForm<UpdateAppData>({
     resolver: zodResolver(updateAppSchema),
     defaultValues: {

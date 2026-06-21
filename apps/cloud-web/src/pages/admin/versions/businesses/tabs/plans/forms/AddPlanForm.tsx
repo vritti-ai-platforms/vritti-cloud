@@ -8,6 +8,7 @@ import { TextField } from '@vritti/quantum-ui/TextField';
 import { z, zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 
 const addPlanFormSchema = z
   .object({
@@ -27,13 +28,12 @@ const addPlanFormSchema = z
 type AddPlanFormData = z.infer<typeof addPlanFormSchema>;
 
 interface AddPlanFormProps {
-  versionId: string;
-  businessId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddPlanForm: React.FC<AddPlanFormProps> = ({ versionId, businessId, onSuccess, onCancel }) => {
+export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId, businessId } = useVersionContext();
   const form = useForm<AddPlanFormData>({
     resolver: zodResolver(addPlanFormSchema),
     defaultValues: { name: '', code: '', isCustom: false, organizationId: '', maxBusinessUnits: '' },

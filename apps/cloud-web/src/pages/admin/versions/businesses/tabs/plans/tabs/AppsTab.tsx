@@ -6,19 +6,17 @@ import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/qua
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { AppWindow, Pencil, Plus, Trash2 } from 'lucide-react';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { PlanAppTableRow } from '@/schemas/admin/plan-apps';
 import { AssignPlanAppForm } from '../forms/AssignPlanAppForm';
 import { EditPlanAppForm } from '../forms/EditPlanAppForm';
 
 interface ColumnActions {
-  versionId: string;
-  businessId: string;
-  planId: string;
   onRemove: (row: PlanAppTableRow) => void;
 }
 
 // Builds column definitions for the plan apps data table
-function getColumns({ versionId, businessId, planId, onRemove }: ColumnActions): ColumnDef<PlanAppTableRow, unknown>[] {
+function getColumns({ onRemove }: ColumnActions): ColumnDef<PlanAppTableRow, unknown>[] {
   return [
     {
       accessorKey: 'appCode',
@@ -59,9 +57,6 @@ function getColumns({ versionId, businessId, planId, onRemove }: ColumnActions):
                 description: `Choose which features from ${row.original.appCode} are included in this plan.`,
                 content: (close) => (
                   <EditPlanAppForm
-                    versionId={versionId}
-                    businessId={businessId}
-                    planId={planId}
                     appCode={row.original.appCode}
                     currentFeatureCodes={row.original.includedFeatureCodes}
                     onSuccess={close}
@@ -87,15 +82,8 @@ function getColumns({ versionId, businessId, planId, onRemove }: ColumnActions):
 }
 
 // Apps tab — data table of apps assigned to a plan with assign + configure + remove
-export const AppsTab = ({
-  versionId,
-  businessId,
-  planId,
-}: {
-  versionId: string;
-  businessId: string;
-  planId: string;
-}) => {
+export const AppsTab = () => {
+  const { versionId, businessId, planId } = useVersionContext();
   const queryClient = useQueryClient();
   const { data: response, isLoading } = usePlanAppsTable(versionId, businessId, planId);
   const confirm = useConfirm();
@@ -113,7 +101,7 @@ export const AppsTab = ({
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ versionId, businessId, planId, onRemove: handleRemove }),
+    columns: getColumns({ onRemove: handleRemove }),
     slug: `plan-apps-${planId}`,
     label: 'app',
     serverState: response,
@@ -158,15 +146,7 @@ export const AppsTab = ({
         icon={AppWindow}
         title="Assign App"
         description="Select an app to assign to this plan."
-        content={(close) => (
-          <AssignPlanAppForm
-            versionId={versionId}
-            businessId={businessId}
-            planId={planId}
-            onSuccess={close}
-            onCancel={close}
-          />
-        )}
+        content={(close) => <AssignPlanAppForm onSuccess={close} onCancel={close} />}
       />
     </div>
   );

@@ -8,15 +8,12 @@ import { useDialog } from '@vritti/quantum-ui/hooks';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Eye, Plus, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Role } from '@/schemas/admin/role-templates';
 import { AddRoleTemplateForm } from '../role-templates/forms/AddRoleTemplateForm';
 
-interface RoleTemplatesTabProps {
-  versionId: string;
-  businessId: string;
-}
-
-export const RoleTemplatesTab = ({ versionId, businessId }: RoleTemplatesTabProps) => {
+export const RoleTemplatesTab = () => {
+  const { versionId, businessId } = useVersionContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useRoleTemplates(versionId, businessId);
@@ -69,7 +66,7 @@ export const RoleTemplatesTab = ({ versionId, businessId }: RoleTemplatesTabProp
         icon={Shield}
         title="Add Role Template"
         description="Enter the details for the new role template."
-        content={(close) => <AddRoleTemplateForm businessId={businessId} onSuccess={close} onCancel={close} />}
+        content={(close) => <AddRoleTemplateForm onSuccess={close} onCancel={close} />}
       />
     </div>
   );

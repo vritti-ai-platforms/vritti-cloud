@@ -15,23 +15,17 @@ import { AppFilter } from '@vritti/quantum-ui/selects/app';
 import { Blocks, Eye, KeyRound, Pencil, Plus, Trash2 } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { BusinessFeature } from '@/schemas/admin/business-features';
 import { AddBusinessFeatureForm } from './forms/AddBusinessFeatureForm';
 import { EditBusinessFeatureAppsForm } from './forms/EditBusinessFeatureAppsForm';
 
-interface BusinessFeaturesTabProps {
-  versionId: string;
-  businessId: string;
-}
-
 interface ColumnActions {
-  versionId: string;
-  businessId: string;
   onView: (feature: BusinessFeature) => void;
   onRemove: (feature: BusinessFeature) => void;
 }
 
-function getColumns({ versionId, businessId, onView, onRemove }: ColumnActions): ColumnDef<BusinessFeature, unknown>[] {
+function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeature, unknown>[] {
   return [
     {
       accessorKey: 'icon',
@@ -98,13 +92,7 @@ function getColumns({ versionId, businessId, onView, onRemove }: ColumnActions):
                 title: `Edit apps — ${row.original.name}`,
                 description: 'Choose which apps this feature belongs to in this business.',
                 content: (close) => (
-                  <EditBusinessFeatureAppsForm
-                    versionId={versionId}
-                    businessId={businessId}
-                    feature={row.original}
-                    onSuccess={close}
-                    onCancel={close}
-                  />
+                  <EditBusinessFeatureAppsForm feature={row.original} onSuccess={close} onCancel={close} />
                 ),
               },
             },
@@ -124,7 +112,8 @@ function getColumns({ versionId, businessId, onView, onRemove }: ColumnActions):
   ];
 }
 
-export const BusinessFeaturesTab = ({ versionId, businessId }: BusinessFeaturesTabProps) => {
+export const BusinessFeaturesTab = () => {
+  const { versionId, businessId } = useVersionContext();
   const queryClient = useQueryClient();
   const confirm = useConfirm();
   const { data: response, isLoading } = useBusinessFeatures(versionId, businessId);
@@ -157,7 +146,7 @@ export const BusinessFeaturesTab = ({ versionId, businessId }: BusinessFeaturesT
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ versionId, businessId, onView: handleView, onRemove: handleRemove }),
+    columns: getColumns({ onView: handleView, onRemove: handleRemove }),
     slug: `business-features-${businessId}`,
     label: 'feature',
     serverState: response,
@@ -205,9 +194,7 @@ export const BusinessFeaturesTab = ({ versionId, businessId }: BusinessFeaturesT
         icon={Blocks}
         title="Add Feature"
         description="Assign a feature to one or more of this business’s apps."
-        content={(close) => (
-          <AddBusinessFeatureForm versionId={versionId} businessId={businessId} onSuccess={close} onCancel={close} />
-        )}
+        content={(close) => <AddBusinessFeatureForm onSuccess={close} onCancel={close} />}
       />
 
       <Dialog

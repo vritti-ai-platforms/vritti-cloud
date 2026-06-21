@@ -7,6 +7,7 @@ import { FeatureSelector } from '@vritti/quantum-ui/selects/feature';
 import { z, zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 
 const editPlanAppSchema = z.object({
   allFeatures: z.boolean(),
@@ -16,9 +17,6 @@ const editPlanAppSchema = z.object({
 type EditPlanAppFormData = z.infer<typeof editPlanAppSchema>;
 
 interface EditPlanAppFormProps {
-  versionId: string;
-  businessId: string;
-  planId: string;
   appCode: string;
   currentFeatureCodes: string[] | null;
   onSuccess: () => void;
@@ -26,14 +24,12 @@ interface EditPlanAppFormProps {
 }
 
 export const EditPlanAppForm: React.FC<EditPlanAppFormProps> = ({
-  versionId,
-  businessId,
-  planId,
   appCode,
   currentFeatureCodes,
   onSuccess,
   onCancel,
 }) => {
+  const { versionId, businessId, planId } = useVersionContext();
   const form = useForm<EditPlanAppFormData>({
     resolver: zodResolver(editPlanAppSchema),
     defaultValues: {

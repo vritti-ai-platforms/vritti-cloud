@@ -17,12 +17,11 @@ import { EditPermissionForm } from '../forms/EditPermissionForm';
 import { QuickAddPermissionsForm } from '../forms/QuickAddPermissionsForm';
 
 interface ColumnActions {
-  versionId: string;
   featureId: string;
   onDelete: (permission: FeaturePermission) => void;
 }
 
-function getColumns({ versionId, featureId, onDelete }: ColumnActions): ColumnDef<FeaturePermission, unknown>[] {
+function getColumns({ featureId, onDelete }: ColumnActions): ColumnDef<FeaturePermission, unknown>[] {
   return [
     getSelectionColumn<FeaturePermission>(),
     {
@@ -64,7 +63,6 @@ function getColumns({ versionId, featureId, onDelete }: ColumnActions): ColumnDe
                 description: 'Update this permission and its business scope.',
                 content: (close) => (
                   <EditPermissionForm
-                    versionId={versionId}
                     featureId={featureId}
                     permission={row.original}
                     onSuccess={close}
@@ -127,7 +125,7 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
   }
 
   const { table } = useDataTable({
-    columns: getColumns({ versionId, featureId, onDelete: handleDelete }),
+    columns: getColumns({ featureId, onDelete: handleDelete }),
     slug: `feature-permissions-${featureId}`,
     label: 'permission',
     serverState: response,
@@ -191,7 +189,7 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
         title="Add Permission"
         description="Define a permission and the businesses it applies to."
         content={(close) => (
-          <AddPermissionForm versionId={versionId} featureId={featureId} onSuccess={close} onCancel={close} />
+          <AddPermissionForm featureId={featureId} onSuccess={close} onCancel={close} />
         )}
       />
 
@@ -202,7 +200,6 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
         description="Select the standard permissions to add as global (apply to all businesses)."
         content={(close) => (
           <QuickAddPermissionsForm
-            versionId={versionId}
             featureId={featureId}
             existingCodes={existingCodes}
             onSuccess={close}

@@ -7,16 +7,13 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { AppWindow, Pencil, Plus, Trash2 } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { App } from '@/schemas/admin/apps';
 import { AddAppForm } from '../apps/forms/AddAppForm';
 import { EditAppForm } from '../apps/forms/EditAppForm';
 
-interface AppsTabProps {
-  versionId: string;
-  businessId: string;
-}
-
-export const AppsTab = ({ versionId, businessId }: AppsTabProps) => {
+export const AppsTab = () => {
+  const { versionId, businessId } = useVersionContext();
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useApps(versionId, businessId);
   const addDialog = useDialog();
@@ -35,11 +32,7 @@ export const AppsTab = ({ versionId, businessId }: AppsTabProps) => {
   }
 
   const { table } = useDataTable({
-    columns: getColumns({
-      versionId,
-      businessId,
-      onDelete: handleDelete,
-    }),
+    columns: getColumns({ onDelete: handleDelete }),
     slug: `business-apps-${businessId}`,
     label: 'app',
     serverState: response,
@@ -108,21 +101,17 @@ export const AppsTab = ({ versionId, businessId }: AppsTabProps) => {
         icon={AppWindow}
         title="Add App"
         description="Enter the details for the new application."
-        content={(close) => (
-          <AddAppForm versionId={versionId} businessId={businessId} onSuccess={close} onCancel={close} />
-        )}
+        content={(close) => <AddAppForm onSuccess={close} onCancel={close} />}
       />
     </div>
   );
 };
 
 interface ColumnActions {
-  versionId: string;
-  businessId: string;
   onDelete: (app: App) => void;
 }
 
-function getColumns({ versionId, businessId, onDelete }: ColumnActions): ColumnDef<App, unknown>[] {
+function getColumns({ onDelete }: ColumnActions): ColumnDef<App, unknown>[] {
   return [
     {
       accessorKey: 'icon',
@@ -163,15 +152,7 @@ function getColumns({ versionId, businessId, onDelete }: ColumnActions): ColumnD
               dialog: {
                 title: 'Edit App',
                 description: 'Update the details for this application.',
-                content: (close) => (
-                  <EditAppForm
-                    app={row.original}
-                    versionId={versionId}
-                    businessId={businessId}
-                    onSuccess={close}
-                    onCancel={close}
-                  />
-                ),
+                content: (close) => <EditAppForm app={row.original} onSuccess={close} onCancel={close} />,
               },
             },
             {

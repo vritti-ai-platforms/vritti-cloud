@@ -12,13 +12,12 @@ import { useVersionContext } from '@/context/VersionScopeContext';
 import { type CreateRoleTemplateData, createRoleTemplateSchema } from '@/schemas/admin/role-templates';
 
 interface AddRoleTemplateFormProps {
-  businessId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ businessId, onSuccess, onCancel }) => {
-  const { versionId } = useVersionContext();
+export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId, businessId } = useVersionContext();
 
   const form = useForm<CreateRoleTemplateData>({
     resolver: zodResolver(createRoleTemplateSchema),

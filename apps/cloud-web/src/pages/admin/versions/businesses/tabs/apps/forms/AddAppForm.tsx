@@ -6,16 +6,16 @@ import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import { type CreateAppData, createAppSchema } from '@/schemas/admin/apps';
 
 interface AddAppFormProps {
-  versionId: string;
-  businessId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddAppForm: React.FC<AddAppFormProps> = ({ versionId, businessId, onSuccess, onCancel }) => {
+export const AddAppForm: React.FC<AddAppFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId, businessId } = useVersionContext();
   const form = useForm<CreateAppData>({
     resolver: zodResolver(createAppSchema),
     defaultValues: { code: '', name: '', description: '', icon: '', versionId, businessId },

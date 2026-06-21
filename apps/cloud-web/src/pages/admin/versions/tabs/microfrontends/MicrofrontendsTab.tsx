@@ -84,7 +84,7 @@ export const MicrofrontendsTab = () => {
           icon={Boxes}
           title="Add Microfrontend"
           description="Add a new microfrontend bundle to this version."
-          content={(close) => <AddMicrofrontendForm versionId={versionId} onSuccess={close} onCancel={close} />}
+          content={(close) => <AddMicrofrontendForm onSuccess={close} onCancel={close} />}
         />
       )}
     </div>

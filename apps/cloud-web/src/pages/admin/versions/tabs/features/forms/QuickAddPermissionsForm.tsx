@@ -5,6 +5,7 @@ import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { CircleCheck, ShieldCheck } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
+import { useVersionContext } from '@/context/VersionScopeContext';
 
 // Standard global permission presets for one-click adding (created with isGlobal = true)
 export const PERMISSION_PRESETS: { code: string; label: string }[] = [
@@ -18,7 +19,6 @@ export const PERMISSION_PRESETS: { code: string; label: string }[] = [
 ];
 
 interface QuickAddPermissionsFormProps {
-  versionId: string;
   featureId: string;
   existingCodes: string[];
   onSuccess: () => void;
@@ -26,12 +26,12 @@ interface QuickAddPermissionsFormProps {
 }
 
 export const QuickAddPermissionsForm: React.FC<QuickAddPermissionsFormProps> = ({
-  versionId,
   featureId,
   existingCodes,
   onSuccess,
   onCancel,
 }) => {
+  const { versionId } = useVersionContext();
   const missing = PERMISSION_PRESETS.filter((p) => !existingCodes.includes(p.code));
   const [selected, setSelected] = useState<string[]>(missing.map((p) => p.code));
   const bulkMutation = useBulkCreatePermissions(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId));

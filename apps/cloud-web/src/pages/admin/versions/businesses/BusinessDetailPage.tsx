@@ -1,17 +1,16 @@
 import { useVersionBusinesses } from '@hooks/admin/versions/businesses';
-import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import { AppsTab } from './tabs/apps/AppsTab';
 import { BusinessFeaturesTab } from './tabs/features/BusinessFeaturesTab';
 import { PlansTab } from './tabs/plans/PlansTab';
 import { RoleTemplatesTab } from './tabs/role-templates/RoleTemplatesTab';
 
 export const BusinessDetailPage = () => {
-  const { id: versionId } = useSlugParams('versionSlug');
-  const { id: businessId } = useSlugParams('businessSlug');
+  const { versionId, businessId } = useVersionContext();
 
-  const { data: businesses } = useVersionBusinesses(versionId ?? '');
+  const { data: businesses } = useVersionBusinesses(versionId);
   const business = businesses?.find((b) => b.id === businessId);
 
   return (
@@ -25,26 +24,10 @@ export const BusinessDetailPage = () => {
         routeParam="businessTab"
         contentClassName="min-h-[500px]"
         tabs={[
-          {
-            value: 'apps',
-            label: 'Apps',
-            content: <AppsTab versionId={versionId ?? ''} businessId={businessId ?? ''} />,
-          },
-          {
-            value: 'features',
-            label: 'Features',
-            content: <BusinessFeaturesTab versionId={versionId ?? ''} businessId={businessId ?? ''} />,
-          },
-          {
-            value: 'plans',
-            label: 'Plans',
-            content: <PlansTab versionId={versionId ?? ''} businessId={businessId ?? ''} />,
-          },
-          {
-            value: 'role-templates',
-            label: 'Role Templates',
-            content: <RoleTemplatesTab versionId={versionId ?? ''} businessId={businessId ?? ''} />,
-          },
+          { value: 'apps', label: 'Apps', content: <AppsTab /> },
+          { value: 'features', label: 'Features', content: <BusinessFeaturesTab /> },
+          { value: 'plans', label: 'Plans', content: <PlansTab /> },
+          { value: 'role-templates', label: 'Role Templates', content: <RoleTemplatesTab /> },
         ]}
       />
     </div>

@@ -1,10 +1,11 @@
 import { useVersion } from '@hooks/admin/versions';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
+import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { GitBranch, Pencil } from 'lucide-react';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import { EditVersionForm } from './forms/EditVersionForm';
 import { BusinessesTab } from './tabs/businesses/BusinessesTab';
 import { FeaturesTab } from './tabs/features/FeaturesTab';
@@ -12,8 +13,7 @@ import { MicrofrontendsTab } from './tabs/microfrontends/MicrofrontendsTab';
 import { OverviewTab } from './tabs/overview/OverviewTab';
 
 export const VersionDetailPage = () => {
-  const { id } = useSlugParams('versionSlug');
-  const versionId = id ?? '';
+  const { versionId } = useVersionContext();
   const editDialog = useDialog();
 
   const { data: version } = useVersion(versionId);
@@ -34,10 +34,10 @@ export const VersionDetailPage = () => {
         routeParam="versionTab"
         contentClassName="min-h-[500px]"
         tabs={[
-          { value: 'overview', label: 'Overview', content: <OverviewTab versionId={versionId} /> },
+          { value: 'overview', label: 'Overview', content: <OverviewTab /> },
           { value: 'microfrontends', label: 'Microfrontends', content: <MicrofrontendsTab /> },
           { value: 'features', label: 'Features', content: <FeaturesTab /> },
-          { value: 'businesses', label: 'Businesses', content: <BusinessesTab versionId={versionId} /> },
+          { value: 'businesses', label: 'Businesses', content: <BusinessesTab /> },
         ]}
       />
 

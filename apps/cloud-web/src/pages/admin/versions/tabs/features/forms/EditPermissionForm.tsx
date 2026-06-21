@@ -8,6 +8,7 @@ import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import {
   type FeaturePermission,
   type PermissionFormData,
@@ -15,7 +16,6 @@ import {
 } from '@/schemas/admin/feature-permissions';
 
 interface EditPermissionFormProps {
-  versionId: string;
   featureId: string;
   permission: FeaturePermission;
   onSuccess: () => void;
@@ -23,12 +23,12 @@ interface EditPermissionFormProps {
 }
 
 export const EditPermissionForm: React.FC<EditPermissionFormProps> = ({
-  versionId,
   featureId,
   permission,
   onSuccess,
   onCancel,
 }) => {
+  const { versionId } = useVersionContext();
   const form = useForm<PermissionFormData>({
     resolver: zodResolver(permissionFormSchema),
     defaultValues: {

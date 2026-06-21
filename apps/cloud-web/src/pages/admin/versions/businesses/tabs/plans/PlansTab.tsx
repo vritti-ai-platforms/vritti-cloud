@@ -8,15 +8,12 @@ import { useDialog } from '@vritti/quantum-ui/hooks';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { CreditCard, Eye, Plus } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Plan } from '@/schemas/admin/plans';
 import { AddPlanForm } from '../plans/forms/AddPlanForm';
 
-interface PlansTabProps {
-  versionId: string;
-  businessId: string;
-}
-
-export const PlansTab = ({ versionId, businessId }: PlansTabProps) => {
+export const PlansTab = () => {
+  const { versionId, businessId } = useVersionContext();
   const navigate = useNavigate();
   const { versionSlug, businessSlug } = useParams();
   const queryClient = useQueryClient();
@@ -72,9 +69,7 @@ export const PlansTab = ({ versionId, businessId }: PlansTabProps) => {
         icon={CreditCard}
         title="Add Plan"
         description="Enter the details for the new plan."
-        content={(close) => (
-          <AddPlanForm versionId={versionId} businessId={businessId} onSuccess={close} onCancel={close} />
-        )}
+        content={(close) => <AddPlanForm onSuccess={close} onCancel={close} />}
       />
     </div>
   );

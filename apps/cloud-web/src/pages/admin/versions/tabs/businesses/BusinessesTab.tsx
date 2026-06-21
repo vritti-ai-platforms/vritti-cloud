@@ -12,6 +12,7 @@ import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Briefcase, Eye, Plus, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { VersionBusiness } from '@/schemas/admin/version-businesses';
 import { AssignBusinessForm } from '../businesses/forms/AssignBusinessForm';
 
@@ -64,7 +65,8 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<VersionBusin
   ];
 }
 
-export const BusinessesTab = ({ versionId }: { versionId: string }) => {
+export const BusinessesTab = () => {
+  const { versionId } = useVersionContext();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { data: response, isLoading } = useVersionBusinessesTable(versionId);
@@ -134,7 +136,7 @@ export const BusinessesTab = ({ versionId }: { versionId: string }) => {
         icon={Briefcase}
         title="Assign Business"
         description="Select a business to assign to this version."
-        content={(close) => <AssignBusinessForm versionId={versionId} onSuccess={close} onCancel={close} />}
+        content={(close) => <AssignBusinessForm onSuccess={close} onCancel={close} />}
       />
     </>
   );

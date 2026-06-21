@@ -4,14 +4,10 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
-import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { Layers, Lock } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-
-interface FeaturesTabProps {
-  planId: string;
-}
+import { useVersionContext } from '@/context/VersionScopeContext';
 
 // Format app code into display name: "order-management" -> "Order Management"
 function appLabel(code: string): string {
@@ -26,22 +22,17 @@ function serializeSelected(ids: Set<string>): string {
   return [...ids].sort().join('|');
 }
 
-export const FeaturesTab: React.FC<FeaturesTabProps> = ({ planId }) => {
-  const { id: versionId } = useSlugParams('versionSlug');
-  const { id: businessId } = useSlugParams('businessSlug');
+export const FeaturesTab: React.FC = () => {
+  const { versionId, businessId, planId } = useVersionContext();
 
-  const { data: features = [], isLoading: featuresLoading } = usePlanAvailableFeatures(
-    versionId ?? '',
-    businessId ?? '',
-    planId,
-  );
-  const { data: unlocked, isLoading: unlockedLoading } = usePlanUnlocked(versionId ?? '', businessId ?? '', planId);
+  const { data: features = [], isLoading: featuresLoading } = usePlanAvailableFeatures(versionId, businessId, planId);
+  const { data: unlocked, isLoading: unlockedLoading } = usePlanUnlocked(versionId, businessId, planId);
 
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const initialRef = useRef<string>('');
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
-  const saveMutation = useSetPlanUnlocked(versionId ?? '', businessId ?? '', planId);
+  const saveMutation = useSetPlanUnlocked(versionId, businessId, planId);
 
   // Initialize from server data — the plan's currently unlocked feature-permission ids
   useEffect(() => {

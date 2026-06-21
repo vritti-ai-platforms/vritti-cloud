@@ -6,15 +6,16 @@ import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import { type AssignVersionBusinessData, assignVersionBusinessSchema } from '@/schemas/admin/version-businesses';
 
 interface AssignBusinessFormProps {
-  versionId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AssignBusinessForm: React.FC<AssignBusinessFormProps> = ({ versionId, onSuccess, onCancel }) => {
+export const AssignBusinessForm: React.FC<AssignBusinessFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId } = useVersionContext();
   const form = useForm<AssignVersionBusinessData>({
     resolver: zodResolver(assignVersionBusinessSchema),
     defaultValues: { businessId: '' },

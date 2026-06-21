@@ -7,15 +7,16 @@ import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import { type CreateMicrofrontendData, createMicrofrontendSchema } from '@/schemas/admin/microfrontends';
 
 interface AddMicrofrontendFormProps {
-  versionId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddMicrofrontendForm: React.FC<AddMicrofrontendFormProps> = ({ versionId, onSuccess, onCancel }) => {
+export const AddMicrofrontendForm: React.FC<AddMicrofrontendFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId } = useVersionContext();
   const form = useForm<CreateMicrofrontendData>({
     resolver: zodResolver(createMicrofrontendSchema),
     defaultValues: { code: '', name: '', platform: 'WEB', remoteEntry: '' },

@@ -13,9 +13,8 @@ import { RoleTemplatePermissionForm } from './forms/RoleTemplatePermissionForm';
 
 export const RoleTemplateViewPage = () => {
   const { id } = useSlugParams('roleTemplateSlug');
-  const { id: businessId } = useSlugParams('businessSlug');
   const navigate = useNavigate();
-  const { versionId } = useVersionContext();
+  const { versionId, businessId } = useVersionContext();
 
   const editDialog = useDialog();
   const confirm = useConfirm();
@@ -100,7 +99,7 @@ export const RoleTemplateViewPage = () => {
       </div>
 
       {/* Permissions */}
-      <RoleTemplatePermissionForm businessId={businessId} roleId={role.id} />
+      <RoleTemplatePermissionForm roleId={role.id} />
 
       <DangerZone
         title="Delete this role template"

@@ -7,21 +7,16 @@ import { FeatureSelector } from '@vritti/quantum-ui/selects/feature';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import { type AddBusinessFeatureData, addBusinessFeatureSchema } from '@/schemas/admin/business-features';
 
 interface AddBusinessFeatureFormProps {
-  versionId: string;
-  businessId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({
-  versionId,
-  businessId,
-  onSuccess,
-  onCancel,
-}) => {
+export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId, businessId } = useVersionContext();
   const form = useForm<AddBusinessFeatureData>({
     resolver: zodResolver(addBusinessFeatureSchema),
     defaultValues: {

@@ -9,6 +9,7 @@ import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { Calendar, Camera, GitBranch } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import type { VersionStatus } from '@/schemas/admin/versions';
 import { SnapshotView } from '../overview/components/SnapshotView';
 
@@ -24,7 +25,8 @@ function statusVariant(status: VersionStatus): 'secondary' | 'outline' | 'defaul
   }
 }
 
-export const OverviewTab = ({ versionId }: { versionId: string }) => {
+export const OverviewTab = () => {
+  const { versionId } = useVersionContext();
   const navigate = useNavigate();
   const confirm = useConfirm();
 

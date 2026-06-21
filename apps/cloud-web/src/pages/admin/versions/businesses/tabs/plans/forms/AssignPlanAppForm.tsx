@@ -6,23 +6,16 @@ import { AppCodeSelector } from '@vritti/quantum-ui/selects/app-code';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
+import { useVersionContext } from '@/context/VersionScopeContext';
 import { type AssignPlanAppData, assignPlanAppSchema } from '@/schemas/admin/plan-apps';
 
 interface AssignPlanAppFormProps {
-  versionId: string;
-  businessId: string;
-  planId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({
-  versionId,
-  businessId,
-  planId,
-  onSuccess,
-  onCancel,
-}) => {
+export const AssignPlanAppForm: React.FC<AssignPlanAppFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId, businessId, planId } = useVersionContext();
   const form = useForm<AssignPlanAppData>({
     resolver: zodResolver(assignPlanAppSchema),
     defaultValues: { appCode: '' },

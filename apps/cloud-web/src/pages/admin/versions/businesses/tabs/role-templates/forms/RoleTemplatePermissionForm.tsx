@@ -15,7 +15,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useVersionContext } from '@/context/VersionScopeContext';
 
 interface RoleTemplatePermissionFormProps {
-  businessId: string;
   roleId: string;
 }
 
@@ -32,8 +31,8 @@ function serializeSelected(ids: Set<string>): string {
   return [...ids].sort().join('|');
 }
 
-export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProps> = ({ businessId, roleId }) => {
-  const { versionId } = useVersionContext();
+export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProps> = ({ roleId }) => {
+  const { versionId, businessId } = useVersionContext();
 
   const { data: features = [], isLoading: featuresLoading } = useFeaturesWithPermissions(versionId, businessId, roleId);
   const { data: rolePermissions, isLoading: permissionsLoading } = useRoleTemplatePermissions(
