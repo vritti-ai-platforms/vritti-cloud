@@ -1,7 +1,7 @@
 import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { VersionsTableResponse } from '@/schemas/admin/versions';
-import { getVersionsTable } from '../../../services/admin/versions.service';
+import { getVersionsTable } from '@/services/admin/versions.service';
 
 export const VERSIONS_TABLE_KEY = ['admin', 'versions', 'table'] as const;
 

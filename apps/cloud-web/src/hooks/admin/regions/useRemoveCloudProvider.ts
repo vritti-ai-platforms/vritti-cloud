@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { removeCloudProvider } from '../../../services/admin/regions.service';
+import { removeCloudProvider } from '@/services/admin/regions.service';
 
 interface RemoveCloudProviderVariables {
   regionId: string;

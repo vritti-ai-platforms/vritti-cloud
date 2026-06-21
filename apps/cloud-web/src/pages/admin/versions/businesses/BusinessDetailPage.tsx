@@ -1,11 +1,11 @@
-import { useVersionBusinesses } from '@hooks/admin/version-businesses';
+import { useVersionBusinesses } from '@hooks/admin/versions/businesses';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
-import { AppsTab } from './AppsTab';
-import { BusinessFeaturesTab } from './BusinessFeaturesTab';
-import { PlansTab } from './PlansTab';
-import { RoleTemplatesTab } from './RoleTemplatesTab';
+import { AppsTab } from './tabs/apps/AppsTab';
+import { BusinessFeaturesTab } from './tabs/features/BusinessFeaturesTab';
+import { PlansTab } from './tabs/plans/PlansTab';
+import { RoleTemplatesTab } from './tabs/role-templates/RoleTemplatesTab';
 
 export const BusinessDetailPage = () => {
   const { id: versionId } = useSlugParams('versionSlug');

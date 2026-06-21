@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { deleteBusiness } from '../../../services/admin/businesses.service';
+import { deleteBusiness } from '@/services/admin/businesses.service';
 import { BUSINESSES_QUERY_KEY } from './useBusinesses';
 
 type UseDeleteBusinessOptions = Omit<UseMutationOptions<void, AxiosError, string>, 'mutationFn'>;

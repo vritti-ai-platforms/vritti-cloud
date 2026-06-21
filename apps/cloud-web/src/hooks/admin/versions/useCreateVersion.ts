@@ -2,7 +2,7 @@ import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/
 import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
 import type { CreateVersionData, Version } from '@/schemas/admin/versions';
-import { createVersion } from '../../../services/admin/versions.service';
+import { createVersion } from '@/services/admin/versions.service';
 import { VERSIONS_TABLE_KEY } from './useVersionsTable';
 
 type UseCreateVersionOptions = Omit<

@@ -1,4 +1,4 @@
-import { organizationsQueryKey, useOrganizations } from '@hooks/admin/organizations';
+import { organizationsQueryKey, useOrganizations } from '@hooks/admin/deployments/organizations';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { type ColumnDef, DataTable, NumberCell, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';

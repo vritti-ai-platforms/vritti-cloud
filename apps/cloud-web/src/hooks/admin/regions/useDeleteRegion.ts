@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { deleteRegion } from '../../../services/admin/regions.service';
+import { deleteRegion } from '@/services/admin/regions.service';
 import { REGIONS_QUERY_KEY } from './useRegions';
 
 type UseDeleteRegionOptions = Omit<UseMutationOptions<void, AxiosError, string>, 'mutationFn'>;

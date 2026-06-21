@@ -1,7 +1,7 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { Region, UpdateRegionData } from '@/schemas/admin/regions';
-import { updateRegion } from '../../../services/admin/regions.service';
+import { updateRegion } from '@/services/admin/regions.service';
 import { REGIONS_QUERY_KEY } from './useRegions';
 
 interface UpdateRegionVariables {

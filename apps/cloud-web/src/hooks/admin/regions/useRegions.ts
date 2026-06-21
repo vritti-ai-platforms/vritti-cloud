@@ -1,7 +1,7 @@
 import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { RegionsResponse } from '@/schemas/admin/regions';
-import { getRegions } from '../../../services/admin/regions.service';
+import { getRegions } from '@/services/admin/regions.service';
 
 export const REGIONS_QUERY_KEY = ['admin', 'regions'] as const;
 

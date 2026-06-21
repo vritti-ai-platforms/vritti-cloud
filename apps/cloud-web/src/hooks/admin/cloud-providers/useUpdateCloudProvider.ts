@@ -1,7 +1,7 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { CloudProviderPayload } from '@/schemas/admin/cloud-providers';
-import { updateCloudProvider } from '../../../services/admin/cloud-providers.service';
+import { updateCloudProvider } from '@/services/admin/cloud-providers.service';
 import { CLOUD_PROVIDERS_QUERY_KEY } from './useCloudProviders';
 
 type Vars = { id: string; data: CloudProviderPayload };

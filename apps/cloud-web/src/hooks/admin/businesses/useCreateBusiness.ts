@@ -2,7 +2,7 @@ import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/
 import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
 import type { Business, CreateBusinessData } from '@/schemas/admin/businesses';
-import { createBusiness } from '../../../services/admin/businesses.service';
+import { createBusiness } from '@/services/admin/businesses.service';
 import { BUSINESSES_QUERY_KEY } from './useBusinesses';
 
 type UseCreateBusinessOptions = Omit<

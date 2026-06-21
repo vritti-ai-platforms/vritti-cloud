@@ -1,4 +1,4 @@
-import { ORGANIZATION_MEMBERS_QUERY_KEY_FN, useOrganization, useOrganizationMembers } from '@hooks/admin/organizations';
+import { ORGANIZATION_MEMBERS_QUERY_KEY_FN, useOrganization, useOrganizationMembers } from '@hooks/admin/deployments/organizations';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -9,7 +9,7 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import type { AxiosError } from 'axios';
 import { Building2, Cloud, Factory, MapPin, RefreshCw, Server, Users } from 'lucide-react';
 import type { AdminOrganizationMember } from '@/schemas/admin/organizations';
-import { syncOrgFeatures } from '@/services/admin/organizations.service';
+import { syncOrgFeatures } from '@/services/admin/deployments/organizations.service';
 
 const MEMBERS_TABLE_SLUG = 'organization-members';
 

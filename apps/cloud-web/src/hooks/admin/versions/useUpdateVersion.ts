@@ -2,7 +2,7 @@ import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
 import type { UpdateVersionData } from '@/schemas/admin/versions';
-import { updateVersion } from '../../../services/admin/versions.service';
+import { updateVersion } from '@/services/admin/versions.service';
 import { versionQueryKey } from './useVersion';
 import { VERSIONS_TABLE_KEY } from './useVersionsTable';
 

@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { deleteCloudProvider } from '../../../services/admin/cloud-providers.service';
+import { deleteCloudProvider } from '@/services/admin/cloud-providers.service';
 import { CLOUD_PROVIDERS_QUERY_KEY } from './useCloudProviders';
 
 type UseDeleteCloudProviderOptions = Omit<UseMutationOptions<void, AxiosError, string>, 'mutationFn'>;

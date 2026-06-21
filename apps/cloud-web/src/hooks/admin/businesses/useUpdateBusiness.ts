@@ -1,7 +1,7 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { UpdateBusinessData } from '@/schemas/admin/businesses';
-import { updateBusiness } from '../../../services/admin/businesses.service';
+import { updateBusiness } from '@/services/admin/businesses.service';
 import { BUSINESSES_QUERY_KEY } from './useBusinesses';
 
 type UseUpdateBusinessOptions = Omit<

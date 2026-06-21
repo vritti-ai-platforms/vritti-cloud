@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { deleteVersion } from '../../../services/admin/versions.service';
+import { deleteVersion } from '@/services/admin/versions.service';
 import { VERSIONS_TABLE_KEY } from './useVersionsTable';
 
 type UseDeleteVersionOptions = Omit<UseMutationOptions<void, AxiosError, string>, 'mutationFn'>;
