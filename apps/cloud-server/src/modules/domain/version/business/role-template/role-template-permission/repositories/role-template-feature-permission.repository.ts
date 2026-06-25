@@ -23,7 +23,7 @@ export interface AvailableFeature {
   id: string;
   code: string;
   name: string;
-  icon: string;
+  lucideIcon: string;
   permissions: AvailableFeaturePermission[];
   // Platforms this feature has a route on — drives which Web/Mobile columns the matrix shows
   platforms: AppPlatform[];
@@ -114,7 +114,7 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
         featureId: features.id,
         featureCode: features.code,
         featureName: features.name,
-        featureIcon: features.icon,
+        featureIcon: features.lucideIcon,
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
@@ -163,7 +163,7 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           id: row.featureId,
           code: row.featureCode,
           name: row.featureName,
-          icon: row.featureIcon,
+          lucideIcon: row.featureIcon,
           permissions: [],
           platforms: [],
         };

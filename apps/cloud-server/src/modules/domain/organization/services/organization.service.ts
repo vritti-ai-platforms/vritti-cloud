@@ -100,7 +100,7 @@ export class OrganizationService {
         return {
           code: f.code,
           name: f.name,
-          icon: f.icon ?? null,
+          lucideIcon: f.lucideIcon ?? null,
           sfSymbol: (f.sfSymbol as string) ?? 'square',
           materialSymbol: (f.materialSymbol as string) ?? 'square',
           remoteEntry: webMf?.remoteEntry ?? null,

@@ -59,12 +59,12 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   // Returns all features for a version — single query for export (permissions authored separately)
   async findAllForExport(
     versionId: string,
-  ): Promise<{ code: string; name: string; icon: string; description: string | null }[]> {
+  ): Promise<{ code: string; name: string; lucideIcon: string; description: string | null }[]> {
     const rows = await this.db
       .select({
         code: features.code,
         name: features.name,
-        icon: features.icon,
+        lucideIcon: features.lucideIcon,
         description: features.description,
       })
       .from(features)
@@ -95,7 +95,7 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
         code: features.code,
         name: features.name,
         description: features.description,
-        icon: features.icon,
+        lucideIcon: features.lucideIcon,
         isActive: features.isActive,
         sortOrder: features.sortOrder,
         createdAt: features.createdAt,

@@ -19,7 +19,7 @@ export interface BusinessFeatureRow {
   id: string;
   code: string;
   name: string;
-  icon: string;
+  lucideIcon: string;
   app: BusinessFeatureApp;
   permissionCount: number;
 }
@@ -49,7 +49,7 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
         id: features.id,
         code: features.code,
         name: features.name,
-        icon: features.icon,
+        lucideIcon: features.lucideIcon,
         app: sql<BusinessFeatureApp>`jsonb_build_object('id', ${apps.id}, 'name', ${apps.name})`,
         permissionCount: sql<number>`coalesce((
           select count(*)::int

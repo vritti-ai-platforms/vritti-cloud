@@ -7,7 +7,7 @@ export interface Feature {
   code: string;
   name: string;
   versionId: string;
-  icon: IconName;
+  lucideIcon: IconName;
   sfSymbol: string;
   materialSymbol: string;
   description: string | null;
@@ -42,7 +42,7 @@ export const createFeatureSchema = z.object({
     .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'Must be lowercase with dots (e.g. crm.leads.view)'),
   name: z.string().min(1, 'Feature name is required').max(255, 'Name must be 255 characters or less'),
   versionId: z.string().uuid('App version is required'),
-  icon: z.string().min(1, 'Icon is required').max(100),
+  lucideIcon: z.string().min(1, 'Icon is required').max(100),
   sfSymbol: z.string().min(1, 'SF Symbol is required').max(255),
   materialSymbol: z.string().min(1, 'Material Symbol is required').max(255),
   description: z.string().optional(),
@@ -56,7 +56,7 @@ export const updateFeatureSchema = z.object({
     .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'Must be lowercase with dots (e.g. crm.leads.view)')
     .optional(),
   name: z.string().min(1, 'Feature name is required').max(255).optional(),
-  icon: z.string().min(1, 'Icon is required').max(100).optional(),
+  lucideIcon: z.string().min(1, 'Icon is required').max(100).optional(),
   sfSymbol: z.string().min(1, 'SF Symbol is required').max(255).optional(),
   materialSymbol: z.string().min(1, 'Material Symbol is required').max(255).optional(),
   description: z.string().optional(),

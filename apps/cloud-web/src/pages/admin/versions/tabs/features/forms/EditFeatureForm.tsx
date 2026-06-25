@@ -2,6 +2,7 @@ import { useUpdateFeature } from '@hooks/admin/versions/features';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
+import { IconSelect } from '@vritti/quantum-ui/selects/icon';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -24,7 +25,7 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
     defaultValues: {
       code: feature.code,
       name: feature.name,
-      icon: feature.icon,
+      lucideIcon: feature.lucideIcon,
       sfSymbol: feature.sfSymbol,
       materialSymbol: feature.materialSymbol,
       description: feature.description ?? '',
@@ -45,20 +46,10 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
         <TextField name="code" label="Code" placeholder="e.g. orders" description="Lowercase with hyphens" />
         <TextField name="name" label="Name" placeholder="e.g. Orders" />
       </div>
-      <TextField name="icon" label="Icon" placeholder="e.g. clipboard-list" description="Lucide icon name (web)" />
+      <IconSelect kind="lucide" name="lucideIcon" label="Icon" placeholder="Select icon" />
       <div className="grid grid-cols-2 gap-4">
-        <TextField
-          name="sfSymbol"
-          label="SF Symbol (iOS)"
-          placeholder="e.g. cart.fill"
-          description="Apple SF Symbol name"
-        />
-        <TextField
-          name="materialSymbol"
-          label="Material Symbol (Android)"
-          placeholder="e.g. shopping_cart"
-          description="Google Material Symbol name"
-        />
+        <IconSelect kind="sf" name="sfSymbol" label="SF Symbol (iOS)" placeholder="Select icon" />
+        <IconSelect kind="material" name="materialSymbol" label="Material Symbol (Android)" placeholder="Select icon" />
       </div>
       <TextField name="description" label="Description" placeholder="Optional description" />
 

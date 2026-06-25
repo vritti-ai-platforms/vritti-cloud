@@ -17,7 +17,7 @@ export interface BusinessFeature {
   id: string;
   code: string;
   name: string;
-  icon: string;
+  lucideIcon: string;
   app: BusinessFeatureApp;
   permissionCount: number;
 }

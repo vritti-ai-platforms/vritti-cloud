@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."features" RENAME COLUMN "icon" TO "lucide_icon";

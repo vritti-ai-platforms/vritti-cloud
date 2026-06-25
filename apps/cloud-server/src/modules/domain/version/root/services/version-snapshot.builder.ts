@@ -47,7 +47,7 @@ export interface SnapshotMicrofrontend {
 export interface SnapshotFeature {
   code: string;
   name: string;
-  icon: string;
+  lucideIcon: string;
   sfSymbol: string;
   materialSymbol: string;
   permissions: SnapshotPermission[];
@@ -170,7 +170,7 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
     result[f.code] = {
       code: f.code,
       name: f.name,
-      icon: f.icon,
+      lucideIcon: f.lucideIcon,
       sfSymbol: f.sfSymbol,
       materialSymbol: f.materialSymbol,
       permissions: buildPermissions(f.id, index),

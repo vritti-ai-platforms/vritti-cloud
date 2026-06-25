@@ -14718,7 +14718,7 @@
             "description": "Optional description of the feature",
             "example": "Allows creating a new dine-in order"
           },
-          "icon": {
+          "lucideIcon": {
             "type": "string",
             "description": "Lucide icon name (web)",
             "example": "clipboard-list"
@@ -14743,7 +14743,7 @@
           "versionId",
           "code",
           "name",
-          "icon",
+          "lucideIcon",
           "sfSymbol",
           "materialSymbol"
         ]
@@ -14772,7 +14772,7 @@
             "example": "Allows creating a new dine-in order",
             "nullable": true
           },
-          "icon": {
+          "lucideIcon": {
             "type": "string",
             "example": "clipboard-list"
           },
@@ -14840,7 +14840,7 @@
           "versionId",
           "code",
           "name",
-          "icon",
+          "lucideIcon",
           "sfSymbol",
           "materialSymbol",
           "isActive",
@@ -14902,7 +14902,7 @@
             "description": "Optional description of the feature",
             "example": "Allows creating a new dine-in order"
           },
-          "icon": {
+          "lucideIcon": {
             "type": "string",
             "description": "Lucide icon name (web)",
             "example": "clipboard-list"
@@ -15249,7 +15249,7 @@
             "type": "string",
             "example": "Inventory Items"
           },
-          "icon": {
+          "lucideIcon": {
             "type": "string",
             "example": "package"
           },
@@ -15266,7 +15266,7 @@
           "id",
           "code",
           "name",
-          "icon",
+          "lucideIcon",
           "app",
           "permissionCount"
         ]

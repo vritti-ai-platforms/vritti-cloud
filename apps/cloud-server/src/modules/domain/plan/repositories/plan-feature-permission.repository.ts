@@ -23,7 +23,7 @@ export interface AvailablePlanFeature {
   id: string;
   code: string;
   name: string;
-  icon: string;
+  lucideIcon: string;
   permissions: AvailablePlanPermission[];
   // Platforms this feature has a route on — drives which Web/Mobile columns the matrix shows
   platforms: AppPlatform[];
@@ -107,7 +107,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
         featureId: features.id,
         featureCode: features.code,
         featureName: features.name,
-        featureIcon: features.icon,
+        featureIcon: features.lucideIcon,
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
@@ -156,7 +156,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
           id: row.featureId,
           code: row.featureCode,
           name: row.featureName,
-          icon: row.featureIcon,
+          lucideIcon: row.featureIcon,
           permissions: [],
           platforms: [],
         };

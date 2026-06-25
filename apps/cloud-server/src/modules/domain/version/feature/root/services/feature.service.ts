@@ -172,12 +172,12 @@ export class FeatureService {
         const incomingDesc = row.data.description || null;
         if (
           existing.name !== row.data.name ||
-          existing.icon !== row.data.icon ||
+          existing.lucideIcon !== row.data.lucideIcon ||
           existing.description !== incomingDesc
         ) {
           await this.featureRepository.update(existing.id, {
             name: row.data.name,
-            icon: row.data.icon,
+            lucideIcon: row.data.lucideIcon,
             description: incomingDesc ?? undefined,
           } as UpdateFeatureDto);
           updated++;
@@ -189,7 +189,7 @@ export class FeatureService {
           versionId,
           code: row.data.code,
           name: row.data.name,
-          icon: row.data.icon,
+          lucideIcon: row.data.lucideIcon,
           description: row.data.description || null,
         });
         created++;
@@ -207,7 +207,7 @@ export class FeatureService {
     const rows = result.map((r) => ({
       code: r.code,
       name: r.name,
-      icon: r.icon,
+      lucideIcon: r.lucideIcon,
       description: r.description ?? '',
     }));
 

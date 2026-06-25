@@ -18,7 +18,7 @@ export class FeatureDto {
   description: string | null;
 
   @ApiProperty({ example: 'clipboard-list' })
-  icon: string;
+  lucideIcon: string;
 
   @ApiProperty({ example: 'cart.fill', description: 'iOS SF Symbol name' })
   sfSymbol: string;
@@ -64,7 +64,7 @@ export class FeatureDto {
     dto.code = feature.code;
     dto.name = feature.name;
     dto.description = feature.description;
-    dto.icon = feature.icon;
+    dto.lucideIcon = feature.lucideIcon;
     dto.sfSymbol = feature.sfSymbol;
     dto.materialSymbol = feature.materialSymbol;
     dto.isActive = feature.isActive;

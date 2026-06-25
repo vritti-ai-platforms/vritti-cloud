@@ -53,7 +53,7 @@ export const FeaturesTab = () => {
           columns: [
             { key: 'code', label: 'Code' },
             { key: 'name', label: 'Name' },
-            { key: 'icon', label: 'Icon' },
+            { key: 'lucideIcon', label: 'Icon' },
             { key: 'description', label: 'Description' },
             { key: 'permissions', label: 'Permissions' },
           ],
@@ -61,14 +61,14 @@ export const FeaturesTab = () => {
             {
               code: 'products',
               name: 'Products',
-              icon: 'package',
+              lucideIcon: 'package',
               description: 'Product catalog management',
               permissions: 'VIEW,CREATE,EDIT,DELETE',
             },
             {
               code: 'orders',
               name: 'Orders',
-              icon: 'clipboard-list',
+              lucideIcon: 'clipboard-list',
               description: 'Order management',
               permissions: 'VIEW,CREATE',
             },
@@ -78,7 +78,7 @@ export const FeaturesTab = () => {
           transformExportRow: (row) => ({
             code: row.code,
             name: row.name,
-            icon: row.icon,
+            lucideIcon: row.lucideIcon,
             description: row.description ?? '',
             permissions: row.permissions.join(','),
           }),
@@ -125,9 +125,9 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
   return [
     getSelectionColumn<Feature>(),
     {
-      accessorKey: 'icon',
+      accessorKey: 'lucideIcon',
       header: '',
-      cell: ({ row }) => <DynamicIcon name={row.original.icon} className="size-4 text-muted-foreground" />,
+      cell: ({ row }) => <DynamicIcon name={row.original.lucideIcon} className="size-4 text-muted-foreground" />,
       enableSorting: false,
       enableHiding: false,
       size: 40,

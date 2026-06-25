@@ -20,7 +20,7 @@ export class BusinessFeatureDto {
   name: string;
 
   @ApiProperty({ example: 'package' })
-  icon: string;
+  lucideIcon: string;
 
   @ApiProperty({ type: BusinessFeatureAppDto })
   app: BusinessFeatureAppDto;
@@ -34,7 +34,7 @@ export class BusinessFeatureDto {
     dto.id = row.id;
     dto.code = row.code;
     dto.name = row.name;
-    dto.icon = row.icon;
+    dto.lucideIcon = row.lucideIcon;
     dto.app = row.app;
     dto.permissionCount = row.permissionCount;
     return dto;

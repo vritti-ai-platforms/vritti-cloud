@@ -12,7 +12,7 @@ export interface MatrixFeature {
   id: string;
   code: string;
   name: string;
-  icon: string | null;
+  lucideIcon: string | null;
   permissions: MatrixPermissionOption[];
   platforms: Platform[];
 }

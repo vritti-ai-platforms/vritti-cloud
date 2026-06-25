@@ -28,9 +28,11 @@ interface ColumnActions {
 function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeature, unknown>[] {
   return [
     {
-      accessorKey: 'icon',
+      accessorKey: 'lucideIcon',
       header: '',
-      cell: ({ row }) => <DynamicIcon name={row.original.icon as IconName} className="size-4 text-muted-foreground" />,
+      cell: ({ row }) => (
+        <DynamicIcon name={row.original.lucideIcon as IconName} className="size-4 text-muted-foreground" />
+      ),
       enableSorting: false,
       enableHiding: false,
       size: 40,

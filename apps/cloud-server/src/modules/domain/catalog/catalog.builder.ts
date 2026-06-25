@@ -10,7 +10,7 @@ export interface CatalogPermission {
 export interface FeatureCatalogEntry {
   code: string;
   name: string;
-  icon: string | null;
+  lucideIcon: string | null;
   sfSymbol: string;
   materialSymbol: string;
   remoteEntry: string | null;
@@ -75,7 +75,7 @@ export function buildBuCatalog(
       catalog.push({
         code: feature.code,
         name: feature.name,
-        icon: feature.icon ?? null,
+        lucideIcon: feature.lucideIcon ?? null,
         sfSymbol: feature.sfSymbol ?? 'square',
         materialSymbol: feature.materialSymbol ?? 'square',
         remoteEntry: web?.remoteEntry ?? null,
