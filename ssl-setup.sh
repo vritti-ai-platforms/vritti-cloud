@@ -60,6 +60,7 @@ mkcert \
     -cert-file "_wildcard.local.vrittiai.com+4.pem" \
     "*.local.vrittiai.com" \
     "local.vrittiai.com" \
+    "local.mobile.vrittiai.com" \
     "localhost" \
     "127.0.0.1" \
     "::1"
