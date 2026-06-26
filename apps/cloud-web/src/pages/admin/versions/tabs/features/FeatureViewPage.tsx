@@ -10,6 +10,7 @@ import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import { EditFeatureForm } from './forms/EditFeatureForm';
 import { MicrofrontendTab } from './tabs/MicrofrontendTab';
+import { OverviewTab } from './tabs/OverviewTab';
 import { PermissionsTab } from './tabs/PermissionsTab';
 
 export const FeatureViewPage = () => {
@@ -53,8 +54,9 @@ export const FeatureViewPage = () => {
 
       {/* Tabs */}
       <Tabs
-        defaultValue="microfrontend"
+        defaultValue="overview"
         tabs={[
+          { value: 'overview', label: 'Overview', content: <OverviewTab feature={feature} /> },
           { value: 'microfrontend', label: 'Microfrontend', content: <MicrofrontendTab featureId={feature.id} /> },
           { value: 'permissions', label: 'Permissions', content: <PermissionsTab featureId={feature.id} /> },
         ]}

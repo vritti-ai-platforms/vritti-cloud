@@ -6,7 +6,6 @@ import {
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
-import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { keyBy } from '@vritti/quantum-ui/lodash';
@@ -138,9 +137,6 @@ const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) =>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
-            Edit
-          </Button>
           <Button
             variant="ghost"
             size="sm"
@@ -150,6 +146,9 @@ const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) =>
           >
             <Unlink className="size-4 mr-1" />
             Unlink
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setShowForm(true)}>
+            Edit
           </Button>
         </div>
       </CardHeader>
@@ -222,15 +221,27 @@ const LinkMicrofrontendForm = ({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center gap-3">
-        <PlatformIcon className="size-5 text-muted-foreground" />
-        <div>
-          <CardTitle className="text-base">Link {platform} Microfrontend</CardTitle>
-          <CardDescription>Configure the module federation entry for this feature</CardDescription>
-        </div>
-      </CardHeader>
-      <CardContent>
-        <Form form={form} mutation={setMutation}>
+      {/* Form wraps header + body so the header's submit button drives the fields below.
+          Buttons stay in the SAME positions as the view card: Cancel (left/Unlink slot), Save (right/Edit slot). */}
+      <Form form={form} mutation={setMutation}>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div className="flex items-center gap-3">
+            <PlatformIcon className="size-5 text-muted-foreground" />
+            <div>
+              <CardTitle className="text-base">{platform}</CardTitle>
+              <CardDescription>Module federation configuration</CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="default" size="sm" loadingText="Saving...">
+              Save
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <MicrofrontendSelector
             name="microfrontendId"
             params={{ versionId, platform }}
@@ -250,16 +261,8 @@ const LinkMicrofrontendForm = ({
               description="URL path for this feature"
             />
           </div>
-          <DialogActions>
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button type="submit" loadingText="Saving...">
-              Save Configuration
-            </Button>
-          </DialogActions>
-        </Form>
-      </CardContent>
+        </CardContent>
+      </Form>
     </Card>
   );
 };

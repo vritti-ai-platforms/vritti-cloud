@@ -11,6 +11,38 @@
  */
 @import "@vritti/quantum-ui/index.css";
 
+/**
+ * Material Symbols (Outlined) — self-hosted, cloud-web only (the admin UI is the only place
+ * we preview the mobile Android icon set). Downloaded from Google's font server, not npm.
+ * Rsbuild emits the woff2 to the build output and rewrites this url. Render via the ligature
+ * name (underscored): <span class="material-symbols-outlined">shopping_bag</span>.
+ */
+@font-face {
+  font-family: "Material Symbols Outlined";
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url("./assets/fonts/MaterialSymbolsOutlined.woff2") format("woff2");
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  /* Variable-font axes — without these the glyph can render blank (Google's canonical setup). */
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
 @layer base {
   * {
     @apply border-border; /* border-color: var(--color-border); */

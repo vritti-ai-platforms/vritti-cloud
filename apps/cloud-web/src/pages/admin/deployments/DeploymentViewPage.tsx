@@ -64,9 +64,9 @@ export const DeploymentViewPage = () => {
                 <Card>
                   <CardContent className="grid grid-cols-1 gap-4 py-6 sm:grid-cols-2">
                     <DetailField label="URL" type="string" value={deployment.url} mono />
-                    <DetailField label="Version" type="string" value={deployment.version ?? '—'} mono />
-                    <DetailField label="Region" type="string" value={deployment.regionName ?? '—'} />
-                    <DetailField label="Cloud Provider" type="string" value={deployment.cloudProviderName ?? '—'} />
+                    <DetailField label="Version" type="string" value={deployment.version} mono />
+                    <DetailField label="Region" type="string" value={deployment.regionName} />
+                    <DetailField label="Cloud Provider" type="string" value={deployment.cloudProviderName} />
                     <DetailField
                       label="Status"
                       type="string"

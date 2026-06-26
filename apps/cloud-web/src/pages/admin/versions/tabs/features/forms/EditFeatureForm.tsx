@@ -46,11 +46,15 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
         <TextField name="code" label="Code" placeholder="e.g. orders" description="Lowercase with hyphens" />
         <TextField name="name" label="Name" placeholder="e.g. Orders" />
       </div>
-      <IconSelect kind="lucide" name="lucideIcon" label="Icon" placeholder="Select icon" />
-      <div className="grid grid-cols-2 gap-4">
-        <IconSelect kind="sf" name="sfSymbol" label="SF Symbol (iOS)" placeholder="Select icon" />
-        <IconSelect kind="material" name="materialSymbol" label="Material Symbol (Android)" placeholder="Select icon" />
-      </div>
+      <IconSelect kind="lucide" name="lucideIcon" label="Icon" placeholder="Select icon" clearable={false} />
+      <IconSelect kind="sf" name="sfSymbol" label="SF Symbol (iOS)" placeholder="Select icon" clearable={false} />
+      <IconSelect
+        kind="material"
+        name="materialSymbol"
+        label="Material Symbol (Android)"
+        placeholder="Select icon"
+        clearable={false}
+      />
       <TextField name="description" label="Description" placeholder="Optional description" />
 
       <DialogActions>
