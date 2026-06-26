@@ -2,7 +2,7 @@ import { COUNTRIES_QUERY_KEY, useCountries, useDeleteCountry } from '@hooks/admi
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, StringCell, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -125,7 +125,7 @@ function getColumns(): ColumnDef<Country, unknown>[] {
       accessorKey: 'taxIdLabel',
       header: 'Tax ID',
       enableSorting: false,
-      cell: ({ row }) => row.original.taxIdLabel ?? '—',
+      cell: ({ row }) => <StringCell value={row.original.taxIdLabel} />,
     },
     {
       accessorKey: 'isActive',
