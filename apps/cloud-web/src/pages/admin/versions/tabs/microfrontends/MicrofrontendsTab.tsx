@@ -34,7 +34,7 @@ export const MicrofrontendsTab = () => {
       variant: 'destructive',
     });
     if (confirmed && versionId) {
-      deleteMutation.mutate({ versionId, id: mf.id });
+      deleteMutation.mutate({ versionId, platform: mf.platform === 'MOBILE' ? 'mobile' : 'web', id: mf.id });
     }
   }
 

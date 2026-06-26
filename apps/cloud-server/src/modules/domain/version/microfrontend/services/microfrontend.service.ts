@@ -5,36 +5,20 @@ import {
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
-  NotFoundException,
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
-import { type AppPlatform, AppPlatformValues, microfrontends } from '@/db/schema';
+import { type AppPlatform, microfrontends } from '@/db/schema';
 import { MicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/entity/microfrontend.dto';
-import type { CreateMicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/request/create-microfrontend.dto';
-import type { UpdateMicrofrontendDto } from '@/modules/admin-api/version/microfrontend/dto/request/update-microfrontend.dto';
+import type { MobileMicrofrontendBodyDto } from '@/modules/admin-api/version/microfrontend/dto/request/mobile-microfrontend-body.dto';
+import type { WebMicrofrontendBodyDto } from '@/modules/admin-api/version/microfrontend/dto/request/web-microfrontend-body.dto';
 import type { MicrofrontendTableResponseDto } from '@/modules/admin-api/version/microfrontend/dto/response/microfrontend-table-response.dto';
 import type { MicrofrontendSelectQueryDto } from '@/modules/select-api/dto/microfrontend-select-query.dto';
 import { MicrofrontendRepository } from '../repositories/microfrontend.repository';
 
-// Clears URL columns not relevant to the row's platform so the DB never carries inconsistent state
-function normalizeMfUrls<
-  T extends {
-    platform?: AppPlatform;
-    remoteEntry?: string | null;
-    remoteEntryAndroid?: string | null;
-    remoteEntryIos?: string | null;
-  },
->(dto: T): T {
-  if (dto.platform === AppPlatformValues.WEB) {
-    return { ...dto, remoteEntryAndroid: null, remoteEntryIos: null };
-  }
-  if (dto.platform === AppPlatformValues.MOBILE) {
-    return { ...dto, remoteEntry: null };
-  }
-  return dto;
-}
+// The URL platform param, lowercase
+export type MicrofrontendPlatformParam = 'web' | 'mobile';
 
 @Injectable()
 export class MicrofrontendService {
@@ -51,38 +35,7 @@ export class MicrofrontendService {
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
-  // Creates a new microfrontend; throws ConflictException on duplicate code+platform within version
-  async create(dto: CreateMicrofrontendDto & { versionId: string }): Promise<CreateResponseDto<MicrofrontendDto>> {
-    const existing = await this.microfrontendRepository.findByVersionAndCodeAndPlatform(
-      dto.versionId,
-      dto.code,
-      dto.platform,
-    );
-    if (existing) {
-      throw new ConflictException({
-        label: 'Microfrontend Already Exists',
-        detail: 'A microfrontend with this code and platform already exists in this version.',
-        errors: [{ field: 'code', message: 'Duplicate code + platform' }],
-      });
-    }
-    try {
-      const microfrontend = await this.microfrontendRepository.create(normalizeMfUrls(dto));
-      this.logger.log(`Created microfrontend: ${microfrontend.code} (${microfrontend.id})`);
-      return {
-        success: true,
-        message: `Microfrontend "${microfrontend.name}" created successfully.`,
-        data: MicrofrontendDto.from(microfrontend),
-      };
-    } catch (error) {
-      const err = error as Error & { cause?: Error; code?: string; detail?: string };
-      this.logger.error(`Failed to create microfrontend: ${err.message}`);
-      this.logger.error(`Cause: ${err.cause?.message ?? 'none'}`);
-      this.logger.error(`PG code: ${err.code ?? 'none'}, detail: ${err.detail ?? 'none'}`);
-      throw error;
-    }
-  }
-
-  // Returns microfrontends for the data table filtered by app version
+  // Returns microfrontends for the data table filtered by app version (reads the unified view)
   async findForTable(userId: string, versionId: string): Promise<MicrofrontendTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(
       userId,
@@ -107,62 +60,73 @@ export class MicrofrontendService {
     return this.microfrontendRepository.findMicrofrontendSelectOptions(query);
   }
 
-  // Finds a microfrontend by ID; throws NotFoundException if not found
-  async findById(id: string): Promise<MicrofrontendDto> {
-    const microfrontend = await this.microfrontendRepository.findById(id);
-    if (!microfrontend) {
-      throw new NotFoundException('Microfrontend not found.');
+  // Upserts a microfrontend (PUT semantics) keyed by (versionId, code) into the platform-appropriate table
+  async upsert(
+    platform: MicrofrontendPlatformParam,
+    versionId: string,
+    dto: WebMicrofrontendBodyDto | MobileMicrofrontendBodyDto,
+  ): Promise<CreateResponseDto<MicrofrontendDto>> {
+    if (platform === 'web') {
+      const body = dto as WebMicrofrontendBodyDto;
+      const row = await this.microfrontendRepository.upsertWeb({
+        versionId,
+        code: body.code,
+        name: body.name,
+        remoteEntry: body.remoteEntry,
+      });
+      this.logger.log(`Upserted web microfrontend: ${row.code} (${row.id})`);
+      return {
+        success: true,
+        message: `Microfrontend "${row.name}" saved successfully.`,
+        data: MicrofrontendDto.from({
+          id: row.id,
+          versionId: row.versionId,
+          code: row.code,
+          name: row.name,
+          platform: 'WEB',
+          remoteEntry: row.remoteEntry,
+          remoteEntryAndroid: null,
+          remoteEntryIos: null,
+        }),
+      };
     }
-    this.logger.log(`Fetched microfrontend: ${id}`);
-    return MicrofrontendDto.from(microfrontend);
-  }
-
-  // Updates a microfrontend by ID; checks uniqueness if code or platform changed
-  async update(id: string, dto: UpdateMicrofrontendDto): Promise<SuccessResponseDto> {
-    const existing = await this.microfrontendRepository.findById(id);
-    if (!existing) {
-      throw new NotFoundException('Microfrontend not found.');
-    }
-    if (dto.code || dto.platform) {
-      const code = dto.code ?? existing.code;
-      const platform = dto.platform ?? existing.platform;
-      const duplicate = await this.microfrontendRepository.findByVersionAndCodeAndPlatform(
-        existing.versionId,
-        code,
-        platform,
-      );
-      if (duplicate && duplicate.id !== id) {
-        throw new ConflictException({
-          label: 'Microfrontend Already Exists',
-          detail: 'A microfrontend with this code and platform already exists in this version.',
-          errors: [{ field: 'code', message: 'Duplicate code + platform' }],
-        });
-      }
-    }
-    const effectivePlatform = dto.platform ?? existing.platform;
-    const microfrontend = await this.microfrontendRepository.update(
-      id,
-      normalizeMfUrls({ ...dto, platform: effectivePlatform }),
-    );
-    this.logger.log(`Updated microfrontend: ${microfrontend.code} (${microfrontend.id})`);
-    return { success: true, message: `Microfrontend "${existing.name}" updated successfully.` };
+    const body = dto as MobileMicrofrontendBodyDto;
+    const row = await this.microfrontendRepository.upsertMobile({
+      versionId,
+      code: body.code,
+      name: body.name,
+      remoteEntryAndroid: body.remoteEntryAndroid,
+      remoteEntryIos: body.remoteEntryIos,
+    });
+    this.logger.log(`Upserted mobile microfrontend: ${row.code} (${row.id})`);
+    return {
+      success: true,
+      message: `Microfrontend "${row.name}" saved successfully.`,
+      data: MicrofrontendDto.from({
+        id: row.id,
+        versionId: row.versionId,
+        code: row.code,
+        name: row.name,
+        platform: 'MOBILE',
+        remoteEntry: null,
+        remoteEntryAndroid: row.remoteEntryAndroid,
+        remoteEntryIos: row.remoteEntryIos,
+      }),
+    };
   }
 
   // Deletes a microfrontend by ID; rejects if features reference it
-  async delete(id: string): Promise<SuccessResponseDto> {
-    const existing = await this.microfrontendRepository.findById(id);
-    if (!existing) {
-      throw new NotFoundException('Microfrontend not found.');
-    }
-    const refs = await this.microfrontendRepository.countFeatureReferences(id);
+  async remove(platform: MicrofrontendPlatformParam, id: string): Promise<SuccessResponseDto> {
+    const appPlatform: AppPlatform = platform === 'web' ? 'WEB' : 'MOBILE';
+    const refs = await this.microfrontendRepository.countFeatureReferences(id, appPlatform);
     if (refs > 0) {
       throw new ConflictException({
         label: 'Microfrontend In Use',
-        detail: `Cannot delete "${existing.name}" — it is referenced by ${refs} feature${refs > 1 ? 's' : ''}. Remove those references first.`,
+        detail: `It is referenced by ${refs} feature${refs > 1 ? 's' : ''}. Unlink those features first.`,
       });
     }
-    await this.microfrontendRepository.delete(id);
-    this.logger.log(`Deleted microfrontend: ${existing.name} (${existing.id})`);
-    return { success: true, message: `Microfrontend "${existing.name}" deleted successfully.` };
+    await this.microfrontendRepository.remove(appPlatform, id);
+    this.logger.log(`Deleted ${appPlatform} microfrontend: ${id}`);
+    return { success: true, message: 'Microfrontend deleted successfully.' };
   }
 }

@@ -1,4 +1,4 @@
-import { useUpdateMicrofrontend } from '@hooks/admin/versions/microfrontends';
+import { useUpsertMicrofrontend } from '@hooks/admin/versions/microfrontends';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -6,9 +6,9 @@ import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import type { Microfrontend } from '@/schemas/admin/microfrontends';
-import { type UpdateMicrofrontendData, updateMicrofrontendSchema } from '@/schemas/admin/microfrontends';
+import { type MicrofrontendData, microfrontendSchema } from '@/schemas/admin/microfrontends';
 
 interface EditMicrofrontendFormProps {
   microfrontend: Microfrontend;
@@ -17,28 +17,34 @@ interface EditMicrofrontendFormProps {
 }
 
 export const EditMicrofrontendForm: React.FC<EditMicrofrontendFormProps> = ({ microfrontend, onSuccess, onCancel }) => {
-  const form = useForm<UpdateMicrofrontendData>({
-    resolver: zodResolver(updateMicrofrontendSchema),
-    defaultValues: {
-      code: microfrontend.code,
-      name: microfrontend.name,
-      platform: microfrontend.platform,
-      remoteEntry: microfrontend.remoteEntry ?? '',
-      remoteEntryAndroid: microfrontend.remoteEntryAndroid ?? '',
-      remoteEntryIos: microfrontend.remoteEntryIos ?? '',
-    },
+  const isMobile = microfrontend.platform === 'MOBILE';
+  const form = useForm<MicrofrontendData>({
+    resolver: zodResolver(microfrontendSchema),
+    defaultValues: isMobile
+      ? {
+          platform: 'MOBILE',
+          code: microfrontend.code,
+          name: microfrontend.name,
+          remoteEntryAndroid: microfrontend.remoteEntryAndroid ?? '',
+          remoteEntryIos: microfrontend.remoteEntryIos ?? '',
+        }
+      : {
+          platform: 'WEB',
+          code: microfrontend.code,
+          name: microfrontend.name,
+          remoteEntry: microfrontend.remoteEntry ?? '',
+        },
   });
 
-  const platform = useWatch({ control: form.control, name: 'platform' });
-  const updateMutation = useUpdateMicrofrontend(microfrontend.versionId, { onSuccess });
+  const upsertMutation = useUpsertMicrofrontend(microfrontend.versionId, { onSuccess });
 
   return (
     <Form
       form={form}
-      mutation={updateMutation}
-      transformSubmit={(data: UpdateMicrofrontendData) => ({
+      mutation={upsertMutation}
+      transformSubmit={(data: MicrofrontendData) => ({
         versionId: microfrontend.versionId,
-        id: microfrontend.id,
+        platform: isMobile ? ('mobile' as const) : ('web' as const),
         data,
       })}
       resetOnSuccess={false}
@@ -55,12 +61,13 @@ export const EditMicrofrontendForm: React.FC<EditMicrofrontendFormProps> = ({ mi
         name="platform"
         label="Platform"
         placeholder="Select platform"
+        disabled
         options={[
           { value: 'WEB', label: 'Web' },
           { value: 'MOBILE', label: 'Mobile' },
         ]}
       />
-      {platform === 'WEB' && (
+      {!isMobile && (
         <TextField
           name="remoteEntry"
           label="Remote Entry"
@@ -68,7 +75,7 @@ export const EditMicrofrontendForm: React.FC<EditMicrofrontendFormProps> = ({ mi
           description="URL to the remote entry file"
         />
       )}
-      {platform === 'MOBILE' && (
+      {isMobile && (
         <>
           <TextField
             name="remoteEntryAndroid"

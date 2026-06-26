@@ -13,9 +13,12 @@ export interface FeatureCatalogEntry {
   lucideIcon: string | null;
   sfSymbol: string;
   materialSymbol: string;
-  remoteEntry: string | null;
-  exposedModule: string | null;
-  routePrefix: string | null;
+  // Per-platform MF route — symmetric { web?, mobile? }; null when the feature has no MF for that platform.
+  web: {
+    remoteEntry: string;
+    exposedModule: string;
+    routePrefix: string;
+  } | null;
   mobile: {
     remoteEntryAndroid: string;
     remoteEntryIos: string;
@@ -57,15 +60,15 @@ export function buildBuCatalog(
     // The app's renderable features (each feature pins to exactly one app)
     const appFeatures = app.features
       .map((code) => snapshot.features?.[code])
-      .filter((f): f is SnapshotFeature => !!f && !!(f.microfrontends?.WEB || f.microfrontends?.MOBILE));
+      .filter((f): f is SnapshotFeature => !!f && !!(f.microfrontends?.web || f.microfrontends?.mobile));
 
     // Apps are DERIVED: include this app only if the plan unlocks at least one of its features (on any platform)
     const appHasUnlock = appFeatures.some((f) => unlockedCodes(plan?.unlockedPermissions?.[f.code]).length > 0);
     if (!appHasUnlock) continue;
 
     for (const feature of appFeatures) {
-      const web = feature.microfrontends?.WEB;
-      const mobile = feature.microfrontends?.MOBILE;
+      const web = feature.microfrontends?.web;
+      const mobile = feature.microfrontends?.mobile;
 
       // Flatten per-platform unlocks until core resolution becomes platform-aware (locked = locked on every platform)
       const unlocked = unlockedCodes(plan?.unlockedPermissions?.[feature.code]);
@@ -78,9 +81,13 @@ export function buildBuCatalog(
         lucideIcon: feature.lucideIcon ?? null,
         sfSymbol: feature.sfSymbol ?? 'square',
         materialSymbol: feature.materialSymbol ?? 'square',
-        remoteEntry: web?.remoteEntry ?? null,
-        exposedModule: web?.exposedModule ?? null,
-        routePrefix: web?.routePrefix ?? null,
+        web: web
+          ? {
+              remoteEntry: web.remoteEntry ?? '',
+              exposedModule: web.exposedModule ?? '',
+              routePrefix: web.routePrefix ?? '',
+            }
+          : null,
         mobile: mobile
           ? {
               remoteEntryAndroid: mobile.remoteEntryAndroid ?? '',

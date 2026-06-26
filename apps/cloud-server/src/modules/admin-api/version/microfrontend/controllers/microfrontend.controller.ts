@@ -1,19 +1,37 @@
-import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
+import {
+  type MicrofrontendPlatformParam,
+  MicrofrontendService,
+} from '@domain/version/microfrontend/services/microfrontend.service';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateResponseDto, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
-  ApiCreateMicrofrontend,
   ApiDeleteMicrofrontend,
   ApiFindForTableMicrofrontends,
-  ApiGetMicrofrontendById,
-  ApiUpdateMicrofrontend,
+  ApiUpsertMicrofrontend,
 } from '../docs/microfrontend.docs';
 import { MicrofrontendDto } from '../dto/entity/microfrontend.dto';
-import { CreateMicrofrontendDto } from '../dto/request/create-microfrontend.dto';
-import { UpdateMicrofrontendDto } from '../dto/request/update-microfrontend.dto';
+import { MobileMicrofrontendBodyDto } from '../dto/request/mobile-microfrontend-body.dto';
+import { WebMicrofrontendBodyDto } from '../dto/request/web-microfrontend-body.dto';
 import { MicrofrontendTableResponseDto } from '../dto/response/microfrontend-table-response.dto';
+
+// Validates the :platform path param is 'web' or 'mobile'
+function parsePlatform(platform: string): MicrofrontendPlatformParam {
+  if (platform === 'web' || platform === 'mobile') return platform;
+  throw new BadRequestException('platform', 'Platform must be "web" or "mobile".');
+}
 
 @ApiTags('Admin - Microfrontends')
 @ApiBearerAuth()
@@ -23,18 +41,6 @@ export class MicrofrontendController {
   private readonly logger = new Logger(MicrofrontendController.name);
 
   constructor(private readonly microfrontendService: MicrofrontendService) {}
-
-  // Creates a new microfrontend within a version
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  @ApiCreateMicrofrontend()
-  create(
-    @Param('versionId') versionId: string,
-    @Body() dto: CreateMicrofrontendDto,
-  ): Promise<CreateResponseDto<MicrofrontendDto>> {
-    this.logger.log(`POST /admin-api/versions/${versionId}/microfrontends`);
-    return this.microfrontendService.create({ ...dto, versionId: versionId });
-  }
 
   // Returns microfrontends for the data table filtered by version
   @Get('table')
@@ -47,32 +53,29 @@ export class MicrofrontendController {
     return this.microfrontendService.findForTable(userId, versionId);
   }
 
-  // Returns a single microfrontend by ID
-  @Get(':id')
-  @ApiGetMicrofrontendById()
-  findById(@Param('versionId') _versionId: string, @Param('id') id: string): Promise<MicrofrontendDto> {
-    this.logger.log(`GET /admin-api/versions/${_versionId}/microfrontends/${id}`);
-    return this.microfrontendService.findById(id);
+  // Upserts a microfrontend for the given platform (PUT = upsert by version + code)
+  @Put(':platform')
+  @HttpCode(HttpStatus.OK)
+  @ApiUpsertMicrofrontend()
+  upsert(
+    @Param('versionId') versionId: string,
+    @Param('platform') platform: string,
+    @Body() body: WebMicrofrontendBodyDto & MobileMicrofrontendBodyDto,
+  ): Promise<CreateResponseDto<MicrofrontendDto>> {
+    this.logger.log(`PUT /admin-api/versions/${versionId}/microfrontends/${platform}`);
+    return this.microfrontendService.upsert(parsePlatform(platform), versionId, body);
   }
 
-  // Updates a microfrontend by ID
-  @Patch(':id')
-  @ApiUpdateMicrofrontend()
-  update(
-    @Param('versionId') _versionId: string,
-    @Param('id') id: string,
-    @Body() dto: UpdateMicrofrontendDto,
-  ): Promise<SuccessResponseDto> {
-    this.logger.log(`PATCH /admin-api/versions/${_versionId}/microfrontends/${id}`);
-    return this.microfrontendService.update(id, dto);
-  }
-
-  // Deletes a microfrontend by ID
-  @Delete(':id')
+  // Deletes a microfrontend by platform + ID
+  @Delete(':platform/:id')
   @HttpCode(HttpStatus.OK)
   @ApiDeleteMicrofrontend()
-  delete(@Param('versionId') _versionId: string, @Param('id') id: string): Promise<SuccessResponseDto> {
-    this.logger.log(`DELETE /admin-api/versions/${_versionId}/microfrontends/${id}`);
-    return this.microfrontendService.delete(id);
+  remove(
+    @Param('versionId') versionId: string,
+    @Param('platform') platform: string,
+    @Param('id') id: string,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /admin-api/versions/${versionId}/microfrontends/${platform}/${id}`);
+    return this.microfrontendService.remove(parsePlatform(platform), id);
   }
 }

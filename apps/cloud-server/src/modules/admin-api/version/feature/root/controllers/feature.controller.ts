@@ -1,5 +1,22 @@
-import { FeatureService } from '@domain/version/feature/root/services/feature.service';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Res } from '@nestjs/common';
+import {
+  type FeatureMicrofrontendPlatformParam,
+  FeatureService,
+} from '@domain/version/feature/root/services/feature.service';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Res,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   CreateResponseDto,
@@ -19,13 +36,24 @@ import {
   ApiExportFeatures,
   ApiFindForTableFeatures,
   ApiGetFeatureById,
+  ApiGetFeatureMicrofrontends,
   ApiImportFeatures,
+  ApiRemoveFeatureMicrofrontend,
+  ApiSetFeatureMicrofrontend,
   ApiUpdateFeature,
 } from '../docs/feature.docs';
 import { FeatureDto } from '../dto/entity/feature.dto';
+import { FeatureMicrofrontendLinksDto } from '../dto/entity/feature-microfrontend-links.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
+import { SetFeatureMicrofrontendDto } from '../dto/request/set-feature-microfrontend.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '../dto/response/feature-table-response.dto';
+
+// Validates the :platform path param is 'web' or 'mobile'
+function parseFeatureMfPlatform(platform: string): FeatureMicrofrontendPlatformParam {
+  if (platform === 'web' || platform === 'mobile') return platform;
+  throw new BadRequestException('platform', 'Platform must be "web" or "mobile".');
+}
 
 @ApiTags('Admin - Features')
 @ApiBearerAuth()
@@ -105,5 +133,38 @@ export class FeatureController {
   delete(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`DELETE /admin-api/features/${id}`);
     return this.featureService.delete(id);
+  }
+
+  // Returns a feature's microfrontend links keyed by platform
+  @Get(':featureId/microfrontends')
+  @ApiGetFeatureMicrofrontends()
+  getMicrofrontends(@Param('featureId') featureId: string): Promise<FeatureMicrofrontendLinksDto> {
+    this.logger.log(`GET /admin-api/features/${featureId}/microfrontends`);
+    return this.featureService.getMicrofrontends(featureId);
+  }
+
+  // Sets or updates a feature's microfrontend link for the given platform
+  @Put(':featureId/microfrontend/:platform')
+  @HttpCode(HttpStatus.OK)
+  @ApiSetFeatureMicrofrontend()
+  setMicrofrontend(
+    @Param('featureId') featureId: string,
+    @Param('platform') platform: string,
+    @Body() dto: SetFeatureMicrofrontendDto,
+  ): Promise<CreateResponseDto<FeatureDto>> {
+    this.logger.log(`PUT /admin-api/features/${featureId}/microfrontend/${platform}`);
+    return this.featureService.setMicrofrontend(featureId, parseFeatureMfPlatform(platform), dto);
+  }
+
+  // Removes a feature's microfrontend link for the given platform
+  @Delete(':featureId/microfrontend/:platform')
+  @HttpCode(HttpStatus.OK)
+  @ApiRemoveFeatureMicrofrontend()
+  removeMicrofrontend(
+    @Param('featureId') featureId: string,
+    @Param('platform') platform: string,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /admin-api/features/${featureId}/microfrontend/${platform}`);
+    return this.featureService.removeMicrofrontend(featureId, parseFeatureMfPlatform(platform));
   }
 }

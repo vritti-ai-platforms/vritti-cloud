@@ -185,7 +185,7 @@ export const SnapshotView: React.FC<SnapshotViewProps> = ({ snapshot }) => {
   const mfCodes = new Set<string>();
   for (const f of features) {
     for (const mf of Object.values(f.microfrontends)) {
-      if (mf.code) mfCodes.add(mf.code);
+      if (mf?.code) mfCodes.add(mf.code);
     }
   }
   const totalMfes = mfCodes.size;

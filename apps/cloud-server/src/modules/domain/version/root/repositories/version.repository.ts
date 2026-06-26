@@ -6,10 +6,9 @@ import {
   appFeatures,
   apps,
   businesses,
-  featureMicrofrontends,
   featurePermissions,
   features,
-  microfrontends,
+  mobileMicrofrontends,
   permissionBusinesses,
   planFeaturePermissions,
   plans,
@@ -17,6 +16,7 @@ import {
   roleTemplates,
   versionBusinesses,
   versions,
+  webMicrofrontends,
 } from '@/db/schema';
 import type { SnapshotData } from '../services/version-snapshot.builder';
 
@@ -51,8 +51,8 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
     const [
       featureRows,
       permissionRows,
-      mfRows,
-      featureMfRows,
+      webMfRows,
+      mobileMfRows,
       appRows,
       appFeatureRows,
       roleRows,
@@ -63,8 +63,8 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
     ] = await Promise.all([
       this.db.select().from(features).where(eq(features.versionId, versionId)),
       this.db.select().from(featurePermissions).where(eq(featurePermissions.versionId, versionId)),
-      this.db.select().from(microfrontends).where(eq(microfrontends.versionId, versionId)),
-      this.db.select().from(featureMicrofrontends).where(eq(featureMicrofrontends.versionId, versionId)),
+      this.db.select().from(webMicrofrontends).where(eq(webMicrofrontends.versionId, versionId)),
+      this.db.select().from(mobileMicrofrontends).where(eq(mobileMicrofrontends.versionId, versionId)),
       this.db.select().from(apps).where(eq(apps.versionId, versionId)),
       this.db.select().from(appFeatures).where(eq(appFeatures.versionId, versionId)),
       this.db.select().from(roleTemplates).where(eq(roleTemplates.versionId, versionId)),
@@ -92,8 +92,8 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
     return {
       features: featureRows,
       permissions: permissionRows,
-      microfrontends: mfRows,
-      featureMicrofrontends: featureMfRows,
+      webMicrofrontends: webMfRows,
+      mobileMicrofrontends: mobileMfRows,
       apps: appRows,
       appFeatures: appFeatureRows,
       roleTemplates: roleRows,

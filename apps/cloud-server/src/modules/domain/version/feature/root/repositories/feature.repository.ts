@@ -7,15 +7,7 @@ import {
 } from '@vritti/api-sdk';
 import { countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
-import {
-  appFeatures,
-  apps,
-  featureMicrofrontends,
-  featurePermissions,
-  features,
-  microfrontends,
-  permissionBusinesses,
-} from '@/db/schema';
+import { appFeatures, apps, featurePermissions, features, permissionBusinesses } from '@/db/schema';
 
 export type FeatureTableRow = Feature & {
   permissions: string[];
@@ -104,7 +96,11 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
           mapFromDriverValue: (value: unknown) =>
             Array.isArray(value) ? value : value === '{}' || !value ? [] : String(value).slice(1, -1).split(','),
         }),
-        platforms: sql<string[]>`array_remove(array_agg(distinct ${microfrontends.platform}), null)`.mapWith({
+        // Platforms a feature has a route on, derived from its own web/mobile link columns
+        platforms: sql<string[]>`array_remove(array[
+          case when ${features.webMfId} is not null then 'WEB' end,
+          case when ${features.mobileMfId} is not null then 'MOBILE' end
+        ], null)`.mapWith({
           mapFromDriverValue: (value: unknown) =>
             Array.isArray(value) ? value : value === '{}' || !value ? [] : String(value).slice(1, -1).split(','),
         }),
@@ -113,8 +109,6 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
       },
       leftJoins: [
         { table: featurePermissions, on: eq(featurePermissions.featureId, features.id) },
-        { table: featureMicrofrontends, on: eq(featureMicrofrontends.featureId, features.id) },
-        { table: microfrontends, on: eq(microfrontends.id, featureMicrofrontends.microfrontendId) },
         { table: appFeatures, on: eq(appFeatures.featureId, features.id) },
         { table: apps, on: eq(apps.id, appFeatures.appId) },
       ],
@@ -144,6 +138,44 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
         where af.feature_id = ${features.id} and a.business_id = ${businessId}
       )`;
     return this.findForSelect({ ...config, conditions: [...(config.conditions ?? []), available] });
+  }
+
+  // Sets the feature's web microfrontend link columns
+  async setWebMicrofrontend(
+    featureId: string,
+    link: { webMfId: string; webExposedModule: string; webRoutePrefix: string },
+  ): Promise<Feature> {
+    const rows = await this.db.update(features).set(link).where(eq(features.id, featureId)).returning();
+    return rows[0] as Feature;
+  }
+
+  // Sets the feature's mobile microfrontend link columns
+  async setMobileMicrofrontend(
+    featureId: string,
+    link: { mobileMfId: string; mobileExposedModule: string; mobileRoutePrefix: string },
+  ): Promise<Feature> {
+    const rows = await this.db.update(features).set(link).where(eq(features.id, featureId)).returning();
+    return rows[0] as Feature;
+  }
+
+  // Clears the feature's web microfrontend link columns
+  async clearWebMicrofrontend(featureId: string): Promise<Feature> {
+    const rows = await this.db
+      .update(features)
+      .set({ webMfId: null, webExposedModule: null, webRoutePrefix: null })
+      .where(eq(features.id, featureId))
+      .returning();
+    return rows[0] as Feature;
+  }
+
+  // Clears the feature's mobile microfrontend link columns
+  async clearMobileMicrofrontend(featureId: string): Promise<Feature> {
+    const rows = await this.db
+      .update(features)
+      .set({ mobileMfId: null, mobileExposedModule: null, mobileRoutePrefix: null })
+      .where(eq(features.id, featureId))
+      .returning();
+    return rows[0] as Feature;
   }
 
   // Returns a set of feature IDs that have at least one app_feature reference (cannot be deleted)

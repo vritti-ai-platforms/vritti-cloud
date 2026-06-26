@@ -1,10 +1,10 @@
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type {
-  CreateMicrofrontendData,
   Microfrontend,
+  MicrofrontendData,
+  MicrofrontendPlatformParam,
   MicrofrontendsTableResponse,
-  UpdateMicrofrontendData,
 } from '@/schemas/admin/microfrontends';
 
 // Fetches microfrontends for the data table — scoped to a version
@@ -14,33 +14,32 @@ export function getMicrofrontendsTable(versionId: string): Promise<Microfrontend
     .then((r) => r.data);
 }
 
-// Creates a new microfrontend under a version
-export function createMicrofrontend({
+// Upserts a microfrontend under a version — keyed by (versionId, code) on the platform-specific table
+export function upsertMicrofrontend({
   versionId,
+  platform,
   data,
 }: {
   versionId: string;
-  data: CreateMicrofrontendData;
+  platform: MicrofrontendPlatformParam;
+  data: MicrofrontendData;
 }): Promise<CreateResponse<Microfrontend>> {
   return axios
-    .post<CreateResponse<Microfrontend>>(`admin-api/versions/${versionId}/microfrontends`, data)
+    .put<CreateResponse<Microfrontend>>(`admin-api/versions/${versionId}/microfrontends/${platform}`, data)
     .then((r) => r.data);
 }
 
-// Updates a microfrontend by ID
-export function updateMicrofrontend({
+// Deletes a microfrontend by platform + ID
+export function deleteMicrofrontend({
   versionId,
+  platform,
   id,
-  data,
 }: {
   versionId: string;
+  platform: MicrofrontendPlatformParam;
   id: string;
-  data: UpdateMicrofrontendData;
 }): Promise<SuccessResponse> {
-  return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/microfrontends/${id}`, data).then((r) => r.data);
-}
-
-// Deletes a microfrontend by ID
-export function deleteMicrofrontend({ versionId, id }: { versionId: string; id: string }): Promise<void> {
-  return axios.delete(`admin-api/versions/${versionId}/microfrontends/${id}`).then(() => undefined);
+  return axios
+    .delete<SuccessResponse>(`admin-api/versions/${versionId}/microfrontends/${platform}/${id}`)
+    .then((r) => r.data);
 }

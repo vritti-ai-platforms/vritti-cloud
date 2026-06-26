@@ -10,14 +10,27 @@ export interface SnapshotFeaturePermission {
   businesses: string[];
 }
 
-export interface SnapshotMicrofrontend {
+export interface SnapshotMicrofrontendWeb {
   code: string;
   name: string;
-  remoteEntry?: string | null;
-  remoteEntryAndroid?: string | null;
-  remoteEntryIos?: string | null;
+  remoteEntry: string | null;
   exposedModule: string | null;
   routePrefix: string | null;
+}
+
+export interface SnapshotMicrofrontendMobile {
+  code: string;
+  name: string;
+  remoteEntryAndroid: string | null;
+  remoteEntryIos: string | null;
+  exposedModule: string | null;
+  routePrefix: string | null;
+}
+
+// Mirrors the snapshot's {web?, mobile?} microfrontend shape (see version-snapshot.builder.ts).
+export interface SnapshotMicrofrontends {
+  web?: SnapshotMicrofrontendWeb;
+  mobile?: SnapshotMicrofrontendMobile;
 }
 
 export interface SnapshotFeature {
@@ -25,7 +38,7 @@ export interface SnapshotFeature {
   name: string;
   icon: string;
   permissions: SnapshotFeaturePermission[];
-  microfrontends: Record<string, SnapshotMicrofrontend>;
+  microfrontends: SnapshotMicrofrontends;
 }
 
 export interface SnapshotApp {

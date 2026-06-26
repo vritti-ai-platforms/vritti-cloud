@@ -76,7 +76,6 @@ export const relations = defineRelations(schema, (r) => ({
   versions: {
     features: r.many.features(),
     microfrontends: r.many.microfrontends(),
-    featureMicrofrontends: r.many.featureMicrofrontends(),
     apps: r.many.apps(),
     roleTemplates: r.many.roleTemplates(),
     plans: r.many.plans(),
@@ -195,7 +194,6 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.features.versionId,
       to: r.versions.id,
     }),
-    featureMicrofrontends: r.many.featureMicrofrontends(),
     featurePermissions: r.many.featurePermissions(),
     appFeatures: r.many.appFeatures(),
   },
@@ -205,23 +203,6 @@ export const relations = defineRelations(schema, (r) => ({
     appVersion: r.one.versions({
       from: r.microfrontends.versionId,
       to: r.versions.id,
-    }),
-    featureMicrofrontends: r.many.featureMicrofrontends(),
-  },
-
-  // Feature-Microfrontend junction relations
-  featureMicrofrontends: {
-    appVersion: r.one.versions({
-      from: r.featureMicrofrontends.versionId,
-      to: r.versions.id,
-    }),
-    feature: r.one.features({
-      from: r.featureMicrofrontends.featureId,
-      to: r.features.id,
-    }),
-    microfrontend: r.one.microfrontends({
-      from: r.featureMicrofrontends.microfrontendId,
-      to: r.microfrontends.id,
     }),
   },
 

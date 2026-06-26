@@ -19,8 +19,6 @@ import { RoleTemplatePermissionController } from './business/role-template/role-
 import { BusinessRoleTemplateController } from './business/role-template/root/controllers/business-role-template.controller';
 // Businesses in a version
 import { VersionBusinessController } from './business/root/controllers/version-business.controller';
-// Feature Microfrontend
-import { FeatureMicrofrontendController } from './feature/feature-microfrontend/controllers/feature-microfrontend.controller';
 // Feature Permission (feature-scoped read-only table)
 import { FeaturePermissionController } from './feature/permission/controllers/feature-permission.controller';
 // Feature
@@ -43,7 +41,6 @@ import { VersionSnapshotService } from './root/services/version-snapshot.service
     PermissionController,
     MicrofrontendController,
     FeatureController,
-    FeatureMicrofrontendController,
     FeaturePermissionController,
     AppController,
     BusinessFeatureController,

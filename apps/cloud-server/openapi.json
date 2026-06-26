@@ -6007,63 +6007,6 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/microfrontends": {
-      "post": {
-        "operationId": "MicrofrontendController_create",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "description": "App version UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/CreateMicrofrontendDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Microfrontend created successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MicrofrontendDto"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Validation failed."
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "409": {
-            "description": "Microfrontend with this code and platform already exists."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Create a new microfrontend",
-        "tags": [
-          "Admin - Microfrontends"
-        ]
-      }
-    },
     "/admin-api/versions/{versionId}/microfrontends/table": {
       "get": {
         "operationId": "MicrofrontendController_findForTable",
@@ -6105,9 +6048,9 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/microfrontends/{id}": {
-      "get": {
-        "operationId": "MicrofrontendController_findById",
+    "/admin-api/versions/{versionId}/microfrontends/{platform}": {
+      "put": {
+        "operationId": "MicrofrontendController_upsert",
         "parameters": [
           {
             "name": "versionId",
@@ -6120,64 +6063,15 @@
             }
           },
           {
-            "name": "id",
+            "name": "platform",
             "required": true,
             "in": "path",
-            "description": "Microfrontend UUID",
+            "description": "Target platform",
             "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Microfrontend retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MicrofrontendDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Microfrontend not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Get a microfrontend by ID",
-        "tags": [
-          "Admin - Microfrontends"
-        ]
-      },
-      "patch": {
-        "operationId": "MicrofrontendController_update",
-        "parameters": [
-          {
-            "name": "versionId",
-            "required": true,
-            "in": "path",
-            "description": "App version UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
-              "type": "string"
-            }
-          },
-          {
-            "name": "id",
-            "required": true,
-            "in": "path",
-            "description": "Microfrontend UUID",
-            "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "enum": [
+                "web",
+                "mobile"
+              ],
               "type": "string"
             }
           }
@@ -6187,33 +6081,34 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/UpdateMicrofrontendDto"
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/WebMicrofrontendBodyDto"
+                  },
+                  {
+                    "$ref": "#/components/schemas/MobileMicrofrontendBodyDto"
+                  }
+                ]
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Microfrontend updated successfully.",
+            "description": "Microfrontend saved successfully.",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
+                  "$ref": "#/components/schemas/MicrofrontendDto"
                 }
               }
             }
           },
           "400": {
-            "description": "Validation failed."
+            "description": "Validation failed or invalid platform."
           },
           "401": {
             "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Microfrontend not found."
-          },
-          "409": {
-            "description": "Microfrontend with this code and platform already exists."
           }
         },
         "security": [
@@ -6221,13 +6116,15 @@
             "bearer": []
           }
         ],
-        "summary": "Update a microfrontend",
+        "summary": "Create or update a microfrontend (upsert by version + code)",
         "tags": [
           "Admin - Microfrontends"
         ]
-      },
+      }
+    },
+    "/admin-api/versions/{versionId}/microfrontends/{platform}/{id}": {
       "delete": {
-        "operationId": "MicrofrontendController_delete",
+        "operationId": "MicrofrontendController_remove",
         "parameters": [
           {
             "name": "versionId",
@@ -6236,6 +6133,19 @@
             "description": "App version UUID",
             "schema": {
               "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "platform",
+            "required": true,
+            "in": "path",
+            "description": "Target platform",
+            "schema": {
+              "enum": [
+                "web",
+                "mobile"
+              ],
               "type": "string"
             }
           },
@@ -6263,9 +6173,6 @@
           },
           "401": {
             "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Microfrontend not found."
           },
           "409": {
             "description": "Microfrontend is referenced by features."
@@ -6576,7 +6483,7 @@
     },
     "/admin-api/versions/{versionId}/features/{featureId}/microfrontends": {
       "get": {
-        "operationId": "FeatureMicrofrontendController_list",
+        "operationId": "FeatureController_getMicrofrontends",
         "parameters": [
           {
             "name": "featureId",
@@ -6595,10 +6502,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/FeatureMicrofrontendDto"
-                  }
+                  "$ref": "#/components/schemas/FeatureMicrofrontendLinksDto"
                 }
               }
             }
@@ -6615,15 +6519,15 @@
             "bearer": []
           }
         ],
-        "summary": "List microfrontend links for a feature",
+        "summary": "Get a feature's microfrontend links keyed by platform",
         "tags": [
-          "Admin - Feature Microfrontends"
+          "Admin - Features"
         ]
       }
     },
-    "/admin-api/versions/{versionId}/features/{featureId}/microfrontends/{microfrontendId}": {
+    "/admin-api/versions/{versionId}/features/{featureId}/microfrontend/{platform}": {
       "put": {
-        "operationId": "FeatureMicrofrontendController_set",
+        "operationId": "FeatureController_setMicrofrontend",
         "parameters": [
           {
             "name": "featureId",
@@ -6636,12 +6540,15 @@
             }
           },
           {
-            "name": "microfrontendId",
+            "name": "platform",
             "required": true,
             "in": "path",
-            "description": "Microfrontend UUID",
+            "description": "Target platform",
             "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "enum": [
+                "web",
+                "mobile"
+              ],
               "type": "string"
             }
           }
@@ -6662,13 +6569,13 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/FeatureMicrofrontendDto"
+                  "$ref": "#/components/schemas/FeatureDto"
                 }
               }
             }
           },
           "400": {
-            "description": "Validation failed."
+            "description": "Validation failed or invalid platform."
           },
           "401": {
             "description": "Unauthorized."
@@ -6682,13 +6589,13 @@
             "bearer": []
           }
         ],
-        "summary": "Set or update a microfrontend link for a feature",
+        "summary": "Set or update a feature's microfrontend link for a platform",
         "tags": [
-          "Admin - Feature Microfrontends"
+          "Admin - Features"
         ]
       },
       "delete": {
-        "operationId": "FeatureMicrofrontendController_remove",
+        "operationId": "FeatureController_removeMicrofrontend",
         "parameters": [
           {
             "name": "featureId",
@@ -6701,12 +6608,15 @@
             }
           },
           {
-            "name": "microfrontendId",
+            "name": "platform",
             "required": true,
             "in": "path",
-            "description": "Microfrontend UUID",
+            "description": "Target platform",
             "schema": {
-              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "enum": [
+                "web",
+                "mobile"
+              ],
               "type": "string"
             }
           }
@@ -6726,7 +6636,7 @@
             "description": "Unauthorized."
           },
           "404": {
-            "description": "Feature or microfrontend link not found."
+            "description": "Feature not found."
           }
         },
         "security": [
@@ -6734,9 +6644,9 @@
             "bearer": []
           }
         ],
-        "summary": "Remove a microfrontend link from a feature",
+        "summary": "Remove a feature's microfrontend link for a platform",
         "tags": [
-          "Admin - Feature Microfrontends"
+          "Admin - Features"
         ]
       }
     },
@@ -14535,50 +14445,6 @@
           }
         }
       },
-      "CreateMicrofrontendDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "description": "Unique code (lowercase alphanumeric with hyphens)",
-            "example": "order-mf"
-          },
-          "name": {
-            "type": "string",
-            "description": "Display name",
-            "example": "Order Microfrontend"
-          },
-          "platform": {
-            "type": "string",
-            "description": "Target platform",
-            "enum": [
-              "WEB",
-              "MOBILE"
-            ],
-            "example": "WEB"
-          },
-          "remoteEntry": {
-            "type": "string",
-            "description": "Remote entry URL (required for WEB)",
-            "example": "/order-mf/remoteEntry.js"
-          },
-          "remoteEntryAndroid": {
-            "type": "string",
-            "description": "Android remote entry URL (required for MOBILE)",
-            "example": "https://cdn/.../android/mf-manifest.json"
-          },
-          "remoteEntryIos": {
-            "type": "string",
-            "description": "iOS remote entry URL (required for MOBILE)",
-            "example": "https://cdn/.../ios/mf-manifest.json"
-          }
-        },
-        "required": [
-          "code",
-          "name",
-          "platform"
-        ]
-      },
       "MicrofrontendDto": {
         "type": "object",
         "properties": {
@@ -14656,7 +14522,7 @@
           "state"
         ]
       },
-      "UpdateMicrofrontendDto": {
+      "WebMicrofrontendBodyDto": {
         "type": "object",
         "properties": {
           "code": {
@@ -14669,31 +14535,48 @@
             "description": "Display name",
             "example": "Order Microfrontend"
           },
-          "platform": {
-            "type": "string",
-            "description": "Target platform",
-            "enum": [
-              "WEB",
-              "MOBILE"
-            ],
-            "example": "WEB"
-          },
           "remoteEntry": {
             "type": "string",
-            "description": "Remote entry URL (WEB only)",
+            "description": "Web remote entry URL",
             "example": "/order-mf/remoteEntry.js"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "remoteEntry"
+        ]
+      },
+      "MobileMicrofrontendBodyDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Unique code (lowercase alphanumeric with hyphens)",
+            "example": "order-mf"
+          },
+          "name": {
+            "type": "string",
+            "description": "Display name",
+            "example": "Order Microfrontend"
           },
           "remoteEntryAndroid": {
             "type": "string",
-            "description": "Android remote entry URL (MOBILE only)",
+            "description": "Android remote entry URL",
             "example": "https://cdn/.../android/mf-manifest.json"
           },
           "remoteEntryIos": {
             "type": "string",
-            "description": "iOS remote entry URL (MOBILE only)",
+            "description": "iOS remote entry URL",
             "example": "https://cdn/.../ios/mf-manifest.json"
           }
-        }
+        },
+        "required": [
+          "code",
+          "name",
+          "remoteEntryAndroid",
+          "remoteEntryIos"
+        ]
       },
       "CreateFeatureDto": {
         "type": "object",
@@ -14924,50 +14807,24 @@
           }
         }
       },
-      "FeatureMicrofrontendDto": {
+      "FeatureMicrofrontendWebLinkDto": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "featureId": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
           "microfrontendId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
-          "microfrontendCode": {
+          "code": {
             "type": "string",
             "example": "order-mf"
           },
-          "microfrontendName": {
+          "name": {
             "type": "string",
             "example": "Order Microfrontend"
           },
-          "platform": {
-            "type": "string",
-            "example": "WEB"
-          },
           "remoteEntry": {
-            "type": "object",
-            "example": "/order-mf/remoteEntry.js",
-            "nullable": true,
-            "description": "Set on WEB rows"
-          },
-          "remoteEntryAndroid": {
-            "type": "object",
-            "example": "https://cdn/.../android/mf-manifest.json",
-            "nullable": true,
-            "description": "Set on MOBILE rows"
-          },
-          "remoteEntryIos": {
-            "type": "object",
-            "example": "https://cdn/.../ios/mf-manifest.json",
-            "nullable": true,
-            "description": "Set on MOBILE rows"
+            "type": "string",
+            "example": "/order-mf/remoteEntry.js"
           },
           "exposedModule": {
             "type": "string",
@@ -14979,19 +14836,85 @@
           }
         },
         "required": [
-          "id",
-          "featureId",
           "microfrontendId",
-          "microfrontendCode",
-          "microfrontendName",
-          "platform",
+          "code",
+          "name",
+          "remoteEntry",
           "exposedModule",
           "routePrefix"
         ]
       },
+      "FeatureMicrofrontendMobileLinkDto": {
+        "type": "object",
+        "properties": {
+          "microfrontendId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "order-mf"
+          },
+          "name": {
+            "type": "string",
+            "example": "Order Microfrontend"
+          },
+          "remoteEntryAndroid": {
+            "type": "string",
+            "example": "https://cdn/.../android/mf-manifest.json"
+          },
+          "remoteEntryIos": {
+            "type": "string",
+            "example": "https://cdn/.../ios/mf-manifest.json"
+          },
+          "exposedModule": {
+            "type": "string",
+            "example": "./Orders"
+          },
+          "routePrefix": {
+            "type": "string",
+            "example": "/orders"
+          }
+        },
+        "required": [
+          "microfrontendId",
+          "code",
+          "name",
+          "remoteEntryAndroid",
+          "remoteEntryIos",
+          "exposedModule",
+          "routePrefix"
+        ]
+      },
+      "FeatureMicrofrontendLinksDto": {
+        "type": "object",
+        "properties": {
+          "web": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureMicrofrontendWebLinkDto"
+              }
+            ]
+          },
+          "mobile": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FeatureMicrofrontendMobileLinkDto"
+              }
+            ]
+          }
+        }
+      },
       "SetFeatureMicrofrontendDto": {
         "type": "object",
         "properties": {
+          "microfrontendId": {
+            "type": "string",
+            "description": "Microfrontend UUID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
           "exposedModule": {
             "type": "string",
             "description": "Module federation exposed module name",
@@ -15004,6 +14927,7 @@
           }
         },
         "required": [
+          "microfrontendId",
           "exposedModule",
           "routePrefix"
         ]

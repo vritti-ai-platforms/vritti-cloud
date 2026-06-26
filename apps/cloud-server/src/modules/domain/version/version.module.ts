@@ -17,9 +17,6 @@ import { RoleTemplateService } from './business/role-template/root/services/role
 // Version Business (junction)
 import { VersionBusinessRepository } from './business/root/repositories/version-business.repository';
 import { VersionBusinessService } from './business/root/services/version-business.service';
-// Feature Microfrontend
-import { FeatureMicrofrontendRepository } from './feature/feature-microfrontend/repositories/feature-microfrontend.repository';
-import { FeatureMicrofrontendService } from './feature/feature-microfrontend/services/feature-microfrontend.service';
 // Feature Permission
 import { FeaturePermissionRepository } from './feature/feature-permission/repositories/feature-permission.repository';
 import { FeaturePermissionService } from './feature/feature-permission/services/feature-permission.service';
@@ -50,9 +47,6 @@ import { VersionService } from './root/services/version.service';
     // Feature Permission
     FeaturePermissionService,
     FeaturePermissionRepository,
-    // Feature Microfrontend
-    FeatureMicrofrontendService,
-    FeatureMicrofrontendRepository,
     // App
     AppService,
     AppRepository,
@@ -76,7 +70,6 @@ import { VersionService } from './root/services/version.service';
     MicrofrontendRepository,
     FeatureRepository,
     FeaturePermissionRepository,
-    FeatureMicrofrontendRepository,
     AppRepository,
     AppFeatureRepository,
     AppPriceRepository,
@@ -91,7 +84,6 @@ import { VersionService } from './root/services/version.service';
     MicrofrontendService,
     BusinessFeatureService,
     FeaturePermissionService,
-    FeatureMicrofrontendService,
     RoleTemplatePermissionService,
   ],
 })

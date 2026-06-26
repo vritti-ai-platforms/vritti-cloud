@@ -5,10 +5,8 @@ import type { AppPlatform, NewRoleTemplateFeaturePermission } from '@/db/schema'
 import {
   appFeatures,
   apps,
-  featureMicrofrontends,
   featurePermissions,
   features,
-  microfrontends,
   permissionBusinesses,
   roleTemplateFeaturePermissions,
 } from '@/db/schema';
@@ -118,14 +116,13 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
-        platform: microfrontends.platform,
+        webMfId: features.webMfId,
+        mobileMfId: features.mobileMfId,
       })
       .from(appFeatures)
       .innerJoin(apps, and(eq(apps.id, appFeatures.appId), eq(apps.businessId, businessId)))
       .innerJoin(features, eq(features.id, appFeatures.featureId))
       .innerJoin(featurePermissions, eq(featurePermissions.featureId, features.id))
-      .leftJoin(featureMicrofrontends, eq(featureMicrofrontends.featureId, features.id))
-      .leftJoin(microfrontends, eq(microfrontends.id, featureMicrofrontends.microfrontendId))
       .where(
         and(
           eq(appFeatures.versionId, versionId),
@@ -167,6 +164,8 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           permissions: [],
           platforms: [],
         };
+        if (row.webMfId) feature.platforms.push('WEB');
+        if (row.mobileMfId) feature.platforms.push('MOBILE');
         featureMap.set(featureKey, feature);
         app.features.push(feature);
       }
@@ -177,7 +176,6 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           label: row.permissionLabel,
         });
       }
-      if (row.platform && !feature.platforms.includes(row.platform)) feature.platforms.push(row.platform);
     }
     return Array.from(appMap.values());
   }

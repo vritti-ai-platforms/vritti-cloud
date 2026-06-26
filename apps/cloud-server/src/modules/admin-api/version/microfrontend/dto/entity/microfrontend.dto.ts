@@ -34,14 +34,14 @@ export class MicrofrontendDto {
   })
   remoteEntryIos: string | null;
 
-  // Maps a Microfrontend entity to a MicrofrontendDto
+  // Maps a Microfrontend view row to a MicrofrontendDto (view columns are nullable)
   static from(entity: Microfrontend): MicrofrontendDto {
     const dto = new MicrofrontendDto();
-    dto.id = entity.id;
-    dto.versionId = entity.versionId;
-    dto.code = entity.code;
-    dto.name = entity.name;
-    dto.platform = entity.platform;
+    dto.id = entity.id ?? '';
+    dto.versionId = entity.versionId ?? '';
+    dto.code = entity.code ?? '';
+    dto.name = entity.name ?? '';
+    dto.platform = entity.platform ?? '';
     dto.remoteEntry = entity.remoteEntry;
     dto.remoteEntryAndroid = entity.remoteEntryAndroid;
     dto.remoteEntryIos = entity.remoteEntryIos;

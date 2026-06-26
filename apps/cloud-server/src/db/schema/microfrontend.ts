@@ -1,35 +1,32 @@
 import { sql } from '@vritti/api-sdk/drizzle-orm';
-import { check, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { appPlatformEnum } from './enums';
-import { versions } from './version';
 
-// Microfrontend deployments scoped to an app version — one per code+platform combo.
-// WEB rows fill `remoteEntry`; MOBILE rows fill `remoteEntryAndroid` + `remoteEntryIos`.
-// The CHECK constraint enforces this invariant at the DB layer.
-export const microfrontends = cloudSchema.table(
-  'microfrontends',
-  {
-    id: uuid('id').primaryKey().defaultRandom(),
-    versionId: uuid('version_id')
-      .notNull()
-      .references(() => versions.id, { onDelete: 'cascade' }),
-    code: varchar('code', { length: 100 }).notNull(),
-    name: varchar('name', { length: 255 }).notNull(),
-    platform: appPlatformEnum('platform').notNull(),
+// Read-only unified view over web_microfrontends + mobile_microfrontends. Reproduces the legacy
+// `microfrontends` shape (platform + per-platform remote-entry columns) for list/select/snapshot
+// reads. WRITES go to the concrete tables; this view is never inserted/updated.
+export const microfrontends = cloudSchema
+  .view('microfrontends', {
+    id: uuid('id'),
+    versionId: uuid('version_id'),
+    code: varchar('code', { length: 100 }),
+    name: varchar('name', { length: 255 }),
+    platform: appPlatformEnum('platform'),
     remoteEntry: varchar('remote_entry', { length: 500 }),
     remoteEntryAndroid: varchar('remote_entry_android', { length: 500 }),
     remoteEntryIos: varchar('remote_entry_ios', { length: 500 }),
-  },
-  (table) => [
-    uniqueIndex('microfrontend_version_code_platform_idx').on(table.versionId, table.code, table.platform),
-    check(
-      'microfrontend_url_per_platform_chk',
-      sql`(${table.platform} = 'WEB' AND ${table.remoteEntry} IS NOT NULL AND ${table.remoteEntryAndroid} IS NULL AND ${table.remoteEntryIos} IS NULL)
-       OR (${table.platform} = 'MOBILE' AND ${table.remoteEntry} IS NULL AND ${table.remoteEntryAndroid} IS NOT NULL AND ${table.remoteEntryIos} IS NOT NULL)`,
-    ),
-  ],
-);
+  })
+  .as(
+    sql`SELECT id, version_id, code, name, 'WEB'::cloud."AppPlatform" AS platform,
+               remote_entry, NULL::varchar AS remote_entry_android, NULL::varchar AS remote_entry_ios
+        FROM cloud.web_microfrontends
+        UNION ALL
+        SELECT id, version_id, code, name, 'MOBILE'::cloud."AppPlatform" AS platform,
+               NULL::varchar AS remote_entry, remote_entry_android, remote_entry_ios
+        FROM cloud.mobile_microfrontends`,
+  );
 
+// Unified read row (legacy shape). Per-platform columns are nullable in the view (a WEB row has no
+// android/ios; a MOBILE row has no remote_entry) — consumers needing non-null read the concrete tables.
 export type Microfrontend = typeof microfrontends.$inferSelect;
-export type NewMicrofrontend = typeof microfrontends.$inferInsert;

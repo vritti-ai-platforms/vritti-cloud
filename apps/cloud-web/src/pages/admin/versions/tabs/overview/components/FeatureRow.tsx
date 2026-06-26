@@ -9,8 +9,8 @@ interface FeatureRowProps {
 
 export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
   const [expanded, setExpanded] = useState(false);
-  const platforms = Object.keys(feature.microfrontends);
-  const hasMfeDetail = platforms.length > 0;
+  const { web, mobile } = feature.microfrontends;
+  const hasMfeDetail = !!(web || mobile);
 
   return (
     <div className={nested ? '' : 'rounded-xl border border-border/60 bg-card overflow-hidden'}>
@@ -27,12 +27,12 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
 
         {/* Platform indicators */}
         <div className="flex items-center gap-1 shrink-0">
-          {platforms.includes('WEB') && (
+          {web && (
             <span className="flex items-center justify-center w-5 h-5 rounded bg-warning/15" title="Web">
               <Monitor className="size-3 text-warning" />
             </span>
           )}
-          {platforms.includes('MOBILE') && (
+          {mobile && (
             <span className="flex items-center justify-center w-5 h-5 rounded bg-primary/15" title="Mobile">
               <Smartphone className="size-3 text-primary" />
             </span>
@@ -68,31 +68,44 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
       {/* MFE detail panel */}
       {expanded && (
         <div className="px-4 pb-3 pt-1 space-y-2">
-          {platforms.map((platform) => {
-            const mf = feature.microfrontends[platform];
-            return (
-              <div key={platform} className="rounded-lg bg-muted/60 border border-border/30 p-3">
-                <div className="flex items-center gap-1.5 mb-2">
-                  {platform === 'WEB' ? (
-                    <Monitor className="size-3 text-warning" />
-                  ) : (
-                    <Smartphone className="size-3 text-primary" />
-                  )}
-                  <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-                    {platform} Microfrontend
-                  </span>
-                </div>
-                <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs font-mono">
-                  <span className="text-muted-foreground select-none">entry</span>
-                  <span className="truncate">{mf.remoteEntry}</span>
-                  <span className="text-muted-foreground select-none">module</span>
-                  <span>{mf.exposedModule}</span>
-                  <span className="text-muted-foreground select-none">route</span>
-                  <span className="text-primary">{mf.routePrefix}</span>
-                </div>
+          {web && (
+            <div className="rounded-lg bg-muted/60 border border-border/30 p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Monitor className="size-3 text-warning" />
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  WEB Microfrontend
+                </span>
               </div>
-            );
-          })}
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs font-mono">
+                <span className="text-muted-foreground select-none">entry</span>
+                <span className="truncate">{web.remoteEntry}</span>
+                <span className="text-muted-foreground select-none">module</span>
+                <span>{web.exposedModule}</span>
+                <span className="text-muted-foreground select-none">route</span>
+                <span className="text-primary">{web.routePrefix}</span>
+              </div>
+            </div>
+          )}
+          {mobile && (
+            <div className="rounded-lg bg-muted/60 border border-border/30 p-3">
+              <div className="flex items-center gap-1.5 mb-2">
+                <Smartphone className="size-3 text-primary" />
+                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  MOBILE Microfrontend
+                </span>
+              </div>
+              <div className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs font-mono">
+                <span className="text-muted-foreground select-none">android</span>
+                <span className="truncate">{mobile.remoteEntryAndroid}</span>
+                <span className="text-muted-foreground select-none">ios</span>
+                <span className="truncate">{mobile.remoteEntryIos}</span>
+                <span className="text-muted-foreground select-none">module</span>
+                <span>{mobile.exposedModule}</span>
+                <span className="text-muted-foreground select-none">route</span>
+                <span className="text-primary">{mobile.routePrefix}</span>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

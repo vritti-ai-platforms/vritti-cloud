@@ -15,12 +15,18 @@ import { and } from '@vritti/api-sdk/drizzle-orm';
 import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
 import { features } from '@/db/schema';
 import { FeatureDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature.dto';
+import { FeatureMicrofrontendLinksDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature-microfrontend-links.dto';
 import { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
+import type { SetFeatureMicrofrontendDto } from '@/modules/admin-api/version/feature/root/dto/request/set-feature-microfrontend.dto';
 import type { UpdateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '@/modules/admin-api/version/feature/root/dto/response/feature-table-response.dto';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
 import { validateImportRows } from '@/utils/validate-import-rows';
+import { MicrofrontendRepository } from '../../../microfrontend/repositories/microfrontend.repository';
 import { FeatureRepository } from '../repositories/feature.repository';
+
+// The URL platform param, lowercase
+export type FeatureMicrofrontendPlatformParam = 'web' | 'mobile';
 
 @Injectable()
 export class FeatureService {
@@ -33,8 +39,111 @@ export class FeatureService {
 
   constructor(
     private readonly featureRepository: FeatureRepository,
+    private readonly microfrontendRepository: MicrofrontendRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
+
+  // Links a microfrontend to a feature on the given platform (sets the feature's web/mobile link columns)
+  async setMicrofrontend(
+    featureId: string,
+    platform: FeatureMicrofrontendPlatformParam,
+    dto: SetFeatureMicrofrontendDto,
+  ): Promise<CreateResponseDto<FeatureDto>> {
+    const feature = await this.featureRepository.findById(featureId);
+    if (!feature) {
+      throw new NotFoundException('Feature not found.');
+    }
+    if (platform === 'web') {
+      const mf = await this.microfrontendRepository.findWebById(dto.microfrontendId);
+      if (!mf) {
+        throw new NotFoundException('Web microfrontend not found.');
+      }
+      const updated = await this.featureRepository.setWebMicrofrontend(featureId, {
+        webMfId: dto.microfrontendId,
+        webExposedModule: dto.exposedModule,
+        webRoutePrefix: dto.routePrefix,
+      });
+      this.logger.log(`Linked web microfrontend ${dto.microfrontendId} to feature: ${featureId}`);
+      return {
+        success: true,
+        message: `Microfrontend "${mf.name}" linked to "${feature.name}" successfully.`,
+        data: FeatureDto.from(updated),
+      };
+    }
+    const mf = await this.microfrontendRepository.findMobileById(dto.microfrontendId);
+    if (!mf) {
+      throw new NotFoundException('Mobile microfrontend not found.');
+    }
+    const updated = await this.featureRepository.setMobileMicrofrontend(featureId, {
+      mobileMfId: dto.microfrontendId,
+      mobileExposedModule: dto.exposedModule,
+      mobileRoutePrefix: dto.routePrefix,
+    });
+    this.logger.log(`Linked mobile microfrontend ${dto.microfrontendId} to feature: ${featureId}`);
+    return {
+      success: true,
+      message: `Microfrontend "${mf.name}" linked to "${feature.name}" successfully.`,
+      data: FeatureDto.from(updated),
+    };
+  }
+
+  // Removes a feature's microfrontend link for the given platform (clears the web/mobile link columns)
+  async removeMicrofrontend(
+    featureId: string,
+    platform: FeatureMicrofrontendPlatformParam,
+  ): Promise<SuccessResponseDto> {
+    const feature = await this.featureRepository.findById(featureId);
+    if (!feature) {
+      throw new NotFoundException('Feature not found.');
+    }
+    if (platform === 'web') {
+      await this.featureRepository.clearWebMicrofrontend(featureId);
+    } else {
+      await this.featureRepository.clearMobileMicrofrontend(featureId);
+    }
+    this.logger.log(`Removed ${platform} microfrontend link from feature: ${featureId}`);
+    return { success: true, message: `Microfrontend link removed from "${feature.name}" successfully.` };
+  }
+
+  // Returns a feature's microfrontend links keyed by platform (the per-feature admin tab source)
+  async getMicrofrontends(featureId: string): Promise<FeatureMicrofrontendLinksDto> {
+    const feature = await this.featureRepository.findById(featureId);
+    if (!feature) {
+      throw new NotFoundException('Feature not found.');
+    }
+    const links = new FeatureMicrofrontendLinksDto();
+    links.web = null;
+    links.mobile = null;
+    if (feature.webMfId && feature.webExposedModule && feature.webRoutePrefix) {
+      const mf = await this.microfrontendRepository.findWebById(feature.webMfId);
+      if (mf) {
+        links.web = {
+          microfrontendId: mf.id,
+          code: mf.code,
+          name: mf.name,
+          remoteEntry: mf.remoteEntry,
+          exposedModule: feature.webExposedModule,
+          routePrefix: feature.webRoutePrefix,
+        };
+      }
+    }
+    if (feature.mobileMfId && feature.mobileExposedModule && feature.mobileRoutePrefix) {
+      const mf = await this.microfrontendRepository.findMobileById(feature.mobileMfId);
+      if (mf) {
+        links.mobile = {
+          microfrontendId: mf.id,
+          code: mf.code,
+          name: mf.name,
+          remoteEntryAndroid: mf.remoteEntryAndroid,
+          remoteEntryIos: mf.remoteEntryIos,
+          exposedModule: feature.mobileExposedModule,
+          routePrefix: feature.mobileRoutePrefix,
+        };
+      }
+    }
+    this.logger.log(`Fetched microfrontend links for feature: ${featureId}`);
+    return links;
+  }
 
   // Creates a new feature; throws ConflictException on duplicate code
   async create(dto: CreateFeatureDto): Promise<CreateResponseDto<FeatureDto>> {
@@ -173,11 +282,15 @@ export class FeatureService {
         if (
           existing.name !== row.data.name ||
           existing.lucideIcon !== row.data.lucideIcon ||
+          existing.sfSymbol !== row.data.sfSymbol ||
+          existing.materialSymbol !== row.data.materialSymbol ||
           existing.description !== incomingDesc
         ) {
           await this.featureRepository.update(existing.id, {
             name: row.data.name,
             lucideIcon: row.data.lucideIcon,
+            sfSymbol: row.data.sfSymbol,
+            materialSymbol: row.data.materialSymbol,
             description: incomingDesc ?? undefined,
           } as UpdateFeatureDto);
           updated++;
@@ -190,6 +303,8 @@ export class FeatureService {
           code: row.data.code,
           name: row.data.name,
           lucideIcon: row.data.lucideIcon,
+          sfSymbol: row.data.sfSymbol,
+          materialSymbol: row.data.materialSymbol,
           description: row.data.description || null,
         });
         created++;

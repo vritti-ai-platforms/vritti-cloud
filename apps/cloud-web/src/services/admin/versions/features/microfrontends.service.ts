@@ -1,45 +1,46 @@
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
-import type { FeatureMicrofrontend } from '@/schemas/admin/features';
+import type { Feature, FeatureMicrofrontendLinks, SetFeatureMicrofrontendData } from '@/schemas/admin/features';
+import type { MicrofrontendPlatformParam } from '@/schemas/admin/microfrontends';
 
-// Fetches all microfrontend links for a feature
-export function getFeatureMicrofrontends(versionId: string, featureId: string): Promise<FeatureMicrofrontend[]> {
+// Fetches the per-platform microfrontend links for a feature
+export function getFeatureMicrofrontends(versionId: string, featureId: string): Promise<FeatureMicrofrontendLinks> {
   return axios
-    .get<FeatureMicrofrontend[]>(`admin-api/versions/${versionId}/features/${featureId}/microfrontends`)
+    .get<FeatureMicrofrontendLinks>(`admin-api/versions/${versionId}/features/${featureId}/microfrontends`)
     .then((r) => r.data);
 }
 
-// Links or updates a microfrontend on a feature — microfrontendId in URL, body has only exposedModule + routePrefix
+// Links or updates a microfrontend on a feature for a platform
 export function setFeatureMicrofrontend({
   versionId,
   featureId,
-  microfrontendId,
+  platform,
   data,
 }: {
   versionId: string;
   featureId: string;
-  microfrontendId: string;
-  data: { exposedModule: string; routePrefix: string };
-}): Promise<SuccessResponse> {
+  platform: MicrofrontendPlatformParam;
+  data: SetFeatureMicrofrontendData;
+}): Promise<CreateResponse<Feature>> {
   return axios
-    .put<SuccessResponse>(
-      `admin-api/versions/${versionId}/features/${featureId}/microfrontends/${microfrontendId}`,
+    .put<CreateResponse<Feature>>(
+      `admin-api/versions/${versionId}/features/${featureId}/microfrontend/${platform}`,
       data,
     )
     .then((r) => r.data);
 }
 
-// Removes a microfrontend link from a feature
+// Removes a microfrontend link from a feature for a platform
 export function removeFeatureMicrofrontend({
   versionId,
   featureId,
-  microfrontendId,
+  platform,
 }: {
   versionId: string;
   featureId: string;
-  microfrontendId: string;
-}): Promise<void> {
+  platform: MicrofrontendPlatformParam;
+}): Promise<SuccessResponse> {
   return axios
-    .delete(`admin-api/versions/${versionId}/features/${featureId}/microfrontends/${microfrontendId}`)
-    .then(() => undefined);
+    .delete<SuccessResponse>(`admin-api/versions/${versionId}/features/${featureId}/microfrontend/${platform}`)
+    .then((r) => r.data);
 }

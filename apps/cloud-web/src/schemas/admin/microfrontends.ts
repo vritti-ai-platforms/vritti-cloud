@@ -14,6 +14,8 @@ export interface Microfrontend {
 
 export type MicrofrontendsTableResponse = TableResponse<Microfrontend>;
 
+export type MicrofrontendPlatformParam = 'web' | 'mobile';
+
 const codeRule = z
   .string()
   .min(1, 'Code is required')
@@ -24,8 +26,8 @@ const nameRule = z.string().min(1, 'Name is required').max(255, 'Name must be 25
 
 const urlRule = z.string().min(1, 'Remote entry URL is required').max(500, 'URL must be 500 characters or less');
 
-// Create: per-platform required URL fields enforced via discriminated union
-export const createMicrofrontendSchema = z.discriminatedUnion('platform', [
+// Upsert: per-platform required URL fields enforced via discriminated union — same body for add + edit
+export const microfrontendSchema = z.discriminatedUnion('platform', [
   z.object({
     platform: z.literal('WEB'),
     code: codeRule,
@@ -41,22 +43,4 @@ export const createMicrofrontendSchema = z.discriminatedUnion('platform', [
   }),
 ]);
 
-// Update: same discriminated shape but everything optional except platform discriminator
-export const updateMicrofrontendSchema = z.discriminatedUnion('platform', [
-  z.object({
-    platform: z.literal('WEB'),
-    code: codeRule.optional(),
-    name: nameRule.optional(),
-    remoteEntry: urlRule.optional(),
-  }),
-  z.object({
-    platform: z.literal('MOBILE'),
-    code: codeRule.optional(),
-    name: nameRule.optional(),
-    remoteEntryAndroid: urlRule.optional(),
-    remoteEntryIos: urlRule.optional(),
-  }),
-]);
-
-export type CreateMicrofrontendData = z.infer<typeof createMicrofrontendSchema>;
-export type UpdateMicrofrontendData = z.infer<typeof updateMicrofrontendSchema>;
+export type MicrofrontendData = z.infer<typeof microfrontendSchema>;

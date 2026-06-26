@@ -3,21 +3,21 @@ import type {
   App,
   AppFeature,
   Feature,
-  FeatureMicrofrontend,
   FeaturePermission,
-  Microfrontend,
+  MobileMicrofrontend,
   Plan,
   PlanFeaturePermission,
   RoleTemplate,
   RoleTemplateFeaturePermission,
+  WebMicrofrontend,
 } from '@/db/schema';
 
 // Raw versioned rows fetched for a single version (see VersionRepository.findSnapshotData)
 export interface SnapshotData {
   features: Feature[];
   permissions: FeaturePermission[];
-  microfrontends: Microfrontend[];
-  featureMicrofrontends: FeatureMicrofrontend[];
+  webMicrofrontends: WebMicrofrontend[];
+  mobileMicrofrontends: MobileMicrofrontend[];
   apps: App[];
   appFeatures: AppFeature[];
   roleTemplates: RoleTemplate[];
@@ -35,14 +35,29 @@ export interface SnapshotPermission {
   isGlobal: boolean;
   businesses: string[];
 }
-export interface SnapshotMicrofrontend {
+// WEB microfrontend route — a single remote entry. All non-null: a WEB microfrontend row is
+// CHECK-constrained to have remoteEntry set, and the feature↔MF link's module/route are NOT NULL.
+export interface SnapshotMicrofrontendWeb {
   code: string;
   name: string;
-  remoteEntry?: string | null;
-  remoteEntryAndroid?: string | null;
-  remoteEntryIos?: string | null;
-  exposedModule: string | null;
-  routePrefix: string | null;
+  remoteEntry: string;
+  exposedModule: string;
+  routePrefix: string;
+}
+// MOBILE microfrontend route — per-OS remote entries (android + ios). All non-null: a MOBILE row is
+// CHECK-constrained to have both android + ios set, and the link's module/route are NOT NULL.
+export interface SnapshotMicrofrontendMobile {
+  code: string;
+  name: string;
+  remoteEntryAndroid: string;
+  remoteEntryIos: string;
+  exposedModule: string;
+  routePrefix: string;
+}
+// Per-platform microfrontend routes — mirrors the {web?, mobile?} shape used by role grants / plan unlocks.
+export interface SnapshotMicrofrontends {
+  web?: SnapshotMicrofrontendWeb;
+  mobile?: SnapshotMicrofrontendMobile;
 }
 export interface SnapshotFeature {
   code: string;
@@ -51,7 +66,7 @@ export interface SnapshotFeature {
   sfSymbol: string;
   materialSymbol: string;
   permissions: SnapshotPermission[];
-  microfrontends: Record<string, SnapshotMicrofrontend>;
+  microfrontends: SnapshotMicrofrontends;
 }
 export interface SnapshotApp {
   code: string;
@@ -98,7 +113,8 @@ function buildIndex(data: SnapshotData) {
   // Feature → its app code (one app per feature within a business) — used to derive a role's apps from its grants
   const appCodeByFeatureId = _.mapValues(_.keyBy(data.appFeatures, 'featureId'), (af) => appById[af.appId]?.code);
   return {
-    mfById: _.keyBy(data.microfrontends, 'id'),
+    webMfById: _.keyBy(data.webMicrofrontends, 'id'),
+    mobileMfById: _.keyBy(data.mobileMicrofrontends, 'id'),
     featureById: _.keyBy(data.features, 'id'),
     appById,
     appCodeByFeatureId,
@@ -106,7 +122,6 @@ function buildIndex(data: SnapshotData) {
     businessCodeById,
     businessNameByCode: _.mapValues(_.keyBy(data.businesses, 'code'), (b) => b.name),
     businessCodesByPermissionId,
-    featureMfByFeatureId: _.groupBy(data.featureMicrofrontends, 'featureId'),
     permsByFeatureId: _.groupBy(data.permissions, 'featureId'),
     appFeaturesByAppId: _.groupBy(data.appFeatures, 'appId'),
     rolePermsByRoleId: _.groupBy(data.roleTemplatePermissions, 'roleTemplateId'),
@@ -126,31 +141,33 @@ function buildRoleApps(roleId: string, index: SnapshotIndex): string[] {
 }
 type SnapshotIndex = ReturnType<typeof buildIndex>;
 
-// A feature's microfrontend routes per platform (WEB carries remoteEntry; MOBILE carries the android/ios entries)
-function buildMicrofrontends(featureId: string, index: SnapshotIndex): SnapshotFeature['microfrontends'] {
-  const mfMap: SnapshotFeature['microfrontends'] = {};
-  for (const link of index.featureMfByFeatureId[featureId] ?? []) {
-    const mf = index.mfById[link.microfrontendId];
-    if (!mf) continue;
-    mfMap[mf.platform] =
-      mf.platform === 'MOBILE'
-        ? {
-            code: mf.code,
-            name: mf.name,
-            remoteEntryAndroid: mf.remoteEntryAndroid,
-            remoteEntryIos: mf.remoteEntryIos,
-            exposedModule: link.exposedModule,
-            routePrefix: link.routePrefix,
-          }
-        : {
-            code: mf.code,
-            name: mf.name,
-            remoteEntry: mf.remoteEntry,
-            exposedModule: link.exposedModule,
-            routePrefix: link.routePrefix,
-          };
+// A feature's microfrontend routes per platform, built from its own web/mobile link columns
+function buildMicrofrontends(feature: Feature, index: SnapshotIndex): SnapshotMicrofrontends {
+  const mf: SnapshotMicrofrontends = {};
+  if (feature.webMfId && feature.webExposedModule && feature.webRoutePrefix) {
+    const w = index.webMfById[feature.webMfId];
+    if (w)
+      mf.web = {
+        code: w.code,
+        name: w.name,
+        remoteEntry: w.remoteEntry,
+        exposedModule: feature.webExposedModule,
+        routePrefix: feature.webRoutePrefix,
+      };
   }
-  return mfMap;
+  if (feature.mobileMfId && feature.mobileExposedModule && feature.mobileRoutePrefix) {
+    const m = index.mobileMfById[feature.mobileMfId];
+    if (m)
+      mf.mobile = {
+        code: m.code,
+        name: m.name,
+        remoteEntryAndroid: m.remoteEntryAndroid,
+        remoteEntryIos: m.remoteEntryIos,
+        exposedModule: feature.mobileExposedModule,
+        routePrefix: feature.mobileRoutePrefix,
+      };
+  }
+  return mf;
 }
 
 // A feature's scoped permissions (global ones carry no businesses; others list the business codes they apply to)
@@ -174,7 +191,7 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
       sfSymbol: f.sfSymbol,
       materialSymbol: f.materialSymbol,
       permissions: buildPermissions(f.id, index),
-      microfrontends: buildMicrofrontends(f.id, index),
+      microfrontends: buildMicrofrontends(f, index),
     };
   }
   return result;

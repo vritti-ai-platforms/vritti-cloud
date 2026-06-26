@@ -1,4 +1,4 @@
-import { useCreateMicrofrontend } from '@hooks/admin/versions/microfrontends';
+import { useUpsertMicrofrontend } from '@hooks/admin/versions/microfrontends';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -8,7 +8,7 @@ import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useVersionContext } from '@/context/VersionScopeContext';
-import { type CreateMicrofrontendData, createMicrofrontendSchema } from '@/schemas/admin/microfrontends';
+import { type MicrofrontendData, microfrontendSchema } from '@/schemas/admin/microfrontends';
 
 interface AddMicrofrontendFormProps {
   onSuccess: () => void;
@@ -17,19 +17,23 @@ interface AddMicrofrontendFormProps {
 
 export const AddMicrofrontendForm: React.FC<AddMicrofrontendFormProps> = ({ onSuccess, onCancel }) => {
   const { versionId } = useVersionContext();
-  const form = useForm<CreateMicrofrontendData>({
-    resolver: zodResolver(createMicrofrontendSchema),
+  const form = useForm<MicrofrontendData>({
+    resolver: zodResolver(microfrontendSchema),
     defaultValues: { code: '', name: '', platform: 'WEB', remoteEntry: '' },
   });
 
   const platform = useWatch({ control: form.control, name: 'platform' });
-  const createMutation = useCreateMicrofrontend(versionId, { onSuccess });
+  const upsertMutation = useUpsertMicrofrontend(versionId, { onSuccess });
 
   return (
     <Form
       form={form}
-      mutation={createMutation}
-      transformSubmit={(data: CreateMicrofrontendData) => ({ versionId, data })}
+      mutation={upsertMutation}
+      transformSubmit={(data: MicrofrontendData) => ({
+        versionId,
+        platform: data.platform === 'MOBILE' ? ('mobile' as const) : ('web' as const),
+        data,
+      })}
       resetOnSuccess
       onCancel={onCancel}
     >

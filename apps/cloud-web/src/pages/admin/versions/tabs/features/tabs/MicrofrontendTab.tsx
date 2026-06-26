@@ -8,20 +8,21 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
-import { keyBy } from '@vritti/quantum-ui/lodash';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { MicrofrontendSelector } from '@vritti/quantum-ui/selects/microfrontend';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import { Globe, LinkIcon, Monitor, Smartphone, Unlink } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import {
-  type FeatureMicrofrontend,
+  type MobileMicrofrontendLink,
   type SetFeatureMicrofrontendData,
   setFeatureMicrofrontendSchema,
+  type WebMicrofrontendLink,
 } from '@/schemas/admin/features';
+import type { MicrofrontendPlatformParam } from '@/schemas/admin/microfrontends';
 
 interface MicrofrontendTabProps {
   featureId: string;
@@ -32,7 +33,6 @@ type Platform = 'WEB' | 'MOBILE';
 export const MicrofrontendTab = ({ featureId }: MicrofrontendTabProps) => {
   const { versionId } = useVersionContext();
   const { data: links, isLoading } = useFeatureMicrofrontends(versionId, featureId);
-  const linksByPlatform = useMemo(() => keyBy(links ?? [], 'platform'), [links]);
   if (isLoading) {
     return (
       <div className="grid gap-4 pt-4">
@@ -44,8 +44,8 @@ export const MicrofrontendTab = ({ featureId }: MicrofrontendTabProps) => {
 
   return (
     <div className="flex flex-col gap-4 pt-4">
-      <PlatformSection platform="WEB" featureId={featureId} link={linksByPlatform.WEB} />
-      <PlatformSection platform="MOBILE" featureId={featureId} link={linksByPlatform.MOBILE} />
+      <PlatformSection platform="WEB" featureId={featureId} link={links?.web ?? null} />
+      <PlatformSection platform="MOBILE" featureId={featureId} link={links?.mobile ?? null} />
     </div>
   );
 };
@@ -53,13 +53,15 @@ export const MicrofrontendTab = ({ featureId }: MicrofrontendTabProps) => {
 interface PlatformSectionProps {
   platform: Platform;
   featureId: string;
-  link?: FeatureMicrofrontend;
+  link: WebMicrofrontendLink | MobileMicrofrontendLink | null;
 }
 
 const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) => {
   const { versionId } = useVersionContext();
   const confirm = useConfirm();
   const [showForm, setShowForm] = useState(false);
+
+  const platformParam: MicrofrontendPlatformParam = platform === 'MOBILE' ? 'mobile' : 'web';
 
   const removeMutation = useRemoveFeatureMicrofrontend(versionId, featureId, {
     onSuccess: () => setShowForm(false),
@@ -76,7 +78,7 @@ const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) =>
       confirmLabel: 'Unlink',
       variant: 'destructive',
     });
-    if (confirmed) removeMutation.mutate(link.microfrontendId);
+    if (confirmed) removeMutation.mutate({ platform: platformParam });
   };
 
   // Form is open
@@ -125,6 +127,11 @@ const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) =>
     );
   }
 
+  const remoteEntry =
+    platform === 'MOBILE'
+      ? `android: ${(link as MobileMicrofrontendLink).remoteEntryAndroid} · ios: ${(link as MobileMicrofrontendLink).remoteEntryIos}`
+      : (link as WebMicrofrontendLink).remoteEntry;
+
   // Configured — show linked MF details
   return (
     <Card>
@@ -158,13 +165,13 @@ const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) =>
             <p className="text-xs font-medium text-muted-foreground">Microfrontend</p>
             <div className="flex items-center gap-2">
               <Globe className="size-4 text-muted-foreground" />
-              <p className="text-sm font-medium">{link.microfrontendName}</p>
+              <p className="text-sm font-medium">{link.name}</p>
             </div>
           </div>
           <div className="space-y-1">
             <p className="text-xs font-medium text-muted-foreground">Code</p>
             <Badge variant="outline" className="font-mono text-xs">
-              {link.microfrontendCode}
+              {link.code}
             </Badge>
           </div>
           <div className="space-y-1">
@@ -182,7 +189,7 @@ const PlatformSection = ({ platform, featureId, link }: PlatformSectionProps) =>
         </div>
         <div className="mt-4 space-y-1">
           <p className="text-xs font-medium text-muted-foreground">Remote Entry</p>
-          <p className="font-mono text-xs text-foreground bg-muted/50 rounded px-2 py-1 truncate">{link.remoteEntry}</p>
+          <p className="font-mono text-xs text-foreground bg-muted/50 rounded px-2 py-1 truncate">{remoteEntry}</p>
         </div>
       </CardContent>
     </Card>
@@ -218,12 +225,17 @@ const LinkMicrofrontendForm = ({
   const setMutation = useSetFeatureMicrofrontend(versionId, featureId, { onSuccess });
 
   const PlatformIcon = platform === 'WEB' ? Monitor : Smartphone;
+  const platformParam: MicrofrontendPlatformParam = platform === 'MOBILE' ? 'mobile' : 'web';
 
   return (
     <Card>
       {/* Form wraps header + body so the header's submit button drives the fields below.
           Buttons stay in the SAME positions as the view card: Cancel (left/Unlink slot), Save (right/Edit slot). */}
-      <Form form={form} mutation={setMutation}>
+      <Form
+        form={form}
+        mutation={setMutation}
+        transformSubmit={(data: SetFeatureMicrofrontendData) => ({ platform: platformParam, data })}
+      >
         <CardHeader className="flex flex-row items-center justify-between">
           <div className="flex items-center gap-3">
             <PlatformIcon className="size-5 text-muted-foreground" />

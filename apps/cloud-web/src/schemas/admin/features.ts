@@ -20,16 +20,28 @@ export interface Feature {
   canDelete: boolean;
 }
 
-export interface FeatureMicrofrontend {
-  id: string;
-  featureId: string;
+export interface WebMicrofrontendLink {
   microfrontendId: string;
-  microfrontendCode: string;
-  microfrontendName: string;
-  platform: string;
+  code: string;
+  name: string;
   remoteEntry: string;
   exposedModule: string;
   routePrefix: string;
+}
+
+export interface MobileMicrofrontendLink {
+  microfrontendId: string;
+  code: string;
+  name: string;
+  remoteEntryAndroid: string;
+  remoteEntryIos: string;
+  exposedModule: string;
+  routePrefix: string;
+}
+
+export interface FeatureMicrofrontendLinks {
+  web: WebMicrofrontendLink | null;
+  mobile: MobileMicrofrontendLink | null;
 }
 
 export type FeaturesTableResponse = TableResponse<Feature>;

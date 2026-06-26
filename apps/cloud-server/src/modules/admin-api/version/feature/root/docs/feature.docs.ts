@@ -2,9 +2,56 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiProduces, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { FeatureDto } from '../dto/entity/feature.dto';
+import { FeatureMicrofrontendLinksDto } from '../dto/entity/feature-microfrontend-links.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
+import { SetFeatureMicrofrontendDto } from '../dto/request/set-feature-microfrontend.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
 import { FeatureTableResponseDto } from '../dto/response/feature-table-response.dto';
+
+// Swagger docs for getting a feature's microfrontend links
+export function ApiGetFeatureMicrofrontends() {
+  return applyDecorators(
+    ApiOperation({ summary: "Get a feature's microfrontend links keyed by platform" }),
+    ApiParam({ name: 'featureId', description: 'Feature UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({
+      status: 200,
+      description: 'Feature microfrontend links retrieved successfully.',
+      type: FeatureMicrofrontendLinksDto,
+    }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Feature not found.' }),
+  );
+}
+
+// Swagger docs for setting a feature's microfrontend link on a platform
+export function ApiSetFeatureMicrofrontend() {
+  return applyDecorators(
+    ApiOperation({ summary: "Set or update a feature's microfrontend link for a platform" }),
+    ApiParam({ name: 'featureId', description: 'Feature UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({ name: 'platform', description: 'Target platform', enum: ['web', 'mobile'], example: 'web' }),
+    ApiBody({ type: SetFeatureMicrofrontendDto }),
+    ApiResponse({ status: 200, description: 'Feature microfrontend link set successfully.', type: FeatureDto }),
+    ApiResponse({ status: 400, description: 'Validation failed or invalid platform.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Feature or microfrontend not found.' }),
+  );
+}
+
+// Swagger docs for removing a feature's microfrontend link on a platform
+export function ApiRemoveFeatureMicrofrontend() {
+  return applyDecorators(
+    ApiOperation({ summary: "Remove a feature's microfrontend link for a platform" }),
+    ApiParam({ name: 'featureId', description: 'Feature UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({ name: 'platform', description: 'Target platform', enum: ['web', 'mobile'], example: 'web' }),
+    ApiResponse({
+      status: 200,
+      description: 'Feature microfrontend link removed successfully.',
+      type: SuccessResponseDto,
+    }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Feature not found.' }),
+  );
+}
 
 // Swagger docs for creating a feature
 export function ApiCreateFeature() {

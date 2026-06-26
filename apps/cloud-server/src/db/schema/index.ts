@@ -22,9 +22,10 @@ export * from './table-view';
 // RBAC tables
 export * from './version';
 export * from './version-business';
+export * from './web-microfrontend';
+export * from './mobile-microfrontend';
 export * from './microfrontend';
 export * from './feature';
-export * from './feature-microfrontend';
 export * from './feature-permission';
 export * from './permission-business';
 export * from './app';
