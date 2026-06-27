@@ -39,7 +39,7 @@ export class UpdateFeaturePermissionDto {
   })
   @IsOptional()
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsUUID('all', { each: true })
   businessIds?: string[];
 
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })

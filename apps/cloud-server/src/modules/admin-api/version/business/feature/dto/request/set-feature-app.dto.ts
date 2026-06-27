@@ -9,6 +9,6 @@ export class SetFeatureAppDto {
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @ValidateIf((o) => o.appId !== null && o.appId !== undefined)
-  @IsUUID('4')
+  @IsUUID()
   appId: string | null;
 }

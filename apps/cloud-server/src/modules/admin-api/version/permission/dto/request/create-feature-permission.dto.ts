@@ -39,7 +39,7 @@ export class CreateFeaturePermissionDto {
     example: ['550e8400-e29b-41d4-a716-446655440002'],
   })
   @IsArray()
-  @IsUUID('4', { each: true })
+  @IsUUID('all', { each: true })
   businessIds: string[];
 
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })
