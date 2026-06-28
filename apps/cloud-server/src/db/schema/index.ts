@@ -10,6 +10,7 @@ export * from './country';
 export * from './deployment';
 export * from './organization';
 export * from './plan';
+export * from './plan-feature';
 export * from './plan-feature-permission';
 export * from './plan-price';
 export * from './cloud-provider';
@@ -32,6 +33,7 @@ export * from './app';
 export * from './app-feature';
 export * from './app-price';
 export * from './role-template';
+export * from './role-template-feature';
 export * from './role-template-feature-permission';
 // Export relations last (depends on tables above)
 export * from './relations';

@@ -3,7 +3,7 @@ import { z } from '@vritti/quantum-ui/zod';
 import type {
   MatrixApp,
   MatrixFeature,
-  MatrixGrant,
+  MatrixMembership,
   MatrixPermissionOption,
   Platform as MatrixPlatform,
 } from './permission-matrix';
@@ -30,12 +30,11 @@ export type Platform = MatrixPlatform;
 export type FeaturePermissionOption = MatrixPermissionOption;
 export type RoleTemplateFeature = MatrixFeature;
 export type RoleTemplateApp = MatrixApp;
-export type RoleTemplateGrant = MatrixGrant;
+export type RoleTemplateMembership = MatrixMembership;
 
-// The full matrix payload: the role's apps (each with its features) + the complete current grant set
+// The matrix payload: apps carry their feature catalog + the role's nested memberships
 export interface RoleTemplatePermissionsResponse {
   apps: RoleTemplateApp[];
-  grants: RoleTemplateGrant[];
 }
 
 export type RoleTemplatesTableResponse = TableResponse<Role>;
@@ -54,10 +53,11 @@ export const updateRoleTemplateSchema = z.object({
 });
 
 export const setPermissionsSchema = z.object({
-  grants: z.array(
+  memberships: z.array(
     z.object({
-      featurePermissionId: z.string().uuid(),
+      featureId: z.string().uuid(),
       platform: z.enum(['WEB', 'MOBILE']),
+      permissions: z.array(z.string().uuid()),
     }),
   ),
 });

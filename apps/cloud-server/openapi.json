@@ -4496,9 +4496,9 @@
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/business-units/{buId}/apps": {
-      "patch": {
-        "operationId": "OrganizationBusinessUnitsController_updateBuApps",
+    "/cloud-api/organizations/{orgId}/business-units/{buId}/permissions": {
+      "get": {
+        "operationId": "OrganizationBusinessUnitsController_getBuPermissions",
         "parameters": [
           {
             "name": "orgId",
@@ -4517,6 +4517,50 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "Organization Business Units"
+        ]
+      },
+      "put": {
+        "operationId": "OrganizationBusinessUnitsController_updateBuPermissions",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "buId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetPlanUnlockedDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": ""
@@ -8011,7 +8055,7 @@
     },
     "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/permissions": {
       "get": {
-        "operationId": "PlanFeaturePermissionController_getUnlocked",
+        "operationId": "PlanFeaturePermissionController_getMatrix",
         "parameters": [
           {
             "name": "planId",
@@ -13726,6 +13770,55 @@
           "result"
         ]
       },
+      "PlanMembershipDto": {
+        "type": "object",
+        "properties": {
+          "featureId": {
+            "type": "string",
+            "description": "Feature included in this plan on this platform (the unlock/route gate)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform this membership applies to",
+            "enum": [
+              "WEB",
+              "MOBILE"
+            ],
+            "example": "WEB"
+          },
+          "permissions": {
+            "description": "Feature-permission ids unlocked under this membership (empty = included but view-only)",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "featureId",
+          "platform",
+          "permissions"
+        ]
+      },
+      "SetPlanUnlockedDto": {
+        "type": "object",
+        "properties": {
+          "memberships": {
+            "description": "Per-platform feature memberships, each with its unlocked permissions (full replace)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanMembershipDto"
+            }
+          }
+        },
+        "required": [
+          "memberships"
+        ]
+      },
       "CloudBusinessDto": {
         "type": "object",
         "properties": {
@@ -15454,42 +15547,53 @@
           }
         }
       },
-      "RoleTemplateGrantDto": {
+      "RoleTemplateMembershipDto": {
         "type": "object",
         "properties": {
-          "featurePermissionId": {
+          "featureId": {
             "type": "string",
-            "description": "Feature permission ID to grant",
+            "description": "Feature included in this role on this platform (the View/route gate)",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "platform": {
             "type": "string",
-            "description": "Platform this grant applies to",
+            "description": "Platform this membership applies to",
             "enum": [
               "WEB",
               "MOBILE"
             ],
             "example": "WEB"
+          },
+          "permissions": {
+            "description": "Feature-permission ids granted under this membership (empty = view-only member)",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           }
         },
         "required": [
-          "featurePermissionId",
-          "platform"
+          "featureId",
+          "platform",
+          "permissions"
         ]
       },
       "AssignRoleTemplatePermissionsDto": {
         "type": "object",
         "properties": {
-          "grants": {
-            "description": "Platform-scoped permission grants for the role template (full replace)",
+          "memberships": {
+            "description": "Per-platform feature memberships, each with its granted permissions (full replace)",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleTemplateGrantDto"
+              "$ref": "#/components/schemas/RoleTemplateMembershipDto"
             }
           }
         },
         "required": [
-          "grants"
+          "memberships"
         ]
       },
       "CreatePlanDto": {
@@ -15767,44 +15871,6 @@
           "countryId",
           "billingPeriod",
           "amount"
-        ]
-      },
-      "PlanUnlockGrantDto": {
-        "type": "object",
-        "properties": {
-          "featurePermissionId": {
-            "type": "string",
-            "description": "Feature permission ID to unlock",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "platform": {
-            "type": "string",
-            "description": "Platform this unlock applies to",
-            "enum": [
-              "WEB",
-              "MOBILE"
-            ],
-            "example": "WEB"
-          }
-        },
-        "required": [
-          "featurePermissionId",
-          "platform"
-        ]
-      },
-      "SetPlanUnlockedDto": {
-        "type": "object",
-        "properties": {
-          "grants": {
-            "description": "Platform-scoped permission unlocks for the plan (full replace)",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PlanUnlockGrantDto"
-            }
-          }
-        },
-        "required": [
-          "grants"
         ]
       },
       "CreateDeploymentDto": {

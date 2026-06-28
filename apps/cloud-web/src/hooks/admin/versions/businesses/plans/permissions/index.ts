@@ -2,43 +2,32 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
 import {
-  type AvailablePlanApp,
-  getPlanAvailableApps,
-  getPlanUnlocked,
-  type PlanUnlockGrant,
+  getPlanMatrix,
+  type PlanMatrixApp,
+  type PlanMembership,
   setPlanUnlocked,
 } from '@/services/admin/versions/businesses/plans/permissions.service';
 
-function availableKey(planId: string) {
-  return ['admin', 'plan-permissions', planId, 'apps'] as const;
-}
-function unlockedKey(planId: string) {
-  return ['admin', 'plan-permissions', planId, 'unlocked'] as const;
+export type PlanUnlockPayload = { memberships: PlanMembership[] };
+
+function matrixKey(planId: string) {
+  return ['admin', 'plan-permissions', planId, 'matrix'] as const;
 }
 
-// Fetches the unlock-matrix source for a plan (apps, each with its features)
-export function usePlanAvailableApps(versionId: string, businessId: string, planId: string) {
-  return useQuery<AvailablePlanApp[], AxiosError>({
-    queryKey: availableKey(planId),
-    queryFn: () => getPlanAvailableApps(versionId, businessId, planId),
+// Fetches the plan matrix — apps (catalog) each with the plan's current memberships nested under it
+export function usePlanMatrix(versionId: string, businessId: string, planId: string) {
+  return useQuery<{ apps: PlanMatrixApp[] }, AxiosError>({
+    queryKey: matrixKey(planId),
+    queryFn: () => getPlanMatrix(versionId, businessId, planId),
     enabled: !!versionId && !!businessId && !!planId,
   });
 }
 
-// Fetches the plan's currently unlocked (feature-permission, platform) grants
-export function usePlanUnlocked(versionId: string, businessId: string, planId: string) {
-  return useQuery<{ grants: PlanUnlockGrant[] }, AxiosError>({
-    queryKey: unlockedKey(planId),
-    queryFn: () => getPlanUnlocked(versionId, businessId, planId),
-    enabled: !!versionId && !!businessId && !!planId,
-  });
-}
-
-// Saves the plan's unlocked grants
+// Saves the plan's memberships (each with its unlocked permissions)
 export function useSetPlanUnlocked(versionId: string, businessId: string, planId: string) {
   const queryClient = useQueryClient();
-  return useMutation<SuccessResponse, AxiosError, PlanUnlockGrant[]>({
-    mutationFn: (grants) => setPlanUnlocked({ versionId, businessId, planId, grants }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: unlockedKey(planId) }),
+  return useMutation<SuccessResponse, AxiosError, PlanUnlockPayload>({
+    mutationFn: (payload) => setPlanUnlocked({ versionId, businessId, planId, ...payload }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: matrixKey(planId) }),
   });
 }

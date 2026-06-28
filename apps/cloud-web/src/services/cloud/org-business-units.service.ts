@@ -1,5 +1,6 @@
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { MatrixApp, MatrixMembership } from '@/schemas/admin/permission-matrix';
 import type {
   BusinessUnit,
   BusinessUnitsResponse,
@@ -94,18 +95,25 @@ export interface BURoleAssignment {
   createdAt: string;
 }
 
-// Updates the assigned apps for a business unit
-export function updateBuApps({
+// Fetches the BU permission matrix — the plan ceiling with the BU's current allow-set nested as memberships
+export function getBuPermissionMatrix(orgId: string, buId: string): Promise<{ apps: MatrixApp[] }> {
+  return axios
+    .get<{ apps: MatrixApp[] }>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`)
+    .then((r) => r.data);
+}
+
+// Replaces the BU's unlocked-permission allow-list within the plan
+export function setBuPermissions({
   orgId,
   buId,
-  appCodes,
+  memberships,
 }: {
   orgId: string;
   buId: string;
-  appCodes: string[];
+  memberships: MatrixMembership[];
 }): Promise<SuccessResponse> {
   return axios
-    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/apps`, { appCodes })
+    .put<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`, { memberships })
     .then((r) => r.data);
 }
 

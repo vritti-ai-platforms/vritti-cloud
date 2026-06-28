@@ -26,19 +26,22 @@ export class CatalogSyncService {
     private readonly businessRepository: BusinessRepository,
   ) {}
 
-  // Recomputes and pushes the feature catalog for a single BU whose app assignment changed
-  async syncBuApps(orgId: string, buId: string, appCodes: string[]): Promise<void> {
+  // Recomputes and pushes the feature catalog (snapshot) for a single BU; core derives its apps from it
+  async syncBuSnapshot(orgId: string, buId: string): Promise<void> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const snapshot = await this.loadSnapshot(deployment.version);
     if (!snapshot) return;
 
     const businessCode = await this.resolveBusinessCode(org);
-    const featureCatalog = buildBuCatalog(snapshot, businessCode, org.planCode);
-    await this.coreBusinessUnitService.updateBuApps(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId, {
-      appCodes,
+    const featureCatalog = buildBuCatalog(snapshot, businessCode, org.planCode, org.buUnlocks?.[buId]);
+    await this.coreBusinessUnitService.replaceBuSnapshot(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      buId,
       featureCatalog,
-    });
-    this.logger.log(`Synced catalog for BU ${buId} (org ${orgId}): ${featureCatalog.length} features`);
+    );
+    this.logger.log(`Synced snapshot for BU ${buId} (org ${orgId}): ${featureCatalog.length} features`);
   }
 
   // Seeds/tops-up role templates for the org's business (core skips templates already provisioned)
@@ -76,15 +79,20 @@ export class CatalogSyncService {
             );
           }
 
-          const assignments = (org.buAppAssignments ?? {}) as Record<string, string[]>;
-          for (const [buId, appCodes] of Object.entries(assignments)) {
-            const featureCatalog = buildBuCatalog(snapshot, businessCode, org.planCode);
-            await this.coreBusinessUnitService.updateBuApps(
+          // BUs are owned by core — enumerate them and push each one's recomputed snapshot
+          const businessUnits = await this.coreBusinessUnitService.getBusinessUnits(
+            deployment.url,
+            deployment.webhookSecret,
+            org.orgIdentifier,
+          );
+          for (const bu of businessUnits) {
+            const featureCatalog = buildBuCatalog(snapshot, businessCode, org.planCode, org.buUnlocks?.[bu.id]);
+            await this.coreBusinessUnitService.replaceBuSnapshot(
               deployment.url,
               deployment.webhookSecret,
               org.orgIdentifier,
-              buId,
-              { appCodes, featureCatalog },
+              bu.id,
+              featureCatalog,
             );
           }
         }

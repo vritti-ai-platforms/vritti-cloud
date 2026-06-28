@@ -1,9 +1,21 @@
-import type { SnapshotFeature, VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
+import type {
+  SnapshotFeature,
+  SnapshotPlan,
+  VersionSnapshot,
+} from '@domain/version/root/services/version-snapshot.builder';
 
-// A catalog permission carries its lock state (locked = not unlocked by the org's plan → upsell)
+// Why a permission/feature is locked: PLAN (org's plan doesn't unlock it) or BU (this BU restricts it)
+export type LockReason = 'PLAN' | 'BU';
+
+// A BU's per-feature allow-list (subset of the plan). Undefined ⇒ the BU inherits the full plan.
+export type BuFeatureUnlocks = Record<string, { web?: string[]; mobile?: string[] }>;
+
+// A catalog permission: its lock state + reason + (when plan-locked) the plans that would unlock it (upsell)
 export interface CatalogPermission {
   code: string;
   locked: boolean;
+  lockReason: LockReason | null;
+  unlockPlans: string[];
 }
 
 // Mirrors core-server's business_units.featureCatalog entry shape exactly
@@ -31,6 +43,9 @@ export interface FeatureCatalogEntry {
   appSortOrder: number;
   // Feature-level lock = every permission locked (whole feature greyed)
   locked: boolean;
+  lockReason: LockReason | null;
+  // Plans (in the business) that would unlock the feature when it's plan-locked — for upsell
+  unlockPlans: string[];
   permissions: CatalogPermission[];
 }
 
@@ -44,16 +59,19 @@ export interface RoleItem {
   features: Record<string, { web?: string[]; mobile?: string[] }>;
 }
 
-// Builds the FULL business catalog with per-permission lock flags from the org's plan (nothing is hidden).
+// Builds the per-BU catalog. The plan is the ceiling (membership + unlocks); buUnlocks further restricts within
+// the plan (undefined ⇒ inherit the full plan). Each permission carries locked + lockReason + unlockPlans (upsell).
 export function buildBuCatalog(
   snapshot: VersionSnapshot,
   businessCode: string | undefined,
   planCode: string | undefined,
+  buUnlocks?: BuFeatureUnlocks,
 ): FeatureCatalogEntry[] {
   if (!businessCode) return [];
   const business = snapshot.businesses?.[businessCode];
   if (!business) return [];
   const plan = planCode ? business.plans?.[planCode] : undefined;
+  const plans = business.plans ?? {};
 
   const catalog: FeatureCatalogEntry[] = [];
   for (const app of business.apps) {
@@ -62,18 +80,26 @@ export function buildBuCatalog(
       .map((code) => snapshot.features?.[code])
       .filter((f): f is SnapshotFeature => !!f && !!(f.microfrontends?.web || f.microfrontends?.mobile));
 
-    // Apps are DERIVED: include this app only if the plan unlocks at least one of its features (on any platform)
-    const appHasUnlock = appFeatures.some((f) => unlockedCodes(plan?.unlockedPermissions?.[f.code]).length > 0);
-    if (!appHasUnlock) continue;
+    // A feature is included only if the plan includes it (membership key present, even with zero unlocked actions).
+    // Apps are DERIVED: shown only if they own at least one member feature.
+    const memberFeatures = appFeatures.filter((f) => isPlanMember(plan?.unlockedPermissions?.[f.code]));
+    if (memberFeatures.length === 0) continue;
 
-    for (const feature of appFeatures) {
-      const web = feature.microfrontends?.web;
-      const mobile = feature.microfrontends?.mobile;
+    for (const feature of memberFeatures) {
+      const membership = plan?.unlockedPermissions?.[feature.code];
+      // Gate each platform's route by per-platform membership (member on web but not mobile → mobile omitted)
+      const web = membership?.web !== undefined ? feature.microfrontends?.web : undefined;
+      const mobile = membership?.mobile !== undefined ? feature.microfrontends?.mobile : undefined;
 
-      // Flatten per-platform unlocks until core resolution becomes platform-aware (locked = locked on every platform)
-      const unlocked = unlockedCodes(plan?.unlockedPermissions?.[feature.code]);
-      const permissions = buildPermissions(feature, businessCode, unlocked);
+      const permissions = buildPermissions(feature, businessCode, membership, buUnlocks, plans);
       const locked = permissions.length === 0 ? true : permissions.every((p) => p.locked);
+      // Feature reason: all locked-by-BU ⇒ BU; otherwise PLAN. Unlock plans only meaningful for plan-locks.
+      const lockReason: LockReason | null = !locked
+        ? null
+        : permissions.length > 0 && permissions.every((p) => p.lockReason === 'BU')
+          ? 'BU'
+          : 'PLAN';
+      const unlockPlans = locked && lockReason === 'PLAN' ? plansIncludingFeature(plans, feature.code) : [];
 
       catalog.push({
         code: feature.code,
@@ -101,11 +127,18 @@ export function buildBuCatalog(
         appIcon: app.icon ?? null,
         appSortOrder: app.sortOrder ?? 0,
         locked,
+        lockReason,
+        unlockPlans,
         permissions,
       });
     }
   }
   return catalog;
+}
+
+// A feature is a plan member when its unlock entry exists on at least one platform (even with zero actions)
+function isPlanMember(entry: { web?: string[]; mobile?: string[] } | undefined): boolean {
+  return !!entry && (entry.web !== undefined || entry.mobile !== undefined);
 }
 
 // Flattens a feature's per-platform unlock entry into the union of unlocked permission codes
@@ -114,11 +147,51 @@ function unlockedCodes(entry: { web?: string[]; mobile?: string[] } | undefined)
   return [...new Set([...(entry.web ?? []), ...(entry.mobile ?? [])])];
 }
 
-// A feature's business-scoped permissions, each tagged locked against the plan's unlocked set
-function buildPermissions(feature: SnapshotFeature, businessCode: string, unlocked: string[]): CatalogPermission[] {
+// A feature's business-scoped permissions, each tagged with locked + reason against the plan and the BU allow-set.
+function buildPermissions(
+  feature: SnapshotFeature,
+  businessCode: string,
+  planMembership: { web?: string[]; mobile?: string[] } | undefined,
+  buUnlocks: BuFeatureUnlocks | undefined,
+  plans: Record<string, SnapshotPlan>,
+): CatalogPermission[] {
+  const planUnlocked = new Set(unlockedCodes(planMembership));
+  // undefined buUnlocks ⇒ BU inherits the plan (no restriction); else the feature's BU allow-set (absent ⇒ none)
+  const buUnlocked = buUnlocks === undefined ? null : new Set(unlockedCodes(buUnlocks[feature.code]));
+
   return (feature.permissions ?? [])
     .filter((p) => p.isGlobal || p.businesses.includes(businessCode))
-    .map((p) => ({ code: p.code, locked: !unlocked.includes(p.code) }));
+    .map((p) => {
+      const planAllows = planUnlocked.has(p.code);
+      const buAllows = buUnlocked === null ? true : buUnlocked.has(p.code);
+      const locked = !planAllows || !buAllows;
+      // Plan is the ceiling, so a plan-lock wins over a BU-lock when reporting the reason
+      const lockReason: LockReason | null = !planAllows ? 'PLAN' : !buAllows ? 'BU' : null;
+      const unlockPlans = lockReason === 'PLAN' ? plansUnlockingPermission(plans, feature.code, p.code) : [];
+      return { code: p.code, locked, lockReason, unlockPlans };
+    });
+}
+
+// Plan codes (in the business) whose unlocked set includes this feature+permission — the upsell targets
+function plansUnlockingPermission(
+  plans: Record<string, SnapshotPlan>,
+  featureCode: string,
+  permCode: string,
+): string[] {
+  const result: string[] = [];
+  for (const [code, plan] of Object.entries(plans)) {
+    if (unlockedCodes(plan.unlockedPermissions?.[featureCode]).includes(permCode)) result.push(code);
+  }
+  return result;
+}
+
+// Plan codes (in the business) that include this feature at all (membership) — the feature-level upsell targets
+function plansIncludingFeature(plans: Record<string, SnapshotPlan>, featureCode: string): string[] {
+  const result: string[] = [];
+  for (const [code, plan] of Object.entries(plans)) {
+    if (isPlanMember(plan.unlockedPermissions?.[featureCode])) result.push(code);
+  }
+  return result;
 }
 
 // Maps the business's role templates into provisionable role items for core (global grants)

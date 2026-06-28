@@ -6,8 +6,10 @@ import type {
   FeaturePermission,
   MobileMicrofrontend,
   Plan,
+  PlanFeature,
   PlanFeaturePermission,
   RoleTemplate,
+  RoleTemplateFeature,
   RoleTemplateFeaturePermission,
   WebMicrofrontend,
 } from '@/db/schema';
@@ -21,8 +23,12 @@ export interface SnapshotData {
   apps: App[];
   appFeatures: AppFeature[];
   roleTemplates: RoleTemplate[];
+  // Per-platform feature memberships (the role's included features) + the action grants under them
+  roleTemplateFeatures: RoleTemplateFeature[];
   roleTemplatePermissions: RoleTemplateFeaturePermission[];
   plans: Plan[];
+  // Per-platform feature memberships (the plan's included features) + the action unlocks under them
+  planFeatures: PlanFeature[];
   planFeaturePermissions: PlanFeaturePermission[];
   businesses: Array<{ id: string; code: string; name: string }>;
   permissionBusinesses: Array<{ featurePermissionId: string; businessId: string }>;
@@ -126,15 +132,18 @@ function buildIndex(data: SnapshotData) {
     appFeaturesByAppId: _.groupBy(data.appFeatures, 'appId'),
     rolePermsByRoleId: _.groupBy(data.roleTemplatePermissions, 'roleTemplateId'),
     planPermsByPlanId: _.groupBy(data.planFeaturePermissions, 'planId'),
+    roleFeatureById: _.keyBy(data.roleTemplateFeatures, 'id'),
+    roleFeaturesByRoleId: _.groupBy(data.roleTemplateFeatures, 'roleTemplateId'),
+    planFeatureById: _.keyBy(data.planFeatures, 'id'),
+    planFeaturesByPlanId: _.groupBy(data.planFeatures, 'planId'),
   };
 }
 
-// A role's apps, derived from the features its grants touch (one app per feature within a business)
+// A role's apps, derived from its feature memberships (one app per feature within a business)
 function buildRoleApps(roleId: string, index: SnapshotIndex): string[] {
   const codes = new Set<string>();
-  for (const rp of index.rolePermsByRoleId[roleId] ?? []) {
-    const featureId = index.permissionById[rp.featurePermissionId]?.featureId;
-    const appCode = featureId && index.appCodeByFeatureId[featureId];
+  for (const m of index.roleFeaturesByRoleId[roleId] ?? []) {
+    const appCode = index.appCodeByFeatureId[m.featureId];
     if (appCode) codes.add(appCode);
   }
   return [...codes];
@@ -197,17 +206,27 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
   return result;
 }
 
-// A role's grants: { featureCode: [permissionCode...] }
+// A role's features: { featureCode: { web?: [permCode…], mobile?: [permCode…] } }. Seeded from memberships
+// (so a member with zero actions still appears = the View/route gate), then filled with action grants.
 function buildRoleFeatures(
   roleId: string,
   index: SnapshotIndex,
 ): Record<string, { web?: string[]; mobile?: string[] }> {
   const featurePerms: Record<string, { web?: string[]; mobile?: string[] }> = {};
-  for (const rp of index.rolePermsByRoleId[roleId] ?? []) {
-    const perm = index.permissionById[rp.featurePermissionId];
-    const featureCode = perm && index.featureById[perm.featureId]?.code;
+  for (const m of index.roleFeaturesByRoleId[roleId] ?? []) {
+    const featureCode = index.featureById[m.featureId]?.code;
     if (!featureCode) continue;
-    const key = rp.platform === 'WEB' ? 'web' : 'mobile';
+    const key = m.platform === 'WEB' ? 'web' : 'mobile';
+    const bucket = featurePerms[featureCode] ?? {};
+    featurePerms[featureCode] = bucket;
+    if (!bucket[key]) bucket[key] = [];
+  }
+  for (const rp of index.rolePermsByRoleId[roleId] ?? []) {
+    const membership = index.roleFeatureById[rp.roleTemplateFeatureId];
+    const perm = index.permissionById[rp.featurePermissionId];
+    const featureCode = membership && index.featureById[membership.featureId]?.code;
+    if (!featureCode || !perm) continue;
+    const key = membership.platform === 'WEB' ? 'web' : 'mobile';
     const bucket = featurePerms[featureCode] ?? {};
     featurePerms[featureCode] = bucket;
     const list = bucket[key] ?? [];
@@ -217,17 +236,27 @@ function buildRoleFeatures(
   return featurePerms;
 }
 
-// A plan's unlocked feature-permissions: { featureCode: [permissionCode...] }
+// A plan's unlocked features: { featureCode: { web?: [permCode…], mobile?: [permCode…] } }. Seeded from
+// memberships (a member with zero unlocked actions still appears = included/view-only), then filled with unlocks.
 function buildPlanUnlockedPermissions(
   planId: string,
   index: SnapshotIndex,
 ): Record<string, { web?: string[]; mobile?: string[] }> {
   const featurePerms: Record<string, { web?: string[]; mobile?: string[] }> = {};
-  for (const pfp of index.planPermsByPlanId[planId] ?? []) {
-    const perm = index.permissionById[pfp.featurePermissionId];
-    const featureCode = perm && index.featureById[perm.featureId]?.code;
+  for (const m of index.planFeaturesByPlanId[planId] ?? []) {
+    const featureCode = index.featureById[m.featureId]?.code;
     if (!featureCode) continue;
-    const key = pfp.platform === 'WEB' ? 'web' : 'mobile';
+    const key = m.platform === 'WEB' ? 'web' : 'mobile';
+    const bucket = featurePerms[featureCode] ?? {};
+    featurePerms[featureCode] = bucket;
+    if (!bucket[key]) bucket[key] = [];
+  }
+  for (const pfp of index.planPermsByPlanId[planId] ?? []) {
+    const membership = index.planFeatureById[pfp.planFeatureId];
+    const perm = index.permissionById[pfp.featurePermissionId];
+    const featureCode = membership && index.featureById[membership.featureId]?.code;
+    if (!featureCode || !perm) continue;
+    const key = membership.platform === 'WEB' ? 'web' : 'mobile';
     const bucket = featurePerms[featureCode] ?? {};
     featurePerms[featureCode] = bucket;
     const list = bucket[key] ?? [];

@@ -2,7 +2,9 @@ import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
 import type { OrgRole } from '@/schemas/cloud/org-roles';
 import { getCompatibleRoles } from '../../../services/cloud/org-business-units.service';
-import { BU_COMPATIBLE_ROLES_KEY } from './useUpdateBuApps';
+
+export const BU_COMPATIBLE_ROLES_KEY = (orgId: string, buId: string) =>
+  ['organizations', orgId, 'business-units', buId, 'compatible-roles'] as const;
 
 type UseCompatibleRolesOptions = Omit<UseQueryOptions<OrgRole[], AxiosError>, 'queryKey' | 'queryFn'>;
 

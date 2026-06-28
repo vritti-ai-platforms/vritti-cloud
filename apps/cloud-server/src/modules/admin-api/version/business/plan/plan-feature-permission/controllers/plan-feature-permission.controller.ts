@@ -1,12 +1,12 @@
-import { PlanFeaturePermissionService } from '@domain/plan/services/plan-feature-permission.service';
+import {
+  type PlanAppWithMemberships,
+  PlanFeaturePermissionService,
+} from '@domain/plan/services/plan-feature-permission.service';
 import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, type SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import type {
-  AvailablePlanApp,
-  PlanUnlockGrant,
-} from '@/modules/domain/plan/repositories/plan-feature-permission.repository';
+import type { AvailablePlanApp } from '@/modules/domain/plan/repositories/plan-feature-permission.repository';
 import { SetPlanUnlockedDto } from '../dto/request/set-plan-unlocked.dto';
 
 @ApiTags('Admin - Plan Permissions')
@@ -18,21 +18,21 @@ export class PlanFeaturePermissionController {
 
   constructor(private readonly service: PlanFeaturePermissionService) {}
 
-  // Returns the unlock matrix source — the business's apps, each with the features + permissions it owns
+  // Returns just the matrix catalog — the business's apps, each with the features + permissions it owns
   @Get('apps')
   getAvailableApps(@Param('planId') planId: string): Promise<AvailablePlanApp[]> {
     this.logger.log(`GET .../plans/${planId}/permissions/apps`);
     return this.service.getAvailableApps(planId);
   }
 
-  // Returns the plan's currently unlocked (feature-permission, platform) grants
+  // Returns the matrix — apps each with the plan's current memberships (with their unlocked permissions) nested
   @Get()
-  getUnlocked(@Param('planId') planId: string): Promise<{ grants: PlanUnlockGrant[] }> {
+  getMatrix(@Param('planId') planId: string): Promise<{ apps: PlanAppWithMemberships[] }> {
     this.logger.log(`GET .../plans/${planId}/permissions`);
-    return this.service.getUnlocked(planId);
+    return this.service.getMatrix(planId);
   }
 
-  // Replaces the plan's unlocked set
+  // Replaces the plan's memberships + their nested unlock grants
   @Put()
   setUnlocked(@Param('planId') planId: string, @Body() dto: SetPlanUnlockedDto): Promise<SuccessResponseDto> {
     this.logger.log(`PUT .../plans/${planId}/permissions`);

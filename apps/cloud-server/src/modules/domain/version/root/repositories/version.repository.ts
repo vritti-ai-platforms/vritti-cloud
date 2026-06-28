@@ -11,8 +11,10 @@ import {
   mobileMicrofrontends,
   permissionBusinesses,
   planFeaturePermissions,
+  planFeatures,
   plans,
   roleTemplateFeaturePermissions,
+  roleTemplateFeatures,
   roleTemplates,
   versionBusinesses,
   versions,
@@ -56,9 +58,11 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       appRows,
       appFeatureRows,
       roleRows,
+      roleFeatureRows,
       rolePermRows,
       businessRows,
       permissionBusinessRows,
+      planFeatureRows,
       planFpRows,
     ] = await Promise.all([
       this.db.select().from(features).where(eq(features.versionId, versionId)),
@@ -68,6 +72,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       this.db.select().from(apps).where(eq(apps.versionId, versionId)),
       this.db.select().from(appFeatures).where(eq(appFeatures.versionId, versionId)),
       this.db.select().from(roleTemplates).where(eq(roleTemplates.versionId, versionId)),
+      this.db.select().from(roleTemplateFeatures).where(eq(roleTemplateFeatures.versionId, versionId)),
       this.db
         .select()
         .from(roleTemplateFeaturePermissions)
@@ -84,6 +89,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
         })
         .from(permissionBusinesses)
         .where(eq(permissionBusinesses.versionId, versionId)),
+      this.db.select().from(planFeatures).where(eq(planFeatures.versionId, versionId)),
       planIds.length
         ? this.db.select().from(planFeaturePermissions).where(inArray(planFeaturePermissions.planId, planIds))
         : Promise.resolve([]),
@@ -97,8 +103,10 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       apps: appRows,
       appFeatures: appFeatureRows,
       roleTemplates: roleRows,
+      roleTemplateFeatures: roleFeatureRows,
       roleTemplatePermissions: rolePermRows,
       plans: planRows,
+      planFeatures: planFeatureRows,
       planFeaturePermissions: planFpRows,
       businesses: businessRows,
       permissionBusinesses: permissionBusinessRows,

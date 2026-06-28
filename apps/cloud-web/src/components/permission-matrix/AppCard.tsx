@@ -1,87 +1,69 @@
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
-import type { MatrixApp, MatrixFeature, Platform } from '@/schemas/admin/permission-matrix';
+import type { MatrixApp, Platform } from '@/schemas/admin/permission-matrix';
 import { FeatureGroup } from './FeatureGroup';
-import { appPlatforms, grantKey, PLATFORM_LABEL } from './utils';
+import { addedFeatureCount, appPlatforms, type MatrixState, PLATFORM_LABEL } from './utils';
 
 interface AppCardProps {
   app: MatrixApp;
-  selected: Set<string>;
+  state: MatrixState;
   expanded: boolean;
   onToggleExpanded: () => void;
-  onTogglePermission: (featurePermissionId: string, platform: Platform) => void;
-  onToggleFeatureColumn: (feature: MatrixFeature, platform: Platform) => void;
+  onToggleMembership: (featureId: string, platform: Platform) => void;
+  onTogglePermission: (featureId: string, featurePermissionId: string, platform: Platform) => void;
+  onToggleAll: (featureId: string, platform: Platform) => void;
 }
 
-// Granted / total permission count for one platform across all of an app's features
-function platformCounts(app: MatrixApp, platform: Platform, selected: Set<string>): { count: number; total: number } {
-  let count = 0;
-  let total = 0;
-  for (const feature of app.features) {
-    if (!feature.platforms.includes(platform)) continue;
-    for (const perm of feature.permissions) {
-      total += 1;
-      if (selected.has(grantKey(perm.featurePermissionId, platform))) count += 1;
-    }
-  }
-  return { count, total };
-}
-
-// An app as a card (layer 1): bold section header + a single labeled permission grid for its features (layer 2)
+// An app as a card (layer 1): section header with an added/total feature count + the platform-column grid (layer 2)
 export const AppCard: React.FC<AppCardProps> = ({
   app,
-  selected,
+  state,
   expanded,
   onToggleExpanded,
+  onToggleMembership,
   onTogglePermission,
-  onToggleFeatureColumn,
+  onToggleAll,
 }) => {
   const columns = appPlatforms(app);
-  const featureCount = app.features.length;
+  const total = app.features.length;
+  const added = addedFeatureCount(app, columns, state);
+  const full = added > 0 && added === total;
 
   return (
-    <div className="overflow-hidden rounded-lg border bg-card shadow-sm">
+    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <Collapsible
         open={expanded}
         onOpenChange={onToggleExpanded}
-        headerClassName="bg-muted/60 px-4 py-3 transition-colors hover:bg-muted"
+        headerClassName="bg-muted/50 px-4 py-3 transition-colors hover:bg-muted"
         triggerClassName="gap-2.5"
         trigger={
           <>
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <DynamicIcon name={app.icon as IconName} className="size-4" />
             </div>
             <div className="flex min-w-0 flex-col items-start gap-0.5 leading-none">
               <span className="text-[15px] font-semibold text-foreground">{app.name}</span>
-              <span className="text-xs font-normal text-muted-foreground">
-                {featureCount} feature{featureCount === 1 ? '' : 's'}
+              <span className={`text-xs tabular-nums ${full ? 'font-medium text-primary' : 'text-muted-foreground'}`}>
+                {added}/{total} feature{total === 1 ? '' : 's'} added
               </span>
             </div>
           </>
         }
       >
-        {/* Column header — labeled once per app, with the app's granted/total count per platform */}
+        {/* Column header — platform labels, aligned with the toggle/checkbox columns */}
         <div className="flex items-center gap-3 border-y bg-background px-4 py-2">
           <span className="flex-1 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-            Permission
+            Feature
           </span>
           <div className="flex">
-            {columns.map((pf) => {
-              const { count, total } = platformCounts(app, pf, selected);
-              const full = count > 0 && count === total;
-              return (
-                <div key={pf} className="flex w-24 flex-col items-center gap-0.5">
-                  <span className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
-                    {PLATFORM_LABEL[pf]}
-                  </span>
-                  <span
-                    className={`text-[11px] tabular-nums ${full ? 'font-semibold text-primary' : 'text-muted-foreground'}`}
-                  >
-                    {count}/{total}
-                  </span>
-                </div>
-              );
-            })}
+            {columns.map((pf) => (
+              <span
+                key={pf}
+                className="w-24 text-center text-[11px] font-semibold uppercase tracking-wide text-muted-foreground"
+              >
+                {PLATFORM_LABEL[pf]}
+              </span>
+            ))}
           </div>
         </div>
 
@@ -92,9 +74,10 @@ export const AppCard: React.FC<AppCardProps> = ({
               key={feature.id}
               feature={feature}
               columns={columns}
-              selected={selected}
+              state={state}
+              onToggleMembership={onToggleMembership}
               onTogglePermission={onTogglePermission}
-              onToggleColumn={onToggleFeatureColumn}
+              onToggleAll={onToggleAll}
             />
           ))}
         </div>

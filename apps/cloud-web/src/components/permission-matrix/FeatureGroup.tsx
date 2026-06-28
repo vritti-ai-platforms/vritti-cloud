@@ -1,59 +1,42 @@
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
+import { CompactSwitch } from '@vritti/quantum-ui/Switch';
 import type { MatrixFeature, Platform } from '@/schemas/admin/permission-matrix';
-import { grantKey } from './utils';
+import { cellKey, type MatrixState } from './utils';
 
 interface FeatureGroupProps {
   feature: MatrixFeature;
   // The app's platform columns (fixed slots so every cell lines up)
   columns: Platform[];
-  selected: Set<string>;
-  onTogglePermission: (featurePermissionId: string, platform: Platform) => void;
-  onToggleColumn: (feature: MatrixFeature, platform: Platform) => void;
+  state: MatrixState;
+  onToggleMembership: (featureId: string, platform: Platform) => void;
+  onTogglePermission: (featureId: string, featurePermissionId: string, platform: Platform) => void;
+  onToggleAll: (featureId: string, platform: Platform) => void;
 }
 
-// A feature as a parent/child group: a bold master row (tri-state per platform "grant whole feature")
-// followed by indented, muted permission rows with individual checkboxes.
+// A feature row: name + a per-platform membership toggle. When a platform is on, an "All" master checkbox +
+// the individual permission checkboxes reveal beneath; off hides them. A member with no boxes ticked = view-only.
 export const FeatureGroup: React.FC<FeatureGroupProps> = ({
   feature,
   columns,
-  selected,
+  state,
+  onToggleMembership,
   onTogglePermission,
-  onToggleColumn,
-}) => (
-  <div className="py-1.5">
-    {/* Master row — the feature */}
-    <div className="flex items-center gap-3 px-4 py-1.5">
-      <span className="flex-1 text-sm font-semibold text-foreground">{feature.name}</span>
-      <div className="flex">
-        {columns.map((pf) => {
-          if (!feature.platforms.includes(pf)) return <div key={pf} className="w-24" />;
-          const keys = feature.permissions.map((p) => grantKey(p.featurePermissionId, pf));
-          const allOn = keys.length > 0 && keys.every((k) => selected.has(k));
-          const someOn = keys.some((k) => selected.has(k)) && !allOn;
-          return (
-            <div key={pf} className="flex w-24 flex-col items-center gap-0.5">
-              <Checkbox
-                checked={allOn ? true : someOn ? 'indeterminate' : false}
-                onCheckedChange={() => onToggleColumn(feature, pf)}
-              />
-              <span className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">All</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
+  onToggleAll,
+}) => {
+  const anyMember = columns.some((pf) => feature.platforms.includes(pf) && state.has(cellKey(feature.id, pf)));
 
-    {/* Child rows — individual permissions */}
-    {feature.permissions.map((permission) => (
-      <div key={permission.featurePermissionId} className="flex items-center gap-3 py-1 pl-10 pr-4">
-        <span className="flex-1 text-sm text-muted-foreground">{permission.label}</span>
+  return (
+    <div className={anyMember ? 'bg-muted/20' : undefined}>
+      {/* Master row — the feature + per-platform membership switch */}
+      <div className="flex items-center gap-3 px-4 py-2">
+        <span className="flex-1 text-sm font-medium text-foreground">{feature.name}</span>
         <div className="flex">
           {columns.map((pf) =>
             feature.platforms.includes(pf) ? (
               <div key={pf} className="flex w-24 justify-center">
-                <Checkbox
-                  checked={selected.has(grantKey(permission.featurePermissionId, pf))}
-                  onCheckedChange={() => onTogglePermission(permission.featurePermissionId, pf)}
+                <CompactSwitch
+                  checked={state.has(cellKey(feature.id, pf))}
+                  onCheckedChange={() => onToggleMembership(feature.id, pf)}
                 />
               </div>
             ) : (
@@ -62,6 +45,54 @@ export const FeatureGroup: React.FC<FeatureGroupProps> = ({
           )}
         </div>
       </div>
-    ))}
-  </div>
-);
+
+      {/* Revealed for member platforms: an "All" master checkbox row, then the individual permissions */}
+      {anyMember && (
+        <div className="animate-in fade-in slide-in-from-top-1 pb-1.5 duration-200">
+          {/* All (tri-state) — grant/clear every permission of the feature on a platform */}
+          <div className="flex items-center gap-3 py-1 pl-10 pr-4">
+            <span className="flex-1 text-[13px] font-medium text-foreground/80">All</span>
+            <div className="flex">
+              {columns.map((pf) => {
+                const set = feature.platforms.includes(pf) ? state.get(cellKey(feature.id, pf)) : undefined;
+                if (!set) return <div key={pf} className="w-24" />;
+                const ids = feature.permissions.map((p) => p.featurePermissionId);
+                const allOn = ids.length > 0 && ids.every((id) => set.has(id));
+                const someOn = ids.some((id) => set.has(id)) && !allOn;
+                return (
+                  <div key={pf} className="flex w-24 justify-center">
+                    <Checkbox
+                      checked={allOn ? true : someOn ? 'indeterminate' : false}
+                      onCheckedChange={() => onToggleAll(feature.id, pf)}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {feature.permissions.map((permission) => (
+            <div key={permission.featurePermissionId} className="flex items-center gap-3 py-1 pl-10 pr-4">
+              <span className="flex-1 text-[13px] text-muted-foreground">{permission.label}</span>
+              <div className="flex">
+                {columns.map((pf) => {
+                  const member = feature.platforms.includes(pf) && state.has(cellKey(feature.id, pf));
+                  return member ? (
+                    <div key={pf} className="flex w-24 justify-center">
+                      <Checkbox
+                        checked={state.get(cellKey(feature.id, pf))?.has(permission.featurePermissionId) ?? false}
+                        onCheckedChange={() => onTogglePermission(feature.id, permission.featurePermissionId, pf)}
+                      />
+                    </div>
+                  ) : (
+                    <div key={pf} className="w-24" />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};

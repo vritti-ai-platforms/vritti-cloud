@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."organizations" ADD COLUMN "bu_unlocks" jsonb DEFAULT '{}' NOT NULL;

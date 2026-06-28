@@ -1,5 +1,7 @@
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { PlanRepository } from '@domain/plan/repositories/plan.repository';
+import { PlanFeatureRepository } from '@domain/plan/repositories/plan-feature.repository';
+import { PlanFeaturePermissionRepository } from '@domain/plan/repositories/plan-feature-permission.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ForbiddenException,
@@ -8,11 +10,14 @@ import {
   type SuccessResponseDto,
 } from '@vritti/api-sdk';
 import type { Deployment, Organization } from '@/db/schema';
+import type { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
+import type { PlanMembership } from '@/modules/domain/plan/repositories/plan-feature.repository';
+import { type BuAppWithMemberships, buildBuMatrix, membershipsToBuUnlocks } from '../bu-matrix.builder';
 import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
 
 @Injectable()
@@ -23,6 +28,8 @@ export class OrganizationBusinessUnitsService {
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly organizationRepository: OrganizationRepository,
     private readonly planRepository: PlanRepository,
+    private readonly planFeatureRepository: PlanFeatureRepository,
+    private readonly planFeaturePermissionRepository: PlanFeaturePermissionRepository,
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly coreBusinessUnitService: CoreBusinessUnitService,
     private readonly catalogSyncService: CatalogSyncService,
@@ -66,6 +73,8 @@ export class OrganizationBusinessUnitsService {
       );
       // Seed the org's business role templates (idempotent — core skips already-provisioned ones)
       await this.catalogSyncService.syncRoles(orgId);
+      // Seed the new BU's snapshot — with no BU locks yet it inherits the full plan
+      await this.catalogSyncService.syncBuSnapshot(orgId, result.id);
       this.logger.log(`Created business unit for org ${orgId}`);
       return result;
     } catch (error: unknown) {
@@ -217,28 +226,49 @@ export class OrganizationBusinessUnitsService {
     }
   }
 
-  // Updates the assigned apps for a business unit and pushes the recomputed feature catalog to core
-  async updateBuApps(orgId: string, buId: string, appCodes: string[]): Promise<SuccessResponseDto> {
-    const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+  // Returns the BU permission matrix — the plan ceiling (apps/features/permissions) with the BU's current allow-set
+  async getBuMatrix(orgId: string, buId: string): Promise<{ apps: BuAppWithMemberships[] }> {
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const plan = await this.resolvePlan(org, deployment);
+    const [apps, planMemberships] = await Promise.all([
+      this.planFeaturePermissionRepository.findAvailableApps(plan.versionId, plan.businessId),
+      this.planFeatureRepository.findByPlanId(plan.id),
+    ]);
+    return buildBuMatrix(apps, planMemberships, org.buUnlocks?.[buId]);
+  }
 
-    // Persist BU app assignment on cloud — the source of truth the catalog is derived from
-    const assignments = (org.buAppAssignments ?? {}) as Record<string, string[]>;
-    if (appCodes.length > 0) {
-      assignments[buId] = appCodes;
-    } else {
-      delete assignments[buId];
+  // Replaces the BU's unlocked-permission allow-list (within the plan) and re-pushes the recomputed catalog to core
+  async updateBuLocks(orgId: string, buId: string, dto: SetPlanUnlockedDto): Promise<SuccessResponseDto> {
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+    const plan = await this.resolvePlan(org, deployment);
+    const apps = await this.planFeaturePermissionRepository.findAvailableApps(plan.versionId, plan.businessId);
+
+    // De-duplicate memberships by (feature, platform), then convert ids → codes for version-portable storage
+    const byKey = new Map<string, PlanMembership>();
+    for (const m of dto.memberships) {
+      byKey.set(`${m.featureId}:${m.platform}`, {
+        featureId: m.featureId,
+        platform: m.platform,
+        permissions: m.permissions,
+      });
     }
-    await this.organizationRepository.update(orgId, { buAppAssignments: assignments });
+    const featureUnlocks = membershipsToBuUnlocks([...byKey.values()], apps);
 
+    // Always store explicitly once edited — an empty allow-list means "lock everything", NOT "inherit the plan"
+    const buUnlocks = { ...(org.buUnlocks ?? {}) };
+    buUnlocks[buId] = featureUnlocks;
+    await this.organizationRepository.update(orgId, { buUnlocks });
+
+    // Re-push the BU snapshot so the new locks take effect downstream (per-user resolution reads it)
     try {
-      await this.catalogSyncService.syncBuApps(orgId, buId, appCodes);
-      this.logger.log(`Updated apps for BU ${buId} in org ${orgId}: [${appCodes.join(', ')}]`);
-      return { success: true, message: 'Business unit apps updated successfully.' };
+      await this.catalogSyncService.syncBuSnapshot(orgId, buId);
+      this.logger.log(`Updated locks for BU ${buId} in org ${orgId}`);
+      return { success: true, message: 'Business unit permissions updated successfully.' };
     } catch (error: unknown) {
-      this.logger.error(`Failed to update apps for BU ${buId} in org ${orgId}: ${error}`);
+      this.logger.error(`Failed to sync locks for BU ${buId} in org ${orgId}: ${error}`);
       throw new ServiceUnavailableException({
         label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to update business unit apps.',
+        detail: 'Unable to reach the deployment to update business unit permissions.',
       });
     }
   }
@@ -261,6 +291,16 @@ export class OrganizationBusinessUnitsService {
         detail: 'Unable to reach the deployment to fetch compatible roles.',
       });
     }
+  }
+
+  // Resolves the org's plan (version + business + planCode) — the ceiling the BU's locks live within
+  private async resolvePlan(org: Organization, deployment: Deployment) {
+    const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
+    const plan = appVersion
+      ? await this.planRepository.findByVersionBusinessCode(appVersion.id, org.businessId, org.planCode)
+      : undefined;
+    if (!plan) throw new NotFoundException('Plan not found.');
+    return plan;
   }
 
   // Extracts location fields into metadata for core-server while keeping timezone as a top-level BU field

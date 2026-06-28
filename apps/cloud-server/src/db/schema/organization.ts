@@ -6,6 +6,10 @@ import { deployments } from './deployment';
 import { orgMemberRoleEnum, orgSizeEnum } from './enums';
 import { users } from './user';
 
+// Per-BU allow-list of unlocked permissions, layered under the plan (the ceiling). Keyed by core BU id, then
+// feature code, then platform → permission codes. A BU absent here inherits the full plan; present = subset.
+export type BuUnlocks = Record<string, Record<string, { web?: string[]; mobile?: string[] }>>;
+
 // Organizations table - workspace entities created by users
 export const organizations = cloudSchema.table('organizations', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -27,7 +31,8 @@ export const organizations = cloudSchema.table('organizations', {
   deploymentId: uuid('deployment_id')
     .notNull()
     .references(() => deployments.id, { onDelete: 'restrict' }),
-  buAppAssignments: jsonb('bu_app_assignments').$type<Record<string, string[]>>().notNull().default({}),
+  // Per-BU unlocked-permission allow-list under the plan (see BuUnlocks); absent BU inherits the full plan
+  buUnlocks: jsonb('bu_unlocks').$type<BuUnlocks>().notNull().default({}),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

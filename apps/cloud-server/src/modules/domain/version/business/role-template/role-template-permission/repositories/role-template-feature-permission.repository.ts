@@ -36,29 +36,12 @@ export interface AvailableApp {
   features: AvailableFeature[];
 }
 
-// A single platform-scoped grant on a role template
-export interface RoleTemplateGrant {
-  featurePermissionId: string;
-  platform: AppPlatform;
-}
-
 @Injectable()
 export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseRepository<
   typeof roleTemplateFeaturePermissions
 > {
   constructor(database: PrimaryDatabaseService) {
     super(database, roleTemplateFeaturePermissions);
-  }
-
-  // Returns the platform-scoped grant pairs for a role template
-  async findGrantsByRoleTemplateId(roleTemplateId: string): Promise<RoleTemplateGrant[]> {
-    return this.db
-      .select({
-        featurePermissionId: roleTemplateFeaturePermissions.featurePermissionId,
-        platform: roleTemplateFeaturePermissions.platform,
-      })
-      .from(roleTemplateFeaturePermissions)
-      .where(eq(roleTemplateFeaturePermissions.roleTemplateId, roleTemplateId));
   }
 
   // Deletes all grants for a given role template

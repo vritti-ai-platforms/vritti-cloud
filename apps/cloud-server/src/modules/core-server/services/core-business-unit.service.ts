@@ -125,22 +125,22 @@ export class CoreBusinessUnitService {
     return result;
   }
 
-  // Updates the assigned app codes and derived feature catalog for a business unit in core
-  async updateBuApps(
+  // Replaces a business unit's snapshot (feature catalog) in core; core derives its assigned apps from it
+  async replaceBuSnapshot(
     url: string,
     webhookSecret: string,
     orgId: string,
     buId: string,
-    data: { appCodes: string[]; featureCatalog: FeatureCatalogEntry[] },
+    featureCatalog: FeatureCatalogEntry[],
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.patch<SuccessResponseDto>(
+    const result = await this.http.put<SuccessResponseDto>(
       url,
       webhookSecret,
-      `/business-units/webhook/${buId}/apps`,
-      data,
+      `/business-units/webhook/${buId}/snapshot`,
+      { featureCatalog },
       { orgId },
     );
-    this.logger.log(`Updated apps for business unit ${buId} in core`);
+    this.logger.log(`Replaced snapshot for business unit ${buId} in core`);
     return result;
   }
 

@@ -1,6 +1,8 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
+import { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
+import type { BuAppWithMemberships } from '../bu-matrix.builder';
 import {
   ApiCreateBusinessUnit,
   ApiDeleteBusinessUnit,
@@ -60,15 +62,25 @@ export class OrganizationBusinessUnitsController {
     return this.orgBuService.updateBusinessUnit(orgId, buId, data);
   }
 
-  // Updates the assigned apps for a business unit
-  @Patch(':buId/apps')
-  async updateBuApps(
+  // Returns the BU permission matrix (plan ceiling + the BU's current allow-set) for the lock editor
+  @Get(':buId/permissions')
+  async getBuPermissions(
     @Param('orgId') orgId: string,
     @Param('buId') buId: string,
-    @Body() data: { appCodes: string[] },
+  ): Promise<{ apps: BuAppWithMemberships[] }> {
+    this.logger.log(`GET /organizations/${orgId}/business-units/${buId}/permissions`);
+    return this.orgBuService.getBuMatrix(orgId, buId);
+  }
+
+  // Replaces the BU's unlocked-permission allow-list within the plan
+  @Put(':buId/permissions')
+  async updateBuPermissions(
+    @Param('orgId') orgId: string,
+    @Param('buId') buId: string,
+    @Body() dto: SetPlanUnlockedDto,
   ): Promise<SuccessResponseDto> {
-    this.logger.log(`PATCH /organizations/${orgId}/business-units/${buId}/apps`);
-    return this.orgBuService.updateBuApps(orgId, buId, data.appCodes);
+    this.logger.log(`PUT /organizations/${orgId}/business-units/${buId}/permissions`);
+    return this.orgBuService.updateBuLocks(orgId, buId, dto);
   }
 
   // Returns roles compatible with a business unit's assigned apps

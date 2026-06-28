@@ -1,19 +1,22 @@
-import { usePlanMatrix, useSetPlanUnlocked } from '@hooks/admin/versions/businesses/plans/permissions';
+import { useBuPermissionMatrix, useSetBuPermissions } from '@hooks/cloud/org-business-units';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Layers, Lock } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { AppCard, buildState, cellKey, PermissionMatrixSkeleton } from '@/components/permission-matrix';
-import { useVersionContext } from '@/context/VersionScopeContext';
 import type { MatrixMembership, Platform } from '@/schemas/admin/permission-matrix';
 
-export const FeaturesTab: React.FC = () => {
-  const { versionId, businessId, planId } = useVersionContext();
+interface FeaturesTabProps {
+  orgId: string;
+  buId: string;
+}
 
-  const { data, isLoading } = usePlanMatrix(versionId, businessId, planId);
+// Features tab — the BU's permission lock editor. The plan is the ceiling; toggling here restricts within it.
+export const FeaturesTab: React.FC<FeaturesTabProps> = ({ orgId, buId }) => {
+  const { data, isLoading } = useBuPermissionMatrix(orgId, buId);
   const apps = data?.apps ?? [];
-  const saveMutation = useSetPlanUnlocked(versionId, businessId, planId);
+  const saveMutation = useSetBuPermissions(orgId, buId);
 
   const form = useForm<{ memberships: MatrixMembership[] }>({ defaultValues: { memberships: [] } });
   const { append, remove, update } = useFieldArray({ control: form.control, name: 'memberships' });
@@ -115,7 +118,7 @@ export const FeaturesTab: React.FC = () => {
           <Layers className="mb-3 size-8 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">No features available</p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Assign features to this business’s apps to unlock their permissions here.
+            Your plan unlocks no features for this business unit to restrict.
           </p>
         </CardContent>
       </Card>
@@ -127,8 +130,8 @@ export const FeaturesTab: React.FC = () => {
       {/* Toolbar */}
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
-          Switch a feature on per platform to include it in the plan, then check the actions it unlocks. A switched-on
-          feature with no actions is included but view-only.
+          Your plan is the ceiling — switch a feature off for this business unit, or uncheck the actions it should not
+          allow. A switched-on feature with no actions is included but view-only.
         </p>
         <Button size="sm" onClick={save} disabled={!isDirty} isLoading={saveMutation.isPending} loadingText="Saving...">
           Save Unlocks

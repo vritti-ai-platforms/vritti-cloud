@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService, type TypedDrizzleClient } from '@vritti/api-sdk';
 import { and, eq, exists, inArray, or } from '@vritti/api-sdk/drizzle-orm';
-import type { AppPlatform } from '@/db/schema';
+import type { AppPlatform, NewPlanFeaturePermission } from '@/db/schema';
 import {
   appFeatures,
   apps,
@@ -9,6 +9,7 @@ import {
   features,
   permissionBusinesses,
   planFeaturePermissions,
+  planFeatures,
 } from '@/db/schema';
 
 export interface AvailablePlanPermission {
@@ -48,14 +49,15 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
     super(database, planFeaturePermissions);
   }
 
-  // Returns the plan's platform-scoped unlock pairs (the admin matrix source)
+  // Returns the plan's platform-scoped unlock pairs (platform comes from the membership row)
   async findGrantsByPlanId(planId: string): Promise<PlanUnlockGrant[]> {
     return this.db
       .select({
         featurePermissionId: planFeaturePermissions.featurePermissionId,
-        platform: planFeaturePermissions.platform,
+        platform: planFeatures.platform,
       })
       .from(planFeaturePermissions)
+      .innerJoin(planFeatures, eq(planFeatures.id, planFeaturePermissions.planFeatureId))
       .where(eq(planFeaturePermissions.planId, planId));
   }
 
@@ -68,20 +70,11 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
     return rows.map((r) => r.id);
   }
 
-  // Replaces a plan's unlocked set with the given (feature-permission, platform) grants
-  async setUnlocked(planId: string, grants: PlanUnlockGrant[]): Promise<void> {
-    await this.database.drizzleClient.transaction(async (tx) => {
-      await tx.delete(planFeaturePermissions).where(eq(planFeaturePermissions.planId, planId));
-      if (grants.length > 0) {
-        await tx.insert(planFeaturePermissions).values(
-          grants.map((g) => ({
-            planId,
-            featurePermissionId: g.featurePermissionId,
-            platform: g.platform,
-          })),
-        );
-      }
-    });
+  // Bulk-inserts unlock grant entries (each carrying its plan_feature_id membership parent)
+  async bulkCreate(entries: NewPlanFeaturePermission[], tx?: TypedDrizzleClient): Promise<void> {
+    if (entries.length === 0) return;
+    const db = tx ?? this.db;
+    await db.insert(planFeaturePermissions).values(entries);
   }
 
   // Returns the subset of the given feature-permission ids that actually exist

@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."organizations" DROP COLUMN "bu_app_assignments";

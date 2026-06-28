@@ -87,6 +87,7 @@ export const relations = defineRelations(schema, (r) => ({
   // Plan relations
   plans: {
     planPrices: r.many.planPrices(),
+    planFeatures: r.many.planFeatures(),
     planFeaturePermissions: r.many.planFeaturePermissions(),
     version: r.one.versions({
       from: r.plans.versionId,
@@ -267,9 +268,21 @@ export const relations = defineRelations(schema, (r) => ({
     country: r.one.countries({ from: r.appPrices.countryId, to: r.countries.id }),
   },
 
-  // Plan-Feature-Permission junction relations (the plan's unlocked permission set)
+  // Plan-Feature membership relations (the plan's included features, per platform)
+  planFeatures: {
+    appVersion: r.one.versions({ from: r.planFeatures.versionId, to: r.versions.id }),
+    plan: r.one.plans({ from: r.planFeatures.planId, to: r.plans.id }),
+    feature: r.one.features({ from: r.planFeatures.featureId, to: r.features.id }),
+    planFeaturePermissions: r.many.planFeaturePermissions(),
+  },
+
+  // Plan-Feature-Permission junction relations (the plan's unlocked action permissions under a membership)
   planFeaturePermissions: {
     plan: r.one.plans({ from: r.planFeaturePermissions.planId, to: r.plans.id }),
+    planFeature: r.one.planFeatures({
+      from: r.planFeaturePermissions.planFeatureId,
+      to: r.planFeatures.id,
+    }),
     featurePermission: r.one.featurePermissions({
       from: r.planFeaturePermissions.featurePermissionId,
       to: r.featurePermissions.id,
@@ -283,10 +296,19 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.versions.id,
     }),
     business: r.one.businesses({ from: r.roleTemplates.businessId, to: r.businesses.id }),
+    roleTemplateFeatures: r.many.roleTemplateFeatures(),
     roleTemplateFeaturePermissions: r.many.roleTemplateFeaturePermissions(),
   },
 
-  // Role-Template-Feature-Permission junction relations
+  // Role-Template-Feature membership relations (the role's included features, per platform)
+  roleTemplateFeatures: {
+    appVersion: r.one.versions({ from: r.roleTemplateFeatures.versionId, to: r.versions.id }),
+    roleTemplate: r.one.roleTemplates({ from: r.roleTemplateFeatures.roleTemplateId, to: r.roleTemplates.id }),
+    feature: r.one.features({ from: r.roleTemplateFeatures.featureId, to: r.features.id }),
+    roleTemplateFeaturePermissions: r.many.roleTemplateFeaturePermissions(),
+  },
+
+  // Role-Template-Feature-Permission junction relations (action grants under a membership)
   roleTemplateFeaturePermissions: {
     appVersion: r.one.versions({
       from: r.roleTemplateFeaturePermissions.versionId,
@@ -295,6 +317,10 @@ export const relations = defineRelations(schema, (r) => ({
     roleTemplate: r.one.roleTemplates({
       from: r.roleTemplateFeaturePermissions.roleTemplateId,
       to: r.roleTemplates.id,
+    }),
+    roleTemplateFeature: r.one.roleTemplateFeatures({
+      from: r.roleTemplateFeaturePermissions.roleTemplateFeatureId,
+      to: r.roleTemplateFeatures.id,
     }),
     featurePermission: r.one.featurePermissions({
       from: r.roleTemplateFeaturePermissions.featurePermissionId,

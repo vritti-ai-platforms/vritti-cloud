@@ -1,4 +1,4 @@
-// Generic shapes for the app → feature → permission matrix, shared by role-template grants and plan unlocks.
+// Generic shapes for the app → feature → permission matrix, shared by role-template and plan editors.
 export type Platform = 'WEB' | 'MOBILE';
 
 export interface MatrixPermissionOption {
@@ -7,7 +7,7 @@ export interface MatrixPermissionOption {
   label: string;
 }
 
-// One feature (layer 2) — its permissions + the platforms it has a route on
+// One feature (layer 2) — its permission options + the platforms it has a route on (the catalog)
 export interface MatrixFeature {
   id: string;
   code: string;
@@ -17,17 +17,19 @@ export interface MatrixFeature {
   platforms: Platform[];
 }
 
-// One app (layer 1) with the features it owns
+// One per-platform membership = the feature is in the role/plan on that platform, with its granted permission ids
+export interface MatrixMembership {
+  featureId: string;
+  platform: Platform;
+  permissions: string[];
+}
+
+// One app (layer 1): its feature catalog + the current memberships nested under it
 export interface MatrixApp {
   id: string;
   code: string;
   name: string;
   icon: string | null;
   features: MatrixFeature[];
-}
-
-// One platform-scoped grant/unlock
-export interface MatrixGrant {
-  featurePermissionId: string;
-  platform: Platform;
+  memberships: MatrixMembership[];
 }

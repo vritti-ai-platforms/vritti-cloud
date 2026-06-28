@@ -75,6 +75,18 @@ export class CoreHttpService {
     return response.data;
   }
 
+  // Sends a PUT request and returns the response body
+  async put<T>(
+    url: string,
+    webhookSecret: string,
+    path: string,
+    data?: unknown,
+    options?: { orgId?: string },
+  ): Promise<T> {
+    const response = await axios.put<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId));
+    return response.data;
+  }
+
   // Sends a DELETE request and returns the response body
   async delete<T>(url: string, webhookSecret: string, path: string, options?: { orgId?: string }): Promise<T> {
     const response = await axios.delete<T>(`${url}${path}`, this.deleteConfig(webhookSecret, options?.orgId));
