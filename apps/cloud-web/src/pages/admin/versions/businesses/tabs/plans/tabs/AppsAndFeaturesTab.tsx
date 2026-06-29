@@ -8,7 +8,7 @@ import { AppCard, buildState, cellKey, PermissionMatrixSkeleton } from '@/compon
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { MatrixMembership, Platform } from '@/schemas/admin/permission-matrix';
 
-export const FeaturesTab: React.FC = () => {
+export const AppsAndFeaturesTab: React.FC = () => {
   const { versionId, businessId, planId } = useVersionContext();
 
   const { data, isLoading } = usePlanMatrix(versionId, businessId, planId);
@@ -21,11 +21,10 @@ export const FeaturesTab: React.FC = () => {
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const seededRef = useRef(false);
 
-  // Seed once from the nested memberships; expand every app by default
+  // Seed once from the nested memberships; app cards start collapsed
   useEffect(() => {
     if (!data || apps.length === 0 || seededRef.current) return;
     form.reset({ memberships: data.apps.flatMap((a) => a.memberships) });
-    setExpandedApps(new Set(apps.map((a) => a.id)));
     seededRef.current = true;
   }, [data, apps, form]);
 

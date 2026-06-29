@@ -2,12 +2,13 @@ import {
   BUSINESS_FEATURES_TABLE_KEY,
   useBusinessFeaturePermissions,
   useBusinessFeatures,
+  useRemoveBusinessFeatures,
   useSetBusinessFeatureApp,
 } from '@hooks/admin/versions/businesses/features';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
@@ -27,6 +28,7 @@ interface ColumnActions {
 
 function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeature, unknown>[] {
   return [
+    getSelectionColumn<BusinessFeature>(),
     {
       accessorKey: 'lucideIcon',
       header: '',
@@ -52,6 +54,7 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeat
     },
     {
       id: 'app',
+      accessorFn: (row) => row.app?.name ?? '',
       header: 'App',
       cell: ({ row }) => (
         <div className="flex items-center justify-center">
@@ -64,7 +67,6 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeat
           )}
         </div>
       ),
-      enableSorting: false,
     },
     {
       accessorKey: 'permissionCount',
@@ -121,6 +123,7 @@ export const BusinessFeaturesTab = () => {
   const [selected, setSelected] = useState<BusinessFeature | null>(null);
 
   const removeMutation = useSetBusinessFeatureApp();
+  const bulkRemoveMutation = useRemoveBusinessFeatures();
   const { data: permissions = [], isLoading: permissionsLoading } = useBusinessFeaturePermissions(
     versionId,
     businessId,
@@ -144,14 +147,27 @@ export const BusinessFeaturesTab = () => {
     if (confirmed) removeMutation.mutate({ versionId, businessId, featureId: feature.id, data: { appId: null } });
   }
 
+  // Prompts then removes all selected features from this business in a single request
+  async function handleBulkRemove(featureIds: string[]) {
+    const confirmed = await confirm({
+      title: `Remove ${featureIds.length} feature${featureIds.length === 1 ? '' : 's'}?`,
+      description:
+        'The selected features will be removed from this business’s apps. This does not delete the features.',
+      confirmLabel: 'Remove',
+      variant: 'destructive',
+    });
+    if (!confirmed) return;
+    bulkRemoveMutation.mutate({ versionId, businessId, featureIds }, { onSuccess: () => table.resetRowSelection() });
+  }
+
   const { table } = useDataTable({
     columns: getColumns({ onView: handleView, onRemove: handleRemove }),
     slug: `business-features-${businessId}`,
     label: 'feature',
     serverState: response,
-    enableRowSelection: false,
+    enableRowSelection: true,
     enableSorting: true,
-    enableMultiSort: false,
+    enableMultiSort: true,
     onStatePush: () => queryClient.invalidateQueries({ queryKey: BUSINESS_FEATURES_TABLE_KEY(versionId, businessId) }),
   });
 
@@ -168,11 +184,21 @@ export const BusinessFeaturesTab = () => {
           ],
           searchAll: true,
         }}
-        filters={[<AppFilter key="appId" name="appId" params={{ versionId, businessId }} />]}
+        filters={[<AppFilter key="appId" name="appId" params={{ versionId, businessId }} multiple />]}
+        selectActions={(rows) => (
+          <Button
+            variant="destructive"
+            size="sm"
+            startAdornment={<Trash2 className="size-4" />}
+            onClick={() => handleBulkRemove(rows.map((r) => r.original.id))}
+          >
+            Remove {rows.length} from business
+          </Button>
+        )}
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-              Add Feature
+              Add Features
             </Button>
           ),
         }}
@@ -182,7 +208,7 @@ export const BusinessFeaturesTab = () => {
           description: 'Add a feature and assign it to this business’s apps.',
           action: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-              Add Feature
+              Add Features
             </Button>
           ),
         }}
@@ -191,8 +217,8 @@ export const BusinessFeaturesTab = () => {
       <Dialog
         handle={addDialog}
         icon={Blocks}
-        title="Add Feature"
-        description="Assign a feature to one or more of this business’s apps."
+        title="Add Features"
+        description="Select features to add to this business under an app."
         content={(close) => <AddBusinessFeatureForm onSuccess={close} onCancel={close} />}
       />
 

@@ -67,7 +67,11 @@ export class CloudProviderService {
   async create(dto: CreateCloudProviderDto): Promise<CreateResponseDto<CloudProviderDto>> {
     const existing = await this.cloudProviderRepository.findByCode(dto.code);
     if (existing) {
-      throw new ConflictException('Provider with this code already exists.');
+      throw new ConflictException({
+        label: 'Duplicate Code',
+        detail: 'A cloud provider with this code already exists. Please use a different code.',
+        errors: [{ field: 'code', message: 'Code already exists' }],
+      });
     }
     const provider = await this.cloudProviderRepository.create(dto);
     this.logger.log(`Created provider: ${provider.name} (${provider.id})`);
@@ -100,7 +104,11 @@ export class CloudProviderService {
     if (dto.code) {
       const existingCode = await this.cloudProviderRepository.findByCode(dto.code);
       if (existingCode && existingCode.id !== id) {
-        throw new ConflictException('Provider with this code already exists.');
+        throw new ConflictException({
+          label: 'Duplicate Code',
+          detail: 'A cloud provider with this code already exists. Please use a different code.',
+          errors: [{ field: 'code', message: 'Code already exists' }],
+        });
       }
     }
 

@@ -5,7 +5,7 @@ import {
   PrimaryDatabaseService,
   type SelectQueryResult,
 } from '@vritti/api-sdk';
-import { countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
 import { appFeatures, apps, featurePermissions, features, permissionBusinesses } from '@/db/schema';
 
@@ -122,6 +122,30 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
 
   // Returns feature select options available to add to a business: features that have a permission applicable to
   // the business (global or business-linked) and are not already assigned to any of the business's apps
+  // Of the given feature ids, returns those addable to a business: belong to the version AND have an applicable
+  // permission (global or business-scoped). The caller rejects any id not returned here.
+  async findAddableIds(versionId: string, businessId: string, featureIds: string[]): Promise<string[]> {
+    if (featureIds.length === 0) return [];
+    const rows = await this.db
+      .select({ id: features.id })
+      .from(features)
+      .where(
+        and(
+          inArray(features.id, featureIds),
+          eq(features.versionId, versionId),
+          sql`exists (
+            select 1 from ${featurePermissions} fp
+            where fp.feature_id = ${features.id}
+              and (fp.is_global = true or exists (
+                select 1 from ${permissionBusinesses} pb
+                where pb.feature_permission_id = fp.id and pb.business_id = ${businessId}
+              ))
+          )`,
+        ),
+      );
+    return rows.map((r) => r.id);
+  }
+
   async findForSelectForBusiness(config: FindForSelectConfig, businessId: string): Promise<SelectQueryResult> {
     const available = sql`
       exists (

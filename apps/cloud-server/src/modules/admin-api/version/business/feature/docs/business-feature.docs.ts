@@ -2,6 +2,8 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
 import { BusinessFeaturePermissionDto } from '../dto/entity/business-feature-permission.dto';
+import { AssignFeaturesToAppDto } from '../dto/request/assign-features-to-app.dto';
+import { RemoveBusinessFeaturesDto } from '../dto/request/remove-business-features.dto';
 import { SetFeatureAppDto } from '../dto/request/set-feature-app.dto';
 import { BusinessFeatureTableResponseDto } from '../dto/response/business-feature-table-response.dto';
 
@@ -51,5 +53,29 @@ export function ApiSetFeatureApp() {
     ApiResponse({ status: 400, description: 'Validation failed or invalid app.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Feature not found.' }),
+  );
+}
+
+export function ApiAssignFeaturesToApp() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Add many features to a business at once, all pinned to one app' }),
+    ApiParam({ name: 'versionId', description: 'Version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({ name: 'businessId', description: 'Business UUID', example: '550e8400-e29b-41d4-a716-446655440001' }),
+    ApiBody({ type: AssignFeaturesToAppDto }),
+    ApiResponse({ status: 201, description: 'Features added to the business.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Invalid app, or a feature has no permissions / wrong version.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
+export function ApiRemoveBusinessFeatures() {
+  return applyDecorators(
+    ApiOperation({ summary: 'Remove many features from a business at once (unassigns each from its app)' }),
+    ApiParam({ name: 'versionId', description: 'Version UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({ name: 'businessId', description: 'Business UUID', example: '550e8400-e29b-41d4-a716-446655440001' }),
+    ApiBody({ type: RemoveBusinessFeaturesDto }),
+    ApiResponse({ status: 200, description: 'Features removed from the business.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
   );
 }

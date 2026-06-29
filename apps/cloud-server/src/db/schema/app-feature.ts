@@ -1,4 +1,4 @@
-import { integer, uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
+import { integer, unique, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { apps } from './app';
 import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
@@ -18,13 +18,14 @@ export const appFeatures = cloudSchema.table(
       .references(() => businesses.id, { onDelete: 'cascade' }),
     appId: uuid('app_id')
       .notNull()
-      .references(() => apps.id, { onDelete: 'cascade' }),
+      .references(() => apps.id, { onDelete: 'restrict' }),
     featureId: uuid('feature_id')
       .notNull()
       .references(() => features.id, { onDelete: 'cascade' }),
     sortOrder: integer('sort_order').notNull().default(0),
   },
-  (table) => [uniqueIndex('app_feature_business_feature_idx').on(table.businessId, table.featureId)],
+  // UNIQUE constraint (not just an index) so membership tables can FK to (business_id, feature_id)
+  (table) => [unique('app_feature_business_feature_key').on(table.businessId, table.featureId)],
 );
 
 export type AppFeature = typeof appFeatures.$inferSelect;

@@ -7,13 +7,13 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { AppCard, buildState, cellKey, PermissionMatrixSkeleton } from '@/components/permission-matrix';
 import type { MatrixMembership, Platform } from '@/schemas/admin/permission-matrix';
 
-interface FeaturesTabProps {
+interface AppsAndFeaturesTabProps {
   orgId: string;
   buId: string;
 }
 
-// Features tab — the BU's permission lock editor. The plan is the ceiling; toggling here restricts within it.
-export const FeaturesTab: React.FC<FeaturesTabProps> = ({ orgId, buId }) => {
+// Apps & Features tab — the BU's permission lock editor. The plan is the ceiling; toggling here restricts within it.
+export const AppsAndFeaturesTab: React.FC<AppsAndFeaturesTabProps> = ({ orgId, buId }) => {
   const { data, isLoading } = useBuPermissionMatrix(orgId, buId);
   const apps = data?.apps ?? [];
   const saveMutation = useSetBuPermissions(orgId, buId);
@@ -24,11 +24,10 @@ export const FeaturesTab: React.FC<FeaturesTabProps> = ({ orgId, buId }) => {
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
   const seededRef = useRef(false);
 
-  // Seed once from the nested memberships; expand every app by default
+  // Seed once from the nested memberships; app cards start collapsed
   useEffect(() => {
     if (!data || apps.length === 0 || seededRef.current) return;
     form.reset({ memberships: data.apps.flatMap((a) => a.memberships) });
-    setExpandedApps(new Set(apps.map((a) => a.id)));
     seededRef.current = true;
   }, [data, apps, form]);
 

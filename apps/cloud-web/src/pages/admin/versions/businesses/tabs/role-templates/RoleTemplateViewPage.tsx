@@ -88,7 +88,7 @@ export const RoleTemplateViewPage = () => {
       </div>
 
       {/* Permissions */}
-      <RoleTemplatePermissionForm roleId={role.id} />
+      <RoleTemplatePermissionForm />
 
       <DangerZone
         title="Delete this role template"

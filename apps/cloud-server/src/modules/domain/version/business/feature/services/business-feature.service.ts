@@ -7,8 +7,8 @@ import {
   NotFoundException,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
-import { appFeatures, features } from '@/db/schema';
+import { and } from '@vritti/api-sdk/drizzle-orm';
+import { appFeatures, apps, features } from '@/db/schema';
 import { BusinessFeatureDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature.dto';
 import { BusinessFeaturePermissionDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature-permission.dto';
 import type { BusinessFeatureTableResponseDto } from '@/modules/admin-api/version/business/feature/dto/response/business-feature-table-response.dto';
@@ -24,11 +24,10 @@ export class BusinessFeatureService {
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: features.name, type: 'string' },
     code: { column: features.code, type: 'string' },
-    appId: {
-      expression: (value) =>
-        sql`exists (select 1 from ${appFeatures} af where af.feature_id = ${features.id} and af.app_id = ${value})`,
-      type: 'string',
-    },
+    // Column (not expression) so the multi-select filter's isAnyOf → inArray works; the table query is FROM app_features
+    appId: { column: appFeatures.appId, type: 'string' },
+    // Sorts the App column by app name (apps is joined in findBusinessFeaturesForTable)
+    app: { column: apps.name, type: 'string' },
   };
 
   constructor(
@@ -107,5 +106,43 @@ export class BusinessFeatureService {
     await this.appFeatureRepository.setFeatureApp(versionId, businessId, featureId, appId);
     this.logger.log(`Set app ${appId ?? 'none'} for feature ${featureId} in business: ${businessId}`);
     return { success: true, message: `App for "${feature.feature.name}" updated successfully.` };
+  }
+
+  // Adds many features to a business under one app at once. Validates the app belongs to the business and every
+  // feature belongs to the version + has at least one applicable permission (rejecting the whole batch otherwise).
+  async assignFeaturesToApp(
+    versionId: string,
+    businessId: string,
+    appId: string,
+    featureIds: string[],
+  ): Promise<SuccessResponseDto> {
+    const app = await this.appRepository.findById(appId);
+    if (!app || app.versionId !== versionId || app.businessId !== businessId) {
+      throw new BadRequestException({
+        label: 'Invalid App',
+        detail: 'The selected app does not belong to this business.',
+      });
+    }
+
+    const uniqueIds = [...new Set(featureIds)];
+    const addable = new Set(await this.featureRepository.findAddableIds(versionId, businessId, uniqueIds));
+    const invalid = uniqueIds.filter((id) => !addable.has(id));
+    if (invalid.length > 0) {
+      throw new BadRequestException({
+        label: 'Invalid Features',
+        detail: `${invalid.length} selected feature(s) can't be added — they don't belong to this version or have no permissions.`,
+      });
+    }
+
+    await this.appFeatureRepository.assignFeaturesToApp(versionId, businessId, appId, uniqueIds);
+    this.logger.log(`Added ${uniqueIds.length} feature(s) to app ${appId} in business: ${businessId}`);
+    return { success: true, message: `${uniqueIds.length} feature(s) added to this business.` };
+  }
+
+  // Removes many features from a business at once (unassigns each from its app) in a single statement
+  async removeFromBusiness(_versionId: string, businessId: string, featureIds: string[]): Promise<SuccessResponseDto> {
+    await this.appFeatureRepository.removeFeaturesFromBusiness(businessId, featureIds);
+    this.logger.log(`Removed ${featureIds.length} feature(s) from business: ${businessId}`);
+    return { success: true, message: `${featureIds.length} feature(s) removed from this business.` };
   }
 }

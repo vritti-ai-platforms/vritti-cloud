@@ -40,19 +40,31 @@ export class MobileVerificationService {
     const user = await this.userService.findById(userId);
 
     if (user.phoneVerified) {
-      throw new BadRequestException('Phone number already verified');
+      throw new BadRequestException({
+        label: 'Already Verified',
+        detail: 'This phone number is already verified. You can proceed to the next step.',
+        errors: [{ field: 'phone', message: 'Already verified' }],
+      });
     }
 
     const channel = mapToInternalChannel(dto.method);
 
     if (channel === VerificationChannelValues.SMS_OUT && !dto.phone) {
-      throw new BadRequestException('Phone number is required for OTP verification');
+      throw new BadRequestException({
+        label: 'Phone Number Required',
+        detail: 'Please enter a phone number to receive the verification code.',
+        errors: [{ field: 'phone', message: 'Phone number required' }],
+      });
     }
 
     if (dto.phone) {
       const phoneAlreadyUsed = await this.verificationService.isTargetVerifiedByOtherUser(dto.phone, userId);
       if (phoneAlreadyUsed) {
-        throw new BadRequestException('This phone number is already verified by another user');
+        throw new BadRequestException({
+          label: 'Phone Number Unavailable',
+          detail: 'This phone number is already verified by another account. Please use a different number.',
+          errors: [{ field: 'phone', message: 'Already in use' }],
+        });
       }
     }
 

@@ -133,16 +133,13 @@ export class OrganizationService {
     }
 
     // Insert organization and owner membership atomically
-    const org = await this.orgRepository.transaction(async (tx) => {
-      const createdOrg = await this.orgRepository.create({ ...dto, taxIdCountry, orgIdentifier: nexusOrg.id }, tx);
-      await this.orgMemberRepository.create(
-        {
-          organizationId: createdOrg.id,
-          userId,
-          role: OrgMemberRoleValues.Owner,
-        },
-        tx,
-      );
+    const org = await this.orgRepository.transaction(async () => {
+      const createdOrg = await this.orgRepository.create({ ...dto, taxIdCountry, orgIdentifier: nexusOrg.id });
+      await this.orgMemberRepository.create({
+        organizationId: createdOrg.id,
+        userId,
+        role: OrgMemberRoleValues.Owner,
+      });
       return createdOrg;
     });
 

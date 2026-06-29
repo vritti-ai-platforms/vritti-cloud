@@ -1,4 +1,4 @@
-import { useSetBusinessFeatureApp } from '@hooks/admin/versions/businesses/features';
+import { useAssignFeaturesToApp } from '@hooks/admin/versions/businesses/features';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -20,12 +20,12 @@ export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({ 
   const form = useForm<AddBusinessFeatureData>({
     resolver: zodResolver(addBusinessFeatureSchema),
     defaultValues: {
-      featureId: '',
+      featureIds: [],
       appId: '',
     },
   });
 
-  const mutation = useSetBusinessFeatureApp({ onSuccess });
+  const mutation = useAssignFeaturesToApp({ onSuccess });
 
   return (
     <Form
@@ -36,20 +36,21 @@ export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({ 
       transformSubmit={(data) => ({
         versionId,
         businessId,
-        featureId: data.featureId,
-        data: { appId: data.appId },
+        appId: data.appId,
+        featureIds: data.featureIds,
       })}
     >
       <FeatureSelector
-        name="featureId"
-        label="Feature"
-        placeholder="Select a feature to add"
+        name="featureIds"
+        label="Features"
+        placeholder="Select features to add"
         params={{ versionId, businessId }}
+        multiple
       />
       <AppSelector
         name="appId"
         label="App"
-        placeholder="Select the app this feature belongs to"
+        placeholder="Select the app these features belong to"
         params={{ versionId, businessId }}
       />
       <DialogActions>
@@ -57,7 +58,7 @@ export const AddBusinessFeatureForm: React.FC<AddBusinessFeatureFormProps> = ({ 
           Cancel
         </Button>
         <Button type="submit" loadingText="Adding...">
-          Add Feature
+          Add Features
         </Button>
       </DialogActions>
     </Form>

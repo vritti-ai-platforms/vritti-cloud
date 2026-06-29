@@ -59,7 +59,11 @@ export class CountryService {
   async create(dto: CreateCountryDto): Promise<CreateResponseDto<CountryDto>> {
     const existing = await this.countryRepository.findByCode(dto.code);
     if (existing) {
-      throw new ConflictException('Country with this code already exists.');
+      throw new ConflictException({
+        label: 'Duplicate Code',
+        detail: 'A country with this code already exists. Please use a different code.',
+        errors: [{ field: 'code', message: 'Code already exists' }],
+      });
     }
     const country = await this.countryRepository.create(dto);
     this.logger.log(`Created country: ${country.name} (${country.id})`);
@@ -110,7 +114,11 @@ export class CountryService {
     if (dto.code) {
       const existingCode = await this.countryRepository.findByCode(dto.code);
       if (existingCode && existingCode.id !== id) {
-        throw new ConflictException('Country with this code already exists.');
+        throw new ConflictException({
+          label: 'Duplicate Code',
+          detail: 'A country with this code already exists. Please use a different code.',
+          errors: [{ field: 'code', message: 'Code already exists' }],
+        });
       }
     }
 

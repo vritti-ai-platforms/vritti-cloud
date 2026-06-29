@@ -138,11 +138,18 @@ export class AppService {
     return { success: true, message: `App "${existing.name}" updated successfully.` };
   }
 
-  // Deletes an app by ID (its feature links cascade; role grants are on feature-permissions, not the app)
+  // Deletes an app by ID. An app is a grouping layer, so it can't be deleted while features are still pinned to it.
   async delete(id: string): Promise<SuccessResponseDto> {
     const existing = await this.appRepository.findById(id);
     if (!existing) {
       throw new NotFoundException('App not found.');
+    }
+    const featureCount = await this.appRepository.countFeatures(id);
+    if (featureCount > 0) {
+      throw new ConflictException({
+        label: 'App In Use',
+        detail: `"${existing.name}" still has ${featureCount} feature(s) assigned. Reassign or remove them first.`,
+      });
     }
     await this.appRepository.delete(id);
     this.logger.log(`Deleted app: ${existing.name} (${existing.id})`);

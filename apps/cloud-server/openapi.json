@@ -7265,6 +7265,132 @@
         ]
       }
     },
+    "/admin-api/versions/{versionId}/businesses/{businessId}/features": {
+      "post": {
+        "operationId": "BusinessFeatureController_assignMany",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "Version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "description": "Business UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440001",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignFeaturesToAppDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Features added to the business.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid app, or a feature has no permissions / wrong version."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add many features to a business at once, all pinned to one app",
+        "tags": [
+          "Admin - Business Features"
+        ]
+      },
+      "delete": {
+        "operationId": "BusinessFeatureController_removeMany",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "description": "Version UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "businessId",
+            "required": true,
+            "in": "path",
+            "description": "Business UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440001",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RemoveBusinessFeaturesDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Features removed from the business.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove many features from a business at once (unassigns each from its app)",
+        "tags": [
+          "Admin - Business Features"
+        ]
+      }
+    },
     "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates": {
       "post": {
         "operationId": "RoleTemplateController_create",
@@ -15352,6 +15478,48 @@
             "example": "550e8400-e29b-41d4-a716-446655440000"
           }
         }
+      },
+      "AssignFeaturesToAppDto": {
+        "type": "object",
+        "properties": {
+          "appId": {
+            "type": "string",
+            "description": "App (of this business) to pin the selected features to",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "featureIds": {
+            "description": "Feature ids to add to this business under the app",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440001"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "appId",
+          "featureIds"
+        ]
+      },
+      "RemoveBusinessFeaturesDto": {
+        "type": "object",
+        "properties": {
+          "featureIds": {
+            "description": "Feature ids to remove from this business (unassigns each from its app)",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "featureIds"
+        ]
       },
       "CreateRoleTemplateDto": {
         "type": "object",

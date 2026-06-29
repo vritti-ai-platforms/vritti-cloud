@@ -4,7 +4,7 @@ import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FeaturesTab } from './tabs/FeaturesTab';
+import { AppsAndFeaturesTab } from './tabs/AppsAndFeaturesTab';
 import { OverviewTab } from './tabs/OverviewTab';
 import { UsersTab } from './tabs/UsersTab';
 
@@ -51,7 +51,7 @@ export const BUViewPage = () => {
           {
             value: 'features',
             label: 'Apps & Features',
-            content: <FeaturesTab orgId={orgId} buId={unit.id} />,
+            content: <AppsAndFeaturesTab orgId={orgId} buId={unit.id} />,
           },
           {
             value: 'users',

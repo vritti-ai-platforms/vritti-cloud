@@ -10,8 +10,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Plan } from '@/schemas/admin/plans';
 import { EditPlanForm } from './forms/EditPlanForm';
+import { AppsAndFeaturesTab } from './tabs/AppsAndFeaturesTab';
 import { ContentTab } from './tabs/ContentTab';
-import { FeaturesTab } from './tabs/FeaturesTab';
 import { PlanStats } from './tabs/PlanStats';
 import { PricesTab } from './tabs/PricesTab';
 
@@ -76,7 +76,7 @@ export const PlanViewPage = () => {
         contentClassName="min-h-[500px]"
         tabs={[
           { value: 'content', label: 'Content', content: <ContentTab plan={plan} /> },
-          { value: 'features', label: 'Features', content: <FeaturesTab /> },
+          { value: 'features', label: 'Apps & Features', content: <AppsAndFeaturesTab /> },
           { value: 'prices', label: 'Prices', content: <PricesTab /> },
         ]}
       />

@@ -20,6 +20,12 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     return this.model.findFirst({ where: { versionId, businessId, code } });
   }
 
+  // Counts features pinned to an app — an app can't be deleted while it still groups features
+  async countFeatures(appId: string): Promise<number> {
+    const rows = await this.db.select({ count: count() }).from(appFeatures).where(eq(appFeatures.appId, appId));
+    return Number(rows[0]?.count ?? 0);
+  }
+
   // Returns paginated apps with feature counts and the total filtered count
   async findAllWithCounts(
     where?: SQL,

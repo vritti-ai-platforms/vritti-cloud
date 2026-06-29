@@ -70,7 +70,11 @@ export class RegionService {
   async create(dto: CreateRegionDto): Promise<CreateResponseDto<RegionDto>> {
     const existing = await this.regionRepository.findByCode(dto.code);
     if (existing) {
-      throw new ConflictException('Region with this code already exists.');
+      throw new ConflictException({
+        label: 'Duplicate Code',
+        detail: 'A region with this code already exists. Please use a different code.',
+        errors: [{ field: 'code', message: 'Code already exists' }],
+      });
     }
     const region = await this.regionRepository.create(dto);
     this.logger.log(`Created region: ${region.name} (${region.id})`);
@@ -132,7 +136,11 @@ export class RegionService {
     if (dto.code) {
       const existingCode = await this.regionRepository.findByCode(dto.code);
       if (existingCode && existingCode.id !== id) {
-        throw new ConflictException('Region with this code already exists.');
+        throw new ConflictException({
+          label: 'Duplicate Code',
+          detail: 'A region with this code already exists. Please use a different code.',
+          errors: [{ field: 'code', message: 'Code already exists' }],
+        });
       }
     }
 

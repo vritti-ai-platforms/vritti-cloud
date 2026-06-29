@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService, type TypedDrizzleClient } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { FeaturePermission, NewFeaturePermission } from '@/db/schema';
 import { featurePermissions, features, permissionBusinesses } from '@/db/schema';
@@ -231,9 +231,8 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
   }
 
   // Deletes a permission row by ID (junction rows cascade)
-  async deleteOne(id: string, tx?: TypedDrizzleClient): Promise<void> {
-    const db = tx ?? this.db;
-    await db.delete(featurePermissions).where(eq(featurePermissions.id, id));
+  async deleteOne(id: string): Promise<void> {
+    await this.db.delete(featurePermissions).where(eq(featurePermissions.id, id));
   }
 
   // Returns the permission codes for a feature (used by the snapshot)

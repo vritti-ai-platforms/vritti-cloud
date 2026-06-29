@@ -1,4 +1,6 @@
-import { uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
+import { foreignKey, uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
+import { appFeatures } from './app-feature';
+import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
 import { appPlatformEnum } from './enums';
 import { features } from './feature';
@@ -17,6 +19,9 @@ export const roleTemplateFeatures = cloudSchema.table(
     roleTemplateId: uuid('role_template_id')
       .notNull()
       .references(() => roleTemplates.id, { onDelete: 'cascade' }),
+    businessId: uuid('business_id')
+      .notNull()
+      .references(() => businesses.id, { onDelete: 'cascade' }),
     featureId: uuid('feature_id')
       .notNull()
       .references(() => features.id, { onDelete: 'cascade' }),
@@ -24,6 +29,12 @@ export const roleTemplateFeatures = cloudSchema.table(
   },
   (table) => [
     uniqueIndex('role_template_feature_unique_idx').on(table.roleTemplateId, table.featureId, table.platform),
+    // Membership follows the feature's app pin: unassigning the feature (deleting its app_features row) cascades here
+    foreignKey({
+      columns: [table.businessId, table.featureId],
+      foreignColumns: [appFeatures.businessId, appFeatures.featureId],
+      name: 'role_template_feature_app_fk',
+    }).onDelete('cascade'),
   ],
 );
 

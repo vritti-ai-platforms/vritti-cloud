@@ -1,14 +1,18 @@
 import { BusinessFeatureService } from '@domain/version/business/feature/services/business-feature.service';
-import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
 import {
+  ApiAssignFeaturesToApp,
   ApiFindBusinessFeaturePermissions,
   ApiFindForTableBusinessFeatures,
+  ApiRemoveBusinessFeatures,
   ApiSetFeatureApp,
 } from '../docs/business-feature.docs';
 import { BusinessFeaturePermissionDto } from '../dto/entity/business-feature-permission.dto';
+import { AssignFeaturesToAppDto } from '../dto/request/assign-features-to-app.dto';
+import { RemoveBusinessFeaturesDto } from '../dto/request/remove-business-features.dto';
 import { SetFeatureAppDto } from '../dto/request/set-feature-app.dto';
 import { BusinessFeatureTableResponseDto } from '../dto/response/business-feature-table-response.dto';
 
@@ -57,5 +61,31 @@ export class BusinessFeatureController {
   ): Promise<SuccessResponseDto> {
     this.logger.log(`PUT /admin-api/versions/${versionId}/businesses/${businessId}/features/${featureId}/app`);
     return this.businessFeatureService.setApp(versionId, businessId, featureId, dto.appId);
+  }
+
+  // Adds many features to this business at once, all pinned to one app
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiAssignFeaturesToApp()
+  assignMany(
+    @Param('versionId') versionId: string,
+    @Param('businessId') businessId: string,
+    @Body() dto: AssignFeaturesToAppDto,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/versions/${versionId}/businesses/${businessId}/features`);
+    return this.businessFeatureService.assignFeaturesToApp(versionId, businessId, dto.appId, dto.featureIds);
+  }
+
+  // Removes many features from this business at once (unassigns each from its app)
+  @Delete()
+  @HttpCode(HttpStatus.OK)
+  @ApiRemoveBusinessFeatures()
+  removeMany(
+    @Param('versionId') versionId: string,
+    @Param('businessId') businessId: string,
+    @Body() dto: RemoveBusinessFeaturesDto,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /admin-api/versions/${versionId}/businesses/${businessId}/features`);
+    return this.businessFeatureService.removeFromBusiness(versionId, businessId, dto.featureIds);
   }
 }

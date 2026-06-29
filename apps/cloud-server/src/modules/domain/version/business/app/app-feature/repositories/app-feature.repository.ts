@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService, type TypedDrizzleClient } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, asc, count, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import {
   appFeatures,
@@ -93,24 +93,37 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
       .where(eq(appFeatures.appId, appId));
   }
 
-  // Pins a feature to a single app within a business (one-to-one) — clears the existing link, then sets the new one
-  async setFeatureApp(
-    versionId: string,
-    businessId: string,
-    featureId: string,
-    appId: string | null,
-    tx?: TypedDrizzleClient,
-  ): Promise<void> {
-    const db = tx ?? this.db;
-    await db
+  // Pins many features to one app in a business in a single statement (already-pinned features are left as-is)
+  async assignFeaturesToApp(versionId: string, businessId: string, appId: string, featureIds: string[]): Promise<void> {
+    if (featureIds.length === 0) return;
+    await this.db
+      .insert(appFeatures)
+      .values(featureIds.map((featureId) => ({ versionId, businessId, appId, featureId })))
+      .onConflictDoNothing({ target: [appFeatures.businessId, appFeatures.featureId] });
+  }
+
+  // Removes many features from a business in one statement (unassigns each from its app)
+  async removeFeaturesFromBusiness(businessId: string, featureIds: string[]): Promise<void> {
+    if (featureIds.length === 0) return;
+    await this.db
       .delete(appFeatures)
-      .where(and(eq(appFeatures.businessId, businessId), eq(appFeatures.featureId, featureId)));
-    if (appId) {
-      await db
-        .insert(appFeatures)
-        .values({ versionId, businessId, appId, featureId })
-        .onConflictDoNothing({ target: [appFeatures.businessId, appFeatures.featureId] });
+      .where(and(eq(appFeatures.businessId, businessId), inArray(appFeatures.featureId, featureIds)));
+  }
+
+  // Pins a feature to a single app within a business (one-to-one). Reassignment UPSERTS (updates app_id) so the
+  // (business, feature) row is never deleted — preserving the role/plan memberships that cascade off it. appId=null
+  // deletes the row, which cascade-deletes those memberships.
+  async setFeatureApp(versionId: string, businessId: string, featureId: string, appId: string | null): Promise<void> {
+    if (!appId) {
+      await this.db
+        .delete(appFeatures)
+        .where(and(eq(appFeatures.businessId, businessId), eq(appFeatures.featureId, featureId)));
+      return;
     }
+    await this.db
+      .insert(appFeatures)
+      .values({ versionId, businessId, appId, featureId })
+      .onConflictDoUpdate({ target: [appFeatures.businessId, appFeatures.featureId], set: { appId, versionId } });
   }
 
   // Counts how many role_template_feature_permissions reference a given feature (via its permissions)

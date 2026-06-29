@@ -5,6 +5,7 @@ import {
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Form } from '@vritti/quantum-ui/Form';
+import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { Layers, Shield } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
@@ -12,16 +13,13 @@ import { AppCard, buildState, cellKey, PermissionMatrixSkeleton } from '@/compon
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Platform, RoleTemplateMembership } from '@/schemas/admin/role-templates';
 
-interface RoleTemplatePermissionFormProps {
-  roleId: string;
-}
-
 interface PermissionFormValues {
   memberships: RoleTemplateMembership[];
 }
 
-export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProps> = ({ roleId }) => {
+export const RoleTemplatePermissionForm: React.FC = () => {
   const { versionId, businessId } = useVersionContext();
+  const { id: roleId = '' } = useSlugParams('roleTemplateSlug');
   const [expandedApps, setExpandedApps] = useState<Set<string>>(new Set());
 
   // One call: the role's apps (catalog) each with the role's current memberships nested under it
@@ -32,12 +30,11 @@ export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProp
   const { append, remove, update } = useFieldArray({ control: form.control, name: 'memberships' });
   const saveMutation = useSetRoleTemplatePermissions();
 
-  // Seed the form once from the nested memberships; expand every app by default
+  // Seed the form once from the nested memberships; app cards start collapsed
   const seededRef = useRef(false);
   useEffect(() => {
     if (!data || seededRef.current) return;
     form.reset({ memberships: data.apps.flatMap((a) => a.memberships) });
-    setExpandedApps(new Set(data.apps.map((a) => a.id)));
     seededRef.current = true;
   }, [data, form]);
 

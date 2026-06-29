@@ -52,7 +52,8 @@ export class AppDto {
     dto.createdAt = app.createdAt;
     dto.updatedAt = app.updatedAt;
     dto.featureCount = featureCount;
-    dto.canDelete = true;
+    // An app is a grouping layer — it can only be deleted once no features are pinned to it
+    dto.canDelete = featureCount === 0;
     return dto;
   }
 }

@@ -41,3 +41,37 @@ export function setBusinessFeatureApp({
     .put<SuccessResponse>(`admin-api/versions/${versionId}/businesses/${businessId}/features/${featureId}/app`, data)
     .then((r) => r.data);
 }
+
+// Adds many features to a business at once, all pinned to one app
+export function assignFeaturesToApp({
+  versionId,
+  businessId,
+  appId,
+  featureIds,
+}: {
+  versionId: string;
+  businessId: string;
+  appId: string;
+  featureIds: string[];
+}): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(`admin-api/versions/${versionId}/businesses/${businessId}/features`, { appId, featureIds })
+    .then((r) => r.data);
+}
+
+// Removes many features from a business at once (unassigns each from its app)
+export function removeBusinessFeatures({
+  versionId,
+  businessId,
+  featureIds,
+}: {
+  versionId: string;
+  businessId: string;
+  featureIds: string[];
+}): Promise<SuccessResponse> {
+  return axios
+    .delete<SuccessResponse>(`admin-api/versions/${versionId}/businesses/${businessId}/features`, {
+      data: { featureIds },
+    })
+    .then((r) => r.data);
+}

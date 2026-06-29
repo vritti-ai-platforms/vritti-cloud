@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService, TypedDrizzleClient } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, exists, inArray, or, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewRoleTemplateFeaturePermission } from '@/db/schema';
 import {
@@ -45,18 +45,16 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
   }
 
   // Deletes all grants for a given role template
-  async deleteByRoleTemplateId(roleTemplateId: string, tx?: TypedDrizzleClient): Promise<void> {
-    const db = tx ?? this.db;
-    await db
+  async deleteByRoleTemplateId(roleTemplateId: string): Promise<void> {
+    await this.db
       .delete(roleTemplateFeaturePermissions)
       .where(eq(roleTemplateFeaturePermissions.roleTemplateId, roleTemplateId));
   }
 
   // Bulk-inserts grant entries
-  async bulkCreate(entries: NewRoleTemplateFeaturePermission[], tx?: TypedDrizzleClient): Promise<void> {
+  async bulkCreate(entries: NewRoleTemplateFeaturePermission[]): Promise<void> {
     if (entries.length === 0) return;
-    const db = tx ?? this.db;
-    await db.insert(roleTemplateFeaturePermissions).values(entries);
+    await this.db.insert(roleTemplateFeaturePermissions).values(entries);
   }
 
   // Deletes all grants whose permission belongs to a given feature, across all role templates

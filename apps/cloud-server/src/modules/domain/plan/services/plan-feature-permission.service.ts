@@ -72,16 +72,17 @@ export class PlanFeaturePermissionService {
       await this.planFeaturePermissionRepository.findExistingFeaturePermissionIds(allPermissionIds),
     );
 
-    await this.planFeatureRepository.transaction(async (tx) => {
-      await this.planFeatureRepository.deleteByPlanId(planId, tx);
+    await this.planFeatureRepository.transaction(async () => {
+      await this.planFeatureRepository.deleteByPlanId(planId);
 
       const membershipEntries: NewPlanFeature[] = memberships.map((m) => ({
         versionId: plan.versionId,
         planId,
+        businessId: plan.businessId,
         featureId: m.featureId,
         platform: m.platform,
       }));
-      const inserted = await this.planFeatureRepository.bulkCreate(membershipEntries, tx);
+      const inserted = await this.planFeatureRepository.bulkCreate(membershipEntries);
       const membershipIdByKey = new Map(inserted.map((r) => [`${r.featureId}:${r.platform}`, r.id]));
 
       const grantEntries: NewPlanFeaturePermission[] = [];
@@ -94,7 +95,7 @@ export class PlanFeaturePermissionService {
           }
         }
       }
-      await this.planFeaturePermissionRepository.bulkCreate(grantEntries, tx);
+      await this.planFeaturePermissionRepository.bulkCreate(grantEntries);
     });
 
     this.logger.log(

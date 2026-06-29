@@ -32,7 +32,7 @@ export const setFeatureAppSchema = z.object({
 export type SetFeatureAppData = z.infer<typeof setFeatureAppSchema>;
 
 export const addBusinessFeatureSchema = z.object({
-  featureId: z.string().uuid('Please select a feature'),
+  featureIds: z.array(z.string().uuid()).min(1, 'Select at least one feature'),
   appId: z.string().uuid('Select an app'),
 });
 

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService, type TypedDrizzleClient } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, exists, inArray, or } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewPlanFeaturePermission } from '@/db/schema';
 import {
@@ -71,10 +71,9 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
   }
 
   // Bulk-inserts unlock grant entries (each carrying its plan_feature_id membership parent)
-  async bulkCreate(entries: NewPlanFeaturePermission[], tx?: TypedDrizzleClient): Promise<void> {
+  async bulkCreate(entries: NewPlanFeaturePermission[]): Promise<void> {
     if (entries.length === 0) return;
-    const db = tx ?? this.db;
-    await db.insert(planFeaturePermissions).values(entries);
+    await this.db.insert(planFeaturePermissions).values(entries);
   }
 
   // Returns the subset of the given feature-permission ids that actually exist
