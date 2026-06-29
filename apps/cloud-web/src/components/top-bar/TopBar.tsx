@@ -5,8 +5,8 @@ import { Bell, ChevronRight, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { BUSwitcher } from './bu-switcher/BUSwitcher';
 import { BusinessSwitcher } from './business-switcher';
-import { CompanySwitcher } from './company-switcher';
 import { FeatureSwitcher } from './feature-switcher';
+import { OrganizationSwitcher } from './organization-switcher';
 import { RoleTemplateSwitcher } from './role-template-switcher';
 import { UserMenu } from './UserMenu';
 import { VersionSwitcher } from './version-switcher';
@@ -48,7 +48,7 @@ export const TopBar = () => {
                 // First-level segment with org- prefix = org slug
                 if (segment.path.match(/^\/[^/]+$/) && segment.raw.startsWith(ORG_SLUG_PREFIX)) {
                   return (
-                    <CompanySwitcher
+                    <OrganizationSwitcher
                       currentOrgId={segment.id ?? segment.raw}
                       currentOrgName={segment.slug ? segment.label : undefined}
                     />

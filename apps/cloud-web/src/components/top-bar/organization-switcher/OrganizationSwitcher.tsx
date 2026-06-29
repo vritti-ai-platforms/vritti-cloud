@@ -5,13 +5,13 @@ import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Building2, Check, ChevronsUpDown, Plus } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
-interface CompanySwitcherProps {
+interface OrganizationSwitcherProps {
   currentOrgId: string;
   currentOrgName?: string;
 }
 
 // Renders the org switcher dropdown in the top bar breadcrumb
-export const CompanySwitcher = ({ currentOrgId, currentOrgName }: CompanySwitcherProps) => {
+export const OrganizationSwitcher = ({ currentOrgId, currentOrgName }: OrganizationSwitcherProps) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
 
@@ -21,7 +21,7 @@ export const CompanySwitcher = ({ currentOrgId, currentOrgName }: CompanySwitche
       fieldKeys={{ valueKey: 'id', labelKey: 'name', descriptionKey: 'code' }}
       value={currentOrgId}
       searchable
-      searchPlaceholder="Find company..."
+      searchPlaceholder="Find organization..."
       contentClassName="w-60"
       anchor={({ selectedOption }) => (
         <Button

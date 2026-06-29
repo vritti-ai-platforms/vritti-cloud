@@ -162,7 +162,7 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
           </Button>
           <Button type="submit" disabled={!agreedToTerms} isLoading={createMutation.isPending}>
             <Check className="h-4 w-4 mr-2" />
-            Create Company
+            Create Organization
           </Button>
         </div>
       </Form>

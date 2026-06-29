@@ -15,8 +15,8 @@ import { PlanPriceController } from './business/plan/plan-price/controllers/plan
 import { PlanController } from './business/plan/root/controllers/plan.controller';
 // Role Template Permission
 import { RoleTemplatePermissionController } from './business/role-template/role-template-permission/controllers/role-template-permission.controller';
-// Business Role Template (business-scoped CRUD)
-import { BusinessRoleTemplateController } from './business/role-template/root/controllers/business-role-template.controller';
+// Role Template (business-scoped CRUD)
+import { RoleTemplateController } from './business/role-template/root/controllers/role-template.controller';
 // Businesses in a version
 import { VersionBusinessController } from './business/root/controllers/version-business.controller';
 // Feature Permission (feature-scoped read-only table)
@@ -44,7 +44,7 @@ import { VersionSnapshotService } from './root/services/version-snapshot.service
     FeaturePermissionController,
     AppController,
     BusinessFeatureController,
-    BusinessRoleTemplateController,
+    RoleTemplateController,
     RoleTemplatePermissionController,
     PlanController,
     PlanPriceController,

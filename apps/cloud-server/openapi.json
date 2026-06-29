@@ -7267,7 +7267,7 @@
     },
     "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates": {
       "post": {
-        "operationId": "BusinessRoleTemplateController_create",
+        "operationId": "RoleTemplateController_create",
         "parameters": [
           {
             "name": "businessId",
@@ -7319,7 +7319,7 @@
     },
     "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/table": {
       "get": {
-        "operationId": "BusinessRoleTemplateController_findForTable",
+        "operationId": "RoleTemplateController_findForTable",
         "parameters": [
           {
             "name": "businessId",
@@ -7358,7 +7358,7 @@
     },
     "/admin-api/versions/{versionId}/businesses/{businessId}/role-templates/{roleTemplateId}": {
       "get": {
-        "operationId": "BusinessRoleTemplateController_findById",
+        "operationId": "RoleTemplateController_findById",
         "parameters": [
           {
             "name": "businessId",
@@ -7408,7 +7408,7 @@
         ]
       },
       "patch": {
-        "operationId": "BusinessRoleTemplateController_update",
+        "operationId": "RoleTemplateController_update",
         "parameters": [
           {
             "name": "businessId",
@@ -7471,7 +7471,7 @@
         ]
       },
       "delete": {
-        "operationId": "BusinessRoleTemplateController_delete",
+        "operationId": "RoleTemplateController_delete",
         "parameters": [
           {
             "name": "businessId",

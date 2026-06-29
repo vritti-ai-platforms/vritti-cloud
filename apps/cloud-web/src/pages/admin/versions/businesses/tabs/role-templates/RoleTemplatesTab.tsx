@@ -23,7 +23,7 @@ export const RoleTemplatesTab = () => {
     columns: getColumns({
       onView: (role) => navigate(`rt-${buildSlug(role.name, role.id)}`, { relative: 'path' }),
     }),
-    slug: `business-role-templates-${businessId}`,
+    slug: `role-templates-${businessId}`,
     label: 'role template',
     serverState: response,
     enableRowSelection: false,

@@ -71,7 +71,7 @@ export class OrganizationBusinessUnitsService {
         org.orgIdentifier,
         this.packMetadata(data),
       );
-      // Seed the org's business role templates (idempotent — core skips already-provisioned ones)
+      // Seed the org's role templates (idempotent — core skips already-provisioned ones)
       await this.catalogSyncService.syncRoles(orgId);
       // Seed the new BU's snapshot — with no BU locks yet it inherits the full plan
       await this.catalogSyncService.syncBuSnapshot(orgId, result.id);

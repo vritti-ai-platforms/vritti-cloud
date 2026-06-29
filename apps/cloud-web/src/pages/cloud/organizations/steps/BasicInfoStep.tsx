@@ -31,7 +31,7 @@ export const BasicInfoStep: React.FC<BasicInfoStepProps> = ({ form, onContinue }
         <TextField
           name="subdomain"
           label="Organization URL"
-          placeholder="company-slug"
+          placeholder="organization-slug"
           endAdornment={<span className="text-muted-foreground text-sm pr-3">.vrittiai.com</span>}
           description="This will be your organization's subdomain URL"
         />

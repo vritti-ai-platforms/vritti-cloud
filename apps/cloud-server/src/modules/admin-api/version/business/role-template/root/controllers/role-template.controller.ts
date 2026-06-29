@@ -19,8 +19,8 @@ import { RoleTemplateTableResponseDto } from '../dto/response/role-template-tabl
 @ApiBearerAuth()
 @RequireSession(SessionTypeValues.ADMIN)
 @Controller('versions/:versionId/businesses/:businessId/role-templates')
-export class BusinessRoleTemplateController {
-  private readonly logger = new Logger(BusinessRoleTemplateController.name);
+export class RoleTemplateController {
+  private readonly logger = new Logger(RoleTemplateController.name);
 
   constructor(private readonly roleTemplateService: RoleTemplateService) {}
 
