@@ -31,6 +31,7 @@ const PlanUnlocksEditor: React.FC = () => {
   if (apps.length === 0) {
     return (
       <Empty
+        className="min-h-120"
         icon={<Layers />}
         title="No features available"
         description="Assign features to this business’s apps to unlock their permissions here."
@@ -40,7 +41,7 @@ const PlanUnlocksEditor: React.FC = () => {
 
   return (
     <Form form={form} mutation={saveMutation} resetOnSuccess={false}>
-      <div className="flex min-h-100 flex-col gap-4">
+      <div className="flex min-h-120 flex-col gap-4">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             Switch a feature on per platform to unlock it in the plan, then check the actions it unlocks. A switched-on

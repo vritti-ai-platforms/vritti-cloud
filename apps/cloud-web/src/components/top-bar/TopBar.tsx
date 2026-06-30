@@ -43,7 +43,7 @@ export const TopBar = () => {
         <div className="flex-1">
           {showBreadcrumb && (
             <Breadcrumb
-              maxItems={4}
+              maxItems={6}
               renderSegment={(segment) => {
                 // First-level segment with org- prefix = org slug
                 if (segment.path.match(/^\/[^/]+$/) && segment.raw.startsWith(ORG_SLUG_PREFIX)) {
