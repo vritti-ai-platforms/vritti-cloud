@@ -47,7 +47,7 @@ export const BusinessSwitcher = ({ versionSlug, currentBusinessId, currentBusine
         >
           <span className="flex-1 text-left truncate">{option.label}</span>
           {option.description && (
-            <span className="shrink-0 rounded-full border border-border px-1.5 py-px text-[10px] font-medium font-mono tracking-wider">
+            <span className="shrink-0 rounded-full border border-border px-1.5 py-px text-xs font-medium font-mono tracking-wider">
               {option.description}
             </span>
           )}

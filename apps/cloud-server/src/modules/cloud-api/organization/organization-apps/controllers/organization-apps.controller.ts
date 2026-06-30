@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
+import type { BuMatrixResponseDto } from '../../organization-business-units/dto/response/bu-matrix.response.dto';
 import {
   ApiCancelAddon,
   ApiDisableApp,
@@ -10,7 +11,7 @@ import {
   ApiPurchaseAddon,
 } from '../docs/organization-apps.docs';
 import type { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';
-import type { OrgAppListResponseDto, OrgPermissionsResponseDto } from '../dto/response/org-app-list.response.dto';
+import type { OrgAppListResponseDto } from '../dto/response/org-app-list.response.dto';
 import { OrganizationAppsService } from '../services/organization-apps.service';
 
 @ApiTags('Organization Apps')
@@ -76,7 +77,7 @@ export class OrganizationAppsController {
   // Returns all features grouped by app for the organization (used in role form)
   @Get('permissions')
   @ApiGetOrgPermissions()
-  async getPermissions(@Param('orgId') orgId: string): Promise<OrgPermissionsResponseDto> {
+  async getPermissions(@Param('orgId') orgId: string): Promise<BuMatrixResponseDto> {
     this.logger.log(`GET /organizations/${orgId}/permissions`);
     return this.orgAppsService.getPermissions(orgId);
   }

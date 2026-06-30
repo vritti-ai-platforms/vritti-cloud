@@ -3,20 +3,20 @@ import { Type } from 'class-transformer';
 import { ArrayUnique, IsArray, IsEnum, IsUUID, ValidateNested } from 'class-validator';
 import { type AppPlatform, AppPlatformValues } from '@/db/schema';
 
-export class PlanMembershipDto {
+export class PlanUnlockDto {
   @ApiProperty({
-    description: 'Feature included in this plan on this platform (the unlock/route gate)',
+    description: 'Feature unlocked in this plan on this platform (the route/unlock gate)',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsUUID()
   featureId: string;
 
-  @ApiProperty({ description: 'Platform this membership applies to', enum: ['WEB', 'MOBILE'], example: 'WEB' })
+  @ApiProperty({ description: 'Platform this unlock applies to', enum: ['WEB', 'MOBILE'], example: 'WEB' })
   @IsEnum(AppPlatformValues)
   platform: AppPlatform;
 
   @ApiProperty({
-    description: 'Feature-permission ids unlocked under this membership (empty = included but view-only)',
+    description: 'Feature-permission ids unlocked under this unlock (empty = unlocked but view-only)',
     type: [String],
     example: ['550e8400-e29b-41d4-a716-446655440000'],
   })
@@ -27,12 +27,12 @@ export class PlanMembershipDto {
 
 export class SetPlanUnlockedDto {
   @ApiProperty({
-    description: 'Per-platform feature memberships, each with its unlocked permissions (full replace)',
-    type: [PlanMembershipDto],
+    description: 'Per-platform feature unlocks, each with its unlocked permissions (full replace)',
+    type: [PlanUnlockDto],
   })
   @IsArray()
-  @ArrayUnique((m: PlanMembershipDto) => `${m.featureId}:${m.platform}`)
+  @ArrayUnique((u: PlanUnlockDto) => `${u.featureId}:${u.platform}`)
   @ValidateNested({ each: true })
-  @Type(() => PlanMembershipDto)
-  memberships: PlanMembershipDto[];
+  @Type(() => PlanUnlockDto)
+  unlocks: PlanUnlockDto[];
 }

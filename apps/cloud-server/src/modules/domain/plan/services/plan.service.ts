@@ -191,6 +191,13 @@ export class PlanService {
       }
     }
     const plan = await this.planRepository.update(id, dto);
+    // Renaming the code breaks orgs that reference the plan by its old code — re-point them
+    if (dto.code && dto.code !== existing.code) {
+      const recoded = await this.planRepository.recodeOrganizations(existing.businessId, existing.code, dto.code);
+      if (recoded > 0) {
+        this.logger.log(`Re-pointed ${recoded} org(s) from plan code "${existing.code}" to "${dto.code}"`);
+      }
+    }
     this.logger.log(`Updated plan: ${plan.name} (${plan.id})`);
     return { success: true, message: `Plan "${plan.name}" updated successfully.` };
   }

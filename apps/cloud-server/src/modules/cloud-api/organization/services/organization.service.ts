@@ -1,3 +1,4 @@
+import { BusinessRepository } from '@domain/business/repositories/business.repository';
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { OrganizationMemberRepository } from '@domain/cloud-organization/repositories/organization-member.repository';
 import { CountryRepository } from '@domain/country/repositories/country.repository';
@@ -44,6 +45,7 @@ export class OrganizationService {
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly countryRepository: CountryRepository,
     private readonly planRepository: PlanRepository,
+    private readonly businessRepository: BusinessRepository,
   ) {}
 
   // Checks if a subdomain is available; throws ConflictException if already taken
@@ -132,9 +134,25 @@ export class OrganizationService {
       });
     }
 
+    // Org references its business by code (version-portable); resolve it from the validated business id
+    const business = await this.businessRepository.findById(dto.businessId);
+    if (!business) {
+      throw new BadRequestException({
+        label: 'Invalid Business',
+        detail: 'The specified business does not exist.',
+        errors: [{ field: 'businessId', message: 'Not found' }],
+      });
+    }
+    const { businessId: _businessId, ...orgData } = dto;
+
     // Insert organization and owner membership atomically
     const org = await this.orgRepository.transaction(async () => {
-      const createdOrg = await this.orgRepository.create({ ...dto, taxIdCountry, orgIdentifier: nexusOrg.id });
+      const createdOrg = await this.orgRepository.create({
+        ...orgData,
+        businessCode: business.code,
+        taxIdCountry,
+        orgIdentifier: nexusOrg.id,
+      });
       await this.orgMemberRepository.create({
         organizationId: createdOrg.id,
         userId,

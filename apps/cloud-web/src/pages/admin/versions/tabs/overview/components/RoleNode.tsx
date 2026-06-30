@@ -16,8 +16,11 @@ const SCOPE_COLOR: Record<string, string> = {
 
 export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, featureToApp }) => {
   const [open, setOpen] = useState(false);
-  const featureEntries = Object.entries(role.features ?? {});
-  const totalPerms = featureEntries.reduce((sum, [, perms]) => sum + perms.length, 0);
+  // Each feature's grant is per-platform { web?, mobile? }; flatten to the unique set of action codes
+  const featureEntries = Object.entries(role.features ?? {}).map(
+    ([code, perms]) => [code, [...new Set([...(perms.web ?? []), ...(perms.mobile ?? [])])]] as const,
+  );
+  const totalPerms = featureEntries.reduce((sum, [, codes]) => sum + codes.length, 0);
 
   // Derive apps from feature permissions (deduplicated)
   const derivedApps: Record<string, SnapshotApp> = {};
@@ -46,12 +49,12 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
         </div>
         <div className="min-w-0">
           <span className="text-sm font-semibold block truncate">{role.name}</span>
-          <span className="text-[11px] text-muted-foreground">
+          <span className="text-xs text-muted-foreground">
             {roleApps.length} {roleApps.length === 1 ? 'app' : 'apps'} · {totalPerms} permissions
           </span>
         </div>
         <span
-          className={`ml-auto shrink-0 text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${SCOPE_COLOR[role.scope] ?? 'bg-muted text-muted-foreground'}`}
+          className={`ml-auto shrink-0 text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${SCOPE_COLOR[role.scope] ?? 'bg-muted text-muted-foreground'}`}
         >
           {role.scope}
         </span>
@@ -67,7 +70,7 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
           {/* App access */}
           {roleApps.length > 0 && (
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-2">
+              <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground block mb-2">
                 App Access
               </span>
               <div className="flex flex-wrap gap-1.5">
@@ -87,7 +90,7 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
           {/* Permission matrix */}
           {featureEntries.length > 0 && (
             <div>
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground block mb-2">
+              <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground block mb-2">
                 Feature Permissions
               </span>
               <div className="rounded-lg border border-border/40 bg-card overflow-hidden divide-y divide-border/30">
@@ -103,7 +106,7 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
                         {perms.map((perm) => (
                           <span
                             key={perm}
-                            className="inline-flex items-center justify-center h-5 px-1.5 rounded text-[9px] font-bold uppercase tracking-wider bg-success/10 text-success"
+                            className="inline-flex items-center justify-center h-5 px-1.5 rounded text-xs font-bold uppercase tracking-wider bg-success/10 text-success"
                           >
                             {perm}
                           </span>

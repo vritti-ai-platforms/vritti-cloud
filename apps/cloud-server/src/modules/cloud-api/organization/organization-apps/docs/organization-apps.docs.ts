@@ -1,8 +1,9 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk';
+import { BuMatrixResponseDto } from '../../organization-business-units/dto/response/bu-matrix.response.dto';
 import { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';
-import { OrgAppListResponseDto, OrgPermissionsResponseDto } from '../dto/response/org-app-list.response.dto';
+import { OrgAppListResponseDto } from '../dto/response/org-app-list.response.dto';
 
 export function ApiListOrgApps() {
   return applyDecorators(
@@ -84,7 +85,7 @@ export function ApiGetOrgPermissions() {
       description: 'Returns all features grouped by app for the organization, used for building role permission forms.',
     }),
     ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
-    ApiResponse({ status: 200, description: 'Permissions retrieved successfully.', type: OrgPermissionsResponseDto }),
+    ApiResponse({ status: 200, description: 'Permissions retrieved successfully.', type: BuMatrixResponseDto }),
     ApiResponse({ status: 404, description: 'Organization not found.' }),
   );
 }

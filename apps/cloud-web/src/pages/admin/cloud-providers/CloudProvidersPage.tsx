@@ -114,7 +114,7 @@ function getColumns(onDelete: (id: string, name: string) => Promise<void>): Colu
       accessorKey: 'code',
       header: 'Code',
       cell: ({ row }) => (
-        <Badge variant="outline" className="font-mono text-[10px] font-medium">
+        <Badge variant="outline" className="font-mono text-xs font-medium">
           {row.original.code}
         </Badge>
       ),

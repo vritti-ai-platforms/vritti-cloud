@@ -1,10 +1,8 @@
-import { BusinessRepository } from '@domain/business/repositories/business.repository';
 import { buildBuCatalog, buildBuRoles } from '@domain/catalog/catalog.builder';
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
 import type { VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
-import type { Organization } from '@/db/schema';
 import { CoreVersionRepository } from '../repositories/core-version.repository';
 import { CoreBusinessUnitService } from './core-business-unit.service';
 import { CoreDeploymentService } from './core-deployment.service';
@@ -23,7 +21,6 @@ export class CatalogSyncService {
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly deploymentRepository: DeploymentRepository,
     private readonly organizationRepository: OrganizationRepository,
-    private readonly businessRepository: BusinessRepository,
   ) {}
 
   // Recomputes and pushes the feature catalog (snapshot) for a single BU; core derives its apps from it
@@ -32,8 +29,7 @@ export class CatalogSyncService {
     const snapshot = await this.loadSnapshot(deployment.version);
     if (!snapshot) return;
 
-    const businessCode = await this.resolveBusinessCode(org);
-    const featureCatalog = buildBuCatalog(snapshot, businessCode, org.planCode, org.buUnlocks?.[buId]);
+    const featureCatalog = buildBuCatalog(snapshot, org.businessCode, org.planCode, org.buUnlocks?.[buId]);
     await this.coreBusinessUnitService.replaceBuSnapshot(
       deployment.url,
       deployment.webhookSecret,
@@ -50,8 +46,7 @@ export class CatalogSyncService {
     const snapshot = await this.loadSnapshot(deployment.version);
     if (!snapshot) return;
 
-    const businessCode = await this.resolveBusinessCode(org);
-    const roles = buildBuRoles(snapshot, businessCode);
+    const roles = buildBuRoles(snapshot, org.businessCode);
     if (roles.length === 0) return;
     await this.coreRoleService.provisionRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier, roles);
     this.logger.log(`Synced ${roles.length} role template(s) for org ${orgId}`);
@@ -67,9 +62,7 @@ export class CatalogSyncService {
 
         const orgs = await this.organizationRepository.findByDeploymentId(deployment.id);
         for (const org of orgs) {
-          const businessCode = await this.resolveBusinessCode(org);
-
-          const roles = buildBuRoles(snapshot, businessCode);
+          const roles = buildBuRoles(snapshot, org.businessCode);
           if (roles.length > 0) {
             await this.coreRoleService.provisionRoles(
               deployment.url,
@@ -86,7 +79,7 @@ export class CatalogSyncService {
             org.orgIdentifier,
           );
           for (const bu of businessUnits) {
-            const featureCatalog = buildBuCatalog(snapshot, businessCode, org.planCode, org.buUnlocks?.[bu.id]);
+            const featureCatalog = buildBuCatalog(snapshot, org.businessCode, org.planCode, org.buUnlocks?.[bu.id]);
             await this.coreBusinessUnitService.replaceBuSnapshot(
               deployment.url,
               deployment.webhookSecret,
@@ -108,11 +101,5 @@ export class CatalogSyncService {
     if (!version) return null;
     const appVersion = await this.coreVersionRepository.findByVersion(version);
     return (appVersion?.snapshot as VersionSnapshot | null) ?? null;
-  }
-
-  // Resolves the snapshot business code for an org's business
-  private async resolveBusinessCode(org: Organization): Promise<string | undefined> {
-    const business = await this.businessRepository.findById(org.businessId);
-    return business?.code;
   }
 }

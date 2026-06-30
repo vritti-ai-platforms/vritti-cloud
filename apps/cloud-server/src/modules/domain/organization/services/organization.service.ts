@@ -28,7 +28,7 @@ export class OrganizationService {
     planCode: { column: organizations.planCode, type: 'string' },
     businessName: { column: businesses.name, type: 'string' },
     deploymentName: { column: deployments.name, type: 'string' },
-    businessId: { column: organizations.businessId, type: 'string' },
+    businessId: { column: businesses.id, type: 'string' },
     memberCount: {
       column:
         sql<number>`(SELECT count(*) FROM cloud.organization_members WHERE organization_id = ${organizations.id})` as unknown as Column,

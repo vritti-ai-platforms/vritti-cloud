@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, asc, count, countDistinct, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
+import { and, asc, count, countDistinct, eq, inArray, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { Plan } from '@/db/schema';
 import { businesses, organizations, planPrices, plans } from '@/db/schema';
 
@@ -22,14 +22,20 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
     return this.model.findFirst({ where: { versionId, businessId, code } });
   }
 
-  // Returns the org's id, business, and name for attaching a custom plan
+  // Returns the org's id, business (resolved code → id), and name for attaching a custom plan
   async findOrgForAttach(orgId: string): Promise<{ id: string; businessId: string; name: string } | undefined> {
     const rows = await this.db
-      .select({ id: organizations.id, businessId: organizations.businessId, name: organizations.name })
+      .select({ id: organizations.id, businessId: businesses.id, name: organizations.name })
       .from(organizations)
+      .innerJoin(businesses, eq(businesses.code, organizations.businessCode))
       .where(eq(organizations.id, orgId))
       .limit(1);
     return rows[0];
+  }
+
+  // Subquery: the code of the business with this id — bridges plan.businessId (UUID) to org.businessCode
+  private businessCodeFor(businessId: string) {
+    return this.db.select({ code: businesses.code }).from(businesses).where(eq(businesses.id, businessId));
   }
 
   // Points an organization at a plan by code (attaches a custom plan to its org)
@@ -37,12 +43,29 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
     await this.db.update(organizations).set({ planCode }).where(eq(organizations.id, orgId));
   }
 
+  // Re-points every org on (business, oldCode) to newCode; returns the number of orgs updated
+  async recodeOrganizations(businessId: string, oldCode: string, newCode: string): Promise<number> {
+    const rows = (await this.db
+      .update(organizations)
+      .set({ planCode: newCode })
+      .where(
+        and(inArray(organizations.businessCode, this.businessCodeFor(businessId)), eq(organizations.planCode, oldCode)),
+      )
+      .returning({ id: organizations.id })) as { id: string }[];
+    return rows.length;
+  }
+
   // Returns the name of an organization on this (business, planCode), if any
   async findAttachedOrgName(businessId: string, planCode: string): Promise<string | null> {
     const rows = await this.db
       .select({ name: organizations.name })
       .from(organizations)
-      .where(and(eq(organizations.businessId, businessId), eq(organizations.planCode, planCode)))
+      .where(
+        and(
+          inArray(organizations.businessCode, this.businessCodeFor(businessId)),
+          eq(organizations.planCode, planCode),
+        ),
+      )
       .limit(1);
     return rows[0]?.name ?? null;
   }
@@ -66,7 +89,12 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
       this.db
         .select({ n: count(organizations.id) })
         .from(organizations)
-        .where(and(eq(organizations.businessId, businessId), eq(organizations.planCode, planCode))),
+        .where(
+          and(
+            inArray(organizations.businessCode, this.businessCodeFor(businessId)),
+            eq(organizations.planCode, planCode),
+          ),
+        ),
       this.db
         .select({ name: businesses.name })
         .from(plans)

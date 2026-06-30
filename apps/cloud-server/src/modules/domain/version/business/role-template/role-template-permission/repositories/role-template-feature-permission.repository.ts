@@ -124,7 +124,7 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           ),
         ),
       )
-      .orderBy(apps.sortOrder, features.sortOrder, featurePermissions.sortOrder);
+      .orderBy(apps.name, features.sortOrder, featurePermissions.sortOrder);
 
     const appMap = new Map<string, AvailableApp>();
     const featureMap = new Map<string, AvailableFeature>();

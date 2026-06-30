@@ -4043,7 +4043,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/OrgPermissionsResponseDto"
+                  "$ref": "#/components/schemas/BuMatrixResponseDto"
                 }
               }
             }
@@ -4556,7 +4556,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SetPlanUnlockedDto"
+                "$ref": "#/components/schemas/SetBuUnlocksDto"
               }
             }
           }
@@ -13306,11 +13306,10 @@
             "description": "Organization ID in api-nexus",
             "example": "550e8400-e29b-41d4-a716-446655440001"
           },
-          "businessId": {
-            "type": "object",
-            "description": "Business ID",
-            "example": "550e8400-e29b-41d4-a716-446655440002",
-            "nullable": true
+          "businessCode": {
+            "type": "string",
+            "description": "Business code",
+            "example": "PHARMA"
           },
           "size": {
             "type": "string",
@@ -13372,6 +13371,7 @@
           "name",
           "subdomain",
           "orgIdentifier",
+          "businessCode",
           "size",
           "planCode",
           "role",
@@ -13402,11 +13402,10 @@
             "description": "Organization ID in api-nexus",
             "example": "550e8400-e29b-41d4-a716-446655440001"
           },
-          "businessId": {
-            "type": "object",
-            "description": "Business ID",
-            "example": "550e8400-e29b-41d4-a716-446655440002",
-            "nullable": true
+          "businessCode": {
+            "type": "string",
+            "description": "Business code",
+            "example": "PHARMA"
           },
           "size": {
             "type": "string",
@@ -13464,6 +13463,7 @@
           "name",
           "subdomain",
           "orgIdentifier",
+          "businessCode",
           "size",
           "planCode",
           "role",
@@ -13775,24 +13775,36 @@
           "businessUnitIds"
         ]
       },
-      "OrgPermissionFeatureDto": {
+      "BuMatrixPlanDto": {
         "type": "object",
         "properties": {
           "code": {
             "type": "string",
-            "example": "crm.leads"
+            "example": "essential"
           },
           "name": {
             "type": "string",
-            "example": "Leads"
+            "example": "Essential"
+          }
+        },
+        "required": [
+          "code",
+          "name"
+        ]
+      },
+      "BuMatrixCellDto": {
+        "type": "object",
+        "properties": {
+          "inPlan": {
+            "type": "boolean",
+            "description": "The org's plan unlocks this (feature, platform, permission)"
           },
-          "permissions": {
-            "example": [
-              "VIEW",
-              "CREATE",
-              "EDIT",
-              "DELETE"
-            ],
+          "selected": {
+            "type": "boolean",
+            "description": "The BU currently has it enabled (never true when inPlan is false)"
+          },
+          "availableIn": {
+            "description": "Other plan names that unlock it — upsell; only when inPlan is false",
             "type": "array",
             "items": {
               "type": "string"
@@ -13800,51 +13812,156 @@
           }
         },
         "required": [
+          "inPlan",
+          "selected",
+          "availableIn"
+        ]
+      },
+      "BuMatrixPermissionDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "VIEW"
+          },
+          "label": {
+            "type": "string",
+            "example": "View"
+          },
+          "web": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BuMatrixCellDto"
+              }
+            ]
+          },
+          "mobile": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BuMatrixCellDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "code",
+          "label",
+          "web",
+          "mobile"
+        ]
+      },
+      "BuMatrixFeatureDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "pos"
+          },
+          "name": {
+            "type": "string",
+            "example": "POS Terminals"
+          },
+          "icon": {
+            "type": "object",
+            "nullable": true,
+            "example": "monitor"
+          },
+          "platforms": {
+            "example": [
+              "web",
+              "mobile"
+            ],
+            "description": "Platforms the feature ships on",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inPlan": {
+            "type": "boolean",
+            "description": "Feature-level: is this feature a member of the org plan at all?"
+          },
+          "availableIn": {
+            "description": "Plans that include the feature — upsell when inPlan is false",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "permissions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BuMatrixPermissionDto"
+            }
+          }
+        },
+        "required": [
           "code",
           "name",
+          "icon",
+          "platforms",
+          "inPlan",
+          "availableIn",
           "permissions"
         ]
       },
-      "OrgPermissionAppResponseDto": {
+      "BuMatrixAppDto": {
         "type": "object",
         "properties": {
-          "appId": {
+          "code": {
             "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "example": "pos"
           },
-          "appCode": {
+          "name": {
             "type": "string",
-            "example": "crm"
+            "example": "POS"
           },
-          "appName": {
-            "type": "string",
-            "example": "CRM"
+          "icon": {
+            "type": "object",
+            "nullable": true,
+            "example": "scan-barcode"
+          },
+          "unlockedCount": {
+            "type": "number",
+            "description": "(feature × platform × permission) cells the plan unlocks"
+          },
+          "totalCount": {
+            "type": "number",
+            "description": "All possible cells in this app"
           },
           "features": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OrgPermissionFeatureDto"
+              "$ref": "#/components/schemas/BuMatrixFeatureDto"
             }
           }
         },
         "required": [
-          "appId",
-          "appCode",
-          "appName",
+          "code",
+          "name",
+          "icon",
+          "unlockedCount",
+          "totalCount",
           "features"
         ]
       },
-      "OrgPermissionsResponseDto": {
+      "BuMatrixResponseDto": {
         "type": "object",
         "properties": {
+          "plan": {
+            "$ref": "#/components/schemas/BuMatrixPlanDto"
+          },
           "apps": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/OrgPermissionAppResponseDto"
+              "$ref": "#/components/schemas/BuMatrixAppDto"
             }
           }
         },
         "required": [
+          "plan",
           "apps"
         ]
       },
@@ -13896,53 +14013,33 @@
           "result"
         ]
       },
-      "PlanMembershipDto": {
+      "SetBuUnlocksDto": {
         "type": "object",
         "properties": {
-          "featureId": {
-            "type": "string",
-            "description": "Feature included in this plan on this platform (the unlock/route gate)",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "platform": {
-            "type": "string",
-            "description": "Platform this membership applies to",
-            "enum": [
-              "WEB",
-              "MOBILE"
-            ],
-            "example": "WEB"
-          },
-          "permissions": {
-            "description": "Feature-permission ids unlocked under this membership (empty = included but view-only)",
-            "example": [
-              "550e8400-e29b-41d4-a716-446655440000"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "unlocks": {
+            "type": "object",
+            "description": "featureCode → { web?: permCodes, mobile?: permCodes } — the BU allow-set (full replace)",
+            "example": {
+              "pos": {
+                "web": [
+                  "VIEW",
+                  "CREATE"
+                ],
+                "mobile": [
+                  "VIEW"
+                ]
+              },
+              "items": {
+                "web": [
+                  "VIEW"
+                ]
+              }
+            },
+            "additionalProperties": true
           }
         },
         "required": [
-          "featureId",
-          "platform",
-          "permissions"
-        ]
-      },
-      "SetPlanUnlockedDto": {
-        "type": "object",
-        "properties": {
-          "memberships": {
-            "description": "Per-platform feature memberships, each with its unlocked permissions (full replace)",
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PlanMembershipDto"
-            }
-          }
-        },
-        "required": [
-          "memberships"
+          "unlocks"
         ]
       },
       "CloudBusinessDto": {
@@ -15715,17 +15812,17 @@
           }
         }
       },
-      "RoleTemplateMembershipDto": {
+      "RoleTemplateGrantDto": {
         "type": "object",
         "properties": {
           "featureId": {
             "type": "string",
-            "description": "Feature included in this role on this platform (the View/route gate)",
+            "description": "Feature granted by this role on this platform (the View/route gate)",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
           "platform": {
             "type": "string",
-            "description": "Platform this membership applies to",
+            "description": "Platform this grant applies to",
             "enum": [
               "WEB",
               "MOBILE"
@@ -15733,7 +15830,7 @@
             "example": "WEB"
           },
           "permissions": {
-            "description": "Feature-permission ids granted under this membership (empty = view-only member)",
+            "description": "Feature-permission ids granted under this grant (empty = view-only)",
             "example": [
               "550e8400-e29b-41d4-a716-446655440000"
             ],
@@ -15752,16 +15849,16 @@
       "AssignRoleTemplatePermissionsDto": {
         "type": "object",
         "properties": {
-          "memberships": {
-            "description": "Per-platform feature memberships, each with its granted permissions (full replace)",
+          "grants": {
+            "description": "Per-platform feature grants, each with its granted permissions (full replace)",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/RoleTemplateMembershipDto"
+              "$ref": "#/components/schemas/RoleTemplateGrantDto"
             }
           }
         },
         "required": [
-          "memberships"
+          "grants"
         ]
       },
       "CreatePlanDto": {
@@ -16041,6 +16138,55 @@
           "amount"
         ]
       },
+      "PlanUnlockDto": {
+        "type": "object",
+        "properties": {
+          "featureId": {
+            "type": "string",
+            "description": "Feature unlocked in this plan on this platform (the route/unlock gate)",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "platform": {
+            "type": "string",
+            "description": "Platform this unlock applies to",
+            "enum": [
+              "WEB",
+              "MOBILE"
+            ],
+            "example": "WEB"
+          },
+          "permissions": {
+            "description": "Feature-permission ids unlocked under this unlock (empty = unlocked but view-only)",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "featureId",
+          "platform",
+          "permissions"
+        ]
+      },
+      "SetPlanUnlockedDto": {
+        "type": "object",
+        "properties": {
+          "unlocks": {
+            "description": "Per-platform feature unlocks, each with its unlocked permissions (full replace)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanUnlockDto"
+            }
+          }
+        },
+        "required": [
+          "unlocks"
+        ]
+      },
       "CreateDeploymentDto": {
         "type": "object",
         "properties": {
@@ -16306,9 +16452,9 @@
             "type": "string",
             "example": "Technology"
           },
-          "businessId": {
+          "businessCode": {
             "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "example": "PHARMA"
           },
           "regionName": {
             "type": "string",
@@ -16348,7 +16494,7 @@
           "deploymentId",
           "deploymentType",
           "businessName",
-          "businessId",
+          "businessCode",
           "regionName",
           "regionCode",
           "cloudProviderName",

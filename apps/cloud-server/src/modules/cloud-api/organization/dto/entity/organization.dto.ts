@@ -17,8 +17,8 @@ export class OrgListItemDto {
   @ApiProperty({ description: 'Organization ID in api-nexus', example: '550e8400-e29b-41d4-a716-446655440001' })
   orgIdentifier: string;
 
-  @ApiPropertyOptional({ description: 'Business ID', example: '550e8400-e29b-41d4-a716-446655440002', nullable: true })
-  businessId: string | null;
+  @ApiProperty({ description: 'Business code', example: 'PHARMA' })
+  businessCode: string;
 
   @ApiProperty({
     description: 'Size of the organization',
@@ -72,7 +72,7 @@ export class OrgListItemDto {
       name: org.name,
       subdomain: org.subdomain,
       orgIdentifier: org.orgIdentifier,
-      businessId: org.businessId ?? null,
+      businessCode: org.businessCode,
       size: org.size,
       mediaId: org.mediaId ?? null,
       planCode: org.planCode,

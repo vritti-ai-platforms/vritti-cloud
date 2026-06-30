@@ -22,7 +22,7 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
         <Globe className="size-3.5 text-success shrink-0" />
         <div className="min-w-0 flex-1">
           <span className="text-sm font-medium truncate block">{feature.name}</span>
-          <span className="text-[10px] text-muted-foreground font-mono">{feature.code}</span>
+          <span className="text-xs text-muted-foreground font-mono">{feature.code}</span>
         </div>
 
         {/* Platform indicators */}
@@ -46,13 +46,13 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
               <span
                 key={perm.code}
                 title={perm.label}
-                className="inline-flex items-center justify-center h-5 px-1.5 rounded text-[9px] font-semibold uppercase tracking-wider bg-muted text-muted-foreground"
+                className="inline-flex items-center justify-center h-5 px-1.5 rounded text-xs font-semibold uppercase tracking-wider bg-muted text-muted-foreground"
               >
                 {perm.code.slice(0, 3)}
               </span>
             ))}
             {feature.permissions.length > 4 && (
-              <span className="text-[9px] text-muted-foreground ml-0.5">+{feature.permissions.length - 4}</span>
+              <span className="text-xs text-muted-foreground ml-0.5">+{feature.permissions.length - 4}</span>
             )}
           </div>
         )}
@@ -72,7 +72,7 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
             <div className="rounded-lg bg-muted/60 border border-border/30 p-3">
               <div className="flex items-center gap-1.5 mb-2">
                 <Monitor className="size-3 text-warning" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   WEB Microfrontend
                 </span>
               </div>
@@ -90,7 +90,7 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
             <div className="rounded-lg bg-muted/60 border border-border/30 p-3">
               <div className="flex items-center gap-1.5 mb-2">
                 <Smartphone className="size-3 text-primary" />
-                <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
                   MOBILE Microfrontend
                 </span>
               </div>

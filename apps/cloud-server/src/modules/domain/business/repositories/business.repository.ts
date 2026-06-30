@@ -59,9 +59,10 @@ export class BusinessRepository extends PrimaryBaseRepository<typeof businesses>
     if (ids.length === 0) return new Set();
     const [orgs, planRows, appRows, roleRows] = await Promise.all([
       this.db
-        .select({ id: organizations.businessId })
+        .select({ id: businesses.id })
         .from(organizations)
-        .where(inArray(organizations.businessId, ids)),
+        .innerJoin(businesses, eq(businesses.code, organizations.businessCode))
+        .where(inArray(businesses.id, ids)),
       this.db.select({ id: plans.businessId }).from(plans).where(inArray(plans.businessId, ids)),
       this.db.select({ id: apps.businessId }).from(apps).where(inArray(apps.businessId, ids)),
       this.db
@@ -81,7 +82,11 @@ export class BusinessRepository extends PrimaryBaseRepository<typeof businesses>
     id: string,
   ): Promise<{ organizations: number; plans: number; apps: number; roleTemplates: number }> {
     const [orgsResult, plansResult, appsResult, rolesResult] = await Promise.all([
-      this.db.select({ count: count() }).from(organizations).where(eq(organizations.businessId, id)),
+      this.db
+        .select({ count: count() })
+        .from(organizations)
+        .innerJoin(businesses, eq(businesses.code, organizations.businessCode))
+        .where(eq(businesses.id, id)),
       this.db.select({ count: count() }).from(plans).where(eq(plans.businessId, id)),
       this.db.select({ count: count() }).from(apps).where(eq(apps.businessId, id)),
       this.db.select({ count: count() }).from(roleTemplates).where(eq(roleTemplates.businessId, id)),

@@ -53,7 +53,8 @@ export interface SnapshotRoleTemplate {
   scope: string;
   sourceRoleId: string;
   apps: string[];
-  features: Record<string, string[]>;
+  // featureCode → granted permission codes per platform (mirrors the snapshot builder)
+  features: Record<string, { web?: string[]; mobile?: string[] }>;
 }
 
 export interface SnapshotBusiness {

@@ -47,7 +47,7 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeat
       accessorKey: 'code',
       header: 'Code',
       cell: ({ row }) => (
-        <Badge variant="outline" className="font-mono text-[10px] font-medium">
+        <Badge variant="outline" className="font-mono text-xs font-medium">
           {row.original.code}
         </Badge>
       ),
@@ -59,11 +59,11 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeat
       cell: ({ row }) => (
         <div className="flex items-center justify-center">
           {row.original.app ? (
-            <Badge variant="secondary" className="text-[10px]">
+            <Badge variant="secondary" className="text-xs">
               {row.original.app.name}
             </Badge>
           ) : (
-            <span className="text-[10px] text-muted-foreground">—</span>
+            <span className="text-xs text-muted-foreground">—</span>
           )}
         </div>
       ),
@@ -236,7 +236,7 @@ export const BusinessFeaturesTab = () => {
                 <div key={permission.id} className="flex items-center gap-3 rounded-md border px-3 py-2">
                   <div className="flex flex-col gap-0.5 flex-1 min-w-0">
                     <span className="text-sm font-medium truncate">{permission.label}</span>
-                    <span className="text-[11px] font-mono text-muted-foreground truncate">{permission.code}</span>
+                    <span className="text-xs font-mono text-muted-foreground truncate">{permission.code}</span>
                   </div>
                   {permission.isGlobal ? (
                     <Badge variant="secondary">Global</Badge>

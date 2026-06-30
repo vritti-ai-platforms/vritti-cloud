@@ -1,9 +1,8 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { OrgPermissionGroup } from '@/schemas/cloud/org-roles';
+import type { BuMatrix } from '@/schemas/cloud/bu-matrix';
 
-// Fetches permissions grouped by app for the organization
-export function getOrgPermissions(orgId: string): Promise<OrgPermissionGroup[]> {
-  return axios
-    .get<{ apps: OrgPermissionGroup[] }>(`cloud-api/organizations/${orgId}/apps/permissions`)
-    .then((r) => r.data.apps);
+// Fetches the org's full apps/features/permissions catalog (snapshot-driven, with per-platform lock state) —
+// the source for the Create Custom Role permission picker.
+export function getOrgPermissions(orgId: string): Promise<BuMatrix> {
+  return axios.get<BuMatrix>(`cloud-api/organizations/${orgId}/apps/permissions`).then((r) => r.data);
 }

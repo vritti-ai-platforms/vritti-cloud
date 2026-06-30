@@ -41,7 +41,7 @@ const StatPill = ({
         </div>
         <div>
           <span className="text-2xl font-bold tracking-tight leading-none tabular-nums">{value}</span>
-          <p className="text-[11px] text-muted-foreground mt-0.5">{label}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
         </div>
       </CardContent>
     </Card>
@@ -89,7 +89,9 @@ function BusinessPanel({
   featureToApp: Record<string, SnapshotApp>;
 }) {
   const totalPerms = roleTemplates.reduce(
-    (sum, r) => sum + Object.values(r.features ?? {}).reduce((s, p) => s + p.length, 0),
+    (sum, r) =>
+      sum +
+      Object.values(r.features ?? {}).reduce((s, p) => s + new Set([...(p.web ?? []), ...(p.mobile ?? [])]).size, 0),
     0,
   );
 
@@ -105,12 +107,12 @@ function BusinessPanel({
               <Building2 className="size-5" />
             </div>
             <div className="flex flex-col min-w-0 text-left">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground leading-none">
+              <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground leading-none">
                 Business
               </span>
               <div className="flex items-center gap-2 min-w-0 mt-1">
                 <span className="text-sm font-bold truncate">{name}</span>
-                <span className="font-mono text-[10px] font-medium uppercase tracking-wider text-muted-foreground bg-muted rounded px-1.5 py-0.5 shrink-0">
+                <span className="font-mono text-xs font-medium uppercase tracking-wider text-muted-foreground bg-muted rounded px-1.5 py-0.5 shrink-0">
                   {code}
                 </span>
               </div>

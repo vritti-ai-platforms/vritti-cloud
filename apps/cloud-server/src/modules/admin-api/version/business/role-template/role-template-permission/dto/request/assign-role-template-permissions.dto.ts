@@ -3,20 +3,20 @@ import { Type } from 'class-transformer';
 import { ArrayUnique, IsArray, IsEnum, IsUUID, ValidateNested } from 'class-validator';
 import { type AppPlatform, AppPlatformValues } from '@/db/schema';
 
-export class RoleTemplateMembershipDto {
+export class RoleTemplateGrantDto {
   @ApiProperty({
-    description: 'Feature included in this role on this platform (the View/route gate)',
+    description: 'Feature granted by this role on this platform (the View/route gate)',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
   @IsUUID()
   featureId: string;
 
-  @ApiProperty({ description: 'Platform this membership applies to', enum: ['WEB', 'MOBILE'], example: 'WEB' })
+  @ApiProperty({ description: 'Platform this grant applies to', enum: ['WEB', 'MOBILE'], example: 'WEB' })
   @IsEnum(AppPlatformValues)
   platform: AppPlatform;
 
   @ApiProperty({
-    description: 'Feature-permission ids granted under this membership (empty = view-only member)',
+    description: 'Feature-permission ids granted under this grant (empty = view-only)',
     type: [String],
     example: ['550e8400-e29b-41d4-a716-446655440000'],
   })
@@ -27,12 +27,12 @@ export class RoleTemplateMembershipDto {
 
 export class AssignRoleTemplatePermissionsDto {
   @ApiProperty({
-    description: 'Per-platform feature memberships, each with its granted permissions (full replace)',
-    type: [RoleTemplateMembershipDto],
+    description: 'Per-platform feature grants, each with its granted permissions (full replace)',
+    type: [RoleTemplateGrantDto],
   })
   @IsArray()
-  @ArrayUnique((m: RoleTemplateMembershipDto) => `${m.featureId}:${m.platform}`)
+  @ArrayUnique((g: RoleTemplateGrantDto) => `${g.featureId}:${g.platform}`)
   @ValidateNested({ each: true })
-  @Type(() => RoleTemplateMembershipDto)
-  memberships: RoleTemplateMembershipDto[];
+  @Type(() => RoleTemplateGrantDto)
+  grants: RoleTemplateGrantDto[];
 }

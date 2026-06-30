@@ -4,8 +4,8 @@ import { eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewRoleTemplateFeature } from '@/db/schema';
 import { roleTemplateFeaturePermissions, roleTemplateFeatures } from '@/db/schema';
 
-// A role template's per-platform feature membership with the action permissions granted under it
-export interface RoleTemplateMembership {
+// A role template's per-platform feature grant with the action permissions granted under it
+export interface RoleTemplateGrant {
   featureId: string;
   platform: AppPlatform;
   permissions: string[];
@@ -17,9 +17,9 @@ export class RoleTemplateFeatureRepository extends PrimaryBaseRepository<typeof 
     super(database, roleTemplateFeatures);
   }
 
-  // Returns the role's memberships (feature, platform) with their granted permission ids aggregated per membership.
-  // The empty array for a member with no grants (LEFT JOIN miss) is preserved via FILTER + COALESCE — the view-only gate.
-  async findByRoleTemplateId(roleTemplateId: string): Promise<RoleTemplateMembership[]> {
+  // Returns the role's grants (feature, platform) with their granted permission ids aggregated per grant.
+  // The empty array for a grant with no permissions (LEFT JOIN miss) is preserved via FILTER + COALESCE (view-only).
+  async findByRoleTemplateId(roleTemplateId: string): Promise<RoleTemplateGrant[]> {
     return this.db
       .select({
         featureId: roleTemplateFeatures.featureId,
@@ -38,12 +38,12 @@ export class RoleTemplateFeatureRepository extends PrimaryBaseRepository<typeof 
       .orderBy(roleTemplateFeatures.featureId, roleTemplateFeatures.platform);
   }
 
-  // Deletes all memberships for a role template (cascades its grants)
+  // Deletes all grants for a role template (cascades its granted permissions)
   async deleteByRoleTemplateId(roleTemplateId: string): Promise<void> {
     await this.db.delete(roleTemplateFeatures).where(eq(roleTemplateFeatures.roleTemplateId, roleTemplateId));
   }
 
-  // Bulk-inserts memberships, returning each inserted row so the caller can map grants onto them
+  // Bulk-inserts grants, returning each inserted row so the caller can map permission ids onto them
   async bulkCreate(
     entries: NewRoleTemplateFeature[],
   ): Promise<Array<{ id: string; featureId: string; platform: AppPlatform }>> {

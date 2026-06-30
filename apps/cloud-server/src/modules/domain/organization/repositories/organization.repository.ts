@@ -61,7 +61,7 @@ export class OrganizationRepository extends PrimaryBaseRepository<typeof organiz
         })
         .from(organizations)
         .innerJoin(deployments, eq(deployments.id, organizations.deploymentId))
-        .innerJoin(businesses, eq(businesses.id, organizations.businessId))
+        .innerJoin(businesses, eq(businesses.code, organizations.businessCode))
         .where(where)
         .orderBy(...(orderBy && orderBy.length > 0 ? orderBy : [asc(organizations.name)]))
         .limit(limit)

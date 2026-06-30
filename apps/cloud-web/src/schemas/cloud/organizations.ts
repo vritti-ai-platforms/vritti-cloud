@@ -19,7 +19,7 @@ export interface OrgListItem {
   name: string;
   subdomain: string;
   orgIdentifier: string;
-  businessId: string;
+  businessCode: string;
   size: OrgSize;
   mediaId: string | null;
   planCode: string;

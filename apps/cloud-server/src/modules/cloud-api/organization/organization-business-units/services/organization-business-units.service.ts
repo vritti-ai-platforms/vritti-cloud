@@ -1,7 +1,6 @@
+import { buildBuMatrix } from '@domain/catalog/bu-matrix.builder';
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
-import { PlanRepository } from '@domain/plan/repositories/plan.repository';
-import { PlanFeatureRepository } from '@domain/plan/repositories/plan-feature.repository';
-import { PlanFeaturePermissionRepository } from '@domain/plan/repositories/plan-feature-permission.repository';
+import type { SnapshotPlan, VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import {
   ForbiddenException,
@@ -9,16 +8,18 @@ import {
   ServiceUnavailableException,
   type SuccessResponseDto,
 } from '@vritti/api-sdk';
-import type { Deployment, Organization } from '@/db/schema';
-import type { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
+import type { BuUnlocks, Deployment, Organization } from '@/db/schema';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
-import type { PlanMembership } from '@/modules/domain/plan/repositories/plan-feature.repository';
-import { type BuAppWithMemberships, buildBuMatrix, membershipsToBuUnlocks } from '../bu-matrix.builder';
+import type { SetBuUnlocksDto } from '../dto/request/set-bu-unlocks.dto';
+import type { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
 import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
+
+// UI platform keys (snapshot microfrontend keys), used when clamping BU unlocks to the plan ceiling
+const PLATFORMS = ['web', 'mobile'] as const;
 
 @Injectable()
 export class OrganizationBusinessUnitsService {
@@ -27,9 +28,6 @@ export class OrganizationBusinessUnitsService {
   constructor(
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly organizationRepository: OrganizationRepository,
-    private readonly planRepository: PlanRepository,
-    private readonly planFeatureRepository: PlanFeatureRepository,
-    private readonly planFeaturePermissionRepository: PlanFeaturePermissionRepository,
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly coreBusinessUnitService: CoreBusinessUnitService,
     private readonly catalogSyncService: CatalogSyncService,
@@ -226,37 +224,37 @@ export class OrganizationBusinessUnitsService {
     }
   }
 
-  // Returns the BU permission matrix — the plan ceiling (apps/features/permissions) with the BU's current allow-set
-  async getBuMatrix(orgId: string, buId: string): Promise<{ apps: BuAppWithMemberships[] }> {
+  // Returns the BU permission matrix — built purely from the version snapshot (all apps/features/permissions, with
+  // per-platform inPlan/selected/availableIn). No catalog-table reads.
+  async getBuMatrix(orgId: string, buId: string): Promise<BuMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    const plan = await this.resolvePlan(org, deployment);
-    const [apps, planMemberships] = await Promise.all([
-      this.planFeaturePermissionRepository.findAvailableApps(plan.versionId, plan.businessId),
-      this.planFeatureRepository.findByPlanId(plan.id),
-    ]);
-    return buildBuMatrix(apps, planMemberships, org.buUnlocks?.[buId]);
+    const { snapshot } = await this.loadPlanContext(org, deployment);
+    return buildBuMatrix(snapshot, org.businessCode, org.planCode, org.buUnlocks?.[buId]);
   }
 
-  // Replaces the BU's unlocked-permission allow-list (within the plan) and re-pushes the recomputed catalog to core
-  async updateBuLocks(orgId: string, buId: string, dto: SetPlanUnlockedDto): Promise<SuccessResponseDto> {
+  // Replaces the BU's unlock allow-list (clamped to the plan ceiling) and re-pushes the recomputed catalog to core
+  async updateBuLocks(orgId: string, buId: string, dto: SetBuUnlocksDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    const plan = await this.resolvePlan(org, deployment);
-    const apps = await this.planFeaturePermissionRepository.findAvailableApps(plan.versionId, plan.businessId);
+    const { plan } = await this.loadPlanContext(org, deployment);
 
-    // De-duplicate memberships by (feature, platform), then convert ids → codes for version-portable storage
-    const byKey = new Map<string, PlanMembership>();
-    for (const m of dto.memberships) {
-      byKey.set(`${m.featureId}:${m.platform}`, {
-        featureId: m.featureId,
-        platform: m.platform,
-        permissions: m.permissions,
-      });
+    // Clamp each requested code to the plan ceiling — a BU can never unlock more than its plan
+    const clamped: BuUnlocks[string] = {};
+    for (const [featureCode, platforms] of Object.entries(dto.unlocks ?? {})) {
+      const planEntry = plan.unlockedPermissions?.[featureCode];
+      if (!planEntry) continue;
+      const entry: { web?: string[]; mobile?: string[] } = {};
+      for (const platform of PLATFORMS) {
+        const requested = platforms?.[platform];
+        if (requested === undefined) continue;
+        const ceiling = new Set(planEntry[platform] ?? []);
+        entry[platform] = requested.filter((code) => ceiling.has(code));
+      }
+      if (entry.web !== undefined || entry.mobile !== undefined) clamped[featureCode] = entry;
     }
-    const featureUnlocks = membershipsToBuUnlocks([...byKey.values()], apps);
 
     // Always store explicitly once edited — an empty allow-list means "lock everything", NOT "inherit the plan"
     const buUnlocks = { ...(org.buUnlocks ?? {}) };
-    buUnlocks[buId] = featureUnlocks;
+    buUnlocks[buId] = clamped;
     await this.organizationRepository.update(orgId, { buUnlocks });
 
     // Re-push the BU snapshot so the new locks take effect downstream (per-user resolution reads it)
@@ -293,14 +291,17 @@ export class OrganizationBusinessUnitsService {
     }
   }
 
-  // Resolves the org's plan (version + business + planCode) — the ceiling the BU's locks live within
-  private async resolvePlan(org: Organization, deployment: Deployment) {
+  // Loads the org's version snapshot + its plan (from snapshot.businesses[businessCode].plans[planCode]).
+  // The plan is the ceiling the BU's locks live within. Throws NotFound if the snapshot or plan is missing.
+  private async loadPlanContext(
+    org: Organization,
+    deployment: Deployment,
+  ): Promise<{ snapshot: VersionSnapshot; plan: SnapshotPlan }> {
     const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
-    const plan = appVersion
-      ? await this.planRepository.findByVersionBusinessCode(appVersion.id, org.businessId, org.planCode)
-      : undefined;
-    if (!plan) throw new NotFoundException('Plan not found.');
-    return plan;
+    const snapshot = (appVersion?.snapshot as VersionSnapshot | null) ?? null;
+    const plan = snapshot?.businesses?.[org.businessCode]?.plans?.[org.planCode];
+    if (!snapshot || !plan) throw new NotFoundException('Plan not found.');
+    return { snapshot, plan };
   }
 
   // Extracts location fields into metadata for core-server while keeping timezone as a top-level BU field
@@ -318,11 +319,7 @@ export class OrganizationBusinessUnitsService {
 
   // Checks if the organization has reached its plan's max business unit limit
   private async checkBusinessUnitLimit(org: Organization, deployment: Deployment): Promise<void> {
-    const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
-    const plan = appVersion
-      ? await this.planRepository.findByVersionBusinessCode(appVersion.id, org.businessId, org.planCode)
-      : undefined;
-    if (!plan) throw new NotFoundException('Plan not found.');
+    const { plan } = await this.loadPlanContext(org, deployment);
 
     // null maxBusinessUnits means unlimited
     if (plan.maxBusinessUnits === null) return;

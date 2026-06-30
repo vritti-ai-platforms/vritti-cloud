@@ -1,5 +1,5 @@
 import {
-  type PlanAppWithMemberships,
+  type PlanAppWithUnlocks,
   PlanFeaturePermissionService,
 } from '@domain/plan/services/plan-feature-permission.service';
 import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
@@ -25,14 +25,14 @@ export class PlanFeaturePermissionController {
     return this.service.getAvailableApps(planId);
   }
 
-  // Returns the matrix — apps each with the plan's current memberships (with their unlocked permissions) nested
+  // Returns the matrix — apps each with the plan's current unlocks (with their unlocked permissions) nested
   @Get()
-  getMatrix(@Param('planId') planId: string): Promise<{ apps: PlanAppWithMemberships[] }> {
+  getMatrix(@Param('planId') planId: string): Promise<{ apps: PlanAppWithUnlocks[] }> {
     this.logger.log(`GET .../plans/${planId}/permissions`);
     return this.service.getMatrix(planId);
   }
 
-  // Replaces the plan's memberships + their nested unlock grants
+  // Replaces the plan's unlocks + their nested permission ids
   @Put()
   setUnlocked(@Param('planId') planId: string, @Body() dto: SetPlanUnlockedDto): Promise<SuccessResponseDto> {
     this.logger.log(`PUT .../plans/${planId}/permissions`);

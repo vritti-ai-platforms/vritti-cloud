@@ -1,4 +1,3 @@
-import { BusinessRepository } from '@domain/business/repositories/business.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException, ServiceUnavailableException } from '@vritti/api-sdk';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
@@ -14,7 +13,6 @@ export class OrganizationRolesService {
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly coreRoleService: CoreRoleService,
     private readonly coreVersionRepository: CoreVersionRepository,
-    private readonly businessRepository: BusinessRepository,
   ) {}
 
   // Returns role templates from the deployment's app version snapshot, scoped to the org's business
@@ -34,8 +32,7 @@ export class OrganizationRolesService {
       string,
       { roleTemplates: RoleTemplateListResponseDto['result'] }
     >;
-    const business = await this.businessRepository.findById(org.businessId);
-    const roleTemplates = business ? (businesses[business.code]?.roleTemplates ?? []) : [];
+    const roleTemplates = businesses[org.businessCode]?.roleTemplates ?? [];
 
     this.logger.log(`Fetched ${roleTemplates.length} role templates for org ${orgId}`);
     return { result: roleTemplates };

@@ -36,8 +36,8 @@ export class OrganizationDetailDto {
   @ApiProperty({ example: 'Technology' })
   businessName: string;
 
-  @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
-  businessId: string;
+  @ApiProperty({ example: 'PHARMA' })
+  businessCode: string;
 
   @ApiProperty({ example: 'US East' })
   regionName: string;
@@ -70,7 +70,7 @@ export class OrganizationDetailDto {
     dto.deploymentId = org.deploymentId;
     dto.deploymentType = org.deployment.type;
     dto.businessName = org.business.name;
-    dto.businessId = org.businessId;
+    dto.businessCode = org.businessCode;
     dto.regionName = org.deployment.region.name;
     dto.regionCode = org.deployment.region.code;
     dto.cloudProviderName = org.deployment.cloudProvider.name;

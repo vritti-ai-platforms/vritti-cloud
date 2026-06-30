@@ -136,7 +136,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
       accessorKey: 'code',
       header: 'Code',
       cell: ({ row }) => (
-        <Badge variant="outline" className="font-mono text-[10px] font-medium">
+        <Badge variant="outline" className="font-mono text-xs font-medium">
           {row.original.code}
         </Badge>
       ),
@@ -164,7 +164,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
         return (
           <div className="flex flex-wrap justify-center gap-1">
             {platforms.map((p) => (
-              <Badge key={p} variant="outline" className="text-[10px] font-medium">
+              <Badge key={p} variant="outline" className="text-xs font-medium">
                 {p}
               </Badge>
             ))}

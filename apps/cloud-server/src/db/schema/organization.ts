@@ -16,9 +16,9 @@ export const organizations = cloudSchema.table('organizations', {
   name: varchar('name', { length: 255 }).notNull(),
   subdomain: varchar('subdomain', { length: 100 }).notNull().unique(),
   orgIdentifier: varchar('org_identifier', { length: 100 }).notNull().unique(),
-  businessId: uuid('business_id')
+  businessCode: varchar('business_code', { length: 100 })
     .notNull()
-    .references(() => businesses.id, { onDelete: 'restrict' }),
+    .references(() => businesses.code, { onDelete: 'restrict' }),
   countryId: uuid('country_id')
     .notNull()
     .references(() => countries.id, { onDelete: 'restrict' }),
@@ -26,7 +26,7 @@ export const organizations = cloudSchema.table('organizations', {
   taxIdCountry: varchar('tax_id_country', { length: 2 }),
   size: orgSizeEnum('size').notNull(),
   mediaId: varchar('media_id', { length: 255 }),
-  // Plan reference by code so it resolves across version upgrades: (deployment.version, businessId, planCode)
+  // Plan reference by code so it resolves across version upgrades: (deployment.version, businessCode, planCode)
   planCode: varchar('plan_code', { length: 100 }).notNull(),
   deploymentId: uuid('deployment_id')
     .notNull()

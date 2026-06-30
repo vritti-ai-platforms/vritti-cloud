@@ -53,7 +53,7 @@ export function deleteRoleTemplate(versionId: string, businessId: string, id: st
     .then(() => undefined);
 }
 
-// Fetches the role-template permission matrix — the role's apps (each with its features) + the full grant set
+// Fetches the matrix — apps (catalog) each with the role's current grants nested
 export function getRoleTemplatePermissions(
   versionId: string,
   businessId: string,
@@ -66,7 +66,7 @@ export function getRoleTemplatePermissions(
     .then((r) => r.data);
 }
 
-// Replaces a role template's granted permissions (full set of featurePermissionIds)
+// Replaces a role template's grants (each with its granted permissions)
 export function setRoleTemplatePermissions({
   versionId,
   businessId,

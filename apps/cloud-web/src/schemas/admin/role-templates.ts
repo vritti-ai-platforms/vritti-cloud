@@ -1,12 +1,5 @@
 import type { TableResponse } from '@vritti/quantum-ui/api-response';
 import { z } from '@vritti/quantum-ui/zod';
-import type {
-  MatrixApp,
-  MatrixFeature,
-  MatrixMembership,
-  MatrixPermissionOption,
-  Platform as MatrixPlatform,
-} from './permission-matrix';
 
 type RoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
 
@@ -25,14 +18,41 @@ export interface Role {
 // A role's apps are derived from the permissions it grants, so the detail view is just the role
 export type RoleTemplateDetail = Role;
 
-// Matrix shapes are shared with plan unlocks — see schemas/admin/permission-matrix
-export type Platform = MatrixPlatform;
-export type FeaturePermissionOption = MatrixPermissionOption;
-export type RoleTemplateFeature = MatrixFeature;
-export type RoleTemplateApp = MatrixApp;
-export type RoleTemplateMembership = MatrixMembership;
+// Role-template matrix terminology = "grants" (a role GRANTS feature-permissions). Role-owned types (not shared).
+export type Platform = 'WEB' | 'MOBILE';
 
-// The matrix payload: apps carry their feature catalog + the role's nested memberships
+export interface RolePermissionOption {
+  featurePermissionId: string;
+  code: string;
+  label: string;
+}
+
+export interface RoleTemplateFeature {
+  id: string;
+  code: string;
+  name: string;
+  lucideIcon: string | null;
+  permissions: RolePermissionOption[];
+  platforms: Platform[];
+}
+
+// One per-platform grant = the role grants this feature on a platform, with the granted permission ids
+export interface RoleTemplateGrant {
+  featureId: string;
+  platform: Platform;
+  permissions: string[];
+}
+
+// One app (catalog) + the role's current grants nested under it
+export interface RoleTemplateApp {
+  id: string;
+  code: string;
+  name: string;
+  icon: string | null;
+  features: RoleTemplateFeature[];
+  grants: RoleTemplateGrant[];
+}
+
 export interface RoleTemplatePermissionsResponse {
   apps: RoleTemplateApp[];
 }
@@ -53,7 +73,7 @@ export const updateRoleTemplateSchema = z.object({
 });
 
 export const setPermissionsSchema = z.object({
-  memberships: z.array(
+  grants: z.array(
     z.object({
       featureId: z.string().uuid(),
       platform: z.enum(['WEB', 'MOBILE']),

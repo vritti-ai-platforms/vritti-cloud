@@ -49,7 +49,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
     super(database, planFeaturePermissions);
   }
 
-  // Returns the plan's platform-scoped unlock pairs (platform comes from the membership row)
+  // Returns the plan's platform-scoped unlock pairs (platform comes from the plan_feature row)
   async findGrantsByPlanId(planId: string): Promise<PlanUnlockGrant[]> {
     return this.db
       .select({
@@ -70,7 +70,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
     return rows.map((r) => r.id);
   }
 
-  // Bulk-inserts unlock grant entries (each carrying its plan_feature_id membership parent)
+  // Bulk-inserts unlocked-permission entries (each carrying its plan_feature_id parent)
   async bulkCreate(entries: NewPlanFeaturePermission[]): Promise<void> {
     if (entries.length === 0) return;
     await this.db.insert(planFeaturePermissions).values(entries);
@@ -128,7 +128,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
           ),
         ),
       )
-      .orderBy(apps.sortOrder, features.sortOrder, featurePermissions.sortOrder);
+      .orderBy(apps.name, features.sortOrder, featurePermissions.sortOrder);
 
     const appMap = new Map<string, AvailablePlanApp>();
     const featureMap = new Map<string, AvailablePlanFeature>();

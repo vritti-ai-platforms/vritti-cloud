@@ -103,7 +103,7 @@ export const OrganizationViewPage = () => {
         <CardContent>
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium">{org.planName}</span>
-            <Badge variant="outline" className="font-mono text-[10px]">
+            <Badge variant="outline" className="font-mono text-xs">
               {org.planCode}
             </Badge>
           </div>
@@ -125,14 +125,14 @@ export const OrganizationViewPage = () => {
             <div className="flex items-center gap-3">
               <MapPin className="size-4 text-muted-foreground" />
               <span className="text-sm">{org.regionName}</span>
-              <Badge variant="outline" className="font-mono text-[10px]">
+              <Badge variant="outline" className="font-mono text-xs">
                 {org.regionCode}
               </Badge>
             </div>
             <div className="flex items-center gap-3">
               <Cloud className="size-4 text-muted-foreground" />
               <span className="text-sm">{org.cloudProviderName}</span>
-              <Badge variant="outline" className="font-mono text-[10px]">
+              <Badge variant="outline" className="font-mono text-xs">
                 {org.cloudProviderCode}
               </Badge>
             </div>

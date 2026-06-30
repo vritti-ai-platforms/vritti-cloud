@@ -45,7 +45,7 @@ export const BUNodeCard = ({ data }: NodeProps<Node<BUNodeData>>) => {
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold truncate leading-tight">{data.name}</h3>
-            {data.code && <span className="text-[10px] font-mono text-muted-foreground">{data.code}</span>}
+            {data.code && <span className="text-xs font-mono text-muted-foreground">{data.code}</span>}
           </div>
         </div>
 
@@ -65,16 +65,16 @@ export const BUNodeCard = ({ data }: NodeProps<Node<BUNodeData>>) => {
 
       {/* Stats row */}
       <div className="flex items-center gap-2 mt-2">
-        <Badge variant="secondary" className={`text-[10px] ${typeBadge.className}`}>
+        <Badge variant="secondary" className={`text-xs ${typeBadge.className}`}>
           {typeBadge.label}
         </Badge>
         {data.childCount > 0 && (
-          <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
             <Building2 className="size-2.5" />
             {data.childCount}
           </span>
         )}
-        <span className="flex items-center gap-1 text-[10px] text-muted-foreground">
+        <span className="flex items-center gap-1 text-xs text-muted-foreground">
           <Users className="size-2.5" />0
         </span>
       </div>

@@ -5,25 +5,25 @@ import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/versi
 import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
 import {
   RoleTemplateFeatureRepository,
-  type RoleTemplateMembership,
+  type RoleTemplateGrant,
 } from '../repositories/role-template-feature.repository';
 import {
   type AvailableApp,
   RoleTemplateFeaturePermissionRepository,
 } from '../repositories/role-template-feature-permission.repository';
 
-// An app (catalog) plus the role's current memberships for its features
-export interface AppWithMemberships extends AvailableApp {
-  memberships: RoleTemplateMembership[];
+// An app (catalog) plus the role's current grants for its features
+export interface AppWithGrants extends AvailableApp {
+  grants: RoleTemplateGrant[];
 }
 
-// The matrix payload: apps carry both their feature catalog and the role's nested memberships
+// The matrix payload: apps carry both their feature catalog and the role's nested grants
 export interface RoleTemplatePermissionsResponse {
-  apps: AppWithMemberships[];
+  apps: AppWithGrants[];
 }
 
-// Composite key identifying a single per-platform feature membership
-function membershipKey(featureId: string, platform: RoleTemplateMembership['platform']): string {
+// Composite key identifying a single per-platform feature grant
+function cellKey(featureId: string, platform: RoleTemplateGrant['platform']): string {
   return `${featureId}:${platform}`;
 }
 
@@ -37,48 +37,46 @@ export class RoleTemplatePermissionService {
     private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionRepository,
   ) {}
 
-  // Returns the matrix — the business's app/feature catalog with the role's current memberships nested under each app
+  // Returns the matrix — the business's app/feature catalog with the role's current grants nested under each app
   async getPermissions(roleTemplateId: string): Promise<RoleTemplatePermissionsResponse> {
     const roleTemplate = await this.ensureRoleTemplate(roleTemplateId);
-    const [apps, memberships] = await Promise.all([
+    const [apps, grants] = await Promise.all([
       this.roleTemplateFeaturePermissionRepository.findAvailableApps(roleTemplate.versionId, roleTemplate.businessId),
       this.roleTemplateFeatureRepository.findByRoleTemplateId(roleTemplateId),
     ]);
 
     this.logger.log(
-      `Fetched permissions for role template ${roleTemplateId} (${apps.length} apps, ${memberships.length} memberships)`,
+      `Fetched permissions for role template ${roleTemplateId} (${apps.length} apps, ${grants.length} grants)`,
     );
-    return { apps: nestMembershipsUnderApps(apps, memberships) };
+    return { apps: nestGrantsUnderApps(apps, grants) };
   }
 
-  // Replaces the role's memberships + their nested action grants in one transaction (full delete-then-insert)
+  // Replaces the role's grants + their nested action permissions in one transaction (full delete-then-insert)
   async setPermissions(
     roleTemplateId: string,
     dto: AssignRoleTemplatePermissionsDto,
   ): Promise<{ success: true; message: string }> {
     const roleTemplate = await this.ensureRoleTemplate(roleTemplateId);
-    // The DTO's @ArrayUnique validator already guarantees one membership per (feature, platform)
-    const memberships = dto.memberships;
+    // The DTO's @ArrayUnique validator already guarantees one grant per (feature, platform)
+    const grants = dto.grants;
 
-    const permissionIds = [...new Set(memberships.flatMap((m) => m.permissions))];
+    const permissionIds = [...new Set(grants.flatMap((g) => g.permissions))];
     if (permissionIds.length > 0) {
       await this.validatePermissionsExist(permissionIds);
     }
 
     await this.roleTemplateFeatureRepository.transaction(async () => {
       await this.roleTemplateFeatureRepository.deleteByRoleTemplateId(roleTemplateId);
-      // Insert memberships first so each returned row id can parent its action grants
-      const inserted = await this.roleTemplateFeatureRepository.bulkCreate(
-        buildMembershipRows(roleTemplate, memberships),
-      );
-      const membershipIdByKey = new Map(inserted.map((row) => [membershipKey(row.featureId, row.platform), row.id]));
+      // Insert the feature rows first so each returned row id can parent its action permissions
+      const inserted = await this.roleTemplateFeatureRepository.bulkCreate(buildFeatureRows(roleTemplate, grants));
+      const roleFeatureIdByKey = new Map(inserted.map((row) => [cellKey(row.featureId, row.platform), row.id]));
       await this.roleTemplateFeaturePermissionRepository.bulkCreate(
-        buildGrantRows(roleTemplate, memberships, membershipIdByKey),
+        buildPermissionRows(roleTemplate, grants, roleFeatureIdByKey),
       );
     });
 
     this.logger.log(
-      `Set ${memberships.length} membership(s) + ${permissionIds.length} grant(s) for role template: ${roleTemplate.name} (${roleTemplateId})`,
+      `Set ${grants.length} grant(s) + ${permissionIds.length} permission(s) for role template: ${roleTemplate.name} (${roleTemplateId})`,
     );
     return { success: true, message: `Permissions for "${roleTemplate.name}" updated successfully.` };
   }
@@ -105,8 +103,8 @@ export class RoleTemplatePermissionService {
   }
 }
 
-// Nests each membership under the app that owns its feature (a feature pins to exactly one app)
-function nestMembershipsUnderApps(apps: AvailableApp[], memberships: RoleTemplateMembership[]): AppWithMemberships[] {
+// Nests each grant under the app that owns its feature (a feature pins to exactly one app)
+function nestGrantsUnderApps(apps: AvailableApp[], grants: RoleTemplateGrant[]): AppWithGrants[] {
   const appIdByFeatureId = new Map<string, string>();
   for (const app of apps) {
     for (const feature of app.features) {
@@ -114,47 +112,44 @@ function nestMembershipsUnderApps(apps: AvailableApp[], memberships: RoleTemplat
     }
   }
 
-  const membershipsByAppId = new Map<string, RoleTemplateMembership[]>();
-  for (const membership of memberships) {
-    const appId = appIdByFeatureId.get(membership.featureId);
+  const grantsByAppId = new Map<string, RoleTemplateGrant[]>();
+  for (const grant of grants) {
+    const appId = appIdByFeatureId.get(grant.featureId);
     if (!appId) continue;
-    const list = membershipsByAppId.get(appId) ?? [];
-    list.push(membership);
-    membershipsByAppId.set(appId, list);
+    const list = grantsByAppId.get(appId) ?? [];
+    list.push(grant);
+    grantsByAppId.set(appId, list);
   }
 
-  return apps.map((app) => ({ ...app, memberships: membershipsByAppId.get(app.id) ?? [] }));
+  return apps.map((app) => ({ ...app, grants: grantsByAppId.get(app.id) ?? [] }));
 }
 
-// Builds the membership rows (one per feature+platform) to insert for a role template
-function buildMembershipRows(
-  roleTemplate: RoleTemplate,
-  memberships: RoleTemplateMembership[],
-): NewRoleTemplateFeature[] {
-  return memberships.map((m) => ({
+// Builds the feature rows (one per feature+platform) to insert for a role template
+function buildFeatureRows(roleTemplate: RoleTemplate, grants: RoleTemplateGrant[]): NewRoleTemplateFeature[] {
+  return grants.map((g) => ({
     versionId: roleTemplate.versionId,
     roleTemplateId: roleTemplate.id,
     businessId: roleTemplate.businessId,
-    featureId: m.featureId,
-    platform: m.platform,
+    featureId: g.featureId,
+    platform: g.platform,
   }));
 }
 
-// Builds the action-grant rows, each linked to its parent membership row via membershipIdByKey
-function buildGrantRows(
+// Builds the action-permission rows, each linked to its parent feature row via roleFeatureIdByKey
+function buildPermissionRows(
   roleTemplate: RoleTemplate,
-  memberships: RoleTemplateMembership[],
-  membershipIdByKey: Map<string, string>,
+  grants: RoleTemplateGrant[],
+  roleFeatureIdByKey: Map<string, string>,
 ): NewRoleTemplateFeaturePermission[] {
   const rows: NewRoleTemplateFeaturePermission[] = [];
-  for (const m of memberships) {
-    const membershipId = membershipIdByKey.get(membershipKey(m.featureId, m.platform));
-    if (!membershipId) continue;
-    for (const featurePermissionId of new Set(m.permissions)) {
+  for (const g of grants) {
+    const roleTemplateFeatureId = roleFeatureIdByKey.get(cellKey(g.featureId, g.platform));
+    if (!roleTemplateFeatureId) continue;
+    for (const featurePermissionId of new Set(g.permissions)) {
       rows.push({
         versionId: roleTemplate.versionId,
         roleTemplateId: roleTemplate.id,
-        roleTemplateFeatureId: membershipId,
+        roleTemplateFeatureId,
         featurePermissionId,
       });
     }

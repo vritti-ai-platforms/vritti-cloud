@@ -47,8 +47,8 @@ export const relations = defineRelations(schema, (r) => ({
   organizations: {
     members: r.many.organizationMembers(),
     business: r.one.businesses({
-      from: r.organizations.businessId,
-      to: r.businesses.id,
+      from: r.organizations.businessCode,
+      to: r.businesses.code,
     }),
     country: r.one.countries({
       from: r.organizations.countryId,

@@ -1,6 +1,6 @@
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
-import type { MatrixApp, MatrixMembership } from '@/schemas/admin/permission-matrix';
+import type { BuMatrix, FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
 import type {
   BusinessUnit,
   BusinessUnitsResponse,
@@ -95,25 +95,23 @@ export interface BURoleAssignment {
   createdAt: string;
 }
 
-// Fetches the BU permission matrix — the plan ceiling with the BU's current allow-set nested as memberships
-export function getBuPermissionMatrix(orgId: string, buId: string): Promise<{ apps: MatrixApp[] }> {
-  return axios
-    .get<{ apps: MatrixApp[] }>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`)
-    .then((r) => r.data);
+// Fetches the BU permission matrix — snapshot-driven: all apps/features/permissions with per-platform lock state
+export function getBuPermissionMatrix(orgId: string, buId: string): Promise<BuMatrix> {
+  return axios.get<BuMatrix>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`).then((r) => r.data);
 }
 
-// Replaces the BU's unlocked-permission allow-list within the plan
+// Replaces the BU's unlock allow-list within the plan (code-keyed; backend clamps to the plan ceiling)
 export function setBuPermissions({
   orgId,
   buId,
-  memberships,
+  unlocks,
 }: {
   orgId: string;
   buId: string;
-  memberships: MatrixMembership[];
+  unlocks: FeatureUnlocks;
 }): Promise<SuccessResponse> {
   return axios
-    .put<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`, { memberships })
+    .put<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`, { unlocks })
     .then((r) => r.data);
 }
 

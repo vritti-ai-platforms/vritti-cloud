@@ -1,4 +1,4 @@
-import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
 import type { SetPermissionsData } from '@/schemas/admin/role-templates';
@@ -7,20 +7,16 @@ import { roleTemplateQueryKey } from './useRoleTemplate';
 import { roleTemplatePermissionsPrefixKey } from './useRoleTemplatePermissions';
 import { ROLE_TEMPLATES_QUERY_KEY } from './useRoleTemplates';
 
-type Vars = { versionId: string; businessId: string; roleId: string; data: SetPermissionsData };
-type UseSetRoleTemplatePermissionsOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, Vars>, 'mutationFn'>;
-
-// Replaces a role template's permissions and refreshes its detail + tables
-export function useSetRoleTemplatePermissions(options?: UseSetRoleTemplatePermissionsOptions) {
+// Replaces a role template's grants and refreshes its detail + tables. Ids are closed over, so callers submit
+// just the grant set ({ grants }).
+export function useSetRoleTemplatePermissions(versionId: string, businessId: string, roleId: string) {
   const queryClient = useQueryClient();
-  return useMutation<SuccessResponse, AxiosError, Vars>({
-    ...options,
-    mutationFn: setRoleTemplatePermissions,
-    onSuccess: (result, vars, ...args) => {
-      queryClient.invalidateQueries({ queryKey: roleTemplatePermissionsPrefixKey(vars.versionId, vars.roleId) });
-      queryClient.invalidateQueries({ queryKey: roleTemplateQueryKey(vars.versionId, vars.businessId, vars.roleId) });
-      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(vars.versionId, vars.businessId) });
-      options?.onSuccess?.(result, vars, ...args);
+  return useMutation<SuccessResponse, AxiosError, SetPermissionsData>({
+    mutationFn: (data) => setRoleTemplatePermissions({ versionId, businessId, roleId, data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: roleTemplatePermissionsPrefixKey(versionId, roleId) });
+      queryClient.invalidateQueries({ queryKey: roleTemplateQueryKey(versionId, businessId, roleId) });
+      queryClient.invalidateQueries({ queryKey: ROLE_TEMPLATES_QUERY_KEY(versionId, businessId) });
     },
   });
 }

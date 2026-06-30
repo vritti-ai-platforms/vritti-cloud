@@ -146,7 +146,7 @@ export const RegionViewPage = () => {
                       <div className="flex flex-col gap-0.5">
                         <span className="text-sm">{provider.name}</span>
                         <div className="flex items-center gap-2">
-                          <Badge variant="outline" className="font-mono text-[10px]">
+                          <Badge variant="outline" className="font-mono text-xs">
                             {provider.code}
                           </Badge>
                           {!!provider.deploymentCount && (

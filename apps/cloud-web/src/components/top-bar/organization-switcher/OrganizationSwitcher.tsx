@@ -45,7 +45,7 @@ export const OrganizationSwitcher = ({ currentOrgId, currentOrgName }: Organizat
         >
           <span className="flex-1 text-left truncate">{option.label}</span>
           {option.description && (
-            <span className="shrink-0 rounded-full border border-border px-1.5 py-px text-[10px] font-medium uppercase tracking-wider">
+            <span className="shrink-0 rounded-full border border-border px-1.5 py-px text-xs font-medium uppercase tracking-wider">
               {option.description}
             </span>
           )}

@@ -4,8 +4,8 @@ import { eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewPlanFeature } from '@/db/schema';
 import { planFeaturePermissions, planFeatures } from '@/db/schema';
 
-// A plan's per-platform feature membership with the action permissions unlocked under it
-export interface PlanMembership {
+// A plan's per-platform feature unlock with the action permissions unlocked under it
+export interface PlanUnlock {
   featureId: string;
   platform: AppPlatform;
   permissions: string[];
@@ -17,9 +17,9 @@ export class PlanFeatureRepository extends PrimaryBaseRepository<typeof planFeat
     super(database, planFeatures);
   }
 
-  // Returns the plan's memberships (feature, platform) with their unlocked permission ids aggregated per membership.
-  // The empty array for a member with no unlocks (LEFT JOIN miss) is preserved via FILTER + COALESCE — included/view-only.
-  async findByPlanId(planId: string): Promise<PlanMembership[]> {
+  // Returns the plan's unlocks (feature, platform) with their unlocked permission ids aggregated per unlock.
+  // The empty array for an unlock with no permissions (LEFT JOIN miss) is preserved via FILTER + COALESCE (view-only).
+  async findByPlanId(planId: string): Promise<PlanUnlock[]> {
     return this.db
       .select({
         featureId: planFeatures.featureId,
@@ -35,12 +35,12 @@ export class PlanFeatureRepository extends PrimaryBaseRepository<typeof planFeat
       .orderBy(planFeatures.featureId, planFeatures.platform);
   }
 
-  // Deletes all memberships for a plan (cascades its unlock grants)
+  // Deletes all unlocks for a plan (cascades its unlocked permissions)
   async deleteByPlanId(planId: string): Promise<void> {
     await this.db.delete(planFeatures).where(eq(planFeatures.planId, planId));
   }
 
-  // Bulk-inserts memberships, returning each inserted row so the caller can map unlock grants onto them
+  // Bulk-inserts unlocks, returning each inserted row so the caller can map permission ids onto them
   async bulkCreate(
     entries: NewPlanFeature[],
   ): Promise<Array<{ id: string; featureId: string; platform: AppPlatform }>> {

@@ -99,7 +99,7 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Version, unknown>[] {
       accessorKey: 'version',
       header: 'Version',
       cell: ({ row }) => (
-        <Badge variant="outline" className="font-mono text-[10px] font-medium">
+        <Badge variant="outline" className="font-mono text-xs font-medium">
           {row.original.version}
         </Badge>
       ),

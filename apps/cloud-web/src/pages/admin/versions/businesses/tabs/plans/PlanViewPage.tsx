@@ -9,10 +9,10 @@ import { CreditCard } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Plan } from '@/schemas/admin/plans';
+import { PlanStats } from './components/PlanStats';
 import { EditPlanForm } from './forms/EditPlanForm';
 import { AppsAndFeaturesTab } from './tabs/AppsAndFeaturesTab';
 import { ContentTab } from './tabs/ContentTab';
-import { PlanStats } from './tabs/PlanStats';
 import { PricesTab } from './tabs/PricesTab';
 
 // Builds a specific warning listing what blocks deletion

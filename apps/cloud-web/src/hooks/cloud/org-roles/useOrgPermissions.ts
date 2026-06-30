@@ -1,15 +1,15 @@
 import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { OrgPermissionGroup } from '@/schemas/cloud/org-roles';
+import type { BuMatrix } from '@/schemas/cloud/bu-matrix';
 import { getOrgPermissions } from '../../../services/cloud/org-permissions.service';
 
 const ORG_PERMISSIONS_QUERY_KEY = (orgId: string) => ['organizations', orgId, 'permissions'] as const;
 
-type UseOrgPermissionsOptions = Omit<UseQueryOptions<OrgPermissionGroup[], AxiosError>, 'queryKey' | 'queryFn'>;
+type UseOrgPermissionsOptions = Omit<UseQueryOptions<BuMatrix, AxiosError>, 'queryKey' | 'queryFn'>;
 
-// Fetches permissions grouped by app for the role permission picker
+// Fetches the org's snapshot-driven apps/features/permissions catalog for the role permission picker
 export function useOrgPermissions(orgId: string, options?: UseOrgPermissionsOptions) {
-  return useQuery<OrgPermissionGroup[], AxiosError>({
+  return useQuery<BuMatrix, AxiosError>({
     queryKey: ORG_PERMISSIONS_QUERY_KEY(orgId),
     queryFn: () => getOrgPermissions(orgId),
     enabled: !!orgId,

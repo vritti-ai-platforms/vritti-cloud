@@ -26,7 +26,7 @@ export const AppNode: React.FC<AppNodeProps> = ({ app, featureByCode }) => {
         </div>
         <div className="min-w-0">
           <span className="text-sm font-semibold block truncate">{app.name}</span>
-          <span className="text-[11px] text-muted-foreground font-mono">{app.code}</span>
+          <span className="text-xs text-muted-foreground font-mono">{app.code}</span>
         </div>
         <Badge variant="outline" className="ml-auto mr-2 shrink-0 text-xs tabular-nums">
           {app.features.length}

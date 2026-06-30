@@ -1,29 +1,29 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
 import {
   getPlanMatrix,
   type PlanMatrixApp,
-  type PlanMembership,
+  type PlanUnlock,
   setPlanUnlocked,
 } from '@/services/admin/versions/businesses/plans/permissions.service';
 
-export type PlanUnlockPayload = { memberships: PlanMembership[] };
+export type PlanUnlockPayload = { unlocks: PlanUnlock[] };
 
 function matrixKey(planId: string) {
   return ['admin', 'plan-permissions', planId, 'matrix'] as const;
 }
 
-// Fetches the plan matrix — apps (catalog) each with the plan's current memberships nested under it
-export function usePlanMatrix(versionId: string, businessId: string, planId: string) {
-  return useQuery<{ apps: PlanMatrixApp[] }, AxiosError>({
+// Fetches the plan unlock matrix — apps (catalog) each with the plan's current unlocks nested. Suspense so the
+// editor mounts with data already present (and can seed react-hook-form defaultValues directly).
+export function usePlanUnlocks(versionId: string, businessId: string, planId: string) {
+  return useSuspenseQuery<{ apps: PlanMatrixApp[] }, AxiosError>({
     queryKey: matrixKey(planId),
     queryFn: () => getPlanMatrix(versionId, businessId, planId),
-    enabled: !!versionId && !!businessId && !!planId,
   });
 }
 
-// Saves the plan's memberships (each with its unlocked permissions)
+// Saves the plan's unlocks (each with its unlocked permissions)
 export function useSetPlanUnlocked(versionId: string, businessId: string, planId: string) {
   const queryClient = useQueryClient();
   return useMutation<SuccessResponse, AxiosError, PlanUnlockPayload>({

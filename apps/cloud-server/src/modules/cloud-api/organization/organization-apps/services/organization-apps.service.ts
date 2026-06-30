@@ -1,17 +1,20 @@
+import { BusinessRepository } from '@domain/business/repositories/business.repository';
+import { buildBuMatrix } from '@domain/catalog/bu-matrix.builder';
 import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { PlanFeaturePermissionRepository } from '@domain/plan/repositories/plan-feature-permission.repository';
 import { AppRepository } from '@domain/version/business/app/root/repositories/app.repository';
 import { VersionRepository } from '@domain/version/root/repositories/version.repository';
+import type { VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
 import type { Deployment, Organization } from '@/db/schema';
+import type { BuMatrixResponseDto } from '@/modules/cloud-api/organization/organization-business-units/dto/response/bu-matrix.response.dto';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import type { PurchaseAddonDto } from '../dto/request/purchase-addon.dto';
 import type {
   OrgAppFeatureDto,
   OrgAppItemResponseDto,
   OrgAppListResponseDto,
-  OrgPermissionsResponseDto,
 } from '../dto/response/org-app-list.response.dto';
 
 @Injectable()
@@ -24,18 +27,20 @@ export class OrganizationAppsService {
     private readonly planFeaturePermissionRepository: PlanFeaturePermissionRepository,
     private readonly appRepository: AppRepository,
     private readonly versionRepository: VersionRepository,
+    private readonly businessRepository: BusinessRepository,
   ) {}
 
   // Lists the business's apps with their plan status — 'included' when the plan unlocks ≥1 of the app's features
   async listApps(orgId: string): Promise<OrgAppListResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const versionId = await this.resolveVersionId(deployment);
-    const planId = await this.resolveOrgPlanId(org, versionId);
+    const businessId = await this.resolveBusinessId(org);
+    const planId = await this.resolveOrgPlanId(businessId, versionId, org.planCode);
 
     const [availableApps, unlocked, businessApps] = await Promise.all([
-      this.planFeaturePermissionRepository.findAvailableApps(versionId, org.businessId),
+      this.planFeaturePermissionRepository.findAvailableApps(versionId, businessId),
       this.resolveUnlockedSet(planId),
-      this.appRepository.findByBusiness(versionId, org.businessId),
+      this.appRepository.findByBusiness(versionId, businessId),
     ]);
     const availByCode = new Map(availableApps.map((a) => [a.code, a]));
 
@@ -91,35 +96,18 @@ export class OrganizationAppsService {
     return { success: true, message: `Addon '${app.name}' cancelled for business unit.` };
   }
 
-  // Returns the org's unlocked features grouped by their app (the role form's assignable permission source)
-  async getPermissions(orgId: string): Promise<OrgPermissionsResponseDto> {
+  // The org's full apps/features/permissions catalog from the version snapshot — the role form's permission source.
+  // Shows everything (incl. plan-locked) with per-platform inPlan/availableIn, so the picker can render upsell.
+  async getPermissions(orgId: string): Promise<BuMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    const versionId = await this.resolveVersionId(deployment);
-    const planId = await this.resolveOrgPlanId(org, versionId);
-
-    const [availableApps, unlocked] = await Promise.all([
-      this.planFeaturePermissionRepository.findAvailableApps(versionId, org.businessId),
-      this.resolveUnlockedSet(planId),
-    ]);
-
-    // Keep only features (and apps) that have at least one unlocked permission
-    const apps = availableApps
-      .map((app) => ({
-        appId: app.id,
-        appCode: app.code,
-        appName: app.name,
-        features: app.features
-          .map((f) => ({
-            code: f.code,
-            name: f.name,
-            permissions: f.permissions.filter((p) => unlocked.has(p.featurePermissionId)).map((p) => p.code),
-          }))
-          .filter((f) => f.permissions.length > 0),
-      }))
-      .filter((a) => a.features.length > 0);
-
-    this.logger.log(`Resolved permissions for ${apps.length} apps in org ${orgId}`);
-    return { apps };
+    const version = await this.versionRepository.findByVersion(deployment.version);
+    const snapshot = version?.snapshot as VersionSnapshot | null;
+    if (!snapshot) {
+      throw new NotFoundException('No snapshot available for this deployment.');
+    }
+    const matrix = buildBuMatrix(snapshot, org.businessCode, org.planCode, undefined);
+    this.logger.log(`Resolved permission catalog (${matrix.apps.length} apps) for org ${orgId}`);
+    return matrix;
   }
 
   // Returns the plan's unlocked feature-permission ids (unlocked on any platform) as a set
@@ -129,9 +117,18 @@ export class OrganizationAppsService {
     return new Set(ids);
   }
 
+  // Resolves the org's business id from its version-portable business code
+  private async resolveBusinessId(org: Organization): Promise<string> {
+    const business = await this.businessRepository.findByCode(org.businessCode);
+    if (!business) {
+      throw new NotFoundException('Business not found for this organization.');
+    }
+    return business.id;
+  }
+
   // Resolves the org's plan id from (version, business, planCode); undefined if the plan can't be resolved
-  private async resolveOrgPlanId(org: Organization, versionId: string): Promise<string | undefined> {
-    const plan = await this.planRepository.findByVersionBusinessCode(versionId, org.businessId, org.planCode);
+  private async resolveOrgPlanId(businessId: string, versionId: string, planCode: string): Promise<string | undefined> {
+    const plan = await this.planRepository.findByVersionBusinessCode(versionId, businessId, planCode);
     return plan?.id;
   }
 

@@ -5,6 +5,7 @@ export interface VersionScope {
   versionId: string;
   businessId: string;
   planId: string;
+  roleTemplateId: string;
 }
 
 const VersionScopeContext = createContext<VersionScope | null>(null);
@@ -15,10 +16,16 @@ export const VersionScopeProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const { id: versionId } = useSlugParams('versionSlug');
   const { id: businessId } = useSlugParams('businessSlug');
   const { id: planId } = useSlugParams('planSlug');
+  const { id: roleTemplateId } = useSlugParams('roleTemplateSlug');
 
   const value = useMemo<VersionScope>(
-    () => ({ versionId: versionId ?? '', businessId: businessId ?? '', planId: planId ?? '' }),
-    [versionId, businessId, planId],
+    () => ({
+      versionId: versionId ?? '',
+      businessId: businessId ?? '',
+      planId: planId ?? '',
+      roleTemplateId: roleTemplateId ?? '',
+    }),
+    [versionId, businessId, planId, roleTemplateId],
   );
 
   return <VersionScopeContext.Provider value={value}>{children}</VersionScopeContext.Provider>;
