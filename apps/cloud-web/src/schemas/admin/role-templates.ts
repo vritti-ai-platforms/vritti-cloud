@@ -3,6 +3,7 @@ import { z } from '@vritti/quantum-ui/zod';
 
 export interface Role {
   id: string;
+  code: string;
   name: string;
   description: string | null;
   businessId: string;
@@ -57,6 +58,10 @@ export interface RoleTemplatePermissionsResponse {
 export type RoleTemplatesTableResponse = TableResponse<Role>;
 
 export const createRoleTemplateSchema = z.object({
+  code: z
+    .string()
+    .transform((v) => v.trim().toLowerCase())
+    .pipe(z.string().regex(/^[a-z][a-z0-9-]*$/, 'Single lowercase word (hyphens allowed)')),
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
   versionId: z.string().uuid('App version is required'),

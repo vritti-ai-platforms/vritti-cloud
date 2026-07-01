@@ -58,7 +58,7 @@ export class CoreRoleService {
     return result;
   }
 
-  // Provisions role templates for an organization in core (idempotent — core skips existing by sourceRoleId)
+  // Provisions role templates for an organization in core (idempotent — core upserts existing by code)
   async provisionRoles(
     url: string,
     webhookSecret: string,

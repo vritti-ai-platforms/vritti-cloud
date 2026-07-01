@@ -100,7 +100,7 @@ export class OrganizationBusinessUnitsController {
   async assignRole(
     @Param('orgId') orgId: string,
     @Param('buId') buId: string,
-    @Body() data: { userId: string; orgRoleId: string },
+    @Body() data: { userId: string; roleId: string },
   ): Promise<SuccessResponseDto> {
     this.logger.log(`POST /organizations/${orgId}/business-units/${buId}/role-assignments`);
     return this.orgBuService.assignRole(orgId, buId, data);

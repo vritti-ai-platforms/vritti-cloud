@@ -11,6 +11,8 @@ export const roleTemplates = cloudSchema.table(
     versionId: uuid('version_id')
       .notNull()
       .references(() => versions.id, { onDelete: 'cascade' }),
+    // Stable single-word kebab code — the durable link to provisioned org roles (survives renames, unlike id)
+    code: varchar('code', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
     businessId: uuid('business_id')
@@ -19,8 +21,11 @@ export const roleTemplates = cloudSchema.table(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },
-  // Role templates are per business — a name is unique within (version, business), not across the whole version
-  (table) => [uniqueIndex('role_template_version_business_name_idx').on(table.versionId, table.businessId, table.name)],
+  // Role templates are per business — name and code are each unique within (version, business)
+  (table) => [
+    uniqueIndex('role_template_version_business_name_idx').on(table.versionId, table.businessId, table.name),
+    uniqueIndex('role_template_version_business_code_idx').on(table.versionId, table.businessId, table.code),
+  ],
 );
 
 export type RoleTemplate = typeof roleTemplates.$inferSelect;

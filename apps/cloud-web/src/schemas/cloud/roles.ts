@@ -5,15 +5,22 @@ export interface Role {
   id: string;
   name: string;
   description: string | null;
+  // Non-null when provisioned from a role template — its presence marks the role as a read-only "default" role
+  code: string | null;
   // featureCode → { web?: permCodes, mobile?: permCodes } — per-platform grant (mirrors the snapshot/role webhook)
   features: FeatureUnlocks;
-  isLocked: boolean;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
 
+// A role is a read-only "default" role when it carries a template code; codeless roles are custom + editable
+export function isDefaultRole(role: Pick<Role, 'code'>): boolean {
+  return Boolean(role.code);
+}
+
 export interface RoleTemplate {
+  code: string;
   name: string;
   description?: string;
   features: FeatureUnlocks;
@@ -26,11 +33,11 @@ const featureUnlocksSchema = z.record(
 );
 
 export const createRoleSchema = z.object({
+  // Present only on the template-provision path; its presence makes the created role a read-only default role
+  code: z.string().optional(),
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().max(500, 'Description must be 500 characters or less').optional(),
   features: featureUnlocksSchema,
-  // Default (template-seeded) roles are read-only; custom roles are editable
-  isLocked: z.boolean().optional(),
 });
 
 export const updateRoleSchema = z.object({

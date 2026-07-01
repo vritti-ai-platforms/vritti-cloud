@@ -9,7 +9,7 @@ import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { KeyRound, Layers, Shield } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { Role } from '@/schemas/cloud/roles';
+import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
 import { EditRoleDetailsForm } from './components/EditRoleDetailsForm';
 import { RoleGrantsView } from './components/RoleGrantsView';
 import { RolePermissionForm } from './components/RolePermissionForm';
@@ -72,6 +72,7 @@ export const RoleViewPage = () => {
   }
 
   const stats = summarize(role.features);
+  const isDefault = isDefaultRole(role);
 
   // Confirm then delete, returning to the roles list
   const handleDelete = async () => {
@@ -91,7 +92,7 @@ export const RoleViewPage = () => {
         title={role.name}
         description={role.description || 'Manage this role'}
         actions={
-          !role.isLocked && (
+          !isDefault && (
             <Button variant="outline" size="sm" onClick={editDialog.open}>
               Edit
             </Button>
@@ -104,13 +105,13 @@ export const RoleViewPage = () => {
         <StatCard icon={<Layers className="size-6" />} label="Features" value={stats.features} />
       </div>
 
-      {role.isLocked ? (
+      {isDefault ? (
         <RoleGrantsView orgId={orgId} features={role.features} />
       ) : (
         <RolePermissionForm orgId={orgId} role={role} />
       )}
 
-      {!role.isLocked && (
+      {!isDefault && (
         <DangerZone
           title="Delete this role"
           description="This action cannot be undone. All associated permission assignments will be removed."

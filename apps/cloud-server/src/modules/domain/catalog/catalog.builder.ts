@@ -52,8 +52,8 @@ export interface FeatureCatalogEntry {
 // Role template pushed to core for provisioning (matches core RoleItemDto)
 export interface RoleItem {
   name: string;
-  sourceRoleId: string;
-  isLocked: boolean;
+  // Stable link to the provisioned org role (the template's code) — also marks it as a read-only default role
+  code: string;
   // featureCode -> { app: appCode, web?: [permCode…], mobile?: [permCode…] }
   features: Record<string, { app: string; web?: string[]; mobile?: string[] }>;
 }
@@ -79,16 +79,25 @@ export function buildBuCatalog(
       .map((code) => snapshot.features?.[code])
       .filter((f): f is SnapshotFeature => !!f && !!(f.microfrontends?.web || f.microfrontends?.mobile));
 
-    // A feature is included only if the plan includes it (membership key present, even with zero unlocked actions).
-    // Apps are DERIVED: shown only if they own at least one member feature.
-    const memberFeatures = businessAppFeatures.filter((f) => isPlanMember(plan?.unlockedPermissions?.[f.code]));
-    if (memberFeatures.length === 0) continue;
+    if (businessAppFeatures.length === 0) continue;
 
-    for (const feature of memberFeatures) {
+    // Emit EVERY business feature so a role's grant on a plan-omitted feature still resolves (rendered as a locked
+    // tile with an upsell) instead of vanishing. Core filters the catalog down to what the user's role grants.
+    for (const feature of businessAppFeatures) {
       const membership = plan?.unlockedPermissions?.[feature.code];
-      // Gate each platform's route by per-platform membership (member on web but not mobile → mobile omitted)
-      const web = membership?.web !== undefined ? feature.microfrontends?.web : undefined;
-      const mobile = membership?.mobile !== undefined ? feature.microfrontends?.mobile : undefined;
+      const isMember = isPlanMember(membership);
+      // Member: gate each platform's route by per-platform plan membership (member on web but not mobile → omit mobile).
+      // Non-member (dormant): expose the route wherever the feature ships so it renders as a fully-locked tile.
+      const web = isMember
+        ? membership?.web !== undefined
+          ? feature.microfrontends?.web
+          : undefined
+        : feature.microfrontends?.web;
+      const mobile = isMember
+        ? membership?.mobile !== undefined
+          ? feature.microfrontends?.mobile
+          : undefined
+        : feature.microfrontends?.mobile;
 
       const permissions = buildPermissions(feature, businessCode, membership, buUnlocks, plans);
       const locked = permissions.length === 0 ? true : permissions.every((p) => p.locked);
@@ -200,8 +209,7 @@ export function buildBuRoles(snapshot: VersionSnapshot, businessCode: string | u
   if (!business) return [];
   return business.roleTemplates.map((r) => ({
     name: r.name,
-    sourceRoleId: r.sourceRoleId,
-    isLocked: false,
+    code: r.code,
     features: r.features,
   }));
 }

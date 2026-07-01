@@ -5,6 +5,9 @@ export class RoleTemplateDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   id: string;
 
+  @ApiProperty({ example: 'cashier' })
+  code: string;
+
   @ApiProperty({ example: 'Chef' })
   name: string;
 
@@ -24,6 +27,7 @@ export class RoleTemplateDto {
   static from(roleTemplate: RoleTemplate): RoleTemplateDto {
     const dto = new RoleTemplateDto();
     dto.id = roleTemplate.id;
+    dto.code = roleTemplate.code;
     dto.name = roleTemplate.name;
     dto.description = roleTemplate.description;
     dto.businessId = roleTemplate.businessId;

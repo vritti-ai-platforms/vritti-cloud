@@ -16,6 +16,7 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
       .select({
         id: roleTemplates.id,
         versionId: roleTemplates.versionId,
+        code: roleTemplates.code,
         name: roleTemplates.name,
         description: roleTemplates.description,
         businessId: roleTemplates.businessId,
@@ -32,6 +33,7 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
     return {
       id: row.id,
       versionId: row.versionId,
+      code: row.code,
       name: row.name,
       description: row.description,
       businessId: row.businessId,
@@ -52,6 +54,7 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
       .select({
         id: roleTemplates.id,
         versionId: roleTemplates.versionId,
+        code: roleTemplates.code,
         name: roleTemplates.name,
         description: roleTemplates.description,
         businessId: roleTemplates.businessId,
@@ -83,6 +86,7 @@ export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTem
       result: rows.map((row) => ({
         id: row.id,
         versionId: row.versionId,
+        code: row.code,
         name: row.name,
         description: row.description,
         businessId: row.businessId,

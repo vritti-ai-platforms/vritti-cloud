@@ -19,7 +19,7 @@ export interface CoreBusinessUnit {
 export interface BuRoleAssignment {
   id: string;
   userId: string;
-  orgRoleId: string;
+  roleId: string;
   businessUnitId: string;
   assignmentType: string;
   createdAt: Date;
@@ -33,8 +33,7 @@ export interface CoreRole {
   organizationId: string;
   name: string;
   description: string | null;
-  sourceRoleId: string | null;
-  isLocked: boolean;
+  code: string | null;
   appCodes: string[];
   features: Record<string, string[]>;
   isActive: boolean;

@@ -60,7 +60,7 @@ export function assignBURole({
 }: {
   orgId: string;
   buId: string;
-  data: { userId: string; orgRoleId: string };
+  data: { userId: string; roleId: string };
 }): Promise<SuccessResponse> {
   return axios
     .post<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/role-assignments`, data)
@@ -85,7 +85,7 @@ export function removeBURoleAssignment({
 export interface BURoleAssignment {
   id: string;
   userId: string;
-  orgRoleId: string;
+  roleId: string;
   businessUnitId: string;
   assignmentType: string;
   isActive: boolean;

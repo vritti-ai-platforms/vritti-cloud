@@ -178,7 +178,7 @@ export class OrganizationBusinessUnitsService {
   async assignRole(
     orgId: string,
     buId: string,
-    data: { userId: string; orgRoleId: string },
+    data: { userId: string; roleId: string },
   ): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
@@ -189,7 +189,7 @@ export class OrganizationBusinessUnitsService {
         org.orgIdentifier,
         data.userId,
         {
-          orgRoleId: data.orgRoleId,
+          roleId: data.roleId,
           businessUnitId: buId,
         },
       );

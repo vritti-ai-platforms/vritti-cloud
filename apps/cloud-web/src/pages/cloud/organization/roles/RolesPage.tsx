@@ -7,7 +7,7 @@ import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Copy, Plus, Shield } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import type { Role } from '@/schemas/cloud/roles';
+import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
 import { AddRoleForm } from './components/AddRoleForm';
 import { RoleCard } from './components/RoleCard';
 import { TemplatePickerDialog } from './components/TemplatePickerDialog';
@@ -40,8 +40,8 @@ export const RolesPage = () => {
     if (confirmed) deleteMutation.mutate({ orgId, roleId: role.id });
   }
 
-  const systemRoles = roles.filter((r) => r.isLocked);
-  const customRoles = roles.filter((r) => !r.isLocked);
+  const systemRoles = roles.filter(isDefaultRole);
+  const customRoles = roles.filter((r) => !isDefaultRole(r));
 
   const actions = (
     <div className="flex gap-2">

@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateRoleTemplateDto {
   @ApiProperty({
@@ -8,6 +9,16 @@ export class CreateRoleTemplateDto {
   })
   @IsUUID()
   versionId: string;
+
+  @ApiProperty({
+    description: 'Stable role code — a single lowercase word (hyphens allowed). The durable link to provisioned org roles.',
+    example: 'cashier',
+  })
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
+  @IsString()
+  @Matches(/^[a-z][a-z0-9-]*$/, { message: 'code must be a single lowercase word (hyphens allowed)' })
+  @MaxLength(255)
+  code: string;
 
   @ApiProperty({ description: 'Display name of the role template', example: 'Chef' })
   @IsString()

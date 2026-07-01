@@ -83,7 +83,8 @@ export interface SnapshotApp {
 }
 export interface SnapshotRoleTemplate {
   name: string;
-  sourceRoleId: string;
+  // Stable link to provisioned org roles (the template's code, not its id)
+  code: string;
   // featureCode -> { app: appCode, web?: [permCode…], mobile?: [permCode…] } — grants split per platform, app stamped
   features: Record<string, { app: string; web?: string[]; mobile?: string[] }>;
 }
@@ -293,7 +294,7 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
     if (!code) continue;
     ensure(code).roleTemplates.push({
       name: r.name,
-      sourceRoleId: r.id,
+      code: r.code,
       features: buildRoleFeatures(r.id, index),
     });
   }

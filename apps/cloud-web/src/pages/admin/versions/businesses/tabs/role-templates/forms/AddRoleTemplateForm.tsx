@@ -20,6 +20,7 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ onSucc
   const form = useForm<CreateRoleTemplateData>({
     resolver: zodResolver(createRoleTemplateSchema),
     defaultValues: {
+      code: '',
       name: '',
       description: '',
       versionId: versionId ?? '',
@@ -30,6 +31,7 @@ export const AddRoleTemplateForm: React.FC<AddRoleTemplateFormProps> = ({ onSucc
 
   return (
     <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
+      <TextField name="code" label="Code" placeholder="e.g. cashier" />
       <TextField name="name" label="Role Name" placeholder="e.g. Sales Manager" />
       <TextField name="description" label="Description" placeholder="Optional description" />
       <DialogActions>

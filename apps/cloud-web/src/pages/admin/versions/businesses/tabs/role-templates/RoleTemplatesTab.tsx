@@ -2,7 +2,7 @@ import { ROLE_TEMPLATES_QUERY_KEY, useRoleTemplates } from '@hooks/admin/version
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
+import { type ColumnDef, DataTable, RowActions, StringCell, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { buildSlug } from '@vritti/quantum-ui/slug';
@@ -81,6 +81,11 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Role, unknown>[] {
     {
       accessorKey: 'name',
       header: 'Role Template',
+    },
+    {
+      accessorKey: 'code',
+      header: 'Code',
+      cell: ({ row }) => <StringCell value={row.original.code} mono />,
     },
     {
       accessorKey: 'permissionCount',

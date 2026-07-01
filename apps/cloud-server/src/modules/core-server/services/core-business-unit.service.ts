@@ -94,7 +94,7 @@ export class CoreBusinessUnitService {
     webhookSecret: string,
     orgId: string,
     userId: string,
-    data: { orgRoleId: string; businessUnitId: string },
+    data: { roleId: string; businessUnitId: string },
   ): Promise<SuccessResponseDto> {
     const result = await this.http.post<SuccessResponseDto>(
       url,

@@ -2,6 +2,7 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { CompactSwitch } from '@vritti/quantum-ui/Switch';
+import { Tooltip } from '@vritti/quantum-ui/Tooltip';
 import { Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
@@ -45,6 +46,16 @@ function lockedOnPlatform(feature: BuMatrixFeature, platform: MatrixPlatform): b
   return feature.platforms.includes(platform) && inPlanCodes(feature, platform).length === 0;
 }
 
+// Tooltip body for a lock chip — lists the plans that unlock it (or a fallback when none do)
+function lockTooltip(plans: string[]): React.ReactNode {
+  if (plans.length === 0) return 'Not included in your plan';
+  return (
+    <span>
+      Available in <span className="font-semibold">{plans.join(', ')}</span>
+    </span>
+  );
+}
+
 // Plan names that would unlock this feature on a given platform (union across its locked cells) — the upsell
 function platformUpsell(feature: BuMatrixFeature, platform: MatrixPlatform): string[] {
   const names = new Set<string>();
@@ -81,11 +92,12 @@ function Cell({
     return null;
   }
   if (!cell.inPlan) {
-    const tip = cell.availableIn.length ? `Available in ${cell.availableIn.join(', ')}` : 'Not in your plan';
     return (
-      <span title={tip} className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
-        <Lock className="size-3" />
-      </span>
+      <Tooltip content={lockTooltip(cell.availableIn)}>
+        <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
+          <Lock className="size-3" />
+        </span>
+      </Tooltip>
     );
   }
   if (!member) {
@@ -111,8 +123,11 @@ function FeatureBlock({
   readOnly?: boolean;
 }) {
   const locked = !feature.inPlan;
-  // Reveal the permission rows only when a switch is on — collapse for plan-locked or switched-off features
-  const expanded = isMember(feature.code, 'web') || isMember(feature.code, 'mobile');
+  // Every platform the feature ships on is plan-locked — nothing here is actionable
+  const fullyLocked = feature.platforms.length > 0 && feature.platforms.every((p) => lockedOnPlatform(feature, p));
+  // Reveal the permission rows only when a switch is on — collapse for plan-locked or switched-off features.
+  // In read-only mode a locked feature may still carry grants, so also collapse when it's fully locked.
+  const expanded = (isMember(feature.code, 'web') || isMember(feature.code, 'mobile')) && !(readOnly && fullyLocked);
   // Plan names unlocking this feature (across platforms) — shown as the right-aligned upsell when locked
   const upsell = [...new Set([...platformUpsell(feature, 'web'), ...platformUpsell(feature, 'mobile')])];
 
@@ -139,16 +154,13 @@ function FeatureBlock({
               return <div key={platform} className="w-24" />;
             }
             if (lockedOnPlatform(feature, platform)) {
-              const up = platformUpsell(feature, platform);
-              const tip = up.length ? `Available in ${up.join(', ')}` : 'Not in your plan';
               return (
                 <div key={platform} className="flex w-24 justify-center">
-                  <span
-                    title={tip}
-                    className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning"
-                  >
-                    <Lock className="size-3" />
-                  </span>
+                  <Tooltip content={lockTooltip(platformUpsell(feature, platform))}>
+                    <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
+                      <Lock className="size-3" />
+                    </span>
+                  </Tooltip>
                 </div>
               );
             }

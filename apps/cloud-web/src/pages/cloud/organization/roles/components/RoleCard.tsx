@@ -4,7 +4,7 @@ import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { ArrowRight, KeyRound, Layers, Lock, Monitor, MoreVertical, Shield, Smartphone, Trash2 } from 'lucide-react';
 import type React from 'react';
-import type { Role } from '@/schemas/cloud/roles';
+import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
 
 interface RoleCardProps {
   role: Role;
@@ -28,6 +28,7 @@ function summarize(features: Role['features']) {
 // A role summary card — the footer "View" affordance opens the view page; the ⋮ menu (custom roles only) deletes.
 export const RoleCard: React.FC<RoleCardProps> = ({ role, onView, onDelete }) => {
   const s = summarize(role.features);
+  const isDefault = isDefaultRole(role);
 
   return (
     <div className="group relative flex flex-col rounded-xl border bg-card text-left shadow-sm transition-all hover:shadow-md">
@@ -35,15 +36,15 @@ export const RoleCard: React.FC<RoleCardProps> = ({ role, onView, onDelete }) =>
       <div className="flex items-start gap-3 p-5">
         <div
           className={`flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors ${
-            role.isLocked ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary group-hover:bg-primary/15'
+            isDefault ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary group-hover:bg-primary/15'
           }`}
         >
-          {role.isLocked ? <Lock className="size-5" /> : <Shield className="size-5" />}
+          {isDefault ? <Lock className="size-5" /> : <Shield className="size-5" />}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="truncate text-sm font-semibold text-foreground">{role.name}</h3>
-            {role.isLocked && (
+            {isDefault && (
               <Badge variant="secondary" className="text-xs">
                 Default
               </Badge>
@@ -51,7 +52,7 @@ export const RoleCard: React.FC<RoleCardProps> = ({ role, onView, onDelete }) =>
           </div>
           <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{role.description || 'No description'}</p>
         </div>
-        {!role.isLocked && (
+        {!isDefault && (
           <DropdownMenu
             trigger={{
               children: (

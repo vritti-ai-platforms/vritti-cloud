@@ -13586,6 +13586,10 @@
       "RoleTemplateResponseDto": {
         "type": "object",
         "properties": {
+          "code": {
+            "type": "string",
+            "example": "cashier"
+          },
           "name": {
             "type": "string",
             "example": "Admin"
@@ -13604,6 +13608,7 @@
           }
         },
         "required": [
+          "code",
           "name",
           "features"
         ]
@@ -15312,6 +15317,11 @@
             "description": "App version UUID this role template belongs to",
             "example": "550e8400-e29b-41d4-a716-446655440000"
           },
+          "code": {
+            "type": "string",
+            "description": "Stable role code — a single lowercase word (hyphens allowed). The durable link to provisioned org roles.",
+            "example": "cashier"
+          },
           "name": {
             "type": "string",
             "description": "Display name of the role template",
@@ -15325,6 +15335,7 @@
         },
         "required": [
           "versionId",
+          "code",
           "name"
         ]
       },
@@ -15334,6 +15345,10 @@
           "id": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "cashier"
           },
           "name": {
             "type": "string",
@@ -15360,6 +15375,7 @@
         },
         "required": [
           "id",
+          "code",
           "name",
           "businessId",
           "createdAt"
@@ -15371,6 +15387,10 @@
           "id": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "code": {
+            "type": "string",
+            "example": "cashier"
           },
           "name": {
             "type": "string",
@@ -15405,6 +15425,7 @@
         },
         "required": [
           "id",
+          "code",
           "name",
           "businessId",
           "createdAt",

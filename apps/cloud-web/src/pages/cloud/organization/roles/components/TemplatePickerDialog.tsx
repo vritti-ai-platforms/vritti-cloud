@@ -27,11 +27,11 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
       {
         orgId,
         data: {
+          // The template code makes the provisioned role a read-only default role
+          code: template.code,
           name: template.name,
           description: template.description,
           features: template.features,
-          // Default roles seeded from a template are read-only
-          isLocked: true,
         },
       },
       {

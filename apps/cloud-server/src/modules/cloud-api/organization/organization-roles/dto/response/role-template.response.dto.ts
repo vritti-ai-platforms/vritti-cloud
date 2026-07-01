@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RoleTemplateResponseDto {
+  @ApiProperty({ example: 'cashier' })
+  code: string;
+
   @ApiProperty({ example: 'Admin' })
   name: string;
 
