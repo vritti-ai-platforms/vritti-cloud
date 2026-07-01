@@ -7912,34 +7912,6 @@
         ]
       }
     },
-    "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/permissions/apps": {
-      "get": {
-        "operationId": "PlanFeaturePermissionController_getAvailableApps",
-        "parameters": [
-          {
-            "name": "planId",
-            "required": true,
-            "in": "path",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": ""
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "tags": [
-          "Admin - Plan Permissions"
-        ]
-      }
-    },
     "/admin-api/versions/{versionId}/businesses/{businessId}/plans/{planId}/permissions": {
       "get": {
         "operationId": "PlanFeaturePermissionController_getMatrix",

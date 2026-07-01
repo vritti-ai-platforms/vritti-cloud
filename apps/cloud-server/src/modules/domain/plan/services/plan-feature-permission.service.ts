@@ -24,12 +24,6 @@ export class PlanFeaturePermissionService {
     private readonly planRepository: PlanRepository,
   ) {}
 
-  // Returns just the unlock matrix catalog — the business's apps, each with the features + permissions it owns
-  async getAvailableApps(planId: string): Promise<AvailablePlanApp[]> {
-    const plan = await this.ensurePlan(planId);
-    return this.planFeaturePermissionRepository.findAvailableApps(plan.versionId, plan.businessId);
-  }
-
   // Returns the matrix source — apps (catalog) each with the plan's current unlocks nested under it.
   async getMatrix(planId: string): Promise<{ apps: PlanAppWithUnlocks[] }> {
     const plan = await this.ensurePlan(planId);
