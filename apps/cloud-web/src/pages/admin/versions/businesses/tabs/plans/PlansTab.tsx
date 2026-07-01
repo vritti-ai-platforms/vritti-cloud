@@ -81,7 +81,7 @@ function getColumns({ onView }: { onView: (plan: Plan) => void }): ColumnDef<Pla
       accessorKey: 'name',
       header: 'Plan',
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           <span>{row.original.name}</span>
           {row.original.isCustom && (
             <Badge variant="secondary" className="text-xs">
