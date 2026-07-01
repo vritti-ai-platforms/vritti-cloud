@@ -23,6 +23,8 @@ interface SnapshotMatrixProps {
   name?: string;
   value?: FeatureUnlocks;
   onChange?: (next: FeatureUnlocks) => void;
+  // Read-only render — switches/checkboxes are disabled (show state), everything else (locks, upsell) is identical
+  readOnly?: boolean;
 }
 
 // Internal callback bundle the sub-components consume
@@ -63,12 +65,14 @@ function Cell({
   member,
   checked,
   onToggle,
+  readOnly,
 }: {
   cell: BuMatrixCell | null;
   platformLocked: boolean;
   member: boolean;
   checked: boolean;
   onToggle: () => void;
+  readOnly?: boolean;
 }) {
   if (cell === null) {
     return <span className="text-xs text-muted-foreground">—</span>;
@@ -87,7 +91,7 @@ function Cell({
   if (!member) {
     return <Checkbox checked={false} disabled />;
   }
-  return <Checkbox checked={checked} onCheckedChange={onToggle} />;
+  return <Checkbox checked={checked} disabled={readOnly} onCheckedChange={onToggle} />;
 }
 
 // A single feature block: master row (name + per-platform switch) then one row per permission
@@ -97,12 +101,14 @@ function FeatureBlock({
   isChecked,
   onToggle,
   onToggleMember,
+  readOnly,
 }: {
   feature: BuMatrixFeature;
   isMember: MatrixHandlers['isMember'];
   isChecked: MatrixHandlers['isChecked'];
   onToggle: MatrixHandlers['onToggle'];
   onToggleMember: MatrixHandlers['onToggleMember'];
+  readOnly?: boolean;
 }) {
   const locked = !feature.inPlan;
   // Reveal the permission rows only when a switch is on — collapse for plan-locked or switched-off features
@@ -150,6 +156,7 @@ function FeatureBlock({
               <div key={platform} className="flex w-24 justify-center">
                 <CompactSwitch
                   checked={isMember(feature.code, platform)}
+                  disabled={readOnly}
                   onCheckedChange={() => onToggleMember(feature.code, platform, inPlanCodes(feature, platform))}
                 />
               </div>
@@ -173,6 +180,7 @@ function FeatureBlock({
                       member={isMember(feature.code, platform)}
                       checked={isChecked(feature.code, platform, perm.code)}
                       onToggle={() => onToggle(feature.code, platform, perm.code)}
+                      readOnly={readOnly}
                     />
                   </div>
                 ))}
@@ -192,12 +200,14 @@ function AppCard({
   isChecked,
   onToggle,
   onToggleMember,
+  readOnly,
 }: {
   app: BuMatrixApp;
   isMember: MatrixHandlers['isMember'];
   isChecked: MatrixHandlers['isChecked'];
   onToggle: MatrixHandlers['onToggle'];
   onToggleMember: MatrixHandlers['onToggleMember'];
+  readOnly?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -247,6 +257,7 @@ function AppCard({
               isChecked={isChecked}
               onToggle={onToggle}
               onToggleMember={onToggleMember}
+              readOnly={readOnly}
             />
           ))}
         </div>
@@ -257,7 +268,7 @@ function AppCard({
 
 // The shared snapshot-driven Apps & Features matrix — a controlled form field. `value` (the code-keyed allow-list)
 // and `onChange` are injected by quantum <Form> when used with a `name` prop; every switch/checkbox edits `value`.
-export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({ apps, value = {}, onChange }) => {
+export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({ apps, value = {}, onChange, readOnly }) => {
   const handlers: MatrixHandlers = {
     isMember: (code, platform) => isMemberIn(value, code, platform),
     isChecked: (code, platform, permCode) => isCheckedIn(value, code, platform, permCode),
@@ -268,7 +279,7 @@ export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({ apps, value = {}
   return (
     <div className="flex flex-col gap-3">
       {apps.map((app) => (
-        <AppCard key={app.code} app={app} {...handlers} />
+        <AppCard key={app.code} app={app} {...handlers} readOnly={readOnly} />
       ))}
     </div>
   );

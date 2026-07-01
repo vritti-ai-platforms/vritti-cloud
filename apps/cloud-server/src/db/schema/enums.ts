@@ -173,15 +173,6 @@ export const AppPlatformValues = {
   MOBILE: 'MOBILE' as const,
 };
 
-// Role scope — how far a role's access extends in the BU tree
-export const roleScopeEnum = cloudSchema.enum('RoleScope', ['GLOBAL', 'SUBTREE', 'SINGLE_BU']);
-export type RoleScope = (typeof roleScopeEnum.enumValues)[number];
-export const RoleScopeValues = {
-  GLOBAL: 'GLOBAL' as const,
-  SUBTREE: 'SUBTREE' as const,
-  SINGLE_BU: 'SINGLE_BU' as const,
-};
-
 // Billing period — how often a plan or app price recurs
 export const billingPeriodEnum = cloudSchema.enum('BillingPeriod', ['monthly', 'annual', 'triennial']);
 export type BillingPeriod = (typeof billingPeriodEnum.enumValues)[number];

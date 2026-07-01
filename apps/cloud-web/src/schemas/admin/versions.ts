@@ -50,7 +50,6 @@ export interface SnapshotApp {
 
 export interface SnapshotRoleTemplate {
   name: string;
-  scope: string;
   sourceRoleId: string;
   apps: string[];
   // featureCode → granted permission codes per platform (mirrors the snapshot builder)

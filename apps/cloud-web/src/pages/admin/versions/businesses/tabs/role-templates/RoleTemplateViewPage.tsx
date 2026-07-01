@@ -5,7 +5,7 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Factory, GitBranch, Shield } from 'lucide-react';
+import { Factory, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import { EditRoleTemplateForm } from './forms/EditRoleTemplateForm';
@@ -51,7 +51,7 @@ export const RoleTemplateViewPage = () => {
       />
 
       {/* Role info */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
@@ -60,17 +60,6 @@ export const RoleTemplateViewPage = () => {
             <div>
               <p className="text-sm text-muted-foreground">Permissions</p>
               <p className="text-2xl font-semibold">{role.permissionCount}</p>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="flex items-center gap-4 p-6">
-            <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
-              <GitBranch className="size-6 text-primary" />
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Scope</p>
-              <p className="text-lg font-semibold capitalize">{role.scope.toLowerCase().replace('_', ' ')}</p>
             </div>
           </CardContent>
         </Card>

@@ -13590,14 +13590,6 @@
             "type": "string",
             "example": "Admin"
           },
-          "scope": {
-            "type": "string",
-            "example": "ORG",
-            "enum": [
-              "ORG",
-              "BU"
-            ]
-          },
           "features": {
             "type": "object",
             "example": {
@@ -13613,7 +13605,6 @@
         },
         "required": [
           "name",
-          "scope",
           "features"
         ]
       },
@@ -15330,21 +15321,11 @@
             "type": "string",
             "description": "Optional description of the role template",
             "example": "Kitchen staff responsible for food preparation"
-          },
-          "scope": {
-            "type": "string",
-            "enum": [
-              "GLOBAL",
-              "SUBTREE",
-              "SINGLE_BU"
-            ],
-            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
           }
         },
         "required": [
           "versionId",
-          "name",
-          "scope"
+          "name"
         ]
       },
       "RoleTemplateDto": {
@@ -15363,15 +15344,6 @@
             "example": "Kitchen staff responsible for food preparation",
             "nullable": true
           },
-          "scope": {
-            "type": "string",
-            "example": "GLOBAL",
-            "enum": [
-              "GLOBAL",
-              "SUBTREE",
-              "SINGLE_BU"
-            ]
-          },
           "businessId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -15389,7 +15361,6 @@
         "required": [
           "id",
           "name",
-          "scope",
           "businessId",
           "createdAt"
         ]
@@ -15409,15 +15380,6 @@
             "type": "object",
             "example": "Kitchen staff responsible for food preparation",
             "nullable": true
-          },
-          "scope": {
-            "type": "string",
-            "example": "GLOBAL",
-            "enum": [
-              "GLOBAL",
-              "SUBTREE",
-              "SINGLE_BU"
-            ]
           },
           "businessId": {
             "type": "string",
@@ -15444,7 +15406,6 @@
         "required": [
           "id",
           "name",
-          "scope",
           "businessId",
           "createdAt",
           "businessName",
@@ -15495,15 +15456,6 @@
             "type": "string",
             "description": "Optional description of the role template",
             "example": "Kitchen staff responsible for food preparation"
-          },
-          "scope": {
-            "type": "string",
-            "enum": [
-              "GLOBAL",
-              "SUBTREE",
-              "SINGLE_BU"
-            ],
-            "description": "How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)"
           }
         }
       },

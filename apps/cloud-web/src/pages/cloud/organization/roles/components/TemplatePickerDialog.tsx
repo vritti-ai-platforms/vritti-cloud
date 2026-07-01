@@ -1,5 +1,4 @@
-import { useCreateOrgRole, useOrgRoleTemplates } from '@hooks/cloud/org-roles';
-import { Badge } from '@vritti/quantum-ui/Badge';
+import { useCreateRole, useRoleTemplates } from '@hooks/cloud/roles';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
@@ -7,7 +6,7 @@ import type { DialogHandle } from '@vritti/quantum-ui/hooks';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { FileText, LayoutTemplate, Shield } from 'lucide-react';
 import { useState } from 'react';
-import type { RoleTemplate } from '@/schemas/cloud/org-roles';
+import type { RoleTemplate } from '@/schemas/cloud/roles';
 
 interface TemplatePickerDialogProps {
   orgId: string;
@@ -15,22 +14,10 @@ interface TemplatePickerDialogProps {
   onSuccess: () => void;
 }
 
-// Maps scope to a display-friendly badge
-function getScopeBadge(scope: RoleTemplate['scope']) {
-  switch (scope) {
-    case 'GLOBAL':
-      return { label: 'Global', className: 'bg-primary/15 text-primary border-primary/25' };
-    case 'SUBTREE':
-      return { label: 'Subtree', className: 'bg-warning/15 text-warning border-warning/25' };
-    case 'SINGLE_BU':
-      return { label: 'Single BU', className: 'bg-accent/15 text-accent-foreground border-accent/25' };
-  }
-}
-
 // Dialog for selecting a role template to create a role from
 export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgId, handle, onSuccess }) => {
-  const { data: templates = [], isLoading } = useOrgRoleTemplates(orgId);
-  const createMutation = useCreateOrgRole();
+  const { data: templates = [], isLoading } = useRoleTemplates(orgId);
+  const createMutation = useCreateRole();
   const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null);
 
   // Creates a role from the selected template
@@ -41,9 +28,10 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
         orgId,
         data: {
           name: template.name,
-          scope: template.scope,
           description: template.description,
           features: template.features,
+          // Default roles seeded from a template are read-only
+          isLocked: true,
         },
       },
       {
@@ -63,8 +51,8 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
     <Dialog
       handle={handle}
       icon={Shield}
-      title="Select a Template"
-      description="Choose a pre-configured role template to quickly set up permissions."
+      title="Add Default Roles"
+      description="Add pre-configured default roles from templates. Default roles are read-only."
       className="sm:max-w-2xl"
       content={() => (
         <div className="flex flex-col gap-4">
@@ -92,7 +80,6 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
           {!isLoading && templates.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
               {templates.map((template) => {
-                const scopeBadge = getScopeBadge(template.scope);
                 const featureCount = Object.keys(template.features).length;
                 const isCreating = creatingTemplate === template.name;
 
@@ -115,16 +102,11 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
                           </div>
                         </div>
 
-                        {/* Scope and feature count */}
+                        {/* Feature count */}
                         <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <Badge variant="secondary" className={`text-xs ${scopeBadge.className}`}>
-                              {scopeBadge.label}
-                            </Badge>
-                            <span className="text-xs text-muted-foreground">
-                              {featureCount} feature{featureCount !== 1 ? 's' : ''}
-                            </span>
-                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {featureCount} feature{featureCount !== 1 ? 's' : ''}
+                          </span>
                           <Button
                             size="sm"
                             variant="outline"

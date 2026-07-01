@@ -83,15 +83,6 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Role, unknown>[] {
       header: 'Role Template',
     },
     {
-      accessorKey: 'scope',
-      header: 'Scope',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="capitalize">
-          {row.original.scope.toLowerCase().replace('_', ' ')}
-        </Badge>
-      ),
-    },
-    {
       accessorKey: 'permissionCount',
       header: 'Permissions',
       cell: ({ row }) => <Badge variant="secondary">{row.original.permissionCount}</Badge>,

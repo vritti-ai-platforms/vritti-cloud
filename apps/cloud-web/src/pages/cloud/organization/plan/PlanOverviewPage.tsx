@@ -1,4 +1,4 @@
-import { useOrgPermissions } from '@hooks/cloud/org-roles/useOrgPermissions';
+import { usePermissions } from '@hooks/cloud/roles/usePermissions';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -19,7 +19,7 @@ import {
 export const PlanOverviewPage = () => {
   const { orgSlug } = useParams<{ orgSlug: string }>();
   const orgId = orgSlug?.replace(/^org-/, '').split('~').pop() || '';
-  const { data, isLoading } = useOrgPermissions(orgId);
+  const { data, isLoading } = usePermissions(orgId);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const toggle = (code: string) =>

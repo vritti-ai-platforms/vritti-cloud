@@ -83,11 +83,9 @@ export interface SnapshotApp {
 }
 export interface SnapshotRoleTemplate {
   name: string;
-  scope: string;
   sourceRoleId: string;
-  apps: string[];
-  // featureCode -> { web?: [permCode…], mobile?: [permCode…] } — grants split per platform
-  features: Record<string, { web?: string[]; mobile?: string[] }>;
+  // featureCode -> { app: appCode, web?: [permCode…], mobile?: [permCode…] } — grants split per platform, app stamped
+  features: Record<string, { app: string; web?: string[]; mobile?: string[] }>;
 }
 // A plan is a lock overlay: the feature-permissions it UNLOCKS per platform (everything else renders locked).
 // Apps are derived from these. Shape mirrors role grants: featureCode -> { web?: [permCode…], mobile?: [permCode…] }.
@@ -116,7 +114,7 @@ function buildIndex(data: SnapshotData) {
     rows.map((r) => businessCodeById[r.businessId]).filter((c): c is string => Boolean(c)),
   );
   const appById = _.keyBy(data.apps, 'id');
-  // Feature → its app code (one app per feature within a business) — used to derive a role's apps from its grants
+  // Feature → its app code (one app per feature within a business) — stamped onto each role grant
   const appCodeByFeatureId = _.mapValues(
     _.keyBy(data.businessAppFeatures, 'featureId'),
     (af) => appById[af.appId]?.code,
@@ -125,7 +123,6 @@ function buildIndex(data: SnapshotData) {
     webMfById: _.keyBy(data.webMicrofrontends, 'id'),
     mobileMfById: _.keyBy(data.mobileMicrofrontends, 'id'),
     featureById: _.keyBy(data.features, 'id'),
-    appById,
     appCodeByFeatureId,
     permissionById: _.keyBy(data.permissions, 'id'),
     businessCodeById,
@@ -142,15 +139,6 @@ function buildIndex(data: SnapshotData) {
   };
 }
 
-// A role's apps, derived from its feature memberships (one app per feature within a business)
-function buildRoleApps(roleId: string, index: SnapshotIndex): string[] {
-  const codes = new Set<string>();
-  for (const m of index.roleFeaturesByRoleId[roleId] ?? []) {
-    const appCode = index.appCodeByFeatureId[m.featureId];
-    if (appCode) codes.add(appCode);
-  }
-  return [...codes];
-}
 type SnapshotIndex = ReturnType<typeof buildIndex>;
 
 // A feature's microfrontend routes per platform, built from its own web/mobile link columns
@@ -209,29 +197,36 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
   return result;
 }
 
-// A role's features: { featureCode: { web?: [permCode…], mobile?: [permCode…] } }. Seeded from memberships
-// (so a member with zero actions still appears = the View/route gate), then filled with action grants.
+// A role's features: { featureCode: { app, web?: [permCode…], mobile?: [permCode…] } }. Seeded from memberships
+// (so a member with zero actions still appears = the View/route gate), then filled with action grants. `app` = the
+// feature's owning app code, so core can derive a role's apps without a separate list.
 function buildRoleFeatures(
   roleId: string,
   index: SnapshotIndex,
-): Record<string, { web?: string[]; mobile?: string[] }> {
-  const featurePerms: Record<string, { web?: string[]; mobile?: string[] }> = {};
+): Record<string, { app: string; web?: string[]; mobile?: string[] }> {
+  const featurePerms: Record<string, { app: string; web?: string[]; mobile?: string[] }> = {};
+  const bucketFor = (featureId: string, featureCode: string) => {
+    let bucket = featurePerms[featureCode];
+    if (!bucket) {
+      bucket = { app: index.appCodeByFeatureId[featureId] ?? '' };
+      featurePerms[featureCode] = bucket;
+    }
+    return bucket;
+  };
   for (const m of index.roleFeaturesByRoleId[roleId] ?? []) {
     const featureCode = index.featureById[m.featureId]?.code;
     if (!featureCode) continue;
     const key = m.platform === 'WEB' ? 'web' : 'mobile';
-    const bucket = featurePerms[featureCode] ?? {};
-    featurePerms[featureCode] = bucket;
+    const bucket = bucketFor(m.featureId, featureCode);
     if (!bucket[key]) bucket[key] = [];
   }
   for (const rp of index.rolePermsByRoleId[roleId] ?? []) {
     const membership = index.roleFeatureById[rp.roleTemplateFeatureId];
     const perm = index.permissionById[rp.featurePermissionId];
     const featureCode = membership && index.featureById[membership.featureId]?.code;
-    if (!featureCode || !perm) continue;
+    if (!featureCode || !perm || !membership) continue;
     const key = membership.platform === 'WEB' ? 'web' : 'mobile';
-    const bucket = featurePerms[featureCode] ?? {};
-    featurePerms[featureCode] = bucket;
+    const bucket = bucketFor(membership.featureId, featureCode);
     const list = bucket[key] ?? [];
     bucket[key] = list;
     list.push(perm.code);
@@ -298,9 +293,7 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
     if (!code) continue;
     ensure(code).roleTemplates.push({
       name: r.name,
-      scope: r.scope,
       sourceRoleId: r.id,
-      apps: buildRoleApps(r.id, index),
       features: buildRoleFeatures(r.id, index),
     });
   }

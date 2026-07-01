@@ -1,7 +1,7 @@
 import type { RoleItem } from '@domain/catalog/catalog.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
-import type { CoreOrgRole } from '@/modules/cloud-api/organization/organization-business-units/types';
+import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreHttpService } from './core-http.service';
 
 // Proxies role management calls to core-server. orgId is sent as `x-org-id` for RLS scoping.
@@ -12,8 +12,8 @@ export class CoreRoleService {
   constructor(private readonly http: CoreHttpService) {}
 
   // Fetches all roles for an organization from core
-  async getOrgRoles(url: string, webhookSecret: string, orgId: string): Promise<CoreOrgRole[]> {
-    const result = await this.http.get<CoreOrgRole[]>(url, webhookSecret, '/organizations/webhook/roles', {
+  async getOrgRoles(url: string, webhookSecret: string, orgId: string): Promise<CoreRole[]> {
+    const result = await this.http.get<CoreRole[]>(url, webhookSecret, '/organizations/webhook/roles', {
       orgId,
       params: { orgId },
     });
@@ -77,8 +77,8 @@ export class CoreRoleService {
   }
 
   // Fetches roles compatible with a business unit's assigned apps from core
-  async getCompatibleRoles(url: string, webhookSecret: string, orgId: string, buId: string): Promise<CoreOrgRole[]> {
-    const result = await this.http.get<CoreOrgRole[]>(url, webhookSecret, '/organizations/webhook/roles/compatible', {
+  async getCompatibleRoles(url: string, webhookSecret: string, orgId: string, buId: string): Promise<CoreRole[]> {
+    const result = await this.http.get<CoreRole[]>(url, webhookSecret, '/organizations/webhook/roles/compatible', {
       orgId,
       params: { buId },
     });

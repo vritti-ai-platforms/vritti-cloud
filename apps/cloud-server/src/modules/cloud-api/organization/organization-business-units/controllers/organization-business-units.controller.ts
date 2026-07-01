@@ -11,7 +11,7 @@ import {
 import { SetBuUnlocksDto } from '../dto/request/set-bu-unlocks.dto';
 import type { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
 import { OrganizationBusinessUnitsService } from '../services/organization-business-units.service';
-import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
+import type { BuRoleAssignment, CoreBusinessUnit, CoreRole } from '../types';
 
 @ApiTags('Organization Business Units')
 @ApiBearerAuth()
@@ -82,7 +82,7 @@ export class OrganizationBusinessUnitsController {
 
   // Returns roles compatible with a business unit's assigned apps
   @Get(':buId/compatible-roles')
-  async getCompatibleRoles(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<CoreOrgRole[]> {
+  async getCompatibleRoles(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<CoreRole[]> {
     this.logger.log(`GET /organizations/${orgId}/business-units/${buId}/compatible-roles`);
     return this.orgBuService.getCompatibleRoles(orgId, buId);
   }

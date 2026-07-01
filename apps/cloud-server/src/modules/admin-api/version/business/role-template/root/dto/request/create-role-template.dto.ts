@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
-import { type RoleScope, RoleScopeValues } from '@/db/schema';
+import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class CreateRoleTemplateDto {
   @ApiProperty({
@@ -23,8 +22,4 @@ export class CreateRoleTemplateDto {
   @IsOptional()
   @IsString()
   description?: string;
-
-  @ApiProperty({ enum: RoleScopeValues, description: 'How far the role access extends (GLOBAL, SUBTREE, SINGLE_BU)' })
-  @IsEnum(RoleScopeValues)
-  scope: RoleScope;
 }

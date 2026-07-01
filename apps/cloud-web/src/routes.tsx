@@ -45,9 +45,8 @@ import { BUViewPageSkeleton } from './pages/cloud/organization/business-units/BU
 import { OrgBusinessUnitsPage } from './pages/cloud/organization/business-units/OrgBusinessUnitsPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
 import { PlanOverviewPage } from './pages/cloud/organization/plan/PlanOverviewPage';
-import { CreateOrgRolePage } from './pages/cloud/organization/roles/CreateOrgRolePage';
-import { EditOrgRolePage } from './pages/cloud/organization/roles/EditOrgRolePage';
-import { OrgRolesPage } from './pages/cloud/organization/roles/OrgRolesPage';
+import { RolesPage } from './pages/cloud/organization/roles/RolesPage';
+import { RoleViewPage } from './pages/cloud/organization/roles/RoleViewPage';
 import { OrganizationSettingsPage } from './pages/cloud/organization/settings/OrganizationSettingsPage';
 import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
@@ -281,15 +280,11 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'roles',
-        element: <OrgRolesPage />,
+        element: <RolesPage />,
       },
       {
-        path: 'roles/create',
-        element: <CreateOrgRolePage />,
-      },
-      {
-        path: 'roles/:roleId/edit',
-        element: <EditOrgRolePage />,
+        path: 'roles/:roleSlug',
+        element: <RoleViewPage />,
       },
       {
         path: 'business-units',

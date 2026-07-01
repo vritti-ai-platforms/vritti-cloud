@@ -16,7 +16,7 @@ import { CoreDeploymentService } from '@/modules/core-server/services/core-deplo
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
 import type { SetBuUnlocksDto } from '../dto/request/set-bu-unlocks.dto';
 import type { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
-import type { BuRoleAssignment, CoreBusinessUnit, CoreOrgRole } from '../types';
+import type { BuRoleAssignment, CoreBusinessUnit, CoreRole } from '../types';
 
 // UI platform keys (snapshot microfrontend keys), used when clamping BU unlocks to the plan ceiling
 const PLATFORMS = ['web', 'mobile'] as const;
@@ -272,7 +272,7 @@ export class OrganizationBusinessUnitsService {
   }
 
   // Returns roles compatible with a business unit's assigned apps
-  async getCompatibleRoles(orgId: string, buId: string): Promise<CoreOrgRole[]> {
+  async getCompatibleRoles(orgId: string, buId: string): Promise<CoreRole[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     try {

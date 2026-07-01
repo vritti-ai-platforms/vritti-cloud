@@ -1,13 +1,10 @@
 import type { TableResponse } from '@vritti/quantum-ui/api-response';
 import { z } from '@vritti/quantum-ui/zod';
 
-type RoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
-
 export interface Role {
   id: string;
   name: string;
   description: string | null;
-  scope: RoleScope;
   businessId: string;
   businessName: string;
   permissionCount: number;
@@ -62,14 +59,12 @@ export type RoleTemplatesTableResponse = TableResponse<Role>;
 export const createRoleTemplateSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
-  scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU'], { message: 'Please select a scope' }),
   versionId: z.string().uuid('App version is required'),
 });
 
 export const updateRoleTemplateSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255).optional(),
   description: z.string().optional(),
-  scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU']).optional(),
 });
 
 export const setPermissionsSchema = z.object({

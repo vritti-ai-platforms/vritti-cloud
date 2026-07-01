@@ -7,7 +7,7 @@ import type {
   CreateBusinessUnitData,
   UpdateBusinessUnitData,
 } from '@/schemas/cloud/org-business-units';
-import type { OrgRole } from '@/schemas/cloud/org-roles';
+import type { Role } from '@/schemas/cloud/roles';
 
 // Fetches all business units for the organization
 export function getOrgBusinessUnits(orgId: string): Promise<BusinessUnitsResponse> {
@@ -116,9 +116,9 @@ export function setBuPermissions({
 }
 
 // Fetches roles compatible with a business unit's assigned apps
-export function getCompatibleRoles(orgId: string, buId: string): Promise<OrgRole[]> {
+export function getCompatibleRoles(orgId: string, buId: string): Promise<Role[]> {
   return axios
-    .get<OrgRole[]>(`cloud-api/organizations/${orgId}/business-units/${buId}/compatible-roles`)
+    .get<Role[]>(`cloud-api/organizations/${orgId}/business-units/${buId}/compatible-roles`)
     .then((r) => r.data);
 }
 

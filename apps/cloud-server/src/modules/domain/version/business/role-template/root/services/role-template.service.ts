@@ -26,7 +26,6 @@ export class RoleTemplateService {
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: roleTemplates.name, type: 'string' },
-    scope: { column: roleTemplates.scope, type: 'string' },
     businessId: { column: roleTemplates.businessId, type: 'string' },
   };
 

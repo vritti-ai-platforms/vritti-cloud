@@ -1,103 +1,109 @@
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
-import { Lock, MoreVertical, Pencil, Shield, Trash2 } from 'lucide-react';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
+import { ArrowRight, KeyRound, Layers, Lock, Monitor, MoreVertical, Shield, Smartphone, Trash2 } from 'lucide-react';
 import type React from 'react';
-import type { OrgRole } from '@/schemas/cloud/org-roles';
+import type { Role } from '@/schemas/cloud/roles';
 
 interface RoleCardProps {
-  role: OrgRole;
-  onEdit: (role: OrgRole) => void;
-  onDelete: (role: OrgRole) => void;
+  role: Role;
+  onView: (role: Role) => void;
+  onDelete: (role: Role) => void;
 }
 
-// Maps scope to a display-friendly badge
-function getScopeBadge(scope: OrgRole['scope']) {
-  switch (scope) {
-    case 'GLOBAL':
-      return { label: 'Global', className: 'bg-primary/15 text-primary border-primary/25' };
-    case 'SUBTREE':
-      return { label: 'Subtree', className: 'bg-warning/15 text-warning border-warning/25' };
-    case 'SINGLE_BU':
-      return { label: 'Single BU', className: 'bg-accent/15 text-accent-foreground border-accent/25' };
+// Rolls the per-feature grants up into headline numbers + platform coverage
+function summarize(features: Role['features']) {
+  let permissions = 0;
+  let web = false;
+  let mobile = false;
+  for (const f of Object.values(features)) {
+    permissions += (f.web?.length ?? 0) + (f.mobile?.length ?? 0);
+    if (f.web?.length) web = true;
+    if (f.mobile?.length) mobile = true;
   }
+  return { features: Object.keys(features).length, permissions, web, mobile };
 }
 
-// Card displaying a role with scope badge, feature count, and actions
-export const RoleCard: React.FC<RoleCardProps> = ({ role, onEdit, onDelete }) => {
-  const scopeBadge = getScopeBadge(role.scope);
-  const featureCount = Object.keys(role.features).length;
+// A role summary card — the footer "View" affordance opens the view page; the ⋮ menu (custom roles only) deletes.
+export const RoleCard: React.FC<RoleCardProps> = ({ role, onView, onDelete }) => {
+  const s = summarize(role.features);
 
   return (
-    <Card>
-      <CardContent className="p-6">
-        <div className="flex items-start gap-4">
-          {/* Icon */}
-          <div className="flex items-center justify-center size-10 rounded-lg bg-primary/10 shrink-0">
-            {role.isLocked ? (
-              <Lock className="size-5 text-muted-foreground" />
-            ) : (
-              <Shield className="size-5 text-primary" />
+    <div className="group relative flex flex-col rounded-xl border bg-card text-left shadow-sm transition-all hover:shadow-md">
+      {/* header — icon tile, name + Default badge, description, ⋮ management menu */}
+      <div className="flex items-start gap-3 p-5">
+        <div
+          className={`flex size-10 shrink-0 items-center justify-center rounded-lg transition-colors ${
+            role.isLocked ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary group-hover:bg-primary/15'
+          }`}
+        >
+          {role.isLocked ? <Lock className="size-5" /> : <Shield className="size-5" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="truncate text-sm font-semibold text-foreground">{role.name}</h3>
+            {role.isLocked && (
+              <Badge variant="secondary" className="text-xs">
+                Default
+              </Badge>
             )}
           </div>
-
-          {/* Content */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <h3 className="text-sm font-semibold truncate">{role.name}</h3>
-              {role.isLocked && (
-                <Badge variant="secondary" className="text-xs bg-muted text-muted-foreground">
-                  System
-                </Badge>
-              )}
-            </div>
-
-            {role.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{role.description}</p>}
-
-            <div className="flex items-center gap-4">
-              <Badge variant="secondary" className={`text-xs ${scopeBadge.className}`}>
-                {scopeBadge.label}
-              </Badge>
-              <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Shield className="size-3" />
-                {featureCount} feature{featureCount !== 1 ? 's' : ''}
-              </span>
-            </div>
-          </div>
-
-          {/* Actions */}
-          {!role.isLocked && (
-            <DropdownMenu
-              trigger={{
-                children: (
-                  <Button variant="ghost" size="icon" className="size-8">
-                    <MoreVertical className="size-4" />
-                  </Button>
-                ),
-              }}
-              align="end"
-              items={[
-                {
-                  type: 'item' as const,
-                  id: 'edit',
-                  label: 'Edit',
-                  icon: Pencil,
-                  onClick: () => onEdit(role),
-                },
-                {
-                  type: 'item' as const,
-                  id: 'delete',
-                  label: 'Delete',
-                  icon: Trash2,
-                  variant: 'destructive',
-                  onClick: () => onDelete(role),
-                },
-              ]}
-            />
-          )}
+          <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{role.description || 'No description'}</p>
         </div>
-      </CardContent>
-    </Card>
+        {!role.isLocked && (
+          <DropdownMenu
+            trigger={{
+              children: (
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="-mr-1.5 -mt-1 size-8 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+                >
+                  <MoreVertical className="size-4" />
+                </Button>
+              ),
+            }}
+            align="end"
+            items={[
+              {
+                type: 'item' as const,
+                id: 'delete',
+                label: 'Delete',
+                icon: Trash2,
+                variant: 'destructive',
+                onClick: () => onDelete(role),
+              },
+            ]}
+          />
+        )}
+      </div>
+
+      {/* footer — compact stats on the left, primary "View" navigation on the right */}
+      <div className="mt-auto flex items-center justify-between gap-3 border-t px-5 py-3">
+        <div className="flex min-w-0 items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <KeyRound className="size-3.5 shrink-0" />
+            <span className="font-medium text-foreground">{s.permissions}</span>
+            <span className="hidden sm:inline">{pluralize('permission', s.permissions)}</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <Layers className="size-3.5 shrink-0" />
+            <span className="font-medium text-foreground">{s.features}</span>
+            <span className="hidden sm:inline">{pluralize('feature', s.features)}</span>
+          </span>
+          <span
+            className="flex items-center gap-1.5"
+            title={`Web ${s.web ? 'included' : 'none'} · Mobile ${s.mobile ? 'included' : 'none'}`}
+          >
+            <Monitor className={`size-3.5 ${s.web ? 'text-foreground' : 'text-muted-foreground/40'}`} />
+            <Smartphone className={`size-3.5 ${s.mobile ? 'text-foreground' : 'text-muted-foreground/40'}`} />
+          </span>
+        </div>
+        <Button variant="link" className="h-auto shrink-0 gap-1 p-0 text-sm text-primary" onClick={() => onView(role)}>
+          View <ArrowRight className="size-3.5 transition-transform group-hover:translate-x-0.5" />
+        </Button>
+      </div>
+    </div>
   );
 };

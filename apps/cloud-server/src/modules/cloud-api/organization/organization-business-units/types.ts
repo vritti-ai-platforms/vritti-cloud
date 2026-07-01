@@ -28,12 +28,11 @@ export interface BuRoleAssignment {
   roleName: string;
 }
 
-export interface CoreOrgRole {
+export interface CoreRole {
   id: string;
   organizationId: string;
   name: string;
   description: string | null;
-  scope: string;
   sourceRoleId: string | null;
   isLocked: boolean;
   appCodes: string[];

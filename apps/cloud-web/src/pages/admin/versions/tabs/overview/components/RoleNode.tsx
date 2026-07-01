@@ -8,12 +8,6 @@ interface RoleNodeProps {
   featureToApp: Record<string, SnapshotApp>;
 }
 
-const SCOPE_COLOR: Record<string, string> = {
-  GLOBAL: 'bg-destructive/15 text-destructive',
-  SUBTREE: 'bg-warning/15 text-warning',
-  SINGLE_BU: 'bg-primary/15 text-primary',
-};
-
 export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, featureToApp }) => {
   const [open, setOpen] = useState(false);
   // Each feature's grant is per-platform { web?, mobile? }; flatten to the unique set of action codes
@@ -53,15 +47,10 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
             {roleApps.length} {roleApps.length === 1 ? 'app' : 'apps'} · {totalPerms} permissions
           </span>
         </div>
-        <span
-          className={`ml-auto shrink-0 text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${SCOPE_COLOR[role.scope] ?? 'bg-muted text-muted-foreground'}`}
-        >
-          {role.scope}
-        </span>
         {open ? (
-          <ChevronDown className="size-4 text-muted-foreground shrink-0 ml-2" />
+          <ChevronDown className="size-4 text-muted-foreground shrink-0 ml-auto" />
         ) : (
-          <ChevronRight className="size-4 text-muted-foreground shrink-0 ml-2" />
+          <ChevronRight className="size-4 text-muted-foreground shrink-0 ml-auto" />
         )}
       </button>
 

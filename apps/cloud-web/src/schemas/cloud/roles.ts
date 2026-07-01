@@ -1,13 +1,10 @@
 import { z } from '@vritti/quantum-ui/zod';
 import type { FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
 
-type OrgRoleScope = 'GLOBAL' | 'SUBTREE' | 'SINGLE_BU';
-
-export interface OrgRole {
+export interface Role {
   id: string;
   name: string;
   description: string | null;
-  scope: OrgRoleScope;
   // featureCode → { web?: permCodes, mobile?: permCodes } — per-platform grant (mirrors the snapshot/role webhook)
   features: FeatureUnlocks;
   isLocked: boolean;
@@ -19,7 +16,6 @@ export interface OrgRole {
 export interface RoleTemplate {
   name: string;
   description?: string;
-  scope: OrgRoleScope;
   features: FeatureUnlocks;
 }
 
@@ -29,23 +25,23 @@ const featureUnlocksSchema = z.record(
   z.object({ web: z.array(z.string()).optional(), mobile: z.array(z.string()).optional() }),
 );
 
-export const createOrgRoleSchema = z.object({
+export const createRoleSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().max(500, 'Description must be 500 characters or less').optional(),
-  scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU'], { message: 'Please select a scope' }),
   features: featureUnlocksSchema,
+  // Default (template-seeded) roles are read-only; custom roles are editable
+  isLocked: z.boolean().optional(),
 });
 
-export const updateOrgRoleSchema = z.object({
+export const updateRoleSchema = z.object({
   name: z.string().min(1, 'Role name is required').max(255).optional(),
   description: z.string().max(500).optional(),
-  scope: z.enum(['GLOBAL', 'SUBTREE', 'SINGLE_BU']).optional(),
   features: featureUnlocksSchema.optional(),
 });
 
-export type CreateOrgRoleFormData = z.infer<typeof createOrgRoleSchema>;
-type UpdateOrgRoleFormData = z.infer<typeof updateOrgRoleSchema>;
+export type CreateRoleFormData = z.infer<typeof createRoleSchema>;
+type UpdateRoleFormData = z.infer<typeof updateRoleSchema>;
 
 // The matrix field is part of the form now, so the submit payload IS the form data
-export type CreateOrgRoleData = CreateOrgRoleFormData;
-export type UpdateOrgRoleData = UpdateOrgRoleFormData;
+export type CreateRoleData = CreateRoleFormData;
+export type UpdateRoleData = UpdateRoleFormData;

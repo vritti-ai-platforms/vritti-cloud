@@ -52,11 +52,10 @@ export interface FeatureCatalogEntry {
 // Role template pushed to core for provisioning (matches core RoleItemDto)
 export interface RoleItem {
   name: string;
-  scope: string;
   sourceRoleId: string;
   isLocked: boolean;
-  appCodes: string[];
-  features: Record<string, { web?: string[]; mobile?: string[] }>;
+  // featureCode -> { app: appCode, web?: [permCode…], mobile?: [permCode…] }
+  features: Record<string, { app: string; web?: string[]; mobile?: string[] }>;
 }
 
 // Builds the per-BU catalog. The plan is the ceiling (membership + unlocks); buUnlocks further restricts within
@@ -201,10 +200,8 @@ export function buildBuRoles(snapshot: VersionSnapshot, businessCode: string | u
   if (!business) return [];
   return business.roleTemplates.map((r) => ({
     name: r.name,
-    scope: r.scope,
     sourceRoleId: r.sourceRoleId,
     isLocked: false,
-    appCodes: r.apps,
     features: r.features,
   }));
 }
