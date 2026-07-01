@@ -35,6 +35,8 @@ export const features = cloudSchema.table(
   },
   (table) => [
     uniqueIndex('feature_version_code_idx').on(table.versionId, table.code),
+    // Codes are stored lowercase (slug-style) — enforced at the DB so no path can insert a mixed-case code
+    check('feature_code_lowercase_chk', sql`${table.code} = lower(${table.code})`),
     // The web link is all-three-set or all-three-null (an MF link always carries its module + route).
     check(
       'feature_web_mf_all_or_nothing_chk',

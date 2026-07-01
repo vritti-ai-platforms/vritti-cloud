@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, asc, count, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import {
-  appFeatures,
-  apps,
+  businessAppFeatures,
+  businessApps,
   featurePermissions,
   features,
   permissionBusinesses,
@@ -25,9 +25,9 @@ export interface BusinessFeatureRow {
 }
 
 @Injectable()
-export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatures> {
+export class AppFeatureRepository extends PrimaryBaseRepository<typeof businessAppFeatures> {
   constructor(database: PrimaryDatabaseService) {
-    super(database, appFeatures);
+    super(database, businessAppFeatures);
   }
 
   // Returns the features a business's apps include (grouped by feature) for the data table.
@@ -38,7 +38,10 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
     businessId: string,
     options: { where?: SQL; orderBy?: SQL[]; limit: number; offset: number },
   ): Promise<{ result: BusinessFeatureRow[]; count: number }> {
-    const conditions: SQL[] = [eq(appFeatures.versionId, versionId), eq(appFeatures.businessId, businessId)];
+    const conditions: SQL[] = [
+      eq(businessAppFeatures.versionId, versionId),
+      eq(businessAppFeatures.businessId, businessId),
+    ];
     if (options.where) {
       conditions.push(options.where);
     }
@@ -50,7 +53,7 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
         code: features.code,
         name: features.name,
         lucideIcon: features.lucideIcon,
-        app: sql<BusinessFeatureApp>`jsonb_build_object('id', ${apps.id}, 'name', ${apps.name})`,
+        app: sql<BusinessFeatureApp>`jsonb_build_object('id', ${businessApps.id}, 'name', ${businessApps.name})`,
         permissionCount: sql<number>`coalesce((
           select count(*)::int
           from ${featurePermissions} fp
@@ -59,11 +62,11 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
         ), 0)`,
       },
       leftJoins: [
-        { table: apps, on: eq(apps.id, appFeatures.appId) },
-        { table: features, on: eq(features.id, appFeatures.featureId) },
+        { table: businessApps, on: eq(businessApps.id, businessAppFeatures.appId) },
+        { table: features, on: eq(features.id, businessAppFeatures.featureId) },
       ],
       where: and(...conditions),
-      groupBy: [features.id, apps.id, apps.name],
+      groupBy: [features.id, businessApps.id, businessApps.name],
       orderBy: options.orderBy && options.orderBy.length > 0 ? options.orderBy : [asc(features.sortOrder)],
       limit: options.limit,
       offset: options.offset,
@@ -82,32 +85,32 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
   > {
     return this.db
       .select({
-        id: appFeatures.id,
-        featureId: appFeatures.featureId,
+        id: businessAppFeatures.id,
+        featureId: businessAppFeatures.featureId,
         code: features.code,
         name: features.name,
-        sortOrder: appFeatures.sortOrder,
+        sortOrder: businessAppFeatures.sortOrder,
       })
-      .from(appFeatures)
-      .innerJoin(features, eq(features.id, appFeatures.featureId))
-      .where(eq(appFeatures.appId, appId));
+      .from(businessAppFeatures)
+      .innerJoin(features, eq(features.id, businessAppFeatures.featureId))
+      .where(eq(businessAppFeatures.appId, appId));
   }
 
   // Pins many features to one app in a business in a single statement (already-pinned features are left as-is)
   async assignFeaturesToApp(versionId: string, businessId: string, appId: string, featureIds: string[]): Promise<void> {
     if (featureIds.length === 0) return;
     await this.db
-      .insert(appFeatures)
+      .insert(businessAppFeatures)
       .values(featureIds.map((featureId) => ({ versionId, businessId, appId, featureId })))
-      .onConflictDoNothing({ target: [appFeatures.businessId, appFeatures.featureId] });
+      .onConflictDoNothing({ target: [businessAppFeatures.businessId, businessAppFeatures.featureId] });
   }
 
   // Removes many features from a business in one statement (unassigns each from its app)
   async removeFeaturesFromBusiness(businessId: string, featureIds: string[]): Promise<void> {
     if (featureIds.length === 0) return;
     await this.db
-      .delete(appFeatures)
-      .where(and(eq(appFeatures.businessId, businessId), inArray(appFeatures.featureId, featureIds)));
+      .delete(businessAppFeatures)
+      .where(and(eq(businessAppFeatures.businessId, businessId), inArray(businessAppFeatures.featureId, featureIds)));
   }
 
   // Pins a feature to a single app within a business (one-to-one). Reassignment UPSERTS (updates app_id) so the
@@ -116,14 +119,17 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
   async setFeatureApp(versionId: string, businessId: string, featureId: string, appId: string | null): Promise<void> {
     if (!appId) {
       await this.db
-        .delete(appFeatures)
-        .where(and(eq(appFeatures.businessId, businessId), eq(appFeatures.featureId, featureId)));
+        .delete(businessAppFeatures)
+        .where(and(eq(businessAppFeatures.businessId, businessId), eq(businessAppFeatures.featureId, featureId)));
       return;
     }
     await this.db
-      .insert(appFeatures)
+      .insert(businessAppFeatures)
       .values({ versionId, businessId, appId, featureId })
-      .onConflictDoUpdate({ target: [appFeatures.businessId, appFeatures.featureId], set: { appId, versionId } });
+      .onConflictDoUpdate({
+        target: [businessAppFeatures.businessId, businessAppFeatures.featureId],
+        set: { appId, versionId },
+      });
   }
 
   // Counts how many role_template_feature_permissions reference a given feature (via its permissions)
@@ -147,26 +153,26 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
     rows: Array<{ featureId: string; code: string; name: string; sortOrder: number }>;
     total: number;
   }> {
-    const baseWhere = where ? and(eq(appFeatures.appId, appId), where) : eq(appFeatures.appId, appId);
+    const baseWhere = where ? and(eq(businessAppFeatures.appId, appId), where) : eq(businessAppFeatures.appId, appId);
 
     const [rows, totalResult] = await Promise.all([
       this.db
         .select({
-          featureId: appFeatures.featureId,
+          featureId: businessAppFeatures.featureId,
           code: features.code,
           name: features.name,
-          sortOrder: appFeatures.sortOrder,
+          sortOrder: businessAppFeatures.sortOrder,
         })
-        .from(appFeatures)
-        .innerJoin(features, eq(features.id, appFeatures.featureId))
+        .from(businessAppFeatures)
+        .innerJoin(features, eq(features.id, businessAppFeatures.featureId))
         .where(baseWhere)
         .orderBy(...(orderBy ?? []))
         .limit(limit)
         .offset(offset),
       this.db
         .select({ count: count() })
-        .from(appFeatures)
-        .innerJoin(features, eq(features.id, appFeatures.featureId))
+        .from(businessAppFeatures)
+        .innerJoin(features, eq(features.id, businessAppFeatures.featureId))
         .where(baseWhere),
     ]);
 
@@ -180,13 +186,13 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof appFeatur
     if (appIds.length === 0) return [];
     return this.db
       .select({
-        appId: appFeatures.appId,
-        featureId: appFeatures.featureId,
+        appId: businessAppFeatures.appId,
+        featureId: businessAppFeatures.featureId,
         code: features.code,
         name: features.name,
       })
-      .from(appFeatures)
-      .innerJoin(features, eq(features.id, appFeatures.featureId))
-      .where(inArray(appFeatures.appId, appIds));
+      .from(businessAppFeatures)
+      .innerJoin(features, eq(features.id, businessAppFeatures.featureId))
+      .where(inArray(businessAppFeatures.appId, appIds));
   }
 }

@@ -76,13 +76,13 @@ export function buildBuCatalog(
   const catalog: FeatureCatalogEntry[] = [];
   for (const app of business.apps) {
     // The app's renderable features (each feature pins to exactly one app)
-    const appFeatures = app.features
+    const businessAppFeatures = app.features
       .map((code) => snapshot.features?.[code])
       .filter((f): f is SnapshotFeature => !!f && !!(f.microfrontends?.web || f.microfrontends?.mobile));
 
     // A feature is included only if the plan includes it (membership key present, even with zero unlocked actions).
     // Apps are DERIVED: shown only if they own at least one member feature.
-    const memberFeatures = appFeatures.filter((f) => isPlanMember(plan?.unlockedPermissions?.[f.code]));
+    const memberFeatures = businessAppFeatures.filter((f) => isPlanMember(plan?.unlockedPermissions?.[f.code]));
     if (memberFeatures.length === 0) continue;
 
     for (const feature of memberFeatures) {

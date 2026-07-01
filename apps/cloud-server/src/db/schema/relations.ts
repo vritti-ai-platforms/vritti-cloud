@@ -76,11 +76,11 @@ export const relations = defineRelations(schema, (r) => ({
   versions: {
     features: r.many.features(),
     microfrontends: r.many.microfrontends(),
-    apps: r.many.apps(),
+    businessApps: r.many.businessApps(),
     roleTemplates: r.many.roleTemplates(),
     plans: r.many.plans(),
     featurePermissions: r.many.featurePermissions(),
-    appFeatures: r.many.appFeatures(),
+    businessAppFeatures: r.many.businessAppFeatures(),
     versionBusinesses: r.many.versionBusinesses(),
   },
 
@@ -107,8 +107,8 @@ export const relations = defineRelations(schema, (r) => ({
   businesses: {
     organizations: r.many.organizations(),
     plans: r.many.plans(),
-    apps: r.many.apps(),
-    appFeatures: r.many.appFeatures(),
+    businessApps: r.many.businessApps(),
+    businessAppFeatures: r.many.businessAppFeatures(),
     roleTemplates: r.many.roleTemplates(),
     versionBusinesses: r.many.versionBusinesses(),
   },
@@ -129,7 +129,6 @@ export const relations = defineRelations(schema, (r) => ({
   countries: {
     organizations: r.many.organizations(),
     planPrices: r.many.planPrices(),
-    appPrices: r.many.appPrices(),
     plans: r.many.plans({
       from: r.countries.id.through(r.planPrices.countryId),
       to: r.plans.id.through(r.planPrices.planId),
@@ -196,7 +195,7 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.versions.id,
     }),
     featurePermissions: r.many.featurePermissions(),
-    appFeatures: r.many.appFeatures(),
+    businessAppFeatures: r.many.businessAppFeatures(),
   },
 
   // Microfrontend relations
@@ -208,28 +207,27 @@ export const relations = defineRelations(schema, (r) => ({
   },
 
   // App relations
-  apps: {
+  businessApps: {
     appVersion: r.one.versions({
-      from: r.apps.versionId,
+      from: r.businessApps.versionId,
       to: r.versions.id,
     }),
     business: r.one.businesses({
-      from: r.apps.businessId,
+      from: r.businessApps.businessId,
       to: r.businesses.id,
     }),
-    appFeatures: r.many.appFeatures(),
-    appPrices: r.many.appPrices(),
+    businessAppFeatures: r.many.businessAppFeatures(),
   },
 
   // App-Feature junction relations
-  appFeatures: {
+  businessAppFeatures: {
     appVersion: r.one.versions({
-      from: r.appFeatures.versionId,
+      from: r.businessAppFeatures.versionId,
       to: r.versions.id,
     }),
-    business: r.one.businesses({ from: r.appFeatures.businessId, to: r.businesses.id }),
-    app: r.one.apps({ from: r.appFeatures.appId, to: r.apps.id }),
-    feature: r.one.features({ from: r.appFeatures.featureId, to: r.features.id }),
+    business: r.one.businesses({ from: r.businessAppFeatures.businessId, to: r.businesses.id }),
+    app: r.one.businessApps({ from: r.businessAppFeatures.appId, to: r.businessApps.id }),
+    feature: r.one.features({ from: r.businessAppFeatures.featureId, to: r.features.id }),
   },
 
   // Feature permission relations
@@ -260,12 +258,6 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.permissionBusinesses.businessId,
       to: r.businesses.id,
     }),
-  },
-
-  // App-Price relations
-  appPrices: {
-    app: r.one.apps({ from: r.appPrices.appId, to: r.apps.id }),
-    country: r.one.countries({ from: r.appPrices.countryId, to: r.countries.id }),
   },
 
   // Plan-Feature membership relations (the plan's included features, per platform)

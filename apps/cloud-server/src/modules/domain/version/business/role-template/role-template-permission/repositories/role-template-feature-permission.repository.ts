@@ -3,8 +3,8 @@ import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, exists, inArray, or, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewRoleTemplateFeaturePermission } from '@/db/schema';
 import {
-  appFeatures,
-  apps,
+  businessAppFeatures,
+  businessApps,
   featurePermissions,
   features,
   permissionBusinesses,
@@ -86,10 +86,10 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
   async findAvailableApps(versionId: string, businessId: string): Promise<AvailableApp[]> {
     const rows = await this.db
       .select({
-        appId: apps.id,
-        appCode: apps.code,
-        appName: apps.name,
-        appIcon: apps.icon,
+        appId: businessApps.id,
+        appCode: businessApps.code,
+        appName: businessApps.name,
+        appIcon: businessApps.icon,
         featureId: features.id,
         featureCode: features.code,
         featureName: features.name,
@@ -100,14 +100,17 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
         webMfId: features.webMfId,
         mobileMfId: features.mobileMfId,
       })
-      .from(appFeatures)
-      .innerJoin(apps, and(eq(apps.id, appFeatures.appId), eq(apps.businessId, businessId)))
-      .innerJoin(features, eq(features.id, appFeatures.featureId))
+      .from(businessAppFeatures)
+      .innerJoin(
+        businessApps,
+        and(eq(businessApps.id, businessAppFeatures.appId), eq(businessApps.businessId, businessId)),
+      )
+      .innerJoin(features, eq(features.id, businessAppFeatures.featureId))
       .innerJoin(featurePermissions, eq(featurePermissions.featureId, features.id))
       .where(
         and(
-          eq(appFeatures.versionId, versionId),
-          eq(appFeatures.businessId, businessId),
+          eq(businessAppFeatures.versionId, versionId),
+          eq(businessAppFeatures.businessId, businessId),
           or(
             eq(featurePermissions.isGlobal, true),
             exists(
@@ -124,7 +127,7 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           ),
         ),
       )
-      .orderBy(apps.name, features.sortOrder, featurePermissions.sortOrder);
+      .orderBy(businessApps.name, features.sortOrder, featurePermissions.sortOrder);
 
     const appMap = new Map<string, AvailableApp>();
     const featureMap = new Map<string, AvailableFeature>();

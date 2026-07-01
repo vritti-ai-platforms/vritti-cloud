@@ -51,7 +51,7 @@ export const createFeatureSchema = z.object({
     .string()
     .min(1, 'Feature code is required')
     .max(255, 'Code must be 255 characters or less')
-    .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'Must be lowercase with dots (e.g. crm.leads.view)'),
+    .regex(/^[a-z][a-z0-9-]*$/, 'Single lowercase word, hyphens allowed (e.g. inventory-items)'),
   name: z.string().min(1, 'Feature name is required').max(255, 'Name must be 255 characters or less'),
   versionId: z.string().uuid('App version is required'),
   lucideIcon: z.string().min(1, 'Please select an icon').max(100),
@@ -65,7 +65,7 @@ export const updateFeatureSchema = z.object({
     .string()
     .min(1, 'Feature code is required')
     .max(255, 'Code must be 255 characters or less')
-    .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'Must be lowercase with dots (e.g. crm.leads.view)')
+    .regex(/^[a-z][a-z0-9-]*$/, 'Single lowercase word, hyphens allowed (e.g. inventory-items)')
     .optional(),
   name: z.string().min(1, 'Feature name is required').max(255).optional(),
   lucideIcon: z.string().min(1, 'Please select an icon').max(100).optional(),

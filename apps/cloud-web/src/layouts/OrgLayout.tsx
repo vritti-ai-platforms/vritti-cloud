@@ -15,7 +15,7 @@ function useOrgNavGroups(orgSlug?: string): SidebarNavGroup[] {
           { title: 'Users', icon: Users, path: `${base}/users` },
           { title: 'Roles & Permissions', icon: Shield, path: `${base}/roles` },
           { title: 'Business Units', icon: Building2, path: `${base}/business-units` },
-          { title: 'Applications', icon: Layers, path: `${base}/applications` },
+          { title: 'Plan', icon: Layers, path: `${base}/plan` },
         ],
       },
       {

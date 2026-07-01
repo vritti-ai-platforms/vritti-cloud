@@ -17,7 +17,7 @@ export type FeaturePermissionsTableResponse = TableResponse<FeaturePermission>;
 const codeField = z
   .string()
   .min(1, 'Code is required')
-  .regex(/^[a-z0-9]+(?:[-_:.][a-z0-9]+)*$/, 'Use lowercase letters, numbers and - _ : . only');
+  .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'Code must be dot-separated lowercase (e.g. add.salt)');
 
 const labelField = z.string().min(1, 'Label is required');
 

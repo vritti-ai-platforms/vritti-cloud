@@ -1,8 +1,8 @@
 {
   "version": "8",
   "dialect": "postgres",
-  "id": "a4ce88db-a066-46ec-8d9c-5f221d82f2f0",
-  "prevIds": ["90b35c67-78e8-4c79-926c-85d69dd892c0"],
+  "id": "aee7df21-ee38-4845-a98d-22e8ed01d3dd",
+  "prevIds": ["c5894c3b-7fd0-4d7e-a6ed-5e1a313a1784"],
   "ddl": [
     {
       "name": "cloud",
@@ -304,13 +304,13 @@
     },
     {
       "isRlsEnabled": false,
-      "name": "apps",
+      "name": "business_apps",
       "entityType": "tables",
       "schema": "cloud"
     },
     {
       "isRlsEnabled": false,
-      "name": "app_features",
+      "name": "business_app_features",
       "entityType": "tables",
       "schema": "cloud"
     },
@@ -1197,14 +1197,14 @@
       "table": "organizations"
     },
     {
-      "type": "uuid",
+      "type": "varchar(100)",
       "typeSchema": null,
       "notNull": true,
       "dimensions": 0,
       "default": null,
       "generated": null,
       "identity": null,
-      "name": "business_id",
+      "name": "business_code",
       "entityType": "columns",
       "schema": "cloud",
       "table": "organizations"
@@ -3976,7 +3976,7 @@
       "name": "id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "uuid",
@@ -3989,7 +3989,7 @@
       "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "uuid",
@@ -4002,7 +4002,7 @@
       "name": "business_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "varchar(100)",
@@ -4015,7 +4015,7 @@
       "name": "code",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "varchar(255)",
@@ -4028,7 +4028,7 @@
       "name": "name",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "text",
@@ -4041,7 +4041,7 @@
       "name": "description",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "varchar(255)",
@@ -4054,7 +4054,7 @@
       "name": "icon",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "integer",
@@ -4067,7 +4067,7 @@
       "name": "sort_order",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "timestamp with time zone",
@@ -4080,7 +4080,7 @@
       "name": "created_at",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "timestamp with time zone",
@@ -4093,7 +4093,7 @@
       "name": "updated_at",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "type": "uuid",
@@ -4106,7 +4106,7 @@
       "name": "id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "type": "uuid",
@@ -4119,7 +4119,7 @@
       "name": "version_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "type": "uuid",
@@ -4132,7 +4132,7 @@
       "name": "business_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "type": "uuid",
@@ -4145,7 +4145,7 @@
       "name": "app_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "type": "uuid",
@@ -4158,7 +4158,7 @@
       "name": "feature_id",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "type": "integer",
@@ -4171,7 +4171,7 @@
       "name": "sort_order",
       "entityType": "columns",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "type": "uuid",
@@ -5454,7 +5454,7 @@
       "name": "app_version_business_code_idx",
       "entityType": "indexes",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "nameExplicit": true,
@@ -5669,13 +5669,13 @@
     },
     {
       "nameExplicit": false,
-      "columns": ["business_id"],
+      "columns": ["business_code"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": ["id"],
+      "columnsTo": ["code"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
-      "name": "organizations_business_id_businesses_id_fkey",
+      "name": "organizations_business_code_businesses_code_fkey",
       "entityType": "fks",
       "schema": "cloud",
       "table": "organizations"
@@ -5788,7 +5788,7 @@
       "nameExplicit": true,
       "columns": ["business_id", "feature_id"],
       "schemaTo": "cloud",
-      "tableTo": "app_features",
+      "tableTo": "business_app_features",
       "columnsTo": ["business_id", "feature_id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
@@ -6198,7 +6198,7 @@
       "name": "apps_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "nameExplicit": false,
@@ -6211,7 +6211,7 @@
       "name": "apps_business_id_businesses_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "apps"
+      "table": "business_apps"
     },
     {
       "nameExplicit": false,
@@ -6224,7 +6224,7 @@
       "name": "app_features_version_id_versions_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "nameExplicit": false,
@@ -6237,20 +6237,20 @@
       "name": "app_features_business_id_businesses_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "nameExplicit": false,
       "columns": ["app_id"],
       "schemaTo": "cloud",
-      "tableTo": "apps",
+      "tableTo": "business_apps",
       "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "app_features_app_id_apps_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "nameExplicit": false,
@@ -6263,13 +6263,13 @@
       "name": "app_features_feature_id_features_id_fkey",
       "entityType": "fks",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "nameExplicit": false,
       "columns": ["app_id"],
       "schemaTo": "cloud",
-      "tableTo": "apps",
+      "tableTo": "business_apps",
       "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
@@ -6373,7 +6373,7 @@
       "nameExplicit": true,
       "columns": ["business_id", "feature_id"],
       "schemaTo": "cloud",
-      "tableTo": "app_features",
+      "tableTo": "business_app_features",
       "columnsTo": ["business_id", "feature_id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
@@ -6679,7 +6679,7 @@
       "nameExplicit": false,
       "name": "apps_pkey",
       "schema": "cloud",
-      "table": "apps",
+      "table": "business_apps",
       "entityType": "pks"
     },
     {
@@ -6687,7 +6687,7 @@
       "nameExplicit": false,
       "name": "app_features_pkey",
       "schema": "cloud",
-      "table": "app_features",
+      "table": "business_app_features",
       "entityType": "pks"
     },
     {
@@ -6738,7 +6738,7 @@
       "name": "app_feature_business_feature_key",
       "entityType": "uniques",
       "schema": "cloud",
-      "table": "app_features"
+      "table": "business_app_features"
     },
     {
       "nameExplicit": false,
@@ -6874,5 +6874,5 @@
       "schema": "cloud"
     }
   ],
-  "renames": []
+  "renames": ["cloud.apps->cloud.business_apps", "cloud.app_features->cloud.business_app_features"]
 }

@@ -1,0 +1,1 @@
+DROP TABLE "cloud"."app_prices";

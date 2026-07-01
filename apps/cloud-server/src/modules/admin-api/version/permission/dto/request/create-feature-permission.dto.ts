@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -16,11 +17,14 @@ export class CreateFeaturePermissionDto {
   @IsUUID()
   featureId: string;
 
-  @ApiProperty({ description: 'Permission code (lowercase snake_case)', example: 'add_salt' })
+  @ApiProperty({ description: 'Permission code (dot-separated lowercase)', example: 'add.salt' })
   @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @MinLength(1)
   @MaxLength(50)
-  @Matches(/^[a-z][a-z0-9_]*$/, { message: 'Code must be lowercase snake_case (e.g. "add_salt")' })
+  @Matches(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, {
+    message: 'Code must be dot-separated lowercase segments (e.g. "add.salt")',
+  })
   code: string;
 
   @ApiProperty({ description: 'Human-readable permission label', example: 'Add Salt' })

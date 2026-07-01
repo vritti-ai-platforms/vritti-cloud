@@ -1,0 +1,2 @@
+ALTER TABLE "cloud"."features" ADD CONSTRAINT "feature_code_lowercase_chk" CHECK ("code" = lower("code"));--> statement-breakpoint
+ALTER TABLE "cloud"."feature_permissions" ADD CONSTRAINT "feature_permission_code_lowercase_chk" CHECK ("code" = lower("code"));

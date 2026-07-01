@@ -40,11 +40,11 @@ import { MFAVerificationPage } from './pages/auth/MFAVerificationPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { HomePage } from './pages/cloud/home/HomePage';
 import { InvitationsPage } from './pages/cloud/invitations/InvitationsPage';
-import { OrgAppsPage } from './pages/cloud/organization/apps/OrgAppsPage';
 import { BUViewPage } from './pages/cloud/organization/business-units/BUViewPage';
 import { BUViewPageSkeleton } from './pages/cloud/organization/business-units/BUViewPageSkeleton';
 import { OrgBusinessUnitsPage } from './pages/cloud/organization/business-units/OrgBusinessUnitsPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
+import { PlanOverviewPage } from './pages/cloud/organization/plan/PlanOverviewPage';
 import { CreateOrgRolePage } from './pages/cloud/organization/roles/CreateOrgRolePage';
 import { EditOrgRolePage } from './pages/cloud/organization/roles/EditOrgRolePage';
 import { OrgRolesPage } from './pages/cloud/organization/roles/OrgRolesPage';
@@ -304,8 +304,8 @@ export const cloudRoutes: RouteObject[] = [
         ),
       },
       {
-        path: 'applications',
-        element: <OrgAppsPage />,
+        path: 'plan',
+        element: <PlanOverviewPage />,
       },
       {
         path: 'billing',

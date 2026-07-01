@@ -7,7 +7,7 @@ import {
 } from '@vritti/api-sdk';
 import { and, countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Feature } from '@/db/schema';
-import { appFeatures, apps, featurePermissions, features, permissionBusinesses } from '@/db/schema';
+import { businessAppFeatures, businessApps, featurePermissions, features, permissionBusinesses } from '@/db/schema';
 
 export type FeatureTableRow = Feature & {
   permissions: string[];
@@ -68,8 +68,8 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   async countAppFeatureReferences(featureId: string): Promise<number> {
     const result = await this.db
       .select({ count: sql<number>`count(*)` })
-      .from(appFeatures)
-      .where(eq(appFeatures.featureId, featureId));
+      .from(businessAppFeatures)
+      .where(eq(businessAppFeatures.featureId, featureId));
     return Number(result[0]?.count ?? 0);
   }
 
@@ -104,13 +104,13 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
           mapFromDriverValue: (value: unknown) =>
             Array.isArray(value) ? value : value === '{}' || !value ? [] : String(value).slice(1, -1).split(','),
         }),
-        appFeatureCount: countDistinct(appFeatures.id),
-        businessCount: countDistinct(apps.businessId),
+        appFeatureCount: countDistinct(businessAppFeatures.id),
+        businessCount: countDistinct(businessApps.businessId),
       },
       leftJoins: [
         { table: featurePermissions, on: eq(featurePermissions.featureId, features.id) },
-        { table: appFeatures, on: eq(appFeatures.featureId, features.id) },
-        { table: apps, on: eq(apps.id, appFeatures.appId) },
+        { table: businessAppFeatures, on: eq(businessAppFeatures.featureId, features.id) },
+        { table: businessApps, on: eq(businessApps.id, businessAppFeatures.appId) },
       ],
       groupBy: [features.id],
       where: options.where,
@@ -157,8 +157,8 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
           ))
       )
       and not exists (
-        select 1 from ${appFeatures} af
-        join ${apps} a on a.id = af.app_id
+        select 1 from ${businessAppFeatures} af
+        join ${businessApps} a on a.id = af.app_id
         where af.feature_id = ${features.id} and a.business_id = ${businessId}
       )`;
     return this.findForSelect({ ...config, conditions: [...(config.conditions ?? []), available] });
@@ -206,9 +206,9 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
   async findReferencedIds(ids: string[]): Promise<Set<string>> {
     if (ids.length === 0) return new Set();
     const rows = await this.db
-      .select({ id: appFeatures.featureId })
-      .from(appFeatures)
-      .where(inArray(appFeatures.featureId, ids));
+      .select({ id: businessAppFeatures.featureId })
+      .from(businessAppFeatures)
+      .where(inArray(businessAppFeatures.featureId, ids));
     const referenced = new Set<string>();
     for (const row of rows) {
       if (row.id) referenced.add(row.id);

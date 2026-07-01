@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, count, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { Business } from '@/db/schema';
-import { apps, businesses, roleTemplates, versionBusinesses, versions } from '@/db/schema';
+import { businessApps, businesses, roleTemplates, versionBusinesses, versions } from '@/db/schema';
 
 export type VersionBusinessRow = Business & { appCount: number };
 
@@ -22,11 +22,11 @@ export class VersionBusinessRepository extends PrimaryBaseRepository<typeof vers
         description: businesses.description,
         createdAt: businesses.createdAt,
         updatedAt: businesses.updatedAt,
-        appCount: count(apps.id),
+        appCount: count(businessApps.id),
       })
       .from(versionBusinesses)
       .innerJoin(businesses, eq(businesses.id, versionBusinesses.businessId))
-      .leftJoin(apps, and(eq(apps.businessId, businesses.id), eq(apps.versionId, versionId)))
+      .leftJoin(businessApps, and(eq(businessApps.businessId, businesses.id), eq(businessApps.versionId, versionId)))
       .where(eq(versionBusinesses.versionId, versionId))
       .groupBy(businesses.id)
       .orderBy(businesses.name);
@@ -47,11 +47,14 @@ export class VersionBusinessRepository extends PrimaryBaseRepository<typeof vers
         description: businesses.description,
         createdAt: businesses.createdAt,
         updatedAt: businesses.updatedAt,
-        appCount: count(apps.id),
+        appCount: count(businessApps.id),
       },
       leftJoins: [
         { table: businesses, on: eq(businesses.id, versionBusinesses.businessId) },
-        { table: apps, on: and(eq(apps.businessId, businesses.id), eq(apps.versionId, versionId)) },
+        {
+          table: businessApps,
+          on: and(eq(businessApps.businessId, businesses.id), eq(businessApps.versionId, versionId)),
+        },
       ],
       groupBy: [businesses.id],
       where: options.where ? and(scopeWhere, options.where) : scopeWhere,
@@ -96,8 +99,8 @@ export class VersionBusinessRepository extends PrimaryBaseRepository<typeof vers
     const [appsResult, rolesResult] = await Promise.all([
       this.db
         .select({ count: count() })
-        .from(apps)
-        .where(and(eq(apps.versionId, versionId), eq(apps.businessId, businessId))),
+        .from(businessApps)
+        .where(and(eq(businessApps.versionId, versionId), eq(businessApps.businessId, businessId))),
       this.db
         .select({ count: count() })
         .from(roleTemplates)

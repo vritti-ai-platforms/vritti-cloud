@@ -1,4 +1,5 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
@@ -12,12 +13,15 @@ import {
 } from 'class-validator';
 
 export class UpdateFeaturePermissionDto {
-  @ApiPropertyOptional({ description: 'Permission code (lowercase snake_case)', example: 'add_salt' })
+  @ApiPropertyOptional({ description: 'Permission code (dot-separated lowercase)', example: 'add.salt' })
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @MinLength(1)
   @MaxLength(50)
-  @Matches(/^[a-z][a-z0-9_]*$/, { message: 'Code must be lowercase snake_case (e.g. "add_salt")' })
+  @Matches(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, {
+    message: 'Code must be dot-separated lowercase segments (e.g. "add.salt")',
+  })
   code?: string;
 
   @ApiPropertyOptional({ description: 'Human-readable permission label', example: 'Add Salt' })

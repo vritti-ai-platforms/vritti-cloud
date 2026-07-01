@@ -4,8 +4,8 @@ import { cloudSchema } from './cloud-schema';
 import { versions } from './version';
 
 // Curated feature bundles scoped to an app version and business
-export const apps = cloudSchema.table(
-  'apps',
+export const businessApps = cloudSchema.table(
+  'business_apps',
   {
     id: uuid('id').primaryKey().defaultRandom(),
     versionId: uuid('version_id')
@@ -25,5 +25,5 @@ export const apps = cloudSchema.table(
   (table) => [uniqueIndex('app_version_business_code_idx').on(table.versionId, table.businessId, table.code)],
 );
 
-export type App = typeof apps.$inferSelect;
-export type NewApp = typeof apps.$inferInsert;
+export type App = typeof businessApps.$inferSelect;
+export type NewApp = typeof businessApps.$inferInsert;

@@ -3,8 +3,8 @@ import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { eq, inArray } from '@vritti/api-sdk/drizzle-orm';
 import type { Version } from '@/db/schema';
 import {
-  appFeatures,
-  apps,
+  businessAppFeatures,
+  businessApps,
   businesses,
   featurePermissions,
   features,
@@ -69,8 +69,8 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       this.db.select().from(featurePermissions).where(eq(featurePermissions.versionId, versionId)),
       this.db.select().from(webMicrofrontends).where(eq(webMicrofrontends.versionId, versionId)),
       this.db.select().from(mobileMicrofrontends).where(eq(mobileMicrofrontends.versionId, versionId)),
-      this.db.select().from(apps).where(eq(apps.versionId, versionId)),
-      this.db.select().from(appFeatures).where(eq(appFeatures.versionId, versionId)),
+      this.db.select().from(businessApps).where(eq(businessApps.versionId, versionId)),
+      this.db.select().from(businessAppFeatures).where(eq(businessAppFeatures.versionId, versionId)),
       this.db.select().from(roleTemplates).where(eq(roleTemplates.versionId, versionId)),
       this.db.select().from(roleTemplateFeatures).where(eq(roleTemplateFeatures.versionId, versionId)),
       this.db
@@ -101,7 +101,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       webMicrofrontends: webMfRows,
       mobileMicrofrontends: mobileMfRows,
       apps: appRows,
-      appFeatures: appFeatureRows,
+      businessAppFeatures: appFeatureRows,
       roleTemplates: roleRows,
       roleTemplateFeatures: roleFeatureRows,
       roleTemplatePermissions: rolePermRows,

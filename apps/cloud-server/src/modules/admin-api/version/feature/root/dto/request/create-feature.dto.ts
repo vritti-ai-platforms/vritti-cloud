@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIconName } from '@vritti/api-sdk/icons';
+import { Transform } from 'class-transformer';
 import { IsInt, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateFeatureDto {
@@ -11,14 +12,15 @@ export class CreateFeatureDto {
   versionId: string;
 
   @ApiProperty({
-    description: 'Dot-separated feature code (lowercase, alphanumeric segments)',
-    example: 'orders.dine-in.create',
+    description: 'Unique feature code — a single lowercase word (hyphens allowed)',
+    example: 'inventory-items',
   })
   @IsString()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @MinLength(1)
   @MaxLength(255)
-  @Matches(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, {
-    message: 'Code must be dot-separated lowercase segments (e.g. "orders.dine-in.create")',
+  @Matches(/^[a-z][a-z0-9-]*$/, {
+    message: 'Code must be a single lowercase word (letters, numbers, hyphens; e.g. "inventory-items")',
   })
   code: string;
 

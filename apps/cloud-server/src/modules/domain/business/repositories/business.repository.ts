@@ -7,7 +7,7 @@ import {
 } from '@vritti/api-sdk';
 import { count, eq, inArray, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Business } from '@/db/schema';
-import { apps, businesses, organizations, plans, roleTemplates, versionBusinesses } from '@/db/schema';
+import { businessApps, businesses, organizations, plans, roleTemplates, versionBusinesses } from '@/db/schema';
 
 @Injectable()
 export class BusinessRepository extends PrimaryBaseRepository<typeof businesses> {
@@ -64,7 +64,7 @@ export class BusinessRepository extends PrimaryBaseRepository<typeof businesses>
         .innerJoin(businesses, eq(businesses.code, organizations.businessCode))
         .where(inArray(businesses.id, ids)),
       this.db.select({ id: plans.businessId }).from(plans).where(inArray(plans.businessId, ids)),
-      this.db.select({ id: apps.businessId }).from(apps).where(inArray(apps.businessId, ids)),
+      this.db.select({ id: businessApps.businessId }).from(businessApps).where(inArray(businessApps.businessId, ids)),
       this.db
         .select({ id: roleTemplates.businessId })
         .from(roleTemplates)
@@ -88,7 +88,7 @@ export class BusinessRepository extends PrimaryBaseRepository<typeof businesses>
         .innerJoin(businesses, eq(businesses.code, organizations.businessCode))
         .where(eq(businesses.id, id)),
       this.db.select({ count: count() }).from(plans).where(eq(plans.businessId, id)),
-      this.db.select({ count: count() }).from(apps).where(eq(apps.businessId, id)),
+      this.db.select({ count: count() }).from(businessApps).where(eq(businessApps.businessId, id)),
       this.db.select({ count: count() }).from(roleTemplates).where(eq(roleTemplates.businessId, id)),
     ]);
     return {

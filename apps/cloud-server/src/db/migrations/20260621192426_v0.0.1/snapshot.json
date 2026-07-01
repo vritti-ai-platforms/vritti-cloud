@@ -2,207 +2,122 @@
   "version": "8",
   "dialect": "postgres",
   "id": "f1b11fd9-665f-40e9-a02b-1c38c09dc279",
-  "prevIds": [
-    "b066808e-bc5d-4177-819f-7707946165e3"
-  ],
+  "prevIds": ["b066808e-bc5d-4177-819f-7707946165e3"],
   "ddl": [
     {
       "name": "cloud",
       "entityType": "schemas"
     },
     {
-      "values": [
-        "PENDING_VERIFICATION",
-        "ACTIVE",
-        "INACTIVE"
-      ],
+      "values": ["PENDING_VERIFICATION", "ACTIVE", "INACTIVE"],
       "name": "AccountStatus",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "WEB",
-        "MOBILE"
-      ],
+      "values": ["WEB", "MOBILE"],
       "name": "AppPlatform",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "monthly",
-        "annual",
-        "triennial"
-      ],
+      "values": ["monthly", "annual", "triennial"],
       "name": "BillingPeriod",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "SHARED",
-        "DEDICATED"
-      ],
+      "values": ["SHARED", "DEDICATED"],
       "name": "DatabaseType",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "active",
-        "stopped",
-        "Provisioning"
-      ],
+      "values": ["active", "stopped", "Provisioning"],
       "name": "DeploymentStatus",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "shared",
-        "dedicated"
-      ],
+      "values": ["shared", "dedicated"],
       "name": "DeploymentType",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "pending",
-        "ready",
-        "failed",
-        "deleted"
-      ],
+      "values": ["pending", "ready", "failed", "deleted"],
       "name": "MediaStatus",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "TOTP",
-        "PASSKEY"
-      ],
+      "values": ["TOTP", "PASSKEY"],
       "name": "MfaMethod",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "GOOGLE",
-        "MICROSOFT",
-        "APPLE",
-        "FACEBOOK",
-        "X"
-      ],
+      "values": ["GOOGLE", "MICROSOFT", "APPLE", "FACEBOOK", "X"],
       "name": "OAuthProviderType",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "EMAIL_VERIFICATION",
-        "SET_PASSWORD",
-        "MOBILE_VERIFICATION",
-        "TWO_FACTOR_SETUP",
-        "COMPLETE"
-      ],
+      "values": ["EMAIL_VERIFICATION", "SET_PASSWORD", "MOBILE_VERIFICATION", "TWO_FACTOR_SETUP", "COMPLETE"],
       "name": "OnboardingStep",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "Owner",
-        "Admin"
-      ],
+      "values": ["Owner", "Admin"],
       "name": "OrgMemberRole",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "0-10",
-        "10-20",
-        "20-50",
-        "50-100",
-        "100-500",
-        "500+"
-      ],
+      "values": ["0-10", "10-20", "20-50", "50-100", "100-500", "500+"],
       "name": "OrgSize",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "GLOBAL",
-        "SUBTREE",
-        "SINGLE_BU"
-      ],
+      "values": ["GLOBAL", "SUBTREE", "SINGLE_BU"],
       "name": "RoleScope",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "ONBOARDING",
-        "CLOUD",
-        "COMPANY",
-        "RESET",
-        "ADMIN"
-      ],
+      "values": ["ONBOARDING", "CLOUD", "COMPANY", "RESET", "ADMIN"],
       "name": "SessionType",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "email",
-        "oauth"
-      ],
+      "values": ["email", "oauth"],
       "name": "SignupMethod",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "GST",
-        "VAT",
-        "NONE"
-      ],
+      "values": ["GST", "VAT", "NONE"],
       "name": "TaxRegime",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "ACTIVE",
-        "SUSPENDED",
-        "ARCHIVED"
-      ],
+      "values": ["ACTIVE", "SUSPENDED", "ARCHIVED"],
       "name": "TenantStatus",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "EMAIL",
-        "SMS_OUT",
-        "SMS_IN",
-        "WHATSAPP_IN",
-        "IDENTITY_EMAIL_OUT",
-        "IDENTITY_SMS_OUT"
-      ],
+      "values": ["EMAIL", "SMS_OUT", "SMS_IN", "WHATSAPP_IN", "IDENTITY_EMAIL_OUT", "IDENTITY_SMS_OUT"],
       "name": "verification_channel",
       "entityType": "enums",
       "schema": "cloud"
     },
     {
-      "values": [
-        "ALPHA",
-        "BETA",
-        "PROD"
-      ],
+      "values": ["ALPHA", "BETA", "PROD"],
       "name": "AppVersionStatus",
       "entityType": "enums",
       "schema": "cloud"
@@ -5448,14 +5363,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "oauth_providers_user_id_users_id_fkey",
@@ -5465,14 +5376,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "sessions_user_id_users_id_fkey",
@@ -5482,14 +5389,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "region_id"
-      ],
+      "columns": ["region_id"],
       "schemaTo": "cloud",
       "tableTo": "regions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "deployments_region_id_regions_id_fkey",
@@ -5499,14 +5402,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "cloud_provider_id"
-      ],
+      "columns": ["cloud_provider_id"],
       "schemaTo": "cloud",
       "tableTo": "cloud_providers",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "deployments_cloud_provider_id_cloud_providers_id_fkey",
@@ -5516,14 +5415,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "organization_id"
-      ],
+      "columns": ["organization_id"],
       "schemaTo": "cloud",
       "tableTo": "organizations",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "organization_members_organization_id_organizations_id_fkey",
@@ -5533,14 +5428,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "organization_members_user_id_users_id_fkey",
@@ -5550,14 +5441,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "business_id"
-      ],
+      "columns": ["business_id"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "organizations_business_id_businesses_id_fkey",
@@ -5567,14 +5454,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "country_id"
-      ],
+      "columns": ["country_id"],
       "schemaTo": "cloud",
       "tableTo": "countries",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "organizations_country_id_countries_id_fkey",
@@ -5584,14 +5467,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "deployment_id"
-      ],
+      "columns": ["deployment_id"],
       "schemaTo": "cloud",
       "tableTo": "deployments",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "organizations_deployment_id_deployments_id_fkey",
@@ -5601,14 +5480,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "plans_version_id_versions_id_fkey",
@@ -5618,14 +5493,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "business_id"
-      ],
+      "columns": ["business_id"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "plans_business_id_businesses_id_fkey",
@@ -5635,14 +5506,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "plan_id"
-      ],
+      "columns": ["plan_id"],
       "schemaTo": "cloud",
       "tableTo": "plans",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "plan_feature_permissions_plan_id_plans_id_fkey",
@@ -5652,14 +5519,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "feature_permission_id"
-      ],
+      "columns": ["feature_permission_id"],
       "schemaTo": "cloud",
       "tableTo": "feature_permissions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "plan_feature_permissions_mhQop5QF18Yc_fkey",
@@ -5669,14 +5532,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "plan_id"
-      ],
+      "columns": ["plan_id"],
       "schemaTo": "cloud",
       "tableTo": "plans",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "plan_prices_plan_id_plans_id_fkey",
@@ -5686,14 +5545,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "country_id"
-      ],
+      "columns": ["country_id"],
       "schemaTo": "cloud",
       "tableTo": "countries",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "plan_prices_country_id_countries_id_fkey",
@@ -5703,14 +5558,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "region_id"
-      ],
+      "columns": ["region_id"],
       "schemaTo": "cloud",
       "tableTo": "regions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "region_cloud_providers_region_id_regions_id_fkey",
@@ -5720,14 +5571,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "cloud_provider_id"
-      ],
+      "columns": ["cloud_provider_id"],
       "schemaTo": "cloud",
       "tableTo": "cloud_providers",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "region_cloud_providers_LRAndYB1ZHnO_fkey",
@@ -5737,14 +5584,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "media_id"
-      ],
+      "columns": ["media_id"],
       "schemaTo": "cloud",
       "tableTo": "media",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "users_media_id_media_id_fkey",
@@ -5754,14 +5597,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "change_request_rate_limits_user_id_users_id_fkey",
@@ -5771,14 +5610,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "email_change_requests_user_id_users_id_fkey",
@@ -5788,14 +5623,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "identity_verification_id"
-      ],
+      "columns": ["identity_verification_id"],
       "schemaTo": "cloud",
       "tableTo": "verifications",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "email_change_requests_QFJ7gz9kmHX4_fkey",
@@ -5805,14 +5636,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "new_email_verification_id"
-      ],
+      "columns": ["new_email_verification_id"],
       "schemaTo": "cloud",
       "tableTo": "verifications",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "email_change_requests_oEKlRXpNOIxn_fkey",
@@ -5822,14 +5649,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "mfa_auth_user_id_users_id_fkey",
@@ -5839,14 +5662,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "phone_change_requests_user_id_users_id_fkey",
@@ -5856,14 +5675,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "identity_verification_id"
-      ],
+      "columns": ["identity_verification_id"],
       "schemaTo": "cloud",
       "tableTo": "verifications",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "phone_change_requests_QFJ7gz9gGf2I_fkey",
@@ -5873,14 +5688,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "new_phone_verification_id"
-      ],
+      "columns": ["new_phone_verification_id"],
       "schemaTo": "cloud",
       "tableTo": "verifications",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "SET NULL",
       "name": "phone_change_requests_2weMc6AIXEN3_fkey",
@@ -5890,14 +5701,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "verifications_user_id_users_id_fkey",
@@ -5907,14 +5714,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "user_id"
-      ],
+      "columns": ["user_id"],
       "schemaTo": "cloud",
       "tableTo": "users",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "table_views_user_id_users_id_fkey",
@@ -5924,14 +5727,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "version_businesses_version_id_versions_id_fkey",
@@ -5941,14 +5740,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "business_id"
-      ],
+      "columns": ["business_id"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "RESTRICT",
       "name": "version_businesses_business_id_businesses_id_fkey",
@@ -5958,14 +5753,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "microfrontends_version_id_versions_id_fkey",
@@ -5975,14 +5766,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "features_version_id_versions_id_fkey",
@@ -5992,14 +5779,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "feature_microfrontends_version_id_versions_id_fkey",
@@ -6009,14 +5792,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "feature_id"
-      ],
+      "columns": ["feature_id"],
       "schemaTo": "cloud",
       "tableTo": "features",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "feature_microfrontends_feature_id_features_id_fkey",
@@ -6026,14 +5805,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "microfrontend_id"
-      ],
+      "columns": ["microfrontend_id"],
       "schemaTo": "cloud",
       "tableTo": "microfrontends",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "feature_microfrontends_microfrontend_id_microfrontends_id_fkey",
@@ -6043,14 +5818,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "feature_permissions_version_id_versions_id_fkey",
@@ -6060,14 +5831,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "feature_id"
-      ],
+      "columns": ["feature_id"],
       "schemaTo": "cloud",
       "tableTo": "features",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "feature_permissions_feature_id_features_id_fkey",
@@ -6077,14 +5844,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "permission_businesses_version_id_versions_id_fkey",
@@ -6094,14 +5857,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "feature_permission_id"
-      ],
+      "columns": ["feature_permission_id"],
       "schemaTo": "cloud",
       "tableTo": "feature_permissions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "permission_businesses_YPB5xWrbQzdp_fkey",
@@ -6111,14 +5870,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "business_id"
-      ],
+      "columns": ["business_id"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "permission_businesses_business_id_businesses_id_fkey",
@@ -6128,14 +5883,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "apps_version_id_versions_id_fkey",
@@ -6145,14 +5896,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "business_id"
-      ],
+      "columns": ["business_id"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "apps_business_id_businesses_id_fkey",
@@ -6162,14 +5909,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "app_features_version_id_versions_id_fkey",
@@ -6179,14 +5922,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "business_id"
-      ],
+      "columns": ["business_id"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "app_features_business_id_businesses_id_fkey",
@@ -6196,14 +5935,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "app_id"
-      ],
+      "columns": ["app_id"],
       "schemaTo": "cloud",
       "tableTo": "apps",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "app_features_app_id_apps_id_fkey",
@@ -6213,14 +5948,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "feature_id"
-      ],
+      "columns": ["feature_id"],
       "schemaTo": "cloud",
       "tableTo": "features",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "app_features_feature_id_features_id_fkey",
@@ -6230,14 +5961,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "app_id"
-      ],
+      "columns": ["app_id"],
       "schemaTo": "cloud",
       "tableTo": "apps",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "app_prices_app_id_apps_id_fkey",
@@ -6247,14 +5974,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "country_id"
-      ],
+      "columns": ["country_id"],
       "schemaTo": "cloud",
       "tableTo": "countries",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "app_prices_country_id_countries_id_fkey",
@@ -6264,14 +5987,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "role_templates_version_id_versions_id_fkey",
@@ -6281,14 +6000,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "business_id"
-      ],
+      "columns": ["business_id"],
       "schemaTo": "cloud",
       "tableTo": "businesses",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "role_templates_business_id_businesses_id_fkey",
@@ -6298,14 +6013,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version_id"
-      ],
+      "columns": ["version_id"],
       "schemaTo": "cloud",
       "tableTo": "versions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "role_template_feature_permissions_version_id_versions_id_fkey",
@@ -6315,14 +6026,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "role_template_id"
-      ],
+      "columns": ["role_template_id"],
       "schemaTo": "cloud",
       "tableTo": "role_templates",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "role_template_feature_permissions_kQhYPC6W6CFa_fkey",
@@ -6332,14 +6039,10 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "feature_permission_id"
-      ],
+      "columns": ["feature_permission_id"],
       "schemaTo": "cloud",
       "tableTo": "feature_permissions",
-      "columnsTo": [
-        "id"
-      ],
+      "columnsTo": ["id"],
       "onUpdate": "NO ACTION",
       "onDelete": "CASCADE",
       "name": "role_template_feature_permissions_taBODYTPBhoG_fkey",
@@ -6348,10 +6051,7 @@
       "table": "role_template_feature_permissions"
     },
     {
-      "columns": [
-        "region_id",
-        "cloud_provider_id"
-      ],
+      "columns": ["region_id", "cloud_provider_id"],
       "nameExplicit": false,
       "name": "region_cloud_providers_pkey",
       "entityType": "pks",
@@ -6359,9 +6059,7 @@
       "table": "region_cloud_providers"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "oauth_providers_pkey",
       "schema": "cloud",
@@ -6369,9 +6067,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "oauth_states_pkey",
       "schema": "cloud",
@@ -6379,9 +6075,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "sessions_pkey",
       "schema": "cloud",
@@ -6389,9 +6083,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "businesses_pkey",
       "schema": "cloud",
@@ -6399,9 +6091,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "countries_pkey",
       "schema": "cloud",
@@ -6409,9 +6099,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "deployments_pkey",
       "schema": "cloud",
@@ -6419,9 +6107,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "organization_members_pkey",
       "schema": "cloud",
@@ -6429,9 +6115,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "organizations_pkey",
       "schema": "cloud",
@@ -6439,9 +6123,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "plans_pkey",
       "schema": "cloud",
@@ -6449,9 +6131,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "plan_feature_permissions_pkey",
       "schema": "cloud",
@@ -6459,9 +6139,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "plan_prices_pkey",
       "schema": "cloud",
@@ -6469,9 +6147,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "cloud_providers_pkey",
       "schema": "cloud",
@@ -6479,9 +6155,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "regions_pkey",
       "schema": "cloud",
@@ -6489,9 +6163,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "users_pkey",
       "schema": "cloud",
@@ -6499,9 +6171,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "change_request_rate_limits_pkey",
       "schema": "cloud",
@@ -6509,9 +6179,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "email_change_requests_pkey",
       "schema": "cloud",
@@ -6519,9 +6187,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "mfa_auth_pkey",
       "schema": "cloud",
@@ -6529,9 +6195,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "phone_change_requests_pkey",
       "schema": "cloud",
@@ -6539,9 +6203,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "verifications_pkey",
       "schema": "cloud",
@@ -6549,9 +6211,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "media_pkey",
       "schema": "cloud",
@@ -6559,9 +6219,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "table_views_pkey",
       "schema": "cloud",
@@ -6569,9 +6227,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "versions_pkey",
       "schema": "cloud",
@@ -6579,9 +6235,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "version_businesses_pkey",
       "schema": "cloud",
@@ -6589,9 +6243,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "microfrontends_pkey",
       "schema": "cloud",
@@ -6599,9 +6251,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "features_pkey",
       "schema": "cloud",
@@ -6609,9 +6259,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "feature_microfrontends_pkey",
       "schema": "cloud",
@@ -6619,9 +6267,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "feature_permissions_pkey",
       "schema": "cloud",
@@ -6629,9 +6275,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "permission_businesses_pkey",
       "schema": "cloud",
@@ -6639,9 +6283,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "apps_pkey",
       "schema": "cloud",
@@ -6649,9 +6291,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "app_features_pkey",
       "schema": "cloud",
@@ -6659,9 +6299,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "app_prices_pkey",
       "schema": "cloud",
@@ -6669,9 +6307,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "role_templates_pkey",
       "schema": "cloud",
@@ -6679,9 +6315,7 @@
       "entityType": "pks"
     },
     {
-      "columns": [
-        "id"
-      ],
+      "columns": ["id"],
       "nameExplicit": false,
       "name": "role_template_feature_permissions_pkey",
       "schema": "cloud",
@@ -6690,10 +6324,7 @@
     },
     {
       "nameExplicit": true,
-      "columns": [
-        "provider",
-        "provider_id"
-      ],
+      "columns": ["provider", "provider_id"],
       "nullsNotDistinct": false,
       "name": "oauth_providers_provider_provider_id_key",
       "entityType": "uniques",
@@ -6702,9 +6333,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "state_token"
-      ],
+      "columns": ["state_token"],
       "nullsNotDistinct": false,
       "name": "oauth_states_state_token_key",
       "schema": "cloud",
@@ -6713,9 +6342,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "access_token_hash"
-      ],
+      "columns": ["access_token_hash"],
       "nullsNotDistinct": false,
       "name": "sessions_access_token_hash_key",
       "schema": "cloud",
@@ -6724,9 +6351,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "refresh_token_hash"
-      ],
+      "columns": ["refresh_token_hash"],
       "nullsNotDistinct": false,
       "name": "sessions_refresh_token_hash_key",
       "schema": "cloud",
@@ -6735,9 +6360,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "code"
-      ],
+      "columns": ["code"],
       "nullsNotDistinct": false,
       "name": "businesses_code_key",
       "schema": "cloud",
@@ -6746,9 +6369,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "code"
-      ],
+      "columns": ["code"],
       "nullsNotDistinct": false,
       "name": "countries_code_key",
       "schema": "cloud",
@@ -6757,9 +6378,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "subdomain"
-      ],
+      "columns": ["subdomain"],
       "nullsNotDistinct": false,
       "name": "organizations_subdomain_key",
       "schema": "cloud",
@@ -6768,9 +6387,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "org_identifier"
-      ],
+      "columns": ["org_identifier"],
       "nullsNotDistinct": false,
       "name": "organizations_org_identifier_key",
       "schema": "cloud",
@@ -6779,9 +6396,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "code"
-      ],
+      "columns": ["code"],
       "nullsNotDistinct": false,
       "name": "cloud_providers_code_key",
       "schema": "cloud",
@@ -6790,9 +6405,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "code"
-      ],
+      "columns": ["code"],
       "nullsNotDistinct": false,
       "name": "regions_code_key",
       "schema": "cloud",
@@ -6801,9 +6414,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "email"
-      ],
+      "columns": ["email"],
       "nullsNotDistinct": false,
       "name": "users_email_key",
       "schema": "cloud",
@@ -6812,9 +6423,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "passkey_credential_id"
-      ],
+      "columns": ["passkey_credential_id"],
       "nullsNotDistinct": false,
       "name": "mfa_auth_passkey_credential_id_key",
       "schema": "cloud",
@@ -6823,9 +6432,7 @@
     },
     {
       "nameExplicit": false,
-      "columns": [
-        "version"
-      ],
+      "columns": ["version"],
       "nullsNotDistinct": false,
       "name": "versions_version_key",
       "schema": "cloud",

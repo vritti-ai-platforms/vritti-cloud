@@ -11,9 +11,9 @@ import {
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { and } from '@vritti/api-sdk/drizzle-orm';
+import { and, sql } from '@vritti/api-sdk/drizzle-orm';
 import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
-import { features } from '@/db/schema';
+import { businessAppFeatures, features } from '@/db/schema';
 import { FeatureDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature.dto';
 import { FeatureMicrofrontendLinksDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature-microfrontend-links.dto';
 import { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
@@ -35,6 +35,15 @@ export class FeatureService {
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: features.name, type: 'string' },
     code: { column: features.code, type: 'string' },
+    // Filter by business assignment (via the business_app_features placement); EXISTS keeps the row counts intact.
+    // Honour the operator so "is not" (notEquals / isNotAnyOf) negates to features NOT assigned to the business.
+    businessId: {
+      expression: (value, operator) => {
+        const exists = sql`EXISTS (SELECT 1 FROM ${businessAppFeatures} WHERE ${businessAppFeatures.featureId} = ${features.id} AND ${businessAppFeatures.businessId} = ${value}::uuid)`;
+        return operator === 'notEquals' || operator === 'isNotAnyOf' ? sql`NOT ${exists}` : exists;
+      },
+      type: 'string',
+    },
   };
 
   constructor(

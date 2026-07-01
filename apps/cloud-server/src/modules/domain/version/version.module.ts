@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 // App Feature
 import { AppFeatureRepository } from './business/app/app-feature/repositories/app-feature.repository';
 // App Price
-import { AppPriceRepository } from './business/app/app-price/repositories/app-price.repository';
 // App
 import { AppRepository } from './business/app/root/repositories/app.repository';
 import { AppService } from './business/app/root/services/app.service';
@@ -56,7 +55,6 @@ import { VersionService } from './root/services/version.service';
     // Business Feature
     BusinessFeatureService,
     // App Price
-    AppPriceRepository,
     // Role Template
     RoleTemplateService,
     RoleTemplateRepository,
@@ -74,7 +72,6 @@ import { VersionService } from './root/services/version.service';
     FeaturePermissionRepository,
     AppRepository,
     AppFeatureRepository,
-    AppPriceRepository,
     RoleTemplateRepository,
     RoleTemplateFeatureRepository,
     RoleTemplateFeaturePermissionRepository,

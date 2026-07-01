@@ -14,7 +14,7 @@ import {
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
 import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
-import { apps } from '@/db/schema';
+import { businessApps } from '@/db/schema';
 import { AppDto } from '@/modules/admin-api/version/business/app/dto/entity/app.dto';
 import { CreateAppDto } from '@/modules/admin-api/version/business/app/dto/request/create-app.dto';
 import type { UpdateAppDto } from '@/modules/admin-api/version/business/app/dto/request/update-app.dto';
@@ -28,10 +28,10 @@ export class AppService {
   private readonly logger = new Logger(AppService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
-    name: { column: apps.name, type: 'string' },
-    code: { column: apps.code, type: 'string' },
-    versionId: { column: apps.versionId, type: 'string' },
-    businessId: { column: apps.businessId, type: 'string' },
+    name: { column: businessApps.name, type: 'string' },
+    code: { column: businessApps.code, type: 'string' },
+    versionId: { column: businessApps.versionId, type: 'string' },
+    businessId: { column: businessApps.businessId, type: 'string' },
   };
 
   constructor(

@@ -1,5 +1,5 @@
 import { foreignKey, uniqueIndex, uuid } from '@vritti/api-sdk/drizzle-pg-core';
-import { appFeatures } from './app-feature';
+import { businessAppFeatures } from './app-feature';
 import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
 import { appPlatformEnum } from './enums';
@@ -32,7 +32,7 @@ export const roleTemplateFeatures = cloudSchema.table(
     // Membership follows the feature's app pin: unassigning the feature (deleting its app_features row) cascades here
     foreignKey({
       columns: [table.businessId, table.featureId],
-      foreignColumns: [appFeatures.businessId, appFeatures.featureId],
+      foreignColumns: [businessAppFeatures.businessId, businessAppFeatures.featureId],
       name: 'role_template_feature_app_fk',
     }).onDelete('cascade'),
   ],

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { eq, ilike, or, sql } from '@vritti/api-sdk/drizzle-orm';
-import { appFeatures, apps, features } from '@/db/schema';
+import { businessAppFeatures, businessApps, features } from '@/db/schema';
 
 @Injectable()
-export class AppCodeRepository extends PrimaryBaseRepository<typeof apps> {
+export class AppCodeRepository extends PrimaryBaseRepository<typeof businessApps> {
   constructor(database: PrimaryDatabaseService) {
-    super(database, apps);
+    super(database, businessApps);
   }
 
   // Returns distinct feature codes + names for features belonging to the given app code
@@ -17,7 +17,7 @@ export class AppCodeRepository extends PrimaryBaseRepository<typeof apps> {
     const limit = options?.limit ?? 50;
     const offset = options?.offset ?? 0;
 
-    const conditions = [eq(apps.code, appCode)];
+    const conditions = [eq(businessApps.code, appCode)];
     if (options?.search) {
       conditions.push(or(ilike(features.code, `%${options.search}%`), ilike(features.name, `%${options.search}%`))!);
     }
@@ -28,9 +28,9 @@ export class AppCodeRepository extends PrimaryBaseRepository<typeof apps> {
         name: features.name,
         total: sql<number>`count(*) over()`.mapWith(Number),
       })
-      .from(appFeatures)
-      .innerJoin(apps, eq(appFeatures.appId, apps.id))
-      .innerJoin(features, eq(appFeatures.featureId, features.id))
+      .from(businessAppFeatures)
+      .innerJoin(businessApps, eq(businessAppFeatures.appId, businessApps.id))
+      .innerJoin(features, eq(businessAppFeatures.featureId, features.id))
       .where(conditions.length === 1 ? conditions[0] : sql`${conditions[0]} AND ${conditions[1]}`)
       .orderBy(features.name)
       .limit(limit)

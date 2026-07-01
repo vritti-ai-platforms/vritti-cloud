@@ -7,6 +7,7 @@ import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable
 
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
+import { BusinessFilter } from '@vritti/quantum-ui/selects/business';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Blocks, Eye, Plus } from 'lucide-react';
 import { DynamicIcon } from 'lucide-react/dynamic';
@@ -49,6 +50,7 @@ export const FeaturesTab = () => {
           ],
           searchAll: true,
         }}
+        filters={[<BusinessFilter key="businessId" name="businessId" params={{ inVersion: versionId }} />]}
         importExport={{
           columns: [
             { key: 'code', label: 'Code' },

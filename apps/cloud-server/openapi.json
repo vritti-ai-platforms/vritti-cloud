@@ -3741,290 +3741,9 @@
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/apps": {
-      "get": {
-        "description": "Returns all catalog apps with status: included, addon, unavailable, or enabled.",
-        "operationId": "OrganizationAppsController_listApps",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "description": "Organization ID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "App list retrieved successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/OrgAppListResponseDto"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized."
-          },
-          "404": {
-            "description": "Organization or deployment not found."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "List organization apps",
-        "tags": [
-          "Organization Apps"
-        ]
-      }
-    },
-    "/cloud-api/organizations/{orgId}/apps/{appId}/enable": {
-      "post": {
-        "description": "Enables a plan-included app for the organization by pushing configuration to core.",
-        "operationId": "OrganizationAppsController_enableApp",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "description": "Organization ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "App ID to enable",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "App enabled successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "App not included in the organization plan."
-          },
-          "404": {
-            "description": "Organization, deployment, or app not found."
-          },
-          "503": {
-            "description": "Deployment unreachable."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Enable a plan-included app",
-        "tags": [
-          "Organization Apps"
-        ]
-      }
-    },
-    "/cloud-api/organizations/{orgId}/apps/{appId}/disable": {
-      "post": {
-        "description": "Disables an app for the organization by notifying core.",
-        "operationId": "OrganizationAppsController_disableApp",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "description": "Organization ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "App ID to disable",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "App disabled successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Organization, deployment, or app not found."
-          },
-          "503": {
-            "description": "Deployment unreachable."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Disable an app",
-        "tags": [
-          "Organization Apps"
-        ]
-      }
-    },
-    "/cloud-api/organizations/{orgId}/apps/{appId}/addon": {
-      "post": {
-        "description": "Purchases an addon app for specific business units and provisions it in core.",
-        "operationId": "OrganizationAppsController_purchaseAddon",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "description": "Organization ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "Addon app ID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/PurchaseAddonDto"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Addon purchased successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "App is plan-included or addon not available in region."
-          },
-          "404": {
-            "description": "Organization, deployment, or app not found."
-          },
-          "503": {
-            "description": "Deployment unreachable."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Purchase an addon app",
-        "tags": [
-          "Organization Apps"
-        ]
-      }
-    },
-    "/cloud-api/organizations/{orgId}/apps/{appId}/addon/{businessUnitId}": {
-      "delete": {
-        "description": "Cancels an addon app for a specific business unit in core.",
-        "operationId": "OrganizationAppsController_cancelAddon",
-        "parameters": [
-          {
-            "name": "orgId",
-            "required": true,
-            "in": "path",
-            "description": "Organization ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "appId",
-            "required": true,
-            "in": "path",
-            "description": "Addon app ID",
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "name": "businessUnitId",
-            "required": true,
-            "in": "path",
-            "description": "Business unit ID",
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Addon cancelled successfully.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/SuccessResponseDto"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Organization, deployment, or app not found."
-          },
-          "503": {
-            "description": "Deployment unreachable."
-          }
-        },
-        "security": [
-          {
-            "bearer": []
-          }
-        ],
-        "summary": "Cancel an addon for a business unit",
-        "tags": [
-          "Organization Apps"
-        ]
-      }
-    },
     "/cloud-api/organizations/{orgId}/apps/permissions": {
       "get": {
-        "description": "Returns all features grouped by app for the organization, used for building role permission forms.",
+        "description": "Returns every app/feature/permission for the organization with per-platform plan-inclusion (inPlan/availableIn) — powers the role permission picker and the read-only Plan Overview.",
         "operationId": "OrganizationAppsController_getPermissions",
         "parameters": [
           {
@@ -4039,7 +3758,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Permissions retrieved successfully.",
+            "description": "Catalog retrieved successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -4057,7 +3776,7 @@
             "bearer": []
           }
         ],
-        "summary": "List organization permissions",
+        "summary": "Organization permission catalog",
         "tags": [
           "Organization Apps"
         ]
@@ -13660,121 +13379,6 @@
           }
         }
       },
-      "OrgAppPriceDto": {
-        "type": "object",
-        "properties": {
-          "monthlyPrice": {
-            "type": "string",
-            "example": "499.00"
-          },
-          "currency": {
-            "type": "string",
-            "example": "INR"
-          }
-        },
-        "required": [
-          "monthlyPrice",
-          "currency"
-        ]
-      },
-      "OrgAppFeatureDto": {
-        "type": "object",
-        "properties": {
-          "code": {
-            "type": "string",
-            "example": "crm.leads"
-          },
-          "name": {
-            "type": "string",
-            "example": "Leads"
-          }
-        },
-        "required": [
-          "code",
-          "name"
-        ]
-      },
-      "OrgAppItemResponseDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
-          },
-          "code": {
-            "type": "string",
-            "example": "crm"
-          },
-          "name": {
-            "type": "string",
-            "example": "CRM"
-          },
-          "description": {
-            "type": "object",
-            "example": "Customer Relationship Management"
-          },
-          "icon": {
-            "type": "object",
-            "example": "briefcase"
-          },
-          "status": {
-            "type": "string",
-            "example": "included",
-            "enum": [
-              "included",
-              "locked"
-            ]
-          },
-          "price": {
-            "$ref": "#/components/schemas/OrgAppPriceDto"
-          },
-          "features": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrgAppFeatureDto"
-            }
-          }
-        },
-        "required": [
-          "id",
-          "code",
-          "name",
-          "status",
-          "features"
-        ]
-      },
-      "OrgAppListResponseDto": {
-        "type": "object",
-        "properties": {
-          "result": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/OrgAppItemResponseDto"
-            }
-          }
-        },
-        "required": [
-          "result"
-        ]
-      },
-      "PurchaseAddonDto": {
-        "type": "object",
-        "properties": {
-          "businessUnitIds": {
-            "description": "Business unit IDs to enable the addon for",
-            "example": [
-              "550e8400-e29b-41d4-a716-446655440000"
-            ],
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        },
-        "required": [
-          "businessUnitIds"
-        ]
-      },
       "BuMatrixPlanDto": {
         "type": "object",
         "properties": {
@@ -14653,8 +14257,8 @@
           },
           "code": {
             "type": "string",
-            "description": "Permission code (lowercase snake_case)",
-            "example": "add_salt"
+            "description": "Permission code (dot-separated lowercase)",
+            "example": "add.salt"
           },
           "label": {
             "type": "string",
@@ -14731,8 +14335,8 @@
         "properties": {
           "code": {
             "type": "string",
-            "description": "Permission code (lowercase snake_case)",
-            "example": "add_salt"
+            "description": "Permission code (dot-separated lowercase)",
+            "example": "add.salt"
           },
           "label": {
             "type": "string",
@@ -14904,8 +14508,8 @@
           },
           "code": {
             "type": "string",
-            "description": "Dot-separated feature code (lowercase, alphanumeric segments)",
-            "example": "orders.dine-in.create"
+            "description": "Unique feature code — a single lowercase word (hyphens allowed)",
+            "example": "inventory-items"
           },
           "name": {
             "type": "string",
@@ -15088,8 +14692,8 @@
           },
           "code": {
             "type": "string",
-            "description": "Dot-separated feature code (lowercase, alphanumeric segments)",
-            "example": "orders.dine-in.create"
+            "description": "Unique feature code — a single lowercase word (hyphens allowed)",
+            "example": "inventory-items"
           },
           "name": {
             "type": "string",

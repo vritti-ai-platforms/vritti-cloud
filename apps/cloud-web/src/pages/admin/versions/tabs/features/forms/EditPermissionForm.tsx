@@ -55,7 +55,12 @@ export const EditPermissionForm: React.FC<EditPermissionFormProps> = ({
         data: { ...data, businessIds: data.isGlobal ? [] : data.businessIds },
       })}
     >
-      <TextField name="code" label="Code" placeholder="e.g. add_salt" description="Lowercase slug (- _ : . allowed)" />
+      <TextField
+        name="code"
+        label="Code"
+        placeholder="e.g. add.salt"
+        description="Lowercase, dot-separated (e.g. add.salt)"
+      />
       <TextField name="label" label="Label" placeholder="e.g. Add Salt" />
       <Switch name="isGlobal" label="Global" description="Applies to all businesses" />
       {!isGlobal && <BusinessSelector name="businessIds" label="Businesses" placeholder="Select businesses" multiple />}

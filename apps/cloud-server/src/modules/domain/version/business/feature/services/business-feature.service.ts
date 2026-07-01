@@ -8,7 +8,7 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
-import { appFeatures, apps, features } from '@/db/schema';
+import { businessAppFeatures, businessApps, features } from '@/db/schema';
 import { BusinessFeatureDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature.dto';
 import { BusinessFeaturePermissionDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature-permission.dto';
 import type { BusinessFeatureTableResponseDto } from '@/modules/admin-api/version/business/feature/dto/response/business-feature-table-response.dto';
@@ -25,9 +25,9 @@ export class BusinessFeatureService {
     name: { column: features.name, type: 'string' },
     code: { column: features.code, type: 'string' },
     // Column (not expression) so the multi-select filter's isAnyOf → inArray works; the table query is FROM app_features
-    appId: { column: appFeatures.appId, type: 'string' },
+    appId: { column: businessAppFeatures.appId, type: 'string' },
     // Sorts the App column by app name (apps is joined in findBusinessFeaturesForTable)
-    app: { column: apps.name, type: 'string' },
+    app: { column: businessApps.name, type: 'string' },
   };
 
   constructor(

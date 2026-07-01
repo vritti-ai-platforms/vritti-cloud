@@ -21,7 +21,7 @@ export interface SnapshotData {
   webMicrofrontends: WebMicrofrontend[];
   mobileMicrofrontends: MobileMicrofrontend[];
   apps: App[];
-  appFeatures: AppFeature[];
+  businessAppFeatures: AppFeature[];
   roleTemplates: RoleTemplate[];
   // Per-platform feature memberships (the role's included features) + the action grants under them
   roleTemplateFeatures: RoleTemplateFeature[];
@@ -117,7 +117,10 @@ function buildIndex(data: SnapshotData) {
   );
   const appById = _.keyBy(data.apps, 'id');
   // Feature → its app code (one app per feature within a business) — used to derive a role's apps from its grants
-  const appCodeByFeatureId = _.mapValues(_.keyBy(data.appFeatures, 'featureId'), (af) => appById[af.appId]?.code);
+  const appCodeByFeatureId = _.mapValues(
+    _.keyBy(data.businessAppFeatures, 'featureId'),
+    (af) => appById[af.appId]?.code,
+  );
   return {
     webMfById: _.keyBy(data.webMicrofrontends, 'id'),
     mobileMfById: _.keyBy(data.mobileMicrofrontends, 'id'),
@@ -129,7 +132,7 @@ function buildIndex(data: SnapshotData) {
     businessNameByCode: _.mapValues(_.keyBy(data.businesses, 'code'), (b) => b.name),
     businessCodesByPermissionId,
     permsByFeatureId: _.groupBy(data.permissions, 'featureId'),
-    appFeaturesByAppId: _.groupBy(data.appFeatures, 'appId'),
+    appFeaturesByAppId: _.groupBy(data.businessAppFeatures, 'appId'),
     rolePermsByRoleId: _.groupBy(data.roleTemplatePermissions, 'roleTemplateId'),
     planPermsByPlanId: _.groupBy(data.planFeaturePermissions, 'planId'),
     roleFeatureById: _.keyBy(data.roleTemplateFeatures, 'id'),

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { asc, count, eq, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { Country } from '@/db/schema';
-import { appPrices, countries, planPrices } from '@/db/schema';
+import { countries, planPrices } from '@/db/schema';
 
 @Injectable()
 export class CountryRepository extends PrimaryBaseRepository<typeof countries> {
@@ -50,12 +50,12 @@ export class CountryRepository extends PrimaryBaseRepository<typeof countries> {
     return { rows, total: Number(countResult) };
   }
 
-  // Counts plan + app prices referencing this country
+  // Counts plan prices referencing this country
   async countPriceReferences(countryId: string): Promise<number> {
-    const [planRows, appRows] = await Promise.all([
-      this.db.select({ total: count() }).from(planPrices).where(eq(planPrices.countryId, countryId)),
-      this.db.select({ total: count() }).from(appPrices).where(eq(appPrices.countryId, countryId)),
-    ]);
-    return Number(planRows[0]?.total ?? 0) + Number(appRows[0]?.total ?? 0);
+    const [planRows] = await this.db
+      .select({ total: count() })
+      .from(planPrices)
+      .where(eq(planPrices.countryId, countryId));
+    return Number(planRows?.total ?? 0);
   }
 }

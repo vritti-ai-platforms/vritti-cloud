@@ -2,12 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, asc, count, countDistinct, eq, inArray, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { App } from '@/db/schema';
-import { appFeatures, apps } from '@/db/schema';
+import { businessAppFeatures, businessApps } from '@/db/schema';
 
 @Injectable()
-export class AppRepository extends PrimaryBaseRepository<typeof apps> {
+export class AppRepository extends PrimaryBaseRepository<typeof businessApps> {
   constructor(database: PrimaryDatabaseService) {
-    super(database, apps);
+    super(database, businessApps);
   }
 
   // Finds an app by its unique identifier
@@ -22,7 +22,10 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
 
   // Counts features pinned to an app — an app can't be deleted while it still groups features
   async countFeatures(appId: string): Promise<number> {
-    const rows = await this.db.select({ count: count() }).from(appFeatures).where(eq(appFeatures.appId, appId));
+    const rows = await this.db
+      .select({ count: count() })
+      .from(businessAppFeatures)
+      .where(eq(businessAppFeatures.appId, appId));
     return Number(rows[0]?.count ?? 0);
   }
 
@@ -36,28 +39,28 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
     const [countResult, rows] = await Promise.all([
       this.db
         .select({ total: count() })
-        .from(apps)
+        .from(businessApps)
         .where(where)
         .then((r) => r[0]?.total ?? 0),
       this.db
         .select({
-          id: apps.id,
-          versionId: apps.versionId,
-          businessId: apps.businessId,
-          code: apps.code,
-          name: apps.name,
-          description: apps.description,
-          icon: apps.icon,
-          sortOrder: apps.sortOrder,
-          createdAt: apps.createdAt,
-          updatedAt: apps.updatedAt,
-          featureCount: countDistinct(appFeatures.id),
+          id: businessApps.id,
+          versionId: businessApps.versionId,
+          businessId: businessApps.businessId,
+          code: businessApps.code,
+          name: businessApps.name,
+          description: businessApps.description,
+          icon: businessApps.icon,
+          sortOrder: businessApps.sortOrder,
+          createdAt: businessApps.createdAt,
+          updatedAt: businessApps.updatedAt,
+          featureCount: countDistinct(businessAppFeatures.id),
         })
-        .from(apps)
-        .leftJoin(appFeatures, eq(appFeatures.appId, apps.id))
+        .from(businessApps)
+        .leftJoin(businessAppFeatures, eq(businessAppFeatures.appId, businessApps.id))
         .where(where)
-        .groupBy(apps.id)
-        .orderBy(...(orderBy && orderBy.length > 0 ? orderBy : [asc(apps.name)]))
+        .groupBy(businessApps.id)
+        .orderBy(...(orderBy && orderBy.length > 0 ? orderBy : [asc(businessApps.name)]))
         .limit(limit ?? 20)
         .offset(offset ?? 0),
     ]);
@@ -71,22 +74,22 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
   async findOneWithCounts(id: string): Promise<(App & { featureCount: number }) | undefined> {
     const [row] = await this.db
       .select({
-        id: apps.id,
-        versionId: apps.versionId,
-        businessId: apps.businessId,
-        code: apps.code,
-        name: apps.name,
-        description: apps.description,
-        icon: apps.icon,
-        sortOrder: apps.sortOrder,
-        createdAt: apps.createdAt,
-        updatedAt: apps.updatedAt,
-        featureCount: countDistinct(appFeatures.id),
+        id: businessApps.id,
+        versionId: businessApps.versionId,
+        businessId: businessApps.businessId,
+        code: businessApps.code,
+        name: businessApps.name,
+        description: businessApps.description,
+        icon: businessApps.icon,
+        sortOrder: businessApps.sortOrder,
+        createdAt: businessApps.createdAt,
+        updatedAt: businessApps.updatedAt,
+        featureCount: countDistinct(businessAppFeatures.id),
       })
-      .from(apps)
-      .leftJoin(appFeatures, eq(appFeatures.appId, apps.id))
-      .where(eq(apps.id, id))
-      .groupBy(apps.id)
+      .from(businessApps)
+      .leftJoin(businessAppFeatures, eq(businessAppFeatures.appId, businessApps.id))
+      .where(eq(businessApps.id, id))
+      .groupBy(businessApps.id)
       .limit(1);
     return row as (App & { featureCount: number }) | undefined;
   }
@@ -108,13 +111,13 @@ export class AppRepository extends PrimaryBaseRepository<typeof apps> {
   async findAllByVersionAndBusiness(versionId: string, businessId: string): Promise<App[]> {
     return this.db
       .select()
-      .from(apps)
-      .where(and(eq(apps.versionId, versionId), eq(apps.businessId, businessId)));
+      .from(businessApps)
+      .where(and(eq(businessApps.versionId, versionId), eq(businessApps.businessId, businessId)));
   }
 
   // Returns apps matching the given IDs
   async findByIds(appIds: string[]): Promise<App[]> {
     if (appIds.length === 0) return [];
-    return this.db.select().from(apps).where(inArray(apps.id, appIds));
+    return this.db.select().from(businessApps).where(inArray(businessApps.id, appIds));
   }
 }
