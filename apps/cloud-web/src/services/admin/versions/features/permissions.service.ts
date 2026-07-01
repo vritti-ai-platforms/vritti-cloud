@@ -4,6 +4,7 @@ import type {
   CreatePermissionData,
   FeaturePermission,
   FeaturePermissionsTableResponse,
+  PermissionUsage,
   UpdatePermissionData,
 } from '@/schemas/admin/feature-permissions';
 
@@ -55,6 +56,13 @@ export function updatePermission({
 }): Promise<SuccessResponse> {
   return axios
     .patch<SuccessResponse>(`admin-api/versions/${versionId}/permissions/${permissionId}`, data)
+    .then((r) => r.data);
+}
+
+// Fetches the business-wise usage (plans + role templates) of a permission
+export function getPermissionUsage(versionId: string, permissionId: string): Promise<PermissionUsage> {
+  return axios
+    .get<PermissionUsage>(`admin-api/versions/${versionId}/permissions/${permissionId}/usage`)
     .then((r) => r.data);
 }
 

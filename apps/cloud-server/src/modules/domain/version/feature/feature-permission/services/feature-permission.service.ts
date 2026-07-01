@@ -16,6 +16,10 @@ import type { BulkCreatePermissionsDto } from '@/modules/admin-api/version/permi
 import type { CreateFeaturePermissionDto } from '@/modules/admin-api/version/permission/dto/request/create-feature-permission.dto';
 import type { UpdateFeaturePermissionDto } from '@/modules/admin-api/version/permission/dto/request/update-feature-permission.dto';
 import type { FeaturePermissionTableResponseDto } from '@/modules/admin-api/version/permission/dto/response/feature-permission-table-response.dto';
+import type {
+  PermissionUsageBusinessDto,
+  PermissionUsageResponseDto,
+} from '@/modules/admin-api/version/permission/dto/response/permission-usage-response.dto';
 import { FeatureRepository } from '../../root/repositories/feature.repository';
 import { FeaturePermissionRepository } from '../repositories/feature-permission.repository';
 
@@ -189,6 +193,33 @@ export class FeaturePermissionService {
     await this.featurePermissionRepository.deleteOne(permissionId);
     this.logger.log(`Deleted permission: ${permissionId}`);
     return { success: true, message: `Permission "${existing.label}" deleted successfully.` };
+  }
+
+  // Business-wise usage of a permission — which plans unlock it and which role templates grant it, grouped by business
+  async getUsage(permissionId: string): Promise<PermissionUsageResponseDto> {
+    // Existence check + usage run concurrently (one round trip) instead of sequentially
+    const [existing, { plans, roleTemplates }] = await Promise.all([
+      this.featurePermissionRepository.findById(permissionId),
+      this.featurePermissionRepository.findUsage(permissionId),
+    ]);
+    if (!existing) {
+      throw new NotFoundException('Permission not found.');
+    }
+
+    const byBusiness = new Map<string, PermissionUsageBusinessDto>();
+    const bucket = (businessId: string, businessName: string): PermissionUsageBusinessDto => {
+      let entry = byBusiness.get(businessId);
+      if (!entry) {
+        entry = { businessId, businessName, plans: [], roleTemplates: [] };
+        byBusiness.set(businessId, entry);
+      }
+      return entry;
+    };
+    for (const p of plans) bucket(p.businessId, p.businessName).plans.push({ id: p.id, name: p.name });
+    for (const r of roleTemplates) bucket(r.businessId, r.businessName).roleTemplates.push({ id: r.id, name: r.name });
+
+    const businesses = [...byBusiness.values()].sort((a, b) => a.businessName.localeCompare(b.businessName));
+    return { businesses, planCount: plans.length, roleTemplateCount: roleTemplates.length };
   }
 
   // Enforces unique permission code within a feature

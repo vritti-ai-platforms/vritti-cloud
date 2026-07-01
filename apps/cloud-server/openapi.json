@@ -5770,6 +5770,48 @@
         ]
       }
     },
+    "/admin-api/versions/{versionId}/permissions/{permissionId}/usage": {
+      "get": {
+        "description": "Plans that unlock and role templates that grant this permission, grouped by business.",
+        "operationId": "PermissionController_usage",
+        "parameters": [
+          {
+            "name": "permissionId",
+            "required": true,
+            "in": "path",
+            "description": "Permission UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usage retrieved.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PermissionUsageResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Permission not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Permission usage (business-wise)",
+        "tags": [
+          "Admin - Permissions"
+        ]
+      }
+    },
     "/admin-api/versions/{versionId}/microfrontends/table": {
       "get": {
         "operationId": "MicrofrontendController_findForTable",
@@ -14364,6 +14406,83 @@
             "example": 0
           }
         }
+      },
+      "PermissionUsageRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "name": {
+            "type": "string",
+            "example": "Pro"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "PermissionUsageBusinessDto": {
+        "type": "object",
+        "properties": {
+          "businessId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440010"
+          },
+          "businessName": {
+            "type": "string",
+            "example": "Pharmacy"
+          },
+          "plans": {
+            "description": "Plans (in this business) that unlock the permission",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionUsageRefDto"
+            }
+          },
+          "roleTemplates": {
+            "description": "Role templates (in this business) that grant it",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionUsageRefDto"
+            }
+          }
+        },
+        "required": [
+          "businessId",
+          "businessName",
+          "plans",
+          "roleTemplates"
+        ]
+      },
+      "PermissionUsageResponseDto": {
+        "type": "object",
+        "properties": {
+          "businesses": {
+            "description": "Usage grouped by business",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PermissionUsageBusinessDto"
+            }
+          },
+          "planCount": {
+            "type": "number",
+            "example": 3,
+            "description": "Total distinct plans using the permission"
+          },
+          "roleTemplateCount": {
+            "type": "number",
+            "example": 2,
+            "description": "Total distinct role templates using the permission"
+          }
+        },
+        "required": [
+          "businesses",
+          "planCount",
+          "roleTemplateCount"
+        ]
       },
       "MicrofrontendDto": {
         "type": "object",

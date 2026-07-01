@@ -1,5 +1,5 @@
 import { FeaturePermissionService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
-import { Body, Controller, Delete, Logger, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { type CreateResponseDto, RequireSession, type SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
@@ -7,12 +7,14 @@ import {
   ApiBulkCreatePermissions,
   ApiCreatePermission,
   ApiDeletePermission,
+  ApiPermissionUsage,
   ApiUpdatePermission,
 } from '../docs/permission.docs';
 import { FeaturePermissionDto } from '../dto/entity/feature-permission.dto';
 import { BulkCreatePermissionsDto } from '../dto/request/bulk-create-permissions.dto';
 import { CreateFeaturePermissionDto } from '../dto/request/create-feature-permission.dto';
 import { UpdateFeaturePermissionDto } from '../dto/request/update-feature-permission.dto';
+import type { PermissionUsageResponseDto } from '../dto/response/permission-usage-response.dto';
 
 @ApiTags('Admin - Permissions')
 @ApiBearerAuth()
@@ -54,6 +56,14 @@ export class PermissionController {
   ): Promise<SuccessResponseDto> {
     this.logger.log(`PATCH /admin-api/versions/_/permissions/${permissionId}`);
     return this.featurePermissionService.update(permissionId, dto);
+  }
+
+  // Business-wise usage of a permission (plans that unlock + role templates that grant) — powers the delete-impact dialog
+  @Get(':permissionId/usage')
+  @ApiPermissionUsage()
+  usage(@Param('permissionId') permissionId: string): Promise<PermissionUsageResponseDto> {
+    this.logger.log(`GET /admin-api/versions/_/permissions/${permissionId}/usage`);
+    return this.featurePermissionService.getUsage(permissionId);
   }
 
   // Deletes a feature permission

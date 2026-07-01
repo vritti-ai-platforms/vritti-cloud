@@ -14,6 +14,25 @@ export interface FeaturePermission {
 
 export type FeaturePermissionsTableResponse = TableResponse<FeaturePermission>;
 
+// Business-wise usage of a permission — powers the delete-impact dialog
+export interface PermissionUsageRef {
+  id: string;
+  name: string;
+}
+
+export interface PermissionUsageBusiness {
+  businessId: string;
+  businessName: string;
+  plans: PermissionUsageRef[];
+  roleTemplates: PermissionUsageRef[];
+}
+
+export interface PermissionUsage {
+  businesses: PermissionUsageBusiness[];
+  planCount: number;
+  roleTemplateCount: number;
+}
+
 const codeField = z
   .string()
   .min(1, 'Code is required')

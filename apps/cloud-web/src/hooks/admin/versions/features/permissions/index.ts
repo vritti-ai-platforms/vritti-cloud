@@ -5,3 +5,4 @@ export {
   useDeletePermission,
   useUpdatePermission,
 } from './usePermissionMutations';
+export { PERMISSION_USAGE_KEY, usePermissionUsage } from './usePermissionUsage';

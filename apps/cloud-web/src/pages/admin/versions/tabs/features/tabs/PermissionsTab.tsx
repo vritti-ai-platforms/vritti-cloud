@@ -12,6 +12,7 @@ import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { KeyRound, Pencil, Plus, Trash2, Zap } from 'lucide-react';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { FeaturePermission } from '@/schemas/admin/feature-permissions';
+import { PermissionUsageBreakdown } from '../components/PermissionUsageBreakdown';
 import { AddPermissionForm } from '../forms/AddPermissionForm';
 import { EditPermissionForm } from '../forms/EditPermissionForm';
 import { QuickAddPermissionsForm } from '../forms/QuickAddPermissionsForm';
@@ -102,10 +103,12 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
   const deleteMutation = useDeletePermission(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId));
   const existingCodes = (response?.result ?? []).map((p) => p.code);
 
+  // Delete with a business-wise usage breakdown — the content component fetches + renders the impact itself
   async function handleDelete(permission: FeaturePermission) {
     const confirmed = await confirm({
-      title: `Delete ${permission.label}?`,
-      description: `The "${permission.code}" permission will be removed. This cannot be undone.`,
+      title: `Delete "${permission.label}"?`,
+      description: `The "${permission.code}" permission will be removed.`,
+      content: <PermissionUsageBreakdown versionId={versionId} permissionId={permission.id} />,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });

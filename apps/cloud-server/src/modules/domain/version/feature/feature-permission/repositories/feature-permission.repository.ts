@@ -2,7 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { FeaturePermission, NewFeaturePermission } from '@/db/schema';
-import { featurePermissions, features, permissionBusinesses } from '@/db/schema';
+import {
+  businesses,
+  featurePermissions,
+  features,
+  permissionBusinesses,
+  planFeaturePermissions,
+  plans,
+  roleTemplateFeaturePermissions,
+  roleTemplates,
+} from '@/db/schema';
 
 export type FeaturePermissionTableRow = FeaturePermission & {
   featureName: string | null;
@@ -14,6 +23,14 @@ export interface BusinessFeaturePermission {
   code: string;
   label: string;
   isGlobal: boolean;
+}
+
+// A plan / role-template that references a permission, carrying its owning business
+export interface PermissionUsageRef {
+  businessId: string;
+  businessName: string;
+  id: string;
+  name: string;
 }
 
 @Injectable()
@@ -140,6 +157,37 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
       )
       .orderBy(featurePermissions.sortOrder);
     return rows;
+  }
+
+  // Business-wise usage of a permission: the plans that unlock it + role templates that grant it (distinct per platform)
+  async findUsage(permissionId: string): Promise<{ plans: PermissionUsageRef[]; roleTemplates: PermissionUsageRef[] }> {
+    const [planRows, roleRows] = await Promise.all([
+      this.db
+        .selectDistinct({
+          businessId: plans.businessId,
+          businessName: businesses.name,
+          id: plans.id,
+          name: plans.name,
+        })
+        .from(planFeaturePermissions)
+        .innerJoin(plans, eq(plans.id, planFeaturePermissions.planId))
+        .innerJoin(businesses, eq(businesses.id, plans.businessId))
+        .where(eq(planFeaturePermissions.featurePermissionId, permissionId))
+        .orderBy(businesses.name, plans.name),
+      this.db
+        .selectDistinct({
+          businessId: roleTemplates.businessId,
+          businessName: businesses.name,
+          id: roleTemplates.id,
+          name: roleTemplates.name,
+        })
+        .from(roleTemplateFeaturePermissions)
+        .innerJoin(roleTemplates, eq(roleTemplates.id, roleTemplateFeaturePermissions.roleTemplateId))
+        .innerJoin(businesses, eq(businesses.id, roleTemplates.businessId))
+        .where(eq(roleTemplateFeaturePermissions.featurePermissionId, permissionId))
+        .orderBy(businesses.name, roleTemplates.name),
+    ]);
+    return { plans: planRows, roleTemplates: roleRows };
   }
 
   // Returns the business ids a permission is linked to
