@@ -7,7 +7,7 @@ import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Copy, Plus, Shield } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
+import type { Role } from '@/schemas/cloud/roles';
 import { AddRoleForm } from './components/AddRoleForm';
 import { RoleCard } from './components/RoleCard';
 import { TemplatePickerDialog } from './components/TemplatePickerDialog';
@@ -41,9 +41,6 @@ export const RolesPage = () => {
     });
     if (confirmed) deleteMutation.mutate({ orgId, roleId: role.id });
   }
-
-  const systemRoles = roles.filter(isDefaultRole);
-  const customRoles = roles.filter((r) => !isDefaultRole(r));
 
   const actions = (
     <div className="flex gap-2">
@@ -81,38 +78,18 @@ export const RolesPage = () => {
         </div>
       )}
 
-      {systemRoles.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Default roles</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {systemRoles.map((role) => (
-              <RoleCard
-                key={role.id}
-                role={role}
-                baseFeatures={templateByCode.get(role.code)?.features}
-                onView={(r) => navigate(buildSlug(r.name, r.id))}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {customRoles.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-sm font-semibold text-muted-foreground">Custom roles</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-            {customRoles.map((role) => (
-              <RoleCard
-                key={role.id}
-                role={role}
-                baseFeatures={templateByCode.get(role.code)?.features}
-                onView={(r) => navigate(buildSlug(r.name, r.id))}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        </section>
+      {!isLoading && roles.length > 0 && (
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {roles.map((role) => (
+            <RoleCard
+              key={role.id}
+              role={role}
+              baseFeatures={templateByCode.get(role.code)?.features}
+              onView={(r) => navigate(buildSlug(r.name, r.id))}
+              onDelete={handleDelete}
+            />
+          ))}
+        </div>
       )}
 
       <Dialog

@@ -81,7 +81,7 @@ const RolePermissionFormInner: React.FC<{
             description="Features will appear here once your plan is configured."
           />
         ) : (
-          <SnapshotMatrix name="features" apps={apps} />
+          <SnapshotMatrix name="features" apps={apps} allowLockedGrants />
         )}
       </div>
     </Form>

@@ -26,6 +26,9 @@ interface SnapshotMatrixProps {
   onChange?: (next: FeatureUnlocks) => void;
   // Read-only render — switches/checkboxes are disabled (show state), everything else (locks, upsell) is identical
   readOnly?: boolean;
+  // When true, plan-locked cells stay grantable (dormant until upgrade) — role editor ONLY.
+  // BU unlocks are a restriction WITHIN the plan and must never grant beyond it (default).
+  allowLockedGrants?: boolean;
 }
 
 // Internal callback bundle the sub-components consume
@@ -77,6 +80,7 @@ function Cell({
   checked,
   onToggle,
   readOnly,
+  allowLockedGrants,
 }: {
   cell: BuMatrixCell | null;
   platformLocked: boolean;
@@ -84,16 +88,21 @@ function Cell({
   checked: boolean;
   onToggle: () => void;
   readOnly?: boolean;
+  allowLockedGrants?: boolean;
 }) {
   if (cell === null) {
     return <span className="text-xs text-muted-foreground">—</span>;
   }
-  // Read-only: the platform lock lives on the feature row, so locked cells stay blank / chip-only
-  if (platformLocked && readOnly) {
+  // Without locked-grant editing the platform lock lives on the feature row, so locked cells stay blank
+  if (platformLocked && !allowLockedGrants) {
+    return null;
+  }
+  // Platform switch is off — hide the permission checkboxes for that platform entirely
+  if (!member) {
     return null;
   }
   if (!cell.inPlan) {
-    if (readOnly) {
+    if (readOnly || !allowLockedGrants) {
       return (
         <Tooltip content={lockTooltip(cell.availableIn)}>
           <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
@@ -102,20 +111,18 @@ function Cell({
         </Tooltip>
       );
     }
-    // Edit mode: plan-locked permissions are still GRANTABLE (dormant until upgrade) — checkbox + lock chip
+    // Role editor: plan-locked permissions are still GRANTABLE (dormant until upgrade) — checkbox with a
+    // small lock badge on its bottom-right corner (hover shows the unlocking plans)
     return (
-      <span className="flex items-center gap-1">
-        <Checkbox checked={member ? checked : false} disabled={!member} onCheckedChange={onToggle} />
-        <Tooltip content={lockTooltip(cell.availableIn)}>
-          <span className="flex size-4 items-center justify-center rounded bg-warning/15 text-warning">
-            <Lock className="size-2.5" />
+      <Tooltip content={lockTooltip(cell.availableIn)}>
+        <span className="relative inline-flex">
+          <Checkbox checked={checked} onCheckedChange={onToggle} />
+          <span className="pointer-events-none absolute -bottom-1 -right-1 flex size-3 items-center justify-center text-warning">
+            <Lock className="size-2" />
           </span>
-        </Tooltip>
-      </span>
+        </span>
+      </Tooltip>
     );
-  }
-  if (!member) {
-    return <Checkbox checked={false} disabled />;
   }
   return <Checkbox checked={checked} disabled={readOnly} onCheckedChange={onToggle} />;
 }
@@ -128,6 +135,7 @@ function FeatureBlock({
   onToggle,
   onToggleMember,
   readOnly,
+  allowLockedGrants,
 }: {
   feature: BuMatrixFeature;
   isMember: MatrixHandlers['isMember'];
@@ -135,6 +143,7 @@ function FeatureBlock({
   onToggle: MatrixHandlers['onToggle'];
   onToggleMember: MatrixHandlers['onToggleMember'];
   readOnly?: boolean;
+  allowLockedGrants?: boolean;
 }) {
   const locked = !feature.inPlan;
   // Every platform the feature ships on is plan-locked — nothing here is actionable
@@ -168,19 +177,30 @@ function FeatureBlock({
               return <div key={platform} className="w-24" />;
             }
             if (lockedOnPlatform(feature, platform)) {
-              // Read-only: chip only. Edit mode: the switch stays usable (grants view-only membership, dormant
-              // until a plan unlocks the platform) with the lock chip + upsell beside it.
+              // Plain lock by default (BU matrix / read-only). In the role editor the switch stays usable
+              // (grants view-only membership, dormant until upgrade) with a small corner lock badge.
+              if (readOnly || !allowLockedGrants) {
+                return (
+                  <div key={platform} className="flex w-24 justify-center">
+                    <Tooltip content={lockTooltip(platformUpsell(feature, platform))}>
+                      <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
+                        <Lock className="size-3" />
+                      </span>
+                    </Tooltip>
+                  </div>
+                );
+              }
               return (
-                <div key={platform} className="flex w-24 items-center justify-center gap-1">
-                  {!readOnly && (
-                    <CompactSwitch
-                      checked={isMember(feature.code, platform)}
-                      onCheckedChange={() => onToggleMember(feature.code, platform, inPlanCodes(feature, platform))}
-                    />
-                  )}
+                <div key={platform} className="flex w-24 justify-center">
                   <Tooltip content={lockTooltip(platformUpsell(feature, platform))}>
-                    <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
-                      <Lock className="size-3" />
+                    <span className="relative inline-flex">
+                      <CompactSwitch
+                        checked={isMember(feature.code, platform)}
+                        onCheckedChange={() => onToggleMember(feature.code, platform, inPlanCodes(feature, platform))}
+                      />
+                      <span className="pointer-events-none absolute -bottom-1 -right-1 flex size-3 items-center justify-center text-warning">
+                        <Lock className="size-2" />
+                      </span>
                     </span>
                   </Tooltip>
                 </div>
@@ -215,6 +235,7 @@ function FeatureBlock({
                       checked={isChecked(feature.code, platform, perm.code)}
                       onToggle={() => onToggle(feature.code, platform, perm.code)}
                       readOnly={readOnly}
+                      allowLockedGrants={allowLockedGrants}
                     />
                   </div>
                 ))}
@@ -235,6 +256,7 @@ function AppCard({
   onToggle,
   onToggleMember,
   readOnly,
+  allowLockedGrants,
 }: {
   app: BuMatrixApp;
   isMember: MatrixHandlers['isMember'];
@@ -242,6 +264,7 @@ function AppCard({
   onToggle: MatrixHandlers['onToggle'];
   onToggleMember: MatrixHandlers['onToggleMember'];
   readOnly?: boolean;
+  allowLockedGrants?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -292,6 +315,7 @@ function AppCard({
               onToggle={onToggle}
               onToggleMember={onToggleMember}
               readOnly={readOnly}
+              allowLockedGrants={allowLockedGrants}
             />
           ))}
         </div>
@@ -302,7 +326,13 @@ function AppCard({
 
 // The shared snapshot-driven Apps & Features matrix — a controlled form field. `value` (the code-keyed allow-list)
 // and `onChange` are injected by quantum <Form> when used with a `name` prop; every switch/checkbox edits `value`.
-export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({ apps, value = {}, onChange, readOnly }) => {
+export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({
+  apps,
+  value = {},
+  onChange,
+  readOnly,
+  allowLockedGrants,
+}) => {
   const handlers: MatrixHandlers = {
     isMember: (code, platform) => isMemberIn(value, code, platform),
     isChecked: (code, platform, permCode) => isCheckedIn(value, code, platform, permCode),
@@ -313,7 +343,7 @@ export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({ apps, value = {}
   return (
     <div className="flex flex-col gap-3">
       {apps.map((app) => (
-        <AppCard key={app.code} app={app} {...handlers} readOnly={readOnly} />
+        <AppCard key={app.code} app={app} {...handlers} readOnly={readOnly} allowLockedGrants={allowLockedGrants} />
       ))}
     </div>
   );
