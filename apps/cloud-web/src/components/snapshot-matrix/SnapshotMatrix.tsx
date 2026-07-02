@@ -88,16 +88,30 @@ function Cell({
   if (cell === null) {
     return <span className="text-xs text-muted-foreground">—</span>;
   }
-  if (platformLocked) {
+  // Read-only: the platform lock lives on the feature row, so locked cells stay blank / chip-only
+  if (platformLocked && readOnly) {
     return null;
   }
   if (!cell.inPlan) {
+    if (readOnly) {
+      return (
+        <Tooltip content={lockTooltip(cell.availableIn)}>
+          <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
+            <Lock className="size-3" />
+          </span>
+        </Tooltip>
+      );
+    }
+    // Edit mode: plan-locked permissions are still GRANTABLE (dormant until upgrade) — checkbox + lock chip
     return (
-      <Tooltip content={lockTooltip(cell.availableIn)}>
-        <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
-          <Lock className="size-3" />
-        </span>
-      </Tooltip>
+      <span className="flex items-center gap-1">
+        <Checkbox checked={member ? checked : false} disabled={!member} onCheckedChange={onToggle} />
+        <Tooltip content={lockTooltip(cell.availableIn)}>
+          <span className="flex size-4 items-center justify-center rounded bg-warning/15 text-warning">
+            <Lock className="size-2.5" />
+          </span>
+        </Tooltip>
+      </span>
     );
   }
   if (!member) {
@@ -154,8 +168,16 @@ function FeatureBlock({
               return <div key={platform} className="w-24" />;
             }
             if (lockedOnPlatform(feature, platform)) {
+              // Read-only: chip only. Edit mode: the switch stays usable (grants view-only membership, dormant
+              // until a plan unlocks the platform) with the lock chip + upsell beside it.
               return (
-                <div key={platform} className="flex w-24 justify-center">
+                <div key={platform} className="flex w-24 items-center justify-center gap-1">
+                  {!readOnly && (
+                    <CompactSwitch
+                      checked={isMember(feature.code, platform)}
+                      onCheckedChange={() => onToggleMember(feature.code, platform, inPlanCodes(feature, platform))}
+                    />
+                  )}
                   <Tooltip content={lockTooltip(platformUpsell(feature, platform))}>
                     <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
                       <Lock className="size-3" />

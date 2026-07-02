@@ -1,7 +1,8 @@
-import { useCreateRole } from '@hooks/cloud/roles';
+import { useCreateRole, useRoleTemplates } from '@hooks/cloud/roles';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
+import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -14,18 +15,23 @@ interface AddRoleFormProps {
   onCancel: () => void;
 }
 
-// Create-role dialog — captures name/description only; permissions are granted afterwards on the role's view page.
+// Create-role dialog — every role builds on a template; permissions start from the template's grants
+// and are customized afterwards on the role's view page.
 export const AddRoleForm: React.FC<AddRoleFormProps> = ({ orgId, onCreated, onCancel }) => {
   const form = useForm<CreateRoleFormData>({
     resolver: zodResolver(createRoleSchema),
-    defaultValues: { name: '', description: '', features: {} },
+    defaultValues: { code: '', name: '', description: '', features: {} },
   });
+  const { data: templates = [] } = useRoleTemplates(orgId);
   const createMutation = useCreateRole({ onSuccess: (res) => onCreated(res.data) });
+
+  const baseOptions = templates.map((t) => ({ value: t.code, label: t.name }));
 
   return (
     <Form form={form} mutation={createMutation} transformSubmit={(data: CreateRoleFormData) => ({ orgId, data })}>
       <TextField name="name" label="Role Name" placeholder="e.g. Regional Manager" />
       <TextField name="description" label="Description" placeholder="Optional description" />
+      <Select name="code" label="Base Role" placeholder="Select the role to build on" options={baseOptions} />
 
       <DialogActions>
         <Button variant="outline" type="button" onClick={onCancel}>

@@ -1,4 +1,4 @@
-import { usePermissions, useUpdateRole } from '@hooks/cloud/roles';
+import { usePermissions, useRoleTemplates, useUpdateRole } from '@hooks/cloud/roles';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import { PermissionMatrixSkeleton } from '@/components/permission-matrix';
 import { SnapshotMatrix } from '@/components/snapshot-matrix';
 import type { FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
+import { composeGrants, diffGrants } from '@/schemas/cloud/role-grants';
 import type { Role } from '@/schemas/cloud/roles';
 
 interface RolePermissionFormProps {
@@ -15,19 +16,42 @@ interface RolePermissionFormProps {
   role: Role;
 }
 
-// Inline permission editor for a role — the shared snapshot matrix bound to the role's `features`, saved via update.
+// Inline permission editor for a role — the shared snapshot matrix over the role's EFFECTIVE grants
+// (template ∪ additions − revoked). On save the selection is diffed against the template so only deltas persist.
 export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, role }) => {
   const { data: matrix, isLoading } = usePermissions(orgId);
+  // The template's grants are needed both to compose the initial selection and to diff on save
+  const { data: templates = [], isLoading: templatesLoading } = useRoleTemplates(orgId);
   const apps = matrix?.apps ?? [];
   const updateMutation = useUpdateRole();
 
-  const form = useForm<{ features: FeatureUnlocks }>({ defaultValues: { features: role.features } });
+  const base = templates.find((t) => t.code === role.code)?.features;
+  const loading = isLoading || templatesLoading;
 
-  const onSubmit = (data: { features: FeatureUnlocks }) =>
-    updateMutation.mutate(
-      { orgId, roleId: role.id, data: { features: data.features } },
-      { onSuccess: () => form.reset(data) },
-    );
+  if (loading) {
+    return <PermissionMatrixSkeleton />;
+  }
+
+  return <RolePermissionFormInner orgId={orgId} role={role} apps={apps} base={base} updateMutation={updateMutation} />;
+};
+
+// Split so the form's defaultValues are computed once, after the base template has loaded
+const RolePermissionFormInner: React.FC<{
+  orgId: string;
+  role: Role;
+  apps: NonNullable<ReturnType<typeof usePermissions>['data']>['apps'];
+  base: FeatureUnlocks | undefined;
+  updateMutation: ReturnType<typeof useUpdateRole>;
+}> = ({ orgId, role, apps, base, updateMutation }) => {
+  const form = useForm<{ features: FeatureUnlocks }>({
+    defaultValues: { features: composeGrants(base ?? {}, role.features, role.revoked) },
+  });
+
+  // Only the deltas vs the template persist; a missing template degrades to saving the selection as-is
+  const onSubmit = (data: { features: FeatureUnlocks }) => {
+    const payload = base ? diffGrants(base, data.features) : { features: data.features };
+    updateMutation.mutate({ orgId, roleId: role.id, data: payload }, { onSuccess: () => form.reset(data) });
+  };
 
   return (
     <Form form={form} onSubmit={onSubmit}>
@@ -35,7 +59,8 @@ export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, r
         <div className="flex items-start justify-between gap-4">
           <p className="text-sm text-muted-foreground">
             Switch a feature on per platform to grant this role access, then check the actions it can perform. Web and
-            Mobile are tracked separately.
+            Mobile are tracked separately. Locked items can still be granted — they activate when your plan unlocks
+            them.
           </p>
           <Button
             type="submit"
@@ -48,9 +73,7 @@ export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, r
           </Button>
         </div>
 
-        {isLoading ? (
-          <PermissionMatrixSkeleton />
-        ) : apps.length === 0 ? (
+        {apps.length === 0 ? (
           <Empty
             className="min-h-100"
             icon={<Layers />}

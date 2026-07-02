@@ -4,10 +4,14 @@ import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { ArrowRight, KeyRound, Layers, Lock, Monitor, MoreVertical, Shield, Smartphone, Trash2 } from 'lucide-react';
 import type React from 'react';
+import type { FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
+import { composeGrants } from '@/schemas/cloud/role-grants';
 import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
 
 interface RoleCardProps {
   role: Role;
+  // The role's template grants — effective counts compose template ∪ additions − revoked
+  baseFeatures?: FeatureUnlocks;
   onView: (role: Role) => void;
   onDelete: (role: Role) => void;
 }
@@ -25,9 +29,9 @@ function summarize(features: Role['features']) {
   return { features: Object.keys(features).length, permissions, web, mobile };
 }
 
-// A role summary card — the footer "View" affordance opens the view page; the ⋮ menu (custom roles only) deletes.
-export const RoleCard: React.FC<RoleCardProps> = ({ role, onView, onDelete }) => {
-  const s = summarize(role.features);
+// A role summary card — the footer "View" affordance opens the view page; the ⋮ menu deletes.
+export const RoleCard: React.FC<RoleCardProps> = ({ role, baseFeatures, onView, onDelete }) => {
+  const s = summarize(composeGrants(baseFeatures ?? {}, role.features, role.revoked));
   const isDefault = isDefaultRole(role);
 
   return (
@@ -52,32 +56,30 @@ export const RoleCard: React.FC<RoleCardProps> = ({ role, onView, onDelete }) =>
           </div>
           <p className="mt-0.5 line-clamp-2 text-xs text-muted-foreground">{role.description || 'No description'}</p>
         </div>
-        {!isDefault && (
-          <DropdownMenu
-            trigger={{
-              children: (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="-mr-1.5 -mt-1 size-8 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
-                >
-                  <MoreVertical className="size-4" />
-                </Button>
-              ),
-            }}
-            align="end"
-            items={[
-              {
-                type: 'item' as const,
-                id: 'delete',
-                label: 'Delete',
-                icon: Trash2,
-                variant: 'destructive',
-                onClick: () => onDelete(role),
-              },
-            ]}
-          />
-        )}
+        <DropdownMenu
+          trigger={{
+            children: (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="-mr-1.5 -mt-1 size-8 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100"
+              >
+                <MoreVertical className="size-4" />
+              </Button>
+            ),
+          }}
+          align="end"
+          items={[
+            {
+              type: 'item' as const,
+              id: 'delete',
+              label: 'Delete',
+              icon: Trash2,
+              variant: 'destructive',
+              onClick: () => onDelete(role),
+            },
+          ]}
+        />
       </div>
 
       {/* footer — compact stats on the left, primary "View" navigation on the right */}

@@ -1,4 +1,5 @@
-import { useDeleteRole, useRoles } from '@hooks/cloud/roles';
+import { useDeleteRole, useRoles, useRoleTemplates } from '@hooks/cloud/roles';
+import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
@@ -9,9 +10,9 @@ import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { KeyRound, Layers, Shield } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { composeGrants } from '@/schemas/cloud/role-grants';
 import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
 import { EditRoleDetailsForm } from './components/EditRoleDetailsForm';
-import { RoleGrantsView } from './components/RoleGrantsView';
 import { RolePermissionForm } from './components/RolePermissionForm';
 
 // Rolls the per-feature grants into headline counts
@@ -47,6 +48,7 @@ export const RoleViewPage = () => {
 
   const { data: roles = [], isLoading } = useRoles(orgId);
   const role = useMemo(() => roles.find((r) => r.id === roleId), [roles, roleId]);
+  const { data: templates = [], isLoading: templatesLoading } = useRoleTemplates(orgId);
   const deleteMutation = useDeleteRole();
 
   if (isLoading) {
@@ -71,7 +73,9 @@ export const RoleViewPage = () => {
     );
   }
 
-  const stats = summarize(role.features);
+  // Stats count the EFFECTIVE grants (template ∪ additions − revoked)
+  const baseTemplate = templates.find((t) => t.code === role.code);
+  const stats = summarize(composeGrants(baseTemplate?.features ?? {}, role.features, role.revoked));
   const isDefault = isDefaultRole(role);
 
   // Confirm then delete, returning to the roles list
@@ -90,13 +94,30 @@ export const RoleViewPage = () => {
     <div className="flex flex-col gap-6">
       <PageHeader
         title={role.name}
+        titleSlot={
+          !templatesLoading &&
+          (baseTemplate ? (
+            <span className="flex items-center gap-2">
+              <Badge variant="secondary" className="text-xs">
+                Based on {baseTemplate.name}
+              </Badge>
+              {!isDefault && (
+                <Badge variant="outline" className="text-xs">
+                  Customized
+                </Badge>
+              )}
+            </span>
+          ) : (
+            <Badge variant="outline" className="border-warning/40 text-xs text-warning">
+              Base template missing
+            </Badge>
+          ))
+        }
         description={role.description || 'Manage this role'}
         actions={
-          !isDefault && (
-            <Button variant="outline" size="sm" onClick={editDialog.open}>
-              Edit
-            </Button>
-          )
+          <Button variant="outline" size="sm" onClick={editDialog.open}>
+            Edit
+          </Button>
         }
       />
 
@@ -105,20 +126,14 @@ export const RoleViewPage = () => {
         <StatCard icon={<Layers className="size-6" />} label="Features" value={stats.features} />
       </div>
 
-      {isDefault ? (
-        <RoleGrantsView orgId={orgId} features={role.features} />
-      ) : (
-        <RolePermissionForm orgId={orgId} role={role} />
-      )}
+      <RolePermissionForm orgId={orgId} role={role} />
 
-      {!isDefault && (
-        <DangerZone
-          title="Delete this role"
-          description="This action cannot be undone. All associated permission assignments will be removed."
-          buttonText="Delete Role"
-          onClick={handleDelete}
-        />
-      )}
+      <DangerZone
+        title="Delete this role"
+        description="This action cannot be undone. All associated permission assignments will be removed."
+        buttonText="Delete Role"
+        onClick={handleDelete}
+      />
 
       <Dialog
         handle={editDialog}

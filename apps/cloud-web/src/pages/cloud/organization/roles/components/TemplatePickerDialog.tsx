@@ -27,11 +27,11 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
       {
         orgId,
         data: {
-          // The template code makes the provisioned role a read-only default role
           code: template.code,
           name: template.name,
           description: template.description,
-          features: template.features,
+          // Zero deltas — the role tracks its template through read-time composition
+          features: {},
         },
       },
       {
@@ -52,7 +52,7 @@ export const TemplatePickerDialog: React.FC<TemplatePickerDialogProps> = ({ orgI
       handle={handle}
       icon={Shield}
       title="Add Default Roles"
-      description="Add pre-configured default roles from templates. Default roles are read-only."
+      description="Add pre-configured roles from templates. They track their template until you customize them."
       className="sm:max-w-2xl"
       content={() => (
         <div className="flex flex-col gap-4">

@@ -1,4 +1,4 @@
-import { useDeleteRole, useRoles } from '@hooks/cloud/roles';
+import { useDeleteRole, useRoles, useRoleTemplates } from '@hooks/cloud/roles';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
@@ -18,6 +18,8 @@ export const RolesPage = () => {
   const navigate = useNavigate();
 
   const { data: roles = [], isLoading } = useRoles(orgId);
+  const { data: templates = [] } = useRoleTemplates(orgId);
+  const templateByCode = new Map(templates.map((t) => [t.code, t]));
   const confirm = useConfirm();
   const addDialog = useDialog();
   const templateDialog = useDialog();
@@ -87,6 +89,7 @@ export const RolesPage = () => {
               <RoleCard
                 key={role.id}
                 role={role}
+                baseFeatures={templateByCode.get(role.code)?.features}
                 onView={(r) => navigate(buildSlug(r.name, r.id))}
                 onDelete={handleDelete}
               />
@@ -103,6 +106,7 @@ export const RolesPage = () => {
               <RoleCard
                 key={role.id}
                 role={role}
+                baseFeatures={templateByCode.get(role.code)?.features}
                 onView={(r) => navigate(buildSlug(r.name, r.id))}
                 onDelete={handleDelete}
               />
