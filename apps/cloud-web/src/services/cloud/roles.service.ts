@@ -1,4 +1,4 @@
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateRoleData, Role, RoleTemplate, UpdateRoleData } from '@/schemas/cloud/roles';
 
@@ -8,8 +8,8 @@ export function getRoles(orgId: string): Promise<Role[]> {
 }
 
 // Creates a new role in the organization
-export function createRole({ orgId, data }: { orgId: string; data: CreateRoleData }): Promise<Role> {
-  return axios.post<Role>(`cloud-api/organizations/${orgId}/roles`, data).then((r) => r.data);
+export function createRole({ orgId, data }: { orgId: string; data: CreateRoleData }): Promise<CreateResponse<Role>> {
+  return axios.post<CreateResponse<Role>>(`cloud-api/organizations/${orgId}/roles`, data).then((r) => r.data);
 }
 
 // Updates a role in the organization

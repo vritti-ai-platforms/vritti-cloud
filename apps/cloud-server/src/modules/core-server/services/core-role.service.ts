@@ -1,6 +1,6 @@
 import type { RoleItem } from '@domain/catalog/catalog.builder';
 import { Injectable, Logger } from '@nestjs/common';
-import type { SuccessResponseDto } from '@vritti/api-sdk';
+import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk';
 import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreHttpService } from './core-http.service';
 
@@ -27,8 +27,8 @@ export class CoreRoleService {
     webhookSecret: string,
     orgId: string,
     roleData: Record<string, unknown>,
-  ): Promise<SuccessResponseDto> {
-    const result = await this.http.post<SuccessResponseDto>(
+  ): Promise<CreateResponseDto<CoreRole>> {
+    const result = await this.http.post<CreateResponseDto<CoreRole>>(
       url,
       webhookSecret,
       '/organizations/webhook/roles/create',

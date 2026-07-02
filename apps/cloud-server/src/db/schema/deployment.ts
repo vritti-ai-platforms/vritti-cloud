@@ -17,6 +17,8 @@ export const deployments = cloudSchema.table('deployments', {
     .notNull()
     .references(() => cloudProviders.id, { onDelete: 'restrict' }),
   version: varchar('version', { length: 50 }).notNull(),
+  // sha256 of the last catalog snapshot delivered to this deployment — staleness/reconciliation check
+  lastPushedHash: varchar('last_pushed_hash', { length: 64 }),
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
   type: deploymentTypeEnum('type').notNull(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

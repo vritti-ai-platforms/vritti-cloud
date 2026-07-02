@@ -43,8 +43,8 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
     await this.db.update(organizations).set({ planCode }).where(eq(organizations.id, orgId));
   }
 
-  // Re-points every org on (business, oldCode) to newCode; returns the number of orgs updated
-  async recodeOrganizations(businessId: string, oldCode: string, newCode: string): Promise<number> {
+  // Re-points every org on (business, oldCode) to newCode; returns the updated org ids
+  async recodeOrganizations(businessId: string, oldCode: string, newCode: string): Promise<string[]> {
     const rows = (await this.db
       .update(organizations)
       .set({ planCode: newCode })
@@ -52,7 +52,7 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
         and(inArray(organizations.businessCode, this.businessCodeFor(businessId)), eq(organizations.planCode, oldCode)),
       )
       .returning({ id: organizations.id })) as { id: string }[];
-    return rows.length;
+    return rows.map((r) => r.id);
   }
 
   // Returns the name of an organization on this (business, planCode), if any

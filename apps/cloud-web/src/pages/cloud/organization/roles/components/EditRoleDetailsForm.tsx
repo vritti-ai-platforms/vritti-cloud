@@ -27,15 +27,16 @@ export const EditRoleDetailsForm: React.FC<EditRoleDetailsFormProps> = ({ orgId,
   });
   const updateMutation = useUpdateRole({ onSuccess });
 
-  const onSubmit = (data: CreateRoleFormData) =>
-    updateMutation.mutate({
-      orgId,
-      roleId: role.id,
-      data: { name: data.name, description: data.description },
-    });
-
   return (
-    <Form form={form} onSubmit={onSubmit}>
+    <Form
+      form={form}
+      mutation={updateMutation}
+      transformSubmit={(data: CreateRoleFormData) => ({
+        orgId,
+        roleId: role.id,
+        data: { name: data.name, description: data.description },
+      })}
+    >
       <div className="flex flex-col gap-4 px-6 py-4">
         <TextField name="name" label="Role Name" placeholder="e.g. Regional Manager" />
         <TextField name="description" label="Description" placeholder="Optional description" />

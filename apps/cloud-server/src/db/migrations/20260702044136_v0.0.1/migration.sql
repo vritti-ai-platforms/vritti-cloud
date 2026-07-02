@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."deployments" ADD COLUMN "last_pushed_hash" varchar(64);

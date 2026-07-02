@@ -2,12 +2,7 @@ import { buildBuMatrix } from '@domain/catalog/bu-matrix.builder';
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import type { SnapshotPlan, VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ForbiddenException,
-  NotFoundException,
-  ServiceUnavailableException,
-  type SuccessResponseDto,
-} from '@vritti/api-sdk';
+import { ForbiddenException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
 import type { BuUnlocks, Deployment, Organization } from '@/db/schema';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
@@ -38,21 +33,13 @@ export class OrganizationBusinessUnitsService {
   async listBusinessUnits(orgId: string): Promise<CoreBusinessUnit[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const businessUnits = await this.coreBusinessUnitService.getBusinessUnits(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-      );
-      this.logger.log(`Fetched business units for org ${orgId}`);
-      return businessUnits;
-    } catch (error: unknown) {
-      this.logger.error(`Failed to fetch business units for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to fetch business units. Please try again later.',
-      });
-    }
+    const businessUnits = await this.coreBusinessUnitService.getBusinessUnits(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+    );
+    this.logger.log(`Fetched business units for org ${orgId}`);
+    return businessUnits;
   }
 
   // Creates a new business unit in core after checking plan limits
@@ -62,166 +49,105 @@ export class OrganizationBusinessUnitsService {
     // Check plan BU limits before creating
     await this.checkBusinessUnitLimit(org, deployment);
 
-    try {
-      const result = await this.coreBusinessUnitService.createBusinessUnit(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        this.packMetadata(data),
-      );
-      // Seed the org's role templates (idempotent — core skips already-provisioned ones)
-      await this.catalogSyncService.syncRoles(orgId);
-      // Seed the new BU's snapshot — with no BU locks yet it inherits the full plan
-      await this.catalogSyncService.syncBuSnapshot(orgId, result.id);
-      this.logger.log(`Created business unit for org ${orgId}`);
-      return result;
-    } catch (error: unknown) {
-      this.logger.error(`Failed to create business unit for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to create the business unit. Please try again later.',
-      });
-    }
+    const result = await this.coreBusinessUnitService.createBusinessUnit(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      this.packMetadata(data),
+    );
+    // Seed the org's role templates (idempotent — core skips already-provisioned ones).
+    // No catalog seeding needed — a new BU has no unlock overlay and resolves from the deployment catalog.
+    await this.catalogSyncService.syncRoles(orgId);
+    this.logger.log(`Created business unit for org ${orgId}`);
+    return result;
   }
 
   // Fetches a single business unit from core (returns subtree)
   async getBusinessUnit(orgId: string, buId: string): Promise<CoreBusinessUnit | null> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const result = await this.coreBusinessUnitService.getBusinessUnit(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        buId,
-      );
-      this.logger.log(`Fetched business unit ${buId} for org ${orgId}`);
-      // Pick the requested BU explicitly — findSubtree returns the BU plus descendants in unspecified order
-      const list = Array.isArray(result) ? result : [result];
-      return list.find((bu) => bu?.id === buId) ?? list[0] ?? null;
-    } catch (error: unknown) {
-      this.logger.error(`Failed to fetch business unit ${buId} for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to fetch the business unit. Please try again later.',
-      });
-    }
+    const result = await this.coreBusinessUnitService.getBusinessUnit(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      buId,
+    );
+    this.logger.log(`Fetched business unit ${buId} for org ${orgId}`);
+    // Pick the requested BU explicitly — findSubtree returns the BU plus descendants in unspecified order
+    const list = Array.isArray(result) ? result : [result];
+    return list.find((bu) => bu?.id === buId) ?? list[0] ?? null;
   }
 
   // Updates a business unit in core
   async updateBusinessUnit(orgId: string, buId: string, data: Record<string, unknown>): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const { parentId: _parentId, ...updateData } = this.packMetadata(data);
-      const result = await this.coreBusinessUnitService.updateBusinessUnit(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        buId,
-        updateData,
-      );
-      this.logger.log(`Updated business unit ${buId} for org ${orgId}`);
-      return result;
-    } catch (error: unknown) {
-      this.logger.error(`Failed to update business unit ${buId} for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to update the business unit. Please try again later.',
-      });
-    }
+    const { parentId: _parentId, ...updateData } = this.packMetadata(data);
+    const result = await this.coreBusinessUnitService.updateBusinessUnit(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      buId,
+      updateData,
+    );
+    this.logger.log(`Updated business unit ${buId} for org ${orgId}`);
+    return result;
   }
 
   // Deletes a business unit in core
   async deleteBusinessUnit(orgId: string, buId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const result = await this.coreBusinessUnitService.deleteBusinessUnit(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        buId,
-      );
-      this.logger.log(`Deleted business unit ${buId} for org ${orgId}`);
-      return result;
-    } catch (error: unknown) {
-      this.logger.error(`Failed to delete business unit ${buId} for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to delete the business unit. Please try again later.',
-      });
-    }
+    const result = await this.coreBusinessUnitService.deleteBusinessUnit(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      buId,
+    );
+    this.logger.log(`Deleted business unit ${buId} for org ${orgId}`);
+    return result;
   }
 
   // Lists role assignments for a business unit
   async getRoleAssignments(orgId: string, buId: string): Promise<BuRoleAssignment[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      return await this.coreBusinessUnitService.getRoleAssignments(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        buId,
-      );
-    } catch (error: unknown) {
-      this.logger.error(`Failed to fetch role assignments for BU ${buId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to fetch role assignments.',
-      });
-    }
+    return this.coreBusinessUnitService.getRoleAssignments(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      buId,
+    );
   }
 
   // Assigns a role to a user at a business unit
-  async assignRole(
-    orgId: string,
-    buId: string,
-    data: { userId: string; roleId: string },
-  ): Promise<SuccessResponseDto> {
+  async assignRole(orgId: string, buId: string, data: { userId: string; roleId: string }): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      return await this.coreBusinessUnitService.assignRole(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        data.userId,
-        {
-          roleId: data.roleId,
-          businessUnitId: buId,
-        },
-      );
-    } catch (error: unknown) {
-      this.logger.error(`Failed to assign role at BU ${buId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to assign the role.',
-      });
-    }
+    return this.coreBusinessUnitService.assignRole(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      data.userId,
+      {
+        roleId: data.roleId,
+        businessUnitId: buId,
+      },
+    );
   }
 
   // Removes a role assignment
   async removeRoleAssignment(orgId: string, assignmentId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      // Core-server DELETE /users/webhook/:userId/roles/:assignmentId — userId is ignored, only assignmentId matters
-      return await this.coreBusinessUnitService.removeRoleAssignment(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        '_',
-        assignmentId,
-      );
-    } catch (error: unknown) {
-      this.logger.error(`Failed to remove role assignment ${assignmentId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to remove the role assignment.',
-      });
-    }
+    // Core-server DELETE /users/webhook/:userId/roles/:assignmentId — userId is ignored, only assignmentId matters
+    return this.coreBusinessUnitService.removeRoleAssignment(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      '_',
+      assignmentId,
+    );
   }
 
   // Returns the BU permission matrix — built purely from the version snapshot (all apps/features/permissions, with
@@ -232,7 +158,7 @@ export class OrganizationBusinessUnitsService {
     return buildBuMatrix(snapshot, org.businessCode, org.planCode, org.buUnlocks?.[buId]);
   }
 
-  // Replaces the BU's unlock allow-list (clamped to the plan ceiling) and re-pushes the recomputed catalog to core
+  // Replaces the BU's unlock allow-list (clamped to the plan ceiling) and pushes the overlay to core
   async updateBuLocks(orgId: string, buId: string, dto: SetBuUnlocksDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { plan } = await this.loadPlanContext(org, deployment);
@@ -257,38 +183,17 @@ export class OrganizationBusinessUnitsService {
     buUnlocks[buId] = clamped;
     await this.organizationRepository.update(orgId, { buUnlocks });
 
-    // Re-push the BU snapshot so the new locks take effect downstream (per-user resolution reads it)
-    try {
-      await this.catalogSyncService.syncBuSnapshot(orgId, buId);
-      this.logger.log(`Updated locks for BU ${buId} in org ${orgId}`);
-      return { success: true, message: 'Business unit permissions updated successfully.' };
-    } catch (error: unknown) {
-      this.logger.error(`Failed to sync locks for BU ${buId} in org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to update business unit permissions.',
-      });
-    }
+    // Push the BU's unlock overlay so the new locks take effect on the next resolution in core
+    await this.catalogSyncService.syncBuUnlocks(orgId, buId);
+    this.logger.log(`Updated locks for BU ${buId} in org ${orgId}`);
+    return { success: true, message: 'Business unit permissions updated successfully.' };
   }
 
   // Returns roles compatible with a business unit's assigned apps
   async getCompatibleRoles(orgId: string, buId: string): Promise<CoreRole[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      return await this.coreRoleService.getCompatibleRoles(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        buId,
-      );
-    } catch (error: unknown) {
-      this.logger.error(`Failed to fetch compatible roles for BU ${buId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to fetch compatible roles.',
-      });
-    }
+    return this.coreRoleService.getCompatibleRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId);
   }
 
   // Loads the org's version snapshot + its plan (from snapshot.businesses[businessCode].plans[planCode]).
@@ -324,21 +229,12 @@ export class OrganizationBusinessUnitsService {
     // null maxBusinessUnits means unlimited
     if (plan.maxBusinessUnits === null) return;
 
-    let currentCount: number;
-    try {
-      const businessUnits = await this.coreBusinessUnitService.getBusinessUnits(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-      );
-      currentCount = Array.isArray(businessUnits) ? businessUnits.length : 0;
-    } catch (error: unknown) {
-      this.logger.error(`Failed to fetch BU count for limit check in org ${org.id}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to verify business unit limits. Please try again later.',
-      });
-    }
+    const businessUnits = await this.coreBusinessUnitService.getBusinessUnits(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+    );
+    const currentCount = Array.isArray(businessUnits) ? businessUnits.length : 0;
 
     if (currentCount >= plan.maxBusinessUnits) {
       throw new ForbiddenException({

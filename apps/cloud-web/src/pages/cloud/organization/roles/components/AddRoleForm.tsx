@@ -20,13 +20,10 @@ export const AddRoleForm: React.FC<AddRoleFormProps> = ({ orgId, onCreated, onCa
     resolver: zodResolver(createRoleSchema),
     defaultValues: { name: '', description: '', features: {} },
   });
-  const createMutation = useCreateRole();
-
-  const onSubmit = (data: CreateRoleFormData) =>
-    createMutation.mutate({ orgId, data }, { onSuccess: (role) => onCreated(role) });
+  const createMutation = useCreateRole({ onSuccess: (res) => onCreated(res.data) });
 
   return (
-    <Form form={form} onSubmit={onSubmit}>
+    <Form form={form} mutation={createMutation} transformSubmit={(data: CreateRoleFormData) => ({ orgId, data })}>
       <TextField name="name" label="Role Name" placeholder="e.g. Regional Manager" />
       <TextField name="description" label="Description" placeholder="Optional description" />
 

@@ -4,7 +4,6 @@ import {
   type FieldMap,
   FilterProcessor,
   NotFoundException,
-  ServiceUnavailableException,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and, type Column, eq, sql } from '@vritti/api-sdk/drizzle-orm';
@@ -117,20 +116,9 @@ export class OrganizationService {
         };
       });
 
-    try {
-      await this.coreOrganizationService.updateOrganization(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        { featureCatalog },
-      );
-    } catch (error: any) {
-      this.logger.error(`Failed to sync feature catalog for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to sync the feature catalog.',
-      });
-    }
+    await this.coreOrganizationService.updateOrganization(deployment.url, deployment.webhookSecret, org.orgIdentifier, {
+      featureCatalog,
+    });
 
     this.logger.log(`Synced feature catalog for org ${orgId} (${featureCatalog.length} features)`);
     return { success: true, message: `Feature catalog synced (${featureCatalog.length} features).` };

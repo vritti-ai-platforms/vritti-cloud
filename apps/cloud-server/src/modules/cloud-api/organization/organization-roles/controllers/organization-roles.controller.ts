@@ -1,5 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk';
+import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
 import {
   ApiCreateOrgRole,
   ApiDeleteOrgRole,
@@ -21,7 +23,7 @@ export class OrganizationRolesController {
   // Lists all roles for the organization (proxied from core)
   @Get()
   @ApiListOrgRoles()
-  async listRoles(@Param('orgId') orgId: string): Promise<any[]> {
+  async listRoles(@Param('orgId') orgId: string): Promise<CoreRole[]> {
     this.logger.log(`GET /organizations/${orgId}/roles`);
     return this.orgRolesService.listRoles(orgId);
   }
@@ -38,7 +40,10 @@ export class OrganizationRolesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiCreateOrgRole()
-  async createRole(@Param('orgId') orgId: string, @Body() data: Record<string, unknown>): Promise<any> {
+  async createRole(
+    @Param('orgId') orgId: string,
+    @Body() data: Record<string, unknown>,
+  ): Promise<CreateResponseDto<CoreRole>> {
     this.logger.log(`POST /organizations/${orgId}/roles`);
     return this.orgRolesService.createRole(orgId, data);
   }
@@ -50,7 +55,7 @@ export class OrganizationRolesController {
     @Param('orgId') orgId: string,
     @Param('roleId') roleId: string,
     @Body() data: Record<string, unknown>,
-  ): Promise<any> {
+  ): Promise<SuccessResponseDto> {
     this.logger.log(`PATCH /organizations/${orgId}/roles/${roleId}`);
     return this.orgRolesService.updateRole(orgId, roleId, data);
   }
@@ -59,7 +64,7 @@ export class OrganizationRolesController {
   @Delete(':roleId')
   @HttpCode(HttpStatus.OK)
   @ApiDeleteOrgRole()
-  async deleteRole(@Param('orgId') orgId: string, @Param('roleId') roleId: string): Promise<any> {
+  async deleteRole(@Param('orgId') orgId: string, @Param('roleId') roleId: string): Promise<SuccessResponseDto> {
     this.logger.log(`DELETE /organizations/${orgId}/roles/${roleId}`);
     return this.orgRolesService.deleteRole(orgId, roleId);
   }

@@ -7,11 +7,11 @@ import {
   DatabaseModule,
   type DatabaseModuleOptions,
   DataTableModule,
-  EmailModule,
   LoggerModule,
   RootModule,
   type TokenExpiryString,
 } from '@vritti/api-sdk';
+import { EmailModule } from '@vritti/api-sdk/email';
 import * as schema from '@/db/schema';
 import { relations } from '@/db/schema';
 import { validate } from './config/env.validation';

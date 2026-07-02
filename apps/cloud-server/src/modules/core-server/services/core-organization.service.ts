@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import type { OrgEntitlement, SignedDocument } from '@vritti/api-sdk/license';
 import { CoreHttpService } from './core-http.service';
 
 // Proxies organization creation to core-server
@@ -28,6 +29,17 @@ export class CoreOrganizationService {
   ): Promise<void> {
     await this.http.patch(url, webhookSecret, `/organizations/webhook/${orgId}`, data, { orgId });
     this.logger.log(`Updated organization in core: ${orgId}`);
+  }
+
+  // Pushes a signed plan/business entitlement document for an organization to core
+  async pushEntitlement(
+    url: string,
+    webhookSecret: string,
+    orgId: string,
+    doc: SignedDocument<OrgEntitlement>,
+  ): Promise<void> {
+    await this.http.patch(url, webhookSecret, `/organizations/webhook/${orgId}/entitlement`, doc, { orgId });
+    this.logger.log(`Pushed entitlement for organization ${orgId} in core`);
   }
 
   // Deletes an organization in core

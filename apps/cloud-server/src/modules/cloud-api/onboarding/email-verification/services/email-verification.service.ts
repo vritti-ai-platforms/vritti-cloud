@@ -1,7 +1,8 @@
 import { UserService } from '@domain/user/services/user.service';
 import { VerificationService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, ConflictException, EmailService, ForbiddenException } from '@vritti/api-sdk';
+import { BadRequestException, ConflictException, ForbiddenException } from '@vritti/api-sdk';
+import { EmailService } from '@vritti/api-sdk/email';
 import { OnboardingStepValues, VerificationChannelValues } from '@/db/schema';
 import { type ChangeEmailDto } from '../dto/request/change-email.dto';
 import { VerifyEmailDto } from '../dto/request/verify-email.dto';

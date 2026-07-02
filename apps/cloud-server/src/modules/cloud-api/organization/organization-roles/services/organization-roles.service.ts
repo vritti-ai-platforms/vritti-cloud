@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotFoundException, ServiceUnavailableException } from '@vritti/api-sdk';
+import { type CreateResponseDto, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
@@ -39,90 +40,54 @@ export class OrganizationRolesService {
   }
 
   // Lists all roles for the organization from core
-  async listRoles(orgId: string): Promise<any[]> {
+  async listRoles(orgId: string): Promise<CoreRole[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const roles = await this.coreRoleService.getOrgRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier);
-      this.logger.log(`Fetched roles for org ${orgId}`);
-      return roles;
-    } catch (error: any) {
-      this.logger.error(`Failed to fetch roles for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to fetch roles. Please try again later.',
-      });
-    }
+    const roles = await this.coreRoleService.getOrgRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier);
+    this.logger.log(`Fetched roles for org ${orgId}`);
+    return roles;
   }
 
   // Creates a new role in core for the organization
-  async createRole(orgId: string, data: Record<string, unknown>): Promise<any> {
+  async createRole(orgId: string, data: Record<string, unknown>): Promise<CreateResponseDto<CoreRole>> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const result = await this.coreRoleService.createOrgRole(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        data,
-      );
-      this.logger.log(`Created role for org ${orgId}`);
-      return result;
-    } catch (error: any) {
-      this.logger.error(`Failed to create role for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to create the role. Please try again later.',
-      });
-    }
+    const result = await this.coreRoleService.createOrgRole(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      data,
+    );
+    this.logger.log(`Created role for org ${orgId}`);
+    return result;
   }
 
   // Updates a role in core
-  async updateRole(orgId: string, roleId: string, data: Record<string, unknown>): Promise<any> {
+  async updateRole(orgId: string, roleId: string, data: Record<string, unknown>): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const result = await this.coreRoleService.updateOrgRole(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        roleId,
-        data,
-      );
-      this.logger.log(`Updated role ${roleId} for org ${orgId}`);
-      return result;
-    } catch (error: any) {
-      this.logger.error(`Failed to update role ${roleId} for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to update the role. Please try again later.',
-      });
-    }
+    const result = await this.coreRoleService.updateOrgRole(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      roleId,
+      data,
+    );
+    this.logger.log(`Updated role ${roleId} for org ${orgId}`);
+    return result;
   }
 
   // Deletes a role in core
-  async deleteRole(orgId: string, roleId: string): Promise<any> {
+  async deleteRole(orgId: string, roleId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    try {
-      const result = await this.coreRoleService.deleteOrgRole(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        roleId,
-      );
-      this.logger.log(`Deleted role ${roleId} for org ${orgId}`);
-      return result;
-    } catch (error: any) {
-      const responseData = error?.response?.data;
-      this.logger.error(
-        `Failed to delete role ${roleId} for org ${orgId}: ${error}`,
-        responseData ? JSON.stringify(responseData) : undefined,
-      );
-      throw new ServiceUnavailableException({
-        label: responseData?.title ?? 'Deployment Unreachable',
-        detail: responseData?.detail ?? 'Unable to reach the deployment to delete the role. Please try again later.',
-      });
-    }
+    const result = await this.coreRoleService.deleteOrgRole(
+      deployment.url,
+      deployment.webhookSecret,
+      org.orgIdentifier,
+      roleId,
+    );
+    this.logger.log(`Deleted role ${roleId} for org ${orgId}`);
+    return result;
   }
 }

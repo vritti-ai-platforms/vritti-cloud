@@ -13,7 +13,6 @@ import {
   NotFoundException,
   type SelectOptionsQueryDto,
   type SelectQueryResult,
-  ServiceUnavailableException,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { plainToInstance } from 'class-transformer';
@@ -21,6 +20,7 @@ import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
 import { OrgMemberRoleValues } from '@/db/schema';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
+import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
 import { isValidTaxId } from '@/utils/tax-id';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
@@ -46,6 +46,7 @@ export class OrganizationService {
     private readonly countryRepository: CountryRepository,
     private readonly planRepository: PlanRepository,
     private readonly businessRepository: BusinessRepository,
+    private readonly catalogSyncService: CatalogSyncService,
   ) {}
 
   // Checks if a subdomain is available; throws ConflictException if already taken
@@ -114,25 +115,16 @@ export class OrganizationService {
       logoUrl = `${url}?v=${Date.now()}`;
     }
     // Create the organization in core-server first to get the nexus org ID
-    let nexusOrg: { id: string };
-    try {
-      nexusOrg = await this.coreOrganizationService.createOrganization(deployment.url, deployment.webhookSecret, {
+    const nexusOrg: { id: string } = await this.coreOrganizationService.createOrganization(
+      deployment.url,
+      deployment.webhookSecret,
+      {
         name: dto.name,
         subdomain: dto.subdomain,
         size: dto.size,
         logoUrl,
-      });
-    } catch (error: any) {
-      const responseData = error?.response?.data;
-      this.logger.error(
-        `Failed to reach deployment ${deployment.url}: ${error}`,
-        responseData ? JSON.stringify(responseData) : undefined,
-      );
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the selected deployment. Please try again later.',
-      });
-    }
+      },
+    );
 
     // Org references its business by code (version-portable); resolve it from the validated business id
     const business = await this.businessRepository.findById(dto.businessId);
@@ -169,6 +161,9 @@ export class OrganizationService {
       await this.orgRepository.update(org.id, { mediaId: media.id });
       org.mediaId = media.id;
     }
+
+    // Push the org's signed plan entitlement to its deployment (push failures are logged, not fatal)
+    await this.catalogSyncService.syncOrgEntitlement(org.id);
 
     this.logger.log(
       `Created organization: ${org.subdomain} (${org.id}) with nexus ID: ${nexusOrg.id} for user: ${userId}`,
@@ -260,19 +255,11 @@ export class OrganizationService {
     if (org.orgIdentifier) {
       const deployment = await this.deploymentRepository.findById(org.deploymentId);
       if (deployment) {
-        try {
-          await this.coreOrganizationService.deleteOrganization(
-            deployment.url,
-            deployment.webhookSecret,
-            org.orgIdentifier,
-          );
-        } catch (error: any) {
-          this.logger.error(`Failed to delete org from core-server: ${error}`);
-          throw new ServiceUnavailableException({
-            label: 'Deployment Unreachable',
-            detail: 'Unable to reach the deployment to delete the organization. Please try again later.',
-          });
-        }
+        await this.coreOrganizationService.deleteOrganization(
+          deployment.url,
+          deployment.webhookSecret,
+          org.orgIdentifier,
+        );
       }
     }
 
@@ -292,20 +279,9 @@ export class OrganizationService {
 
     const featureCatalog = await this.extractFeatureCatalog(deployment.version);
 
-    try {
-      await this.coreOrganizationService.updateOrganization(
-        deployment.url,
-        deployment.webhookSecret,
-        org.orgIdentifier,
-        { featureCatalog },
-      );
-    } catch (error: any) {
-      this.logger.error(`Failed to sync feature catalog for org ${orgId}: ${error}`);
-      throw new ServiceUnavailableException({
-        label: 'Deployment Unreachable',
-        detail: 'Unable to reach the deployment to sync the feature catalog.',
-      });
-    }
+    await this.coreOrganizationService.updateOrganization(deployment.url, deployment.webhookSecret, org.orgIdentifier, {
+      featureCatalog,
+    });
 
     this.logger.log(`Synced feature catalog for org ${orgId} (${featureCatalog?.length ?? 0} features)`);
     return { success: true, message: `Feature catalog synced successfully (${featureCatalog?.length ?? 0} features).` };
@@ -400,7 +376,7 @@ export class OrganizationService {
               org.orgIdentifier,
               webhookData,
             );
-          } catch (error: any) {
+          } catch (error: unknown) {
             this.logger.warn(`Failed to sync org update to core-server: ${error}`);
           }
         }

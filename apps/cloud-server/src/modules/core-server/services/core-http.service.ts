@@ -1,6 +1,7 @@
 import https from 'node:https';
 import { Injectable } from '@nestjs/common';
-import axios, { type AxiosRequestConfig } from 'axios';
+import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import { rethrowCoreError } from '../core-error.util';
 
 // Shared HTTP transport for core-server API calls.
 // orgId is sent as an `x-org-id` header so core-server can scope the request to a single tenant
@@ -37,6 +38,15 @@ export class CoreHttpService {
     };
   }
 
+  // Runs a core call, translating failures: core's HTTP errors pass through verbatim, transport failures become 503
+  private async send<T>(fn: () => Promise<AxiosResponse<T>>): Promise<T> {
+    try {
+      return (await fn()).data;
+    } catch (error: unknown) {
+      rethrowCoreError(error, 'Unable to reach the deployment. Please try again later.');
+    }
+  }
+
   // Sends a GET request and returns the response body
   async get<T>(
     url: string,
@@ -44,11 +54,9 @@ export class CoreHttpService {
     path: string,
     options?: { orgId?: string; params?: Record<string, unknown> },
   ): Promise<T> {
-    const response = await axios.get<T>(
-      `${url}${path}`,
-      this.config(webhookSecret, options?.orgId, { params: options?.params }),
+    return this.send(() =>
+      axios.get<T>(`${url}${path}`, this.config(webhookSecret, options?.orgId, { params: options?.params })),
     );
-    return response.data;
   }
 
   // Sends a POST request and returns the response body
@@ -59,8 +67,7 @@ export class CoreHttpService {
     data?: unknown,
     options?: { orgId?: string },
   ): Promise<T> {
-    const response = await axios.post<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId));
-    return response.data;
+    return this.send(() => axios.post<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId)));
   }
 
   // Sends a PATCH request and returns the response body
@@ -71,8 +78,7 @@ export class CoreHttpService {
     data?: unknown,
     options?: { orgId?: string },
   ): Promise<T> {
-    const response = await axios.patch<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId));
-    return response.data;
+    return this.send(() => axios.patch<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId)));
   }
 
   // Sends a PUT request and returns the response body
@@ -83,13 +89,11 @@ export class CoreHttpService {
     data?: unknown,
     options?: { orgId?: string },
   ): Promise<T> {
-    const response = await axios.put<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId));
-    return response.data;
+    return this.send(() => axios.put<T>(`${url}${path}`, data, this.config(webhookSecret, options?.orgId)));
   }
 
   // Sends a DELETE request and returns the response body
   async delete<T>(url: string, webhookSecret: string, path: string, options?: { orgId?: string }): Promise<T> {
-    const response = await axios.delete<T>(`${url}${path}`, this.deleteConfig(webhookSecret, options?.orgId));
-    return response.data;
+    return this.send(() => axios.delete<T>(`${url}${path}`, this.deleteConfig(webhookSecret, options?.orgId)));
   }
 }

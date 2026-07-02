@@ -4,13 +4,8 @@ import { UserService } from '@domain/user/services/user.service';
 import { VerificationService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  BadRequestException,
-  EmailService,
-  NotFoundException,
-  normalizePhoneNumber,
-  SuccessResponseDto,
-} from '@vritti/api-sdk';
+import { BadRequestException, NotFoundException, normalizePhoneNumber, SuccessResponseDto } from '@vritti/api-sdk';
+import { EmailService } from '@vritti/api-sdk/email';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';

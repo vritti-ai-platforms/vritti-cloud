@@ -1,3 +1,10 @@
+import type {
+  SnapshotBusiness,
+  SnapshotFeature,
+  SnapshotMicrofrontends,
+  SnapshotPermission,
+  VersionSnapshot,
+} from '@vritti/api-sdk/catalog-resolver';
 import _ from '@vritti/api-sdk/lodash';
 import type {
   App,
@@ -34,79 +41,19 @@ export interface SnapshotData {
   permissionBusinesses: Array<{ featurePermissionId: string; businessId: string }>;
 }
 
-// Output document shape — what gets stored in versions.snapshot
-export interface SnapshotPermission {
-  code: string;
-  label: string;
-  isGlobal: boolean;
-  businesses: string[];
-}
-// WEB microfrontend route — a single remote entry. All non-null: a WEB microfrontend row is
-// CHECK-constrained to have remoteEntry set, and the feature↔MF link's module/route are NOT NULL.
-export interface SnapshotMicrofrontendWeb {
-  code: string;
-  name: string;
-  remoteEntry: string;
-  exposedModule: string;
-  routePrefix: string;
-}
-// MOBILE microfrontend route — per-OS remote entries (android + ios). All non-null: a MOBILE row is
-// CHECK-constrained to have both android + ios set, and the link's module/route are NOT NULL.
-export interface SnapshotMicrofrontendMobile {
-  code: string;
-  name: string;
-  remoteEntryAndroid: string;
-  remoteEntryIos: string;
-  exposedModule: string;
-  routePrefix: string;
-}
-// Per-platform microfrontend routes — mirrors the {web?, mobile?} shape used by role grants / plan unlocks.
-export interface SnapshotMicrofrontends {
-  web?: SnapshotMicrofrontendWeb;
-  mobile?: SnapshotMicrofrontendMobile;
-}
-export interface SnapshotFeature {
-  code: string;
-  name: string;
-  lucideIcon: string;
-  sfSymbol: string;
-  materialSymbol: string;
-  permissions: SnapshotPermission[];
-  microfrontends: SnapshotMicrofrontends;
-}
-export interface SnapshotApp {
-  code: string;
-  name: string;
-  icon: string;
-  sortOrder: number;
-  features: string[];
-}
-export interface SnapshotRoleTemplate {
-  name: string;
-  // Stable link to provisioned org roles (the template's code, not its id)
-  code: string;
-  // featureCode -> { app: appCode, web?: [permCode…], mobile?: [permCode…] } — grants split per platform, app stamped
-  features: Record<string, { app: string; web?: string[]; mobile?: string[] }>;
-}
-// A plan is a lock overlay: the feature-permissions it UNLOCKS per platform (everything else renders locked).
-// Apps are derived from these. Shape mirrors role grants: featureCode -> { web?: [permCode…], mobile?: [permCode…] }.
-export interface SnapshotPlan {
-  code: string;
-  name: string;
-  isCustom: boolean;
-  maxBusinessUnits: number | null;
-  unlockedPermissions: Record<string, { web?: string[]; mobile?: string[] }>;
-}
-export interface SnapshotBusiness {
-  name: string;
-  apps: SnapshotApp[];
-  roleTemplates: SnapshotRoleTemplate[];
-  plans: Record<string, SnapshotPlan>;
-}
-export interface VersionSnapshot {
-  features: Record<string, SnapshotFeature>;
-  businesses: Record<string, SnapshotBusiness>;
-}
+// Snapshot document types now live in api-sdk — re-exported so existing importers keep compiling
+export type {
+  SnapshotApp,
+  SnapshotBusiness,
+  SnapshotFeature,
+  SnapshotMicrofrontendMobile,
+  SnapshotMicrofrontends,
+  SnapshotMicrofrontendWeb,
+  SnapshotPermission,
+  SnapshotPlan,
+  SnapshotRoleTemplate,
+  VersionSnapshot,
+} from '@vritti/api-sdk/catalog-resolver';
 
 // Pre-computed lookups derived once from the raw rows
 function buildIndex(data: SnapshotData) {

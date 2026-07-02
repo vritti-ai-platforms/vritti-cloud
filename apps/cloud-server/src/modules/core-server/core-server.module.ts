@@ -7,6 +7,7 @@ import { CoreOrganizationRepository } from './repositories/core-organization.rep
 import { CoreVersionRepository } from './repositories/core-version.repository';
 import { CatalogSyncService } from './services/catalog-sync.service';
 import { CoreBusinessUnitService } from './services/core-business-unit.service';
+import { CoreCatalogService } from './services/core-catalog.service';
 import { CoreDeploymentService } from './services/core-deployment.service';
 import { CoreHttpService } from './services/core-http.service';
 import { CoreOrganizationService } from './services/core-organization.service';
@@ -30,6 +31,7 @@ import { CoreUserService } from './services/core-user.service';
     CoreUserService,
     CoreRoleService,
     CoreBusinessUnitService,
+    CoreCatalogService,
     // Catalog + role push orchestration
     CatalogSyncService,
   ],

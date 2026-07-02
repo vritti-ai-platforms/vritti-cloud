@@ -17,6 +17,7 @@ import { PlanDto } from '@/modules/admin-api/version/business/plan/root/dto/enti
 import type { CreatePlanDto } from '@/modules/admin-api/version/business/plan/root/dto/request/create-plan.dto';
 import type { UpdatePlanDto } from '@/modules/admin-api/version/business/plan/root/dto/request/update-plan.dto';
 import { PlansTableResponseDto } from '@/modules/admin-api/version/business/plan/root/dto/response/plans-table-response.dto';
+import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { PlanRepository } from '../repositories/plan.repository';
 
 @Injectable()
@@ -36,6 +37,7 @@ export class PlanService {
   constructor(
     private readonly planRepository: PlanRepository,
     private readonly dataTableStateService: DataTableStateService,
+    private readonly catalogSyncService: CatalogSyncService,
   ) {}
 
   // Returns paginated plan options for the select component (scoped to a version + business)
@@ -115,6 +117,8 @@ export class PlanService {
 
     if (attachOrgId) {
       await this.planRepository.setOrgPlanCode(attachOrgId, plan.code);
+      // Re-issue the org's signed entitlement so core resolves with the new plan code
+      await this.catalogSyncService.syncOrgEntitlement(attachOrgId);
     }
 
     this.logger.log(`Created ${plan.isCustom ? 'custom ' : ''}plan: ${plan.name} (${plan.id})`);
@@ -194,8 +198,12 @@ export class PlanService {
     // Renaming the code breaks orgs that reference the plan by its old code — re-point them
     if (dto.code && dto.code !== existing.code) {
       const recoded = await this.planRepository.recodeOrganizations(existing.businessId, existing.code, dto.code);
-      if (recoded > 0) {
-        this.logger.log(`Re-pointed ${recoded} org(s) from plan code "${existing.code}" to "${dto.code}"`);
+      if (recoded.length > 0) {
+        this.logger.log(`Re-pointed ${recoded.length} org(s) from plan code "${existing.code}" to "${dto.code}"`);
+        // Re-issue each re-pointed org's signed entitlement so core resolves with the new plan code
+        for (const orgId of recoded) {
+          await this.catalogSyncService.syncOrgEntitlement(orgId);
+        }
       }
     }
     this.logger.log(`Updated plan: ${plan.name} (${plan.id})`);
