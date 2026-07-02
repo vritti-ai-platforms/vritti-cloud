@@ -26,11 +26,14 @@ export function ApiFindOrganizationById() {
   );
 }
 
-export function ApiSyncFeatureCatalog() {
+export function ApiResyncDeployment() {
   return applyDecorators(
-    ApiOperation({ summary: "Sync an organization's feature catalog from its deployment snapshot to core-server" }),
+    ApiOperation({
+      summary: "Resync the organization's deployment",
+      description: 'Re-pushes the deployment catalog, org entitlements and roles.',
+    }),
     ApiParam({ name: 'id', description: 'Organization UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiResponse({ status: 200, description: 'Feature catalog synced successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 200, description: 'Deployment resynced successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Organization not found.' }),
   );

@@ -34,7 +34,6 @@ export interface CoreRole {
   name: string;
   description: string | null;
   code: string | null;
-  appCodes: string[];
   features: Record<string, string[]>;
   isActive: boolean;
   createdAt: Date;

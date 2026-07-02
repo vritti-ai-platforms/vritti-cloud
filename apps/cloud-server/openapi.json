@@ -8273,7 +8273,8 @@
     },
     "/admin-api/deployments/{deploymentId}/organizations/{id}/sync-features": {
       "post": {
-        "operationId": "OrganizationController_syncFeatureCatalog",
+        "description": "Re-pushes the deployment catalog, org entitlements and roles.",
+        "operationId": "OrganizationController_resyncDeployment",
         "parameters": [
           {
             "name": "id",
@@ -8288,7 +8289,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Feature catalog synced successfully.",
+            "description": "Deployment resynced successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -8309,7 +8310,7 @@
             "bearer": []
           }
         ],
-        "summary": "Sync an organization's feature catalog from its deployment snapshot to core-server",
+        "summary": "Resync the organization's deployment",
         "tags": [
           "Admin - Organizations"
         ]

@@ -269,64 +269,6 @@ export class OrganizationService {
     return { success: true, message: 'Organization deleted successfully.' };
   }
 
-  // Syncs the feature catalog from the deployment's app version snapshot to core-server
-  async syncFeatureCatalog(orgId: string): Promise<SuccessResponseDto> {
-    const org = await this.orgRepository.findById(orgId);
-    if (!org) throw new NotFoundException('Organization not found.');
-
-    const deployment = await this.deploymentRepository.findById(org.deploymentId);
-    if (!deployment) throw new NotFoundException('Deployment not found.');
-
-    const featureCatalog = await this.extractFeatureCatalog(deployment.version);
-
-    await this.coreOrganizationService.updateOrganization(deployment.url, deployment.webhookSecret, org.orgIdentifier, {
-      featureCatalog,
-    });
-
-    this.logger.log(`Synced feature catalog for org ${orgId} (${featureCatalog?.length ?? 0} features)`);
-    return { success: true, message: `Feature catalog synced successfully (${featureCatalog?.length ?? 0} features).` };
-  }
-
-  // Extracts feature catalog from the app version snapshot
-  private async extractFeatureCatalog(version: string | null): Promise<object[] | undefined> {
-    if (!version) return undefined;
-
-    const appVersion = await this.coreVersionRepository.findByVersion(version);
-    if (!appVersion?.snapshot) return undefined;
-
-    const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const features = Object.values((snapshot.features ?? {}) as Record<string, Record<string, unknown>>);
-
-    return features
-      .filter((f) => {
-        const mfs = (f.microfrontends ?? {}) as Record<string, unknown>;
-        return Boolean(mfs.WEB) || Boolean(mfs.MOBILE);
-      })
-      .map((f) => {
-        const mfs = (f.microfrontends ?? {}) as Record<string, Record<string, string>>;
-        const webMf = mfs.WEB;
-        const mobileMf = mfs.MOBILE;
-        return {
-          code: f.code,
-          name: f.name,
-          lucideIcon: f.lucideIcon ?? null,
-          sfSymbol: (f.sfSymbol as string) ?? 'square',
-          materialSymbol: (f.materialSymbol as string) ?? 'square',
-          remoteEntry: webMf?.remoteEntry ?? null,
-          exposedModule: webMf?.exposedModule ?? null,
-          routePrefix: webMf?.routePrefix ?? null,
-          mobile: mobileMf
-            ? {
-                remoteEntryAndroid: mobileMf.remoteEntryAndroid,
-                remoteEntryIos: mobileMf.remoteEntryIos,
-                exposedModule: mobileMf.exposedModule,
-                routePrefix: mobileMf.routePrefix,
-              }
-            : null,
-        };
-      });
-  }
-
   // Updates an organization's details (name, size) and optionally replaces the logo
   async update(userId: string, orgId: string, request: FastifyRequest): Promise<SuccessResponseDto> {
     const org = await this.orgRepository.findById(orgId);

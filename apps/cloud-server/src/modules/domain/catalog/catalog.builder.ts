@@ -3,7 +3,6 @@
 export type {
   BuFeatureUnlocks,
   CatalogPermission,
-  FeatureCatalogEntry,
   LockReason,
   RoleItem,
 } from '@vritti/api-sdk/catalog-resolver';

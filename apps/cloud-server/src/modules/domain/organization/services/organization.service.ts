@@ -11,9 +11,7 @@ import { businesses, deployments, organizations } from '@/db/schema';
 import { OrganizationDto } from '@/modules/admin-api/deployment/organization/dto/entity/organization.dto';
 import { OrganizationDetailDto } from '@/modules/admin-api/deployment/organization/dto/entity/organization-detail.dto';
 import { OrganizationTableResponseDto } from '@/modules/admin-api/deployment/organization/dto/response/organizations-response.dto';
-import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
-import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
-import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
+import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { OrganizationRepository } from '../repositories/organization.repository';
 
 @Injectable()
@@ -38,9 +36,7 @@ export class OrganizationService {
   constructor(
     private readonly organizationRepository: OrganizationRepository,
     private readonly dataTableStateService: DataTableStateService,
-    private readonly deploymentRepository: DeploymentRepository,
-    private readonly coreVersionRepository: CoreVersionRepository,
-    private readonly coreOrganizationService: CoreOrganizationService,
+    private readonly catalogSyncService: CatalogSyncService,
   ) {}
 
   // Returns all organizations with counts, applying server-stored filter/sort/search/pagination state
@@ -73,54 +69,14 @@ export class OrganizationService {
     return OrganizationDetailDto.from(org);
   }
 
-  // Syncs the feature catalog from the deployment's app version snapshot to core-server
-  async syncFeatureCatalog(orgId: string): Promise<SuccessResponseDto> {
+  // Re-pushes the deployment catalog, org entitlements and roles for the org's deployment
+  async resyncDeployment(orgId: string): Promise<SuccessResponseDto> {
     const org = await this.organizationRepository.findById(orgId);
     if (!org) throw new NotFoundException('Organization not found.');
 
-    const deployment = await this.deploymentRepository.findById(org.deploymentId);
-    if (!deployment?.version) throw new NotFoundException('Deployment or app version not found.');
+    await this.catalogSyncService.resyncDeployment(org.deploymentId);
 
-    const appVersion = await this.coreVersionRepository.findByVersion(deployment.version);
-    if (!appVersion?.snapshot) throw new NotFoundException('App version snapshot not found.');
-
-    const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const features = Object.values((snapshot.features ?? {}) as Record<string, Record<string, unknown>>);
-
-    const featureCatalog = features
-      .filter((f) => {
-        const mfs = (f.microfrontends ?? {}) as Record<string, unknown>;
-        return Boolean(mfs.WEB) || Boolean(mfs.MOBILE);
-      })
-      .map((f) => {
-        const mfs = (f.microfrontends ?? {}) as Record<string, Record<string, string>>;
-        const webMf = mfs.WEB;
-        const mobileMf = mfs.MOBILE;
-        return {
-          code: f.code,
-          name: f.name,
-          lucideIcon: f.lucideIcon ?? null,
-          sfSymbol: (f.sfSymbol as string) ?? 'square',
-          materialSymbol: (f.materialSymbol as string) ?? 'square',
-          remoteEntry: webMf?.remoteEntry ?? null,
-          exposedModule: webMf?.exposedModule ?? null,
-          routePrefix: webMf?.routePrefix ?? null,
-          mobile: mobileMf
-            ? {
-                remoteEntryAndroid: mobileMf.remoteEntryAndroid,
-                remoteEntryIos: mobileMf.remoteEntryIos,
-                exposedModule: mobileMf.exposedModule,
-                routePrefix: mobileMf.routePrefix,
-              }
-            : null,
-        };
-      });
-
-    await this.coreOrganizationService.updateOrganization(deployment.url, deployment.webhookSecret, org.orgIdentifier, {
-      featureCatalog,
-    });
-
-    this.logger.log(`Synced feature catalog for org ${orgId} (${featureCatalog.length} features)`);
-    return { success: true, message: `Feature catalog synced (${featureCatalog.length} features).` };
+    this.logger.log(`Resynced deployment ${org.deploymentId} for org ${orgId}`);
+    return { success: true, message: 'Deployment catalog, entitlements and roles re-pushed successfully.' };
   }
 }
