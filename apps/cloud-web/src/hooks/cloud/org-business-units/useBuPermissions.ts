@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
-import type { BuMatrix, FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
+import type { BuFeatureLocks, BuMatrix } from '@/schemas/cloud/bu-matrix';
 import { getBuPermissionMatrix, setBuPermissions } from '@/services/cloud/org-business-units.service';
 import { BU_COMPATIBLE_ROLES_KEY } from './useCompatibleRoles';
 import { ORG_BU_DETAIL_QUERY_KEY } from './useOrgBusinessUnit';
 
-export type BuUnlockPayload = { unlocks: FeatureUnlocks };
+export type BuLocksPayload = { locks: BuFeatureLocks };
 
 export const BU_MATRIX_QUERY_KEY = (orgId: string, buId: string) =>
   ['organizations', orgId, 'business-units', buId, 'permissions', 'matrix'] as const;
@@ -20,10 +20,10 @@ export function useBuPermissionMatrix(orgId: string, buId: string) {
   });
 }
 
-// Saves the BU's allow-list within the plan and refreshes the matrix
+// Saves the BU's lock deny-list (ceiling − selection) and refreshes the matrix
 export function useSetBuPermissions(orgId: string, buId: string) {
   const queryClient = useQueryClient();
-  return useMutation<SuccessResponse, AxiosError, BuUnlockPayload>({
+  return useMutation<SuccessResponse, AxiosError, BuLocksPayload>({
     mutationFn: (payload) => setBuPermissions({ orgId, buId, ...payload }),
     // Saving re-derives the BU's apps, so refresh the matrix, the BU detail (app count) and compatible roles
     onSuccess: () => {

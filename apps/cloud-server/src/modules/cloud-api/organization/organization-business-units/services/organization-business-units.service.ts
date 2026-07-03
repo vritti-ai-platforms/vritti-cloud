@@ -1,19 +1,20 @@
 import { buildBuMatrix } from '@domain/catalog/bu-matrix.builder';
+import type { BuFeatureLocks } from '@domain/catalog/catalog.builder';
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import type { SnapshotPlan, VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
-import { ForbiddenException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
-import type { BuUnlocks, Deployment, Organization } from '@/db/schema';
+import { BadRequestException, ForbiddenException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import type { Deployment, Organization } from '@/db/schema';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
-import type { SetBuUnlocksDto } from '../dto/request/set-bu-unlocks.dto';
+import type { SetBuLocksDto } from '../dto/request/set-bu-locks.dto';
 import type { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
 import type { BuRoleAssignment, CoreBusinessUnit, CoreRole } from '../types';
 
-// UI platform keys (snapshot microfrontend keys), used when clamping BU unlocks to the plan ceiling
+// UI platform keys (snapshot microfrontend keys), used when validating the BU lock deny-list shape
 const PLATFORMS = ['web', 'mobile'] as const;
 
 @Injectable()
@@ -56,7 +57,7 @@ export class OrganizationBusinessUnitsService {
       this.packMetadata(data),
     );
     // Seed the org's role templates (idempotent — core skips already-provisioned ones).
-    // No catalog seeding needed — a new BU has no unlock overlay and resolves from the deployment catalog.
+    // No catalog seeding needed — a new BU has no lock overlay and resolves from the deployment catalog.
     await this.catalogSyncService.syncRoles(orgId);
     this.logger.log(`Created business unit for org ${orgId}`);
     return result;
@@ -151,42 +152,48 @@ export class OrganizationBusinessUnitsService {
   }
 
   // Returns the BU permission matrix — built purely from the version snapshot (all apps/features/permissions, with
-  // per-platform inPlan/selected/availableIn). No catalog-table reads.
+  // per-platform inPlan/selected/availableIn) — plus the raw stored deny-list so the editor seeds faithfully.
   async getBuMatrix(orgId: string, buId: string): Promise<BuMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await this.loadPlanContext(org, deployment);
-    return buildBuMatrix(snapshot, org.businessCode, org.planCode, org.buUnlocks?.[buId]);
+    const matrix = buildBuMatrix(snapshot, org.businessCode, org.planCode, org.buLocks?.[buId]);
+    return { ...matrix, locks: org.buLocks?.[buId] ?? {} };
   }
 
-  // Replaces the BU's unlock allow-list (clamped to the plan ceiling) and pushes the overlay to core
-  async updateBuLocks(orgId: string, buId: string, dto: SetBuUnlocksDto): Promise<SuccessResponseDto> {
-    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    const { plan } = await this.loadPlanContext(org, deployment);
+  // Replaces the BU's lock deny-list and pushes the overlay to core. No plan clamping is needed —
+  // the plan remains the ceiling at resolution, so a lock on an out-of-plan code is inert.
+  async updateBuLocks(orgId: string, buId: string, dto: SetBuLocksDto): Promise<SuccessResponseDto> {
+    const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    // Clamp each requested code to the plan ceiling — a BU can never unlock more than its plan
-    const clamped: BuUnlocks[string] = {};
-    for (const [featureCode, platforms] of Object.entries(dto.unlocks ?? {})) {
-      const planEntry = plan.unlockedPermissions?.[featureCode];
-      if (!planEntry) continue;
-      const entry: { web?: string[]; mobile?: string[] } = {};
-      for (const platform of PLATFORMS) {
-        const requested = platforms?.[platform];
-        if (requested === undefined) continue;
-        const ceiling = new Set(planEntry[platform] ?? []);
-        entry[platform] = requested.filter((code) => ceiling.has(code));
-      }
-      if (entry.web !== undefined || entry.mobile !== undefined) clamped[featureCode] = entry;
-    }
+    const buLocks = { ...(org.buLocks ?? {}) };
+    buLocks[buId] = this.validateLocksShape(dto.locks);
+    await this.organizationRepository.update(orgId, { buLocks });
 
-    // Always store explicitly once edited — an empty allow-list means "lock everything", NOT "inherit the plan"
-    const buUnlocks = { ...(org.buUnlocks ?? {}) };
-    buUnlocks[buId] = clamped;
-    await this.organizationRepository.update(orgId, { buUnlocks });
-
-    // Push the BU's unlock overlay so the new locks take effect on the next resolution in core
-    await this.catalogSyncService.syncBuUnlocks(orgId, buId);
+    // Push the BU's lock overlay so the new locks take effect on the next resolution in core
+    await this.catalogSyncService.syncBuLocks(orgId, buId);
     this.logger.log(`Updated locks for BU ${buId} in org ${orgId}`);
     return { success: true, message: 'Business unit permissions updated successfully.' };
+  }
+
+  // Lightly validates the deny-list shape: featureCode → { web?/mobile?: null | string[] }
+  private validateLocksShape(locks: BuFeatureLocks | undefined): BuFeatureLocks {
+    const result: BuFeatureLocks = {};
+    for (const [featureCode, entry] of Object.entries(locks ?? {})) {
+      if (typeof entry !== 'object' || entry === null || Array.isArray(entry)) {
+        throw new BadRequestException('Each lock entry must map web/mobile to null or a list of permission codes.');
+      }
+      const cleaned: BuFeatureLocks[string] = {};
+      for (const platform of PLATFORMS) {
+        const value = entry[platform];
+        if (value === undefined) continue;
+        if (value !== null && !(Array.isArray(value) && value.every((code) => typeof code === 'string'))) {
+          throw new BadRequestException('Each lock entry must map web/mobile to null or a list of permission codes.');
+        }
+        cleaned[platform] = value;
+      }
+      result[featureCode] = cleaned;
+    }
+    return result;
   }
 
   // Returns roles compatible with a business unit's assigned apps

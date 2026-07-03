@@ -4217,12 +4217,14 @@
     },
     "/cloud-api/organizations/{orgId}/business-units/{buId}/permissions": {
       "get": {
+        "description": "Returns the BU permission matrix built from the version snapshot — the plan ceiling minus the BU's lock deny-list.",
         "operationId": "OrganizationBusinessUnitsController_getBuPermissions",
         "parameters": [
           {
             "name": "orgId",
             "required": true,
             "in": "path",
+            "description": "Organization ID",
             "schema": {
               "type": "string"
             }
@@ -4231,6 +4233,7 @@
             "name": "buId",
             "required": true,
             "in": "path",
+            "description": "Business unit ID",
             "schema": {
               "type": "string"
             }
@@ -4238,7 +4241,17 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Matrix retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BuMatrixResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization, deployment, or plan not found."
           }
         },
         "security": [
@@ -4246,17 +4259,20 @@
             "bearer": []
           }
         ],
+        "summary": "Get business unit permission matrix",
         "tags": [
           "Organization Business Units"
         ]
       },
       "put": {
+        "description": "Replaces the BU's lock deny-list (featureCode → { web?, mobile? }; platform null locks the whole feature) and pushes the overlay to core. Locks on out-of-plan codes are inert — the plan remains the ceiling.",
         "operationId": "OrganizationBusinessUnitsController_updateBuPermissions",
         "parameters": [
           {
             "name": "orgId",
             "required": true,
             "in": "path",
+            "description": "Organization ID",
             "schema": {
               "type": "string"
             }
@@ -4265,6 +4281,7 @@
             "name": "buId",
             "required": true,
             "in": "path",
+            "description": "Business unit ID",
             "schema": {
               "type": "string"
             }
@@ -4275,14 +4292,23 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SetBuUnlocksDto"
+                "$ref": "#/components/schemas/SetBuLocksDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": ""
+            "description": "Business unit permissions updated successfully."
+          },
+          "400": {
+            "description": "Invalid lock shape."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
           }
         },
         "security": [
@@ -4290,6 +4316,7 @@
             "bearer": []
           }
         ],
+        "summary": "Replace business unit permission locks",
         "tags": [
           "Organization Business Units"
         ]
@@ -13577,11 +13604,16 @@
             "items": {
               "$ref": "#/components/schemas/BuMatrixAppDto"
             }
+          },
+          "locks": {
+            "type": "object",
+            "description": "The stored BU deny-list — featureCode → { web?/mobile?: null (platform locked) | locked codes }"
           }
         },
         "required": [
           "plan",
-          "apps"
+          "apps",
+          "locks"
         ]
       },
       "RoleTemplateResponseDto": {
@@ -13628,25 +13660,22 @@
           "result"
         ]
       },
-      "SetBuUnlocksDto": {
+      "SetBuLocksDto": {
         "type": "object",
         "properties": {
-          "unlocks": {
+          "locks": {
             "type": "object",
-            "description": "featureCode → { web?: permCodes, mobile?: permCodes } — the BU allow-set (full replace)",
+            "description": "featureCode → { web?, mobile? } — the BU deny-list (full replace); platform null locks the whole feature, string[] locks those permission codes",
             "example": {
               "pos": {
                 "web": [
-                  "VIEW",
                   "CREATE"
                 ],
-                "mobile": [
-                  "VIEW"
-                ]
+                "mobile": null
               },
               "items": {
                 "web": [
-                  "VIEW"
+                  "DELETE"
                 ]
               }
             },
@@ -13654,7 +13683,7 @@
           }
         },
         "required": [
-          "unlocks"
+          "locks"
         ]
       },
       "CloudBusinessDto": {

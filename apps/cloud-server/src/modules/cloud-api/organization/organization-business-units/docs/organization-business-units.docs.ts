@@ -1,5 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { SetBuLocksDto } from '../dto/request/set-bu-locks.dto';
+import { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
 
 export function ApiListBusinessUnits() {
   return applyDecorators(
@@ -55,6 +57,37 @@ export function ApiUpdateBusinessUnit() {
     ApiResponse({ status: 200, description: 'Business unit updated successfully.' }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
     ApiResponse({ status: 404, description: 'Organization, deployment, or business unit not found.' }),
+    ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
+  );
+}
+
+export function ApiGetBuPermissions() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Get business unit permission matrix',
+      description:
+        "Returns the BU permission matrix built from the version snapshot — the plan ceiling minus the BU's lock deny-list.",
+    }),
+    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
+    ApiParam({ name: 'buId', type: String, description: 'Business unit ID' }),
+    ApiResponse({ status: 200, description: 'Matrix retrieved successfully.', type: BuMatrixResponseDto }),
+    ApiResponse({ status: 404, description: 'Organization, deployment, or plan not found.' }),
+  );
+}
+
+export function ApiUpdateBuPermissions() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Replace business unit permission locks',
+      description:
+        "Replaces the BU's lock deny-list (featureCode → { web?, mobile? }; platform null locks the whole feature) and pushes the overlay to core. Locks on out-of-plan codes are inert — the plan remains the ceiling.",
+    }),
+    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
+    ApiParam({ name: 'buId', type: String, description: 'Business unit ID' }),
+    ApiBody({ type: SetBuLocksDto }),
+    ApiResponse({ status: 200, description: 'Business unit permissions updated successfully.' }),
+    ApiResponse({ status: 400, description: 'Invalid lock shape.' }),
+    ApiResponse({ status: 404, description: 'Organization or deployment not found.' }),
     ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
   );
 }

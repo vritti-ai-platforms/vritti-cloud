@@ -26,6 +26,7 @@ export class OrganizationAppsService {
     }
     const matrix = buildBuMatrix(snapshot, org.businessCode, org.planCode, undefined);
     this.logger.log(`Resolved permission catalog (${matrix.apps.length} apps) for org ${orgId}`);
-    return matrix;
+    // No BU overlay here — the role picker/plan overview aren't lock editors
+    return { ...matrix, locks: {} };
   }
 }

@@ -1,6 +1,6 @@
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
-import type { BuMatrix, FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
+import type { BuFeatureLocks, BuMatrix } from '@/schemas/cloud/bu-matrix';
 import type {
   BusinessUnit,
   BusinessUnitsResponse,
@@ -100,18 +100,18 @@ export function getBuPermissionMatrix(orgId: string, buId: string): Promise<BuMa
   return axios.get<BuMatrix>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`).then((r) => r.data);
 }
 
-// Replaces the BU's unlock allow-list within the plan (code-keyed; backend clamps to the plan ceiling)
+// Replaces the BU's lock deny-list (code-keyed; platform null locks the feature there, string[] locks those codes)
 export function setBuPermissions({
   orgId,
   buId,
-  unlocks,
+  locks,
 }: {
   orgId: string;
   buId: string;
-  unlocks: FeatureUnlocks;
+  locks: BuFeatureLocks;
 }): Promise<SuccessResponse> {
   return axios
-    .put<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`, { unlocks })
+    .put<SuccessResponse>(`cloud-api/organizations/${orgId}/business-units/${buId}/permissions`, { locks })
     .then((r) => r.data);
 }
 

@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk';
-import type { BuFeatureUnlocks } from '@vritti/api-sdk/catalog-resolver';
+import type { BuFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 import type {
   BuRoleAssignment,
   CoreBusinessUnit,
@@ -125,22 +125,22 @@ export class CoreBusinessUnitService {
     return result;
   }
 
-  // Replaces a business unit's feature-unlock overlay in core (null ⇒ the BU inherits the full plan)
-  async pushBuUnlocks(
+  // Replaces a business unit's feature-lock overlay in core (null ⇒ the BU inherits the full plan)
+  async pushBuLocks(
     url: string,
     webhookSecret: string,
     orgId: string,
     buId: string,
-    featureUnlocks: BuFeatureUnlocks | null,
+    featureLocks: BuFeatureLocks | null,
   ): Promise<SuccessResponseDto> {
     const result = await this.http.put<SuccessResponseDto>(
       url,
       webhookSecret,
-      `/business-units/webhook/${buId}/unlocks`,
-      { featureUnlocks },
+      `/business-units/webhook/${buId}/locks`,
+      { featureLocks },
       { orgId },
     );
-    this.logger.log(`Pushed feature unlocks for business unit ${buId} in core`);
+    this.logger.log(`Pushed feature locks for business unit ${buId} in core`);
     return result;
   }
 

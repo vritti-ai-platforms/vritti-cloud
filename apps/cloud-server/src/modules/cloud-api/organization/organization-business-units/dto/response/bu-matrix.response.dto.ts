@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { BuFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 
 // A single (permission, platform) cell. null in the parent ⇒ the feature doesn't ship on that platform.
 export class BuMatrixCellDto {
@@ -83,4 +84,10 @@ export class BuMatrixResponseDto {
 
   @ApiProperty({ type: [BuMatrixAppDto] })
   apps: BuMatrixAppDto[];
+
+  @ApiProperty({
+    type: Object,
+    description: 'The stored BU deny-list — featureCode → { web?/mobile?: null (platform locked) | locked codes }',
+  })
+  locks: BuFeatureLocks;
 }

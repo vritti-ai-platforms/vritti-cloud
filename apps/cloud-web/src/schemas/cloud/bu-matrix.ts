@@ -1,6 +1,8 @@
 // Snapshot-driven Apps & Features matrix — shared by the BU lock editor and the Create Custom Role picker.
 // Code-based + per-platform; shows ALL apps/features/permissions, with locked items carrying their upsell plans.
 
+import type { RevokedGrants } from '@/schemas/cloud/role-grants';
+
 export type MatrixPlatform = 'web' | 'mobile';
 export const MATRIX_PLATFORMS: MatrixPlatform[] = ['web', 'mobile'];
 export const PLATFORM_LABEL: Record<MatrixPlatform, string> = { web: 'Web', mobile: 'Mobile' };
@@ -41,10 +43,33 @@ export interface BuMatrixApp {
 export interface BuMatrix {
   plan: { code: string; name: string };
   apps: BuMatrixApp[];
+  // The stored deny-list — the editor seeds its selection from this, not from the selected flags
+  locks: BuFeatureLocks;
 }
 
-// Code-keyed unlock/grant allow-list — the BU save body and the role grant share this exact shape
+// Code-keyed grant allow-list — the matrix selection value and the role grant share this exact shape
 export type FeatureUnlocks = Record<string, { web?: string[]; mobile?: string[] }>;
 
-// PUT body for the BU lock editor
-export type SetBuUnlocksBody = { unlocks: FeatureUnlocks };
+// BU deny-list overlay — platform null locks the whole feature on that platform, string[] locks those codes,
+// feature/platform absent = fully available within the plan
+export type BuFeatureLocks = RevokedGrants;
+
+// PUT body for the BU lock editor: locks = plan ceiling − effective selection
+export type SetBuLocksBody = { locks: BuFeatureLocks };
+
+// The plan ceiling as a selection — per feature/platform, the codes the plan unlocks; a platform key is present
+// only when the feature is a plan member there (some in-plan codes), mirroring the matrix's lockedOnPlatform rule
+export function planCeilingFromMatrix(apps: BuMatrixApp[]): FeatureUnlocks {
+  const out: FeatureUnlocks = {};
+  for (const app of apps) {
+    for (const feature of app.features) {
+      const entry: { web?: string[]; mobile?: string[] } = {};
+      for (const platform of MATRIX_PLATFORMS) {
+        const codes = feature.permissions.filter((p) => p[platform]?.inPlan).map((p) => p.code);
+        if (codes.length > 0) entry[platform] = codes;
+      }
+      if (entry.web || entry.mobile) out[feature.code] = entry;
+    }
+  }
+  return out;
+}

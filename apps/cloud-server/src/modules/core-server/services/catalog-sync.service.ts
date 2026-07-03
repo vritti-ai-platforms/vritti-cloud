@@ -20,7 +20,7 @@ import { CoreOrganizationService } from './core-organization.service';
 import { CoreRoleService } from './core-role.service';
 
 // Pushes the resolution INPUTS from cloud (source of truth) to core deployments: one signed catalog
-// license per deployment, one signed entitlement per org, and per-BU unlock overlays. Core resolves
+// license per deployment, one signed entitlement per org, and per-BU lock overlays. Core resolves
 // permissions at read time — no derived per-BU catalog is materialized downstream anymore.
 @Injectable()
 export class CatalogSyncService {
@@ -72,17 +72,17 @@ export class CatalogSyncService {
     await this.pushOrgEntitlement(org, deployment);
   }
 
-  // Pushes the BU's feature-unlock overlay to core (null ⇒ the BU inherits the full plan)
-  async syncBuUnlocks(orgId: string, buId: string): Promise<void> {
+  // Pushes the BU's feature-lock overlay to core (null ⇒ the BU inherits the full plan)
+  async syncBuLocks(orgId: string, buId: string): Promise<void> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    await this.coreBusinessUnitService.pushBuUnlocks(
+    await this.coreBusinessUnitService.pushBuLocks(
       deployment.url,
       deployment.webhookSecret,
       org.orgIdentifier,
       buId,
-      org.buUnlocks?.[buId] ?? null,
+      org.buLocks?.[buId] ?? null,
     );
-    this.logger.log(`Synced unlocks for BU ${buId} (org ${orgId})`);
+    this.logger.log(`Synced locks for BU ${buId} (org ${orgId})`);
   }
 
   // Seeds/tops-up role templates for the org's business (core skips templates already provisioned)

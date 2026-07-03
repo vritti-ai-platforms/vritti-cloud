@@ -4,11 +4,13 @@ import type { SuccessResponseDto } from '@vritti/api-sdk';
 import {
   ApiCreateBusinessUnit,
   ApiDeleteBusinessUnit,
+  ApiGetBuPermissions,
   ApiGetBusinessUnit,
   ApiListBusinessUnits,
+  ApiUpdateBuPermissions,
   ApiUpdateBusinessUnit,
 } from '../docs/organization-business-units.docs';
-import { SetBuUnlocksDto } from '../dto/request/set-bu-unlocks.dto';
+import { SetBuLocksDto } from '../dto/request/set-bu-locks.dto';
 import type { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
 import { OrganizationBusinessUnitsService } from '../services/organization-business-units.service';
 import type { BuRoleAssignment, CoreBusinessUnit, CoreRole } from '../types';
@@ -62,19 +64,21 @@ export class OrganizationBusinessUnitsController {
     return this.orgBuService.updateBusinessUnit(orgId, buId, data);
   }
 
-  // Returns the BU permission matrix (plan ceiling + the BU's current allow-set) for the lock editor
+  // Returns the BU permission matrix (plan ceiling minus the BU's lock deny-list) for the lock editor
   @Get(':buId/permissions')
+  @ApiGetBuPermissions()
   async getBuPermissions(@Param('orgId') orgId: string, @Param('buId') buId: string): Promise<BuMatrixResponseDto> {
     this.logger.log(`GET /organizations/${orgId}/business-units/${buId}/permissions`);
     return this.orgBuService.getBuMatrix(orgId, buId);
   }
 
-  // Replaces the BU's unlocked-permission allow-list within the plan
+  // Replaces the BU's lock deny-list within the plan
   @Put(':buId/permissions')
+  @ApiUpdateBuPermissions()
   async updateBuPermissions(
     @Param('orgId') orgId: string,
     @Param('buId') buId: string,
-    @Body() dto: SetBuUnlocksDto,
+    @Body() dto: SetBuLocksDto,
   ): Promise<SuccessResponseDto> {
     this.logger.log(`PUT /organizations/${orgId}/business-units/${buId}/permissions`);
     return this.orgBuService.updateBuLocks(orgId, buId, dto);
