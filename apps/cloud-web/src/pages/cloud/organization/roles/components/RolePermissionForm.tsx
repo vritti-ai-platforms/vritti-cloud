@@ -1,4 +1,5 @@
 import { usePermissions, useRoleTemplates, useUpdateRole } from '@hooks/cloud/roles';
+import type { FeatureUnlocks } from '@vritti/api-sdk/catalog-resolver';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -7,7 +8,6 @@ import type React from 'react';
 import { useForm } from 'react-hook-form';
 import { PermissionMatrixSkeleton } from '@/components/permission-matrix';
 import { SnapshotMatrix } from '@/components/snapshot-matrix';
-import type { FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
 import { composeGrants, diffGrants } from '@/schemas/cloud/role-grants';
 import type { Role } from '@/schemas/cloud/roles';
 
@@ -23,7 +23,6 @@ export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, r
   // The template's grants are needed both to compose the initial selection and to diff on save
   const { data: templates = [], isLoading: templatesLoading } = useRoleTemplates(orgId);
   const apps = matrix?.apps ?? [];
-  const updateMutation = useUpdateRole();
 
   const base = templates.find((t) => t.code === role.code)?.features;
   const loading = isLoading || templatesLoading;
@@ -32,7 +31,7 @@ export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, r
     return <PermissionMatrixSkeleton />;
   }
 
-  return <RolePermissionFormInner orgId={orgId} role={role} apps={apps} base={base} updateMutation={updateMutation} />;
+  return <RolePermissionFormInner orgId={orgId} role={role} apps={apps} base={base} />;
 };
 
 // Split so the form's defaultValues are computed once, after the base template has loaded
@@ -41,20 +40,25 @@ const RolePermissionFormInner: React.FC<{
   role: Role;
   apps: NonNullable<ReturnType<typeof usePermissions>['data']>['apps'];
   base: FeatureUnlocks | undefined;
-  updateMutation: ReturnType<typeof useUpdateRole>;
-}> = ({ orgId, role, apps, base, updateMutation }) => {
+}> = ({ orgId, role, apps, base }) => {
   const form = useForm<{ features: FeatureUnlocks }>({
     defaultValues: { features: composeGrants(base ?? {}, role.features, role.revoked) },
   });
-
-  // Only the deltas vs the template persist; a missing template degrades to saving the selection as-is
-  const onSubmit = (data: { features: FeatureUnlocks }) => {
-    const payload = base ? diffGrants(base, data.features) : { features: data.features };
-    updateMutation.mutate({ orgId, roleId: role.id, data: payload }, { onSuccess: () => form.reset(data) });
-  };
+  // Re-baseline the form to the saved selection so dirty tracking restarts from the persisted state
+  const updateMutation = useUpdateRole({ onSuccess: () => form.reset(form.getValues()) });
 
   return (
-    <Form form={form} onSubmit={onSubmit}>
+    <Form
+      form={form}
+      mutation={updateMutation}
+      resetOnSuccess={false}
+      // Only the deltas vs the template persist; a missing template degrades to saving the selection as-is
+      transformSubmit={(data: { features: FeatureUnlocks }) => ({
+        orgId,
+        roleId: role.id,
+        data: base ? diffGrants(base, data.features) : { features: data.features },
+      })}
+    >
       <div className="flex min-h-120 flex-col gap-4">
         <div className="flex items-start justify-between gap-4">
           <p className="text-sm text-muted-foreground">
@@ -62,13 +66,7 @@ const RolePermissionFormInner: React.FC<{
             Mobile are tracked separately. Locked items can still be granted — they activate when your plan unlocks
             them.
           </p>
-          <Button
-            type="submit"
-            size="sm"
-            disabled={!form.formState.isDirty}
-            isLoading={updateMutation.isPending}
-            loadingText="Saving..."
-          >
+          <Button type="submit" size="sm" disabled={!form.formState.isDirty} loadingText="Saving...">
             Save Permissions
           </Button>
         </div>

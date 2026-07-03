@@ -6,10 +6,4 @@ export type {
   LockReason,
   RoleItem,
 } from '@vritti/api-sdk/catalog-resolver';
-export {
-  buildBuCatalog,
-  buildBuRoles,
-  isBuLockedOnPlatform,
-  isPlanMember,
-  unlockedCodes,
-} from '@vritti/api-sdk/catalog-resolver';
+export { buildBuCatalog, buildBuRoles, isBuLockedOnPlatform, isPlanMember } from '@vritti/api-sdk/catalog-resolver';

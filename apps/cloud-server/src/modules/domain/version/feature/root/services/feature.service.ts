@@ -295,13 +295,14 @@ export class FeatureService {
           existing.materialSymbol !== row.data.materialSymbol ||
           existing.description !== incomingDesc
         ) {
-          await this.featureRepository.update(existing.id, {
+          const changes: UpdateFeatureDto = {
             name: row.data.name,
             lucideIcon: row.data.lucideIcon,
             sfSymbol: row.data.sfSymbol,
             materialSymbol: row.data.materialSymbol,
             description: incomingDesc ?? undefined,
-          } as UpdateFeatureDto);
+          };
+          await this.featureRepository.update(existing.id, changes);
           updated++;
         } else {
           skipped++;

@@ -1,9 +1,13 @@
-import type {
-  SnapshotBusiness,
-  SnapshotFeature,
-  SnapshotMicrofrontends,
-  SnapshotPermission,
-  VersionSnapshot,
+import {
+  type FeatureUnlocks,
+  type PlatformBucket,
+  type PlatformCodes,
+  SNAPSHOT_SCHEMA_VERSION,
+  type SnapshotBusiness,
+  type SnapshotFeature,
+  type SnapshotMicrofrontends,
+  type SnapshotPermission,
+  type VersionSnapshot,
 } from '@vritti/api-sdk/catalog-resolver';
 import _ from '@vritti/api-sdk/lodash';
 import type {
@@ -61,17 +65,10 @@ function buildIndex(data: SnapshotData) {
   const businessCodesByPermissionId = _.mapValues(_.groupBy(data.permissionBusinesses, 'featurePermissionId'), (rows) =>
     rows.map((r) => businessCodeById[r.businessId]).filter((c): c is string => Boolean(c)),
   );
-  const appById = _.keyBy(data.apps, 'id');
-  // Feature → its app code (one app per feature within a business) — stamped onto each role grant
-  const appCodeByFeatureId = _.mapValues(
-    _.keyBy(data.businessAppFeatures, 'featureId'),
-    (af) => appById[af.appId]?.code,
-  );
   return {
     webMfById: _.keyBy(data.webMicrofrontends, 'id'),
     mobileMfById: _.keyBy(data.mobileMicrofrontends, 'id'),
     featureById: _.keyBy(data.features, 'id'),
-    appCodeByFeatureId,
     permissionById: _.keyBy(data.permissions, 'id'),
     businessCodeById,
     businessNameByCode: _.mapValues(_.keyBy(data.businesses, 'code'), (b) => b.name),
@@ -145,69 +142,57 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
   return result;
 }
 
-// A role's features: { featureCode: { app, web?: [permCode…], mobile?: [permCode…] } }. Seeded from memberships
-// (so a member with zero actions still appears = the View/route gate), then filled with action grants. `app` = the
-// feature's owning app code, so core can derive a role's apps without a separate list.
-function buildRoleFeatures(
-  roleId: string,
-  index: SnapshotIndex,
-): Record<string, { app: string; web?: string[]; mobile?: string[] }> {
-  const featurePerms: Record<string, { app: string; web?: string[]; mobile?: string[] }> = {};
-  const bucketFor = (featureId: string, featureCode: string) => {
-    let bucket = featurePerms[featureCode];
-    if (!bucket) {
-      bucket = { app: index.appCodeByFeatureId[featureId] ?? '' };
-      featurePerms[featureCode] = bucket;
-    }
-    return bucket;
-  };
+// Returns the feature's per-platform bucket in the unlocks map, creating it on first access
+function bucketFor(unlocks: FeatureUnlocks, featureCode: string): PlatformCodes {
+  let bucket = unlocks[featureCode];
+  if (!bucket) {
+    bucket = {};
+    unlocks[featureCode] = bucket;
+  }
+  return bucket;
+}
+
+// Ensures the platform key exists on the bucket (membership marker) and appends the code once if given
+function addPlatformCode(bucket: PlatformCodes, key: PlatformBucket, code?: string): void {
+  const list = bucket[key] ?? [];
+  bucket[key] = list;
+  if (code && !list.includes(code)) list.push(code);
+}
+
+// A role's features: { featureCode: { web?: [permCode…], mobile?: [permCode…] } }. Seeded from memberships
+// (so a member with zero actions still appears = the View/route gate), then filled with action grants.
+function buildRoleFeatures(roleId: string, index: SnapshotIndex): FeatureUnlocks {
+  const featurePerms: FeatureUnlocks = {};
   for (const m of index.roleFeaturesByRoleId[roleId] ?? []) {
     const featureCode = index.featureById[m.featureId]?.code;
     if (!featureCode) continue;
-    const key = m.platform === 'WEB' ? 'web' : 'mobile';
-    const bucket = bucketFor(m.featureId, featureCode);
-    if (!bucket[key]) bucket[key] = [];
+    addPlatformCode(bucketFor(featurePerms, featureCode), m.platform === 'WEB' ? 'web' : 'mobile');
   }
   for (const rp of index.rolePermsByRoleId[roleId] ?? []) {
     const membership = index.roleFeatureById[rp.roleTemplateFeatureId];
     const perm = index.permissionById[rp.featurePermissionId];
     const featureCode = membership && index.featureById[membership.featureId]?.code;
     if (!featureCode || !perm || !membership) continue;
-    const key = membership.platform === 'WEB' ? 'web' : 'mobile';
-    const bucket = bucketFor(membership.featureId, featureCode);
-    const list = bucket[key] ?? [];
-    bucket[key] = list;
-    list.push(perm.code);
+    addPlatformCode(bucketFor(featurePerms, featureCode), membership.platform === 'WEB' ? 'web' : 'mobile', perm.code);
   }
   return featurePerms;
 }
 
 // A plan's unlocked features: { featureCode: { web?: [permCode…], mobile?: [permCode…] } }. Seeded from
 // memberships (a member with zero unlocked actions still appears = included/view-only), then filled with unlocks.
-function buildPlanUnlockedPermissions(
-  planId: string,
-  index: SnapshotIndex,
-): Record<string, { web?: string[]; mobile?: string[] }> {
-  const featurePerms: Record<string, { web?: string[]; mobile?: string[] }> = {};
+function buildPlanUnlockedPermissions(planId: string, index: SnapshotIndex): FeatureUnlocks {
+  const featurePerms: FeatureUnlocks = {};
   for (const m of index.planFeaturesByPlanId[planId] ?? []) {
     const featureCode = index.featureById[m.featureId]?.code;
     if (!featureCode) continue;
-    const key = m.platform === 'WEB' ? 'web' : 'mobile';
-    const bucket = featurePerms[featureCode] ?? {};
-    featurePerms[featureCode] = bucket;
-    if (!bucket[key]) bucket[key] = [];
+    addPlatformCode(bucketFor(featurePerms, featureCode), m.platform === 'WEB' ? 'web' : 'mobile');
   }
   for (const pfp of index.planPermsByPlanId[planId] ?? []) {
     const membership = index.planFeatureById[pfp.planFeatureId];
     const perm = index.permissionById[pfp.featurePermissionId];
     const featureCode = membership && index.featureById[membership.featureId]?.code;
     if (!featureCode || !perm) continue;
-    const key = membership.platform === 'WEB' ? 'web' : 'mobile';
-    const bucket = featurePerms[featureCode] ?? {};
-    featurePerms[featureCode] = bucket;
-    const list = bucket[key] ?? [];
-    bucket[key] = list;
-    list.push(perm.code);
+    addPlatformCode(bucketFor(featurePerms, featureCode), membership.platform === 'WEB' ? 'web' : 'mobile', perm.code);
   }
   return featurePerms;
 }
@@ -217,7 +202,7 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
   const result: Record<string, SnapshotBusiness> = {};
   const ensure = (code: string): SnapshotBusiness => {
     if (!result[code]) {
-      result[code] = { name: index.businessNameByCode[code], apps: [], roleTemplates: [], plans: {} };
+      result[code] = { name: index.businessNameByCode[code], apps: [], roleTemplates: {}, plans: {} };
     }
     return result[code];
   };
@@ -239,11 +224,11 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
   for (const r of data.roleTemplates) {
     const code = index.businessCodeById[r.businessId];
     if (!code) continue;
-    ensure(code).roleTemplates.push({
+    ensure(code).roleTemplates[r.code] = {
       name: r.name,
       code: r.code,
       features: buildRoleFeatures(r.id, index),
-    });
+    };
   }
 
   for (const p of data.plans) {
@@ -265,6 +250,7 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
 export function buildVersionSnapshot(data: SnapshotData): VersionSnapshot {
   const index = buildIndex(data);
   return {
+    schemaVersion: SNAPSHOT_SCHEMA_VERSION,
     features: buildFeatures(data, index),
     businesses: buildBusinesses(data, index),
   };

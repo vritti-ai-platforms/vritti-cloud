@@ -1,4 +1,5 @@
 import { usePermissions } from '@hooks/cloud/roles/usePermissions';
+import type { BuMatrixCell, BuMatrixFeature, PlatformBucket } from '@vritti/api-sdk/catalog-resolver';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
@@ -7,13 +8,7 @@ import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MatrixCard, type MatrixColumn, MatrixRow, PermissionMatrixSkeleton } from '@/components/permission-matrix';
-import {
-  type BuMatrixCell,
-  type BuMatrixFeature,
-  MATRIX_PLATFORMS,
-  type MatrixPlatform,
-  PLATFORM_LABEL,
-} from '@/schemas/cloud/bu-matrix';
+import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/bu-matrix';
 
 // Read-only view of what the org's plan includes, down to each permission — locked items show their upgrade path.
 export const PlanOverviewPage = () => {
@@ -90,8 +85,8 @@ function StatusCell({ cell }: { cell: BuMatrixCell | null }) {
 }
 
 function FeatureRows({ feature, columns }: { feature: BuMatrixFeature; columns: MatrixColumn[] }) {
-  const onPlatform = (key: string) => feature.platforms.includes(key as MatrixPlatform);
-  const includedOn = (key: string) => feature.permissions.some((p) => p[key as MatrixPlatform]?.inPlan);
+  const onPlatform = (key: string) => feature.platforms.includes(key as PlatformBucket);
+  const includedOn = (key: string) => feature.permissions.some((p) => p[key as PlatformBucket]?.inPlan);
 
   return (
     <div className={feature.inPlan ? undefined : 'opacity-70'}>
@@ -126,7 +121,7 @@ function FeatureRows({ feature, columns }: { feature: BuMatrixFeature; columns: 
           label={perm.label}
           labelClassName="text-sm text-muted-foreground"
           columns={columns}
-          renderCell={(key) => <StatusCell cell={perm[key as MatrixPlatform]} />}
+          renderCell={(key) => <StatusCell cell={perm[key as PlatformBucket]} />}
         />
       ))}
     </div>

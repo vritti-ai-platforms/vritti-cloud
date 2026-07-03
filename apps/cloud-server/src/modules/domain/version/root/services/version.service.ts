@@ -98,6 +98,7 @@ export class VersionService {
       throw new NotFoundException('Version not found.');
     }
     let isSnapshotStale = false;
+    // Staleness check rebuilds the full snapshot on every read — costly but acceptable for this single admin view
     if (version.snapshot) {
       const currentSnapshot = await this.buildSnapshot(id);
       isSnapshotStale = !_.isEqual(version.snapshot, currentSnapshot);

@@ -24,9 +24,9 @@ export class OrganizationAppsService {
     if (!snapshot) {
       throw new NotFoundException('No snapshot available for this deployment.');
     }
+    // No BU overlay here — the role picker/plan overview aren't lock editors, so locks resolve to {}
     const matrix = buildBuMatrix(snapshot, org.businessCode, org.planCode, undefined);
     this.logger.log(`Resolved permission catalog (${matrix.apps.length} apps) for org ${orgId}`);
-    // No BU overlay here — the role picker/plan overview aren't lock editors
-    return { ...matrix, locks: {} };
+    return matrix;
   }
 }

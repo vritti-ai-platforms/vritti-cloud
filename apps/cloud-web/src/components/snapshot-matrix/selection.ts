@@ -1,10 +1,5 @@
-import {
-  type BuFeatureLocks,
-  type BuMatrixApp,
-  type FeatureUnlocks,
-  MATRIX_PLATFORMS,
-  type MatrixPlatform,
-} from '@/schemas/cloud/bu-matrix';
+import type { BuFeatureLocks, BuMatrixApp, FeatureUnlocks, PlatformBucket } from '@vritti/api-sdk/catalog-resolver';
+import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
 
 // The matrix value is the EFFECTIVE selection: a code-keyed, per-platform allow-list. A platform key present (even an
 // empty array) means the feature switch is on for that platform; the array holds the enabled permission codes.
@@ -39,7 +34,7 @@ function cloneLocks(locks: BuFeatureLocks): BuFeatureLocks {
 }
 
 // The whole feature is locked on this platform (the lock switch is on)
-export function isPlatformLockedIn(locks: BuFeatureLocks, code: string, platform: MatrixPlatform): boolean {
+export function isPlatformLockedIn(locks: BuFeatureLocks, code: string, platform: PlatformBucket): boolean {
   return locks[code]?.[platform] === null;
 }
 
@@ -47,7 +42,7 @@ export function isPlatformLockedIn(locks: BuFeatureLocks, code: string, platform
 export function isCodeLockedIn(
   locks: BuFeatureLocks,
   code: string,
-  platform: MatrixPlatform,
+  platform: PlatformBucket,
   permCode: string,
 ): boolean {
   const entry = locks[code]?.[platform];
@@ -55,7 +50,7 @@ export function isCodeLockedIn(
 }
 
 // The feature lock switch — on locks the whole platform (null), off clears the platform's locks entirely
-export function togglePlatformLock(locks: BuFeatureLocks, code: string, platform: MatrixPlatform): BuFeatureLocks {
+export function togglePlatformLock(locks: BuFeatureLocks, code: string, platform: PlatformBucket): BuFeatureLocks {
   const next = cloneLocks(locks);
   const entry = next[code] ?? {};
   if (entry[platform] === null) delete entry[platform];
@@ -69,7 +64,7 @@ export function togglePlatformLock(locks: BuFeatureLocks, code: string, platform
 export function toggleCodeLock(
   locks: BuFeatureLocks,
   code: string,
-  platform: MatrixPlatform,
+  platform: PlatformBucket,
   permCode: string,
 ): BuFeatureLocks {
   const next = cloneLocks(locks);
@@ -109,14 +104,14 @@ export function countLocks(apps: BuMatrixApp[], locks: BuFeatureLocks): { featur
 }
 
 // A feature is a "member" on a platform (its switch is on) when the platform key is present (even if empty)
-export function isMemberIn(selection: FeatureUnlocks, code: string, platform: MatrixPlatform): boolean {
+export function isMemberIn(selection: FeatureUnlocks, code: string, platform: PlatformBucket): boolean {
   return selection[code]?.[platform] !== undefined;
 }
 
 export function isCheckedIn(
   selection: FeatureUnlocks,
   code: string,
-  platform: MatrixPlatform,
+  platform: PlatformBucket,
   permCode: string,
 ): boolean {
   return selection[code]?.[platform]?.includes(permCode) ?? false;
@@ -126,7 +121,7 @@ export function isCheckedIn(
 export function toggleMemberIn(
   selection: FeatureUnlocks,
   code: string,
-  platform: MatrixPlatform,
+  platform: PlatformBucket,
   inPlanCodes: string[],
 ): FeatureUnlocks {
   const next = clone(selection);
@@ -142,7 +137,7 @@ export function toggleMemberIn(
 export function togglePermIn(
   selection: FeatureUnlocks,
   code: string,
-  platform: MatrixPlatform,
+  platform: PlatformBucket,
   permCode: string,
 ): FeatureUnlocks {
   const next = clone(selection);

@@ -60,43 +60,39 @@ export class MicrofrontendService {
     return this.microfrontendRepository.findMicrofrontendSelectOptions(query);
   }
 
-  // Upserts a microfrontend (PUT semantics) keyed by (versionId, code) into the platform-appropriate table
-  async upsert(
-    platform: MicrofrontendPlatformParam,
-    versionId: string,
-    dto: WebMicrofrontendBodyDto | MobileMicrofrontendBodyDto,
-  ): Promise<CreateResponseDto<MicrofrontendDto>> {
-    if (platform === 'web') {
-      const body = dto as WebMicrofrontendBodyDto;
-      const row = await this.microfrontendRepository.upsertWeb({
-        versionId,
-        code: body.code,
-        name: body.name,
-        remoteEntry: body.remoteEntry,
-      });
-      this.logger.log(`Upserted web microfrontend: ${row.code} (${row.id})`);
-      return {
-        success: true,
-        message: `Microfrontend "${row.name}" saved successfully.`,
-        data: MicrofrontendDto.from({
-          id: row.id,
-          versionId: row.versionId,
-          code: row.code,
-          name: row.name,
-          platform: 'WEB',
-          remoteEntry: row.remoteEntry,
-          remoteEntryAndroid: null,
-          remoteEntryIos: null,
-        }),
-      };
-    }
-    const body = dto as MobileMicrofrontendBodyDto;
+  // Upserts a web microfrontend (PUT semantics) keyed by (versionId, code)
+  async upsertWeb(versionId: string, dto: WebMicrofrontendBodyDto): Promise<CreateResponseDto<MicrofrontendDto>> {
+    const row = await this.microfrontendRepository.upsertWeb({
+      versionId,
+      code: dto.code,
+      name: dto.name,
+      remoteEntry: dto.remoteEntry,
+    });
+    this.logger.log(`Upserted web microfrontend: ${row.code} (${row.id})`);
+    return {
+      success: true,
+      message: `Microfrontend "${row.name}" saved successfully.`,
+      data: MicrofrontendDto.from({
+        id: row.id,
+        versionId: row.versionId,
+        code: row.code,
+        name: row.name,
+        platform: 'WEB',
+        remoteEntry: row.remoteEntry,
+        remoteEntryAndroid: null,
+        remoteEntryIos: null,
+      }),
+    };
+  }
+
+  // Upserts a mobile microfrontend (PUT semantics) keyed by (versionId, code)
+  async upsertMobile(versionId: string, dto: MobileMicrofrontendBodyDto): Promise<CreateResponseDto<MicrofrontendDto>> {
     const row = await this.microfrontendRepository.upsertMobile({
       versionId,
-      code: body.code,
-      name: body.name,
-      remoteEntryAndroid: body.remoteEntryAndroid,
-      remoteEntryIos: body.remoteEntryIos,
+      code: dto.code,
+      name: dto.name,
+      remoteEntryAndroid: dto.remoteEntryAndroid,
+      remoteEntryIos: dto.remoteEntryIos,
     });
     this.logger.log(`Upserted mobile microfrontend: ${row.code} (${row.id})`);
     return {

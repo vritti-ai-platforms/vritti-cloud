@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { type CreateResponseDto, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import type { VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
@@ -28,12 +29,8 @@ export class OrganizationRolesService {
       throw new NotFoundException('No snapshot available for this deployment.');
     }
 
-    const snapshot = appVersion.snapshot as Record<string, unknown>;
-    const businesses = (snapshot.businesses ?? {}) as Record<
-      string,
-      { roleTemplates: RoleTemplateListResponseDto['result'] }
-    >;
-    const roleTemplates = businesses[org.businessCode]?.roleTemplates ?? [];
+    const snapshot = appVersion.snapshot as VersionSnapshot;
+    const roleTemplates = Object.values(snapshot.businesses?.[org.businessCode]?.roleTemplates ?? {});
 
     this.logger.log(`Fetched ${roleTemplates.length} role templates for org ${orgId}`);
     return { result: roleTemplates };

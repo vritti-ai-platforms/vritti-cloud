@@ -1,8 +1,10 @@
 import { useUpdatePlan } from '@hooks/admin/versions/businesses/plans';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
+import { Form } from '@vritti/quantum-ui/Form';
 import { RichTextEditor } from '@vritti/quantum-ui/RichTextEditor';
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { Plan } from '@/schemas/admin/plans';
 
@@ -16,96 +18,86 @@ function safeParse(value: string | null | undefined) {
   }
 }
 
-// Inline rich-text editor for plan content
+// Form-field adapter for RichTextEditor — the field value is the serialized JSON string. Lexical fires an
+// initial change on mount, which is skipped so opening the editor doesn't dirty the form.
+const PlanContentField = ({
+  value,
+  onChange,
+  editing,
+}: {
+  name?: string;
+  value?: string;
+  onChange?: (next: string) => void;
+  editing: boolean;
+}) => {
+  const initialized = useRef(false);
+  return (
+    <RichTextEditor
+      editorSerializedState={safeParse(value)}
+      onSerializedChange={(state) => {
+        if (!initialized.current) {
+          initialized.current = true;
+          return;
+        }
+        onChange?.(JSON.stringify(state));
+      }}
+      contentOnly={!editing}
+      placeholder="Add plan features, inclusions, and details..."
+      className="border-0 shadow-none bg-muted/30 min-h-100"
+    />
+  );
+};
+
+// Inline rich-text editor for plan content — the quantum Form owns dirty tracking, submit, and reset
 export const ContentTab = ({ plan }: { plan: Plan }) => {
   const { versionId, businessId } = useVersionContext();
   const [isEditing, setIsEditing] = useState(false);
-  const [mounted, setMounted] = useState(false);
-  const contentRef = useRef<string | undefined>(plan.content ?? undefined);
-  const contentInitialized = useRef(false);
-  const [savedContent, setSavedContent] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const updateMutation = useUpdatePlan(versionId, businessId);
-
-  // Use savedContent (optimistic) until query cache catches up
-  const displayContent = savedContent ?? plan.content;
-
-  // Clear optimistic override once query cache syncs
-  useEffect(() => {
-    if (savedContent && plan.content === savedContent) {
-      setSavedContent(undefined);
-    }
-  }, [plan.content, savedContent]);
-
-  // Save the current editor state
-  const handleSave = () => {
-    updateMutation.mutate(
-      { id: plan.id, data: { content: contentRef.current } },
-      {
-        onSuccess: () => {
-          setSavedContent(contentRef.current);
-          setIsEditing(false);
-        },
-      },
-    );
-  };
-
-  // Discard changes and return to view mode
-  const handleCancel = () => {
-    contentRef.current = displayContent ?? undefined;
-    contentInitialized.current = false;
-    setIsEditing(false);
-  };
+  const form = useForm<{ content: string }>({ defaultValues: { content: plan.content ?? '' } });
+  // Re-baseline the form to what was just saved, then drop back to view mode
+  const updateMutation = useUpdatePlan(versionId, businessId, {
+    onSuccess: () => {
+      form.reset(form.getValues());
+      setIsEditing(false);
+    },
+  });
 
   return (
     <div className="pt-4">
       <Card>
-        <CardHeader className="flex flex-row items-start justify-between gap-4">
-          <div>
-            <CardTitle>Plan Content</CardTitle>
-            <CardDescription>Shown to users when selecting a plan.</CardDescription>
-          </div>
-          {isEditing ? (
-            <div className="flex gap-2 shrink-0">
-              <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateMutation.isPending}>
-                Cancel
-              </Button>
-              <Button size="sm" onClick={handleSave} loadingText="Saving..." isLoading={updateMutation.isPending}>
-                Save
-              </Button>
+        <Form
+          form={form}
+          mutation={updateMutation}
+          resetOnSuccess={false}
+          onCancel={() => setIsEditing(false)}
+          transformSubmit={(data: { content: string }) => ({ id: plan.id, data: { content: data.content } })}
+        >
+          <CardHeader className="flex flex-row items-start justify-between gap-4">
+            <div>
+              <CardTitle>Plan Content</CardTitle>
+              <CardDescription>Shown to users when selecting a plan.</CardDescription>
             </div>
-          ) : (
-            <Button variant="outline" size="sm" className="shrink-0" onClick={() => setIsEditing(true)}>
-              Edit
-            </Button>
-          )}
-        </CardHeader>
-        <CardContent>
-          {mounted ? (
-            <RichTextEditor
-              key={isEditing ? 'edit' : 'view'}
-              editorSerializedState={safeParse(displayContent)}
-              onSerializedChange={(state) => {
-                if (!contentInitialized.current) {
-                  contentInitialized.current = true;
-                  return;
-                }
-                contentRef.current = JSON.stringify(state);
-              }}
-              contentOnly={!isEditing}
-              placeholder="Add plan features, inclusions, and details..."
-              className="border-0 shadow-none bg-muted/30 min-h-[400px]"
-            />
-          ) : (
-            !displayContent && (
-              <p className="text-sm text-muted-foreground">No content yet. Click Edit to add plan features.</p>
-            )
-          )}
-        </CardContent>
+            {isEditing ? (
+              <div className="flex gap-2 shrink-0">
+                {/* data-cancel — the Form resets the field to the last saved content before onCancel fires */}
+                <Button type="button" variant="outline" size="sm" data-cancel>
+                  Cancel
+                </Button>
+                <Button type="submit" size="sm" disabled={!form.formState.isDirty} loadingText="Saving...">
+                  Save
+                </Button>
+              </div>
+            ) : (
+              <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={() => setIsEditing(true)}>
+                Edit
+              </Button>
+            )}
+          </CardHeader>
+          <CardContent>
+            {/* Keyed by mode so the (uncontrolled) editor re-reads the field value on enter/exit */}
+            <PlanContentField key={isEditing ? 'edit' : 'view'} name="content" editing={isEditing} />
+          </CardContent>
+        </Form>
       </Card>
     </div>
   );

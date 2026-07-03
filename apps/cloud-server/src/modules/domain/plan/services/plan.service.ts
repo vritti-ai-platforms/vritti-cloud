@@ -11,7 +11,7 @@ import {
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
-import { and, type Column, eq, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import { planPrices, plans } from '@/db/schema';
 import { PlanDto } from '@/modules/admin-api/version/business/plan/root/dto/entity/plan.dto';
 import type { CreatePlanDto } from '@/modules/admin-api/version/business/plan/root/dto/request/create-plan.dto';
@@ -28,8 +28,25 @@ export class PlanService {
     name: { column: plans.name, type: 'string' },
     code: { column: plans.code, type: 'string' },
     businessId: { column: plans.businessId, type: 'string' },
+    // Aggregates are invalid in WHERE — filter via a correlated price-count subquery honoring the operator
     priceCount: {
-      column: sql<number>`count(${planPrices.id})` as unknown as Column,
+      expression: (value, operator) => {
+        const priceCount = sql`(SELECT count(*) FROM ${planPrices} WHERE ${planPrices.planId} = ${plans.id})`;
+        switch (operator) {
+          case 'notEquals':
+            return sql`${priceCount} <> ${Number(value)}`;
+          case 'gt':
+            return sql`${priceCount} > ${Number(value)}`;
+          case 'gte':
+            return sql`${priceCount} >= ${Number(value)}`;
+          case 'lt':
+            return sql`${priceCount} < ${Number(value)}`;
+          case 'lte':
+            return sql`${priceCount} <= ${Number(value)}`;
+          default:
+            return sql`${priceCount} = ${Number(value)}`;
+        }
+      },
       type: 'number',
     },
   };

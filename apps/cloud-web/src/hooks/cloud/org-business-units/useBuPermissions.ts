@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { type UseMutationOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import type { BuFeatureLocks, BuMatrix } from '@vritti/api-sdk/catalog-resolver';
 import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import type { AxiosError } from 'axios';
-import type { BuFeatureLocks, BuMatrix } from '@/schemas/cloud/bu-matrix';
 import { getBuPermissionMatrix, setBuPermissions } from '@/services/cloud/org-business-units.service';
 import { BU_COMPATIBLE_ROLES_KEY } from './useCompatibleRoles';
 import { ORG_BU_DETAIL_QUERY_KEY } from './useOrgBusinessUnit';
@@ -20,16 +20,20 @@ export function useBuPermissionMatrix(orgId: string, buId: string) {
   });
 }
 
+type UseSetBuPermissionsOptions = Omit<UseMutationOptions<SuccessResponse, AxiosError, BuLocksPayload>, 'mutationFn'>;
+
 // Saves the BU's lock deny-list (ceiling − selection) and refreshes the matrix
-export function useSetBuPermissions(orgId: string, buId: string) {
+export function useSetBuPermissions(orgId: string, buId: string, options?: UseSetBuPermissionsOptions) {
   const queryClient = useQueryClient();
   return useMutation<SuccessResponse, AxiosError, BuLocksPayload>({
+    ...options,
     mutationFn: (payload) => setBuPermissions({ orgId, buId, ...payload }),
     // Saving re-derives the BU's apps, so refresh the matrix, the BU detail (app count) and compatible roles
-    onSuccess: () => {
+    onSuccess: (result, vars, ...args) => {
       queryClient.invalidateQueries({ queryKey: BU_MATRIX_QUERY_KEY(orgId, buId) });
       queryClient.invalidateQueries({ queryKey: ORG_BU_DETAIL_QUERY_KEY(orgId, buId) });
       queryClient.invalidateQueries({ queryKey: BU_COMPATIBLE_ROLES_KEY(orgId, buId) });
+      options?.onSuccess?.(result, vars, ...args);
     },
   });
 }

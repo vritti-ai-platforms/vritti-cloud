@@ -23,12 +23,11 @@ import {
   type WebMicrofrontendLink,
 } from '@/schemas/admin/features';
 import type { MicrofrontendPlatformParam } from '@/schemas/admin/microfrontends';
+import type { Platform } from '@/schemas/admin/role-templates';
 
 interface MicrofrontendTabProps {
   featureId: string;
 }
-
-type Platform = 'WEB' | 'MOBILE';
 
 export const MicrofrontendTab = ({ featureId }: MicrofrontendTabProps) => {
   const { versionId } = useVersionContext();

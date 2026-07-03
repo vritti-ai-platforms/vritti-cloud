@@ -1,4 +1,5 @@
 import { useBuPermissionMatrix, useSetBuPermissions } from '@hooks/cloud/org-business-units';
+import type { BuFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Form } from '@vritti/quantum-ui/Form';
@@ -6,8 +7,7 @@ import { Layers, LockKeyhole } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { PermissionMatrixSkeleton } from '@/components/permission-matrix';
-import { countLocks, SnapshotMatrix } from '@/components/snapshot-matrix';
-import type { BuFeatureLocks } from '@/schemas/cloud/bu-matrix';
+import { BuLocksMatrix, countLocks } from '@/components/snapshot-matrix';
 
 interface AppsAndFeaturesTabProps {
   orgId: string;
@@ -20,9 +20,10 @@ interface AppsAndFeaturesTabProps {
 export const AppsAndFeaturesTab: React.FC<AppsAndFeaturesTabProps> = ({ orgId, buId }) => {
   const { data, isLoading } = useBuPermissionMatrix(orgId, buId);
   const apps = data?.apps ?? [];
-  const saveMutation = useSetBuPermissions(orgId, buId);
 
   const form = useForm<{ locks: BuFeatureLocks }>({ defaultValues: { locks: {} } });
+  // Re-baseline the form to what was just saved so dirty tracking restarts from the persisted state
+  const saveMutation = useSetBuPermissions(orgId, buId, { onSuccess: () => form.reset(form.getValues()) });
   const seededRef = useRef(false);
 
   // Seed the form once from the stored deny-list — the editor shows exactly what was saved
@@ -33,16 +34,6 @@ export const AppsAndFeaturesTab: React.FC<AppsAndFeaturesTabProps> = ({ orgId, b
   }, [data, form]);
 
   const counts = countLocks(apps, form.watch('locks'));
-
-  // await so the Form's isSubmitting (→ submit button loading) tracks the mutation; the hook surfaces its own errors
-  const save = async (values: { locks: BuFeatureLocks }) => {
-    try {
-      await saveMutation.mutateAsync({ locks: values.locks });
-      form.reset(values);
-    } catch {
-      // mutation error is reported by the hook / global handler
-    }
-  };
 
   if (isLoading) return <PermissionMatrixSkeleton />;
 
@@ -61,7 +52,7 @@ export const AppsAndFeaturesTab: React.FC<AppsAndFeaturesTabProps> = ({ orgId, b
   }
 
   return (
-    <Form form={form} onSubmit={save} className="flex min-h-100 flex-col gap-4">
+    <Form form={form} mutation={saveMutation} resetOnSuccess={false} className="flex min-h-100 flex-col gap-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">
@@ -75,7 +66,7 @@ export const AppsAndFeaturesTab: React.FC<AppsAndFeaturesTabProps> = ({ orgId, b
       </div>
 
       {/* App cards → lock matrix (auto-registered as the `locks` form field) */}
-      <SnapshotMatrix name="locks" apps={apps} mode="locks" />
+      <BuLocksMatrix name="locks" apps={apps} />
 
       {/* Footer */}
       <div className="mt-auto flex items-center gap-1.5 text-xs text-muted-foreground">

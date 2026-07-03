@@ -6,9 +6,7 @@ import type React from 'react';
 import { useState } from 'react';
 import { MatrixCard, type MatrixColumn, MatrixRow } from '@/components/permission-matrix';
 import type { Platform, RoleTemplateApp, RoleTemplateFeature, RoleTemplateGrant } from '@/schemas/admin/role-templates';
-
-const PLATFORM_ORDER: Platform[] = ['WEB', 'MOBILE'];
-const PLATFORM_LABEL: Record<Platform, string> = { WEB: 'Web', MOBILE: 'Mobile' };
+import { PLATFORM_LABEL, PLATFORM_ORDER } from '@/services/admin/versions/businesses/plans/permissions.service';
 
 // ── pure operations on the grants array (the form field value) ──
 function indexOf(grants: RoleTemplateGrant[], featureId: string, platform: Platform): number {

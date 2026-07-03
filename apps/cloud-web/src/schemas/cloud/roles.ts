@@ -1,6 +1,5 @@
+import type { FeatureUnlocks, RevokedGrants } from '@vritti/api-sdk/catalog-resolver';
 import { z } from '@vritti/quantum-ui/zod';
-import type { FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
-import type { RevokedGrants } from '@/schemas/cloud/role-grants';
 
 export interface Role {
   id: string;

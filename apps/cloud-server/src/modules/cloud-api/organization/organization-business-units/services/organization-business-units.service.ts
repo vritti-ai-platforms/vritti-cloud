@@ -4,6 +4,7 @@ import { OrganizationRepository } from '@domain/cloud-organization/repositories/
 import type { SnapshotPlan, VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, ForbiddenException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import { PLATFORMS } from '@vritti/api-sdk/catalog-resolver';
 import type { Deployment, Organization } from '@/db/schema';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
@@ -13,9 +14,6 @@ import { CoreRoleService } from '@/modules/core-server/services/core-role.servic
 import type { SetBuLocksDto } from '../dto/request/set-bu-locks.dto';
 import type { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
 import type { BuRoleAssignment, CoreBusinessUnit, CoreRole } from '../types';
-
-// UI platform keys (snapshot microfrontend keys), used when validating the BU lock deny-list shape
-const PLATFORMS = ['web', 'mobile'] as const;
 
 @Injectable()
 export class OrganizationBusinessUnitsService {
@@ -156,8 +154,7 @@ export class OrganizationBusinessUnitsService {
   async getBuMatrix(orgId: string, buId: string): Promise<BuMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await this.loadPlanContext(org, deployment);
-    const matrix = buildBuMatrix(snapshot, org.businessCode, org.planCode, org.buLocks?.[buId]);
-    return { ...matrix, locks: org.buLocks?.[buId] ?? {} };
+    return buildBuMatrix(snapshot, org.businessCode, org.planCode, org.buLocks?.[buId]);
   }
 
   // Replaces the BU's lock deny-list and pushes the overlay to core. No plan clamping is needed —

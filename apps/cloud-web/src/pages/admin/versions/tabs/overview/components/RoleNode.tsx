@@ -1,6 +1,6 @@
+import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@vritti/api-sdk/catalog-resolver';
 import { ChevronDown, ChevronRight, Layers, Shield, Zap } from 'lucide-react';
 import { useState } from 'react';
-import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@/schemas/admin/versions';
 
 interface RoleNodeProps {
   role: SnapshotRoleTemplate;
@@ -16,18 +16,11 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
   );
   const totalPerms = featureEntries.reduce((sum, [, codes]) => sum + codes.length, 0);
 
-  // Derive apps from feature permissions (deduplicated)
+  // Derive apps from feature permissions (deduplicated) — the snapshot template carries no explicit app list
   const derivedApps: Record<string, SnapshotApp> = {};
   for (const [featureCode] of featureEntries) {
     const app = featureToApp[featureCode];
     if (app) derivedApps[app.code] = app;
-  }
-  // Merge explicit role.apps with derived apps
-  const explicitApps = role.apps ?? [];
-  for (const code of explicitApps) {
-    if (!derivedApps[code]) {
-      derivedApps[code] = { code, name: code, icon: 'app-window', features: [] };
-    }
   }
   const roleApps = Object.values(derivedApps);
 

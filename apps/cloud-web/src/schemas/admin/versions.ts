@@ -1,71 +1,8 @@
+import type { VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import type { TableResponse } from '@vritti/quantum-ui/api-response';
 import { z } from '@vritti/quantum-ui/zod';
 
 export type VersionStatus = 'ALPHA' | 'BETA' | 'PROD';
-
-export interface SnapshotFeaturePermission {
-  code: string;
-  label: string;
-  isGlobal: boolean;
-  businesses: string[];
-}
-
-export interface SnapshotMicrofrontendWeb {
-  code: string;
-  name: string;
-  remoteEntry: string | null;
-  exposedModule: string | null;
-  routePrefix: string | null;
-}
-
-export interface SnapshotMicrofrontendMobile {
-  code: string;
-  name: string;
-  remoteEntryAndroid: string | null;
-  remoteEntryIos: string | null;
-  exposedModule: string | null;
-  routePrefix: string | null;
-}
-
-// Mirrors the snapshot's {web?, mobile?} microfrontend shape (see version-snapshot.builder.ts).
-export interface SnapshotMicrofrontends {
-  web?: SnapshotMicrofrontendWeb;
-  mobile?: SnapshotMicrofrontendMobile;
-}
-
-export interface SnapshotFeature {
-  code: string;
-  name: string;
-  icon: string;
-  permissions: SnapshotFeaturePermission[];
-  microfrontends: SnapshotMicrofrontends;
-}
-
-export interface SnapshotApp {
-  code: string;
-  name: string;
-  icon: string;
-  features: string[];
-}
-
-export interface SnapshotRoleTemplate {
-  name: string;
-  sourceRoleId: string;
-  apps: string[];
-  // featureCode → granted permission codes per platform (mirrors the snapshot builder)
-  features: Record<string, { web?: string[]; mobile?: string[] }>;
-}
-
-export interface SnapshotBusiness {
-  name: string;
-  apps: SnapshotApp[];
-  roleTemplates: SnapshotRoleTemplate[];
-}
-
-export interface VersionSnapshot {
-  features: Record<string, SnapshotFeature>;
-  businesses: Record<string, SnapshotBusiness>;
-}
 
 export interface Version {
   id: string;

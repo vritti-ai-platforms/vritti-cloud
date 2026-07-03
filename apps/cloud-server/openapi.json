@@ -13515,14 +13515,18 @@
             "example": "monitor"
           },
           "platforms": {
+            "type": "array",
             "example": [
               "web",
               "mobile"
             ],
             "description": "Platforms the feature ships on",
-            "type": "array",
             "items": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "web",
+                "mobile"
+              ]
             }
           },
           "inPlan": {
@@ -13630,14 +13634,18 @@
           "features": {
             "type": "object",
             "example": {
-              "crm.leads": [
-                "VIEW",
-                "CREATE",
-                "EDIT",
-                "DELETE"
-              ]
+              "crm.leads": {
+                "web": [
+                  "VIEW",
+                  "CREATE",
+                  "EDIT"
+                ],
+                "mobile": [
+                  "VIEW"
+                ]
+              }
             },
-            "description": "Feature code to permission types mapping"
+            "description": "Feature code to per-platform granted permission codes"
           }
         },
         "required": [

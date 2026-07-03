@@ -1,9 +1,9 @@
 import { useCountries } from '@hooks/admin/countries';
 import { useDeletePlanPrice, usePlanPrices, useUpsertPlanPrice } from '@hooks/admin/versions/businesses/plans/prices';
-import { cn } from '@vritti/quantum-ui';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { majorToMinor, minorToMajor } from '@vritti/quantum-ui/money';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { TextField } from '@vritti/quantum-ui/TextField';
 import { DollarSign } from 'lucide-react';
 import { useCallback } from 'react';
 import { useVersionContext } from '@/context/VersionScopeContext';
@@ -13,6 +13,16 @@ import {
   type BillingPeriod,
   type PlanPrice,
 } from '@/schemas/admin/plan-prices';
+
+// Parses a major-unit amount string into minor units — null when the input isn't a valid amount
+function parseMinorAmount(raw: string, currencyCode: string): number | null {
+  if (!/^\d+(\.\d{1,4})?$/.test(raw)) return null;
+  try {
+    return Number(majorToMinor(raw, currencyCode));
+  } catch {
+    return null;
+  }
+}
 
 // Builds a lookup keyed by `${countryId}:${billingPeriod}` for fast cell access
 function indexPrices(prices: PlanPrice[]): Map<string, PlanPrice> {
@@ -46,14 +56,9 @@ export const PricesTab = () => {
         if (existing) deleteMutation.mutate({ ...scope, priceId: existing.id });
         return;
       }
-      if (!/^\d+(\.\d{1,4})?$/.test(trimmed)) return;
 
-      let amount: number;
-      try {
-        amount = Number(majorToMinor(trimmed, currencyCode));
-      } catch {
-        return;
-      }
+      const amount = parseMinorAmount(trimmed, currencyCode);
+      if (amount === null) return;
       if (existing && existing.amount === amount) return;
 
       upsertMutation.mutate({ ...scope, data: { countryId, billingPeriod, amount } });
@@ -156,16 +161,13 @@ const PriceCell = ({ countryId, currencyCode, billingPeriod, price, onSave }: Pr
   <td className="px-4 py-2 align-top">
     <div className="flex items-center gap-1.5">
       <span className="text-xs text-muted-foreground font-mono shrink-0">{currencyCode}</span>
-      <input
+      <TextField
         type="text"
         inputMode="decimal"
         defaultValue={toMajorInput(price, currencyCode)}
         placeholder="—"
         onBlur={(e) => onSave(countryId, currencyCode, billingPeriod, e.target.value)}
-        className={cn(
-          'w-28 rounded-md border border-input bg-background px-2.5 py-1.5 text-sm',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        )}
+        className="w-28"
       />
     </div>
   </td>

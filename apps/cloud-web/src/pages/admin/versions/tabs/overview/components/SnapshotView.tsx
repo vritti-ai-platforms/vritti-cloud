@@ -1,9 +1,9 @@
+import type { SnapshotApp, SnapshotBusiness, VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { motion } from '@vritti/quantum-ui/motion';
 import { Building2, Globe, Layers, Monitor, Shield } from 'lucide-react';
-import type { SnapshotApp, SnapshotRoleTemplate, VersionSnapshot } from '@/schemas/admin/versions';
 import { AppNode } from './AppNode';
 import { FeatureRow } from './FeatureRow';
 import { RoleNode } from './RoleNode';
@@ -84,11 +84,13 @@ function BusinessPanel({
   code: string;
   name: string;
   apps: SnapshotApp[];
-  roleTemplates: SnapshotRoleTemplate[];
+  roleTemplates: SnapshotBusiness['roleTemplates'];
   featureByCode: VersionSnapshot['features'];
   featureToApp: Record<string, SnapshotApp>;
 }) {
-  const totalPerms = roleTemplates.reduce(
+  // Role templates are keyed by code — the same key org roles link to
+  const templates = Object.values(roleTemplates ?? {});
+  const totalPerms = templates.reduce(
     (sum, r) =>
       sum +
       Object.values(r.features ?? {}).reduce((s, p) => s + new Set([...(p.web ?? []), ...(p.mobile ?? [])]).size, 0),
@@ -122,7 +124,7 @@ function BusinessPanel({
         trailing={
           <div className="flex items-center gap-1.5 shrink-0">
             <StatChip icon={Layers} count={apps.length} color="text-primary" />
-            <StatChip icon={Shield} count={roleTemplates.length} color="text-destructive" />
+            <StatChip icon={Shield} count={templates.length} color="text-destructive" />
           </div>
         }
       >
@@ -146,14 +148,14 @@ function BusinessPanel({
             <SectionHeader
               icon={Shield}
               title="Role Templates"
-              count={roleTemplates.length}
+              count={templates.length}
               color="text-destructive"
               subtitle={totalPerms > 0 ? `${totalPerms} permission grants` : undefined}
             />
-            {roleTemplates.length > 0 ? (
+            {templates.length > 0 ? (
               <div className="space-y-3">
-                {roleTemplates.map((role) => (
-                  <RoleNode key={role.name} role={role} featureByCode={featureByCode} featureToApp={featureToApp} />
+                {templates.map((role) => (
+                  <RoleNode key={role.code} role={role} featureByCode={featureByCode} featureToApp={featureToApp} />
                 ))}
               </div>
             ) : (

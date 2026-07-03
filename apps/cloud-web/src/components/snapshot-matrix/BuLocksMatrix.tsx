@@ -1,8 +1,8 @@
 import type {
+  BuFeatureLocks,
   BuMatrixApp,
   BuMatrixCell,
   BuMatrixFeature,
-  FeatureUnlocks,
   PlatformBucket,
 } from '@vritti/api-sdk/catalog-resolver';
 import { Badge } from '@vritti/quantum-ui/Badge';
@@ -10,45 +10,35 @@ import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { CompactSwitch } from '@vritti/quantum-ui/Switch';
 import { Tooltip } from '@vritti/quantum-ui/Tooltip';
-import { Lock } from 'lucide-react';
+import { Lock, LockKeyhole } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
 import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/bu-matrix';
-import { isCheckedIn, isMemberIn, toggleMemberIn, togglePermIn } from './selection';
+import { isCodeLockedIn, isPlatformLockedIn, toggleCodeLock, togglePlatformLock } from './selection';
 
 // Controlled form field — drop it inside a quantum <Form> with a `name` prop and it auto-registers via Controller.
-// Role editors: `value` is the effective allow-list — switch ON / checked = granted.
-// The BU lock editor uses the BuLocksMatrix twin instead.
-interface SnapshotMatrixProps {
+// The BU lock editor's twin of SnapshotMatrix: `value` IS the deny-list (BuFeatureLocks) — switch ON = whole
+// feature locked on that platform (null), checked box = that permission locked. Everything unchecked = available.
+interface BuLocksMatrixProps {
   apps: BuMatrixApp[];
   name?: string;
-  value?: FeatureUnlocks;
-  onChange?: (next: FeatureUnlocks) => void;
-  // Read-only render — switches/checkboxes are disabled (show state), everything else (locks, upsell) is identical
+  value?: BuFeatureLocks;
+  onChange?: (next: BuFeatureLocks) => void;
+  // Read-only render — switches/checkboxes are disabled (show state), plan locks and upsell render identically
   readOnly?: boolean;
-  // When true, plan-locked cells stay grantable (dormant until upgrade) — role editor ONLY.
-  allowLockedGrants?: boolean;
 }
 
-// Internal callback bundle the sub-components consume
-interface MatrixHandlers {
-  isMember: (featureCode: string, platform: PlatformBucket) => boolean;
-  isChecked: (featureCode: string, platform: PlatformBucket, permCode: string) => boolean;
-  onToggle: (featureCode: string, platform: PlatformBucket, permCode: string) => void;
-  onToggleMember: (featureCode: string, platform: PlatformBucket, inPlanCodes: string[]) => void;
-}
-
-// The in-plan permission codes of a feature on a platform — what the feature switch grants/clears
+// The in-plan permission codes of a feature on a platform — what a whole-platform lock covers
 function inPlanCodes(feature: BuMatrixFeature, platform: PlatformBucket): string[] {
   return feature.permissions.filter((p) => p[platform]?.inPlan).map((p) => p.code);
 }
 
-// True when the feature ships on this platform but the plan unlocks nothing there (the switch becomes a lock)
+// True when the feature ships on this platform but the plan unlocks nothing there (nothing to lock — upsell chip)
 function lockedOnPlatform(feature: BuMatrixFeature, platform: PlatformBucket): boolean {
   return feature.platforms.includes(platform) && inPlanCodes(feature, platform).length === 0;
 }
 
-// Tooltip body for a lock chip — lists the plans that unlock it (or a fallback when none do)
+// Tooltip body for a plan-lock chip — lists the plans that unlock it (or a fallback when none do)
 function lockTooltip(plans: string[]): React.ReactNode {
   if (plans.length === 0) return 'Not included in your plan';
   return (
@@ -69,92 +59,78 @@ function platformUpsell(feature: BuMatrixFeature, platform: PlatformBucket): str
   return [...names];
 }
 
-// One (permission, platform) cell. When the WHOLE platform is plan-locked the lock lives on the feature row, so the
-// per-permission cells are left blank; otherwise: — when N/A, a lock + upsell for a single locked permission, a
-// disabled box until the switch is on, and an active checkbox once it is.
-function Cell({
+// One (permission, platform) cell — checked = LOCKED for this business unit. A whole-platform lock (switch on)
+// checks and freezes every box; otherwise each box locks its own permission. Plan-locked cells stay upsell chips.
+function LockCell({
   cell,
+  planLocked,
   platformLocked,
-  member,
   checked,
   onToggle,
   readOnly,
-  allowLockedGrants,
 }: {
   cell: BuMatrixCell | null;
+  planLocked: boolean;
   platformLocked: boolean;
-  member: boolean;
   checked: boolean;
   onToggle: () => void;
   readOnly?: boolean;
-  allowLockedGrants?: boolean;
 }) {
   if (cell === null) {
     return <span className="text-xs text-muted-foreground">—</span>;
   }
-  // Without locked-grant editing the platform lock lives on the feature row, so locked cells stay blank
-  if (platformLocked && !allowLockedGrants) {
-    return null;
-  }
-  // Platform switch is off — hide the permission checkboxes for that platform entirely
-  if (!member) {
+  // The whole platform is plan-locked — its lock chip lives on the feature row, cells stay blank
+  if (planLocked) {
     return null;
   }
   if (!cell.inPlan) {
-    if (readOnly || !allowLockedGrants) {
-      return (
-        <Tooltip content={lockTooltip(cell.availableIn)}>
-          <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
-            <Lock className="size-3" />
-          </span>
-        </Tooltip>
-      );
-    }
-    // Role editor: plan-locked permissions are still GRANTABLE (dormant until upgrade) — checkbox with a
-    // small lock badge on its bottom-right corner (hover shows the unlocking plans)
     return (
       <Tooltip content={lockTooltip(cell.availableIn)}>
-        <span className="relative inline-flex">
-          <Checkbox checked={checked} onCheckedChange={onToggle} />
-          <span className="pointer-events-none absolute -bottom-1 -right-1 flex size-3 items-center justify-center text-warning">
-            <Lock className="size-2" />
-          </span>
+        <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
+          <Lock className="size-3" />
         </span>
       </Tooltip>
     );
   }
-  return <Checkbox checked={checked} disabled={readOnly} onCheckedChange={onToggle} />;
+  const box = <Checkbox checked={checked} disabled={readOnly || platformLocked} onCheckedChange={onToggle} />;
+  if (!checked) return box;
+  return (
+    <Tooltip content="Locked for this business unit">
+      <span className="relative inline-flex">
+        {box}
+        <span className="pointer-events-none absolute -bottom-1 -right-1 flex size-3 items-center justify-center text-destructive">
+          <LockKeyhole className="size-2" />
+        </span>
+      </span>
+    </Tooltip>
+  );
 }
 
-// A single feature block: master row (name + per-platform switch) then one row per permission
+// A single feature block: master row (name + per-platform lock switch) then one row per permission
 function FeatureBlock({
   feature,
-  isMember,
-  isChecked,
-  onToggle,
-  onToggleMember,
+  locks,
+  onToggleCode,
+  onTogglePlatform,
   readOnly,
-  allowLockedGrants,
 }: {
   feature: BuMatrixFeature;
-  isMember: MatrixHandlers['isMember'];
-  isChecked: MatrixHandlers['isChecked'];
-  onToggle: MatrixHandlers['onToggle'];
-  onToggleMember: MatrixHandlers['onToggleMember'];
+  locks: BuFeatureLocks;
+  onToggleCode: (featureCode: string, platform: PlatformBucket, permCode: string) => void;
+  onTogglePlatform: (featureCode: string, platform: PlatformBucket) => void;
   readOnly?: boolean;
-  allowLockedGrants?: boolean;
 }) {
   const locked = !feature.inPlan;
-  // Every platform the feature ships on is plan-locked — nothing here is actionable
+  // Every platform the feature ships on is plan-locked — nothing here is lockable
   const fullyLocked = feature.platforms.length > 0 && feature.platforms.every((p) => lockedOnPlatform(feature, p));
-  // Permission rows reveal only while a switch is on; read-only collapses fully plan-locked features
-  const expanded = (isMember(feature.code, 'web') || isMember(feature.code, 'mobile')) && !(readOnly && fullyLocked);
+  // Permission rows stay visible so per-permission locks are always editable — hidden only when fully plan-locked
+  const expanded = !fullyLocked;
   // Plan names unlocking this feature (across platforms) — shown as the right-aligned upsell when locked
   const upsell = [...new Set([...platformUpsell(feature, 'web'), ...platformUpsell(feature, 'mobile')])];
 
   return (
     <div className={locked ? 'opacity-95' : undefined}>
-      {/* Master row — feature name, right-aligned upsell, and a per-platform switch (or lock when plan-locked) */}
+      {/* Master row — feature name, right-aligned upsell, and a per-platform lock switch (or plan-lock chip) */}
       <div className="flex items-center gap-3 px-4 py-2.5">
         <span className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-success/12 text-success">
           <DynamicIcon name={(feature.icon ?? 'square') as IconName} className="size-3.5" />
@@ -175,29 +151,29 @@ function FeatureBlock({
               return <div key={platform} className="w-24" />;
             }
             if (lockedOnPlatform(feature, platform)) {
-              // Plain lock by default (BU matrix / read-only). In the role editor the switch stays usable
-              // (grants view-only membership, dormant until upgrade) with a small corner lock badge.
-              if (readOnly || !allowLockedGrants) {
-                return (
-                  <div key={platform} className="flex w-24 justify-center">
-                    <Tooltip content={lockTooltip(platformUpsell(feature, platform))}>
-                      <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
-                        <Lock className="size-3" />
-                      </span>
-                    </Tooltip>
-                  </div>
-                );
-              }
               return (
                 <div key={platform} className="flex w-24 justify-center">
                   <Tooltip content={lockTooltip(platformUpsell(feature, platform))}>
+                    <span className="flex size-5 items-center justify-center rounded bg-warning/15 text-warning">
+                      <Lock className="size-3" />
+                    </span>
+                  </Tooltip>
+                </div>
+              );
+            }
+            // The switch LOCKS the whole feature on that platform — ON = locked (red badge)
+            if (isPlatformLockedIn(locks, feature.code, platform)) {
+              return (
+                <div key={platform} className="flex w-24 justify-center">
+                  <Tooltip content="Feature locked for this business unit">
                     <span className="relative inline-flex">
                       <CompactSwitch
-                        checked={isMember(feature.code, platform)}
-                        onCheckedChange={() => onToggleMember(feature.code, platform, inPlanCodes(feature, platform))}
+                        checked
+                        disabled={readOnly}
+                        onCheckedChange={() => onTogglePlatform(feature.code, platform)}
                       />
-                      <span className="pointer-events-none absolute -bottom-1 -right-1 flex size-3 items-center justify-center text-warning">
-                        <Lock className="size-2" />
+                      <span className="pointer-events-none absolute -bottom-1 -right-1 flex size-3 items-center justify-center text-destructive">
+                        <LockKeyhole className="size-2" />
                       </span>
                     </span>
                   </Tooltip>
@@ -207,9 +183,9 @@ function FeatureBlock({
             return (
               <div key={platform} className="flex w-24 justify-center">
                 <CompactSwitch
-                  checked={isMember(feature.code, platform)}
+                  checked={false}
                   disabled={readOnly}
-                  onCheckedChange={() => onToggleMember(feature.code, platform, inPlanCodes(feature, platform))}
+                  onCheckedChange={() => onTogglePlatform(feature.code, platform)}
                 />
               </div>
             );
@@ -217,7 +193,7 @@ function FeatureBlock({
         </div>
       </div>
 
-      {/* Permission rows — revealed only when a platform switch is on (collapsed when locked or switched off) */}
+      {/* Permission rows — always visible (per-permission locks stay editable) unless fully plan-locked */}
       {expanded && (
         <div className="animate-in fade-in slide-in-from-top-1 pb-1 duration-200">
           {feature.permissions.map((perm) => (
@@ -226,14 +202,13 @@ function FeatureBlock({
               <div className="flex">
                 {MATRIX_PLATFORMS.map((platform) => (
                   <div key={platform} className="flex w-24 justify-center">
-                    <Cell
+                    <LockCell
                       cell={perm[platform]}
-                      platformLocked={lockedOnPlatform(feature, platform)}
-                      member={isMember(feature.code, platform)}
-                      checked={isChecked(feature.code, platform, perm.code)}
-                      onToggle={() => onToggle(feature.code, platform, perm.code)}
+                      planLocked={lockedOnPlatform(feature, platform)}
+                      platformLocked={isPlatformLockedIn(locks, feature.code, platform)}
+                      checked={isCodeLockedIn(locks, feature.code, platform, perm.code)}
+                      onToggle={() => onToggleCode(feature.code, platform, perm.code)}
                       readOnly={readOnly}
-                      allowLockedGrants={allowLockedGrants}
                     />
                   </div>
                 ))}
@@ -249,20 +224,16 @@ function FeatureBlock({
 // An app card (collapsed by default): header with an unlocked/total count, then its feature blocks
 function AppCard({
   app,
-  isMember,
-  isChecked,
-  onToggle,
-  onToggleMember,
+  locks,
+  onToggleCode,
+  onTogglePlatform,
   readOnly,
-  allowLockedGrants,
 }: {
   app: BuMatrixApp;
-  isMember: MatrixHandlers['isMember'];
-  isChecked: MatrixHandlers['isChecked'];
-  onToggle: MatrixHandlers['onToggle'];
-  onToggleMember: MatrixHandlers['onToggleMember'];
+  locks: BuFeatureLocks;
+  onToggleCode: (featureCode: string, platform: PlatformBucket, permCode: string) => void;
+  onTogglePlatform: (featureCode: string, platform: PlatformBucket) => void;
   readOnly?: boolean;
-  allowLockedGrants?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -308,12 +279,10 @@ function AppCard({
             <FeatureBlock
               key={feature.code}
               feature={feature}
-              isMember={isMember}
-              isChecked={isChecked}
-              onToggle={onToggle}
-              onToggleMember={onToggleMember}
+              locks={locks}
+              onToggleCode={onToggleCode}
+              onTogglePlatform={onTogglePlatform}
               readOnly={readOnly}
-              allowLockedGrants={allowLockedGrants}
             />
           ))}
         </div>
@@ -322,26 +291,25 @@ function AppCard({
   );
 }
 
-// The shared snapshot-driven Apps & Features matrix — a controlled form field. `value` (the code-keyed selection)
-// and `onChange` are injected by quantum <Form> when used with a `name` prop; every switch/checkbox edits `value`.
-export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({
-  apps,
-  value = {},
-  onChange,
-  readOnly,
-  allowLockedGrants,
-}) => {
-  const handlers: MatrixHandlers = {
-    isMember: (code, platform) => isMemberIn(value, code, platform),
-    isChecked: (code, platform, permCode) => isCheckedIn(value, code, platform, permCode),
-    onToggle: (code, platform, permCode) => onChange?.(togglePermIn(value, code, platform, permCode)),
-    onToggleMember: (code, platform, inPlanCodes) => onChange?.(toggleMemberIn(value, code, platform, inPlanCodes)),
-  };
+// The BU lock matrix — a controlled form field over the deny-list. `value` and `onChange` are injected by
+// quantum <Form> when used with a `name` prop; every switch/checkbox edits the deny-list immutably.
+export const BuLocksMatrix: React.FC<BuLocksMatrixProps> = ({ apps, value = {}, onChange, readOnly }) => {
+  const onToggleCode = (featureCode: string, platform: PlatformBucket, permCode: string) =>
+    onChange?.(toggleCodeLock(value, featureCode, platform, permCode));
+  const onTogglePlatform = (featureCode: string, platform: PlatformBucket) =>
+    onChange?.(togglePlatformLock(value, featureCode, platform));
 
   return (
     <div className="flex flex-col gap-3">
       {apps.map((app) => (
-        <AppCard key={app.code} app={app} {...handlers} readOnly={readOnly} allowLockedGrants={allowLockedGrants} />
+        <AppCard
+          key={app.code}
+          app={app}
+          locks={value}
+          onToggleCode={onToggleCode}
+          onTogglePlatform={onTogglePlatform}
+          readOnly={readOnly}
+        />
       ))}
     </div>
   );

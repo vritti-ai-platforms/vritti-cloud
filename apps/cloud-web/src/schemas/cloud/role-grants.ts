@@ -1,10 +1,5 @@
-import type { FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
-
-// Inherited grants removed from a base template — platform null revokes membership, string[] revokes codes
-export type RevokedGrants = Record<string, { web?: string[] | null; mobile?: string[] | null }>;
-
-const PLATFORMS = ['web', 'mobile'] as const;
-type Platform = (typeof PLATFORMS)[number];
+import type { FeatureUnlocks, PlatformBucket, RevokedGrants } from '@vritti/api-sdk/catalog-resolver';
+import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
 
 // Composes a based role's effective grants: base ∪ additions − revoked (mirrors api-sdk composeRoleGrants).
 // Membership exists when either side has the platform key ([] = member, view-only); revoked null drops the
@@ -19,7 +14,7 @@ export function composeGrants(
 
   for (const code of codes) {
     const entry: { web?: string[]; mobile?: string[] } = {};
-    for (const platform of PLATFORMS) {
+    for (const platform of MATRIX_PLATFORMS) {
       const rev = revoked?.[code]?.[platform];
       if (rev === null) continue;
       const b = base[code]?.[platform];
@@ -42,13 +37,13 @@ export function diffGrants(
   const features: FeatureUnlocks = {};
   const revoked: RevokedGrants = {};
 
-  const addPlatform = (target: FeatureUnlocks, code: string, platform: Platform, codes: string[]) => {
+  const addPlatform = (target: FeatureUnlocks, code: string, platform: PlatformBucket, codes: string[]) => {
     target[code] = { ...target[code], [platform]: codes };
   };
 
   const codes = new Set([...Object.keys(base), ...Object.keys(selection)]);
   for (const code of codes) {
-    for (const platform of PLATFORMS) {
+    for (const platform of MATRIX_PLATFORMS) {
       const b = base[code]?.[platform];
       const s = selection[code]?.[platform];
       if (s !== undefined && b === undefined) {

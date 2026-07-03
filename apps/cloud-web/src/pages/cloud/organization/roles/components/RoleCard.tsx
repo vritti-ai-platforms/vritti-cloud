@@ -1,10 +1,10 @@
+import type { FeatureUnlocks } from '@vritti/api-sdk/catalog-resolver';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DropdownMenu } from '@vritti/quantum-ui/DropdownMenu';
 import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { ArrowRight, KeyRound, Layers, Lock, Monitor, MoreVertical, Shield, Smartphone, Trash2 } from 'lucide-react';
 import type React from 'react';
-import type { FeatureUnlocks } from '@/schemas/cloud/bu-matrix';
 import { composeGrants } from '@/schemas/cloud/role-grants';
 import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
 

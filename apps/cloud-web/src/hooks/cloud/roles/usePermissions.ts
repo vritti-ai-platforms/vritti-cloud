@@ -1,6 +1,6 @@
 import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
+import type { BuMatrix } from '@vritti/api-sdk/catalog-resolver';
 import type { AxiosError } from 'axios';
-import type { BuMatrix } from '@/schemas/cloud/bu-matrix';
 import { getOrgPermissions } from '../../../services/cloud/org-permissions.service';
 
 const ORG_PERMISSIONS_QUERY_KEY = (orgId: string) => ['organizations', orgId, 'permissions'] as const;

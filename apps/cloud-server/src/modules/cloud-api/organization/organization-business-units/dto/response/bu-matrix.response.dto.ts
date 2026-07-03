@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { BuFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
+import type { BuFeatureLocks, PlatformBucket } from '@vritti/api-sdk/catalog-resolver';
 
 // A single (permission, platform) cell. null in the parent ⇒ the feature doesn't ship on that platform.
 export class BuMatrixCellDto {
@@ -37,8 +37,13 @@ export class BuMatrixFeatureDto {
   @ApiProperty({ nullable: true, example: 'monitor' })
   icon: string | null;
 
-  @ApiProperty({ type: [String], example: ['web', 'mobile'], description: 'Platforms the feature ships on' })
-  platforms: string[];
+  @ApiProperty({
+    enum: ['web', 'mobile'],
+    isArray: true,
+    example: ['web', 'mobile'],
+    description: 'Platforms the feature ships on',
+  })
+  platforms: PlatformBucket[];
 
   @ApiProperty({ description: 'Feature-level: is this feature a member of the org plan at all?' })
   inPlan: boolean;

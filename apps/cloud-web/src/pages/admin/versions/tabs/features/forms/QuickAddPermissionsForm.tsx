@@ -2,9 +2,10 @@ import { FEATURE_PERMISSIONS_TABLE_KEY, useBulkCreatePermissions } from '@hooks/
 import { Button } from '@vritti/quantum-ui/Button';
 import { CheckboxGroup } from '@vritti/quantum-ui/CheckboxGroup';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
+import { Form } from '@vritti/quantum-ui/Form';
 import { CircleCheck, ShieldCheck } from 'lucide-react';
 import type React from 'react';
-import { useState } from 'react';
+import { useForm } from 'react-hook-form';
 import { useVersionContext } from '@/context/VersionScopeContext';
 
 // Standard global permission presets for one-click adding (created with isGlobal = true)
@@ -33,32 +34,15 @@ export const QuickAddPermissionsForm: React.FC<QuickAddPermissionsFormProps> = (
 }) => {
   const { versionId } = useVersionContext();
   const missing = PERMISSION_PRESETS.filter((p) => !existingCodes.includes(p.code));
-  const [selected, setSelected] = useState<string[]>(missing.map((p) => p.code));
-  const bulkMutation = useBulkCreatePermissions(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId));
-  const allAdded = missing.length === 0;
 
-  function handleAdd() {
-    const toAdd = missing.filter((p) => selected.includes(p.code));
-    if (toAdd.length === 0) return;
-    bulkMutation.mutate(
-      {
-        versionId,
-        permissions: toAdd.map((preset) => ({
-          featureId,
-          code: preset.code,
-          label: preset.label,
-          isGlobal: true,
-          businessIds: [],
-        })),
-      },
-      { onSuccess },
-    );
-  }
+  const form = useForm<{ codes: string[] }>({ defaultValues: { codes: missing.map((p) => p.code) } });
+  const selected = form.watch('codes');
+  const bulkMutation = useBulkCreatePermissions(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId), { onSuccess });
 
-  return (
-    <>
-      {allAdded ? (
-        <div className="flex min-h-[200px] flex-col items-center justify-center gap-3 px-6 py-8 text-center">
+  if (missing.length === 0) {
+    return (
+      <>
+        <div className="flex min-h-48 flex-col items-center justify-center gap-3 px-6 py-8 text-center">
           <div className="relative flex size-14 items-center justify-center rounded-full bg-success/10">
             <ShieldCheck className="size-7 text-success" />
             <CircleCheck className="-right-0.5 -bottom-0.5 absolute size-5 rounded-full bg-background text-success" />
@@ -68,33 +52,48 @@ export const QuickAddPermissionsForm: React.FC<QuickAddPermissionsFormProps> = (
             <p className="text-muted-foreground text-sm">Every standard permission is already added to this feature.</p>
           </div>
         </div>
-      ) : (
-        <div className="flex min-h-[200px] flex-col gap-4 px-6 py-4">
-          <CheckboxGroup
-            label="Permissions"
-            clearable
-            columns={2}
-            options={missing.map((p) => ({ value: p.code, label: p.label }))}
-            value={selected}
-            onValueChange={setSelected}
-          />
-        </div>
-      )}
-      <DialogActions>
-        <Button variant="outline" onClick={onCancel}>
-          {allAdded ? 'Close' : 'Cancel'}
-        </Button>
-        {!allAdded && (
-          <Button
-            onClick={handleAdd}
-            disabled={selected.length === 0}
-            isLoading={bulkMutation.isPending}
-            loadingText="Adding..."
-          >
-            Add {selected.length}
+        <DialogActions>
+          <Button variant="outline" onClick={onCancel}>
+            Close
           </Button>
-        )}
+        </DialogActions>
+      </>
+    );
+  }
+
+  return (
+    <Form
+      form={form}
+      mutation={bulkMutation}
+      onCancel={onCancel}
+      transformSubmit={(data: { codes: string[] }) => ({
+        versionId,
+        permissions: missing
+          .filter((p) => data.codes.includes(p.code))
+          .map((preset) => ({
+            featureId,
+            code: preset.code,
+            label: preset.label,
+            isGlobal: true,
+            businessIds: [],
+          })),
+      })}
+    >
+      <CheckboxGroup
+        name="codes"
+        label="Permissions"
+        clearable
+        columns={2}
+        options={missing.map((p) => ({ value: p.code, label: p.label }))}
+      />
+      <DialogActions>
+        <Button type="button" variant="outline" data-cancel>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={selected.length === 0} loadingText="Adding...">
+          Add {selected.length}
+        </Button>
       </DialogActions>
-    </>
+    </Form>
   );
 };

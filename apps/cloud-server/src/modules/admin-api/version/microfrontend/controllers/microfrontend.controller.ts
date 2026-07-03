@@ -63,7 +63,9 @@ export class MicrofrontendController {
     @Body() body: WebMicrofrontendBodyDto & MobileMicrofrontendBodyDto,
   ): Promise<CreateResponseDto<MicrofrontendDto>> {
     this.logger.log(`PUT /admin-api/versions/${versionId}/microfrontends/${platform}`);
-    return this.microfrontendService.upsert(parsePlatform(platform), versionId, body);
+    return parsePlatform(platform) === 'web'
+      ? this.microfrontendService.upsertWeb(versionId, body)
+      : this.microfrontendService.upsertMobile(versionId, body);
   }
 
   // Deletes a microfrontend by platform + ID

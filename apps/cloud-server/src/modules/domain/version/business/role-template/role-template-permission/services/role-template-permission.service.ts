@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
+import { BadRequestException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
 import type { NewRoleTemplateFeature, NewRoleTemplateFeaturePermission, RoleTemplate } from '@/db/schema';
 import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/version/business/role-template/role-template-permission/dto/request/assign-role-template-permissions.dto';
 import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
@@ -52,10 +52,7 @@ export class RoleTemplatePermissionService {
   }
 
   // Replaces the role's grants + their nested action permissions in one transaction (full delete-then-insert)
-  async setPermissions(
-    roleTemplateId: string,
-    dto: AssignRoleTemplatePermissionsDto,
-  ): Promise<{ success: true; message: string }> {
+  async setPermissions(roleTemplateId: string, dto: AssignRoleTemplatePermissionsDto): Promise<SuccessResponseDto> {
     const roleTemplate = await this.ensureRoleTemplate(roleTemplateId);
     // The DTO's @ArrayUnique validator already guarantees one grant per (feature, platform)
     const grants = dto.grants;
