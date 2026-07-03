@@ -2,6 +2,7 @@ import { useUpdateApp } from '@hooks/admin/versions/businesses/apps';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
+import { IconSelect } from '@vritti/quantum-ui/selects/icon';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -41,7 +42,7 @@ export const EditAppForm: React.FC<EditAppFormProps> = ({ app, onSuccess, onCanc
       <TextField name="code" label="App Code" placeholder="e.g. crm" description="Lowercase with hyphens" />
       <TextField name="name" label="App Name" placeholder="e.g. CRM" />
       <TextField name="description" label="Description" placeholder="Optional description" />
-      <TextField name="icon" label="Icon" placeholder="e.g. briefcase" />
+      <IconSelect kind="lucide" name="icon" label="Icon" placeholder="Select icon" clearable={false} />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

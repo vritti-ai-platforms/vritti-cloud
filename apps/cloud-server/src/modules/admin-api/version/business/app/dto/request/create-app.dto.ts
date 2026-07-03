@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsIconName } from '@vritti/api-sdk/icons';
 import { IsInt, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 
 export class CreateAppDto {
@@ -41,8 +42,7 @@ export class CreateAppDto {
 
   @ApiProperty({ description: 'Lucide icon name', example: 'shopping-cart' })
   @IsString()
-  @MinLength(1)
-  @MaxLength(255)
+  @IsIconName('lucide')
   icon: string;
 
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })
