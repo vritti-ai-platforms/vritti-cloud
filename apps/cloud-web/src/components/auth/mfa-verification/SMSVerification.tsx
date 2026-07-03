@@ -58,7 +58,7 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({ sessionId, mas
     <div className="space-y-6">
       {/* Icon Container */}
       <div className="flex justify-center">
-        <div className="w-[52px] h-[52px] rounded-full bg-primary/10 flex items-center justify-center">
+        <div className="size-13 rounded-full bg-primary/10 flex items-center justify-center">
           <Smartphone className="h-6 w-6 text-primary" />
         </div>
       </div>
@@ -72,7 +72,7 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({ sessionId, mas
         /* Send Code Button */
         <Button
           onClick={handleSendCode}
-          className="w-full h-9 rounded-[10px] bg-primary text-primary-foreground"
+          className="w-full h-9 rounded-lg bg-primary text-primary-foreground"
           isLoading={sendSmsMutation.isPending}
           loadingText="Sending..."
         >
@@ -96,7 +96,7 @@ export const SMSVerification: React.FC<SMSVerificationProps> = ({ sessionId, mas
             <Field className="pt-2">
               <Button
                 type="submit"
-                className="w-full h-9 rounded-[10px] bg-primary text-primary-foreground"
+                className="w-full h-9 rounded-lg bg-primary text-primary-foreground"
                 loadingText="Verifying..."
               >
                 Verify

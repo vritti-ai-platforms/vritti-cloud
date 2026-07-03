@@ -34,7 +34,7 @@ export const BUNodeCard = ({ data }: NodeProps<Node<BUNodeData>>) => {
   const typeBadge = getTypeBadge(data.type);
 
   return (
-    <div className="bg-card border border-border rounded-lg shadow-sm w-[260px] p-4 hover:shadow-md transition-shadow cursor-pointer">
+    <div className="bg-card border border-border rounded-lg shadow-sm w-65 p-4 hover:shadow-md transition-shadow cursor-pointer">
       <Handle type="target" position={Position.Top} className="!bg-border !w-3 !h-1.5 !rounded-sm !border-0" />
 
       {/* Header */}

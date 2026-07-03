@@ -32,7 +32,7 @@ export const VersionDetailPage = () => {
 
       <Tabs
         routeParam="versionTab"
-        contentClassName="min-h-[500px]"
+        contentClassName="min-h-125"
         tabs={[
           { value: 'overview', label: 'Overview', content: <OverviewTab /> },
           { value: 'microfrontends', label: 'Microfrontends', content: <MicrofrontendsTab /> },

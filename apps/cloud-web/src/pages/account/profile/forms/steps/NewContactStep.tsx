@@ -48,7 +48,7 @@ export const NewContactStep: React.FC<NewContactStepProps> = ({ contactType, cur
       >
         <FieldGroup>
           <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">
-            <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
             <Typography variant="body2" className="text-primary">
               Your current email will remain active until you verify the new one
             </Typography>
@@ -73,7 +73,7 @@ export const NewContactStep: React.FC<NewContactStepProps> = ({ contactType, cur
     >
       <FieldGroup>
         <div className="p-3 bg-primary/10 border border-primary/20 rounded-lg flex items-start gap-2">
-          <Info className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+          <Info className="h-5 w-5 text-primary shrink-0 mt-0.5" />
           <Typography variant="body2" className="text-primary">
             Your current phone will remain active until you verify the new one
           </Typography>

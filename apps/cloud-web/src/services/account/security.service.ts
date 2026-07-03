@@ -1,4 +1,4 @@
-import type { PublicKeyCredentialCreationOptionsJSON } from '@simplewebauthn/browser';
+import type { PublicKeyCredentialCreationOptionsJSON, RegistrationResponseJSON } from '@simplewebauthn/browser';
 import { axios } from '@vritti/quantum-ui/axios';
 import type { SuccessResponse } from './profile.service';
 
@@ -119,7 +119,7 @@ export function getPasskeySetupOptions(): Promise<PublicKeyCredentialCreationOpt
     .then((r) => r.data);
 }
 
-export function verifyPasskeySetup(data: { credential: any }): Promise<BackupCodesResponse> {
+export function verifyPasskeySetup(data: { credential: RegistrationResponseJSON }): Promise<BackupCodesResponse> {
   return axios
     .post<BackupCodesResponse>('account/security/mfa/passkey/verify-setup', data, { showSuccessToast: false })
     .then((r) => r.data);

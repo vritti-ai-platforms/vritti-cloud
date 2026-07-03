@@ -14,7 +14,7 @@ export const AuthLayout: React.FC = () => {
         <ThemeToggle />
       </div>
 
-      <Card className="w-full max-w-[448px] min-h-[60svh] border-border shadow-lg gap-0">
+      <Card className="w-full max-w-md min-h-[60svh] border-border shadow-lg gap-0">
         <CardHeader className="flex flex-col items-center pt-6 pb-4">
           <img src={logo} alt="Vritti AI Cloud" className="h-12 sm:h-14 lg:h-12 w-auto mb-4" />
         </CardHeader>

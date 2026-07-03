@@ -22,7 +22,7 @@ export const BusinessDetailPage = () => {
 
       <Tabs
         routeParam="businessTab"
-        contentClassName="min-h-[500px]"
+        contentClassName="min-h-125"
         tabs={[
           { value: 'apps', label: 'Apps', content: <AppsTab /> },
           { value: 'features', label: 'Features', content: <BusinessFeaturesTab /> },

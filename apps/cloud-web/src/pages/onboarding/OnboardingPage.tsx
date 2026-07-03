@@ -25,7 +25,7 @@ export const OnboardingPage: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex items-center justify-center min-h-100">
         <Spinner className="size-8" />
       </div>
     );

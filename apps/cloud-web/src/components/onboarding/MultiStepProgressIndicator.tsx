@@ -45,7 +45,7 @@ export const MultiStepProgressIndicator: React.FC = () => {
   }, [signupMethod]);
 
   return (
-    <div className="mx-auto w-full max-w-[398px]">
+    <div className="mx-auto w-full max-w-100">
       <StepProgressIndicator steps={steps} currentStep={activeStep} progress={progress} />
     </div>
   );

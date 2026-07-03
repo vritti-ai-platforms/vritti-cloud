@@ -31,7 +31,7 @@ export const OrgCard: React.FC<{ org: OrgListItem }> = ({ org }) => {
     : '—';
 
   return (
-    <Card className="min-h-[320px] flex flex-col justify-between p-5">
+    <Card className="min-h-80 flex flex-col justify-between p-5">
       {/* Header row: avatar + name + role badge */}
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-start gap-3 min-w-0">
@@ -119,7 +119,7 @@ export const OrgCard: React.FC<{ org: OrgListItem }> = ({ org }) => {
 
 // Skeleton placeholder displayed while org data is loading
 export const OrgCardSkeleton: React.FC = () => (
-  <Card className="min-h-[320px] flex flex-col justify-between p-5">
+  <Card className="min-h-80 flex flex-col justify-between p-5">
     <div className="flex items-start justify-between gap-3">
       <div className="flex items-start gap-3 min-w-0">
         <Skeleton className="h-10 w-10 rounded-full shrink-0" />

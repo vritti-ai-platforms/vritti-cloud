@@ -82,7 +82,7 @@ export const OrgBusinessUnitsPage = () => {
         }
       />
 
-      {isLoading && <Skeleton className="h-[600px] w-full rounded-lg" />}
+      {isLoading && <Skeleton className="h-150 w-full rounded-lg" />}
 
       {!isLoading && businessUnits.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">

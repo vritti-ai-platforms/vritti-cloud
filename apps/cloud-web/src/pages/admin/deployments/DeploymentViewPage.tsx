@@ -54,7 +54,7 @@ export const DeploymentViewPage = () => {
       {/* Tabs */}
       <Tabs
         defaultValue="overview"
-        contentClassName="min-h-[400px]"
+        contentClassName="min-h-100"
         tabs={[
           {
             value: 'overview',

@@ -152,7 +152,7 @@ const QRVerificationInner: React.FC<QRVerificationStepProps & { onRetry: () => v
 
     case eventTypes.VERIFIED:
       return (
-        <div className="flex items-center justify-center min-h-[200px]">
+        <div className="flex items-center justify-center min-h-50">
           <Spinner className="size-8 text-primary" />
         </div>
       );

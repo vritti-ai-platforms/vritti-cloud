@@ -58,7 +58,7 @@ export const PasskeySetupStep: React.FC<PasskeySetupStepProps> = ({ onBack, onSu
         <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mb-4">
           <Fingerprint className="h-10 w-10 text-primary" />
         </div>
-        <Typography variant="body2" intent="muted" align="center" className="max-w-[300px]">
+        <Typography variant="body2" intent="muted" align="center" className="max-w-75">
           {mutation.isPending
             ? 'Follow the prompts on your device to create your passkey...'
             : 'When you click the button below, your device will prompt you to create a passkey using Face ID, Touch ID, or your device PIN.'}

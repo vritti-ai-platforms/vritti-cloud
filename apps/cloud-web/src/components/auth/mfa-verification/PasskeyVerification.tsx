@@ -50,7 +50,7 @@ export const PasskeyVerification: React.FC<PasskeyVerificationProps> = ({ onVeri
     <div className="space-y-6">
       {/* Icon Container */}
       <div className="flex justify-center">
-        <div className="w-[52px] h-[52px] rounded-full bg-primary/10 flex items-center justify-center">
+        <div className="size-13 rounded-full bg-primary/10 flex items-center justify-center">
           <KeyRound className="h-6 w-6 text-primary" />
         </div>
       </div>
@@ -63,7 +63,7 @@ export const PasskeyVerification: React.FC<PasskeyVerificationProps> = ({ onVeri
       {/* Error Display */}
       {errorMessage && (
         <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg flex items-start gap-2">
-          <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+          <AlertCircle className="h-5 w-5 text-destructive shrink-0 mt-0.5" />
           <Typography variant="body2" className="text-destructive">
             {errorMessage}
           </Typography>
@@ -73,7 +73,7 @@ export const PasskeyVerification: React.FC<PasskeyVerificationProps> = ({ onVeri
       {/* Verify Button */}
       <Button
         onClick={onVerify}
-        className="w-full h-9 rounded-[10px] bg-primary text-primary-foreground"
+        className="w-full h-9 rounded-lg bg-primary text-primary-foreground"
         isLoading={isVerifying}
         loadingText="Verifying..."
       >

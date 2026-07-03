@@ -17,7 +17,7 @@ export const SessionCard: React.FC<SessionCardProps> = ({ session, isCurrent, on
   <div className={`border border-border rounded-lg p-4 ${isCurrent ? 'bg-success/5' : ''}`}>
     <div className="flex items-start justify-between gap-4">
       <div className="flex gap-3">
-        <div className="flex-shrink-0 mt-1">
+        <div className="shrink-0 mt-1">
           <Monitor className={`h-5 w-5 ${isCurrent ? 'text-success' : 'text-muted-foreground'}`} />
         </div>
         <div className="flex-1 space-y-1">

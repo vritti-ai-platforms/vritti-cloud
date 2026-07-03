@@ -133,7 +133,7 @@ export const RegionViewPage = () => {
                   <div
                     key={provider.id}
                     className={cn(
-                      'flex items-center justify-between px-3 rounded-xl border h-[69px]',
+                      'flex items-center justify-between px-3 rounded-xl border h-17',
                       provider.isAssigned ? 'bg-primary/5 border-primary/30' : 'border-border',
                     )}
                   >

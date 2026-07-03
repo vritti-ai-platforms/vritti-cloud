@@ -73,7 +73,7 @@ export const PlanViewPage = () => {
       {/* Tabs */}
       <Tabs
         defaultValue="content"
-        contentClassName="min-h-[500px]"
+        contentClassName="min-h-125"
         tabs={[
           { value: 'content', label: 'Content', content: <ContentTab plan={plan} /> },
           { value: 'features', label: 'Apps & Features', content: <AppsAndFeaturesTab /> },

@@ -30,7 +30,7 @@ export const TopBar = () => {
   const showBreadcrumb = pathname !== '/';
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-sm border-b border-border min-w-[280px]">
+    <div className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-sm border-b border-border min-w-70">
       <div className="h-14 px-6 flex items-center justify-between">
         {/* Logo */}
         <Link to="/">

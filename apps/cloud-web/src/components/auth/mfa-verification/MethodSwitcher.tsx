@@ -41,11 +41,11 @@ export const MethodSwitcher: React.FC<MethodSwitcherProps> = ({ currentMethod, a
     <div className="space-y-4 pt-2">
       {/* Divider with "Or use" text */}
       <div className="relative flex items-center">
-        <div className="flex-grow border-t border-border"></div>
+        <div className="grow border-t border-border"></div>
         <Typography variant="body2" intent="muted" className="px-3 bg-card">
           Or use
         </Typography>
-        <div className="flex-grow border-t border-border"></div>
+        <div className="grow border-t border-border"></div>
       </div>
 
       {/* Method Buttons */}
@@ -58,7 +58,7 @@ export const MethodSwitcher: React.FC<MethodSwitcherProps> = ({ currentMethod, a
             <Button
               key={method}
               variant="outline"
-              className="w-[127px] h-[65px] border border-border rounded-[12px] flex flex-col items-center justify-center gap-1 p-2"
+              className="w-32 h-16 border border-border rounded-xl flex flex-col items-center justify-center gap-1 p-2"
               onClick={() => onMethodChange(method)}
             >
               <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
