@@ -1,4 +1,9 @@
-import type { BuFeatureLocks, BuMatrixApp, FeatureUnlocks, PlatformBucket } from '@vritti/api-sdk/catalog-resolver';
+import type {
+  BuFeatureLocks,
+  BuMatrixApp,
+  FeatureUnlocks,
+  PlatformBucket,
+} from '@vritti/quantum-ui/types/catalog-resolver';
 import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
 
 // The matrix value is the EFFECTIVE selection: a code-keyed, per-platform allow-list. A platform key present (even an

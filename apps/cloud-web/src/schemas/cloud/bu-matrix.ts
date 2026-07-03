@@ -1,10 +1,15 @@
 // Snapshot-driven Apps & Features matrix — shared by the BU lock editor and the Create Custom Role picker.
-// Canonical types live in @vritti/api-sdk/catalog-resolver (type-only imports — never runtime).
+// Canonical types and the runtime PLATFORMS const live in @vritti/quantum-ui/types/catalog-resolver.
 
-import type { BuFeatureLocks, BuMatrixApp, FeatureUnlocks, PlatformBucket } from '@vritti/api-sdk/catalog-resolver';
+import type {
+  BuFeatureLocks,
+  BuMatrixApp,
+  FeatureUnlocks,
+  PlatformBucket,
+} from '@vritti/quantum-ui/types/catalog-resolver';
+import { PLATFORMS as MATRIX_PLATFORMS } from '@vritti/quantum-ui/types/catalog-resolver';
 
-// Mirrors api-sdk's runtime PLATFORMS const — kept local so api-sdk imports stay type-only
-export const MATRIX_PLATFORMS: PlatformBucket[] = ['web', 'mobile'];
+export { PLATFORMS as MATRIX_PLATFORMS } from '@vritti/quantum-ui/types/catalog-resolver';
 export const PLATFORM_LABEL: Record<PlatformBucket, string> = { web: 'Web', mobile: 'Mobile' };
 
 // PUT body for the BU lock editor: locks = plan ceiling − effective selection

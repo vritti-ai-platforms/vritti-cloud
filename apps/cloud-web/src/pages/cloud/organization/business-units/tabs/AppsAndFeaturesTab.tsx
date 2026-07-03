@@ -1,8 +1,8 @@
 import { useBuPermissionMatrix, useSetBuPermissions } from '@hooks/cloud/org-business-units';
-import type { BuFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Form } from '@vritti/quantum-ui/Form';
+import type { BuFeatureLocks } from '@vritti/quantum-ui/types/catalog-resolver';
 import { Layers, LockKeyhole } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';

@@ -1,4 +1,4 @@
-import type { FeatureUnlocks, RevokedGrants } from '@vritti/api-sdk/catalog-resolver';
+import type { FeatureUnlocks, RevokedGrants } from '@vritti/quantum-ui/types/catalog-resolver';
 import { z } from '@vritti/quantum-ui/zod';
 
 export interface Role {

@@ -1,5 +1,5 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse } from '@vritti/quantum-ui/types/api-response';
 import type { AxiosError } from 'axios';
 import type { VersionBusiness } from '@/schemas/admin/version-businesses';
 import { assignVersionBusiness } from '@/services/admin/versions/businesses.service';

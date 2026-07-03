@@ -1,5 +1,5 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 import type { AxiosError } from 'axios';
 import type { UpdatePlanData } from '@/schemas/admin/plans';
 import { updatePlan } from '@/services/admin/versions/businesses/plans.service';

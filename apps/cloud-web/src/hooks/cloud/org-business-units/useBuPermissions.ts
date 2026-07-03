@@ -1,6 +1,6 @@
 import { type UseMutationOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { BuFeatureLocks, BuMatrix } from '@vritti/api-sdk/catalog-resolver';
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
+import type { BuFeatureLocks, BuMatrix } from '@vritti/quantum-ui/types/catalog-resolver';
 import type { AxiosError } from 'axios';
 import { getBuPermissionMatrix, setBuPermissions } from '@/services/cloud/org-business-units.service';
 import { BU_COMPATIBLE_ROLES_KEY } from './useCompatibleRoles';

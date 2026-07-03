@@ -1,5 +1,5 @@
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 import type { BusinessFeaturePermission, BusinessFeaturesTableResponse } from '@/schemas/admin/business-features';
 
 // Fetches the features a business's apps include (with their apps + permission count) for the data table

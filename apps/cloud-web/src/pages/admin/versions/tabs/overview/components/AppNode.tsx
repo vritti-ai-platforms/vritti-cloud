@@ -1,5 +1,5 @@
-import type { SnapshotApp, SnapshotFeature } from '@vritti/api-sdk/catalog-resolver';
 import { Badge } from '@vritti/quantum-ui/Badge';
+import type { SnapshotApp, SnapshotFeature } from '@vritti/quantum-ui/types/catalog-resolver';
 import { ChevronDown, ChevronRight, Layers } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { FeatureRow } from './FeatureRow';

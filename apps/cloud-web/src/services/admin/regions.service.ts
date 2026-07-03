@@ -1,5 +1,5 @@
-import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { CreateResponse } from '@vritti/quantum-ui/types/api-response';
 import type { CreateRegionData, Region, RegionsResponse, UpdateRegionData } from '@/schemas/admin/regions';
 
 // Fetches regions for the data table — server applies filter/sort state

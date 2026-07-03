@@ -1,5 +1,5 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse } from '@vritti/quantum-ui/types/api-response';
 import type { AxiosError } from 'axios';
 import type { CreateRoleData, Role } from '@/schemas/cloud/roles';
 import { createRole } from '../../../services/cloud/roles.service';

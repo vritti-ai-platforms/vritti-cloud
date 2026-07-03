@@ -1,5 +1,5 @@
-import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { CreateResponse } from '@vritti/quantum-ui/types/api-response';
 import type { Business, BusinessesResponse, CreateBusinessData, UpdateBusinessData } from '@/schemas/admin/businesses';
 
 // Fetches businesses for the data table — server applies filter/sort state

@@ -1,5 +1,5 @@
-import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 import type { CreateVersionData, UpdateVersionData, Version, VersionsTableResponse } from '@/schemas/admin/versions';
 
 // Fetches versions for the data table — server applies filter/sort state

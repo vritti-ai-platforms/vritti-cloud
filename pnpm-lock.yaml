@@ -75,8 +75,8 @@ importers:
         specifier: ^13.2.2
         version: 13.3.0
       '@vritti/api-sdk':
-        specifier: ^0.2.10
-        version: 0.2.10(1e04183797c33645dc0e84c68fc3ed8f)
+        specifier: ^0.3.2
+        version: 0.3.2(1e04183797c33645dc0e84c68fc3ed8f)
       axios:
         specifier: ^1.13.2
         version: 1.13.6
@@ -201,12 +201,9 @@ importers:
       '@tanstack/react-query':
         specifier: ^5.100.10
         version: 5.100.10(react@19.2.3)
-      '@vritti/api-sdk':
-        specifier: ^0.3.1
-        version: 0.3.1(1e04183797c33645dc0e84c68fc3ed8f)
       '@vritti/quantum-ui':
-        specifier: 0.3.11
-        version: 0.3.11(@tanstack/react-query@5.100.10(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.11)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.2(react@19.2.3))(react-is@18.3.1)(react-router-dom@7.13.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(redux@5.0.1)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.4.0)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(yjs@13.6.31)
+        specifier: 0.3.12
+        version: 0.3.12(@tanstack/react-query@5.100.10(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.11)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.2(react@19.2.3))(react-is@18.3.1)(react-router-dom@7.13.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(redux@5.0.1)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.4.0)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(yjs@13.6.31)
       axios:
         specifier: ^1.13.2
         version: 1.13.6
@@ -4546,32 +4543,8 @@ packages:
   '@vitest/utils@3.2.4':
     resolution: {integrity: sha512-fB2V0JFrQSMsCo9HiSq3Ezpdv4iYaXRG1Sx8edX3MwxfyNn83mKiGzOcH+Fkxt4MHxr3y42fQi1oeAInqgX2QA==}
 
-  '@vritti/api-sdk@0.2.10':
-    resolution: {integrity: sha512-kAvmuaKLlWbrGhDl64vymnxMQJqtAXMUs51wJNtfhlM9k5fM93TsPWvSephG0oRyIYkGZrlO+9Kyc2QQMM8vPA==}
-    peerDependencies:
-      '@nestjs/common': ^11.0.0
-      '@nestjs/config': ^4.0.0
-      '@nestjs/core': ^11.0.0
-      '@nestjs/jwt': ^11.0.0
-      '@nestjs/microservices': ^11.0.0
-      '@nestjs/swagger': ^11.0.0
-      class-transformer: ^0.5.0
-      class-validator: ^0.14.0
-      fastify: 5.7.4
-      reflect-metadata: ^0.2.0
-      rxjs: ^7.8.0
-    peerDependenciesMeta:
-      '@nestjs/microservices':
-        optional: true
-      '@nestjs/swagger':
-        optional: true
-      class-transformer:
-        optional: true
-      class-validator:
-        optional: true
-
-  '@vritti/api-sdk@0.3.1':
-    resolution: {integrity: sha512-1Cbfd8mf+7s4G/vJRSBiJUr4cMUKBr2bAouFiwEfoADW6E3DruRloP//2DwA3RxkS3z3kRFxBofsLle+ZWNy6A==}
+  '@vritti/api-sdk@0.3.2':
+    resolution: {integrity: sha512-2ozCBeUgTSnBTFUEzcvH3cQSBWFr99hzvhgSoYCQQDMBVWum5WXD2E3J9swUB3kDKHQJGjHymhtZe6CoThTLuQ==}
     peerDependencies:
       '@nestjs/common': ^11.0.0
       '@nestjs/config': ^4.0.0
@@ -4597,8 +4570,8 @@ packages:
       class-validator:
         optional: true
 
-  '@vritti/quantum-ui@0.3.11':
-    resolution: {integrity: sha512-Eez3vLik+FzbdO+71kNMvpCzig6L0pBh/ZG3rtczTRfiJGL4nWAqg35nhGYjH/04+ZpK+1lg+DKsnUlhBlRFsw==}
+  '@vritti/quantum-ui@0.3.12':
+    resolution: {integrity: sha512-+GUHRYMu6+Thj+aKdVfWUyFx6j04kKYRNCsZ3vDVdKjoFkzKX7CTbnR1DXVcYXcwLO+JtsKXWwP1IqtLL1ohdA==}
     peerDependencies:
       '@tanstack/react-query': ^5.0.0
       react: ^18.0.0 || ^19.0.0
@@ -14957,7 +14930,7 @@ snapshots:
       loupe: 3.2.1
       tinyrainbow: 2.0.0
 
-  '@vritti/api-sdk@0.2.10(1e04183797c33645dc0e84c68fc3ed8f)':
+  '@vritti/api-sdk@0.3.2(1e04183797c33645dc0e84c68fc3ed8f)':
     dependencies:
       '@getbrevo/brevo': 4.0.1
       '@nestjs/common': 11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -15021,71 +14994,7 @@ snapshots:
       - valibot
       - zod
 
-  '@vritti/api-sdk@0.3.1(1e04183797c33645dc0e84c68fc3ed8f)':
-    dependencies:
-      '@getbrevo/brevo': 4.0.1
-      '@nestjs/common': 11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/config': 4.0.3(@nestjs/common@11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(rxjs@7.8.2)
-      '@nestjs/core': 11.1.16(@nestjs/common@11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/jwt': 11.0.2(@nestjs/common@11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))
-      decimal.js: 10.6.0
-      dinero.js: 2.0.2
-      drizzle-orm: 1.0.0-rc.3(@sinclair/typebox@0.34.48)(@types/mssql@9.1.9(@azure/core-client@1.10.2))(@types/pg@8.18.0)(mssql@11.0.1(@azure/core-client@1.10.2))(pg@8.20.0)(zod@4.4.3)
-      fastify: 5.7.4
-      ioredis: 5.11.1
-      lodash: 4.18.1
-      nats: 2.29.3
-      pg: 8.20.0
-      reflect-metadata: 0.2.2
-      rxjs: 7.8.2
-      winston: 3.19.0
-      winston-daily-rotate-file: 5.0.0(winston@3.19.0)
-      xlsx: 0.18.5
-    optionalDependencies:
-      '@nestjs/swagger': 11.2.6(@fastify/static@9.0.0)(@nestjs/common@11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.16(@nestjs/common@11.1.16(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)(rxjs@7.8.2))(reflect-metadata@0.2.2)(rxjs@7.8.2))(class-transformer@0.5.1)(class-validator@0.14.4)(reflect-metadata@0.2.2)
-      class-transformer: 0.5.1
-      class-validator: 0.14.4
-    transitivePeerDependencies:
-      - '@aws-sdk/client-rds-data'
-      - '@cloudflare/workers-types'
-      - '@effect/sql-pg'
-      - '@electric-sql/pglite'
-      - '@libsql/client'
-      - '@libsql/client-wasm'
-      - '@neondatabase/serverless'
-      - '@op-engineering/op-sqlite'
-      - '@opentelemetry/api'
-      - '@planetscale/database'
-      - '@sinclair/typebox'
-      - '@sqlitecloud/drivers'
-      - '@tidbcloud/serverless'
-      - '@tursodatabase/database'
-      - '@tursodatabase/database-common'
-      - '@tursodatabase/database-wasm'
-      - '@types/better-sqlite3'
-      - '@types/mssql'
-      - '@types/pg'
-      - '@types/sql.js'
-      - '@upstash/redis'
-      - '@vercel/postgres'
-      - '@xata.io/client'
-      - arktype
-      - better-sqlite3
-      - bun-types
-      - effect
-      - expo-sqlite
-      - mssql
-      - mysql2
-      - pg-native
-      - postgres
-      - sql.js
-      - sqlite3
-      - supports-color
-      - typebox
-      - valibot
-      - zod
-
-  '@vritti/quantum-ui@0.3.11(@tanstack/react-query@5.100.10(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.11)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.2(react@19.2.3))(react-is@18.3.1)(react-router-dom@7.13.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(redux@5.0.1)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.4.0)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(yjs@13.6.31)':
+  '@vritti/quantum-ui@0.3.12(@tanstack/react-query@5.100.10(react@19.2.3))(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(immer@11.1.11)(react-dom@19.2.3(react@19.2.3))(react-hook-form@7.71.2(react@19.2.3))(react-is@18.3.1)(react-router-dom@7.13.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)(redux@5.0.1)(use-sync-external-store@1.6.0(react@19.2.3))(vite@7.3.1(@types/node@25.4.0)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2))(yjs@13.6.31)':
     dependencies:
       '@dagrejs/dagre': 3.0.0
       '@date-fns/tz': 1.5.0
@@ -15146,7 +15055,7 @@ snapshots:
       fast-equals: 6.0.0
       input-otp: 1.4.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       lexical: 0.41.0
-      lodash: 4.17.23
+      lodash: 4.18.1
       lucide-react: 0.562.0(react@19.2.3)
       motion: 12.42.2(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       pluralize-esm: 9.0.5

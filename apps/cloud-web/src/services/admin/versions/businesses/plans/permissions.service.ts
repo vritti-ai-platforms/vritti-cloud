@@ -1,5 +1,5 @@
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 
 // Plan matrix terminology = "unlocks" (a plan UNLOCKS feature-permissions). Types are plan-owned (not shared).
 export type Platform = 'WEB' | 'MOBILE';

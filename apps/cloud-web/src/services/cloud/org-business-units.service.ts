@@ -1,6 +1,6 @@
-import type { BuFeatureLocks, BuMatrix } from '@vritti/api-sdk/catalog-resolver';
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
+import type { BuFeatureLocks, BuMatrix } from '@vritti/quantum-ui/types/catalog-resolver';
 import type {
   BusinessUnit,
   BusinessUnitsResponse,

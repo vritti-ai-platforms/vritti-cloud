@@ -72,7 +72,7 @@ type UseLoginOptions = Omit<UseMutationOptions<LoginResponse, AxiosError, LoginD
 Create mutations return `{ success, message, data }` from the backend. Use `CreateResponse<T>` from quantum-ui.
 
 ```typescript
-import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse } from '@vritti/quantum-ui/types/api-response';
 
 type UseCreateFeatureOptions = Omit<UseMutationOptions<CreateResponse<Feature>, AxiosError, CreateFeatureData>, 'mutationFn'>;
 

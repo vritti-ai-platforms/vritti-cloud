@@ -1,6 +1,6 @@
-import type { CreateResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
-import type { TableViewState } from '@vritti/quantum-ui/table-filter';
+import type { CreateResponse } from '@vritti/quantum-ui/types/api-response';
+import type { TableViewState } from '@vritti/quantum-ui/types/table-filter';
 import type { CloudProvider, CloudProviderPayload } from '@/schemas/admin/cloud-providers';
 
 export interface CloudProvidersResponse {

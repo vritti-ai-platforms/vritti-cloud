@@ -1,5 +1,5 @@
-import type { VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
-import type { TableResponse } from '@vritti/quantum-ui/api-response';
+import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
+import type { VersionSnapshot } from '@vritti/quantum-ui/types/catalog-resolver';
 import { z } from '@vritti/quantum-ui/zod';
 
 export type VersionStatus = 'ALPHA' | 'BETA' | 'PROD';

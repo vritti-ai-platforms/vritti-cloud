@@ -1,8 +1,8 @@
-import type { SnapshotApp, SnapshotBusiness, VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { motion } from '@vritti/quantum-ui/motion';
+import type { SnapshotApp, SnapshotBusiness, VersionSnapshot } from '@vritti/quantum-ui/types/catalog-resolver';
 import { Building2, Globe, Layers, Monitor, Shield } from 'lucide-react';
 import { AppNode } from './AppNode';
 import { FeatureRow } from './FeatureRow';

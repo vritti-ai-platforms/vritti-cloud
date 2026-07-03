@@ -1,7 +1,6 @@
 import { useOrgUsers } from '@hooks/cloud/organizations/useOrgUsers';
 import { useRoles } from '@hooks/cloud/roles';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
@@ -10,6 +9,7 @@ import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 import type { AxiosError } from 'axios';
 import { Pencil, Shield, Trash2, UserPlus, Users } from 'lucide-react';
 import { useRef } from 'react';

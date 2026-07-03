@@ -1,15 +1,15 @@
+import { Badge } from '@vritti/quantum-ui/Badge';
+import { Checkbox } from '@vritti/quantum-ui/Checkbox';
+import { Collapsible } from '@vritti/quantum-ui/Collapsible';
+import { CompactSwitch } from '@vritti/quantum-ui/Switch';
+import { Tooltip } from '@vritti/quantum-ui/Tooltip';
 import type {
   BuMatrixApp,
   BuMatrixCell,
   BuMatrixFeature,
   FeatureUnlocks,
   PlatformBucket,
-} from '@vritti/api-sdk/catalog-resolver';
-import { Badge } from '@vritti/quantum-ui/Badge';
-import { Checkbox } from '@vritti/quantum-ui/Checkbox';
-import { Collapsible } from '@vritti/quantum-ui/Collapsible';
-import { CompactSwitch } from '@vritti/quantum-ui/Switch';
-import { Tooltip } from '@vritti/quantum-ui/Tooltip';
+} from '@vritti/quantum-ui/types/catalog-resolver';
 import { Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';

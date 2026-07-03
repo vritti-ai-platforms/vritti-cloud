@@ -1,8 +1,8 @@
 import { usePermissions, useRoleTemplates, useUpdateRole } from '@hooks/cloud/roles';
-import type { FeatureUnlocks } from '@vritti/api-sdk/catalog-resolver';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { Form } from '@vritti/quantum-ui/Form';
+import type { FeatureUnlocks } from '@vritti/quantum-ui/types/catalog-resolver';
 import { Layers } from 'lucide-react';
 import type React from 'react';
 import { useForm } from 'react-hook-form';

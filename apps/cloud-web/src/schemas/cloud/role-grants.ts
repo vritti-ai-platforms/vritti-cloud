@@ -1,7 +1,7 @@
-import type { FeatureUnlocks, PlatformBucket, RevokedGrants } from '@vritti/api-sdk/catalog-resolver';
+import type { FeatureUnlocks, PlatformBucket, RevokedGrants } from '@vritti/quantum-ui/types/catalog-resolver';
 import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
 
-// Composes a based role's effective grants: base ∪ additions − revoked (mirrors api-sdk composeRoleGrants).
+// Composes a based role's effective grants: base ∪ additions − revoked (mirrors the server's composeRoleGrants).
 // Membership exists when either side has the platform key ([] = member, view-only); revoked null drops the
 // platform entirely, string[] subtracts codes but keeps membership; featureless entries disappear.
 export function composeGrants(

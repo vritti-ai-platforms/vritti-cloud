@@ -1,4 +1,4 @@
-import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@vritti/api-sdk/catalog-resolver';
+import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@vritti/quantum-ui/types/catalog-resolver';
 import { ChevronDown, ChevronRight, Layers, Shield, Zap } from 'lucide-react';
 import { useState } from 'react';
 

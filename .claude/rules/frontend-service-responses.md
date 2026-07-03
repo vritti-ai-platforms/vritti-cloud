@@ -2,14 +2,14 @@
 
 ## Do NOT use MutationResponse from quantum-ui
 
-Never import `MutationResponse` from `@vritti/quantum-ui/api-response`. Use properly typed responses.
+Never import `MutationResponse` from `@vritti/quantum-ui/types/api-response`. Use properly typed responses.
 
 ## Create services → return CreateResponse\<Entity\>
 
 The backend wraps created entities in `{ success, message, data }`. Use `CreateResponse<T>` from quantum-ui.
 
 ```typescript
-import type { CreateResponse } from '@vritti/quantum-ui/api-response';
+import type { CreateResponse } from '@vritti/quantum-ui/types/api-response';
 
 // CORRECT
 export function createFeature(data: CreateFeatureData): Promise<CreateResponse<Feature>> {
@@ -30,7 +30,7 @@ export function createFeature(data: CreateFeatureData): Promise<MutationResponse
 ## Update/delete services → return SuccessResponse
 
 ```typescript
-import type { SuccessResponse } from '@vritti/quantum-ui/api-response';
+import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 
 export function updateFeature({ id, data }): Promise<SuccessResponse> {
   return axios.patch<SuccessResponse>(`admin-api/features/${id}`, data).then((r) => r.data);
@@ -43,7 +43,7 @@ For endpoints that return paginated table data with server-managed state, use th
 
 ```typescript
 // In schemas/admin/features.ts
-import type { TableResponse } from '@vritti/quantum-ui/api-response';
+import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
 export type FeaturesTableResponse = TableResponse<Feature>;
 ```
 

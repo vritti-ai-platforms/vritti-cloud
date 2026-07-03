@@ -1,8 +1,8 @@
 import { usePermissions } from '@hooks/cloud/roles/usePermissions';
-import type { BuMatrixCell, BuMatrixFeature, PlatformBucket } from '@vritti/api-sdk/catalog-resolver';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
+import type { BuMatrixCell, BuMatrixFeature, PlatformBucket } from '@vritti/quantum-ui/types/catalog-resolver';
 import { Check, Layers, Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';

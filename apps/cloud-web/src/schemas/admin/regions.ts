@@ -1,4 +1,4 @@
-import type { TableViewState } from '@vritti/quantum-ui/table-filter';
+import type { TableViewState } from '@vritti/quantum-ui/types/table-filter';
 import { z } from '@vritti/quantum-ui/zod';
 
 export interface RegionProvider {

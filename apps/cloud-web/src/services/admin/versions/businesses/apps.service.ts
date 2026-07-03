@@ -1,5 +1,5 @@
-import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/api-response';
 import { axios } from '@vritti/quantum-ui/axios';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 import type { App, AppsTableResponse, CreateAppData, UpdateAppData } from '@/schemas/admin/apps';
 
 // Fetches apps for the data table scoped to a business — server applies filter/sort state

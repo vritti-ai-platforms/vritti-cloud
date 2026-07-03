@@ -1,5 +1,5 @@
 import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
-import type { BuMatrix } from '@vritti/api-sdk/catalog-resolver';
+import type { BuMatrix } from '@vritti/quantum-ui/types/catalog-resolver';
 import type { AxiosError } from 'axios';
 import { getOrgPermissions } from '../../../services/cloud/org-permissions.service';
 

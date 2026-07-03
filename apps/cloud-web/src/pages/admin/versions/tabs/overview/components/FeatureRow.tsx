@@ -1,4 +1,4 @@
-import type { SnapshotFeature } from '@vritti/api-sdk/catalog-resolver';
+import type { SnapshotFeature } from '@vritti/quantum-ui/types/catalog-resolver';
 import { ChevronDown, ChevronRight, Globe, Monitor, Smartphone } from 'lucide-react';
 import { useState } from 'react';
 
