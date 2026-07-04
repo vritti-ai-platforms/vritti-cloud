@@ -29,10 +29,10 @@ export class CoreUserService {
   // Creates or upserts a user in core and triggers invite email for new users
   async inviteUser(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     data: { orgId: string; email: string; fullName: string; phone?: string; phoneCountry?: string },
   ): Promise<CoreSuccessDto> {
-    const result = await this.http.post<CoreSuccessDto>(url, webhookSecret, '/users/webhook', data, {
+    const result = await this.http.post<CoreSuccessDto>(url, signingKey, '/users/internal', data, {
       orgId: data.orgId,
     });
     this.logger.log(`Invited user in core: ${data.email}`);
@@ -40,8 +40,8 @@ export class CoreUserService {
   }
 
   // Fetches all portal users for an organization from core
-  async getUsers(url: string, webhookSecret: string, orgId: string): Promise<CoreUserDto[]> {
-    const result = await this.http.get<CoreUserDto[]>(url, webhookSecret, '/users/webhook', {
+  async getUsers(url: string, signingKey: string, orgId: string): Promise<CoreUserDto[]> {
+    const result = await this.http.get<CoreUserDto[]>(url, signingKey, '/users/internal', {
       orgId,
       params: { orgId },
     });
@@ -52,12 +52,12 @@ export class CoreUserService {
   // Updates a user's details in core
   async updateUser(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     userId: string,
     data: { email?: string; fullName?: string; status?: string; locale?: string; timezone?: string },
   ): Promise<CoreSuccessDto> {
-    const result = await this.http.patch<CoreSuccessDto>(url, webhookSecret, `/users/webhook/${userId}`, data, {
+    const result = await this.http.patch<CoreSuccessDto>(url, signingKey, `/users/internal/${userId}`, data, {
       orgId,
     });
     this.logger.log(`Updated user in core: ${userId}`);
@@ -67,7 +67,7 @@ export class CoreUserService {
   // Fetches paginated and filtered portal users for an organization from core
   async getUsersTable(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     params: {
       orgId: string;
       filters?: string;
@@ -77,7 +77,7 @@ export class CoreUserService {
       offset?: number;
     },
   ): Promise<{ result: CoreUserDto[]; count: number }> {
-    const result = await this.http.get<{ result: CoreUserDto[]; count: number }>(url, webhookSecret, '/users/webhook', {
+    const result = await this.http.get<{ result: CoreUserDto[]; count: number }>(url, signingKey, '/users/internal', {
       orgId: params.orgId,
       params: params as Record<string, unknown>,
     });
@@ -86,11 +86,11 @@ export class CoreUserService {
   }
 
   // Resends invitation email to a pending user in core
-  async resendInvite(url: string, webhookSecret: string, orgId: string, userId: string): Promise<SuccessResponseDto> {
+  async resendInvite(url: string, signingKey: string, orgId: string, userId: string): Promise<SuccessResponseDto> {
     const result = await this.http.post<SuccessResponseDto>(
       url,
-      webhookSecret,
-      `/users/webhook/${userId}/resend-invite`,
+      signingKey,
+      `/users/internal/${userId}/resend-invite`,
       {},
       { orgId },
     );

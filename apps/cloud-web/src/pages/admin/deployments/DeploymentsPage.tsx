@@ -7,9 +7,11 @@ import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Eye, Plus, Server } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Deployment } from '@/schemas/admin/deployments';
+import type { Deployment, DeploymentSigningKey } from '@/schemas/admin/deployments';
 import { AddDeploymentForm } from './forms/AddDeploymentForm';
+import { SigningKeyRevealDialog } from './SigningKeyRevealDialog';
 
 const TABLE_SLUG = 'deployments';
 
@@ -17,6 +19,17 @@ export const DeploymentsPage = () => {
   const navigate = useNavigate();
   const { data: response, isLoading } = useDeployments();
   const addDialog = useDialog();
+  const signingKeyDialog = useDialog();
+  const [signingKey, setSigningKey] = useState<DeploymentSigningKey | null>(null);
+
+  // Close the add dialog and reveal the new deployment's signing public key (shown only once)
+  const handleCreated = (close: () => void) => (deployment: Deployment) => {
+    close();
+    if (deployment.publicKey) {
+      setSigningKey({ deploymentId: deployment.id, publicKey: deployment.publicKey });
+      signingKeyDialog.open();
+    }
+  };
   const { table } = useDataTable({
     columns: getColumns({
       onView: (d) => navigate(`/deployments/${buildSlug(d.name, d.id)}`),
@@ -61,8 +74,10 @@ export const DeploymentsPage = () => {
         icon={Server}
         title="Add Deployment"
         description="Configure a new deployment environment."
-        content={(close) => <AddDeploymentForm onSuccess={close} onCancel={close} />}
+        content={(close) => <AddDeploymentForm onSuccess={handleCreated(close)} onCancel={close} />}
       />
+
+      <SigningKeyRevealDialog handle={signingKeyDialog} signingKey={signingKey} />
     </div>
   );
 };

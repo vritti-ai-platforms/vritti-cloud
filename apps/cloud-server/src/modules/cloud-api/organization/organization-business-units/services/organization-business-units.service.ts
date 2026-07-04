@@ -11,6 +11,7 @@ import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.
 import { CoreBusinessUnitService } from '@/modules/core-server/services/core-business-unit.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
+import { requireSigningKey } from '@/modules/core-server/signing-key.util';
 import type { SetBuLocksDto } from '../dto/request/set-bu-locks.dto';
 import type { BuMatrixResponseDto } from '../dto/response/bu-matrix.response.dto';
 import type { BuRoleAssignment, CoreBusinessUnit, CoreRole } from '../types';
@@ -34,7 +35,7 @@ export class OrganizationBusinessUnitsService {
 
     const businessUnits = await this.coreBusinessUnitService.getBusinessUnits(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
     );
     this.logger.log(`Fetched business units for org ${orgId}`);
@@ -50,7 +51,7 @@ export class OrganizationBusinessUnitsService {
 
     const result = await this.coreBusinessUnitService.createBusinessUnit(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       this.packMetadata(data),
     );
@@ -67,7 +68,7 @@ export class OrganizationBusinessUnitsService {
 
     const result = await this.coreBusinessUnitService.getBusinessUnit(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       buId,
     );
@@ -84,7 +85,7 @@ export class OrganizationBusinessUnitsService {
     const { parentId: _parentId, ...updateData } = this.packMetadata(data);
     const result = await this.coreBusinessUnitService.updateBusinessUnit(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       buId,
       updateData,
@@ -99,7 +100,7 @@ export class OrganizationBusinessUnitsService {
 
     const result = await this.coreBusinessUnitService.deleteBusinessUnit(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       buId,
     );
@@ -113,7 +114,7 @@ export class OrganizationBusinessUnitsService {
 
     return this.coreBusinessUnitService.getRoleAssignments(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       buId,
     );
@@ -125,7 +126,7 @@ export class OrganizationBusinessUnitsService {
 
     return this.coreBusinessUnitService.assignRole(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       data.userId,
       {
@@ -142,7 +143,7 @@ export class OrganizationBusinessUnitsService {
     // Core-server DELETE /users/webhook/:userId/roles/:assignmentId — userId is ignored, only assignmentId matters
     return this.coreBusinessUnitService.removeRoleAssignment(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       '_',
       assignmentId,
@@ -197,7 +198,12 @@ export class OrganizationBusinessUnitsService {
   async getCompatibleRoles(orgId: string, buId: string): Promise<CoreRole[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    return this.coreRoleService.getCompatibleRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier, buId);
+    return this.coreRoleService.getCompatibleRoles(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      buId,
+    );
   }
 
   // Loads the org's version snapshot + its plan (from snapshot.businesses[businessCode].plans[planCode]).
@@ -235,7 +241,7 @@ export class OrganizationBusinessUnitsService {
 
     const businessUnits = await this.coreBusinessUnitService.getBusinessUnits(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
     );
     const currentCount = Array.isArray(businessUnits) ? businessUnits.length : 0;

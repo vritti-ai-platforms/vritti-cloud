@@ -1,18 +1,13 @@
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { NotFoundException } from '@vritti/api-sdk';
 import { buildBuRoles, type VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
-import {
-  type CatalogLicense,
-  hashSnapshot,
-  type OrgEntitlement,
-  type SignedDocument,
-  signDocument,
-} from '@vritti/api-sdk/license';
+import { type CatalogLicense, hashSnapshot, type OrgEntitlement, type SignedDocument } from '@vritti/api-sdk/license';
+import { signDocument } from '@vritti/api-sdk/signing';
 import type { Deployment, Organization } from '@/db/schema';
 import { CoreVersionRepository } from '../repositories/core-version.repository';
+import { requireSigningKey } from '../signing-key.util';
 import { CoreBusinessUnitService } from './core-business-unit.service';
 import { CoreCatalogService } from './core-catalog.service';
 import { CoreDeploymentService } from './core-deployment.service';
@@ -27,7 +22,6 @@ export class CatalogSyncService {
   private readonly logger = new Logger(CatalogSyncService.name);
 
   constructor(
-    private readonly configService: ConfigService,
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly coreCatalogService: CoreCatalogService,
     private readonly coreOrganizationService: CoreOrganizationService,
@@ -77,7 +71,7 @@ export class CatalogSyncService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     await this.coreBusinessUnitService.pushBuLocks(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       buId,
       org.buLocks?.[buId] ?? null,
@@ -93,7 +87,7 @@ export class CatalogSyncService {
 
     const roles = buildBuRoles(snapshot, org.businessCode);
     if (roles.length === 0) return;
-    await this.coreRoleService.provisionRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier, roles);
+    await this.coreRoleService.provisionRoles(deployment.url, requireSigningKey(deployment), org.orgIdentifier, roles);
     this.logger.log(`Synced ${roles.length} role template(s) for org ${orgId}`);
   }
 
@@ -105,7 +99,12 @@ export class CatalogSyncService {
     for (const org of orgs) {
       const roles = buildBuRoles(snapshot, org.businessCode);
       if (roles.length > 0) {
-        await this.coreRoleService.provisionRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier, roles);
+        await this.coreRoleService.provisionRoles(
+          deployment.url,
+          requireSigningKey(deployment),
+          org.orgIdentifier,
+          roles,
+        );
       }
       await this.pushOrgEntitlement(org, deployment);
     }
@@ -122,7 +121,11 @@ export class CatalogSyncService {
       snapshot,
       issuedAt: new Date().toISOString(),
     };
-    await this.coreCatalogService.pushCatalog(deployment.url, deployment.webhookSecret, this.sign(license));
+    await this.coreCatalogService.pushCatalog(
+      deployment.url,
+      requireSigningKey(deployment),
+      this.sign(license, deployment),
+    );
     await this.deploymentRepository.update(deployment.id, { lastPushedHash: hash });
   }
 
@@ -138,9 +141,9 @@ export class CatalogSyncService {
       };
       await this.coreOrganizationService.pushEntitlement(
         deployment.url,
-        deployment.webhookSecret,
+        requireSigningKey(deployment),
         org.orgIdentifier,
-        this.sign(entitlement),
+        this.sign(entitlement, deployment),
       );
       this.logger.log(`Pushed entitlement for org ${org.id} (plan ${org.planCode})`);
     } catch (error: unknown) {
@@ -148,9 +151,9 @@ export class CatalogSyncService {
     }
   }
 
-  // Signs a license payload with the cloud Ed25519 private key
-  private sign<T>(payload: T): SignedDocument<T> {
-    return signDocument(payload, this.configService.getOrThrow<string>('LICENSE_SIGNING_KEY'));
+  // Signs a license payload with the deployment's own Ed25519 signing key
+  private sign<T>(payload: T, deployment: Deployment): SignedDocument<T> {
+    return signDocument(payload, requireSigningKey(deployment));
   }
 
   // Loads the stored snapshot document for a deployment's pinned version

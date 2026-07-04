@@ -12,10 +12,10 @@ export class CoreOrganizationService {
   // Creates an organization in core and returns the nexus org ID
   async createOrganization(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     data: { name: string; subdomain: string; size: string; logoUrl?: string },
   ): Promise<{ id: string }> {
-    const result = await this.http.post<{ id: string }>(url, webhookSecret, '/organizations/webhook', data);
+    const result = await this.http.post<{ id: string }>(url, signingKey, '/organizations/internal', data);
     this.logger.log(`Created organization in core: ${data.subdomain} (${result.id})`);
     return result;
   }
@@ -23,28 +23,28 @@ export class CoreOrganizationService {
   // Updates an organization in core
   async updateOrganization(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     data: Record<string, unknown>,
   ): Promise<void> {
-    await this.http.patch(url, webhookSecret, `/organizations/webhook/${orgId}`, data, { orgId });
+    await this.http.patch(url, signingKey, `/organizations/internal/${orgId}`, data, { orgId });
     this.logger.log(`Updated organization in core: ${orgId}`);
   }
 
   // Pushes a signed plan/business entitlement document for an organization to core
   async pushEntitlement(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     doc: SignedDocument<OrgEntitlement>,
   ): Promise<void> {
-    await this.http.patch(url, webhookSecret, `/organizations/webhook/${orgId}/entitlement`, doc, { orgId });
+    await this.http.patch(url, signingKey, `/organizations/internal/${orgId}/entitlement`, doc, { orgId });
     this.logger.log(`Pushed entitlement for organization ${orgId} in core`);
   }
 
   // Deletes an organization in core
-  async deleteOrganization(url: string, webhookSecret: string, orgId: string): Promise<void> {
-    await this.http.delete(url, webhookSecret, `/organizations/webhook/${orgId}`, { orgId });
+  async deleteOrganization(url: string, signingKey: string, orgId: string): Promise<void> {
+    await this.http.delete(url, signingKey, `/organizations/internal/${orgId}`, { orgId });
     this.logger.log(`Deleted organization in core: ${orgId}`);
   }
 }

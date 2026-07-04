@@ -49,7 +49,14 @@ export class DeploymentDto {
   @ApiProperty({ example: 0 })
   organizationCount: number;
 
-  // Strips webhookSecret from the response for security
+  @ApiPropertyOptional({
+    example: 'MCowBQYDK2VwAyEA0V5v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v8=',
+    description:
+      'Ed25519 signing public key (base64). Present only in the create response — shown once, never retrievable again.',
+  })
+  publicKey?: string;
+
+  // Maps a deployment row to the API shape — the license signing key is never exposed
   static from(deployment: Deployment | DeploymentWithNames, organizationCount = 0): DeploymentDto {
     const dto = new DeploymentDto();
     dto.id = deployment.id;

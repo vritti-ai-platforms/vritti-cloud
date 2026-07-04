@@ -16,8 +16,8 @@ export class CoreBusinessUnitService {
   constructor(private readonly http: CoreHttpService) {}
 
   // Fetches all business units for an organization from core
-  async getBusinessUnits(url: string, webhookSecret: string, orgId: string): Promise<CoreBusinessUnit[]> {
-    const result = await this.http.get<CoreBusinessUnit[]>(url, webhookSecret, '/business-units/webhook', {
+  async getBusinessUnits(url: string, signingKey: string, orgId: string): Promise<CoreBusinessUnit[]> {
+    const result = await this.http.get<CoreBusinessUnit[]>(url, signingKey, '/business-units/internal', {
       orgId,
       params: { orgId },
     });
@@ -28,14 +28,14 @@ export class CoreBusinessUnitService {
   // Creates a new business unit in core
   async createBusinessUnit(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     buData: Record<string, unknown>,
   ): Promise<CoreBusinessUnit> {
     const result = await this.http.post<CoreBusinessUnit>(
       url,
-      webhookSecret,
-      '/business-units/webhook',
+      signingKey,
+      '/business-units/internal',
       { orgId, ...buData },
       { orgId },
     );
@@ -44,8 +44,8 @@ export class CoreBusinessUnitService {
   }
 
   // Fetches a single business unit and its subtree from core
-  async getBusinessUnit(url: string, webhookSecret: string, orgId: string, buId: string): Promise<CoreBusinessUnit[]> {
-    const result = await this.http.get<CoreBusinessUnit[]>(url, webhookSecret, `/business-units/webhook/${buId}`, {
+  async getBusinessUnit(url: string, signingKey: string, orgId: string, buId: string): Promise<CoreBusinessUnit[]> {
+    const result = await this.http.get<CoreBusinessUnit[]>(url, signingKey, `/business-units/internal/${buId}`, {
       orgId,
     });
     this.logger.log(`Fetched business unit ${buId} from core`);
@@ -55,33 +55,30 @@ export class CoreBusinessUnitService {
   // Updates a business unit in core
   async updateBusinessUnit(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     buId: string,
     data: Record<string, unknown>,
   ): Promise<SuccessResponseDto> {
     const result = await this.http.patch<SuccessResponseDto>(
       url,
-      webhookSecret,
-      `/business-units/webhook/${buId}`,
+      signingKey,
+      `/business-units/internal/${buId}`,
       data,
-      { orgId },
+      {
+        orgId,
+      },
     );
     this.logger.log(`Updated business unit ${buId} in core`);
     return result;
   }
 
   // Fetches role assignments for a business unit from core
-  async getRoleAssignments(
-    url: string,
-    webhookSecret: string,
-    orgId: string,
-    buId: string,
-  ): Promise<BuRoleAssignment[]> {
+  async getRoleAssignments(url: string, signingKey: string, orgId: string, buId: string): Promise<BuRoleAssignment[]> {
     const result = await this.http.get<BuRoleAssignment[]>(
       url,
-      webhookSecret,
-      `/business-units/webhook/${buId}/role-assignments`,
+      signingKey,
+      `/business-units/internal/${buId}/role-assignments`,
       { orgId },
     );
     this.logger.log(`Fetched ${result.length} role assignments for BU ${buId} from core`);
@@ -91,18 +88,14 @@ export class CoreBusinessUnitService {
   // Assigns a role to a user at a business unit in core
   async assignRole(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     userId: string,
     data: { roleId: string; businessUnitId: string },
   ): Promise<SuccessResponseDto> {
-    const result = await this.http.post<SuccessResponseDto>(
-      url,
-      webhookSecret,
-      `/users/webhook/${userId}/roles`,
-      data,
-      { orgId },
-    );
+    const result = await this.http.post<SuccessResponseDto>(url, signingKey, `/users/internal/${userId}/roles`, data, {
+      orgId,
+    });
     this.logger.log(`Assigned role to user ${userId} in core`);
     return result;
   }
@@ -110,15 +103,15 @@ export class CoreBusinessUnitService {
   // Removes a role assignment in core
   async removeRoleAssignment(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     userId: string,
     assignmentId: string,
   ): Promise<SuccessResponseDto> {
     const result = await this.http.delete<SuccessResponseDto>(
       url,
-      webhookSecret,
-      `/users/webhook/${userId}/roles/${assignmentId}`,
+      signingKey,
+      `/users/internal/${userId}/roles/${assignmentId}`,
       { orgId },
     );
     this.logger.log(`Removed role assignment ${assignmentId} in core`);
@@ -128,15 +121,15 @@ export class CoreBusinessUnitService {
   // Replaces a business unit's feature-lock overlay in core (null ⇒ the BU inherits the full plan)
   async pushBuLocks(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     buId: string,
     featureLocks: BuFeatureLocks | null,
   ): Promise<SuccessResponseDto> {
     const result = await this.http.put<SuccessResponseDto>(
       url,
-      webhookSecret,
-      `/business-units/webhook/${buId}/locks`,
+      signingKey,
+      `/business-units/internal/${buId}/locks`,
       { featureLocks },
       { orgId },
     );
@@ -145,13 +138,8 @@ export class CoreBusinessUnitService {
   }
 
   // Deletes a business unit in core
-  async deleteBusinessUnit(
-    url: string,
-    webhookSecret: string,
-    orgId: string,
-    buId: string,
-  ): Promise<SuccessResponseDto> {
-    const result = await this.http.delete<SuccessResponseDto>(url, webhookSecret, `/business-units/webhook/${buId}`, {
+  async deleteBusinessUnit(url: string, signingKey: string, orgId: string, buId: string): Promise<SuccessResponseDto> {
+    const result = await this.http.delete<SuccessResponseDto>(url, signingKey, `/business-units/internal/${buId}`, {
       orgId,
     });
     this.logger.log(`Deleted business unit ${buId} in core`);

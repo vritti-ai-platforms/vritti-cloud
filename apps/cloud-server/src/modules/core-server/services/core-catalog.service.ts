@@ -10,8 +10,8 @@ export class CoreCatalogService {
   constructor(private readonly http: CoreHttpService) {}
 
   // Replaces the deployment's active catalog with a signed license document (idempotent by snapshot hash)
-  async pushCatalog(url: string, webhookSecret: string, doc: SignedDocument<CatalogLicense>): Promise<void> {
-    await this.http.put(url, webhookSecret, '/catalog/webhook', doc);
+  async pushCatalog(url: string, signingKey: string, doc: SignedDocument<CatalogLicense>): Promise<void> {
+    await this.http.put(url, signingKey, '/catalog/internal', doc);
     this.logger.log(`Pushed catalog license for version ${doc.payload.version} (hash ${doc.payload.hash}) to core`);
   }
 }

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { DataTableStateService, type SuccessResponseDto } from '@vritti/api-sdk';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreUserService } from '@/modules/core-server/services/core-user.service';
+import { requireSigningKey } from '@/modules/core-server/signing-key.util';
 import type { InviteUserDto } from '../dto/request/invite-user.dto';
 import type { UpdateOrgUserDto } from '../dto/request/update-org-user.dto';
 import type { NexusUserResponseDto } from '../dto/response/nexus-user-response.dto';
@@ -21,7 +22,7 @@ export class OrganizationUsersService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
 
-    const { result, count } = await this.coreUserService.getUsersTable(deployment.url, deployment.webhookSecret, {
+    const { result, count } = await this.coreUserService.getUsersTable(deployment.url, requireSigningKey(deployment), {
       orgId: org.orgIdentifier,
       filters: state.filters?.length ? JSON.stringify(state.filters) : undefined,
       search: state.search?.value ? JSON.stringify(state.search) : undefined,
@@ -36,13 +37,13 @@ export class OrganizationUsersService {
   // Returns all nexus portal users for the organization
   async getUsers(orgId: string): Promise<NexusUserResponseDto[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.getUsers(deployment.url, deployment.webhookSecret, org.orgIdentifier);
+    return this.coreUserService.getUsers(deployment.url, requireSigningKey(deployment), org.orgIdentifier);
   }
 
   // Invites a user to the organization in nexus
   async inviteUser(orgId: string, dto: InviteUserDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.inviteUser(deployment.url, deployment.webhookSecret, {
+    return this.coreUserService.inviteUser(deployment.url, requireSigningKey(deployment), {
       orgId: org.orgIdentifier,
       email: dto.email,
       fullName: dto.fullName,
@@ -54,12 +55,18 @@ export class OrganizationUsersService {
   // Updates a user's details in nexus
   async updateUser(orgId: string, userId: string, dto: UpdateOrgUserDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.updateUser(deployment.url, deployment.webhookSecret, org.orgIdentifier, userId, dto);
+    return this.coreUserService.updateUser(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      userId,
+      dto,
+    );
   }
 
   // Resends invitation email to a pending user in nexus
   async resendInvite(orgId: string, userId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.resendInvite(deployment.url, deployment.webhookSecret, org.orgIdentifier, userId);
+    return this.coreUserService.resendInvite(deployment.url, requireSigningKey(deployment), org.orgIdentifier, userId);
   }
 }

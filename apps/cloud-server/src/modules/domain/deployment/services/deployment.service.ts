@@ -6,7 +6,9 @@ import {
   type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
+import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
+import type { SigningKeyDto } from '@/modules/admin-api/deployment/dto/entity/signing-key.dto';
 import type { CreateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/create-deployment.dto';
 import type { DeploymentSelectQueryDto } from '@/modules/admin-api/deployment/dto/request/deployment-select-query.dto';
 import type { UpdateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/update-deployment.dto';
@@ -49,14 +51,33 @@ export class DeploymentService {
     });
   }
 
-  // Creates a new deployment
+  // Creates a new deployment with a fresh signing keypair; the public key is returned once and never persisted
   async create(dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
-    const deployment = await this.deploymentRepository.create(dto);
+    const { privateKey, publicKey } = generateSigningKeyPair();
+    const deployment = await this.deploymentRepository.create({ ...dto, signingKey: privateKey });
     this.logger.log(`Created deployment: ${deployment.name} (${deployment.id})`);
+    const data = DeploymentDto.from(deployment);
+    data.publicKey = publicKey;
     return {
       success: true,
       message: `Deployment "${deployment.name}" created successfully.`,
-      data: DeploymentDto.from(deployment),
+      data,
+    };
+  }
+
+  // Regenerates the deployment's signing keypair; returns the new public key once — it is never retrievable again
+  async regenerateSigningKey(id: string): Promise<CreateResponseDto<SigningKeyDto>> {
+    const existing = await this.deploymentRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundException('Deployment not found.');
+    }
+    const { privateKey, publicKey } = generateSigningKeyPair();
+    await this.deploymentRepository.update(id, { signingKey: privateKey });
+    this.logger.log(`Regenerated signing key for deployment: ${existing.name} (${id})`);
+    return {
+      success: true,
+      message: `Signing key for "${existing.name}" regenerated successfully.`,
+      data: { deploymentId: id, publicKey },
     };
   }
 

@@ -2,7 +2,6 @@ import { useCreateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
-import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { Select } from '@vritti/quantum-ui/Select';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
@@ -11,28 +10,27 @@ import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
-import { type CreateDeploymentData, createDeploymentSchema } from '@/schemas/admin/deployments';
+import { type CreateDeploymentData, createDeploymentSchema, type Deployment } from '@/schemas/admin/deployments';
 
 interface AddDeploymentFormProps {
-  onSuccess: () => void;
+  onSuccess: (deployment: Deployment) => void;
   onCancel: () => void;
 }
 
 export const AddDeploymentForm: React.FC<AddDeploymentFormProps> = ({ onSuccess, onCancel }) => {
   const form = useForm<CreateDeploymentData>({
     resolver: zodResolver(createDeploymentSchema),
-    defaultValues: { name: '', url: '', webhookSecret: '', type: 'shared', version: '' },
+    defaultValues: { name: '', url: '', type: 'shared', version: '' },
   });
 
   const regionId = form.watch('regionId');
 
-  const createMutation = useCreateDeployment({ onSuccess });
+  const createMutation = useCreateDeployment({ onSuccess: (response) => onSuccess(response.data) });
 
   return (
     <Form form={form} mutation={createMutation} resetOnSuccess onCancel={onCancel}>
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vritti.io" />
-      <PasswordField name="webhookSecret" label="Webhook Secret" placeholder="whsec_..." />
       <RegionSelector
         name="regionId"
         label="Region"

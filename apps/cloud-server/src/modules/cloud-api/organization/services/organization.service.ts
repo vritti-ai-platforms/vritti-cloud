@@ -22,6 +22,7 @@ import { OrgMemberRoleValues } from '@/db/schema';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
+import { requireSigningKey } from '@/modules/core-server/signing-key.util';
 import { isValidTaxId } from '@/utils/tax-id';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { CreateOrganizationDto } from '../dto/request/create-organization.dto';
@@ -117,7 +118,7 @@ export class OrganizationService {
     // Create the organization in core-server first to get the nexus org ID
     const nexusOrg: { id: string } = await this.coreOrganizationService.createOrganization(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       {
         name: dto.name,
         subdomain: dto.subdomain,
@@ -257,7 +258,7 @@ export class OrganizationService {
       if (deployment) {
         await this.coreOrganizationService.deleteOrganization(
           deployment.url,
-          deployment.webhookSecret,
+          requireSigningKey(deployment),
           org.orgIdentifier,
         );
       }
@@ -314,7 +315,7 @@ export class OrganizationService {
           try {
             await this.coreOrganizationService.updateOrganization(
               deployment.url,
-              deployment.webhookSecret,
+              requireSigningKey(deployment),
               org.orgIdentifier,
               webhookData,
             );

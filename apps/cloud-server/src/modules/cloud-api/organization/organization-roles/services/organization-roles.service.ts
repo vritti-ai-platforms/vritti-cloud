@@ -5,6 +5,7 @@ import type { CoreRole } from '@/modules/cloud-api/organization/organization-bus
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
+import { requireSigningKey } from '@/modules/core-server/signing-key.util';
 import type { RoleTemplateListResponseDto } from '../dto/response/role-template.response.dto';
 
 @Injectable()
@@ -40,7 +41,11 @@ export class OrganizationRolesService {
   async listRoles(orgId: string): Promise<CoreRole[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    const roles = await this.coreRoleService.getOrgRoles(deployment.url, deployment.webhookSecret, org.orgIdentifier);
+    const roles = await this.coreRoleService.getOrgRoles(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+    );
     this.logger.log(`Fetched roles for org ${orgId}`);
     return roles;
   }
@@ -51,7 +56,7 @@ export class OrganizationRolesService {
 
     const result = await this.coreRoleService.createOrgRole(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       data,
     );
@@ -65,7 +70,7 @@ export class OrganizationRolesService {
 
     const result = await this.coreRoleService.updateOrgRole(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       roleId,
       data,
@@ -80,7 +85,7 @@ export class OrganizationRolesService {
 
     const result = await this.coreRoleService.deleteOrgRole(
       deployment.url,
-      deployment.webhookSecret,
+      requireSigningKey(deployment),
       org.orgIdentifier,
       roleId,
     );

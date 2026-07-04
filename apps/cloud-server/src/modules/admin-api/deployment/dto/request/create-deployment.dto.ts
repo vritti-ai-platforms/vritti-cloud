@@ -15,12 +15,6 @@ export class CreateDeploymentDto {
   @MaxLength(500)
   url: string;
 
-  @ApiProperty({ description: 'Shared secret for webhook authentication', example: 'whsec_abc123...' })
-  @IsString()
-  @MinLength(8)
-  @MaxLength(500)
-  webhookSecret: string;
-
   @ApiProperty({ description: 'Region UUID', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
   regionId: string;

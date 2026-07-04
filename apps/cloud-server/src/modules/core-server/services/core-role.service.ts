@@ -12,8 +12,8 @@ export class CoreRoleService {
   constructor(private readonly http: CoreHttpService) {}
 
   // Fetches all roles for an organization from core
-  async getOrgRoles(url: string, webhookSecret: string, orgId: string): Promise<CoreRole[]> {
-    const result = await this.http.get<CoreRole[]>(url, webhookSecret, '/organizations/webhook/roles', {
+  async getOrgRoles(url: string, signingKey: string, orgId: string): Promise<CoreRole[]> {
+    const result = await this.http.get<CoreRole[]>(url, signingKey, '/organizations/internal/roles', {
       orgId,
       params: { orgId },
     });
@@ -24,14 +24,14 @@ export class CoreRoleService {
   // Creates a new role for an organization in core
   async createOrgRole(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     roleData: Record<string, unknown>,
   ): Promise<CreateResponseDto<CoreRole>> {
     const result = await this.http.post<CreateResponseDto<CoreRole>>(
       url,
-      webhookSecret,
-      '/organizations/webhook/roles/create',
+      signingKey,
+      '/organizations/internal/roles/create',
       { orgId, ...roleData },
       { orgId },
     );
@@ -42,15 +42,15 @@ export class CoreRoleService {
   // Updates a role in core
   async updateOrgRole(
     url: string,
-    webhookSecret: string,
+    signingKey: string,
     orgId: string,
     roleId: string,
     data: Record<string, unknown>,
   ): Promise<SuccessResponseDto> {
     const result = await this.http.patch<SuccessResponseDto>(
       url,
-      webhookSecret,
-      `/organizations/webhook/roles/${roleId}`,
+      signingKey,
+      `/organizations/internal/roles/${roleId}`,
       data,
       { orgId },
     );
@@ -59,16 +59,11 @@ export class CoreRoleService {
   }
 
   // Provisions role templates for an organization in core (idempotent — core upserts existing by code)
-  async provisionRoles(
-    url: string,
-    webhookSecret: string,
-    orgId: string,
-    roles: RoleItem[],
-  ): Promise<SuccessResponseDto> {
+  async provisionRoles(url: string, signingKey: string, orgId: string, roles: RoleItem[]): Promise<SuccessResponseDto> {
     const result = await this.http.post<SuccessResponseDto>(
       url,
-      webhookSecret,
-      '/organizations/webhook/roles',
+      signingKey,
+      '/organizations/internal/roles',
       { orgId, roles },
       { orgId },
     );
@@ -77,8 +72,8 @@ export class CoreRoleService {
   }
 
   // Fetches roles compatible with a business unit's assigned apps from core
-  async getCompatibleRoles(url: string, webhookSecret: string, orgId: string, buId: string): Promise<CoreRole[]> {
-    const result = await this.http.get<CoreRole[]>(url, webhookSecret, '/organizations/webhook/roles/compatible', {
+  async getCompatibleRoles(url: string, signingKey: string, orgId: string, buId: string): Promise<CoreRole[]> {
+    const result = await this.http.get<CoreRole[]>(url, signingKey, '/organizations/internal/roles/compatible', {
       orgId,
       params: { buId },
     });
@@ -87,11 +82,11 @@ export class CoreRoleService {
   }
 
   // Deletes a role in core
-  async deleteOrgRole(url: string, webhookSecret: string, orgId: string, roleId: string): Promise<SuccessResponseDto> {
+  async deleteOrgRole(url: string, signingKey: string, orgId: string, roleId: string): Promise<SuccessResponseDto> {
     const result = await this.http.delete<SuccessResponseDto>(
       url,
-      webhookSecret,
-      `/organizations/webhook/roles/${roleId}`,
+      signingKey,
+      `/organizations/internal/roles/${roleId}`,
       { orgId },
     );
     this.logger.log(`Deleted role ${roleId} in core`);

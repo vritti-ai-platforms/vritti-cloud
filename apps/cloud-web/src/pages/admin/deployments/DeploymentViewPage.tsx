@@ -1,4 +1,4 @@
-import { useDeleteDeployment, useDeployment } from '@hooks/admin/deployments';
+import { useDeleteDeployment, useDeployment, useRegenerateSigningKey } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
@@ -8,9 +8,12 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
-import { Server } from 'lucide-react';
+import { KeyRound, Server } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import type { DeploymentSigningKey } from '@/schemas/admin/deployments';
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
+import { SigningKeyRevealDialog } from './SigningKeyRevealDialog';
 import { OrganizationsTab } from './tabs/OrganizationsTab';
 
 export const DeploymentViewPage = () => {
@@ -26,6 +29,29 @@ export const DeploymentViewPage = () => {
   const deleteMutation = useDeleteDeployment({
     onSuccess: () => navigate('/deployments'),
   });
+
+  const signingKeyDialog = useDialog();
+  const [signingKey, setSigningKey] = useState<DeploymentSigningKey | null>(null);
+
+  const regenerateMutation = useRegenerateSigningKey({
+    onSuccess: (response) => {
+      setSigningKey(response.data);
+      signingKeyDialog.open();
+    },
+  });
+
+  // Warn about invalidating the current key, then regenerate and reveal the new public key
+  const handleRegenerateSigningKey = async () => {
+    if (!id) return;
+    const confirmed = await confirm({
+      title: 'Regenerate signing key?',
+      description:
+        "The current key stops verifying immediately — signed licenses and entitlements will fail until the core deployment's CLOUD_PUBLIC_KEY env is updated and the deployment is resynced.",
+      confirmLabel: 'Regenerate',
+      variant: 'destructive',
+    });
+    if (confirmed) regenerateMutation.mutate(id);
+  };
 
   // Prompt confirmation then delete
   const handleDelete = async () => {
@@ -45,9 +71,21 @@ export const DeploymentViewPage = () => {
         title={deployment.name}
         description={deployment.type}
         actions={
-          <Button variant="outline" size="sm" onClick={editDialog.open}>
-            Edit
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRegenerateSigningKey}
+              isLoading={regenerateMutation.isPending}
+              loadingText="Regenerating..."
+              startAdornment={<KeyRound className="size-4" />}
+            >
+              Regenerate Signing Key
+            </Button>
+            <Button variant="outline" size="sm" onClick={editDialog.open}>
+              Edit
+            </Button>
+          </div>
         }
       />
 
@@ -107,6 +145,9 @@ export const DeploymentViewPage = () => {
         description="Update the details for this deployment."
         content={(close) => <EditDeploymentForm deployment={deployment} onSuccess={close} onCancel={close} />}
       />
+
+      {/* One-time signing key reveal */}
+      <SigningKeyRevealDialog handle={signingKeyDialog} signingKey={signingKey} showResyncNote />
     </div>
   );
 };

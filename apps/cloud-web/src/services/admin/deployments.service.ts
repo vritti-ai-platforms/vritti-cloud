@@ -1,6 +1,11 @@
 import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/types/api-response';
-import type { CreateDeploymentData, Deployment, UpdateDeploymentData } from '@/schemas/admin/deployments';
+import type {
+  CreateDeploymentData,
+  Deployment,
+  DeploymentSigningKey,
+  UpdateDeploymentData,
+} from '@/schemas/admin/deployments';
 
 export interface DeploymentsResponse {
   result: Deployment[];
@@ -25,6 +30,13 @@ export function createDeployment(data: CreateDeploymentData): Promise<CreateResp
 // Updates an existing deployment by ID
 export function updateDeployment({ id, data }: { id: string; data: UpdateDeploymentData }): Promise<SuccessResponse> {
   return axios.patch<SuccessResponse>(`admin-api/deployments/${id}`, data).then((r) => r.data);
+}
+
+// Regenerates a deployment's signing keypair and returns the new public key (one-time reveal)
+export function regenerateSigningKey(id: string): Promise<CreateResponse<DeploymentSigningKey>> {
+  return axios
+    .post<CreateResponse<DeploymentSigningKey>>(`admin-api/deployments/${id}/signing-key`)
+    .then((r) => r.data);
 }
 
 // Deletes a deployment by ID

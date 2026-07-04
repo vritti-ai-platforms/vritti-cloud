@@ -8,9 +8,11 @@ import {
   ApiDeleteDeployment,
   ApiFindAllDeployments,
   ApiFindDeploymentById,
+  ApiRegenerateSigningKey,
   ApiUpdateDeployment,
 } from '../docs/deployment.docs';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
+import { SigningKeyDto } from '../dto/entity/signing-key.dto';
 import { CreateDeploymentDto } from '../dto/request/create-deployment.dto';
 import { UpdateDeploymentDto } from '../dto/request/update-deployment.dto';
 import { DeploymentsResponseDto } from '../dto/response/deployments-response.dto';
@@ -47,6 +49,15 @@ export class DeploymentController {
   findById(@Param('id') id: string): Promise<DeploymentDto> {
     this.logger.log(`GET /admin-api/deployments/${id}`);
     return this.deploymentService.findById(id);
+  }
+
+  // Regenerates the deployment's signing keypair and returns the new public key (one-time reveal)
+  @Post(':id/signing-key')
+  @HttpCode(HttpStatus.OK)
+  @ApiRegenerateSigningKey()
+  regenerateSigningKey(@Param('id') id: string): Promise<CreateResponseDto<SigningKeyDto>> {
+    this.logger.log(`POST /admin-api/deployments/${id}/signing-key`);
+    return this.deploymentService.regenerateSigningKey(id);
   }
 
   // Updates a deployment by ID
