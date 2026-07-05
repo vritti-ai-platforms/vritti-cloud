@@ -35,7 +35,7 @@ export const BUNodeCard = ({ data }: NodeProps<Node<BUNodeData>>) => {
 
   return (
     <div className="bg-card border border-border rounded-lg shadow-sm w-65 p-4 hover:shadow-md transition-shadow cursor-pointer">
-      <Handle type="target" position={Position.Top} className="!bg-border !w-3 !h-1.5 !rounded-sm !border-0" />
+      <Handle type="target" position={Position.Top} className="bg-border! w-3! h-1.5! rounded-sm! border-0!" />
 
       {/* Header */}
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -79,7 +79,7 @@ export const BUNodeCard = ({ data }: NodeProps<Node<BUNodeData>>) => {
         </span>
       </div>
 
-      <Handle type="source" position={Position.Bottom} className="!bg-border !w-3 !h-1.5 !rounded-sm !border-0" />
+      <Handle type="source" position={Position.Bottom} className="bg-border! w-3! h-1.5! rounded-sm! border-0!" />
     </div>
   );
 };
