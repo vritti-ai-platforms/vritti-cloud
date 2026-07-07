@@ -25,12 +25,8 @@ import {
 import type { MicrofrontendPlatformParam } from '@/schemas/admin/microfrontends';
 import type { Platform } from '@/schemas/admin/role-templates';
 
-interface MicrofrontendTabProps {
-  featureId: string;
-}
-
-export const MicrofrontendTab = ({ featureId }: MicrofrontendTabProps) => {
-  const { versionId } = useVersionContext();
+export const MicrofrontendTab = () => {
+  const { versionId, featureId } = useVersionContext();
   const { data: links, isLoading } = useFeatureMicrofrontends(versionId, featureId);
   if (isLoading) {
     return (

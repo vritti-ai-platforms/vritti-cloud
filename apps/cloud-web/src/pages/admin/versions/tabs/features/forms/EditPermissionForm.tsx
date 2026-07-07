@@ -1,9 +1,10 @@
-import { FEATURE_PERMISSIONS_TABLE_KEY, useUpdatePermission } from '@hooks/admin/versions/features/permissions';
+import { FEATURE_PERMISSIONS_KEY, useUpdatePermission } from '@hooks/admin/versions/features/permissions';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Switch } from '@vritti/quantum-ui/Switch';
 import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
+import { FeaturePermissionSelector } from '@vritti/quantum-ui/selects/feature-permission';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -16,19 +17,13 @@ import {
 } from '@/schemas/admin/feature-permissions';
 
 interface EditPermissionFormProps {
-  featureId: string;
   permission: FeaturePermission;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const EditPermissionForm: React.FC<EditPermissionFormProps> = ({
-  featureId,
-  permission,
-  onSuccess,
-  onCancel,
-}) => {
-  const { versionId } = useVersionContext();
+export const EditPermissionForm: React.FC<EditPermissionFormProps> = ({ permission, onSuccess, onCancel }) => {
+  const { versionId, featureId } = useVersionContext();
   const form = useForm<PermissionFormData>({
     resolver: zodResolver(permissionFormSchema),
     defaultValues: {
@@ -36,12 +31,13 @@ export const EditPermissionForm: React.FC<EditPermissionFormProps> = ({
       label: permission.label,
       isGlobal: permission.isGlobal,
       businessIds: permission.businessIds,
+      dependsOn: permission.dependsOn,
     },
   });
 
   const isGlobal = form.watch('isGlobal');
 
-  const updateMutation = useUpdatePermission(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId), { onSuccess });
+  const updateMutation = useUpdatePermission(FEATURE_PERMISSIONS_KEY(versionId, featureId), { onSuccess });
 
   return (
     <Form
@@ -64,6 +60,13 @@ export const EditPermissionForm: React.FC<EditPermissionFormProps> = ({
       <TextField name="label" label="Label" placeholder="e.g. Add Salt" />
       <Switch name="isGlobal" label="Global" description="Applies to all businesses" />
       {!isGlobal && <BusinessSelector name="businessIds" label="Businesses" placeholder="Select businesses" multiple />}
+      <FeaturePermissionSelector
+        name="dependsOn"
+        label="Depends on"
+        placeholder="Select prerequisite permissions"
+        multiple
+        params={{ versionId, featureId, excludeId: permission.id }}
+      />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

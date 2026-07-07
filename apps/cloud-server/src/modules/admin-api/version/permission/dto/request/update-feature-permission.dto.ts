@@ -46,6 +46,16 @@ export class UpdateFeaturePermissionDto {
   @IsUUID('all', { each: true })
   businessIds?: string[];
 
+  @ApiPropertyOptional({
+    type: [String],
+    description: 'Prerequisite sibling permission ids required before this one (replaces existing edges)',
+    example: ['550e8400-e29b-41d4-a716-446655440003'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsUUID('all', { each: true })
+  dependsOn?: string[];
+
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })
   @IsOptional()
   @IsInt()

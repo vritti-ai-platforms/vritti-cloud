@@ -129,7 +129,7 @@ const PriceCardView = ({ card }: { card: PriceCard }) => {
             {cycleCount} {cycleCount === 1 ? 'cycle' : 'cycles'} priced
           </span>
         </div>
-        <Badge variant="secondary" className="ml-auto font-mono text-[10px] tracking-wide">
+        <Badge variant="secondary" className="ml-auto font-mono text-xs tracking-wide">
           {card.currencyCode}
         </Badge>
         <Button

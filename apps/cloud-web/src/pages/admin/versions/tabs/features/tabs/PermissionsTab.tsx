@@ -1,107 +1,46 @@
 import {
-  FEATURE_PERMISSIONS_TABLE_KEY,
+  FEATURE_PERMISSIONS_KEY,
   useDeletePermission,
   useFeaturePermissions,
+  useReorderPermissions,
 } from '@hooks/admin/versions/features/permissions';
-import { useQueryClient } from '@tanstack/react-query';
-import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
-import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
-import { KeyRound, Pencil, Plus, Trash2, Zap } from 'lucide-react';
+import { SortableItem, SortableList } from '@vritti/quantum-ui/Sortable';
+import { Typography } from '@vritti/quantum-ui/Typography';
+import { KeyRound, Plus, Zap } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { FeaturePermission } from '@/schemas/admin/feature-permissions';
+import { PermissionCard } from '../components/PermissionCard';
 import { PermissionUsageBreakdown } from '../components/PermissionUsageBreakdown';
 import { AddPermissionForm } from '../forms/AddPermissionForm';
-import { EditPermissionForm } from '../forms/EditPermissionForm';
 import { QuickAddPermissionsForm } from '../forms/QuickAddPermissionsForm';
 
-interface ColumnActions {
-  featureId: string;
-  onDelete: (permission: FeaturePermission) => void;
-}
-
-function getColumns({ featureId, onDelete }: ColumnActions): ColumnDef<FeaturePermission, unknown>[] {
-  return [
-    getSelectionColumn<FeaturePermission>(),
-    {
-      accessorKey: 'code',
-      header: 'Code',
-      cell: ({ row }) => (
-        <Badge variant="outline" className="font-mono text-xs font-medium">
-          {row.original.code}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: 'label',
-      header: 'Label',
-    },
-    {
-      id: 'scope',
-      header: 'Scope',
-      cell: ({ row }) =>
-        row.original.isGlobal ? (
-          <Badge variant="secondary">Global</Badge>
-        ) : (
-          <Badge variant="outline">Business Specific ({row.original.businessIds.length})</Badge>
-        ),
-      enableSorting: false,
-    },
-    {
-      id: 'actions',
-      header: '',
-      cell: ({ row }) => (
-        <RowActions
-          actions={[
-            {
-              id: 'edit',
-              icon: Pencil,
-              label: 'Edit',
-              dialog: {
-                title: 'Edit Permission',
-                description: 'Update this permission and its business scope.',
-                content: (close) => (
-                  <EditPermissionForm
-                    featureId={featureId}
-                    permission={row.original}
-                    onSuccess={close}
-                    onCancel={close}
-                  />
-                ),
-              },
-            },
-            {
-              id: 'delete',
-              icon: Trash2,
-              label: 'Delete',
-              variant: 'destructive',
-              onClick: () => onDelete(row.original),
-            },
-          ]}
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
-    },
-  ];
-}
-
-interface PermissionsTabProps {
-  featureId: string;
-}
-
-export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
-  const { versionId } = useVersionContext();
-  const queryClient = useQueryClient();
-  const { data: response, isLoading } = useFeaturePermissions(versionId, featureId);
+export const PermissionsTab = () => {
+  const { versionId, featureId } = useVersionContext();
+  const { data: permissions } = useFeaturePermissions(versionId, featureId);
   const addDialog = useDialog();
   const quickAddDialog = useDialog();
   const confirm = useConfirm();
 
-  const deleteMutation = useDeletePermission(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId));
-  const existingCodes = (response?.result ?? []).map((p) => p.code);
+  const deleteMutation = useDeletePermission(FEATURE_PERMISSIONS_KEY(versionId, featureId));
+  const reorderMutation = useReorderPermissions(FEATURE_PERMISSIONS_KEY(versionId, featureId));
+
+  // Local order seeded from the query so drags feel instant; re-synced whenever the server data changes
+  const [orderedPermissions, setOrderedPermissions] = useState<FeaturePermission[]>(permissions ?? []);
+  useEffect(() => {
+    setOrderedPermissions(permissions ?? []);
+  }, [permissions]);
+
+  const existingCodes = orderedPermissions.map((p) => p.code);
+
+  // Optimistically apply the new order, then persist it
+  function handleReorder(next: FeaturePermission[]) {
+    setOrderedPermissions(next);
+    reorderMutation.mutate({ versionId, featureId, orderedIds: next.map((p) => p.id) });
+  }
 
   // Delete with a business-wise usage breakdown — the content component fetches + renders the impact itself
   async function handleDelete(permission: FeaturePermission) {
@@ -115,87 +54,74 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
     if (confirmed) deleteMutation.mutate({ versionId, permissionId: permission.id });
   }
 
-  async function handleBulkDelete(rows: { original: FeaturePermission }[]) {
-    const confirmed = await confirm({
-      title: `Delete ${rows.length} permission${rows.length === 1 ? '' : 's'}?`,
-      description: 'The selected permissions will be removed. This cannot be undone.',
-      confirmLabel: 'Delete',
-      variant: 'destructive',
-    });
-    if (!confirmed) return;
-    for (const row of rows) deleteMutation.mutate({ versionId, permissionId: row.original.id });
-    table.resetRowSelection();
-  }
-
-  const { table } = useDataTable({
-    columns: getColumns({ featureId, onDelete: handleDelete }),
-    slug: `feature-permissions-${featureId}`,
-    label: 'permission',
-    serverState: response,
-    enableRowSelection: true,
-    enableSorting: true,
-    enableMultiSort: false,
-    onStatePush: () => queryClient.invalidateQueries({ queryKey: FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId) }),
-  });
-
   return (
-    <>
-      <DataTable
-        table={table}
-        isLoading={isLoading}
-        searchConfig={{
-          columns: [
-            { id: 'code', label: 'Code' },
-            { id: 'label', label: 'Label' },
-          ],
-          searchAll: true,
-        }}
-        mode="tab"
-        selectActions={(rows) => (
-          <Button
-            variant="destructive"
-            size="sm"
-            startAdornment={<Trash2 className="size-4" />}
-            onClick={() => handleBulkDelete(rows)}
-          >
-            Delete {rows.length}
+    <div className="flex flex-col gap-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <Typography variant="h6">Permissions</Typography>
+          <Typography variant="body2" intent="muted">
+            Drag to reorder the actions this feature exposes.
+          </Typography>
+        </div>
+        <div className="flex shrink-0 items-center gap-2">
+          <Button variant="outline" size="sm" startAdornment={<Zap className="size-4" />} onClick={quickAddDialog.open}>
+            Quick Add
           </Button>
-        )}
-        toolbarActions={{
-          actions: (
-            <>
-              <Button
-                variant="outline"
-                size="sm"
-                startAdornment={<Zap className="size-4" />}
-                onClick={quickAddDialog.open}
-              >
-                Quick Add
-              </Button>
-              <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-                Add Permission
-              </Button>
-            </>
-          ),
-        }}
-        emptyStateConfig={{
-          icon: KeyRound,
-          title: 'No permissions yet',
-          description: 'Add a permission to define an action this feature exposes.',
-          action: (
-            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-              Add Permission
-            </Button>
-          ),
-        }}
-      />
+          <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+            Add Permission
+          </Button>
+        </div>
+      </div>
+
+      {orderedPermissions.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
+          <KeyRound className="size-8 text-muted-foreground" />
+          <div>
+            <Typography variant="body1" className="font-medium">
+              No permissions yet
+            </Typography>
+            <Typography variant="body2" intent="muted">
+              Add a permission to define an action this feature exposes.
+            </Typography>
+          </div>
+          <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+            Add Permission
+          </Button>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          {/* Column header — widths mirror the row columns so everything snaps into alignment */}
+          <div className="flex items-center gap-3 px-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <span className="w-4 shrink-0" aria-hidden />
+            <span className="min-w-0 flex-1">Permission</span>
+            <span className="hidden w-44 shrink-0 sm:block">Scope</span>
+            <span className="hidden w-56 shrink-0 md:block">Depends on</span>
+            <span className="w-16 shrink-0" aria-hidden />
+          </div>
+
+          <SortableList
+            items={orderedPermissions}
+            onReorder={handleReorder}
+            strategy="vertical"
+            className="flex flex-col gap-2"
+          >
+            {orderedPermissions.map((permission) => (
+              <SortableItem key={permission.id} id={permission.id}>
+                {({ isDragging }) => (
+                  <PermissionCard permission={permission} isDragging={isDragging} onDelete={handleDelete} />
+                )}
+              </SortableItem>
+            ))}
+          </SortableList>
+        </div>
+      )}
 
       <Dialog
         handle={addDialog}
         icon={KeyRound}
         title="Add Permission"
         description="Define a permission and the businesses it applies to."
-        content={(close) => <AddPermissionForm featureId={featureId} onSuccess={close} onCancel={close} />}
+        content={(close) => <AddPermissionForm onSuccess={close} onCancel={close} />}
       />
 
       <Dialog
@@ -204,14 +130,9 @@ export const PermissionsTab = ({ featureId }: PermissionsTabProps) => {
         title="Quick Add Permissions"
         description="Select the standard permissions to add as global (apply to all businesses)."
         content={(close) => (
-          <QuickAddPermissionsForm
-            featureId={featureId}
-            existingCodes={existingCodes}
-            onSuccess={close}
-            onCancel={close}
-          />
+          <QuickAddPermissionsForm existingCodes={existingCodes} onSuccess={close} onCancel={close} />
         )}
       />
-    </>
+    </div>
   );
 };

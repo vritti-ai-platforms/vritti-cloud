@@ -14,7 +14,13 @@ import { Lock, LockKeyhole } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
 import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/bu-matrix';
-import { isCodeLockedIn, isPlatformLockedIn, toggleCodeLock, togglePlatformLock } from './selection';
+import {
+  isCodeLockedIn,
+  isPlatformLockedIn,
+  normalizeLocksCell,
+  toggleCodeLock,
+  togglePlatformLock,
+} from './selection';
 
 // Controlled form field — drop it inside a quantum <Form> with a `name` prop and it auto-registers via Controller.
 // The BU lock editor's twin of SnapshotMatrix: `value` IS the deny-list (BuFeatureLocks) — switch ON = whole
@@ -66,6 +72,7 @@ function LockCell({
   planLocked,
   platformLocked,
   checked,
+  disabled,
   onToggle,
   readOnly,
 }: {
@@ -73,6 +80,8 @@ function LockCell({
   planLocked: boolean;
   platformLocked: boolean;
   checked: boolean;
+  // Dependency gate — true when a prerequisite permission is no longer granted (it's force-locked here)
+  disabled?: boolean;
   onToggle: () => void;
   readOnly?: boolean;
 }) {
@@ -92,7 +101,9 @@ function LockCell({
       </Tooltip>
     );
   }
-  const box = <Checkbox checked={checked} disabled={readOnly || platformLocked} onCheckedChange={onToggle} />;
+  const box = (
+    <Checkbox checked={checked} disabled={readOnly || platformLocked || disabled} onCheckedChange={onToggle} />
+  );
   if (!checked) return box;
   return (
     <Tooltip content="Locked for this business unit">
@@ -123,6 +134,12 @@ function FeatureBlock({
   const locked = !feature.inPlan;
   // Every platform the feature ships on is plan-locked — nothing here is lockable
   const fullyLocked = feature.platforms.length > 0 && feature.platforms.every((p) => lockedOnPlatform(feature, p));
+  // A permission is GRANTED on a platform when it's in-plan and not currently locked — the DAG operates on this set
+  const permByCode = new Map(feature.permissions.map((p) => [p.code, p]));
+  const isGranted = (permCode: string, platform: PlatformBucket): boolean => {
+    const cell = permByCode.get(permCode)?.[platform];
+    return !!cell?.inPlan && !isCodeLockedIn(locks, feature.code, platform, permCode);
+  };
   // Permission rows stay visible so per-permission locks are always editable — hidden only when fully plan-locked
   const expanded = !fullyLocked;
   // Plan names unlocking this feature (across platforms) — shown as the right-aligned upsell when locked
@@ -207,6 +224,7 @@ function FeatureBlock({
                       planLocked={lockedOnPlatform(feature, platform)}
                       platformLocked={isPlatformLockedIn(locks, feature.code, platform)}
                       checked={isCodeLockedIn(locks, feature.code, platform, perm.code)}
+                      disabled={!perm.dependsOn.every((dep) => isGranted(dep, platform))}
                       onToggle={() => onToggleCode(feature.code, platform, perm.code)}
                       readOnly={readOnly}
                     />
@@ -294,8 +312,15 @@ function AppCard({
 // The BU lock matrix — a controlled form field over the deny-list. `value` and `onChange` are injected by
 // quantum <Form> when used with a `name` prop; every switch/checkbox edits the deny-list immutably.
 export const BuLocksMatrix: React.FC<BuLocksMatrixProps> = ({ apps, value = {}, onChange, readOnly }) => {
-  const onToggleCode = (featureCode: string, platform: PlatformBucket, permCode: string) =>
-    onChange?.(toggleCodeLock(value, featureCode, platform, permCode));
+  // Feature lookup so a lock toggle can re-derive its cell through the dependency filter (deps live on the feature)
+  const featureByCode = new Map<string, BuMatrixFeature>();
+  for (const app of apps) for (const feature of app.features) featureByCode.set(feature.code, feature);
+
+  const onToggleCode = (featureCode: string, platform: PlatformBucket, permCode: string) => {
+    const next = toggleCodeLock(value, featureCode, platform, permCode);
+    const feature = featureByCode.get(featureCode);
+    onChange?.(feature ? normalizeLocksCell(next, feature, platform) : next);
+  };
   const onTogglePlatform = (featureCode: string, platform: PlatformBucket) =>
     onChange?.(togglePlatformLock(value, featureCode, platform));
 

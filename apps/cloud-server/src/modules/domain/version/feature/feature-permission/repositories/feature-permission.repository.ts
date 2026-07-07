@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
-import { and, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, asc, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import { alias } from '@vritti/api-sdk/drizzle-pg-core';
 import type { FeaturePermission, NewFeaturePermission } from '@/db/schema';
 import {
   businesses,
+  featurePermissionDependencies,
   featurePermissions,
   features,
   permissionBusinesses,
@@ -13,9 +15,16 @@ import {
   roleTemplates,
 } from '@/db/schema';
 
+// Self-alias of feature_permissions to resolve a permission's prerequisite sibling CODES for display
+const prerequisitePermissions = alias(featurePermissions, 'prereq_permission');
+
 export type FeaturePermissionTableRow = FeaturePermission & {
   featureName: string | null;
   businessIds: string[];
+  // Prerequisite sibling permission ids (empty when the permission has no prerequisites) — for the edit form
+  dependsOn: string[];
+  // Prerequisite sibling permission codes — for display in the table
+  dependsOnCodes: string[];
 };
 
 export interface BusinessFeaturePermission {
@@ -23,6 +32,14 @@ export interface BusinessFeaturePermission {
   code: string;
   label: string;
   isGlobal: boolean;
+}
+
+// A permission with its prerequisite sibling CODES — matrix + author-time dependency validation source
+export interface PermissionWithDeps {
+  id: string;
+  code: string;
+  label: string;
+  dependsOn: string[];
 }
 
 // A plan / role-template that references a permission, carrying its owning business
@@ -69,11 +86,27 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
         label: featurePermissions.label,
         isGlobal: featurePermissions.isGlobal,
         sortOrder: featurePermissions.sortOrder,
-        businessIds: sql<string[]>`coalesce(array_remove(array_agg(${permissionBusinesses.businessId}), null), '{}')`,
+        businessIds: sql<
+          string[]
+        >`coalesce(array_remove(array_agg(distinct ${permissionBusinesses.businessId}), null), '{}')`,
+        dependsOn: sql<
+          string[]
+        >`coalesce(array_remove(array_agg(distinct ${featurePermissionDependencies.dependsOnId}), null), '{}')`,
+        dependsOnCodes: sql<
+          string[]
+        >`coalesce(array_remove(array_agg(distinct ${prerequisitePermissions.code}), null), '{}')`,
       },
       leftJoins: [
         { table: features, on: eq(features.id, featurePermissions.featureId) },
         { table: permissionBusinesses, on: eq(permissionBusinesses.featurePermissionId, featurePermissions.id) },
+        {
+          table: featurePermissionDependencies,
+          on: eq(featurePermissionDependencies.permissionId, featurePermissions.id),
+        },
+        {
+          table: prerequisitePermissions,
+          on: eq(prerequisitePermissions.id, featurePermissionDependencies.dependsOnId),
+        },
       ],
       where: and(...conditions),
       groupBy: [
@@ -92,21 +125,9 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
     });
   }
 
-  // Returns the permission rows owned by a feature for the data table
-  async findForFeatureTable(
-    versionId: string,
-    featureId: string,
-    options: { where?: SQL; orderBy?: SQL[]; limit: number; offset: number },
-  ): Promise<{ result: FeaturePermissionTableRow[]; count: number }> {
-    const conditions: SQL[] = [
-      eq(featurePermissions.versionId, versionId),
-      eq(featurePermissions.featureId, featureId),
-    ];
-    if (options.where) {
-      conditions.push(options.where);
-    }
-
-    return this.findAllAndCount<FeaturePermissionTableRow>({
+  // Returns all permission rows owned by a feature, ordered by sortOrder then code
+  async findAllForFeature(versionId: string, featureId: string): Promise<FeaturePermissionTableRow[]> {
+    const { result } = await this.findAllAndCount<FeaturePermissionTableRow>({
       select: {
         id: featurePermissions.id,
         versionId: featurePermissions.versionId,
@@ -116,13 +137,29 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
         label: featurePermissions.label,
         isGlobal: featurePermissions.isGlobal,
         sortOrder: featurePermissions.sortOrder,
-        businessIds: sql<string[]>`coalesce(array_remove(array_agg(${permissionBusinesses.businessId}), null), '{}')`,
+        businessIds: sql<
+          string[]
+        >`coalesce(array_remove(array_agg(distinct ${permissionBusinesses.businessId}), null), '{}')`,
+        dependsOn: sql<
+          string[]
+        >`coalesce(array_remove(array_agg(distinct ${featurePermissionDependencies.dependsOnId}), null), '{}')`,
+        dependsOnCodes: sql<
+          string[]
+        >`coalesce(array_remove(array_agg(distinct ${prerequisitePermissions.code}), null), '{}')`,
       },
       leftJoins: [
         { table: features, on: eq(features.id, featurePermissions.featureId) },
         { table: permissionBusinesses, on: eq(permissionBusinesses.featurePermissionId, featurePermissions.id) },
+        {
+          table: featurePermissionDependencies,
+          on: eq(featurePermissionDependencies.permissionId, featurePermissions.id),
+        },
+        {
+          table: prerequisitePermissions,
+          on: eq(prerequisitePermissions.id, featurePermissionDependencies.dependsOnId),
+        },
       ],
-      where: and(...conditions),
+      where: and(eq(featurePermissions.versionId, versionId), eq(featurePermissions.featureId, featureId)),
       groupBy: [
         featurePermissions.id,
         featurePermissions.versionId,
@@ -133,9 +170,29 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
         featurePermissions.isGlobal,
         featurePermissions.sortOrder,
       ],
-      orderBy: options.orderBy,
-      limit: options.limit,
-      offset: options.offset,
+      orderBy: [asc(featurePermissions.sortOrder), asc(featurePermissions.code)],
+    });
+    return result;
+  }
+
+  // Returns the ids of every permission owned by a feature within a version
+  async findIdsForFeature(versionId: string, featureId: string): Promise<string[]> {
+    const rows = await this.db
+      .select({ id: featurePermissions.id })
+      .from(featurePermissions)
+      .where(and(eq(featurePermissions.versionId, versionId), eq(featurePermissions.featureId, featureId)));
+    return rows.map((r) => r.id);
+  }
+
+  // Sets each permission's sortOrder to its index in the given order, in one transaction
+  async updateSortOrders(orderedIds: string[]): Promise<void> {
+    await this.transaction(async (tx) => {
+      for (let index = 0; index < orderedIds.length; index++) {
+        await tx
+          .update(featurePermissions)
+          .set({ sortOrder: index })
+          .where(eq(featurePermissions.id, orderedIds[index]));
+      }
     });
   }
 
@@ -299,5 +356,126 @@ export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof fe
       .select({ featureId: featurePermissions.featureId, code: featurePermissions.code })
       .from(featurePermissions)
       .where(inArray(featurePermissions.featureId, featureIds));
+  }
+
+  // Returns a permission's direct prerequisite sibling ids (for edit-form prefill)
+  async findDependencyIds(permissionId: string): Promise<string[]> {
+    const rows = await this.db
+      .select({ dependsOnId: featurePermissionDependencies.dependsOnId })
+      .from(featurePermissionDependencies)
+      .where(eq(featurePermissionDependencies.permissionId, permissionId));
+    return rows.map((r) => r.dependsOnId);
+  }
+
+  // Resolves permission codes for a set of permission ids
+  async findCodesByIds(ids: string[]): Promise<string[]> {
+    if (ids.length === 0) return [];
+    const rows = await this.db
+      .select({ code: featurePermissions.code })
+      .from(featurePermissions)
+      .where(inArray(featurePermissions.id, ids));
+    return rows.map((r) => r.code);
+  }
+
+  // Replaces a permission's prerequisite edges (delete existing, insert the new set)
+  async replaceDependencies(permissionId: string, dependsOnIds: string[]): Promise<void> {
+    const unique = [...new Set(dependsOnIds)];
+    await this.transaction(async (tx) => {
+      await tx
+        .delete(featurePermissionDependencies)
+        .where(eq(featurePermissionDependencies.permissionId, permissionId));
+      if (unique.length > 0) {
+        await tx
+          .insert(featurePermissionDependencies)
+          .values(unique.map((dependsOnId) => ({ permissionId, dependsOnId })));
+      }
+    });
+  }
+
+  // True when every given id is a permission of the same feature
+  async siblingsBelongToFeature(featureId: string, ids: string[]): Promise<boolean> {
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) return true;
+    const rows = await this.db
+      .select({ id: featurePermissions.id })
+      .from(featurePermissions)
+      .where(and(eq(featurePermissions.featureId, featureId), inArray(featurePermissions.id, unique)));
+    return rows.length === unique.length;
+  }
+
+  // True when adding these prerequisites would create a cycle (permission reachable from any prerequisite)
+  async wouldCreateCycle(permissionId: string, dependsOnIds: string[]): Promise<boolean> {
+    const unique = [...new Set(dependsOnIds)];
+    if (unique.length === 0) return false;
+    // A permission depending on itself is an immediate cycle
+    if (unique.includes(permissionId)) return true;
+    const result = (await this.db.execute(sql`
+      with recursive closure as (
+        select depends_on_id from ${featurePermissionDependencies}
+        where ${inArray(featurePermissionDependencies.permissionId, unique)}
+        union
+        select d.depends_on_id from ${featurePermissionDependencies} d
+        join closure c on d.permission_id = c.depends_on_id
+      )
+      select 1 from closure where depends_on_id = ${permissionId} limit 1
+    `)) as unknown as { rows: unknown[] } | unknown[];
+    const rows = Array.isArray(result) ? result : result.rows;
+    return rows.length > 0;
+  }
+
+  // Per-feature permissions with their prerequisite sibling CODES (same feature only) — batched matrix/validation source
+  async findPermissionsWithDepsByFeatureIds(featureIds: string[]): Promise<Map<string, PermissionWithDeps[]>> {
+    const byFeature = new Map<string, PermissionWithDeps[]>();
+    const uniqueFeatureIds = [...new Set(featureIds)];
+    if (uniqueFeatureIds.length === 0) return byFeature;
+
+    const permRows = await this.db
+      .select({
+        id: featurePermissions.id,
+        featureId: featurePermissions.featureId,
+        code: featurePermissions.code,
+        label: featurePermissions.label,
+      })
+      .from(featurePermissions)
+      .where(inArray(featurePermissions.featureId, uniqueFeatureIds))
+      .orderBy(featurePermissions.sortOrder);
+
+    const permById = new Map(permRows.map((p) => [p.id, p]));
+    const permIds = permRows.map((p) => p.id);
+
+    const edgeRows = permIds.length
+      ? await this.db
+          .select({
+            permissionId: featurePermissionDependencies.permissionId,
+            dependsOnId: featurePermissionDependencies.dependsOnId,
+          })
+          .from(featurePermissionDependencies)
+          .where(inArray(featurePermissionDependencies.permissionId, permIds))
+      : [];
+
+    // permissionId -> prerequisite sibling codes (drop cross-feature edges defensively)
+    const depsByPermissionId = new Map<string, string[]>();
+    for (const edge of edgeRows) {
+      const dependent = permById.get(edge.permissionId);
+      const prereq = permById.get(edge.dependsOnId);
+      if (!dependent || !prereq || prereq.featureId !== dependent.featureId) continue;
+      const list = depsByPermissionId.get(edge.permissionId) ?? [];
+      list.push(prereq.code);
+      depsByPermissionId.set(edge.permissionId, list);
+    }
+
+    for (const p of permRows) {
+      const list = byFeature.get(p.featureId) ?? [];
+      list.push({ id: p.id, code: p.code, label: p.label, dependsOn: depsByPermissionId.get(p.id) ?? [] });
+      byFeature.set(p.featureId, list);
+    }
+    return byFeature;
+  }
+
+  // A single feature's { permissionCode -> prerequisite sibling codes } map
+  async getDependsOnCodesByFeature(featureId: string): Promise<Map<string, string[]>> {
+    const byFeature = await this.findPermissionsWithDepsByFeatureIds([featureId]);
+    const perms = byFeature.get(featureId) ?? [];
+    return new Map(perms.map((p) => [p.code, p.dependsOn]));
   }
 }

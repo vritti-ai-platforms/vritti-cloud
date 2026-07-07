@@ -1,4 +1,5 @@
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
+import { buildDependsMap, filterGrantedByDeps } from '@vritti/quantum-ui/permission-deps';
 import { CompactSwitch } from '@vritti/quantum-ui/Switch';
 import { Shield } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
@@ -45,6 +46,28 @@ function toggleAll(
   const el = grants[i];
   const allOn = allIds.length > 0 && allIds.every((id) => el.permissions.includes(id));
   return grants.map((g, x) => (x === i ? { ...g, permissions: allOn ? [] : [...allIds] } : g));
+}
+
+// Drops stranded grants: after a toggle, run the cell's granted set through the dependency filter so any
+// permission whose prerequisites are no longer granted on this platform falls off (keeps the cell a valid DAG).
+function normalizeCell(
+  grants: RoleTemplateGrant[],
+  feature: RoleTemplateFeature,
+  platform: Platform,
+): RoleTemplateGrant[] {
+  const i = indexOf(grants, feature.id, platform);
+  if (i < 0) return grants;
+  const idToCode = new Map(feature.permissions.map((p) => [p.featurePermissionId, p.code]));
+  const codeToId = new Map(feature.permissions.map((p) => [p.code, p.featurePermissionId]));
+  const deps = buildDependsMap(feature.permissions);
+  const grantedCodes = new Set<string>();
+  for (const id of grants[i].permissions) {
+    const code = idToCode.get(id);
+    if (code) grantedCodes.add(code);
+  }
+  const kept = filterGrantedByDeps(grantedCodes, deps);
+  const permissions = [...kept].map((code) => codeToId.get(code)).filter((id): id is string => id !== undefined);
+  return grants.map((g, x) => (x === i ? { ...g, permissions } : g));
 }
 
 function appPlatforms(app: RoleTemplateApp): Platform[] {
@@ -104,8 +127,10 @@ export const RoleGrantMatrix: React.FC<RoleGrantMatrixProps> = ({ apps, value = 
                 isOn={isOn}
                 perms={perms}
                 onToggleGrant={(p) => emit(toggleGrant(value, feature.id, p))}
-                onTogglePermission={(permId, p) => emit(togglePermission(value, feature.id, permId, p))}
-                onToggleAll={(p, allIds) => emit(toggleAll(value, feature.id, p, allIds))}
+                onTogglePermission={(permId, p) =>
+                  emit(normalizeCell(togglePermission(value, feature.id, permId, p), feature, p))
+                }
+                onToggleAll={(p, allIds) => emit(normalizeCell(toggleAll(value, feature.id, p, allIds), feature, p))}
               />
             ))}
           </MatrixCard>
@@ -144,6 +169,19 @@ function RoleFeatureRows({
   const on = (key: string) => onPlatform(key) && isOn(feature.id, key as Platform);
   const anyOn = columns.some((c) => on(c.key));
   const allIds = feature.permissions.map((p) => p.featurePermissionId);
+
+  const idToCode = new Map(feature.permissions.map((p) => [p.featurePermissionId, p.code]));
+  // Codes currently granted in a cell — a permission is enabled only when all its prerequisites are among them
+  const grantedCodes = (key: string): Set<string> => {
+    const set = perms(feature.id, key as Platform);
+    const codes = new Set<string>();
+    if (set)
+      for (const id of set) {
+        const code = idToCode.get(id);
+        if (code) codes.add(code);
+      }
+    return codes;
+  };
 
   return (
     <div className={anyOn ? 'bg-muted/20' : undefined}>
@@ -196,6 +234,7 @@ function RoleFeatureRows({
                 on(key) ? (
                   <Checkbox
                     checked={perms(feature.id, key as Platform)?.has(perm.featurePermissionId) ?? false}
+                    disabled={!perm.dependsOn.every((dep) => grantedCodes(key).has(dep))}
                     onCheckedChange={() => onTogglePermission(perm.featurePermissionId, key as Platform)}
                   />
                 ) : null

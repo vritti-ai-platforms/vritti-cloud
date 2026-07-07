@@ -2,7 +2,7 @@ import { useDeleteFeature, useFeature } from '@hooks/admin/versions/features';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
+import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { Blocks } from 'lucide-react';
@@ -14,14 +14,13 @@ import { OverviewTab } from './tabs/OverviewTab';
 import { PermissionsTab } from './tabs/PermissionsTab';
 
 export const FeatureViewPage = () => {
-  const { id } = useSlugParams('featureSlug');
   const navigate = useNavigate();
-  const { versionId } = useVersionContext();
+  const { versionId, featureId } = useVersionContext();
 
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: feature } = useFeature(versionId, id);
+  const { data: feature } = useFeature(versionId, featureId);
 
   const deleteMutation = useDeleteFeature(versionId, {
     onSuccess: () => navigate('../..'),
@@ -29,14 +28,14 @@ export const FeatureViewPage = () => {
 
   // Prompt confirmation then delete
   const handleDelete = async () => {
-    if (!id) return;
+    if (!featureId) return;
     const confirmed = await confirm({
       title: `Delete ${feature.name}?`,
       description: `${feature.name} will be permanently removed. This action cannot be undone.`,
       confirmLabel: 'Delete',
       variant: 'destructive',
     });
-    if (confirmed) deleteMutation.mutate(id);
+    if (confirmed) deleteMutation.mutate(featureId);
   };
 
   return (
@@ -57,8 +56,8 @@ export const FeatureViewPage = () => {
         defaultValue="overview"
         tabs={[
           { value: 'overview', label: 'Overview', content: <OverviewTab feature={feature} /> },
-          { value: 'microfrontend', label: 'Microfrontend', content: <MicrofrontendTab featureId={feature.id} /> },
-          { value: 'permissions', label: 'Permissions', content: <PermissionsTab featureId={feature.id} /> },
+          { value: 'microfrontend', label: 'Microfrontend', content: <MicrofrontendTab /> },
+          { value: 'permissions', label: 'Permissions', content: <PermissionsTab /> },
         ]}
       />
 

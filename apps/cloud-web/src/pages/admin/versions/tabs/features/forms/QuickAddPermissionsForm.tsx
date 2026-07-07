@@ -1,4 +1,4 @@
-import { FEATURE_PERMISSIONS_TABLE_KEY, useBulkCreatePermissions } from '@hooks/admin/versions/features/permissions';
+import { FEATURE_PERMISSIONS_KEY, useBulkCreatePermissions } from '@hooks/admin/versions/features/permissions';
 import { Button } from '@vritti/quantum-ui/Button';
 import { CheckboxGroup } from '@vritti/quantum-ui/CheckboxGroup';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
@@ -20,24 +20,22 @@ export const PERMISSION_PRESETS: { code: string; label: string }[] = [
 ];
 
 interface QuickAddPermissionsFormProps {
-  featureId: string;
   existingCodes: string[];
   onSuccess: () => void;
   onCancel: () => void;
 }
 
 export const QuickAddPermissionsForm: React.FC<QuickAddPermissionsFormProps> = ({
-  featureId,
   existingCodes,
   onSuccess,
   onCancel,
 }) => {
-  const { versionId } = useVersionContext();
+  const { versionId, featureId } = useVersionContext();
   const missing = PERMISSION_PRESETS.filter((p) => !existingCodes.includes(p.code));
 
   const form = useForm<{ codes: string[] }>({ defaultValues: { codes: missing.map((p) => p.code) } });
   const selected = form.watch('codes');
-  const bulkMutation = useBulkCreatePermissions(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId), { onSuccess });
+  const bulkMutation = useBulkCreatePermissions(FEATURE_PERMISSIONS_KEY(versionId, featureId), { onSuccess });
 
   if (missing.length === 0) {
     return (
@@ -76,6 +74,7 @@ export const QuickAddPermissionsForm: React.FC<QuickAddPermissionsFormProps> = (
             label: preset.label,
             isGlobal: true,
             businessIds: [],
+            dependsOn: [],
           })),
       })}
     >

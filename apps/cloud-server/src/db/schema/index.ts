@@ -29,6 +29,7 @@ export * from './mobile-microfrontend';
 export * from './microfrontend';
 export * from './feature';
 export * from './feature-permission';
+export * from './feature-permission-dependency';
 export * from './permission-business';
 export * from './app';
 export * from './app-feature';

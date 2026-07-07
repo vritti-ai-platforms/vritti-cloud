@@ -16,6 +16,7 @@ import { BusinessSelectController } from './controllers/business-select.controll
 import { CloudProviderSelectController } from './controllers/cloud-provider-select.controller';
 import { CountrySelectController } from './controllers/country-select.controller';
 import { DeploymentSelectController } from './controllers/deployment-select.controller';
+import { FeaturePermissionSelectController } from './controllers/feature-permission-select.controller';
 import { FeatureSelectController } from './controllers/feature-select.controller';
 import { MicrofrontendSelectController } from './controllers/microfrontend-select.controller';
 import { OrganizationSelectController } from './controllers/organization-select.controller';
@@ -49,6 +50,7 @@ import { VersionSelectController } from './controllers/version-select.controller
     AppSelectController,
     AppCodeSelectController,
     FeatureSelectController,
+    FeaturePermissionSelectController,
     RoleTemplateSelectController,
     MicrofrontendSelectController,
     OrganizationSelectController,

@@ -3,18 +3,31 @@ import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/types/a
 import type {
   CreatePermissionData,
   FeaturePermission,
-  FeaturePermissionsTableResponse,
   PermissionUsage,
   UpdatePermissionData,
 } from '@/schemas/admin/feature-permissions';
 
-// Fetches all permissions owned by a feature for the data table
-export function getFeaturePermissionsTable(
-  versionId: string,
-  featureId: string,
-): Promise<FeaturePermissionsTableResponse> {
+// Fetches all permissions owned by a feature, ordered by sortOrder
+export function getFeaturePermissions(versionId: string, featureId: string): Promise<FeaturePermission[]> {
   return axios
-    .get<FeaturePermissionsTableResponse>(`admin-api/versions/${versionId}/features/${featureId}/permissions/table`)
+    .get<FeaturePermission[]>(`admin-api/versions/${versionId}/features/${featureId}/permissions`)
+    .then((r) => r.data);
+}
+
+// Persists a new manual ordering of a feature's permissions
+export function reorderPermissions({
+  versionId,
+  featureId,
+  orderedIds,
+}: {
+  versionId: string;
+  featureId: string;
+  orderedIds: string[];
+}): Promise<SuccessResponse> {
+  return axios
+    .patch<SuccessResponse>(`admin-api/versions/${versionId}/features/${featureId}/permissions/reorder`, {
+      orderedIds,
+    })
     .then((r) => r.data);
 }
 

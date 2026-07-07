@@ -14,7 +14,7 @@ import { Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
 import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/bu-matrix';
-import { isCheckedIn, isMemberIn, toggleMemberIn, togglePermIn } from './selection';
+import { isCheckedIn, isMemberIn, normalizeSelectionCell, toggleMemberIn, togglePermIn } from './selection';
 
 // Controlled form field — drop it inside a quantum <Form> with a `name` prop and it auto-registers via Controller.
 // Role editors: `value` is the effective allow-list — switch ON / checked = granted.
@@ -77,6 +77,7 @@ function Cell({
   platformLocked,
   member,
   checked,
+  disabled,
   onToggle,
   readOnly,
   allowLockedGrants,
@@ -85,6 +86,8 @@ function Cell({
   platformLocked: boolean;
   member: boolean;
   checked: boolean;
+  // Dependency gate — true when a prerequisite permission isn't granted on this platform
+  disabled?: boolean;
   onToggle: () => void;
   readOnly?: boolean;
   allowLockedGrants?: boolean;
@@ -115,7 +118,7 @@ function Cell({
     return (
       <Tooltip content={lockTooltip(cell.availableIn)}>
         <span className="relative inline-flex">
-          <Checkbox checked={checked} onCheckedChange={onToggle} />
+          <Checkbox checked={checked} disabled={disabled} onCheckedChange={onToggle} />
           <span className="pointer-events-none absolute -bottom-1 -right-1 flex size-3 items-center justify-center text-warning">
             <Lock className="size-2" />
           </span>
@@ -123,7 +126,7 @@ function Cell({
       </Tooltip>
     );
   }
-  return <Checkbox checked={checked} disabled={readOnly} onCheckedChange={onToggle} />;
+  return <Checkbox checked={checked} disabled={readOnly || disabled} onCheckedChange={onToggle} />;
 }
 
 // A single feature block: master row (name + per-platform switch) then one row per permission
@@ -231,6 +234,7 @@ function FeatureBlock({
                       platformLocked={lockedOnPlatform(feature, platform)}
                       member={isMember(feature.code, platform)}
                       checked={isChecked(feature.code, platform, perm.code)}
+                      disabled={!perm.dependsOn.every((dep) => isChecked(feature.code, platform, dep))}
                       onToggle={() => onToggle(feature.code, platform, perm.code)}
                       readOnly={readOnly}
                       allowLockedGrants={allowLockedGrants}
@@ -331,11 +335,23 @@ export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({
   readOnly,
   allowLockedGrants,
 }) => {
+  // Feature lookup so a toggle can re-run its cell through the dependency filter (deps live on the feature)
+  const featureByCode = new Map<string, BuMatrixFeature>();
+  for (const app of apps) for (const feature of app.features) featureByCode.set(feature.code, feature);
+
   const handlers: MatrixHandlers = {
     isMember: (code, platform) => isMemberIn(value, code, platform),
     isChecked: (code, platform, permCode) => isCheckedIn(value, code, platform, permCode),
-    onToggle: (code, platform, permCode) => onChange?.(togglePermIn(value, code, platform, permCode)),
-    onToggleMember: (code, platform, inPlanCodes) => onChange?.(toggleMemberIn(value, code, platform, inPlanCodes)),
+    onToggle: (code, platform, permCode) => {
+      const next = togglePermIn(value, code, platform, permCode);
+      const feature = featureByCode.get(code);
+      onChange?.(feature ? normalizeSelectionCell(next, feature, platform) : next);
+    },
+    onToggleMember: (code, platform, inPlanCodes) => {
+      const next = toggleMemberIn(value, code, platform, inPlanCodes);
+      const feature = featureByCode.get(code);
+      onChange?.(feature ? normalizeSelectionCell(next, feature, platform) : next);
+    },
   };
 
   return (

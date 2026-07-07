@@ -1,11 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import {
+  BadRequestException,
   ConflictException,
   CreateResponseDto,
   DataTableStateService,
   type FieldMap,
   FilterProcessor,
   NotFoundException,
+  type SelectOptionsQueryDto,
+  type SelectQueryResult,
   SuccessResponseDto,
 } from '@vritti/api-sdk';
 import { and } from '@vritti/api-sdk/drizzle-orm';
@@ -15,7 +18,6 @@ import { FeaturePermissionDto } from '@/modules/admin-api/version/permission/dto
 import type { BulkCreatePermissionsDto } from '@/modules/admin-api/version/permission/dto/request/bulk-create-permissions.dto';
 import type { CreateFeaturePermissionDto } from '@/modules/admin-api/version/permission/dto/request/create-feature-permission.dto';
 import type { UpdateFeaturePermissionDto } from '@/modules/admin-api/version/permission/dto/request/update-feature-permission.dto';
-import type { FeaturePermissionTableResponseDto } from '@/modules/admin-api/version/permission/dto/response/feature-permission-table-response.dto';
 import type {
   PermissionUsageBusinessDto,
   PermissionUsageResponseDto,
@@ -67,30 +69,23 @@ export class FeaturePermissionService {
     return { result: result.map(FeaturePermissionDto.from), count, state, activeViewId };
   }
 
-  // Returns the permissions owned by a feature for the data table
-  async findForFeatureTable(
-    versionId: string,
-    featureId: string,
-    userId: string,
-  ): Promise<FeaturePermissionTableResponseDto> {
-    const { state, activeViewId } = await this.dataTableStateService.getCurrentState(
-      userId,
-      `feature-permissions-${featureId}`,
-    );
-    const where = and(
-      FilterProcessor.buildWhere(state.filters, FeaturePermissionService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, FeaturePermissionService.FIELD_MAP),
-    );
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, FeaturePermissionService.FIELD_MAP);
-    const { limit = 20, offset = 0 } = state.pagination ?? {};
-    const { result, count } = await this.featurePermissionRepository.findForFeatureTable(versionId, featureId, {
-      where,
-      orderBy,
-      limit,
-      offset,
-    });
-    this.logger.log(`Fetched permissions table for feature: ${featureId} (${count} results)`);
-    return { result: result.map(FeaturePermissionDto.from), count, state, activeViewId };
+  // Returns all permissions owned by a feature, ordered for display
+  async findAllForFeature(versionId: string, featureId: string): Promise<FeaturePermissionDto[]> {
+    const rows = await this.featurePermissionRepository.findAllForFeature(versionId, featureId);
+    this.logger.log(`Fetched permissions for feature: ${featureId} (${rows.length} results)`);
+    return rows.map(FeaturePermissionDto.from);
+  }
+
+  // Persists a new display order for a feature's permissions
+  async reorder(versionId: string, featureId: string, orderedIds: string[]): Promise<SuccessResponseDto> {
+    const existingIds = new Set(await this.featurePermissionRepository.findIdsForFeature(versionId, featureId));
+    const allBelong = orderedIds.every((id) => existingIds.has(id));
+    if (!allBelong) {
+      throw new BadRequestException('All permissions must belong to this feature.');
+    }
+    await this.featurePermissionRepository.updateSortOrders(orderedIds);
+    this.logger.log(`Reordered ${orderedIds.length} permissions for feature: ${featureId}`);
+    return { success: true, message: 'Permissions reordered.' };
   }
 
   // Creates a feature permission, linking it to businesses when not global
@@ -112,11 +107,20 @@ export class FeaturePermissionService {
       },
       businessIds,
     );
+    await this.setDependencies(created.id, dto.featureId, dto.dependsOn ?? []);
+    const dependsOn = [...new Set(dto.dependsOn ?? [])];
+    const dependsOnCodes = await this.featurePermissionRepository.findCodesByIds(dependsOn);
     this.logger.log(`Created permission "${created.code}" for feature: ${dto.featureId} (${created.id})`);
     return {
       success: true,
       message: `Permission "${created.label}" created successfully.`,
-      data: FeaturePermissionDto.from({ ...created, featureName: feature.name, businessIds }),
+      data: FeaturePermissionDto.from({
+        ...created,
+        featureName: feature.name,
+        businessIds,
+        dependsOn,
+        dependsOnCodes,
+      }),
     };
   }
 
@@ -180,6 +184,7 @@ export class FeaturePermissionService {
       },
       dto.businessIds,
     );
+    await this.setDependencies(permissionId, existing.featureId, dto.dependsOn ?? []);
     this.logger.log(`Updated permission: ${permissionId}`);
     return { success: true, message: `Permission "${updated.label}" updated successfully.` };
   }
@@ -220,6 +225,48 @@ export class FeaturePermissionService {
 
     const businesses = [...byBusiness.values()].sort((a, b) => a.businessName.localeCompare(b.businessName));
     return { businesses, planCount: plans.length, roleTemplateCount: roleTemplates.length };
+  }
+
+  // Returns feature-permission options (id + label + code) for the "depends on" selector
+  findForSelect(
+    query: SelectOptionsQueryDto & { versionId?: string; featureId: string; excludeId?: string },
+  ): Promise<SelectQueryResult> {
+    this.logger.log(`Fetched feature-permission select options (feature: ${query.featureId})`);
+    return this.featurePermissionRepository.findForSelect({
+      value: query.valueKey || 'id',
+      label: query.labelKey || 'label',
+      additionalKeys: 'code',
+      search: query.search,
+      limit: query.limit,
+      offset: query.offset,
+      values: query.values,
+      excludeIds: query.excludeId,
+      orderBy: { sortOrder: 'asc' },
+      where: {
+        featureId: query.featureId,
+        ...(query.versionId ? { versionId: query.versionId } : {}),
+      },
+    });
+  }
+
+  // Validates a permission's prerequisite edges (same-feature + acyclic) and persists them
+  async setDependencies(permissionId: string, featureId: string, dependsOnIds: string[]): Promise<void> {
+    const unique = [...new Set(dependsOnIds)].filter((id) => id !== permissionId);
+    if (unique.length > 0) {
+      const allSiblings = await this.featurePermissionRepository.siblingsBelongToFeature(featureId, unique);
+      if (!allSiblings) {
+        throw new BadRequestException('Prerequisites must be permissions of the same feature.');
+      }
+      const cyclic = await this.featurePermissionRepository.wouldCreateCycle(permissionId, unique);
+      if (cyclic) {
+        throw new ConflictException({
+          label: 'Circular Dependency',
+          detail:
+            'These prerequisites would create a dependency cycle. Remove the conflicting prerequisite and try again.',
+        });
+      }
+    }
+    await this.featurePermissionRepository.replaceDependencies(permissionId, unique);
   }
 
   // Enforces unique permission code within a feature

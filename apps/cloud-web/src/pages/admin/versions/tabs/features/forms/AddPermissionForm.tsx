@@ -1,9 +1,10 @@
-import { FEATURE_PERMISSIONS_TABLE_KEY, useCreatePermission } from '@hooks/admin/versions/features/permissions';
+import { FEATURE_PERMISSIONS_KEY, useCreatePermission } from '@hooks/admin/versions/features/permissions';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Switch } from '@vritti/quantum-ui/Switch';
 import { BusinessSelector } from '@vritti/quantum-ui/selects/business';
+import { FeaturePermissionSelector } from '@vritti/quantum-ui/selects/feature-permission';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -12,21 +13,20 @@ import { useVersionContext } from '@/context/VersionScopeContext';
 import { type PermissionFormData, permissionFormSchema } from '@/schemas/admin/feature-permissions';
 
 interface AddPermissionFormProps {
-  featureId: string;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export const AddPermissionForm: React.FC<AddPermissionFormProps> = ({ featureId, onSuccess, onCancel }) => {
-  const { versionId } = useVersionContext();
+export const AddPermissionForm: React.FC<AddPermissionFormProps> = ({ onSuccess, onCancel }) => {
+  const { versionId, featureId } = useVersionContext();
   const form = useForm<PermissionFormData>({
     resolver: zodResolver(permissionFormSchema),
-    defaultValues: { code: '', label: '', isGlobal: false, businessIds: [] },
+    defaultValues: { code: '', label: '', isGlobal: false, businessIds: [], dependsOn: [] },
   });
 
   const isGlobal = form.watch('isGlobal');
 
-  const createMutation = useCreatePermission(FEATURE_PERMISSIONS_TABLE_KEY(versionId, featureId), { onSuccess });
+  const createMutation = useCreatePermission(FEATURE_PERMISSIONS_KEY(versionId, featureId), { onSuccess });
 
   return (
     <Form
@@ -47,6 +47,13 @@ export const AddPermissionForm: React.FC<AddPermissionFormProps> = ({ featureId,
       <TextField name="label" label="Label" placeholder="e.g. Add Salt" />
       <Switch name="isGlobal" label="Global" description="Applies to all businesses" />
       {!isGlobal && <BusinessSelector name="businessIds" label="Businesses" placeholder="Select businesses" multiple />}
+      <FeaturePermissionSelector
+        name="dependsOn"
+        label="Depends on"
+        placeholder="Select prerequisite permissions"
+        multiple
+        params={{ versionId, featureId }}
+      />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

@@ -43,6 +43,8 @@ export interface SnapshotData {
   planFeaturePermissions: PlanFeaturePermission[];
   businesses: Array<{ id: string; code: string; name: string }>;
   permissionBusinesses: Array<{ featurePermissionId: string; businessId: string }>;
+  // Prerequisite edges between sibling permissions (permission requires depends_on)
+  permissionDependencies: Array<{ permissionId: string; dependsOnId: string }>;
 }
 
 // Snapshot document types now live in api-sdk — re-exported so existing importers keep compiling
@@ -65,14 +67,26 @@ function buildIndex(data: SnapshotData) {
   const businessCodesByPermissionId = _.mapValues(_.groupBy(data.permissionBusinesses, 'featurePermissionId'), (rows) =>
     rows.map((r) => businessCodeById[r.businessId]).filter((c): c is string => Boolean(c)),
   );
+  const permissionById = _.keyBy(data.permissions, 'id');
+  // permissionId -> its prerequisite sibling CODES (same-feature edges only)
+  const dependsOnCodesByPermissionId: Record<string, string[]> = {};
+  for (const edge of data.permissionDependencies) {
+    const dependent = permissionById[edge.permissionId];
+    const prereq = permissionById[edge.dependsOnId];
+    if (!dependent || !prereq || prereq.featureId !== dependent.featureId) continue;
+    const list = dependsOnCodesByPermissionId[edge.permissionId] ?? [];
+    list.push(prereq.code);
+    dependsOnCodesByPermissionId[edge.permissionId] = list;
+  }
   return {
     webMfById: _.keyBy(data.webMicrofrontends, 'id'),
     mobileMfById: _.keyBy(data.mobileMicrofrontends, 'id'),
     featureById: _.keyBy(data.features, 'id'),
-    permissionById: _.keyBy(data.permissions, 'id'),
+    permissionById,
     businessCodeById,
     businessNameByCode: _.mapValues(_.keyBy(data.businesses, 'code'), (b) => b.name),
     businessCodesByPermissionId,
+    dependsOnCodesByPermissionId,
     permsByFeatureId: _.groupBy(data.permissions, 'featureId'),
     appFeaturesByAppId: _.groupBy(data.businessAppFeatures, 'appId'),
     rolePermsByRoleId: _.groupBy(data.roleTemplatePermissions, 'roleTemplateId'),
@@ -122,6 +136,7 @@ function buildPermissions(featureId: string, index: SnapshotIndex): SnapshotPerm
     label: p.label,
     isGlobal: p.isGlobal,
     businesses: p.isGlobal ? [] : (index.businessCodesByPermissionId[p.id] ?? []),
+    dependsOn: index.dependsOnCodesByPermissionId[p.id] ?? [],
   }));
 }
 

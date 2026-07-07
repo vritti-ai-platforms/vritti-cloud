@@ -27,6 +27,20 @@ export class FeaturePermissionDto {
   })
   businessIds: string[];
 
+  @ApiProperty({
+    type: [String],
+    example: ['550e8400-e29b-41d4-a716-446655440003'],
+    description: 'Prerequisite sibling permission ids required before this one (empty when none)',
+  })
+  dependsOn: string[];
+
+  @ApiProperty({
+    type: [String],
+    example: ['view'],
+    description: 'Prerequisite sibling permission codes (for display; parallels dependsOn ids)',
+  })
+  dependsOnCodes: string[];
+
   @ApiProperty({ example: 0 })
   sortOrder: number;
 
@@ -40,6 +54,8 @@ export class FeaturePermissionDto {
     dto.label = row.label;
     dto.isGlobal = row.isGlobal;
     dto.businessIds = row.businessIds;
+    dto.dependsOn = row.dependsOn;
+    dto.dependsOnCodes = row.dependsOnCodes;
     dto.sortOrder = row.sortOrder;
     return dto;
   }

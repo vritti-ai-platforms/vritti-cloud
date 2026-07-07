@@ -10,6 +10,8 @@ export interface PlanPermissionOption {
   featurePermissionId: string;
   code: string;
   label: string;
+  // Sibling permission codes that must be granted on the same platform before this one
+  dependsOn: string[];
 }
 
 export interface PlanMatrixFeature {

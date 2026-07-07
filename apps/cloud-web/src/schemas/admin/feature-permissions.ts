@@ -1,4 +1,3 @@
-import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
 import { z } from '@vritti/quantum-ui/zod';
 
 export interface FeaturePermission {
@@ -10,9 +9,11 @@ export interface FeaturePermission {
   isGlobal: boolean;
   businessIds: string[];
   sortOrder: number;
+  // Prerequisite permission UUIDs — prefills the "Depends on" selector on edit
+  dependsOn: string[];
+  // Prerequisite permission codes — shown in the "Depends on" table column
+  dependsOnCodes: string[];
 }
-
-export type FeaturePermissionsTableResponse = TableResponse<FeaturePermission>;
 
 // Business-wise usage of a permission — powers the delete-impact dialog
 export interface PermissionUsageRef {
@@ -47,6 +48,7 @@ export const createPermissionSchema = z
     label: labelField,
     isGlobal: z.boolean(),
     businessIds: z.array(z.string()),
+    dependsOn: z.array(z.string()),
   })
   .refine((data) => data.isGlobal || data.businessIds.length > 0, {
     message: 'Select at least one business',
@@ -61,6 +63,7 @@ export const updatePermissionSchema = z
     label: labelField,
     isGlobal: z.boolean(),
     businessIds: z.array(z.string()),
+    dependsOn: z.array(z.string()),
   })
   .refine((data) => data.isGlobal || data.businessIds.length > 0, {
     message: 'Select at least one business',
@@ -76,6 +79,7 @@ export const permissionFormSchema = z
     label: labelField,
     isGlobal: z.boolean(),
     businessIds: z.array(z.string()),
+    dependsOn: z.array(z.string()),
   })
   .refine((data) => data.isGlobal || data.businessIds.length > 0, {
     message: 'Select at least one business',

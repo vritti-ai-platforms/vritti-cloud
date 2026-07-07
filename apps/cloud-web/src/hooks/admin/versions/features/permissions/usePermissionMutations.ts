@@ -6,6 +6,7 @@ import {
   bulkCreatePermissions,
   createPermission,
   deletePermission,
+  reorderPermissions,
   updatePermission,
 } from '@/services/admin/versions/features/permissions.service';
 
@@ -13,6 +14,7 @@ type CreateVars = Parameters<typeof createPermission>[0];
 type BulkCreateVars = Parameters<typeof bulkCreatePermissions>[0];
 type UpdateVars = Parameters<typeof updatePermission>[0];
 type DeleteVars = Parameters<typeof deletePermission>[0];
+type ReorderVars = Parameters<typeof reorderPermissions>[0];
 
 // Bulk-creates permissions in one request and invalidates the provided permissions table
 export function useBulkCreatePermissions(
@@ -55,6 +57,22 @@ export function useUpdatePermission(
   return useMutation<SuccessResponse, AxiosError, UpdateVars>({
     ...options,
     mutationFn: updatePermission,
+    onSuccess: (result, vars, ...args) => {
+      queryClient.invalidateQueries({ queryKey: invalidateKey });
+      options?.onSuccess?.(result, vars, ...args);
+    },
+  });
+}
+
+// Reorders a feature's permissions and invalidates the provided permissions list
+export function useReorderPermissions(
+  invalidateKey: readonly unknown[],
+  options?: Omit<UseMutationOptions<SuccessResponse, AxiosError, ReorderVars>, 'mutationFn'>,
+) {
+  const queryClient = useQueryClient();
+  return useMutation<SuccessResponse, AxiosError, ReorderVars>({
+    ...options,
+    mutationFn: reorderPermissions,
     onSuccess: (result, vars, ...args) => {
       queryClient.invalidateQueries({ queryKey: invalidateKey });
       options?.onSuccess?.(result, vars, ...args);

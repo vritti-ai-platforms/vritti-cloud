@@ -1,10 +1,17 @@
+import { buildDependsMap, filterGrantedByDeps } from '@vritti/quantum-ui/permission-deps';
 import type {
   BuFeatureLocks,
   BuMatrixApp,
+  BuMatrixFeature,
   FeatureUnlocks,
   PlatformBucket,
 } from '@vritti/quantum-ui/types/catalog-resolver';
 import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
+
+// The in-plan permission codes of a feature on a platform — the codes the dependency DAG operates over
+function inPlanCodes(feature: BuMatrixFeature, platform: PlatformBucket): string[] {
+  return feature.permissions.filter((p) => p[platform]?.inPlan).map((p) => p.code);
+}
 
 // The matrix value is the EFFECTIVE selection: a code-keyed, per-platform allow-list. A platform key present (even an
 // empty array) means the feature switch is on for that platform; the array holds the enabled permission codes.
@@ -150,6 +157,55 @@ export function togglePermIn(
   const arr = entry[platform] ?? [];
   entry[platform] = arr.includes(permCode) ? arr.filter((c) => c !== permCode) : [...arr, permCode];
   next[code] = entry;
+  return next;
+}
+
+// ——— Dependency normalization ———
+// After any toggle, drop stranded grants so the cell stays a valid DAG: a permission survives only when all its
+// prerequisites are still selected on that platform. Deps are sibling permission codes carried on each cell.
+
+// Allow-list editor (SnapshotMatrix): run the platform's selected codes through the dependency filter, so
+// deselecting `view` cascade-drops `add`/`edit`/`delete`.
+export function normalizeSelectionCell(
+  selection: FeatureUnlocks,
+  feature: BuMatrixFeature,
+  platform: PlatformBucket,
+): FeatureUnlocks {
+  const codes = selection[feature.code]?.[platform];
+  if (codes === undefined) return selection;
+  const kept = filterGrantedByDeps(new Set(codes), buildDependsMap(feature.permissions));
+  const nextCodes = codes.filter((c) => kept.has(c));
+  if (nextCodes.length === codes.length) return selection;
+  const next = clone(selection);
+  const entry = next[feature.code];
+  if (entry) entry[platform] = nextCodes;
+  return next;
+}
+
+// Deny-list editor (BuLocksMatrix): the granted set is the in-plan codes NOT locked. Re-derive it through the
+// dependency filter, then lock everything that fell out — locking `view` cascades `add`/`edit`/`delete` into the deny.
+export function normalizeLocksCell(
+  locks: BuFeatureLocks,
+  feature: BuMatrixFeature,
+  platform: PlatformBucket,
+): BuFeatureLocks {
+  const entry = locks[feature.code]?.[platform];
+  // Whole-platform lock (null) locks everything already; absent (undefined) locks nothing — neither cascades
+  if (entry === null || entry === undefined) return locks;
+  const inPlan = inPlanCodes(feature, platform);
+  const lockedSet = new Set(entry);
+  const granted = new Set(inPlan.filter((c) => !lockedSet.has(c)));
+  const kept = filterGrantedByDeps(granted, buildDependsMap(feature.permissions));
+  const derivedDeny = inPlan.filter((c) => !kept.has(c));
+  // Keep any out-of-plan codes already in the deny-list untouched (checkboxes never add those)
+  const preserved = entry.filter((c) => !inPlan.includes(c));
+  const combined = [...new Set([...derivedDeny, ...preserved])];
+  const next = cloneLocks(locks);
+  const nextEntry = next[feature.code] ?? {};
+  if (combined.length === 0) delete nextEntry[platform];
+  else nextEntry[platform] = combined;
+  if (nextEntry.web === undefined && nextEntry.mobile === undefined) delete next[feature.code];
+  else next[feature.code] = nextEntry;
   return next;
 }
 

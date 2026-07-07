@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import { buildDependsMap, filterGrantedByDeps, prereqClosure } from '@vritti/api-sdk/catalog-resolver';
 import type { NewRoleTemplateFeature, NewRoleTemplateFeaturePermission, RoleTemplate } from '@/db/schema';
 import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/version/business/role-template/role-template-permission/dto/request/assign-role-template-permissions.dto';
 import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
@@ -61,6 +62,7 @@ export class RoleTemplatePermissionService {
     if (permissionIds.length > 0) {
       await this.validatePermissionsExist(permissionIds);
     }
+    await this.assertPrerequisitesGranted(grants, permissionIds);
 
     await this.roleTemplateFeatureRepository.transaction(async () => {
       await this.roleTemplateFeatureRepository.deleteByRoleTemplateId(roleTemplateId);
@@ -85,6 +87,38 @@ export class RoleTemplatePermissionService {
       throw new NotFoundException('Role template not found.');
     }
     return roleTemplate;
+  }
+
+  // Rejects any (feature, platform) grant set whose granted permissions are missing a required prerequisite
+  private async assertPrerequisitesGranted(grants: RoleTemplateGrant[], permissionIds: string[]): Promise<void> {
+    const featureIds = [...new Set(grants.map((g) => g.featureId))];
+    const [depsByFeature, codeById] = await Promise.all([
+      this.roleTemplateFeaturePermissionRepository.findDependsOnCodesByFeatureIds(featureIds),
+      this.roleTemplateFeaturePermissionRepository.findPermissionCodesByIds(permissionIds),
+    ]);
+
+    for (const g of grants) {
+      const codeMap = depsByFeature.get(g.featureId);
+      if (!codeMap) continue;
+      const deps = buildDependsMap([...codeMap].map(([code, dependsOn]) => ({ code, dependsOn })));
+      const grantedCodes = new Set<string>();
+      for (const id of g.permissions) {
+        const meta = codeById.get(id);
+        if (meta && meta.featureId === g.featureId) grantedCodes.add(meta.code);
+      }
+      const satisfied = filterGrantedByDeps(grantedCodes, deps);
+      if (satisfied.size === grantedCodes.size) continue;
+
+      const problems: string[] = [];
+      for (const code of grantedCodes) {
+        const missing = prereqClosure(code, deps).filter((dep) => !grantedCodes.has(dep));
+        if (missing.length > 0) problems.push(`${code} requires ${missing.join(', ')}`);
+      }
+      throw new BadRequestException({
+        label: 'Missing Prerequisites',
+        detail: `Grant the prerequisite permissions first: ${problems.join('; ')}.`,
+      });
+    }
   }
 
   // Validates that every provided feature-permission id exists

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import { BadRequestException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
+import { buildDependsMap, filterGrantedByDeps, prereqClosure } from '@vritti/api-sdk/catalog-resolver';
 import type { NewPlanFeature, NewPlanFeaturePermission } from '@/db/schema';
 import type { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
 import { PlanRepository } from '../repositories/plan.repository';
@@ -66,6 +67,8 @@ export class PlanFeaturePermissionService {
       await this.planFeaturePermissionRepository.findExistingFeaturePermissionIds(allPermissionIds),
     );
 
+    await this.assertPrerequisitesGranted(unlocks, allPermissionIds);
+
     await this.planFeatureRepository.transaction(async () => {
       await this.planFeatureRepository.deleteByPlanId(planId);
 
@@ -94,6 +97,41 @@ export class PlanFeaturePermissionService {
 
     this.logger.log(`Set ${unlocks.length} unlock(s) + ${allPermissionIds.length} permission(s) for plan ${planId}`);
     return { success: true, message: 'Plan unlocked permissions updated successfully.' };
+  }
+
+  // Rejects any (feature, platform) unlock set whose granted permissions are missing a required prerequisite
+  private async assertPrerequisitesGranted(
+    unlocks: Array<{ featureId: string; platform: PlanUnlock['platform']; permissions: string[] }>,
+    allPermissionIds: string[],
+  ): Promise<void> {
+    const featureIds = [...new Set(unlocks.map((u) => u.featureId))];
+    const [depsByFeature, codeById] = await Promise.all([
+      this.planFeaturePermissionRepository.findDependsOnCodesByFeatureIds(featureIds),
+      this.planFeaturePermissionRepository.findPermissionCodesByIds(allPermissionIds),
+    ]);
+
+    for (const u of unlocks) {
+      const codeMap = depsByFeature.get(u.featureId);
+      if (!codeMap) continue;
+      const deps = buildDependsMap([...codeMap].map(([code, dependsOn]) => ({ code, dependsOn })));
+      const grantedCodes = new Set<string>();
+      for (const id of u.permissions) {
+        const meta = codeById.get(id);
+        if (meta && meta.featureId === u.featureId) grantedCodes.add(meta.code);
+      }
+      const satisfied = filterGrantedByDeps(grantedCodes, deps);
+      if (satisfied.size === grantedCodes.size) continue;
+
+      const problems: string[] = [];
+      for (const code of grantedCodes) {
+        const missing = prereqClosure(code, deps).filter((dep) => !grantedCodes.has(dep));
+        if (missing.length > 0) problems.push(`${code} requires ${missing.join(', ')}`);
+      }
+      throw new BadRequestException({
+        label: 'Missing Prerequisites',
+        detail: `Grant the prerequisite permissions first: ${problems.join('; ')}.`,
+      });
+    }
   }
 
   // Loads a plan; throws NotFoundException otherwise

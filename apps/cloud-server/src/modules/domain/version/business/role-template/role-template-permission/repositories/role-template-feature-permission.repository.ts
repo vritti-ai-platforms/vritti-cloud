@@ -5,6 +5,7 @@ import type { AppPlatform, NewRoleTemplateFeaturePermission } from '@/db/schema'
 import {
   businessAppFeatures,
   businessApps,
+  featurePermissionDependencies,
   featurePermissions,
   features,
   permissionBusinesses,
@@ -15,6 +16,8 @@ export interface AvailableFeaturePermission {
   featurePermissionId: string;
   code: string;
   label: string;
+  // Prerequisite sibling permission CODES — drives the frontend auto-toggle
+  dependsOn: string[];
 }
 
 export interface AvailableFeature {
@@ -158,10 +161,23 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           featurePermissionId: row.featurePermissionId,
           code: row.permissionCode,
           label: row.permissionLabel,
+          dependsOn: [],
         });
       }
     }
-    return Array.from(appMap.values());
+
+    // Attach each permission's prerequisite sibling codes so the matrix can auto-toggle
+    const apps = Array.from(appMap.values());
+    const featureIds = apps.flatMap((app) => app.features.map((f) => f.id));
+    const depsByFeature = await this.findDependsOnCodesByFeatureIds(featureIds);
+    for (const app of apps) {
+      for (const feature of app.features) {
+        const byCode = depsByFeature.get(feature.id);
+        if (!byCode) continue;
+        for (const perm of feature.permissions) perm.dependsOn = byCode.get(perm.code) ?? [];
+      }
+    }
+    return apps;
   }
 
   // Returns the subset of the given feature-permission ids that actually exist
@@ -172,5 +188,58 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
       .from(featurePermissions)
       .where(inArray(featurePermissions.id, ids));
     return rows.map((row) => row.id);
+  }
+
+  // Returns featureId -> (permissionCode -> prerequisite sibling codes) for the given features
+  async findDependsOnCodesByFeatureIds(featureIds: string[]): Promise<Map<string, Map<string, string[]>>> {
+    const result = new Map<string, Map<string, string[]>>();
+    const unique = [...new Set(featureIds)];
+    if (unique.length === 0) return result;
+
+    const perms = await this.db
+      .select({ id: featurePermissions.id, featureId: featurePermissions.featureId, code: featurePermissions.code })
+      .from(featurePermissions)
+      .where(inArray(featurePermissions.featureId, unique));
+    const permById = new Map(perms.map((p) => [p.id, p]));
+    const permIds = perms.map((p) => p.id);
+
+    for (const p of perms) {
+      let byCode = result.get(p.featureId);
+      if (!byCode) {
+        byCode = new Map();
+        result.set(p.featureId, byCode);
+      }
+      if (!byCode.has(p.code)) byCode.set(p.code, []);
+    }
+
+    const edges = permIds.length
+      ? await this.db
+          .select({
+            permissionId: featurePermissionDependencies.permissionId,
+            dependsOnId: featurePermissionDependencies.dependsOnId,
+          })
+          .from(featurePermissionDependencies)
+          .where(inArray(featurePermissionDependencies.permissionId, permIds))
+      : [];
+    for (const edge of edges) {
+      const dependent = permById.get(edge.permissionId);
+      const prereq = permById.get(edge.dependsOnId);
+      if (!dependent || !prereq || prereq.featureId !== dependent.featureId) continue;
+      result.get(dependent.featureId)?.get(dependent.code)?.push(prereq.code);
+    }
+    return result;
+  }
+
+  // Returns id -> { featureId, code } for the given permission ids (dependency validation translation)
+  async findPermissionCodesByIds(ids: string[]): Promise<Map<string, { featureId: string; code: string }>> {
+    const result = new Map<string, { featureId: string; code: string }>();
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) return result;
+    const rows = await this.db
+      .select({ id: featurePermissions.id, featureId: featurePermissions.featureId, code: featurePermissions.code })
+      .from(featurePermissions)
+      .where(inArray(featurePermissions.id, unique));
+    for (const r of rows) result.set(r.id, { featureId: r.featureId, code: r.code });
+    return result;
   }
 }

@@ -6,6 +6,7 @@ import {
   businessAppFeatures,
   businessApps,
   businesses,
+  featurePermissionDependencies,
   featurePermissions,
   features,
   mobileMicrofrontends,
@@ -62,6 +63,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       rolePermRows,
       businessRows,
       permissionBusinessRows,
+      permissionDependencyRows,
       planFeatureRows,
       planFpRows,
     ] = await Promise.all([
@@ -89,6 +91,14 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
         })
         .from(permissionBusinesses)
         .where(eq(permissionBusinesses.versionId, versionId)),
+      this.db
+        .select({
+          permissionId: featurePermissionDependencies.permissionId,
+          dependsOnId: featurePermissionDependencies.dependsOnId,
+        })
+        .from(featurePermissionDependencies)
+        .innerJoin(featurePermissions, eq(featurePermissions.id, featurePermissionDependencies.permissionId))
+        .where(eq(featurePermissions.versionId, versionId)),
       this.db.select().from(planFeatures).where(eq(planFeatures.versionId, versionId)),
       planIds.length
         ? this.db.select().from(planFeaturePermissions).where(inArray(planFeaturePermissions.planId, planIds))
@@ -110,6 +120,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
       planFeaturePermissions: planFpRows,
       businesses: businessRows,
       permissionBusinesses: permissionBusinessRows,
+      permissionDependencies: permissionDependencyRows,
     };
   }
 }
