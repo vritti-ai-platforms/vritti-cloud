@@ -13,6 +13,7 @@ export * from './plan';
 export * from './plan-feature';
 export * from './plan-feature-permission';
 export * from './plan-price';
+export * from './billing-cycle';
 export * from './cloud-provider';
 export * from './region';
 export * from './region-provider';

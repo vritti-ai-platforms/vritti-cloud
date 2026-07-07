@@ -1,11 +1,17 @@
 import { PlanPriceService } from '@domain/plan-price/services/plan-price.service';
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { CreateResponseDto, RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
 import { SessionTypeValues } from '@/db/schema';
-import { ApiDeletePlanPrice, ApiListPlanPrices, ApiUpsertPlanPrice } from '../docs/plan-price.docs';
+import {
+  ApiCreatePlanPrices,
+  ApiDeletePlanPrice,
+  ApiListPlanPrices,
+  ApiUpdatePlanPriceAmount,
+} from '../docs/plan-price.docs';
 import { PlanPriceDto } from '../dto/entity/plan-price.dto';
-import { UpsertPlanPriceDto } from '../dto/request/upsert-plan-price.dto';
+import { CreatePlanPricesDto } from '../dto/request/create-plan-prices.dto';
+import { UpdatePlanPriceAmountDto } from '../dto/request/update-plan-price-amount.dto';
 
 @ApiTags('Admin - Plan Prices')
 @ApiBearerAuth()
@@ -16,7 +22,7 @@ export class PlanPriceController {
 
   constructor(private readonly planPriceService: PlanPriceService) {}
 
-  // Lists prices for a plan
+  // Lists all prices for a plan
   @Get()
   @ApiListPlanPrices()
   findByPlan(@Param('planId') planId: string): Promise<PlanPriceDto[]> {
@@ -24,21 +30,29 @@ export class PlanPriceController {
     return this.planPriceService.findByPlan(planId);
   }
 
-  // Creates or updates a plan price for a market + billing period
+  // Creates or updates prices for a plan + country across billing cycles
   @Post()
   @HttpCode(HttpStatus.OK)
-  @ApiUpsertPlanPrice()
-  upsert(@Param('planId') planId: string, @Body() dto: UpsertPlanPriceDto): Promise<CreateResponseDto<PlanPriceDto>> {
+  @ApiCreatePlanPrices()
+  createBatch(@Param('planId') planId: string, @Body() dto: CreatePlanPricesDto): Promise<SuccessResponseDto> {
     this.logger.log(`POST /admin-api/versions/:v/businesses/:b/plans/${planId}/prices`);
-    return this.planPriceService.upsert(planId, dto);
+    return this.planPriceService.createBatch(planId, dto);
   }
 
-  // Deletes a plan price for a market + billing period
-  @Delete()
+  // Updates the amount on a single plan price
+  @Patch(':priceId')
+  @ApiUpdatePlanPriceAmount()
+  updateAmount(@Param('priceId') priceId: string, @Body() dto: UpdatePlanPriceAmountDto): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /admin-api/versions/:v/businesses/:b/plans/:p/prices/${priceId}`);
+    return this.planPriceService.updateAmount(priceId, dto.amount);
+  }
+
+  // Deletes a single plan price
+  @Delete(':priceId')
   @HttpCode(HttpStatus.OK)
   @ApiDeletePlanPrice()
-  remove(@Param('planId') planId: string, @Body() dto: UpsertPlanPriceDto): Promise<SuccessResponseDto> {
-    this.logger.log(`DELETE /admin-api/versions/:v/businesses/:b/plans/${planId}/prices`);
-    return this.planPriceService.remove(planId, dto);
+  remove(@Param('priceId') priceId: string): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /admin-api/versions/:v/businesses/:b/plans/:p/prices/${priceId}`);
+    return this.planPriceService.remove(priceId);
   }
 }

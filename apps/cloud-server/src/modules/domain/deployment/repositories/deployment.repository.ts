@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
+import { CurrencyAmountDto } from '@vritti/api-sdk/money';
 import type { CloudProvider, Deployment, Region } from '@/db/schema';
 import { countries, deployments, organizations, planPrices, plans, versions } from '@/db/schema';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
@@ -88,8 +89,8 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
     return rows as DeploymentOptionDto[];
   }
 
-  // Returns plans for the deployment's version + business, priced for the given country (monthly)
-  async findPlansForDeployment(deploymentId: string, businessId: string, countryId?: string): Promise<PlanOptionDto[]> {
+  // Returns plans for the deployment's version + business, priced for the given country (representative cycle)
+  async findPlansForDeployment(deploymentId: string, businessId: string, countryId: string): Promise<PlanOptionDto[]> {
     const rows = await this.db
       .select({
         id: plans.id,
@@ -102,26 +103,27 @@ export class DeploymentRepository extends PrimaryBaseRepository<typeof deploymen
       .from(deployments)
       .innerJoin(versions, eq(versions.version, deployments.version))
       .innerJoin(plans, and(eq(plans.versionId, versions.id), eq(plans.businessId, businessId)))
+      .innerJoin(countries, eq(countries.id, countryId))
       .leftJoin(
         planPrices,
-        countryId
-          ? and(
-              eq(planPrices.planId, plans.id),
-              eq(planPrices.countryId, countryId),
-              eq(planPrices.billingPeriod, 'monthly'),
-            )
-          : sql`false`,
+        and(
+          eq(planPrices.planId, plans.id),
+          eq(planPrices.countryId, countryId),
+          eq(
+            planPrices.billingCycleId,
+            sql`(SELECT id FROM cloud.billing_cycles ORDER BY days ASC, sort_order ASC LIMIT 1)`,
+          ),
+        ),
       )
-      .leftJoin(countries, countryId ? eq(countries.id, countryId) : sql`false`)
       .where(eq(deployments.id, deploymentId));
 
+    // Unpriced plans surface an explicit zero in the country's currency rather than a null price
     return rows.map((r) => ({
       id: r.id,
       name: r.name,
       code: r.code,
       content: r.content ?? null,
-      amount: r.amount ?? null,
-      currency: r.amount != null ? (r.currency ?? null) : null,
+      price: CurrencyAmountDto.from(r.amount ?? 0n, r.currency),
     }));
   }
 }

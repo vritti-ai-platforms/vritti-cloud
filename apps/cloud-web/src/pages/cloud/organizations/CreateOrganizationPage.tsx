@@ -47,8 +47,7 @@ export const CreateOrganizationPage: React.FC = () => {
   const handleSelectPlan = (plan: PlanOption) => {
     form.setValue('planCode', plan.code);
     form.setValue('planName', plan.name);
-    form.setValue('planAmount', plan.amount ?? undefined);
-    form.setValue('planCurrency', plan.currency ?? undefined);
+    form.setValue('planPrice', plan.price);
   };
 
   return (

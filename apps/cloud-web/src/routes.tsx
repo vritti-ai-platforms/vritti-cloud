@@ -11,6 +11,7 @@ import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import './index.css';
 import { ProfilePage } from './pages/account/profile/ProfilePage';
 import { SecurityPage } from './pages/account/security/SecurityPage';
+import { BillingCyclesPage } from './pages/admin/billing-cycles/BillingCyclesPage';
 import { BusinessesPage } from './pages/admin/businesses/BusinessesPage';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
 import { CountriesPage } from './pages/admin/countries/CountriesPage';
@@ -159,6 +160,10 @@ export const adminRoutes: RouteObject[] = [
       {
         path: 'countries',
         element: <CountriesPage />,
+      },
+      {
+        path: 'billing-cycles',
+        element: <BillingCyclesPage />,
       },
       {
         path: 'deployments',

@@ -57,8 +57,7 @@ export const createOrganizationSchema = z.object({
   countryName: z.string().optional(),
   planCode: z.string({ message: 'Please select a plan' }).optional(),
   planName: z.string().optional(),
-  planAmount: z.number().optional(),
-  planCurrency: z.string().optional(),
+  planPrice: z.object({ currency: z.string(), value: z.string() }).optional(),
   logo: z
     .instanceof(File)
     .refine((f) => f.size <= 10 * 1024 * 1024, 'File must be under 10MB')

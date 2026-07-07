@@ -1,4 +1,5 @@
 import { AppCodeDomainModule } from '@domain/app-code/app-code.module';
+import { BillingCycleDomainModule } from '@domain/billing-cycle/billing-cycle.module';
 import { BusinessDomainModule } from '@domain/business/business.module';
 import { CloudProviderDomainModule } from '@domain/cloud-provider/cloud-provider.module';
 import { CountryDomainModule } from '@domain/country/country.module';
@@ -10,6 +11,7 @@ import { Module } from '@nestjs/common';
 import { OrganizationModule } from '../cloud-api/organization/organization.module';
 import { AppCodeSelectController } from './controllers/app-code-select.controller';
 import { AppSelectController } from './controllers/app-select.controller';
+import { BillingCycleSelectController } from './controllers/billing-cycle-select.controller';
 import { BusinessSelectController } from './controllers/business-select.controller';
 import { CloudProviderSelectController } from './controllers/cloud-provider-select.controller';
 import { CountrySelectController } from './controllers/country-select.controller';
@@ -32,10 +34,12 @@ import { VersionSelectController } from './controllers/version-select.controller
     CountryDomainModule,
     PlanDomainModule,
     RegionDomainModule,
+    BillingCycleDomainModule,
     OrganizationModule,
   ],
   controllers: [
     BusinessSelectController,
+    BillingCycleSelectController,
     CountrySelectController,
     PlanSelectController,
     RegionSelectController,

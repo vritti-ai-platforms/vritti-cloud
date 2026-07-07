@@ -13,7 +13,7 @@ import { PlanStats } from './components/PlanStats';
 import { EditPlanForm } from './forms/EditPlanForm';
 import { AppsAndFeaturesTab } from './tabs/AppsAndFeaturesTab';
 import { ContentTab } from './tabs/ContentTab';
-import { PricesTab } from './tabs/PricesTab';
+import { PricingTab } from './tabs/pricing/PricingTab';
 
 // Builds a specific warning listing what blocks deletion
 function buildDeleteWarning(plan: Plan): string {
@@ -77,7 +77,7 @@ export const PlanViewPage = () => {
         tabs={[
           { value: 'content', label: 'Content', content: <ContentTab plan={plan} /> },
           { value: 'features', label: 'Apps & Features', content: <AppsAndFeaturesTab /> },
-          { value: 'prices', label: 'Prices', content: <PricesTab /> },
+          { value: 'prices', label: 'Prices', content: <PricingTab /> },
         ]}
       />
 

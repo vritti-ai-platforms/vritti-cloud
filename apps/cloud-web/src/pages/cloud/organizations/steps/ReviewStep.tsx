@@ -2,7 +2,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { FilePreview } from '@vritti/quantum-ui/FilePreview';
 import { Form } from '@vritti/quantum-ui/Form';
-import { formatCurrencyMajor, minorToMajor } from '@vritti/quantum-ui/money';
+import { useFormatters } from '@vritti/quantum-ui/hooks';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { ArrowLeft, Check } from 'lucide-react';
 import type React from 'react';
@@ -31,19 +31,16 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({
   onChangeInfrastructure,
   onChangePlan,
 }) => {
+  const fmt = useFormatters();
   const logo = form.getValues('logo');
   const planName = form.getValues('planName');
-  const planAmount = form.getValues('planAmount');
-  const planCurrency = form.getValues('planCurrency');
+  const planPrice = form.getValues('planPrice');
   const versionName = form.getValues('versionName');
   const deploymentName = form.getValues('deploymentName');
   const countryName = form.getValues('countryName');
   const taxId = form.getValues('taxId');
 
-  const priceDisplay =
-    planAmount != null && planCurrency
-      ? `${formatCurrencyMajor(Number(minorToMajor(String(planAmount), planCurrency)), planCurrency)}/month`
-      : null;
+  const priceDisplay = planPrice ? `${fmt.currency(planPrice).primary}/month` : null;
 
   return (
     <div className="space-y-4">

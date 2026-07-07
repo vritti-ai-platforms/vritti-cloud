@@ -1,5 +1,5 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsUUID } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsUUID } from 'class-validator';
 
 export class DeploymentFilterDto {
   @ApiProperty({ description: 'Region UUID to filter deployments', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -19,19 +19,14 @@ export class DeploymentFilterDto {
 }
 
 export class DeploymentPlanQueryDto {
-  @ApiPropertyOptional({
-    description: 'Business UUID to filter plans',
-    example: '550e8400-e29b-41d4-a716-446655440000',
-  })
-  @IsOptional()
+  @ApiProperty({ description: 'Business UUID to filter plans', example: '550e8400-e29b-41d4-a716-446655440000' })
   @IsUUID()
-  businessId?: string;
+  businessId: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Country UUID to resolve plan pricing',
     example: '550e8400-e29b-41d4-a716-446655440000',
   })
-  @IsOptional()
   @IsUUID()
-  countryId?: string;
+  countryId: string;
 }

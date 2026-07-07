@@ -1,7 +1,7 @@
 import { useDeploymentPlans } from '@hooks/cloud/infrastructure';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Form } from '@vritti/quantum-ui/Form';
-import { formatCurrencyMajor, minorToMajor } from '@vritti/quantum-ui/money';
+import { useFormatters } from '@vritti/quantum-ui/hooks';
 import { RichTextEditor } from '@vritti/quantum-ui/RichTextEditor';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { Typography } from '@vritti/quantum-ui/Typography';
@@ -21,12 +21,6 @@ function safeParse(value: string | null | undefined) {
   }
 }
 
-// Formats a minor-unit amount in its currency, or null when no price is configured
-function formatPlanPrice(amount: number | null, currency: string | null): string | null {
-  if (amount == null || !currency) return null;
-  return formatCurrencyMajor(Number(minorToMajor(String(amount), currency)), currency);
-}
-
 interface ChoosePlanStepProps {
   form: UseFormReturn<CreateOrgFormData>;
   selectedPlanId: string | undefined;
@@ -42,6 +36,7 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
   onBack,
   onContinue,
 }) => {
+  const fmt = useFormatters();
   const deploymentId = form.watch('deploymentId') ?? '';
   const businessId = form.watch('businessId') ?? '';
   const countryId = form.watch('countryId') ?? '';
@@ -71,7 +66,7 @@ export const ChoosePlanStep: React.FC<ChoosePlanStepProps> = ({
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {plans.map((plan) => {
               const isSelected = selectedPlanId === plan.id;
-              const priceLabel = formatPlanPrice(plan.amount, plan.currency);
+              const priceLabel = fmt.currency(plan.price).primary;
               return (
                 // biome-ignore lint/a11y/useSemanticElements: large clickable plan card region, not a native button
                 <div

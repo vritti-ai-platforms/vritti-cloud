@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { CreateResponseDto, NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
+import { NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
+import { type CurrencyAmountDto, type CurrencyCode, majorToMinor } from '@vritti/api-sdk/money';
 import { PlanPriceDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/entity/plan-price.dto';
-import type { UpsertPlanPriceDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/request/upsert-plan-price.dto';
+import type { CreatePlanPricesDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/request/create-plan-prices.dto';
 import { PlanPriceRepository } from '../repositories/plan-price.repository';
 
 @Injectable()
@@ -10,60 +11,62 @@ export class PlanPriceService {
 
   constructor(private readonly planPriceRepository: PlanPriceRepository) {}
 
-  // Lists all prices for a plan with country name and currency
+  // Lists all prices for a plan with country and billing cycle details
   async findByPlan(planId: string): Promise<PlanPriceDto[]> {
-    await this.ensurePlanExists(planId);
-    const rows = await this.planPriceRepository.findByPlanWithCountry(planId);
-    this.logger.log(`Fetched ${rows.length} prices for plan: ${planId}`);
+    const rows = await this.planPriceRepository.findByPlanWithDetails(planId);
+    this.logger.log(`Fetched ${rows.length} prices for plan ${planId}`);
     return rows.map(PlanPriceDto.from);
   }
 
-  // Upserts a plan price for a country + billing period; creates or updates the amount
-  async upsert(planId: string, dto: UpsertPlanPriceDto): Promise<CreateResponseDto<PlanPriceDto>> {
-    await this.ensurePlanExists(planId);
-    const existing = await this.planPriceRepository.findByComposite(planId, dto.countryId, dto.billingPeriod);
-    if (existing) {
-      await this.planPriceRepository.updateAmount(existing.id, dto.amount);
-      this.logger.log(`Updated plan price ${existing.id} for plan ${planId} (${dto.billingPeriod})`);
-    } else {
-      await this.planPriceRepository.create({
-        planId,
-        countryId: dto.countryId,
-        billingPeriod: dto.billingPeriod,
-        amount: dto.amount,
-      });
-      this.logger.log(`Created plan price for plan ${planId} (country: ${dto.countryId}, ${dto.billingPeriod})`);
+  // Upserts a batch of prices for a plan + country across billing cycles
+  async createBatch(planId: string, dto: CreatePlanPricesDto): Promise<SuccessResponseDto> {
+    const exists = await this.planPriceRepository.planExists(planId);
+    if (!exists) {
+      throw new NotFoundException('Plan not found.');
     }
-    const rows = await this.planPriceRepository.findByPlanWithCountry(planId);
-    const row = rows.find((r) => r.countryId === dto.countryId && r.billingPeriod === dto.billingPeriod);
-    if (!row) {
-      throw new NotFoundException('Plan price not found after save.');
+    for (const entry of dto.entries) {
+      const minor = majorToMinor(entry.amount.value, entry.amount.currency as CurrencyCode, 'amount');
+      const existing = await this.planPriceRepository.findByComposite(planId, dto.countryId, entry.billingCycleId);
+      if (existing) {
+        await this.planPriceRepository.updateAmount(existing.id, minor);
+      } else {
+        await this.planPriceRepository.create({
+          planId,
+          countryId: dto.countryId,
+          billingCycleId: entry.billingCycleId,
+          amount: minor,
+        });
+      }
     }
-    return { success: true, message: 'Plan price saved successfully.', data: PlanPriceDto.from(row) };
+    this.logger.log(`Saved ${dto.entries.length} price(s) for plan ${planId} (country: ${dto.countryId})`);
+    return { success: true, message: 'Plan prices saved successfully.' };
   }
 
-  // Deletes a plan price by country + billing period
-  async remove(planId: string, dto: UpsertPlanPriceDto): Promise<SuccessResponseDto> {
-    await this.ensurePlanExists(planId);
-    const existing = await this.planPriceRepository.findByComposite(planId, dto.countryId, dto.billingPeriod);
+  // Updates the amount on a single plan price; throws NotFoundException if missing
+  async updateAmount(priceId: string, amount: CurrencyAmountDto): Promise<SuccessResponseDto> {
+    const existing = await this.planPriceRepository.findById(priceId);
     if (!existing) {
       throw new NotFoundException('Plan price not found.');
     }
-    await this.planPriceRepository.removeByComposite(planId, dto.countryId, dto.billingPeriod);
-    this.logger.log(`Deleted plan price for plan ${planId} (country: ${dto.countryId}, ${dto.billingPeriod})`);
+    const minor = majorToMinor(amount.value, amount.currency as CurrencyCode, 'amount');
+    await this.planPriceRepository.updateAmount(priceId, minor);
+    this.logger.log(`Updated plan price ${priceId} amount`);
+    return { success: true, message: 'Plan price updated successfully.' };
+  }
+
+  // Deletes a single plan price; throws NotFoundException if missing
+  async remove(priceId: string): Promise<SuccessResponseDto> {
+    const existing = await this.planPriceRepository.findById(priceId);
+    if (!existing) {
+      throw new NotFoundException('Plan price not found.');
+    }
+    await this.planPriceRepository.removeById(priceId);
+    this.logger.log(`Deleted plan price ${priceId}`);
     return { success: true, message: 'Plan price deleted successfully.' };
   }
 
   // Returns the number of prices configured for a plan
   countForPlan(planId: string): Promise<number> {
     return this.planPriceRepository.countByPlanId(planId);
-  }
-
-  // Validates that a plan exists; throws NotFoundException otherwise
-  private async ensurePlanExists(planId: string): Promise<void> {
-    const exists = await this.planPriceRepository.planExists(planId);
-    if (!exists) {
-      throw new NotFoundException('Plan not found.');
-    }
   }
 }

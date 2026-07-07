@@ -173,15 +173,6 @@ export const AppPlatformValues = {
   MOBILE: 'MOBILE' as const,
 };
 
-// Billing period — how often a plan or app price recurs
-export const billingPeriodEnum = cloudSchema.enum('BillingPeriod', ['monthly', 'annual', 'triennial']);
-export type BillingPeriod = (typeof billingPeriodEnum.enumValues)[number];
-export const BillingPeriodValues = {
-  monthly: 'monthly' as const,
-  annual: 'annual' as const,
-  triennial: 'triennial' as const,
-};
-
 // Tax regime — the indirect tax system a country operates under
 export const taxRegimeEnum = cloudSchema.enum('TaxRegime', ['GST', 'VAT', 'NONE']);
 export type TaxRegime = (typeof taxRegimeEnum.enumValues)[number];

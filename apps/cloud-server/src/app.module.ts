@@ -16,6 +16,7 @@ import * as schema from '@/db/schema';
 import { relations } from '@/db/schema';
 import { validate } from './config/env.validation';
 import { AccountModule } from './modules/account/account.module';
+import { AdminBillingCycleModule } from './modules/admin-api/billing-cycle/billing-cycle.module';
 import { AdminBusinessModule } from './modules/admin-api/business/business.module';
 import { AdminCloudProviderModule } from './modules/admin-api/cloud-provider/cloud-provider.module';
 import { AdminCountryModule } from './modules/admin-api/country/country.module';
@@ -131,6 +132,7 @@ import { ServicesModule } from './services/services.module';
     AdminCloudProviderModule,
     AdminBusinessModule,
     AdminCountryModule,
+    AdminBillingCycleModule,
     // Select API module
     SelectModule,
     // Route prefixes
@@ -152,6 +154,7 @@ import { ServicesModule } from './services/services.module';
           AdminCloudProviderModule,
           AdminBusinessModule,
           AdminCountryModule,
+          AdminBillingCycleModule,
         ],
       },
       {

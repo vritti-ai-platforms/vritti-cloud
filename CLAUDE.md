@@ -67,6 +67,7 @@ See `.claude/rules/` for detailed pattern documentation:
 - `frontend-service.md` — Axios service conventions
 - `frontend-file-structure.md` — File/folder organization
 - `value-formatting.md` — DetailField / DataTable cells / useFormatters for dates, currency, numbers
+- `money-handling.md` — money as `bigint` minor units + `{currency,value}` wire shape; never `Number(majorToMinor(...))`
 - `comment-style.md` — Comment style rules
 - `export-conventions.md` — Export patterns
 - `apps/cloud-server/.claude/rules/backend-service-responses.md` — create() returns entity DTO, update/delete returns SuccessResponseDto

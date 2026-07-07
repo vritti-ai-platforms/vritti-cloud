@@ -1,18 +1,18 @@
 import { axios } from '@vritti/quantum-ui/axios';
-import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
-import type { PlanPrice, UpsertPlanPriceData } from '@/schemas/admin/plan-prices';
+import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/types/api-response';
+import type { CreatePricesData, PlanPrice, UpdatePriceAmountData } from '@/schemas/admin/prices';
 
 function base(versionId: string, businessId: string, planId: string): string {
   return `admin-api/versions/${versionId}/businesses/${businessId}/plans/${planId}/prices`;
 }
 
-// Fetches all price entries for a plan (across countries and billing periods)
-export function getPlanPrices(versionId: string, businessId: string, planId: string): Promise<PlanPrice[]> {
+// Fetches all price rows for a plan (across countries and billing cycles)
+export function getPrices(versionId: string, businessId: string, planId: string): Promise<PlanPrice[]> {
   return axios.get<PlanPrice[]>(base(versionId, businessId, planId)).then((r) => r.data);
 }
 
-// Upserts a price for a plan in a given country and billing period
-export function upsertPlanPrice({
+// Creates price entries for a country across the selected billing cycles
+export function createPrices({
   versionId,
   businessId,
   planId,
@@ -21,13 +21,30 @@ export function upsertPlanPrice({
   versionId: string;
   businessId: string;
   planId: string;
-  data: UpsertPlanPriceData;
-}): Promise<SuccessResponse> {
-  return axios.post<SuccessResponse>(base(versionId, businessId, planId), data).then((r) => r.data);
+  data: CreatePricesData;
+}): Promise<CreateResponse<PlanPrice[]>> {
+  return axios.post<CreateResponse<PlanPrice[]>>(base(versionId, businessId, planId), data).then((r) => r.data);
 }
 
-// Deletes a price entry from a plan
-export function deletePlanPrice({
+// Updates the amount of a single price entry
+export function updatePriceAmount({
+  versionId,
+  businessId,
+  planId,
+  priceId,
+  data,
+}: {
+  versionId: string;
+  businessId: string;
+  planId: string;
+  priceId: string;
+  data: UpdatePriceAmountData;
+}): Promise<SuccessResponse> {
+  return axios.patch<SuccessResponse>(`${base(versionId, businessId, planId)}/${priceId}`, data).then((r) => r.data);
+}
+
+// Deletes a single price entry
+export function deletePrice({
   versionId,
   businessId,
   planId,

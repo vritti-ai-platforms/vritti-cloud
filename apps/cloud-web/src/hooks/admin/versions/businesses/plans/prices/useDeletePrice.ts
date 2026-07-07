@@ -1,18 +1,18 @@
 import { type UseMutationOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import { deletePlanPrice } from '@/services/admin/versions/businesses/plans/prices.service';
-import { planPricesQueryKey } from './usePlanPrices';
+import { deletePrice } from '@/services/admin/versions/businesses/plans/prices.service';
+import { pricesQueryKey } from './usePrices';
 
 type Vars = { versionId: string; businessId: string; planId: string; priceId: string };
-type UseDeletePlanPriceOptions = Omit<UseMutationOptions<void, AxiosError, Vars>, 'mutationFn'>;
+type UseDeletePriceOptions = Omit<UseMutationOptions<void, AxiosError, Vars>, 'mutationFn'>;
 
-export function useDeletePlanPrice(options?: UseDeletePlanPriceOptions) {
+export function useDeletePrice(options?: UseDeletePriceOptions) {
   const queryClient = useQueryClient();
   return useMutation<void, AxiosError, Vars>({
     ...options,
-    mutationFn: deletePlanPrice,
+    mutationFn: deletePrice,
     onSuccess: (result, vars, ...args) => {
-      queryClient.invalidateQueries({ queryKey: planPricesQueryKey(vars.planId) });
+      queryClient.invalidateQueries({ queryKey: pricesQueryKey(vars.versionId, vars.businessId, vars.planId) });
       options?.onSuccess?.(result, vars, ...args);
     },
   });
