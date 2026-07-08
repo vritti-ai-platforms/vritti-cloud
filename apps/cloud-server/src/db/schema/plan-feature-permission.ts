@@ -4,8 +4,6 @@ import { featurePermissions } from './feature-permission';
 import { plans } from './plan';
 import { planFeatures } from './plan-feature';
 
-// A plan's UNLOCKED action permission under a plan feature membership. Platform comes from the parent
-// membership (plan_features); a (membership, permission) pair absent here renders locked (upsell).
 export const planFeaturePermissions = cloudSchema.table(
   'plan_feature_permissions',
   {

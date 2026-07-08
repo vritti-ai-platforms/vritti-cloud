@@ -15,8 +15,7 @@ export class OrganizationAppsService {
     private readonly versionRepository: VersionRepository,
   ) {}
 
-  // The org's full apps/features/permissions catalog from the version snapshot — every app/feature/permission with
-  // per-platform inPlan/availableIn. Powers both the Create Custom Role picker and the read-only Plan Overview.
+  // The org's full apps/features/permissions catalog from the version snapshot (per-platform inPlan/availableIn), powering the Create Custom Role picker and read-only Plan Overview
   async getPermissions(orgId: string): Promise<BuMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const version = await this.versionRepository.findByVersion(deployment.version);

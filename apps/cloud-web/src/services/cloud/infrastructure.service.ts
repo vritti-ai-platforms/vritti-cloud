@@ -5,7 +5,6 @@ export interface PlanOption {
   name: string;
   code: string;
   content: string | null;
-  // Monthly price in the country currency (major units); zero when unpriced
   price: { currency: string; value: string };
 }
 

@@ -4,7 +4,6 @@ import { eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewPlanFeature } from '@/db/schema';
 import { planFeaturePermissions, planFeatures } from '@/db/schema';
 
-// A plan's per-platform feature unlock with the action permissions unlocked under it
 export interface PlanUnlock {
   featureId: string;
   platform: AppPlatform;
@@ -17,8 +16,7 @@ export class PlanFeatureRepository extends PrimaryBaseRepository<typeof planFeat
     super(database, planFeatures);
   }
 
-  // Returns the plan's unlocks (feature, platform) with their unlocked permission ids aggregated per unlock.
-  // The empty array for an unlock with no permissions (LEFT JOIN miss) is preserved via FILTER + COALESCE (view-only).
+  // Returns the plan's unlocks (feature, platform) with their unlocked permission ids aggregated per unlock
   async findByPlanId(planId: string): Promise<PlanUnlock[]> {
     return this.db
       .select({

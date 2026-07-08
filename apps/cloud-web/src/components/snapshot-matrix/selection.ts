@@ -13,9 +13,7 @@ function inPlanCodes(feature: BuMatrixFeature, platform: PlatformBucket): string
   return feature.permissions.filter((p) => p[platform]?.inPlan).map((p) => p.code);
 }
 
-// The matrix value is the EFFECTIVE selection: a code-keyed, per-platform allow-list. A platform key present (even an
-// empty array) means the feature switch is on for that platform; the array holds the enabled permission codes.
-// These are pure helpers so the value can live directly in a react-hook-form field (Controller).
+// The matrix value is the effective selection: a code-keyed per-platform allow-list (platform key present = switch on); pure helpers for a react-hook-form field.
 
 // Deep-clones the value so updates stay immutable for react-hook-form's change detection
 function clone(selection: FeatureUnlocks): FeatureUnlocks {
@@ -29,9 +27,7 @@ function clone(selection: FeatureUnlocks): FeatureUnlocks {
   return next;
 }
 
-// ——— Lock-mode helpers (BU editor) ———
-// In lock mode the value IS the deny-list (BuFeatureLocks): platform null = whole feature locked there,
-// string[] = those codes locked, absent = fully available. Switch ON = lock the feature; checked box = lock the code.
+// Lock-mode helpers (BU editor): the value IS the deny-list (platform null = whole feature locked, string[] = those codes locked, absent = available).
 
 // Deep-clones the deny-list so updates stay immutable for react-hook-form's change detection
 function cloneLocks(locks: BuFeatureLocks): BuFeatureLocks {
@@ -160,12 +156,9 @@ export function togglePermIn(
   return next;
 }
 
-// ——— Dependency normalization ———
-// After any toggle, drop stranded grants so the cell stays a valid DAG: a permission survives only when all its
-// prerequisites are still selected on that platform. Deps are sibling permission codes carried on each cell.
+// Dependency normalization: after any toggle, drop stranded grants so a permission survives only when all its prerequisites are still selected.
 
-// Allow-list editor (SnapshotMatrix): run the platform's selected codes through the dependency filter, so
-// deselecting `view` cascade-drops `add`/`edit`/`delete`.
+// Allow-list editor (SnapshotMatrix): run the platform's selected codes through the dependency filter, so deselecting `view` cascade-drops `add`/`edit`/`delete`.
 export function normalizeSelectionCell(
   selection: FeatureUnlocks,
   feature: BuMatrixFeature,
@@ -182,8 +175,7 @@ export function normalizeSelectionCell(
   return next;
 }
 
-// Deny-list editor (BuLocksMatrix): the granted set is the in-plan codes NOT locked. Re-derive it through the
-// dependency filter, then lock everything that fell out — locking `view` cascades `add`/`edit`/`delete` into the deny.
+// Deny-list editor (BuLocksMatrix): re-derive the granted set (in-plan codes not locked) through the dependency filter, then lock everything that fell out.
 export function normalizeLocksCell(
   locks: BuFeatureLocks,
   feature: BuMatrixFeature,

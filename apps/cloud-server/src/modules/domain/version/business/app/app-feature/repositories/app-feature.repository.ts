@@ -30,9 +30,7 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof businessA
     super(database, businessAppFeatures);
   }
 
-  // Returns the features a business's apps include (grouped by feature) for the data table.
-  // Membership comes from app_features (scoped to the business's apps); each row carries its business apps
-  // and a count of its applicable permissions (the permission list is fetched separately).
+  // Returns the features a business's apps include (grouped by feature, with app + applicable-permission count) for the data table
   async findBusinessFeaturesForTable(
     versionId: string,
     businessId: string,
@@ -113,9 +111,7 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof businessA
       .where(and(eq(businessAppFeatures.businessId, businessId), inArray(businessAppFeatures.featureId, featureIds)));
   }
 
-  // Pins a feature to a single app within a business (one-to-one). Reassignment UPSERTS (updates app_id) so the
-  // (business, feature) row is never deleted — preserving the role/plan memberships that cascade off it. appId=null
-  // deletes the row, which cascade-deletes those memberships.
+  // Pins a feature to a single app within a business (one-to-one); reassignment UPSERTS to preserve cascading memberships, appId=null deletes the row
   async setFeatureApp(versionId: string, businessId: string, featureId: string, appId: string | null): Promise<void> {
     if (!appId) {
       await this.db

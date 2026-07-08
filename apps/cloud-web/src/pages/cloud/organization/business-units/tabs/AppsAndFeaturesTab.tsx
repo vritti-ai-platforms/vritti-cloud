@@ -14,9 +14,7 @@ interface AppsAndFeaturesTabProps {
   buId: string;
 }
 
-// Apps & Features tab — the BU's lock editor. The matrix form field IS the deny-list (BuFeatureLocks):
-// a feature switch ON locks the whole feature on that platform, a checked box locks that one permission.
-// Everything untouched stays available, so new plan features flow to the BU automatically.
+// Apps & Features tab — the BU's lock editor; the matrix form field IS the deny-list (BuFeatureLocks), untouched items stay available.
 export const AppsAndFeaturesTab: React.FC<AppsAndFeaturesTabProps> = ({ orgId, buId }) => {
   const { data, isLoading } = useBuPermissionMatrix(orgId, buId);
   const apps = data?.apps ?? [];

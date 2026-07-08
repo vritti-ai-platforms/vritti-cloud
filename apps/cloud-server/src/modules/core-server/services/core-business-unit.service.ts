@@ -7,8 +7,6 @@ import type {
 } from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreHttpService } from './core-http.service';
 
-// Proxies business unit management calls to core-server. Every call passes `orgId` so core-server
-// can scope the request to a single tenant via RLS (set via `x-org-id` header).
 @Injectable()
 export class CoreBusinessUnitService {
   private readonly logger = new Logger(CoreBusinessUnitService.name);

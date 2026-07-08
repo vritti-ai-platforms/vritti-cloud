@@ -22,15 +22,11 @@ import {
   togglePlatformLock,
 } from './selection';
 
-// Controlled form field — drop it inside a quantum <Form> with a `name` prop and it auto-registers via Controller.
-// The BU lock editor's twin of SnapshotMatrix: `value` IS the deny-list (BuFeatureLocks) — switch ON = whole
-// feature locked on that platform (null), checked box = that permission locked. Everything unchecked = available.
 interface BuLocksMatrixProps {
   apps: BuMatrixApp[];
   name?: string;
   value?: BuFeatureLocks;
   onChange?: (next: BuFeatureLocks) => void;
-  // Read-only render — switches/checkboxes are disabled (show state), plan locks and upsell render identically
   readOnly?: boolean;
 }
 
@@ -65,8 +61,7 @@ function platformUpsell(feature: BuMatrixFeature, platform: PlatformBucket): str
   return [...names];
 }
 
-// One (permission, platform) cell — checked = LOCKED for this business unit. A whole-platform lock (switch on)
-// checks and freezes every box; otherwise each box locks its own permission. Plan-locked cells stay upsell chips.
+// One (permission, platform) cell — checked = LOCKED; a whole-platform lock checks/freezes every box, else each box locks its own permission.
 function LockCell({
   cell,
   planLocked,
@@ -309,8 +304,7 @@ function AppCard({
   );
 }
 
-// The BU lock matrix — a controlled form field over the deny-list. `value` and `onChange` are injected by
-// quantum <Form> when used with a `name` prop; every switch/checkbox edits the deny-list immutably.
+// The BU lock matrix — a controlled form field over the deny-list; every switch/checkbox edits it immutably.
 export const BuLocksMatrix: React.FC<BuLocksMatrixProps> = ({ apps, value = {}, onChange, readOnly }) => {
   // Feature lookup so a lock toggle can re-derive its cell through the dependency filter (deps live on the feature)
   const featureByCode = new Map<string, BuMatrixFeature>();

@@ -68,8 +68,7 @@ import { ServicesModule } from './services/services.module';
       },
       inject: [ConfigService],
     }),
-    // Multi-tenant database module (Gateway Mode)
-    // forServer() automatically registers TenantContextInterceptor and imports RequestModule
+    // Multi-tenant database module (Gateway Mode) — forServer() registers TenantContextInterceptor and imports RequestModule
     DatabaseModule.forServer({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
@@ -93,8 +92,7 @@ import { ServicesModule } from './services/services.module';
         return options;
       },
     }),
-    // Authentication module (Global guard + JWT)
-    // Must be imported after DatabaseModule since VrittiAuthGuard depends on its services
+    // Authentication module (Global guard + JWT) — import after DatabaseModule (VrittiAuthGuard depends on its services)
     AuthConfigModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

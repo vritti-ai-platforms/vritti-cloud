@@ -6,7 +6,6 @@ import type { MatrixColumn } from './MatrixRow';
 interface MatrixCardProps {
   icon: string | null;
   name: string;
-  // Right-of-title summary (e.g. "3/8 features added" or "5 unlocked") — caller decides the wording
   countLabel: string;
   columns: MatrixColumn[];
   expanded: boolean;
@@ -14,8 +13,7 @@ interface MatrixCardProps {
   children: React.ReactNode;
 }
 
-// Presentational app-card shell: collapsible header (icon + name + count) and the platform column header.
-// No domain types — used by both the plan (unlocks) and role-template (grants) matrices.
+// Presentational app-card shell: collapsible header and the platform column header.
 export const MatrixCard: React.FC<MatrixCardProps> = ({
   icon,
   name,

@@ -1,7 +1,6 @@
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 
-// Loading placeholder mirroring the matrix editor: description + Save bar, a stack of collapsed
-// app cards (icon + name/count header), and the footer summary line.
+// Loading placeholder mirroring the matrix editor: description, Save bar, app cards, footer.
 export const PermissionMatrixSkeleton: React.FC = () => (
   <div className="flex min-h-120 flex-col gap-4">
     {/* Description paragraph + Save button */}

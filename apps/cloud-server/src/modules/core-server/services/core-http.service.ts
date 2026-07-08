@@ -4,14 +4,6 @@ import { signRequestHeaders } from '@vritti/api-sdk/signing';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { rethrowCoreError } from '../core-error.util';
 
-// Shared HTTP transport for core-server API calls.
-// Every request is signed with the deployment's Ed25519 signing key: the canonical string
-// (METHOD, path, orgId, sha256 of the exact serialized body, unix timestamp) is signed and sent as
-// x-timestamp + x-signature headers. Bodies are pre-serialized with JSON.stringify so the signed
-// bytes match the rawBody core-server verifies.
-// orgId is sent as an `x-org-id` header so core-server can scope the request to a single tenant
-// (sets `app.org_id` Postgres session var for RLS). Pass orgId on every call that operates on
-// existing tenant data; org-creation is the only legitimate exception.
 @Injectable()
 export class CoreHttpService {
   private readonly httpsAgent = new https.Agent({ rejectUnauthorized: false });

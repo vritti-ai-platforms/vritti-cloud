@@ -55,8 +55,7 @@ export class OrganizationBusinessUnitsService {
       org.orgIdentifier,
       this.packMetadata(data),
     );
-    // Seed the org's role templates (idempotent — core skips already-provisioned ones).
-    // No catalog seeding needed — a new BU has no lock overlay and resolves from the deployment catalog.
+    // Seed the org's role templates (idempotent); a new BU has no lock overlay and resolves from the deployment catalog
     await this.catalogSyncService.syncRoles(orgId);
     this.logger.log(`Created business unit for org ${orgId}`);
     return result;
@@ -150,16 +149,14 @@ export class OrganizationBusinessUnitsService {
     );
   }
 
-  // Returns the BU permission matrix — built purely from the version snapshot (all apps/features/permissions, with
-  // per-platform inPlan/selected/availableIn) — plus the raw stored deny-list so the editor seeds faithfully.
+  // Returns the BU permission matrix from the version snapshot plus the raw stored deny-list so the editor seeds faithfully
   async getBuMatrix(orgId: string, buId: string): Promise<BuMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await this.loadPlanContext(org, deployment);
     return buildBuMatrix(snapshot, org.businessCode, org.planCode, org.buLocks?.[buId]);
   }
 
-  // Replaces the BU's lock deny-list and pushes the overlay to core. No plan clamping is needed —
-  // the plan remains the ceiling at resolution, so a lock on an out-of-plan code is inert.
+  // Replaces the BU's lock deny-list and pushes the overlay to core (plan stays the ceiling, so an out-of-plan lock is inert)
   async updateBuLocks(orgId: string, buId: string, dto: SetBuLocksDto): Promise<SuccessResponseDto> {
     const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
@@ -206,8 +203,7 @@ export class OrganizationBusinessUnitsService {
     );
   }
 
-  // Loads the org's version snapshot + its plan (from snapshot.businesses[businessCode].plans[planCode]).
-  // The plan is the ceiling the BU's locks live within. Throws NotFound if the snapshot or plan is missing.
+  // Loads the org's version snapshot + its plan (the ceiling BU locks live within); throws NotFound if either is missing
   private async loadPlanContext(
     org: Organization,
     deployment: Deployment,

@@ -2,8 +2,6 @@ import { uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { versions } from './version';
 
-// Mobile microfrontend deployments scoped to an app version — one per code.
-// A mobile MF always has both an Android and an iOS remote entry (both NOT NULL).
 export const mobileMicrofrontends = cloudSchema.table(
   'mobile_microfrontends',
   {

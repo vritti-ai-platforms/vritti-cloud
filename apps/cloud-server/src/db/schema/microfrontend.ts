@@ -3,9 +3,6 @@ import { uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { appPlatformEnum } from './enums';
 
-// Read-only unified view over web_microfrontends + mobile_microfrontends. Reproduces the legacy
-// `microfrontends` shape (platform + per-platform remote-entry columns) for list/select/snapshot
-// reads. WRITES go to the concrete tables; this view is never inserted/updated.
 export const microfrontends = cloudSchema
   .view('microfrontends', {
     id: uuid('id'),
@@ -27,6 +24,4 @@ export const microfrontends = cloudSchema
         FROM cloud.mobile_microfrontends`,
   );
 
-// Unified read row (legacy shape). Per-platform columns are nullable in the view (a WEB row has no
-// android/ios; a MOBILE row has no remote_entry) — consumers needing non-null read the concrete tables.
 export type Microfrontend = typeof microfrontends.$inferSelect;

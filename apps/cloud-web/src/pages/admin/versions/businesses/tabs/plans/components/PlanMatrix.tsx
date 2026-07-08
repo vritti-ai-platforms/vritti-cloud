@@ -46,8 +46,7 @@ function toggleAll(unlocks: PlanUnlock[], featureId: string, platform: Platform,
   return unlocks.map((u, x) => (x === i ? { ...u, permissions: allOn ? [] : [...allIds] } : u));
 }
 
-// Drops stranded unlocks: after a toggle, run the cell's granted set through the dependency filter so any
-// permission whose prerequisites are no longer granted on this platform falls off (keeps the cell a valid DAG).
+// Drops stranded unlocks — runs the cell's granted set through the dependency filter so permissions whose prerequisites are gone fall off.
 function normalizeCell(unlocks: PlanUnlock[], feature: PlanMatrixFeature, platform: Platform): PlanUnlock[] {
   const i = indexOf(unlocks, feature.id, platform);
   if (i < 0) return unlocks;
@@ -68,8 +67,6 @@ function appPlatforms(app: PlanMatrixApp): Platform[] {
   return PLATFORM_ORDER.filter((p) => app.features.some((f) => f.platforms.includes(p)));
 }
 
-// A controlled form field: `value` is the unlocks array, `onChange` emits the next array. Drop it inside a quantum
-// <Form> with a `name` prop and it auto-registers via Controller — the parent never watches per-toggle.
 interface PlanMatrixProps {
   apps: PlanMatrixApp[];
   name?: string;

@@ -54,9 +54,7 @@ export function setPassword(password: string): Promise<SetPasswordResponse> {
   return axios.post<SetPasswordResponse>('onboarding/set-password', { password }).then((r) => r.data);
 }
 
-// ============================================================================
 // MFA (Multi-Factor Authentication) API Functions
-// ============================================================================
 
 export interface TotpSetupResponse {
   keyUri: string;
@@ -87,9 +85,7 @@ export function skipMFASetup(): Promise<{ success: boolean; message: string }> {
   return axios.post<{ success: boolean; message: string }>('onboarding/mfa/skip').then((r) => r.data);
 }
 
-// ============================================================================
 // Passkey (WebAuthn) MFA API Functions
-// ============================================================================
 
 export interface PasskeyRegistrationOptionsResponse {
   options: PublicKeyCredentialCreationOptions;
@@ -138,9 +134,7 @@ export function verifyPasskeySetup(credential: RegistrationResponseJSON): Promis
   return axios.post<BackupCodesResponse>('onboarding/mfa/passkey/verify', { credential }).then((r) => r.data);
 }
 
-// ============================================================================
 // Mobile Verification
-// ============================================================================
 
 export type VerificationMethod = 'whatsapp' | 'sms' | 'manual';
 

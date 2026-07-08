@@ -35,9 +35,7 @@ type AddPriceFormValues = z.infer<typeof addPriceFormSchema>;
 interface AddPriceFormProps {
   onSuccess: () => void;
   onCancel: () => void;
-  // When set, scopes the form to this country — the selector is hidden and the value is pre-filled
   lockedCountryId?: string;
-  // Billing cycles already priced on the card — hidden from the multi-select
   excludeCycleIds?: string[];
 }
 

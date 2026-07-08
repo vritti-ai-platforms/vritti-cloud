@@ -16,7 +16,6 @@ export interface AvailableFeaturePermission {
   featurePermissionId: string;
   code: string;
   label: string;
-  // Prerequisite sibling permission CODES — drives the frontend auto-toggle
   dependsOn: string[];
 }
 
@@ -26,11 +25,9 @@ export interface AvailableFeature {
   name: string;
   lucideIcon: string;
   permissions: AvailableFeaturePermission[];
-  // Platforms this feature has a route on — drives which Web/Mobile columns the matrix shows
   platforms: AppPlatform[];
 }
 
-// An app (layer 1 of the matrix) with the features it owns (layer 2)
 export interface AvailableApp {
   id: string;
   code: string;
@@ -84,8 +81,7 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
     return Number(result[0]?.count ?? 0);
   }
 
-  // Returns the business's apps (each with its features + business-scoped permissions + platforms) — the matrix source.
-  // A role can grant any of the business's feature-permissions; its apps are derived from what it grants.
+  // Returns the business's apps (each with its features + business-scoped permissions + platforms) — the matrix source
   async findAvailableApps(versionId: string, businessId: string): Promise<AvailableApp[]> {
     const rows = await this.db
       .select({

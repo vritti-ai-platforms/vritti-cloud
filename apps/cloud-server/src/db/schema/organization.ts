@@ -7,7 +7,6 @@ import { deployments } from './deployment';
 import { orgMemberRoleEnum, orgSizeEnum } from './enums';
 import { users } from './user';
 
-// Organizations table - workspace entities created by users
 export const organizations = cloudSchema.table('organizations', {
   id: uuid('id').primaryKey().defaultRandom(),
   name: varchar('name', { length: 255 }).notNull(),
@@ -28,14 +27,12 @@ export const organizations = cloudSchema.table('organizations', {
   deploymentId: uuid('deployment_id')
     .notNull()
     .references(() => deployments.id, { onDelete: 'restrict' }),
-  // Per-BU deny-list of locked permissions within the plan, keyed by core BU id (see BuFeatureLocks);
-  // a BU absent here (or a null column) inherits the full plan
+  // Per-BU deny-list of locked permissions within the plan, keyed by core BU id (see BuFeatureLocks); a BU absent here (or a null column) inherits the full plan
   buLocks: jsonb('bu_locks').$type<Record<string, BuFeatureLocks>>(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });
 
-// Organization members table - links users to organizations with roles
 export const organizationMembers = cloudSchema.table(
   'organization_members',
   {

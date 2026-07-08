@@ -5,11 +5,8 @@ export interface Role {
   id: string;
   name: string;
   description: string | null;
-  // The template this role builds on — effective grants = template ∪ features − revoked, composed at read time
   code: string;
-  // featureCode → { web?: permCodes, mobile?: permCodes } — the role's ADDITIONS beyond the template
   features: FeatureUnlocks;
-  // Grants inherited from the template that this role removes
   revoked?: RevokedGrants | null;
   isActive: boolean;
   createdAt: string;
@@ -28,13 +25,11 @@ export interface RoleTemplate {
   features: FeatureUnlocks;
 }
 
-// Per-platform feature grant — the matrix field; mirrors FeatureUnlocks
 const featureUnlocksSchema = z.record(
   z.string(),
   z.object({ web: z.array(z.string()).optional(), mobile: z.array(z.string()).optional() }),
 );
 
-// Revoked grants — platform null revokes the whole platform membership, string[] revokes those codes
 const revokedGrantsSchema = z.record(
   z.string(),
   z.object({
@@ -43,7 +38,6 @@ const revokedGrantsSchema = z.record(
   }),
 );
 
-// Role creation — every role builds on a template (its code); a fresh role has zero deltas
 export const createRoleSchema = z.object({
   code: z.string().min(1, 'Select a base role'),
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
@@ -61,6 +55,5 @@ export const updateRoleSchema = z.object({
 export type CreateRoleFormData = z.infer<typeof createRoleSchema>;
 type UpdateRoleFormData = z.infer<typeof updateRoleSchema>;
 
-// The matrix field is part of the form now, so the submit payload IS the form data
 export type CreateRoleData = CreateRoleFormData;
 export type UpdateRoleData = UpdateRoleFormData;

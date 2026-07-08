@@ -7,8 +7,6 @@ import { features } from './feature';
 import { plans } from './plan';
 import { versions } from './version';
 
-// Explicit feature membership for a plan, per platform. Presence here = the plan includes (unlocks) the
-// feature on that platform; its unlocked action permissions live in plan_feature_permissions (cascade).
 export const planFeatures = cloudSchema.table(
   'plan_features',
   {

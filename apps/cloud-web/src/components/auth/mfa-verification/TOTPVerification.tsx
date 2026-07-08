@@ -12,20 +12,11 @@ import type React from 'react';
 import { useForm } from 'react-hook-form';
 
 interface TOTPVerificationProps {
-  /** MFA session ID for verification */
   sessionId: string;
-  /** Callback when TOTP verification succeeds */
   onSuccess: (response: LoginResponse) => void;
 }
 
-/**
- * TOTP verification component for MFA login
- *
- * Displays authenticator app icon and 6-digit OTP input field.
- * Automatically submits when 6 digits are entered.
- *
- * Owns its own mutation and uses Form's mutation prop for automatic error handling.
- */
+// TOTP verification component for MFA login — 6-digit OTP input that auto-submits when complete.
 export const TOTPVerification: React.FC<TOTPVerificationProps> = ({ sessionId, onSuccess }) => {
   const verifyTotpMutation = useVerifyTotp({ onSuccess });
 

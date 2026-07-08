@@ -4,8 +4,6 @@ import { cloudSchema } from './cloud-schema';
 import { features } from './feature';
 import { versions } from './version';
 
-// Custom, per-feature permission rows. isGlobal=true applies to ALL businesses (base);
-// otherwise the businesses it applies to come from the permission_businesses junction.
 export const featurePermissions = cloudSchema.table(
   'feature_permissions',
   {

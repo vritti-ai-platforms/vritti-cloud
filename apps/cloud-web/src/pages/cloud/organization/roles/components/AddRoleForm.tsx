@@ -15,8 +15,7 @@ interface AddRoleFormProps {
   onCancel: () => void;
 }
 
-// Create-role dialog — every role builds on a template; permissions start from the template's grants
-// and are customized afterwards on the role's view page.
+// Create-role dialog — every role builds on a template, then permissions are customized on the role's view page.
 export const AddRoleForm: React.FC<AddRoleFormProps> = ({ orgId, onCreated, onCancel }) => {
   const form = useForm<CreateRoleFormData>({
     resolver: zodResolver(createRoleSchema),

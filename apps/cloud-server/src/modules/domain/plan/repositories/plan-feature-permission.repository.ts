@@ -17,7 +17,6 @@ export interface AvailablePlanPermission {
   featurePermissionId: string;
   code: string;
   label: string;
-  // Prerequisite sibling permission CODES — drives the frontend auto-toggle
   dependsOn: string[];
 }
 
@@ -27,11 +26,9 @@ export interface AvailablePlanFeature {
   name: string;
   lucideIcon: string;
   permissions: AvailablePlanPermission[];
-  // Platforms this feature has a route on — drives which Web/Mobile columns the matrix shows
   platforms: AppPlatform[];
 }
 
-// An app (layer 1 of the unlock matrix) with the features it owns (layer 2)
 export interface AvailablePlanApp {
   id: string;
   code: string;
@@ -40,7 +37,6 @@ export interface AvailablePlanApp {
   features: AvailablePlanFeature[];
 }
 
-// A single platform-scoped unlock on a plan
 export interface PlanUnlockGrant {
   featurePermissionId: string;
   platform: AppPlatform;

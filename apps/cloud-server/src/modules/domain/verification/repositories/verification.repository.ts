@@ -4,9 +4,6 @@ import { and, eq, lt, ne, sql } from '@vritti/api-sdk/drizzle-orm';
 import { type Verification, verifications } from '@/db/schema';
 import type { VerificationChannel } from '@/db/schema/enums';
 
-// Repository pattern: Prefer this.model for simple queries, use this.db for complex operations
-// - Use this.model.findFirst({ where: { field: value } }) for simple lookups with equality checks
-// - Use this.db when you need: complex conditions (ne, or, not), SQL expressions (sql``), aggregations (count, sum), atomic operations (increment)
 @Injectable()
 export class VerificationRepository extends PrimaryBaseRepository<typeof verifications> {
   constructor(database: PrimaryDatabaseService) {

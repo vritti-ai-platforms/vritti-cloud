@@ -160,8 +160,7 @@ export class MfaVerificationService {
       user.phone,
     );
 
-    // TODO: Actually send SMS via SMS provider (Twilio, etc.)
-    // For now, log it (in development only)
+    // TODO: Actually send SMS via SMS provider (Twilio, etc.); for now log it in development only
     if (process.env.NODE_ENV !== 'production') {
       this.logger.debug(`[DEV] SMS OTP for ${user.phone}: ${otp}`);
     }
@@ -230,9 +229,7 @@ export class MfaVerificationService {
       });
     }
 
-    // Generate authentication options
-    // Don't pass transports hint - let browser discover the best way to reach the authenticator
-    // This avoids QR code prompt when 'hybrid' transport is stored for synced passkeys
+    // Generate authentication options without transports hint so the browser discovers the authenticator (avoids QR prompt for synced 'hybrid' passkeys)
     const allowCredentials = passkeys
       .filter((pk) => pk.passkeyCredentialId)
       .map((pk) => ({ id: pk.passkeyCredentialId as string }));

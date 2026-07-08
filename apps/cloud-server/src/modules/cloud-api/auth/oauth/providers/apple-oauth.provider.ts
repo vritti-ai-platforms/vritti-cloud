@@ -92,11 +92,7 @@ export class AppleOAuthProvider implements IOAuthProvider {
   // Decodes the Apple ID token to extract the user's profile information
   async getUserProfile(accessToken: string): Promise<OAuthUserProfile> {
     try {
-      // Apple doesn't have a user info endpoint
-      // We need to decode the ID token from the initial response
-      // In practice, the ID token is passed separately in the OAuth flow
-      // For now, we'll assume the accessToken is the ID token
-
+      // Apple has no user info endpoint; decode the ID token instead (accessToken is assumed to be the ID token here)
       const decoded = this.jwtService.decode(accessToken) as AppleIdTokenPayload;
 
       if (!decoded) {
@@ -110,8 +106,7 @@ export class AppleOAuthProvider implements IOAuthProvider {
 
       this.logger.log(`Retrieved Apple profile for user: ${decoded.email}`);
 
-      // Apple doesn't provide names in subsequent logins
-      // They're only provided in the initial authorization response
+      // Apple only provides names in the initial authorization response, not in subsequent logins
       return {
         provider: OAuthProviderTypeValues.APPLE,
         providerId: decoded.sub,

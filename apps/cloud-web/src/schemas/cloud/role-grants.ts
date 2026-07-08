@@ -2,8 +2,6 @@ import type { FeatureUnlocks, PlatformBucket, RevokedGrants } from '@vritti/quan
 import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
 
 // Composes a based role's effective grants: base ∪ additions − revoked (mirrors the server's composeRoleGrants).
-// Membership exists when either side has the platform key ([] = member, view-only); revoked null drops the
-// platform entirely, string[] subtracts codes but keeps membership; featureless entries disappear.
 export function composeGrants(
   base: FeatureUnlocks,
   additions: FeatureUnlocks,
@@ -28,8 +26,7 @@ export function composeGrants(
   return result;
 }
 
-// Diffs the editor's effective selection against the base: additions = selection − base,
-// revoked = base platforms/codes missing from the selection (platform gone ⇒ null, codes gone ⇒ array)
+// Diffs the editor's effective selection against the base into additions and revoked grants.
 export function diffGrants(
   base: FeatureUnlocks,
   selection: FeatureUnlocks,

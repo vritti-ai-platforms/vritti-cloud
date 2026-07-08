@@ -10,7 +10,6 @@ import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
 
 interface RoleCardProps {
   role: Role;
-  // The role's template grants — effective counts compose template ∪ additions − revoked
   baseFeatures?: FeatureUnlocks;
   onView: (role: Role) => void;
   onDelete: (role: Role) => void;

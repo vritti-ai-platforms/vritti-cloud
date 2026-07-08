@@ -25,7 +25,6 @@ import { validateImportRows } from '@/utils/validate-import-rows';
 import { MicrofrontendRepository } from '../../../microfrontend/repositories/microfrontend.repository';
 import { FeatureRepository } from '../repositories/feature.repository';
 
-// The URL platform param, lowercase
 export type FeatureMicrofrontendPlatformParam = 'web' | 'mobile';
 
 @Injectable()
@@ -35,8 +34,7 @@ export class FeatureService {
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: features.name, type: 'string' },
     code: { column: features.code, type: 'string' },
-    // Filter by business assignment (via the business_app_features placement); EXISTS keeps the row counts intact.
-    // Honour the operator so "is not" (notEquals / isNotAnyOf) negates to features NOT assigned to the business.
+    // Filter by business assignment via EXISTS; honour the operator so "is not" (notEquals / isNotAnyOf) negates to features NOT assigned to the business
     businessId: {
       expression: (value, operator) => {
         const exists = sql`EXISTS (SELECT 1 FROM ${businessAppFeatures} WHERE ${businessAppFeatures.featureId} = ${features.id} AND ${businessAppFeatures.businessId} = ${value}::uuid)`;
@@ -191,8 +189,7 @@ export class FeatureService {
     };
   }
 
-  // Returns paginated feature options for the select component; when businessId is given, restricts to
-  // features available to add to that business (applicable permission, not already assigned to its apps)
+  // Returns paginated feature select options; when businessId is given, restricts to features addable to that business
   findForSelect(
     query: SelectOptionsQueryDto & { versionId?: string; businessId?: string },
   ): Promise<SelectQueryResult> {

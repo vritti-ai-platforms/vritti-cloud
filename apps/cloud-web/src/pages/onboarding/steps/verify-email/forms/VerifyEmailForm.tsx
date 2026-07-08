@@ -19,8 +19,7 @@ export const VerifyEmailForm: React.FC<VerifyEmailFormProps> = ({ onChangeClick 
 
   const verifyEmailMutation = useVerifyEmail({
     onSuccess: async () => {
-      // Refetch onboarding status to get updated currentStep
-      // OnboardingRouter will render the next step component
+      // Refetch onboarding status so OnboardingRouter renders the next step
       await refetch();
     },
     onError: (error) => {

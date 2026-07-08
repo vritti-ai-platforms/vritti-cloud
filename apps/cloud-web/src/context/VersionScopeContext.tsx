@@ -11,8 +11,7 @@ export interface VersionScope {
 
 const VersionScopeContext = createContext<VersionScope | null>(null);
 
-// Provides the version/business/plan ids resolved from the active route's slug params.
-// Levels not present in the current route resolve to ''.
+// Provides the version/business/plan ids resolved from the active route's slug params (missing levels resolve to '').
 export const VersionScopeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { id: versionId } = useSlugParams('versionSlug');
   const { id: businessId } = useSlugParams('businessSlug');

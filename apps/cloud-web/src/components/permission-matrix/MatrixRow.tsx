@@ -1,6 +1,5 @@
 import type React from 'react';
 
-// A matrix column — `key` identifies the platform (opaque to this visual layer), `label` is the header text
 export interface MatrixColumn {
   key: string;
   label: string;
@@ -11,13 +10,11 @@ interface MatrixRowProps {
   labelClassName?: string;
   columns: MatrixColumn[];
   renderCell: (columnKey: string) => React.ReactNode;
-  // Permission rows sit indented under the feature; master rows are flush
   indent?: boolean;
   className?: string;
 }
 
-// Presentational row grammar: a flex-1 label + one fixed-width centered cell per column. No domain logic — the
-// parent decides what each cell renders (switch, checkbox, lock, or nothing).
+// Presentational row grammar: a flex-1 label + one fixed-width centered cell per column.
 export const MatrixRow: React.FC<MatrixRowProps> = ({
   label,
   labelClassName,

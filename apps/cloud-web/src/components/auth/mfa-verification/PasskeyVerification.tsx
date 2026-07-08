@@ -4,17 +4,12 @@ import { AlertCircle, KeyRound } from 'lucide-react';
 import type React from 'react';
 
 interface PasskeyVerificationProps {
-  /** Callback when passkey verification is triggered */
   onVerify: () => void;
-  /** Whether verification is in progress */
   isVerifying: boolean;
-  /** Error object to display */
   error: Error | null;
 }
 
-/**
- * Get user-friendly error message from WebAuthn errors
- */
+// Get user-friendly error message from WebAuthn errors.
 const getErrorMessage = (error: Error | null): string | null => {
   if (!error) return null;
 
@@ -38,11 +33,7 @@ const getErrorMessage = (error: Error | null): string | null => {
   return error.message || 'An unexpected error occurred.';
 };
 
-/**
- * Passkey verification component for MFA login
- *
- * Displays key icon and triggers biometric/security key verification.
- */
+// Passkey verification component for MFA login — triggers biometric/security key verification.
 export const PasskeyVerification: React.FC<PasskeyVerificationProps> = ({ onVerify, isVerifying, error }) => {
   const errorMessage = getErrorMessage(error);
 

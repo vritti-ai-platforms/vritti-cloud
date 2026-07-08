@@ -108,8 +108,7 @@ export class BusinessFeatureService {
     return { success: true, message: `App for "${feature.feature.name}" updated successfully.` };
   }
 
-  // Adds many features to a business under one app at once. Validates the app belongs to the business and every
-  // feature belongs to the version + has at least one applicable permission (rejecting the whole batch otherwise).
+  // Adds many features to a business under one app at once, validating the app + each feature (rejecting the whole batch otherwise)
   async assignFeaturesToApp(
     versionId: string,
     businessId: string,

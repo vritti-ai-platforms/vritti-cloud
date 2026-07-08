@@ -5,29 +5,18 @@ import { KeyRound, ShieldCheck, Smartphone } from 'lucide-react';
 import type React from 'react';
 
 interface MethodSwitcherProps {
-  /** Currently active MFA method */
   currentMethod: MFAMethod;
-  /** Available MFA methods */
   availableMethods: MFAMethod[];
-  /** Callback when a method is selected */
   onMethodChange: (method: MFAMethod) => void;
 }
 
-/**
- * Method configuration for display
- */
 const METHOD_CONFIG: Record<MFAMethod, { icon: React.ComponentType<{ className?: string }>; label: string }> = {
   totp: { icon: ShieldCheck, label: 'Authenticator' },
   sms: { icon: Smartphone, label: 'SMS' },
   passkey: { icon: KeyRound, label: 'Passkey' },
 };
 
-/**
- * Method switcher component for MFA verification
- *
- * Displays horizontal divider with "Or use" text and method buttons
- * for switching between available MFA methods.
- */
+// Method switcher component for MFA verification — divider + buttons for alternative methods.
 export const MethodSwitcher: React.FC<MethodSwitcherProps> = ({ currentMethod, availableMethods, onMethodChange }) => {
   // Filter out the current method to show only alternative methods
   const alternativeMethods = availableMethods.filter((method) => method !== currentMethod);

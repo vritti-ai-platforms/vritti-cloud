@@ -71,10 +71,7 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
 
 export const SocialAuthButtons: React.FC = () => {
   const handleOAuthLogin = (provider: string) => {
-    // ZERO ENVIRONMENT VARIABLES APPROACH:
-    // Use relative /api path - works in both development and production
-    // Dev: Rsbuild proxy forwards /api/* to localhost:3000
-    // Prod: Nginx proxy forwards /api/* to backend service
+    // Relative /api path works in dev (Rsbuild proxy) and prod (Nginx proxy)
     window.location.href = `/api/auth/oauth/${provider}`;
   };
 

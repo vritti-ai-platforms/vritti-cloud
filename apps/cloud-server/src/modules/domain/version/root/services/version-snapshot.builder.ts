@@ -25,7 +25,6 @@ import type {
   WebMicrofrontend,
 } from '@/db/schema';
 
-// Raw versioned rows fetched for a single version (see VersionRepository.findSnapshotData)
 export interface SnapshotData {
   features: Feature[];
   permissions: FeaturePermission[];
@@ -34,20 +33,16 @@ export interface SnapshotData {
   apps: App[];
   businessAppFeatures: AppFeature[];
   roleTemplates: RoleTemplate[];
-  // Per-platform feature memberships (the role's included features) + the action grants under them
   roleTemplateFeatures: RoleTemplateFeature[];
   roleTemplatePermissions: RoleTemplateFeaturePermission[];
   plans: Plan[];
-  // Per-platform feature memberships (the plan's included features) + the action unlocks under them
   planFeatures: PlanFeature[];
   planFeaturePermissions: PlanFeaturePermission[];
   businesses: Array<{ id: string; code: string; name: string }>;
   permissionBusinesses: Array<{ featurePermissionId: string; businessId: string }>;
-  // Prerequisite edges between sibling permissions (permission requires depends_on)
   permissionDependencies: Array<{ permissionId: string; dependsOnId: string }>;
 }
 
-// Snapshot document types now live in api-sdk — re-exported so existing importers keep compiling
 export type {
   SnapshotApp,
   SnapshotBusiness,
@@ -174,8 +169,7 @@ function addPlatformCode(bucket: PlatformCodes, key: PlatformBucket, code?: stri
   if (code && !list.includes(code)) list.push(code);
 }
 
-// A role's features: { featureCode: { web?: [permCode…], mobile?: [permCode…] } }. Seeded from memberships
-// (so a member with zero actions still appears = the View/route gate), then filled with action grants.
+// A role's features seeded from memberships (a member with zero actions still appears = View/route gate), then filled with action grants
 function buildRoleFeatures(roleId: string, index: SnapshotIndex): FeatureUnlocks {
   const featurePerms: FeatureUnlocks = {};
   for (const m of index.roleFeaturesByRoleId[roleId] ?? []) {
@@ -193,8 +187,7 @@ function buildRoleFeatures(roleId: string, index: SnapshotIndex): FeatureUnlocks
   return featurePerms;
 }
 
-// A plan's unlocked features: { featureCode: { web?: [permCode…], mobile?: [permCode…] } }. Seeded from
-// memberships (a member with zero unlocked actions still appears = included/view-only), then filled with unlocks.
+// A plan's unlocked features seeded from memberships (a member with zero unlocked actions still appears = included/view-only), then filled with unlocks
 function buildPlanUnlockedPermissions(planId: string, index: SnapshotIndex): FeatureUnlocks {
   const featurePerms: FeatureUnlocks = {};
   for (const m of index.planFeaturesByPlanId[planId] ?? []) {

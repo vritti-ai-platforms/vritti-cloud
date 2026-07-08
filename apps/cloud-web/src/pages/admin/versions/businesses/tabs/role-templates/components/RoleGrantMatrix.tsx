@@ -48,8 +48,7 @@ function toggleAll(
   return grants.map((g, x) => (x === i ? { ...g, permissions: allOn ? [] : [...allIds] } : g));
 }
 
-// Drops stranded grants: after a toggle, run the cell's granted set through the dependency filter so any
-// permission whose prerequisites are no longer granted on this platform falls off (keeps the cell a valid DAG).
+// Drops stranded grants — runs the cell's granted set through the dependency filter so permissions whose prerequisites are gone fall off.
 function normalizeCell(
   grants: RoleTemplateGrant[],
   feature: RoleTemplateFeature,
@@ -74,8 +73,6 @@ function appPlatforms(app: RoleTemplateApp): Platform[] {
   return PLATFORM_ORDER.filter((p) => app.features.some((f) => f.platforms.includes(p)));
 }
 
-// A controlled form field: `value` is the grants array, `onChange` emits the next array. Used inside a quantum
-// <Form> with a `name` prop (auto-Controller) — the parent never watches per-toggle.
 interface RoleGrantMatrixProps {
   apps: RoleTemplateApp[];
   name?: string;

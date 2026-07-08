@@ -3,10 +3,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 
-/**
- * WhatsApp Service for sending messages via WhatsApp Cloud API
- * Handles verification messages and webhook signature validation
- */
 @Injectable()
 export class WhatsAppService {
   private readonly logger = new Logger(WhatsAppService.name);
@@ -33,19 +29,13 @@ export class WhatsAppService {
     });
   }
 
-  /**
-   * Send verification message via WhatsApp
-   * @param toPhone Phone number in E.164 format (with + prefix)
-   * @param verificationToken Verification token to send
-   * @returns Message ID if successful
-   */
+  // Sends a verification message via WhatsApp and returns the message ID
   async sendVerificationMessage(toPhone: string, verificationToken: string): Promise<string> {
     try {
       // Remove + prefix for WhatsApp API
       const formattedPhone = toPhone.startsWith('+') ? toPhone.substring(1) : toPhone;
 
-      // For now, send as text message
-      // In production, you should use approved message templates
+      // For now, send as text message (production should use approved message templates)
       const payload = {
         messaging_product: 'whatsapp',
         to: formattedPhone,
@@ -69,15 +59,7 @@ export class WhatsAppService {
     }
   }
 
-  /**
-   * Send verification message using template (for production)
-   * Requires pre-approved message template in Meta Business Manager
-   *
-   * @param toPhone Phone number in E.164 format
-   * @param verificationToken Verification token
-   * @param templateName Template name (must be approved)
-   * @returns Message ID if successful
-   */
+  // Sends a verification message using a pre-approved Meta template and returns the message ID
   async sendVerificationTemplate(
     toPhone: string,
     verificationToken: string,
@@ -126,14 +108,7 @@ export class WhatsAppService {
     }
   }
 
-  /**
-   * Validate webhook signature from WhatsApp
-   * Uses HMAC-SHA256 to verify the request came from Meta
-   *
-   * @param payload Raw request body as string
-   * @param signature Signature from X-Hub-Signature-256 header
-   * @returns true if signature is valid
-   */
+  // Validates a WhatsApp webhook signature via HMAC-SHA256
   validateWebhookSignature(payload: string, signature: string): boolean {
     try {
       if (!signature) {
@@ -174,28 +149,17 @@ export class WhatsAppService {
     }
   }
 
-  /**
-   * Normalize phone number to E.164 format with + prefix
-   * @param phone Phone number (with or without + prefix)
-   * @returns Phone number in E.164 format
-   */
+  // Normalizes a phone number to E.164 format with + prefix
   normalizePhoneNumber(phone: string): string {
     return phone.startsWith('+') ? phone : `+${phone}`;
   }
 
-  /**
-   * Extract country code from phone number
-   * Simple extraction - for production use a library like libphonenumber
-   *
-   * @param phone Phone number in E.164 format
-   * @returns ISO country code (best guess)
-   */
+  // Extracts the ISO country code from a phone number (best guess)
   extractCountryCode(phone: string): string {
     // Remove + prefix
     const normalized = phone.startsWith('+') ? phone.substring(1) : phone;
 
-    // Simple country code extraction (first 1-3 digits)
-    // This is a simplified version - use libphonenumber-js in production
+    // Simple country code extraction (first 1-3 digits); use libphonenumber-js in production
     const countryCodeMap: Record<string, string> = {
       '1': 'US', // USA/Canada
       '91': 'IN', // India

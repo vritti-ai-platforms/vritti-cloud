@@ -128,9 +128,7 @@ export class SecurityService {
     return { success: true, message: `Successfully revoked ${count} session(s).` };
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
   // MFA Status
-  // ──────────────────────────────────────────────────────────────────────────
 
   // Retrieves all active MFA records and returns aggregated status
   async getMfaStatus(userId: string): Promise<MfaStatusResponseDto> {
@@ -180,9 +178,7 @@ export class SecurityService {
     });
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
   // TOTP Setup
-  // ──────────────────────────────────────────────────────────────────────────
 
   // Generates a TOTP secret, persists a pending record, and returns the QR code URI
   async initiateTotpSetup(userId: string): Promise<TotpSetupResponseDto> {
@@ -293,9 +289,7 @@ export class SecurityService {
     return { success: true, message: 'All multi-factor authentication methods have been disabled.' };
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
   // Passkey Setup
-  // ──────────────────────────────────────────────────────────────────────────
 
   // Generates WebAuthn registration options and stores the challenge as a pending record
   async getPasskeySetupOptions(userId: string): Promise<Record<string, unknown>> {
@@ -417,9 +411,7 @@ export class SecurityService {
     return { success: true, message: 'Passkey removed successfully.' };
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
   // Backup Codes
-  // ──────────────────────────────────────────────────────────────────────────
 
   // Generates new backup codes, hashes them, and replaces the stored set on all active MFA records
   async regenerateBackupCodes(userId: string): Promise<BackupCodesResponseDto> {
@@ -448,9 +440,7 @@ export class SecurityService {
     });
   }
 
-  // ──────────────────────────────────────────────────────────────────────────
   // Linked Accounts
-  // ──────────────────────────────────────────────────────────────────────────
 
   // Returns all linked OAuth providers and whether the user can disconnect any
   async getLinkedAccounts(userId: string): Promise<LinkedAccountsResponseDto> {

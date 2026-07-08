@@ -9,13 +9,10 @@ export interface FeaturePermission {
   isGlobal: boolean;
   businessIds: string[];
   sortOrder: number;
-  // Prerequisite permission UUIDs — prefills the "Depends on" selector on edit
   dependsOn: string[];
-  // Prerequisite permission codes — shown in the "Depends on" table column
   dependsOnCodes: string[];
 }
 
-// Business-wise usage of a permission — powers the delete-impact dialog
 export interface PermissionUsageRef {
   id: string;
   name: string;
@@ -72,7 +69,6 @@ export const updatePermissionSchema = z
 
 export type UpdatePermissionData = z.infer<typeof updatePermissionSchema>;
 
-// Feature-tab form input — featureId is injected from page context, not entered by the user
 export const permissionFormSchema = z
   .object({
     code: codeField,

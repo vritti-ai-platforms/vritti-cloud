@@ -14,8 +14,7 @@ function matrixKey(planId: string) {
   return ['admin', 'plan-permissions', planId, 'matrix'] as const;
 }
 
-// Fetches the plan unlock matrix — apps (catalog) each with the plan's current unlocks nested. Suspense so the
-// editor mounts with data already present (and can seed react-hook-form defaultValues directly).
+// Fetches the plan unlock matrix — apps (catalog) each with the plan's current unlocks nested (Suspense).
 export function usePlanUnlocks(versionId: string, businessId: string, planId: string) {
   return useSuspenseQuery<{ apps: PlanMatrixApp[] }, AxiosError>({
     queryKey: matrixKey(planId),

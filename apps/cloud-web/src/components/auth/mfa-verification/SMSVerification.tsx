@@ -13,22 +13,12 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 interface SMSVerificationProps {
-  /** MFA session ID for verification */
   sessionId: string;
-  /** Masked phone number (e.g., "+1 *** *** 4567") */
   maskedPhone: string;
-  /** Callback when SMS verification succeeds */
   onSuccess: (response: LoginResponse) => void;
 }
 
-/**
- * SMS verification component for MFA login
- *
- * Initially shows "Send SMS code" button. After sending,
- * displays OTP input field with verify button and resend link.
- *
- * Owns its own mutations and uses Form's mutation prop for automatic error handling.
- */
+// SMS verification component for MFA login — send code, then OTP input with verify and resend.
 export const SMSVerification: React.FC<SMSVerificationProps> = ({ sessionId, maskedPhone, onSuccess }) => {
   const [codeSent, setCodeSent] = useState(false);
 

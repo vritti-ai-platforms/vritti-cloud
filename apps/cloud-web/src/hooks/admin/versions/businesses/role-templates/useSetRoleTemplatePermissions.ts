@@ -7,8 +7,7 @@ import { roleTemplateQueryKey } from './useRoleTemplate';
 import { roleTemplatePermissionsPrefixKey } from './useRoleTemplatePermissions';
 import { ROLE_TEMPLATES_QUERY_KEY } from './useRoleTemplates';
 
-// Replaces a role template's grants and refreshes its detail + tables. Ids are closed over, so callers submit
-// just the grant set ({ grants }).
+// Replaces a role template's grants and refreshes its detail + tables (ids are closed over, callers submit just { grants }).
 export function useSetRoleTemplatePermissions(versionId: string, businessId: string, roleId: string) {
   const queryClient = useQueryClient();
   return useMutation<SuccessResponse, AxiosError, SetPermissionsData>({

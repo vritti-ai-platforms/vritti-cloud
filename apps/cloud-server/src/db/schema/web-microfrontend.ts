@@ -2,8 +2,6 @@ import { uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { versions } from './version';
 
-// Web microfrontend deployments scoped to an app version — one per code.
-// remote_entry is NOT NULL (a web MF always has a single remote entry).
 export const webMicrofrontends = cloudSchema.table(
   'web_microfrontends',
   {

@@ -18,8 +18,7 @@ function safeParse(value: string | null | undefined) {
   }
 }
 
-// Form-field adapter for RichTextEditor — the field value is the serialized JSON string. Lexical fires an
-// initial change on mount, which is skipped so opening the editor doesn't dirty the form.
+// Form-field adapter for RichTextEditor — field value is the serialized JSON string; Lexical's initial mount change is skipped so opening doesn't dirty the form.
 const PlanContentField = ({
   value,
   onChange,

@@ -16,21 +16,15 @@ import { useState } from 'react';
 import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/bu-matrix';
 import { isCheckedIn, isMemberIn, normalizeSelectionCell, toggleMemberIn, togglePermIn } from './selection';
 
-// Controlled form field — drop it inside a quantum <Form> with a `name` prop and it auto-registers via Controller.
-// Role editors: `value` is the effective allow-list — switch ON / checked = granted.
-// The BU lock editor uses the BuLocksMatrix twin instead.
 interface SnapshotMatrixProps {
   apps: BuMatrixApp[];
   name?: string;
   value?: FeatureUnlocks;
   onChange?: (next: FeatureUnlocks) => void;
-  // Read-only render — switches/checkboxes are disabled (show state), everything else (locks, upsell) is identical
   readOnly?: boolean;
-  // When true, plan-locked cells stay grantable (dormant until upgrade) — role editor ONLY.
   allowLockedGrants?: boolean;
 }
 
-// Internal callback bundle the sub-components consume
 interface MatrixHandlers {
   isMember: (featureCode: string, platform: PlatformBucket) => boolean;
   isChecked: (featureCode: string, platform: PlatformBucket, permCode: string) => boolean;
@@ -69,9 +63,7 @@ function platformUpsell(feature: BuMatrixFeature, platform: PlatformBucket): str
   return [...names];
 }
 
-// One (permission, platform) cell. When the WHOLE platform is plan-locked the lock lives on the feature row, so the
-// per-permission cells are left blank; otherwise: — when N/A, a lock + upsell for a single locked permission, a
-// disabled box until the switch is on, and an active checkbox once it is.
+// One (permission, platform) cell — blank when the whole platform is plan-locked, else a lock/upsell or checkbox per state.
 function Cell({
   cell,
   platformLocked,
@@ -113,8 +105,7 @@ function Cell({
         </Tooltip>
       );
     }
-    // Role editor: plan-locked permissions are still GRANTABLE (dormant until upgrade) — checkbox with a
-    // small lock badge on its bottom-right corner (hover shows the unlocking plans)
+    // Role editor: plan-locked permissions are still GRANTABLE (dormant until upgrade) — checkbox with a corner lock badge
     return (
       <Tooltip content={lockTooltip(cell.availableIn)}>
         <span className="relative inline-flex">
@@ -178,8 +169,7 @@ function FeatureBlock({
               return <div key={platform} className="w-24" />;
             }
             if (lockedOnPlatform(feature, platform)) {
-              // Plain lock by default (BU matrix / read-only). In the role editor the switch stays usable
-              // (grants view-only membership, dormant until upgrade) with a small corner lock badge.
+              // Plain lock by default; in the role editor the switch stays usable (dormant until upgrade) with a corner lock badge.
               if (readOnly || !allowLockedGrants) {
                 return (
                   <div key={platform} className="flex w-24 justify-center">
@@ -326,8 +316,7 @@ function AppCard({
   );
 }
 
-// The shared snapshot-driven Apps & Features matrix — a controlled form field. `value` (the code-keyed selection)
-// and `onChange` are injected by quantum <Form> when used with a `name` prop; every switch/checkbox edits `value`.
+// The shared snapshot-driven Apps & Features matrix — a controlled form field; every switch/checkbox edits `value`.
 export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({
   apps,
   value = {},

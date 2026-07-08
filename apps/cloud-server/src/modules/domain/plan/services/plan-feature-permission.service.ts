@@ -10,7 +10,6 @@ import {
   PlanFeaturePermissionRepository,
 } from '../repositories/plan-feature-permission.repository';
 
-// An app (catalog) plus the plan's current unlocks for its features
 export interface PlanAppWithUnlocks extends AvailablePlanApp {
   unlocks: PlanUnlock[];
 }
@@ -46,8 +45,7 @@ export class PlanFeaturePermissionService {
     return { apps: apps.map((app) => ({ ...app, unlocks: byApp.get(app.id) ?? [] })) };
   }
 
-  // Replaces the plan's unlocks + their nested permission ids (delete-all, then insert). The payload nests
-  // permissions under each unlock, so a permission's parent is explicit — no permission→feature lookup needed.
+  // Replaces the plan's unlocks + their nested permission ids (delete-all, then insert); each permission's parent is explicit
   async setUnlocked(planId: string, dto: SetPlanUnlockedDto): Promise<SuccessResponseDto> {
     const plan = await this.ensurePlan(planId);
 

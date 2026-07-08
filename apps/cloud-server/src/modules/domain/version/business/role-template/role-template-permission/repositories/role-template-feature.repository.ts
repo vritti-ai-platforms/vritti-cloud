@@ -4,7 +4,6 @@ import { eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewRoleTemplateFeature } from '@/db/schema';
 import { roleTemplateFeaturePermissions, roleTemplateFeatures } from '@/db/schema';
 
-// A role template's per-platform feature grant with the action permissions granted under it
 export interface RoleTemplateGrant {
   featureId: string;
   platform: AppPlatform;
@@ -17,8 +16,7 @@ export class RoleTemplateFeatureRepository extends PrimaryBaseRepository<typeof 
     super(database, roleTemplateFeatures);
   }
 
-  // Returns the role's grants (feature, platform) with their granted permission ids aggregated per grant.
-  // The empty array for a grant with no permissions (LEFT JOIN miss) is preserved via FILTER + COALESCE (view-only).
+  // Returns the role's grants (feature, platform) with granted permission ids aggregated per grant (empty array preserved on LEFT JOIN miss)
   async findByRoleTemplateId(roleTemplateId: string): Promise<RoleTemplateGrant[]> {
     return this.db
       .select({

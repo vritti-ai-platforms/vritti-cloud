@@ -120,10 +120,7 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
     });
   }
 
-  // Returns feature select options available to add to a business: features that have a permission applicable to
-  // the business (global or business-linked) and are not already assigned to any of the business's apps
-  // Of the given feature ids, returns those addable to a business: belong to the version AND have an applicable
-  // permission (global or business-scoped). The caller rejects any id not returned here.
+  // Of the given feature ids, returns those addable to a business: belong to the version AND have an applicable global or business-scoped permission
   async findAddableIds(versionId: string, businessId: string, featureIds: string[]): Promise<string[]> {
     if (featureIds.length === 0) return [];
     const rows = await this.db

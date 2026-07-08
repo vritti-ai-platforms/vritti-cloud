@@ -14,9 +14,6 @@ import { CoreDeploymentService } from './core-deployment.service';
 import { CoreOrganizationService } from './core-organization.service';
 import { CoreRoleService } from './core-role.service';
 
-// Pushes the resolution INPUTS from cloud (source of truth) to core deployments: one signed catalog
-// license per deployment, one signed entitlement per org, and per-BU lock overlays. Core resolves
-// permissions at read time — no derived per-BU catalog is materialized downstream anymore.
 @Injectable()
 export class CatalogSyncService {
   private readonly logger = new Logger(CatalogSyncService.name);

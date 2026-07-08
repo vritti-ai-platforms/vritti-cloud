@@ -19,10 +19,7 @@ import type { ValidationError } from 'class-validator';
 import fastifyRawBody from 'fastify-raw-body';
 import { AppModule } from './app.module';
 
-// ============================================================================
 // Environment Configuration
-// ============================================================================
-
 const ENV = {
   nodeEnv: process.env.NODE_ENV,
   useHttps: process.env.USE_HTTPS === 'true',
@@ -36,12 +33,8 @@ const ENV = {
 const protocol = ENV.useHttps ? 'https' : 'http';
 const baseUrl = `${protocol}://${ENV.host}:${ENV.port}`;
 
-// ============================================================================
 // CORS Configuration
-// ============================================================================
-
-// In production, set CORS_ORIGINS (comma-separated, e.g. https://cloud.vrittiai.com,https://admin.vrittiai.com).
-// Falls back to local dev origins when unset.
+// In production, set CORS_ORIGINS (comma-separated); falls back to local dev origins when unset.
 const CORS_ORIGINS = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
   : [
@@ -64,13 +57,9 @@ const CORS_CONFIG = {
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
 };
 
-// ============================================================================
 // Configuration Functions
-// ============================================================================
 
-/**
- * Create Swagger/OpenAPI configuration
- */
+// Create Swagger/OpenAPI configuration
 function createSwaggerConfig() {
   return new DocumentBuilder()
     .setTitle('Vritti Cloud API')
@@ -99,14 +88,9 @@ function createSwaggerConfig() {
     .build();
 }
 
-// ============================================================================
 // Bootstrap Function
-// ============================================================================
-
 async function bootstrap() {
-  // Determine logger configuration
-  // When using default provider, let NestJS use its built-in logger to avoid circular reference
-  // When using Winston, we need to use LoggerService
+  // Determine logger config: default provider uses NestJS built-in logger to avoid circular reference, else Winston LoggerService
   const useBuiltInLogger = ENV.logProvider === 'default';
   const loggerOptions = useBuiltInLogger
     ? {}
@@ -134,8 +118,7 @@ async function bootstrap() {
   // Get services from DI container
   const configService = app.get(ConfigService);
 
-  // Only replace logger when using Winston provider
-  // Default provider would create circular reference if we call app.useLogger()
+  // Only replace logger when using Winston provider (default provider would create circular reference via app.useLogger())
   if (!useBuiltInLogger) {
     const appLogger = app.get(LoggerService);
     app.useLogger(appLogger);
@@ -146,8 +129,7 @@ async function bootstrap() {
     secret: configService.getOrThrow<string>('COOKIE_SECRET'),
   });
 
-  // Register raw body plugin for webhook signature validation
-  // global: true ensures rawBody is available for all routes (needed for webhooks)
+  // Register raw body plugin for webhook signature validation (rawBody needed for webhooks)
   await app.register(fastifyRawBody, {
     field: 'rawBody',
     global: false,
@@ -177,13 +159,10 @@ async function bootstrap() {
     },
   });
 
-  // Register global exception filter for RFC 7807 Problem Details format
-  // This filter transforms all exceptions (custom, NestJS built-in, DTO validation)
-  // into a consistent format with errors array: { errors: [{ field?, message }] }
+  // Register global exception filter transforming all exceptions into RFC 7807 Problem Details format: { errors: [{ field?, message }] }
   app.useGlobalFilters(new HttpExceptionFilter());
 
-  // Register correlation ID middleware for request tracking using Fastify hooks
-  // Using addHook ensures AsyncLocalStorage context persists throughout request lifecycle
+  // Register correlation ID middleware via Fastify addHook so AsyncLocalStorage context persists throughout the request lifecycle
   const correlationMiddleware = app.get(CorrelationIdMiddleware);
   const fastifyInstance = app.getHttpAdapter().getInstance();
   fastifyInstance.addHook('onRequest', async (request, reply) => {

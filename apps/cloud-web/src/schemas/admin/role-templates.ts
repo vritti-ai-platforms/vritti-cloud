@@ -13,17 +13,14 @@ export interface Role {
   updatedAt: string | null;
 }
 
-// A role's apps are derived from the permissions it grants, so the detail view is just the role
 export type RoleTemplateDetail = Role;
 
-// Role-template matrix terminology = "grants" (a role GRANTS feature-permissions). Role-owned types (not shared).
 export type Platform = 'WEB' | 'MOBILE';
 
 export interface RolePermissionOption {
   featurePermissionId: string;
   code: string;
   label: string;
-  // Sibling permission codes that must be granted on the same platform before this one
   dependsOn: string[];
 }
 
@@ -36,14 +33,12 @@ export interface RoleTemplateFeature {
   platforms: Platform[];
 }
 
-// One per-platform grant = the role grants this feature on a platform, with the granted permission ids
 export interface RoleTemplateGrant {
   featureId: string;
   platform: Platform;
   permissions: string[];
 }
 
-// One app (catalog) + the role's current grants nested under it
 export interface RoleTemplateApp {
   id: string;
   code: string;

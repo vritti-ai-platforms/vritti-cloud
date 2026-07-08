@@ -16,8 +16,7 @@ interface RolePermissionFormProps {
   role: Role;
 }
 
-// Inline permission editor for a role — the shared snapshot matrix over the role's EFFECTIVE grants
-// (template ∪ additions − revoked). On save the selection is diffed against the template so only deltas persist.
+// Inline permission editor for a role — shared snapshot matrix over the role's EFFECTIVE grants; on save the selection is diffed against the template so only deltas persist.
 export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, role }) => {
   const { data: matrix, isLoading } = usePermissions(orgId);
   // The template's grants are needed both to compose the initial selection and to diff on save

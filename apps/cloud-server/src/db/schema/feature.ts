@@ -5,7 +5,6 @@ import { mobileMicrofrontends } from './mobile-microfrontend';
 import { versions } from './version';
 import { webMicrofrontends } from './web-microfrontend';
 
-// Sidebar items and capability units scoped to an app version
 export const features = cloudSchema.table(
   'features',
   {
@@ -19,8 +18,7 @@ export const features = cloudSchema.table(
     lucideIcon: varchar('lucide_icon', { length: 255 }).notNull(),
     sfSymbol: varchar('sf_symbol', { length: 255 }).notNull(),
     materialSymbol: varchar('material_symbol', { length: 255 }).notNull(),
-    // Web microfrontend link (optional; all-or-nothing per CHECK). NO ACTION FK: a web MF can't be
-    // deleted while a feature links it (unlink first); the version cascade still cleans both up.
+    // Web microfrontend link (optional; all-or-nothing per CHECK). NO ACTION FK: a web MF can't be deleted while a feature links it; the version cascade still cleans both up.
     webMfId: uuid('web_mf_id').references(() => webMicrofrontends.id),
     webExposedModule: varchar('web_exposed_module', { length: 100 }),
     webRoutePrefix: varchar('web_route_prefix', { length: 100 }),

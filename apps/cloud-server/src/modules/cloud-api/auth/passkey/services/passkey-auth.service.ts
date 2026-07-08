@@ -43,8 +43,7 @@ export class PasskeyAuthService {
         userId = user.id;
         const passkeys = await this.mfaRepo.findAllPasskeysByUserId(user.id);
         if (passkeys.length > 0) {
-          // Don't pass transports hint - let browser discover the best way
-          // This avoids QR code prompt when 'hybrid' transport is stored
+          // Don't pass transports hint so the browser discovers the best way (avoids QR prompt for stored 'hybrid' transport)
           allowCredentials = passkeys
             .filter((pk) => pk.passkeyCredentialId)
             .map((pk) => ({ id: pk.passkeyCredentialId! }));

@@ -5,8 +5,6 @@ import { roleTemplates } from './role-template';
 import { roleTemplateFeatures } from './role-template-feature';
 import { versions } from './version';
 
-// Role-level action grants under a role's feature membership. Platform comes from the parent membership
-// row (role_template_features); deleting that membership cascade-deletes its grants.
 export const roleTemplateFeaturePermissions = cloudSchema.table(
   'role_template_feature_permissions',
   {

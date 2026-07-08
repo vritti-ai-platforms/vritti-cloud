@@ -1,7 +1,6 @@
 import { axios } from '@vritti/quantum-ui/axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 
-// Plan matrix terminology = "unlocks" (a plan UNLOCKS feature-permissions). Types are plan-owned (not shared).
 export type Platform = 'WEB' | 'MOBILE';
 export const PLATFORM_ORDER: Platform[] = ['WEB', 'MOBILE'];
 export const PLATFORM_LABEL: Record<Platform, string> = { WEB: 'Web', MOBILE: 'Mobile' };
@@ -10,7 +9,6 @@ export interface PlanPermissionOption {
   featurePermissionId: string;
   code: string;
   label: string;
-  // Sibling permission codes that must be granted on the same platform before this one
   dependsOn: string[];
 }
 
@@ -23,14 +21,12 @@ export interface PlanMatrixFeature {
   platforms: Platform[];
 }
 
-// One per-platform unlock = the plan unlocks this feature on a platform, with the unlocked permission ids
 export interface PlanUnlock {
   featureId: string;
   platform: Platform;
   permissions: string[];
 }
 
-// One app (catalog) + the plan's current unlocks nested under it
 export interface PlanMatrixApp {
   id: string;
   code: string;

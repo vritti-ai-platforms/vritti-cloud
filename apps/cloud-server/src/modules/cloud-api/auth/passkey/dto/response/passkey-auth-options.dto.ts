@@ -1,7 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-// WebAuthn authentication options DTO
-// Uses generic type to accept the library's return type directly
 export class PasskeyAuthOptionsDto<T = unknown> {
   @ApiProperty({
     description:

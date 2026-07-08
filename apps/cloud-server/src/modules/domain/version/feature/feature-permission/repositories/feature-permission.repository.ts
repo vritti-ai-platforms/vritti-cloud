@@ -15,15 +15,12 @@ import {
   roleTemplates,
 } from '@/db/schema';
 
-// Self-alias of feature_permissions to resolve a permission's prerequisite sibling CODES for display
 const prerequisitePermissions = alias(featurePermissions, 'prereq_permission');
 
 export type FeaturePermissionTableRow = FeaturePermission & {
   featureName: string | null;
   businessIds: string[];
-  // Prerequisite sibling permission ids (empty when the permission has no prerequisites) — for the edit form
   dependsOn: string[];
-  // Prerequisite sibling permission codes — for display in the table
   dependsOnCodes: string[];
 };
 
@@ -34,7 +31,6 @@ export interface BusinessFeaturePermission {
   isGlobal: boolean;
 }
 
-// A permission with its prerequisite sibling CODES — matrix + author-time dependency validation source
 export interface PermissionWithDeps {
   id: string;
   code: string;
@@ -42,7 +38,6 @@ export interface PermissionWithDeps {
   dependsOn: string[];
 }
 
-// A plan / role-template that references a permission, carrying its owning business
 export interface PermissionUsageRef {
   businessId: string;
   businessName: string;

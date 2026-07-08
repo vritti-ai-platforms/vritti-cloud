@@ -3,8 +3,6 @@ import { check, primaryKey, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { featurePermissions } from './feature-permission';
 
-// Self-referential prerequisite edges between sibling permissions of the same feature. A row means
-// permission_id (the dependent) requires depends_on_id (the prerequisite). The graph is a DAG (no cycles).
 export const featurePermissionDependencies = cloudSchema.table(
   'feature_permission_dependencies',
   {

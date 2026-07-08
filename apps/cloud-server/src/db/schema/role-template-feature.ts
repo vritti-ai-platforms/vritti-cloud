@@ -7,8 +7,6 @@ import { features } from './feature';
 import { roleTemplates } from './role-template';
 import { versions } from './version';
 
-// Explicit feature membership for a role template, per platform. Presence here = the feature is in the
-// role (the View/route gate); its action grants live in role_template_feature_permissions (cascade).
 export const roleTemplateFeatures = cloudSchema.table(
   'role_template_features',
   {
