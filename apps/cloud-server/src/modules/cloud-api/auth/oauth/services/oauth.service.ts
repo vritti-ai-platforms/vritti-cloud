@@ -3,7 +3,7 @@ import { SessionService } from '@domain/session/services/session.service';
 import { UserRepository } from '@domain/user/repositories/user.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
+import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
 import {
   type OAuthProviderType,

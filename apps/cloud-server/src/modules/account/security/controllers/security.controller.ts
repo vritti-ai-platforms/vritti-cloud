@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { AccessToken, RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { AccessToken, RequireSession, UserId } from '@vritti/api-sdk/auth';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
 import {

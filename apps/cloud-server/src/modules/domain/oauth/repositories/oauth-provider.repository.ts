@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { type OAuthProvider, oauthProviders } from '@/db/schema';
 import type { OAuthUserProfile } from '@/modules/cloud-api/auth/oauth/interfaces/oauth-user-profile.interface';

@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
 import { ChangePasswordDto } from '../dto/request/change-password.dto';
 import { VerifyPasskeySetupDto } from '../dto/request/verify-passkey-setup.dto';

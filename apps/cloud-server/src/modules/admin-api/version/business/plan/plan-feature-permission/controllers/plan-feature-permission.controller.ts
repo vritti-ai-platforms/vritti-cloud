@@ -4,7 +4,8 @@ import {
 } from '@domain/plan/services/plan-feature-permission.service';
 import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, type SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession } from '@vritti/api-sdk/auth';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import { SetPlanUnlockedDto } from '../dto/request/set-plan-unlocked.dto';
 

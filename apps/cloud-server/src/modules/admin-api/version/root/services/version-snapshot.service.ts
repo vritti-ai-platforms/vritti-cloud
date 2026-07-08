@@ -1,6 +1,6 @@
 import { VersionService } from '@domain/version/root/services/version.service';
 import { Injectable, Logger } from '@nestjs/common';
-import type { SuccessResponseDto } from '@vritti/api-sdk';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 
 @Injectable()

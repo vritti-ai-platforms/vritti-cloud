@@ -1,4 +1,4 @@
-import { BadRequestException } from '@vritti/api-sdk';
+import { BadRequestException } from '@vritti/api-sdk/exceptions';
 import { read, utils } from 'xlsx';
 
 // Parses a CSV or Excel buffer into rows of key-value pairs

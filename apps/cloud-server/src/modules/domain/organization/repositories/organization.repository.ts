@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { asc, count, eq, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Business, CloudProvider, Deployment, Organization, Region } from '@/db/schema';
 import { businesses, deployments, organizations } from '@/db/schema';

@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { SuccessResponseDto } from '@vritti/api-sdk';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { CoreHttpService } from './core-http.service';
 
 interface CoreSuccessDto {

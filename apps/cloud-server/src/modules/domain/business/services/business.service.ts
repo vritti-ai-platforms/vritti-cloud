@@ -1,16 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { DataTableStateService } from '@vritti/api-sdk/data-table';
 import {
-  ConflictException,
   CreateResponseDto,
-  DataTableStateService,
   type FieldMap,
   type FilterCondition,
   FilterProcessor,
-  NotFoundException,
   SelectOptionsQueryDto,
   type SelectQueryResult,
   SuccessResponseDto,
-} from '@vritti/api-sdk';
+} from '@vritti/api-sdk/database';
+import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { businesses } from '@/db/schema';
 import { BusinessDto } from '@/modules/admin-api/business/dto/entity/business.dto';
 import type { CreateBusinessDto } from '@/modules/admin-api/business/dto/request/create-business.dto';

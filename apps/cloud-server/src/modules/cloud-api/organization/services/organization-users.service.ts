@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { DataTableStateService, type SuccessResponseDto } from '@vritti/api-sdk';
+import { DataTableStateService } from '@vritti/api-sdk/data-table';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreUserService } from '@/modules/core-server/services/core-user.service';
 import { requireSigningKey } from '@/modules/core-server/signing-key.util';

@@ -5,7 +5,7 @@ import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
+import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
 import { PasskeyAuthOptionsDto } from '../dto/response/passkey-auth-options.dto';
 import { PasskeyAuthResponseDto } from '../dto/response/passkey-auth-response.dto';

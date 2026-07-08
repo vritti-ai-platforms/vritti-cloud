@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Post, Put, Req } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { FastifyRequest } from 'fastify';
 import type { VerificationChannel } from '@/db/schema';
 import { SessionTypeValues } from '@/db/schema';

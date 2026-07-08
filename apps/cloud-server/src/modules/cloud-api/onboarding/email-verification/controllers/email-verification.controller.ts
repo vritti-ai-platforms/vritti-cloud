@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiChangeEmail, ApiSendEmailOtp, ApiVerifyEmail } from '../docs/email-verification.docs';
 import { type ChangeEmailDto } from '../dto/request/change-email.dto';

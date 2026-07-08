@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { OrganizationDetailDto } from '../dto/entity/organization-detail.dto';
 import { OrganizationTableResponseDto } from '../dto/response/organizations-response.dto';
 

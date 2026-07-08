@@ -7,7 +7,7 @@ import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { VerificationService } from '@domain/verification/services/verification.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk';
+import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
 import {
   type MfaAuth,

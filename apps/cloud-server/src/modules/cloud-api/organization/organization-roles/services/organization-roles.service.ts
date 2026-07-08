@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { type CreateResponseDto, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
 import type { VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
+import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
+import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';

@@ -1,7 +1,7 @@
 import { FeaturePermissionService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
 import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiFindForTableBusinessPermissions } from '../docs/business-permission.docs';
 import { BusinessPermissionTableQueryDto } from '../dto/request/business-permission-table-query.dto';

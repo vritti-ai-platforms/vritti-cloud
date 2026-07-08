@@ -11,7 +11,8 @@ export class CreateRoleTemplateDto {
   versionId: string;
 
   @ApiProperty({
-    description: 'Stable role code — a single lowercase word (hyphens allowed). The durable link to provisioned org roles.',
+    description:
+      'Stable role code — a single lowercase word (hyphens allowed). The durable link to provisioned org roles.',
     example: 'cashier',
   })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))

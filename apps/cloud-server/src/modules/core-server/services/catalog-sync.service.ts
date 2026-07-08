@@ -1,8 +1,8 @@
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { NotFoundException } from '@vritti/api-sdk';
 import { buildBuRoles, type VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
+import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import { type CatalogLicense, hashSnapshot, type OrgEntitlement, type SignedDocument } from '@vritti/api-sdk/license';
 import { signDocument } from '@vritti/api-sdk/signing';
 import type { Deployment, Organization } from '@/db/schema';

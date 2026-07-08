@@ -18,15 +18,9 @@ import {
   Res,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import {
-  CreateResponseDto,
-  ImportResponseDto,
-  RequireSession,
-  SuccessResponseDto,
-  UploadedFile,
-  type UploadedFileResult,
-  UserId,
-} from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
+import { CreateResponseDto, ImportResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
+import { UploadedFile, type UploadedFileResult } from '@vritti/api-sdk/decorators';
 import { type ExportFormat, getExportExt, getExportMimeType } from '@vritti/api-sdk/xlsx';
 import type { FastifyReply } from 'fastify';
 import { SessionTypeValues } from '@/db/schema';

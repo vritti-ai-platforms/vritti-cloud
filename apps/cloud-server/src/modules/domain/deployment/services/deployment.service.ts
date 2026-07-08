@@ -1,11 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  ConflictException,
-  CreateResponseDto,
-  NotFoundException,
-  type SelectQueryResult,
-  SuccessResponseDto,
-} from '@vritti/api-sdk';
+import { CreateResponseDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
+import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
 import type { SigningKeyDto } from '@/modules/admin-api/deployment/dto/entity/signing-key.dto';

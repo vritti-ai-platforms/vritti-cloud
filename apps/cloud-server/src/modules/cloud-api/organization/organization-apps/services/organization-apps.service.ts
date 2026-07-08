@@ -2,7 +2,7 @@ import { buildBuMatrix } from '@domain/catalog/bu-matrix.builder';
 import { VersionRepository } from '@domain/version/root/repositories/version.repository';
 import type { VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
-import { NotFoundException } from '@vritti/api-sdk';
+import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { BuMatrixResponseDto } from '@/modules/cloud-api/organization/organization-business-units/dto/response/bu-matrix.response.dto';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 

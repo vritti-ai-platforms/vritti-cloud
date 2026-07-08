@@ -1,6 +1,6 @@
 import { Controller, Get, HttpCode, HttpStatus, Logger, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
 import { SessionTypeValues } from '@/db/schema';
 import type { MfaStatusResponseDto } from '../../../../account/security/dto/response/mfa-status-response.dto';
 import { ApiGetMfaStatus, ApiSkipMfaSetup } from '../docs/mfa-status.docs';

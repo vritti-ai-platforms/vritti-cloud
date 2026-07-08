@@ -1,7 +1,7 @@
 import { OrganizationMemberService } from '@domain/organization-member/services/organization-member.service';
 import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiFindOrganizationMembers } from '../docs/organization-member.docs';
 import { OrganizationMemberTableResponseDto } from '../dto/response/organization-members-response.dto';

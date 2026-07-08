@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, eq, exists, inArray, or } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, NewPlanFeaturePermission } from '@/db/schema';
 import {

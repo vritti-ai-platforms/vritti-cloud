@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import type { CloudProvider } from '@/db/schema';
 import { cloudProviders, regionCloudProviders } from '@/db/schema';

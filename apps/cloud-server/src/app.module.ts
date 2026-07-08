@@ -2,16 +2,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RouterModule } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import {
-  AuthConfigModule,
-  DatabaseModule,
-  type DatabaseModuleOptions,
-  DataTableModule,
-  LoggerModule,
-  RootModule,
-  type TokenExpiryString,
-} from '@vritti/api-sdk';
+import { AuthConfigModule, type TokenExpiryString } from '@vritti/api-sdk/auth';
+import { DataTableModule } from '@vritti/api-sdk/data-table';
+import { DatabaseModule, type DatabaseModuleOptions } from '@vritti/api-sdk/database';
 import { EmailModule } from '@vritti/api-sdk/email';
+import { LoggerModule } from '@vritti/api-sdk/logger';
+import { RootModule } from '@vritti/api-sdk/root';
 import * as schema from '@/db/schema';
 import { relations } from '@/db/schema';
 import { validate } from './config/env.validation';

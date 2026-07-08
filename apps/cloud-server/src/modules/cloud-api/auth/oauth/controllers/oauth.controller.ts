@@ -1,6 +1,6 @@
 import { Controller, Get, Logger, Param, Query, Redirect, Req, Res } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CookieName, type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk';
+import { CookieName, type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk/auth';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import { ApiHandleOAuthCallback, ApiInitiateOAuth } from '../docs/oauth.docs';
 import { OAuthCallbackQueryDto } from '../dto/request/oauth-callback-query.dto';

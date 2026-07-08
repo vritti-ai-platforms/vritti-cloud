@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { TableResponseDto, type TableViewState } from '@vritti/api-sdk';
+import { TableResponseDto, type TableViewState } from '@vritti/api-sdk/database';
 import { FeaturePermissionDto } from '@/modules/admin-api/version/permission/dto/entity/feature-permission.dto';
 
 export class BusinessPermissionTableResponseDto extends TableResponseDto<FeaturePermissionDto> {

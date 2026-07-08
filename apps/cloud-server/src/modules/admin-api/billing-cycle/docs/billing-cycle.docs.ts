@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BillingCycleDto } from '../dto/entity/billing-cycle.dto';
 import { CreateBillingCycleDto } from '../dto/request/create-billing-cycle.dto';
 import { UpdateBillingCycleDto } from '../dto/request/update-billing-cycle.dto';

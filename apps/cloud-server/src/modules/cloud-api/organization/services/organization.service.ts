@@ -6,15 +6,13 @@ import { DeploymentRepository } from '@domain/deployment/repositories/deployment
 import { MediaService } from '@domain/media/services/media.service';
 import { PlanRepository } from '@domain/plan/repositories/plan.repository';
 import { Injectable, Logger } from '@nestjs/common';
+import { type SelectOptionsQueryDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import {
   BadRequestException,
   ConflictException,
   ForbiddenException,
   NotFoundException,
-  type SelectOptionsQueryDto,
-  type SelectQueryResult,
-  SuccessResponseDto,
-} from '@vritti/api-sdk';
+} from '@vritti/api-sdk/exceptions';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';

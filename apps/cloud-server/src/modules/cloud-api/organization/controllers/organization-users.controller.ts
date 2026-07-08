@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { type SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { UserId } from '@vritti/api-sdk/auth';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import {
   ApiGetOrgUsers,
   ApiGetOrgUsersTable,

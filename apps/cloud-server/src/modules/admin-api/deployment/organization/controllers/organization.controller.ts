@@ -1,8 +1,8 @@
 import { OrganizationService } from '@domain/organization/services/organization.service';
 import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import type { SuccessResponseDto } from '@vritti/api-sdk';
-import { RequireSession, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import { ApiFindForTableOrganizations, ApiFindOrganizationById, ApiResyncDeployment } from '../docs/organization.docs';
 import { OrganizationDetailDto } from '../dto/entity/organization-detail.dto';

@@ -3,7 +3,7 @@ import { extname } from 'node:path';
 import type { Readable } from 'node:stream';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
+import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
 import { type Media, MediaStatusValues } from '@/db/schema';
 import { MediaDto } from '@/modules/cloud-api/media/dto/entity/media.dto';

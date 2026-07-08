@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { SuccessResponseDto } from '@vritti/api-sdk';
 import type { BuFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import type {
   BuRoleAssignment,
   CoreBusinessUnit,

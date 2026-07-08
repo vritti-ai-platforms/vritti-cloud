@@ -1,18 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { DataTableStateService } from '@vritti/api-sdk/data-table';
 import {
-  ConflictException,
   CreateResponseDto,
-  DataTableStateService,
   type FieldMap,
   type FilterCondition,
   FilterProcessor,
   ImportResponseDto,
-  NotFoundException,
   SelectOptionsQueryDto,
   type SelectQueryResult,
   SuccessResponseDto,
-} from '@vritti/api-sdk';
+} from '@vritti/api-sdk/database';
 import { and } from '@vritti/api-sdk/drizzle-orm';
+import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
 import { businessApps } from '@/db/schema';
 import { AppDto } from '@/modules/admin-api/version/business/app/dto/entity/app.dto';

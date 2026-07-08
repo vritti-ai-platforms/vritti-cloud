@@ -1,7 +1,7 @@
 import { DeploymentService } from '@domain/deployment/services/deployment.service';
 import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Public } from '@vritti/api-sdk';
+import { Public } from '@vritti/api-sdk/auth';
 import { DeploymentsResponseDto } from '@/modules/admin-api/deployment/dto/response/deployments-response.dto';
 import { ApiFindAllPublicDeployments, ApiGetDeploymentPlans, ApiGetDeployments } from '../docs/deployment.docs';
 import { DeploymentFilterDto, DeploymentPlanQueryDto } from '../dto/request/deployment-filter.dto';

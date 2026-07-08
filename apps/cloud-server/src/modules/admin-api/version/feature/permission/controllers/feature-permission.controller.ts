@@ -1,7 +1,8 @@
 import { FeaturePermissionService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
 import { Body, Controller, Get, Logger, Param, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, type SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession } from '@vritti/api-sdk/auth';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import { FeaturePermissionDto } from '@/modules/admin-api/version/permission/dto/entity/feature-permission.dto';
 import { ReorderPermissionsDto } from '@/modules/admin-api/version/permission/dto/request/reorder-permissions.dto';

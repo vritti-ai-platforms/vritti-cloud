@@ -1,7 +1,8 @@
 import { VersionBusinessService } from '@domain/version/business/root/services/version-business.service';
 import { Body, Controller, Delete, Get, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { type CreateResponseDto, RequireSession, type SuccessResponseDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
+import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import { VersionBusinessDto } from '@/modules/admin-api/business/dto/entity/version-business.dto';
 import {

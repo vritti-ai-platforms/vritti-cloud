@@ -1,5 +1,5 @@
 import { HttpException } from '@nestjs/common';
-import { ServiceUnavailableException } from '@vritti/api-sdk';
+import { ServiceUnavailableException } from '@vritti/api-sdk/exceptions';
 import { isAxiosError } from 'axios';
 
 // Rethrows a failed core call: core's HTTP error passes through verbatim, only transport failures become a 503

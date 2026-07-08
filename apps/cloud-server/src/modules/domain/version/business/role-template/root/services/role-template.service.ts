@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { DataTableStateService } from '@vritti/api-sdk/data-table';
 import {
   CreateResponseDto,
-  DataTableStateService,
   type FieldMap,
   type FilterCondition,
   FilterProcessor,
-  NotFoundException,
   SelectOptionsQueryDto,
   type SelectQueryResult,
   SuccessResponseDto,
-} from '@vritti/api-sdk';
+} from '@vritti/api-sdk/database';
 import { and } from '@vritti/api-sdk/drizzle-orm';
+import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import { roleTemplates } from '@/db/schema';
 import { RoleTemplateDto } from '@/modules/admin-api/version/business/role-template/root/dto/entity/role-template.dto';
 import { RoleTemplateTableRowDto } from '@/modules/admin-api/version/business/role-template/root/dto/entity/role-template-table-row.dto';

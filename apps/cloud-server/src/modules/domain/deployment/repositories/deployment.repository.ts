@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import { CurrencyAmountDto } from '@vritti/api-sdk/money';
 import type { CloudProvider, Deployment, Region } from '@/db/schema';

@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { NotFoundException, SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
+import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import { type CurrencyAmountDto, type CurrencyCode, majorToMinor } from '@vritti/api-sdk/money';
 import { PlanPriceDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/entity/plan-price.dto';
 import type { CreatePlanPricesDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/request/create-plan-prices.dto';

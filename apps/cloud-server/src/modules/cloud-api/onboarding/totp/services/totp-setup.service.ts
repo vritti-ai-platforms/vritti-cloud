@@ -3,7 +3,7 @@ import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
 import { TotpService } from '@domain/mfa/services/totp.service';
 import { UserService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, NotFoundException } from '@vritti/api-sdk';
+import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
 import { BackupCodesResponseDto } from '../../../../account/security/dto/response/backup-codes-response.dto';
 import { TotpSetupResponseDto } from '../../../../account/security/dto/response/totp-setup-response.dto';

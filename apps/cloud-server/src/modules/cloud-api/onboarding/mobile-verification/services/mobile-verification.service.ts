@@ -3,7 +3,8 @@ import { VerificationService } from '@domain/verification/services/verification.
 import { Injectable, Logger, type MessageEvent } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { BadRequestException, extractCountryFromPhone, normalizePhoneNumber } from '@vritti/api-sdk';
+import { BadRequestException } from '@vritti/api-sdk/exceptions';
+import { extractCountryFromPhone, normalizePhoneNumber } from '@vritti/api-sdk/utils';
 import { concat, finalize, Observable, of } from 'rxjs';
 import { type Verification } from '@/db/schema';
 import { type VerificationChannel, VerificationChannelValues } from '@/db/schema/enums';

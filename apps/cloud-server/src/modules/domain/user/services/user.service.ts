@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConflictException, NotFoundException } from '@vritti/api-sdk';
+import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { SignupMethod, SignupMethodValues, User } from '@/db/schema';
 import { UserDto } from '@/modules/cloud-api/user/dto/entity/user.dto';
 import type { CreateUserDto } from '@/modules/cloud-api/user/dto/request/create-user.dto';

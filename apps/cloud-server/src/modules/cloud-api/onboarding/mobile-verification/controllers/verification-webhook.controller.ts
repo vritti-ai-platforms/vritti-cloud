@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Headers, Logger, Param, Post, Query, Req } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { Public, SkipCsrf } from '@vritti/api-sdk';
+import { Public, SkipCsrf } from '@vritti/api-sdk/auth';
 import type { FastifyRequest } from 'fastify';
 import { ApiHandleWebhook, ApiVerifyWebhook } from '../docs/verification-webhook.docs';
 import { TwilioSmsWebhookDto } from '../dto/request/sms-webhook.dto';

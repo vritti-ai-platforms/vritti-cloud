@@ -1,6 +1,7 @@
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SelectOptionsQueryDto, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
+import { SelectOptionsQueryDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import type { OrganizationSelectResponseDto } from '@/modules/cloud-api/organization/dto/response/organization-select-response.dto';
 import { OrganizationService } from '@/modules/cloud-api/organization/services/organization.service';

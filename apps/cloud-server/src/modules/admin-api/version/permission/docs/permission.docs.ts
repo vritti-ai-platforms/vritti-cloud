@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk';
+import { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BulkCreatePermissionsDto } from '../dto/request/bulk-create-permissions.dto';
 import { CreateFeaturePermissionDto } from '../dto/request/create-feature-permission.dto';
 import { UpdateFeaturePermissionDto } from '../dto/request/update-feature-permission.dto';

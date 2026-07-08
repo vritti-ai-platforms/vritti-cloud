@@ -1,7 +1,8 @@
 import { PlanPriceService } from '@domain/plan-price/services/plan-price.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, SuccessResponseDto } from '@vritti/api-sdk';
+import { RequireSession } from '@vritti/api-sdk/auth';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiCreatePlanPrices,

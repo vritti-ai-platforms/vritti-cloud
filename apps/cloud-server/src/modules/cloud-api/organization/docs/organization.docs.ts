@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { ValidateTaxIdDto } from '../dto/request/validate-tax-id.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';

@@ -1,7 +1,7 @@
 import { MediaService } from '@domain/media/services/media.service';
 import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { UserId } from '@vritti/api-sdk';
+import { UserId } from '@vritti/api-sdk/auth';
 import type { FastifyReply, FastifyRequest } from 'fastify';
 import {
   ApiDeleteMedia,

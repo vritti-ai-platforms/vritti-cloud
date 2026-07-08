@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrimaryBaseRepository, PrimaryDatabaseService, type SelectQueryResult } from '@vritti/api-sdk';
+import { PrimaryBaseRepository, PrimaryDatabaseService, type SelectQueryResult } from '@vritti/api-sdk/database';
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { AppPlatform, Microfrontend, MobileMicrofrontend, WebMicrofrontend } from '@/db/schema';
 import { features, microfrontends, mobileMicrofrontends, versions, webMicrofrontends } from '@/db/schema';

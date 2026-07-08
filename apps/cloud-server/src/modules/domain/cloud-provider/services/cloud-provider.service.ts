@@ -1,15 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { DataTableStateService } from '@vritti/api-sdk/data-table';
 import {
-  ConflictException,
   CreateResponseDto,
-  DataTableStateService,
   type FieldMap,
   FilterProcessor,
-  NotFoundException,
   type SelectQueryResult,
   SuccessResponseDto,
-} from '@vritti/api-sdk';
+} from '@vritti/api-sdk/database';
 import { and, eq } from '@vritti/api-sdk/drizzle-orm';
+import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { cloudProviders, regionCloudProviders } from '@/db/schema';
 import { CloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/entity/cloud-provider.dto';
 import type { CreateCloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/request/create-cloud-provider.dto';

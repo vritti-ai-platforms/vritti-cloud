@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiProduces, ApiResponse } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { FeatureDto } from '../dto/entity/feature.dto';
 import { FeatureMicrofrontendLinksDto } from '../dto/entity/feature-microfrontend-links.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';

@@ -1,6 +1,6 @@
 import { OAuthStateRepository } from '@domain/oauth/repositories/oauth-state.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { UnauthorizedException } from '@vritti/api-sdk';
+import { UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { OAuthProviderType } from '@/db/schema';
 import type { OAuthStateData } from '../interfaces/oauth-state.interface';
 import { OAuthCryptoService } from './oauth-crypto.service';

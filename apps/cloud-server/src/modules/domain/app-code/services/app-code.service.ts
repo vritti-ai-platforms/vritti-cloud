@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { type SelectOptionsQueryDto, type SelectQueryResult } from '@vritti/api-sdk';
+import type { SelectOptionsQueryDto, SelectQueryResult } from '@vritti/api-sdk/database';
 import { AppCodeRepository } from '../repositories/app-code.repository';
 
 @Injectable()

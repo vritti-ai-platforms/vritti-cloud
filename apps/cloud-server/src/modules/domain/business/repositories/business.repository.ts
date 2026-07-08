@@ -4,7 +4,7 @@ import {
   PrimaryBaseRepository,
   PrimaryDatabaseService,
   type SelectQueryResult,
-} from '@vritti/api-sdk';
+} from '@vritti/api-sdk/database';
 import { count, eq, inArray, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Business } from '@/db/schema';
 import { businessApps, businesses, organizations, plans, roleTemplates, versionBusinesses } from '@/db/schema';

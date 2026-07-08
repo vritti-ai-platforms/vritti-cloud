@@ -1,4 +1,4 @@
-import { BadRequestException } from '@vritti/api-sdk';
+import { BadRequestException } from '@vritti/api-sdk/exceptions';
 import type { Deployment } from '@/db/schema';
 
 // Returns the deployment's Ed25519 signing key, failing loudly when none was generated

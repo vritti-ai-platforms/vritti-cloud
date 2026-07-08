@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UnauthorizedException } from '@vritti/api-sdk';
+import { UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import { VerificationChannelValues } from '@/db/schema/enums';
 import { SmsService, WhatsAppService } from '@/services';
 import { TwilioSmsWebhookDto } from '../dto/request/sms-webhook.dto';

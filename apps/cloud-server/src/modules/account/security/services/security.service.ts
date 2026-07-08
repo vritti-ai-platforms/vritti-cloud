@@ -8,13 +8,9 @@ import { SessionService } from '@domain/session/services/session.service';
 import { UserService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import {
-  BadRequestException,
-  hashToken,
-  NotFoundException,
-  SuccessResponseDto,
-  UnauthorizedException,
-} from '@vritti/api-sdk';
+import { hashToken } from '@vritti/api-sdk/auth';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
+import { BadRequestException, NotFoundException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { OAuthProviderType } from '@/db/schema';
 import { EncryptionService } from '@/services';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';

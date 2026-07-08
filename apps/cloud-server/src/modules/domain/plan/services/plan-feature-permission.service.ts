@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { BadRequestException, NotFoundException, type SuccessResponseDto } from '@vritti/api-sdk';
 import { buildDependsMap, filterGrantedByDeps, prereqClosure } from '@vritti/api-sdk/catalog-resolver';
+import type { SuccessResponseDto } from '@vritti/api-sdk/database';
+import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { NewPlanFeature, NewPlanFeaturePermission } from '@/db/schema';
 import type { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
 import { PlanRepository } from '../repositories/plan.repository';

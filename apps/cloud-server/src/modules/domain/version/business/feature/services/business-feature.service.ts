@@ -1,13 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
-import {
-  BadRequestException,
-  DataTableStateService,
-  type FieldMap,
-  FilterProcessor,
-  NotFoundException,
-  SuccessResponseDto,
-} from '@vritti/api-sdk';
+import { DataTableStateService } from '@vritti/api-sdk/data-table';
+import { type FieldMap, FilterProcessor, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { and } from '@vritti/api-sdk/drizzle-orm';
+import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { businessAppFeatures, businessApps, features } from '@/db/schema';
 import { BusinessFeatureDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature.dto';
 import { BusinessFeaturePermissionDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature-permission.dto';

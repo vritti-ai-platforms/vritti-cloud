@@ -1,7 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
-import { hashToken, TokenService, TokenType, UnauthorizedException } from '@vritti/api-sdk';
+import { hashToken, TokenService, TokenType } from '@vritti/api-sdk/auth';
 import { and, eq, ne } from '@vritti/api-sdk/drizzle-orm';
+import { UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
 import { type Session, type SessionType, SessionTypeValues, sessions } from '@/db/schema';
 import { GeoipService } from '@/services';

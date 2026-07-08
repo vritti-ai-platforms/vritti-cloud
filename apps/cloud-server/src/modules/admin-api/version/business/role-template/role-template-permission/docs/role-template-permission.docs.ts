@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { AssignRoleTemplatePermissionsDto } from '../dto/request/assign-role-template-permissions.dto';
 
 // Swagger docs for the role-template permission matrix (the role's apps, each with its features, + the full grant set)

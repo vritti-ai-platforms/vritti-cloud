@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, HttpStatus, Logger, type MessageEvent, Post, Sse } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, UserId } from '@vritti/api-sdk';
+import { RequireSession, UserId } from '@vritti/api-sdk/auth';
 import { Observable } from 'rxjs';
 import { SessionTypeValues } from '@/db/schema';
 import { VerificationChannelValues } from '@/db/schema/enums';

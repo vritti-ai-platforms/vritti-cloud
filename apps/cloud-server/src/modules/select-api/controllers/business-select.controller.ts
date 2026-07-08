@@ -1,7 +1,8 @@
 import { BusinessService } from '@domain/business/services/business.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { RequireSession, type SelectQueryResult } from '@vritti/api-sdk';
+import { RequireSession } from '@vritti/api-sdk/auth';
+import type { SelectQueryResult } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
 import { BusinessSelectQueryDto } from '../dto/business-select-query.dto';
 

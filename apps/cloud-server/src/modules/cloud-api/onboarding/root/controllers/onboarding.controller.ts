@@ -9,7 +9,7 @@ import {
   SessionData,
   type SessionInfo,
   UserId,
-} from '@vritti/api-sdk';
+} from '@vritti/api-sdk/auth';
 import type { FastifyReply } from 'fastify';
 import { SessionTypeValues } from '@/db/schema';
 import { TokenResponse } from '../../../auth/root/dto/response/token-response.dto';

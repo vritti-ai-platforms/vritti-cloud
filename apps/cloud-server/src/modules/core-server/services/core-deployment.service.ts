@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { NotFoundException } from '@vritti/api-sdk';
+import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { Deployment, Organization } from '@/db/schema';
 import { CoreDeploymentRepository } from '../repositories/core-deployment.repository';
 import { CoreOrganizationRepository } from '../repositories/core-organization.repository';

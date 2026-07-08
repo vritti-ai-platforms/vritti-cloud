@@ -1,4 +1,4 @@
-import { dataTableViewsColumns, dataTableViewsIndexes } from '@vritti/api-sdk';
+import { dataTableViewsColumns, dataTableViewsIndexes } from '@vritti/api-sdk/data-table';
 import { uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { users } from './user';

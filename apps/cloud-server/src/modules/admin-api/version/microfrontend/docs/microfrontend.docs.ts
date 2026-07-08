@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiResponse, getSchemaPath } from '@nestjs/swagger';
-import { SuccessResponseDto } from '@vritti/api-sdk';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { MicrofrontendDto } from '../dto/entity/microfrontend.dto';
 import { MobileMicrofrontendBodyDto } from '../dto/request/mobile-microfrontend-body.dto';
 import { WebMicrofrontendBodyDto } from '../dto/request/web-microfrontend-body.dto';
