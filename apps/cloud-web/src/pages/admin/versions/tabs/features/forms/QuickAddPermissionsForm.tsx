@@ -11,7 +11,7 @@ import { useVersionContext } from '@/context/VersionScopeContext';
 // Standard global permission presets for one-click adding (created with isGlobal = true)
 export const PERMISSION_PRESETS: { code: string; label: string }[] = [
   { code: 'view', label: 'View' },
-  { code: 'create', label: 'Create' },
+  { code: 'add', label: 'Add' },
   { code: 'edit', label: 'Edit' },
   { code: 'delete', label: 'Delete' },
   { code: 'export', label: 'Export' },
