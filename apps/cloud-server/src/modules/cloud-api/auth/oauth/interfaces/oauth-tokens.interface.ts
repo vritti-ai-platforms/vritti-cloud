@@ -3,16 +3,16 @@ export interface OAuthTokens {
   refreshToken?: string;
   tokenType: string;
   expiresIn?: number;
-  idToken?: string; // For OpenID Connect providers
+  idToken?: string;
 }
 
 export interface OAuthTokenRequest {
   code: string;
   clientId: string;
-  clientSecret?: string; // Not used for PKCE flow
+  clientSecret?: string;
   redirectUri: string;
   grantType: 'authorization_code';
-  codeVerifier?: string; // For PKCE
+  codeVerifier?: string;
 }
 
 export interface OAuthTokenExchangePayload {
@@ -33,11 +33,11 @@ export interface FacebookTokenParams {
 }
 
 export interface AppleIdTokenPayload {
-  iss: string; // Issuer (https://appleid.apple.com)
-  aud: string; // Client ID
-  exp: number; // Expiration time
-  iat: number; // Issued at
-  sub: string; // User's unique Apple ID
+  iss: string;
+  aud: string;
+  exp: number;
+  iat: number;
+  sub: string;
   email: string;
   email_verified?: boolean | string;
   is_private_email?: boolean | string;

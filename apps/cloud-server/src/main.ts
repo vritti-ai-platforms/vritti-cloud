@@ -19,7 +19,6 @@ import type { ValidationError } from 'class-validator';
 import fastifyRawBody from 'fastify-raw-body';
 import { AppModule } from './app.module';
 
-// Environment Configuration
 const ENV = {
   nodeEnv: process.env.NODE_ENV,
   useHttps: process.env.USE_HTTPS === 'true',
@@ -33,8 +32,6 @@ const ENV = {
 const protocol = ENV.useHttps ? 'https' : 'http';
 const baseUrl = `${protocol}://${ENV.host}:${ENV.port}`;
 
-// CORS Configuration
-// In production, set CORS_ORIGINS (comma-separated); falls back to local dev origins when unset.
 const CORS_ORIGINS = process.env.CORS_ORIGINS
   ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
   : [
