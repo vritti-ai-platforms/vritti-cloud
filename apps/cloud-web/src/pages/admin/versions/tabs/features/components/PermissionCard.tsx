@@ -31,9 +31,9 @@ export const PermissionCard = ({ permission, isDragging, onDelete }: PermissionC
 
       {/* Permission — code chip in a fixed slot so every label starts on the same line */}
       <div className="flex min-w-0 flex-1 items-center gap-3">
-        <div className="w-36 shrink-0">
-          <Badge variant="outline" className="font-mono text-xs font-medium">
-            {permission.code}
+        <div className="w-48 shrink-0">
+          <Badge variant="outline" className="max-w-full font-mono text-xs font-medium" title={permission.code}>
+            <span className="truncate">{permission.code}</span>
           </Badge>
         </div>
         <Typography variant="body2" className="truncate font-medium">
