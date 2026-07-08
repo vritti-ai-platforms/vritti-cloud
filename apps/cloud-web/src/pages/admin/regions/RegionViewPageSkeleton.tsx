@@ -5,7 +5,7 @@ import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 
 export const RegionViewPageSkeleton = () => (
   <div className="flex flex-col gap-6">
-    <PageHeaderSkeleton />
+    <PageHeaderSkeleton showActions />
 
     {/* Stat cards — 3 columns */}
     <div className="grid grid-cols-3 gap-4">
