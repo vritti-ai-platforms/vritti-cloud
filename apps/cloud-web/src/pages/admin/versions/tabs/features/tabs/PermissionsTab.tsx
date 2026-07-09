@@ -6,6 +6,7 @@ import {
 } from '@hooks/admin/versions/features/permissions';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
+import { Empty } from '@vritti/quantum-ui/Empty';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { SortableItem, SortableList } from '@vritti/quantum-ui/Sortable';
 import { Typography } from '@vritti/quantum-ui/Typography';
@@ -74,20 +75,17 @@ export const PermissionsTab = () => {
       </div>
 
       {orderedPermissions.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border py-16 text-center">
-          <KeyRound className="size-8 text-muted-foreground" />
-          <div>
-            <Typography variant="body1" className="font-medium">
-              No permissions yet
-            </Typography>
-            <Typography variant="body2" intent="muted">
-              Add a permission to define an action this feature exposes.
-            </Typography>
-          </div>
-          <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
-            Add Permission
-          </Button>
-        </div>
+        <Empty
+          icon={<KeyRound />}
+          title="No permissions yet"
+          description="Add a permission to define an action this feature exposes."
+          action={
+            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+              Add Permission
+            </Button>
+          }
+          className="py-16"
+        />
       ) : (
         <div className="flex flex-col gap-2">
           {/* Column header — widths mirror the row columns so everything snaps into alignment */}
