@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, eq, exists, inArray, or, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { AppPlatform, NewRoleTemplateFeaturePermission } from '@/db/schema';
+import type { AppPlatform, NewRoleTemplateFeaturePermission, ScopeType, SiteApplies } from '@/db/schema';
 import {
   businessAppFeatures,
   businessApps,
@@ -24,6 +24,8 @@ export interface AvailableFeature {
   code: string;
   name: string;
   lucideIcon: string;
+  scope: ScopeType;
+  applicableSiteTypes: SiteApplies[];
   permissions: AvailableFeaturePermission[];
   platforms: AppPlatform[];
 }
@@ -93,6 +95,8 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
         featureCode: features.code,
         featureName: features.name,
         featureIcon: features.lucideIcon,
+        featureScope: features.scope,
+        featureApplicableSiteTypes: features.applicableSiteTypes,
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
@@ -144,6 +148,8 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
           code: row.featureCode,
           name: row.featureName,
           lucideIcon: row.featureIcon,
+          scope: row.featureScope,
+          applicableSiteTypes: row.featureApplicableSiteTypes,
           permissions: [],
           platforms: [],
         };
@@ -223,6 +229,18 @@ export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseReposito
       if (!dependent || !prereq || prereq.featureId !== dependent.featureId) continue;
       result.get(dependent.featureId)?.get(dependent.code)?.push(prereq.code);
     }
+    return result;
+  }
+
+  async findScopeTypesByIds(ids: string[]): Promise<Map<string, { code: string; scope: ScopeType }>> {
+    const result = new Map<string, { code: string; scope: ScopeType }>();
+    const unique = [...new Set(ids)];
+    if (unique.length === 0) return result;
+    const rows = await this.db
+      .select({ id: features.id, code: features.code, scope: features.scope })
+      .from(features)
+      .where(inArray(features.id, unique));
+    for (const r of rows) result.set(r.id, { code: r.code, scope: r.scope });
     return result;
   }
 

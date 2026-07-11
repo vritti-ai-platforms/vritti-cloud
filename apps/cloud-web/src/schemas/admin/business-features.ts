@@ -1,5 +1,6 @@
 import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
 import { z } from '@vritti/quantum-ui/zod';
+import type { ScopeType } from './features';
 
 export interface BusinessFeaturePermission {
   id: string;
@@ -18,6 +19,7 @@ export interface BusinessFeature {
   code: string;
   name: string;
   lucideIcon: string;
+  scope: ScopeType;
   app: BusinessFeatureApp;
   permissionCount: number;
 }

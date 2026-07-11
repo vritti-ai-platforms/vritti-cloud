@@ -3,11 +3,11 @@ import { Breadcrumb } from '@vritti/quantum-ui/Breadcrumb';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Bell, ChevronRight, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { BUSwitcher } from './bu-switcher/BUSwitcher';
 import { BusinessSwitcher } from './business-switcher';
 import { FeatureSwitcher } from './feature-switcher';
 import { OrganizationSwitcher } from './organization-switcher';
 import { RoleTemplateSwitcher } from './role-template-switcher';
+import { SiteSwitcher } from './site-switcher/SiteSwitcher';
 import { UserMenu } from './UserMenu';
 import { VersionSwitcher } from './version-switcher';
 
@@ -15,8 +15,8 @@ import { VersionSwitcher } from './version-switcher';
 const ORG_SLUG_PREFIX = 'org-';
 // Version slugs use the `ver-` prefix (e.g., ver-restaurant-suite~uuid)
 const VERSION_SLUG_PREFIX = 'ver-';
-// BU slugs use the `bu-` prefix (e.g., bu-north-america~uuid)
-const BU_SLUG_PREFIX = 'bu-';
+// Site slugs use the `site-` prefix (e.g., site-north-america~uuid)
+const SITE_SLUG_PREFIX = 'site-';
 // Feature slugs use the `feat-` prefix (e.g., feat-products~uuid)
 const FEATURE_SLUG_PREFIX = 'feat-';
 // Business slugs use the `biz-` prefix (e.g., biz-pharmacy~uuid)
@@ -66,17 +66,17 @@ export const TopBar = () => {
                   );
                 }
 
-                // Any segment with bu- prefix = BU slug (under /:orgSlug/business-units/)
-                if (segment.raw.startsWith(BU_SLUG_PREFIX)) {
+                // Any segment with site- prefix = site slug (under /:orgSlug/structure/)
+                if (segment.raw.startsWith(SITE_SLUG_PREFIX)) {
                   const orgSegment = segment.path.split('/')[1] ?? '';
                   const orgId = orgSegment.split('~').pop() ?? '';
                   return (
-                    <BUSwitcher
+                    <SiteSwitcher
                       key={segment.raw}
                       orgId={orgId}
                       orgSlug={orgSegment}
-                      currentBuId={segment.id ?? segment.raw}
-                      currentBuName={segment.slug ? segment.label : undefined}
+                      currentSiteId={segment.id ?? segment.raw}
+                      currentSiteName={segment.slug ? segment.label : undefined}
                     />
                   );
                 }

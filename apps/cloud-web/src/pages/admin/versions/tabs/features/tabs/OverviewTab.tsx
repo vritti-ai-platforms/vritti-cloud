@@ -2,7 +2,7 @@ import { MaterialSymbol } from '@components/MaterialSymbol';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { DetailField } from '@vritti/quantum-ui/DetailField';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
-import type { Feature } from '@/schemas/admin/features';
+import { type Feature, formatApplicableSiteTypes, SCOPE_TYPE_LABELS } from '@/schemas/admin/features';
 
 interface OverviewTabProps {
   feature: Feature;
@@ -16,6 +16,12 @@ export const OverviewTab = ({ feature }: OverviewTabProps) => {
           <div className="grid grid-cols-2 gap-6">
             <DetailField label="Name" type="string" value={feature.name} />
             <DetailField label="Code" type="string" value={feature.code} mono />
+            <DetailField label="Scope" type="string" value={SCOPE_TYPE_LABELS[feature.scope]} />
+            <DetailField
+              label="Site Types"
+              type="string"
+              value={feature.scope === 'SITE' ? formatApplicableSiteTypes(feature.applicableSiteTypes ?? []) : null}
+            />
           </div>
           <DetailField label="Description" type="string" value={feature.description} />
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">

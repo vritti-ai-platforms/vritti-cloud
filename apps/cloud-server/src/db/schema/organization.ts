@@ -1,4 +1,4 @@
-import type { BuFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
+import type { SiteFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 import { jsonb, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
@@ -27,8 +27,8 @@ export const organizations = cloudSchema.table('organizations', {
   deploymentId: uuid('deployment_id')
     .notNull()
     .references(() => deployments.id, { onDelete: 'restrict' }),
-  // Per-BU deny-list of locked permissions within the plan, keyed by core BU id (see BuFeatureLocks); a BU absent here (or a null column) inherits the full plan
-  buLocks: jsonb('bu_locks').$type<Record<string, BuFeatureLocks>>(),
+  // Per-site deny-list of locked permissions within the plan, keyed by core site id (see SiteFeatureLocks); a site absent here (or a null column) inherits the full plan
+  siteLocks: jsonb('site_locks').$type<Record<string, SiteFeatureLocks>>(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

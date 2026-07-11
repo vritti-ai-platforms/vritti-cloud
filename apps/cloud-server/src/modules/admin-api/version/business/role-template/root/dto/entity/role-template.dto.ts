@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { RoleTemplate } from '@/db/schema';
+import { type RoleTemplate, type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema';
 
 export class RoleTemplateDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -13,6 +13,16 @@ export class RoleTemplateDto {
 
   @ApiPropertyOptional({ example: 'Kitchen staff responsible for food preparation', nullable: true })
   description: string | null;
+
+  @ApiProperty({ enum: ScopeTypeValues, example: 'SITE' })
+  scope: ScopeType;
+
+  @ApiProperty({
+    enum: SiteAppliesValues,
+    example: 'OUTLET',
+    description: 'Site type the template targets (meaningful only for SITE scope)',
+  })
+  siteType: SiteApplies;
 
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   businessId: string;
@@ -30,6 +40,8 @@ export class RoleTemplateDto {
     dto.code = roleTemplate.code;
     dto.name = roleTemplate.name;
     dto.description = roleTemplate.description;
+    dto.scope = roleTemplate.scope;
+    dto.siteType = roleTemplate.siteType;
     dto.businessId = roleTemplate.businessId;
     dto.createdAt = roleTemplate.createdAt;
     dto.updatedAt = roleTemplate.updatedAt;

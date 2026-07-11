@@ -8,6 +8,7 @@ import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { UploadFile } from '@vritti/quantum-ui/UploadFile';
@@ -18,6 +19,8 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useParams } from 'react-router-dom';
+import { FeatureLocksTab } from '@/components/feature-locks/FeatureLocksTab';
+import { RoleAssignmentsTab } from '@/components/role-assignments/RoleAssignmentsTab';
 import { useMediaUrl } from '@/hooks/cloud/media/useMediaUrl';
 import { useOrganization, useUpdateOrganization } from '@/hooks/cloud/organizations';
 import type { UpdateOrgFormData } from '@/schemas/cloud/organizations';
@@ -109,31 +112,25 @@ export const OrganizationSettingsPage: React.FC = () => {
     );
   }
 
-  return (
+  const overviewTab = (
     <div className="space-y-6">
-      {/* Page Header with Edit/Save/Cancel actions */}
-      <PageHeader
-        title="Organization Settings"
-        description="Manage your organization details and configuration"
-        actions={
-          isEditing ? (
-            <div className="flex gap-3">
-              <Button type="submit" form="org-settings-form" disabled={updateOrgMutation.isPending}>
-                Save Changes
-              </Button>
-              <Button type="button" variant="outline" onClick={handleCancel} disabled={updateOrgMutation.isPending}>
-                Cancel
-              </Button>
-            </div>
-          ) : (
-            <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-              <Edit className="h-4 w-4 mr-2" />
-              Edit
+      <div className="flex justify-end">
+        {isEditing ? (
+          <div className="flex gap-3">
+            <Button type="submit" form="org-settings-form" disabled={updateOrgMutation.isPending}>
+              Save Changes
             </Button>
-          )
-        }
-      />
-
+            <Button type="button" variant="outline" onClick={handleCancel} disabled={updateOrgMutation.isPending}>
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+            <Edit className="h-4 w-4 mr-2" />
+            Edit
+          </Button>
+        )}
+      </div>
       <Form
         id="org-settings-form"
         form={form}
@@ -294,6 +291,25 @@ export const OrganizationSettingsPage: React.FC = () => {
         buttonText="Delete Organization"
         onClick={handleDelete}
         disabled={deleteMutation.isPending}
+      />
+    </div>
+  );
+
+  return (
+    <div className="space-y-6">
+      <PageHeader title="Organization Settings" description="Manage your organization details and configuration" />
+
+      <Tabs
+        defaultValue="overview"
+        tabs={[
+          { value: 'overview', label: 'Overview', content: overviewTab },
+          { value: 'locks', label: 'Apps & Features', content: <FeatureLocksTab scope={{ kind: 'org', orgId }} /> },
+          {
+            value: 'users',
+            label: 'Users & Roles',
+            content: <RoleAssignmentsTab target={{ kind: 'org', orgId }} />,
+          },
+        ]}
       />
     </div>
   );

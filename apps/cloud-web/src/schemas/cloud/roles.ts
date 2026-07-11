@@ -1,4 +1,4 @@
-import type { FeatureUnlocks, RevokedGrants } from '@vritti/quantum-ui/types/catalog-resolver';
+import type { FeatureUnlocks, RevokedGrants, ScopeType, SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
 import { z } from '@vritti/quantum-ui/zod';
 
 export interface Role {
@@ -22,6 +22,8 @@ export interface RoleTemplate {
   code: string;
   name: string;
   description?: string;
+  scope: ScopeType;
+  siteType: SiteType;
   features: FeatureUnlocks;
 }
 

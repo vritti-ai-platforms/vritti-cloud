@@ -59,6 +59,7 @@ export class RoleTemplatePermissionService {
     // The DTO's @ArrayUnique validator already guarantees one grant per (feature, platform)
     const grants = dto.grants;
 
+    await this.assertScopeTypesMatch(roleTemplate, grants);
     const permissionIds = [...new Set(grants.flatMap((g) => g.permissions))];
     if (permissionIds.length > 0) {
       await this.validatePermissionsExist(permissionIds);
@@ -88,6 +89,22 @@ export class RoleTemplatePermissionService {
       throw new NotFoundException('Role template not found.');
     }
     return roleTemplate;
+  }
+
+  private async assertScopeTypesMatch(roleTemplate: RoleTemplate, grants: RoleTemplateGrant[]): Promise<void> {
+    const featureIds = [...new Set(grants.map((g) => g.featureId))];
+    if (featureIds.length === 0) return;
+    const featureById = await this.roleTemplateFeaturePermissionRepository.findScopeTypesByIds(featureIds);
+    const mismatchedCodes: string[] = [];
+    for (const id of featureIds) {
+      const feature = featureById.get(id);
+      if (feature && feature.scope !== roleTemplate.scope) mismatchedCodes.push(feature.code);
+    }
+    if (mismatchedCodes.length === 0) return;
+    throw new BadRequestException({
+      label: 'Scope Mismatch',
+      detail: `The features ${mismatchedCodes.join(', ')} cannot be granted to a ${roleTemplate.scope}-scoped role template.`,
+    });
   }
 
   // Rejects any (feature, platform) grant set whose granted permissions are missing a required prerequisite

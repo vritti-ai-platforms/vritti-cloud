@@ -1,0 +1,30 @@
+.react-flow__controls {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  box-shadow: none;
+}
+
+.react-flow__controls-button {
+  background: var(--color-card);
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  fill: var(--color-foreground);
+  color: var(--color-foreground);
+}
+
+.react-flow__controls-button:hover {
+  background: var(--color-accent);
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+.react-flow__controls-button svg {
+  fill: var(--color-foreground);
+}
+
+.react-flow__background {
+  background: var(--color-background);
+}

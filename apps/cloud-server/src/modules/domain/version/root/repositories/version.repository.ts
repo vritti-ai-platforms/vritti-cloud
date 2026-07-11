@@ -80,7 +80,7 @@ export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
         .from(roleTemplateFeaturePermissions)
         .where(eq(roleTemplateFeaturePermissions.versionId, versionId)),
       this.db
-        .select({ id: businesses.id, code: businesses.code, name: businesses.name })
+        .select({ id: businesses.id, code: businesses.code, name: businesses.name, vocabulary: businesses.vocabulary })
         .from(versionBusinesses)
         .innerJoin(businesses, eq(businesses.id, versionBusinesses.businessId))
         .where(eq(versionBusinesses.versionId, versionId)),

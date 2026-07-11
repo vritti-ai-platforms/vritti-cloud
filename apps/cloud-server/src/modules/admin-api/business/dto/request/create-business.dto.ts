@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsOptional, IsString, MaxLength, MinLength, ValidateNested } from 'class-validator';
+import { BusinessVocabularyDto } from '../entity/business-vocabulary.dto';
 
 export class CreateBusinessDto {
   @ApiProperty({ description: 'Display name of the business', example: 'Healthcare' })
@@ -21,4 +23,13 @@ export class CreateBusinessDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    type: BusinessVocabularyDto,
+    description: 'Display vocabulary overrides for site/siteGroup/outlet/warehouse/production (singular + plural)',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BusinessVocabularyDto)
+  vocabulary?: BusinessVocabularyDto;
 }

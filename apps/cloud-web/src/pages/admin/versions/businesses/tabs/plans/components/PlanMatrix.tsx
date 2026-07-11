@@ -6,6 +6,7 @@ import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import type React from 'react';
 import { useState } from 'react';
 import { MatrixCard, type MatrixColumn, MatrixRow } from '@/components/permission-matrix';
+import { SCOPE_SECTION_ORDER, SCOPE_TYPE_LABELS } from '@/schemas/admin/features';
 import {
   PLATFORM_LABEL,
   PLATFORM_ORDER,
@@ -92,41 +93,59 @@ export const PlanMatrix: React.FC<PlanMatrixProps> = ({ apps, value = [], onChan
 
   const permissionCount = value.reduce((sum, u) => sum + u.permissions.length, 0);
 
-  return (
-    <div className="flex flex-1 flex-col gap-3">
-      {apps.map((app) => {
-        const platforms = appPlatforms(app);
-        const columns: MatrixColumn[] = platforms.map((p) => ({ key: p, label: PLATFORM_LABEL[p] }));
-        const total = app.features.length;
-        const unlocked = app.features.filter((f) => platforms.some((p) => isOn(f.id, p))).length;
+  const sections = SCOPE_SECTION_ORDER.map((scope) => ({
+    scope,
+    apps: apps
+      .map((app) => ({
+        ...app,
+        features: app.features.filter((f) => f.scope === scope),
+      }))
+      .filter((app) => app.features.length > 0),
+  })).filter((section) => section.apps.length > 0);
 
-        return (
-          <MatrixCard
-            key={app.id}
-            icon={app.icon}
-            name={app.name}
-            countLabel={`${unlocked}/${total} feature${total === 1 ? '' : 's'} unlocked`}
-            columns={columns}
-            expanded={expanded.has(app.id)}
-            onToggleExpanded={() => toggleApp(app.id)}
-          >
-            {app.features.map((feature) => (
-              <PlanFeatureRows
-                key={feature.id}
-                feature={feature}
+  return (
+    <div className="flex flex-1 flex-col gap-6">
+      {sections.map((section) => (
+        <section key={section.scope} className="flex flex-col gap-3">
+          <h3 className="text-sm font-semibold">{SCOPE_TYPE_LABELS[section.scope]}</h3>
+          {section.apps.map((app) => {
+            const cardKey = `${section.scope}:${app.id}`;
+            const platforms = appPlatforms(app);
+            const columns: MatrixColumn[] = platforms.map((p) => ({ key: p, label: PLATFORM_LABEL[p] }));
+            const total = app.features.length;
+            const unlocked = app.features.filter((f) => platforms.some((p) => isOn(f.id, p))).length;
+
+            return (
+              <MatrixCard
+                key={cardKey}
+                icon={app.icon}
+                name={app.name}
+                countLabel={`${unlocked}/${total} feature${total === 1 ? '' : 's'} unlocked`}
                 columns={columns}
-                isOn={isOn}
-                perms={perms}
-                onToggleUnlock={(p) => emit(toggleUnlock(value, feature.id, p))}
-                onTogglePermission={(permId, p) =>
-                  emit(normalizeCell(togglePermission(value, feature.id, permId, p), feature, p))
-                }
-                onToggleAll={(p, allIds) => emit(normalizeCell(toggleAll(value, feature.id, p, allIds), feature, p))}
-              />
-            ))}
-          </MatrixCard>
-        );
-      })}
+                expanded={expanded.has(cardKey)}
+                onToggleExpanded={() => toggleApp(cardKey)}
+              >
+                {app.features.map((feature) => (
+                  <PlanFeatureRows
+                    key={feature.id}
+                    feature={feature}
+                    columns={columns}
+                    isOn={isOn}
+                    perms={perms}
+                    onToggleUnlock={(p) => emit(toggleUnlock(value, feature.id, p))}
+                    onTogglePermission={(permId, p) =>
+                      emit(normalizeCell(togglePermission(value, feature.id, permId, p), feature, p))
+                    }
+                    onToggleAll={(p, allIds) =>
+                      emit(normalizeCell(toggleAll(value, feature.id, p, allIds), feature, p))
+                    }
+                  />
+                ))}
+              </MatrixCard>
+            );
+          })}
+        </section>
+      ))}
 
       {/* Summary */}
       <div className="mt-auto flex items-center gap-2 pt-1 text-xs text-muted-foreground">

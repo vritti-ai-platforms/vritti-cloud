@@ -1,4 +1,5 @@
-import { text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import type { BusinessVocabulary } from '@vritti/api-sdk/catalog-resolver';
+import { jsonb, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 
 export const businesses = cloudSchema.table('businesses', {
@@ -6,6 +7,8 @@ export const businesses = cloudSchema.table('businesses', {
   name: varchar('name', { length: 255 }).notNull(),
   code: varchar('code', { length: 100 }).notNull().unique(),
   description: text('description'),
+  // Per-business display vocabulary overrides (site/siteGroup/outlet/warehouse/production); null = platform defaults
+  vocabulary: jsonb('vocabulary').$type<BusinessVocabulary>(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

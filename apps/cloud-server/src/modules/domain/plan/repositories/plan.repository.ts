@@ -134,7 +134,7 @@ export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
           name: plans.name,
           code: plans.code,
           content: plans.content,
-          maxBusinessUnits: plans.maxBusinessUnits,
+          maxSites: plans.maxSites,
           createdAt: plans.createdAt,
           updatedAt: plans.updatedAt,
           isCustom: plans.isCustom,

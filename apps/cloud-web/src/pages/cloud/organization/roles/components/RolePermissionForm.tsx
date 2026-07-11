@@ -21,9 +21,20 @@ export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, r
   const { data: matrix, isLoading } = usePermissions(orgId);
   // The template's grants are needed both to compose the initial selection and to diff on save
   const { data: templates = [], isLoading: templatesLoading } = useRoleTemplates(orgId);
-  const apps = matrix?.apps ?? [];
+  const template = templates.find((t) => t.code === role.code);
+  const allApps = matrix?.apps ?? [];
 
-  const base = templates.find((t) => t.code === role.code)?.features;
+  const apps =
+    template?.scope === 'SITE' && template.siteType
+      ? allApps
+          .map((app) => ({
+            ...app,
+            features: app.features.filter((f) => (f.applicableSiteTypes ?? []).includes(template.siteType)),
+          }))
+          .filter((app) => app.features.length > 0)
+      : allApps;
+
+  const base = template?.features;
   const loading = isLoading || templatesLoading;
 
   if (loading) {

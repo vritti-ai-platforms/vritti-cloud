@@ -1,6 +1,7 @@
 import { text, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
+import { scopeTypeEnum, siteAppliesEnum } from './enums';
 import { versions } from './version';
 
 // Role templates scoped to an app version — admin-created, seeded to orgs via webhooks
@@ -15,6 +16,9 @@ export const roleTemplates = cloudSchema.table(
     code: varchar('code', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
+    scope: scopeTypeEnum('scope').notNull().default('SITE'),
+    // Single site type a SITE-scoped template targets (drives authoring filters + site role compatibility); ignored for other scopes
+    siteType: siteAppliesEnum('site_type').notNull().default('OUTLET'),
     businessId: uuid('business_id')
       .notNull()
       .references(() => businesses.id, { onDelete: 'cascade' }),

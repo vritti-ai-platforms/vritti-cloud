@@ -18,7 +18,7 @@ export class PlanDto {
   code: string;
 
   @ApiPropertyOptional({ example: 50, nullable: true })
-  maxBusinessUnits: number | null;
+  maxSites: number | null;
 
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
@@ -70,7 +70,7 @@ export class PlanDto {
     dto.code = plan.code;
     dto.isCustom = plan.isCustom;
     dto.attachedOrgName = counts.attachedOrgName ?? null;
-    dto.maxBusinessUnits = plan.maxBusinessUnits ?? null;
+    dto.maxSites = plan.maxSites ?? null;
     dto.content = plan.content ?? null;
     dto.createdAt = plan.createdAt;
     dto.updatedAt = plan.updatedAt;

@@ -18,6 +18,7 @@ import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
 import { useVersionContext } from '@/context/VersionScopeContext';
 import type { BusinessFeature } from '@/schemas/admin/business-features';
+import { SCOPE_TYPE_LABELS } from '@/schemas/admin/features';
 import { AddBusinessFeatureForm } from './forms/AddBusinessFeatureForm';
 import { EditBusinessFeatureAppForm } from './forms/EditBusinessFeatureAppForm';
 
@@ -51,6 +52,16 @@ function getColumns({ onView, onRemove }: ColumnActions): ColumnDef<BusinessFeat
           {row.original.code}
         </Badge>
       ),
+    },
+    {
+      accessorKey: 'scope',
+      header: 'Scope',
+      cell: ({ row }) => (
+        <Badge variant="outline" className="text-xs font-medium">
+          {SCOPE_TYPE_LABELS[row.original.scope]}
+        </Badge>
+      ),
+      enableSorting: false,
     },
     {
       id: 'app',

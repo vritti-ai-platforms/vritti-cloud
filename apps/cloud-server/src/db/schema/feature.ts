@@ -1,6 +1,7 @@
 import { sql } from '@vritti/api-sdk/drizzle-orm';
 import { boolean, check, integer, text, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
+import { scopeTypeEnum, siteAppliesEnum } from './enums';
 import { mobileMicrofrontends } from './mobile-microfrontend';
 import { versions } from './version';
 import { webMicrofrontends } from './web-microfrontend';
@@ -15,6 +16,9 @@ export const features = cloudSchema.table(
     code: varchar('code', { length: 255 }).notNull(),
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),
+    scope: scopeTypeEnum('scope').notNull().default('SITE'),
+    // Site types the feature applies at — SITE-scoped features surface only at matching site types
+    applicableSiteTypes: siteAppliesEnum('applicable_site_types').array().notNull().default(['OUTLET']),
     lucideIcon: varchar('lucide_icon', { length: 255 }).notNull(),
     sfSymbol: varchar('sf_symbol', { length: 255 }).notNull(),
     materialSymbol: varchar('material_symbol', { length: 255 }).notNull(),

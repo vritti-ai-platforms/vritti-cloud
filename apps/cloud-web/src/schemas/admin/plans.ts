@@ -26,7 +26,7 @@ export const createPlanSchema = z.object({
   // Required when isCustom — the org this bespoke plan is attached to.
   organizationId: z.string().uuid().optional(),
   // Blank = unlimited.
-  maxBusinessUnits: z.number().int().nonnegative().optional(),
+  maxSites: z.number().int().nonnegative().optional(),
   content: z.string().optional(),
 });
 

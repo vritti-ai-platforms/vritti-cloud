@@ -5,9 +5,18 @@ import {
   PrimaryDatabaseService,
   type SelectQueryResult,
 } from '@vritti/api-sdk/database';
-import { and, countDistinct, eq, inArray, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { Feature } from '@/db/schema';
-import { businessAppFeatures, businessApps, featurePermissions, features, permissionBusinesses } from '@/db/schema';
+import { and, countDistinct, eq, inArray, ne, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
+import type { Feature, ScopeType } from '@/db/schema';
+import {
+  businessAppFeatures,
+  businessApps,
+  featurePermissions,
+  features,
+  permissionBusinesses,
+  roleTemplateFeaturePermissions,
+  roleTemplateFeatures,
+  roleTemplates,
+} from '@/db/schema';
 
 export type FeatureTableRow = Feature & {
   permissions: string[];
@@ -36,6 +45,44 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
     if (!row) return undefined;
     const { featurePermissions: perms, ...feature } = row as Feature & { featurePermissions: { id: string }[] };
     return { feature, hasPermissions: perms.length > 0 };
+  }
+
+  // Bulk-updates scope for the given features within a version (non-SITE scopes reset applicableSiteTypes to the default); returns the matched ids
+  async bulkUpdateScope(versionId: string, featureIds: string[], scope: ScopeType): Promise<string[]> {
+    const rows = await this.db
+      .update(features)
+      .set(scope === 'SITE' ? { scope } : { scope, applicableSiteTypes: ['OUTLET'] })
+      .where(and(eq(features.versionId, versionId), inArray(features.id, featureIds)))
+      .returning({ id: features.id });
+    return rows.map((row) => row.id);
+  }
+
+  // Removes grants for these features from role templates whose scope no longer matches
+  async deleteMismatchedRoleTemplateGrants(featureIds: string[], scope: ScopeType): Promise<void> {
+    const mismatchedTemplateIds = this.database.drizzleClient
+      .select({ id: roleTemplates.id })
+      .from(roleTemplates)
+      .where(ne(roleTemplates.scope, scope));
+    const membershipIds = this.database.drizzleClient
+      .select({ id: roleTemplateFeatures.id })
+      .from(roleTemplateFeatures)
+      .where(inArray(roleTemplateFeatures.featureId, featureIds));
+    await this.db
+      .delete(roleTemplateFeaturePermissions)
+      .where(
+        and(
+          inArray(roleTemplateFeaturePermissions.roleTemplateFeatureId, membershipIds),
+          inArray(roleTemplateFeaturePermissions.roleTemplateId, mismatchedTemplateIds),
+        ),
+      );
+    await this.db
+      .delete(roleTemplateFeatures)
+      .where(
+        and(
+          inArray(roleTemplateFeatures.featureId, featureIds),
+          inArray(roleTemplateFeatures.roleTemplateId, mismatchedTemplateIds),
+        ),
+      );
   }
 
   // Finds a feature by its unique code
@@ -87,6 +134,8 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
         code: features.code,
         name: features.name,
         description: features.description,
+        scope: features.scope,
+        applicableSiteTypes: features.applicableSiteTypes,
         lucideIcon: features.lucideIcon,
         isActive: features.isActive,
         sortOrder: features.sortOrder,

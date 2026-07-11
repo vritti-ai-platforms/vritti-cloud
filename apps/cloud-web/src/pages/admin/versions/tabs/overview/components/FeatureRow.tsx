@@ -1,6 +1,8 @@
+import { Badge } from '@vritti/quantum-ui/Badge';
 import type { SnapshotFeature } from '@vritti/quantum-ui/types/catalog-resolver';
 import { ChevronDown, ChevronRight, Globe, Monitor, Smartphone } from 'lucide-react';
 import { useState } from 'react';
+import { SCOPE_TYPE_LABELS } from '@/schemas/admin/features';
 
 interface FeatureRowProps {
   feature: SnapshotFeature;
@@ -24,6 +26,10 @@ export const FeatureRow: React.FC<FeatureRowProps> = ({ feature, nested }) => {
           <span className="text-sm font-medium truncate block">{feature.name}</span>
           <span className="text-xs text-muted-foreground font-mono">{feature.code}</span>
         </div>
+
+        <Badge variant="outline" className="text-xs font-medium shrink-0">
+          {SCOPE_TYPE_LABELS[feature.scope]}
+        </Badge>
 
         {/* Platform indicators */}
         <div className="flex items-center gap-1 shrink-0">

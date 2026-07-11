@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, eq, exists, inArray, or } from '@vritti/api-sdk/drizzle-orm';
-import type { AppPlatform, NewPlanFeaturePermission } from '@/db/schema';
+import type { AppPlatform, NewPlanFeaturePermission, ScopeType } from '@/db/schema';
 import {
   businessAppFeatures,
   businessApps,
@@ -25,6 +25,7 @@ export interface AvailablePlanFeature {
   code: string;
   name: string;
   lucideIcon: string;
+  scope: ScopeType;
   permissions: AvailablePlanPermission[];
   platforms: AppPlatform[];
 }
@@ -97,6 +98,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
         featureCode: features.code,
         featureName: features.name,
         featureIcon: features.lucideIcon,
+        featureScope: features.scope,
         featurePermissionId: featurePermissions.id,
         permissionCode: featurePermissions.code,
         permissionLabel: featurePermissions.label,
@@ -148,6 +150,7 @@ export class PlanFeaturePermissionRepository extends PrimaryBaseRepository<typeo
           code: row.featureCode,
           name: row.featureName,
           lucideIcon: row.featureIcon,
+          scope: row.featureScope,
           permissions: [],
           platforms: [],
         };

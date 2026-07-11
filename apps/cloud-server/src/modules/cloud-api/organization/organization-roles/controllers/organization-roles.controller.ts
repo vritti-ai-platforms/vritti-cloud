@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
-import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
+import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
 import {
   ApiCreateOrgRole,
   ApiDeleteOrgRole,
@@ -23,7 +23,7 @@ export class OrganizationRolesController {
   // Lists all roles for the organization (proxied from core)
   @Get()
   @ApiListOrgRoles()
-  async listRoles(@Param('orgId') orgId: string): Promise<CoreRole[]> {
+  async listRoles(@Param('orgId') orgId: string): Promise<CoreRoleDto[]> {
     this.logger.log(`GET /organizations/${orgId}/roles`);
     return this.orgRolesService.listRoles(orgId);
   }
@@ -43,7 +43,7 @@ export class OrganizationRolesController {
   async createRole(
     @Param('orgId') orgId: string,
     @Body() data: Record<string, unknown>,
-  ): Promise<CreateResponseDto<CoreRole>> {
+  ): Promise<CreateResponseDto<CoreRoleDto>> {
     this.logger.log(`POST /organizations/${orgId}/roles`);
     return this.orgRolesService.createRole(orgId, data);
   }

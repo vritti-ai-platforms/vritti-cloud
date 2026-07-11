@@ -16,8 +16,8 @@ const addPlanFormSchema = z
     code: z.string().min(1, 'Plan code is required').max(100, 'Code must be 100 characters or less'),
     isCustom: z.boolean().optional(),
     organizationId: z.string().optional(),
-    // Blank = unlimited business units.
-    maxBusinessUnits: z.string().regex(/^\d+$/, 'Enter a whole number').optional().or(z.literal('')),
+    // Blank = unlimited sites.
+    maxSites: z.string().regex(/^\d+$/, 'Enter a whole number').optional().or(z.literal('')),
   })
   .superRefine((data, ctx) => {
     if (data.isCustom && !data.organizationId) {
@@ -36,7 +36,7 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
   const { versionId, businessId } = useVersionContext();
   const form = useForm<AddPlanFormData>({
     resolver: zodResolver(addPlanFormSchema),
-    defaultValues: { name: '', code: '', isCustom: false, organizationId: '', maxBusinessUnits: '' },
+    defaultValues: { name: '', code: '', isCustom: false, organizationId: '', maxSites: '' },
   });
 
   const isCustom = useWatch({ control: form.control, name: 'isCustom' });
@@ -53,7 +53,7 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
         code: data.code,
         isCustom: !!data.isCustom,
         ...(data.isCustom ? { organizationId: data.organizationId } : {}),
-        maxBusinessUnits: data.maxBusinessUnits ? Number(data.maxBusinessUnits) : undefined,
+        maxSites: data.maxSites ? Number(data.maxSites) : undefined,
       })}
     >
       <TextField name="name" label="Plan Name" placeholder="e.g. Pro" />
@@ -70,10 +70,10 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
         />
       )}
       <TextField
-        name="maxBusinessUnits"
-        label="Max Business Units"
+        name="maxSites"
+        label="Max Sites"
         placeholder="Blank = unlimited"
-        description="Leave blank for unlimited business units"
+        description="Leave blank for unlimited sites"
       />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

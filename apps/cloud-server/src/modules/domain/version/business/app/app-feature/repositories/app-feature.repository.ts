@@ -8,6 +8,8 @@ import {
   features,
   permissionBusinesses,
   roleTemplateFeaturePermissions,
+  type ScopeType,
+  type SiteApplies,
 } from '@/db/schema';
 
 export interface BusinessFeatureApp {
@@ -20,6 +22,8 @@ export interface BusinessFeatureRow {
   code: string;
   name: string;
   lucideIcon: string;
+  scope: ScopeType;
+  applicableSiteTypes: SiteApplies[];
   app: BusinessFeatureApp;
   permissionCount: number;
 }
@@ -51,6 +55,8 @@ export class AppFeatureRepository extends PrimaryBaseRepository<typeof businessA
         code: features.code,
         name: features.name,
         lucideIcon: features.lucideIcon,
+        scope: features.scope,
+        applicableSiteTypes: features.applicableSiteTypes,
         app: sql<BusinessFeatureApp>`jsonb_build_object('id', ${businessApps.id}, 'name', ${businessApps.name})`,
         permissionCount: sql<number>`coalesce((
           select count(*)::int

@@ -1,9 +1,9 @@
-import { buildBuMatrix } from '@domain/catalog/bu-matrix.builder';
+import { buildSiteMatrix } from '@domain/catalog/site-matrix.builder';
 import { VersionRepository } from '@domain/version/root/repositories/version.repository';
 import type { VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
-import type { BuMatrixResponseDto } from '@/modules/cloud-api/organization/organization-business-units/dto/response/bu-matrix.response.dto';
+import type { SiteMatrixResponseDto } from '@/modules/cloud-api/organization/dto/response/site-matrix.response.dto';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 
 @Injectable()
@@ -16,15 +16,15 @@ export class OrganizationAppsService {
   ) {}
 
   // The org's full apps/features/permissions catalog from the version snapshot (per-platform inPlan/availableIn), powering the Create Custom Role picker and read-only Plan Overview
-  async getPermissions(orgId: string): Promise<BuMatrixResponseDto> {
+  async getPermissions(orgId: string): Promise<SiteMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const version = await this.versionRepository.findByVersion(deployment.version);
     const snapshot = version?.snapshot as VersionSnapshot | null;
     if (!snapshot) {
       throw new NotFoundException('No snapshot available for this deployment.');
     }
-    // No BU overlay here — the role picker/plan overview aren't lock editors, so locks resolve to {}
-    const matrix = buildBuMatrix(snapshot, org.businessCode, org.planCode, undefined);
+    // No site overlay here — the role picker/plan overview aren't lock editors, so locks resolve to {}
+    const matrix = buildSiteMatrix(snapshot, org.businessCode, org.planCode, undefined);
     this.logger.log(`Resolved permission catalog (${matrix.apps.length} apps) for org ${orgId}`);
     return matrix;
   }

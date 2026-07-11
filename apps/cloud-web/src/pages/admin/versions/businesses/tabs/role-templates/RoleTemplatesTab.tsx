@@ -9,6 +9,7 @@ import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Eye, Plus, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
+import { SCOPE_TYPE_LABELS, SITE_TYPE_LABELS } from '@/schemas/admin/features';
 import type { Role } from '@/schemas/admin/role-templates';
 import { AddRoleTemplateForm } from '../role-templates/forms/AddRoleTemplateForm';
 
@@ -86,6 +87,29 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Role, unknown>[] {
       accessorKey: 'code',
       header: 'Code',
       cell: ({ row }) => <StringCell value={row.original.code} mono />,
+    },
+    {
+      accessorKey: 'scope',
+      header: 'Scope',
+      cell: ({ row }) => (
+        <Badge variant="outline" className="text-xs font-medium">
+          {SCOPE_TYPE_LABELS[row.original.scope]}
+        </Badge>
+      ),
+      enableSorting: false,
+    },
+    {
+      accessorKey: 'siteType',
+      header: 'Site Type',
+      cell: ({ row }) =>
+        row.original.scope === 'SITE' && row.original.siteType ? (
+          <Badge variant="secondary" className="text-xs font-medium">
+            {SITE_TYPE_LABELS[row.original.siteType]}
+          </Badge>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+      enableSorting: false,
     },
     {
       accessorKey: 'permissionCount',

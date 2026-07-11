@@ -1,8 +1,8 @@
 import { useAddCloudProvider, useDeleteRegion, useRegion, useRemoveCloudProvider } from '@hooks/admin/regions';
-import { cn } from '@vritti/quantum-ui';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
+import { cn } from '@vritti/quantum-ui/cn';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { Empty } from '@vritti/quantum-ui/Empty';

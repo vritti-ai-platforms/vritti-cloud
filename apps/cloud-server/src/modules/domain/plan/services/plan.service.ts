@@ -126,7 +126,7 @@ export class PlanService {
       name: dto.name,
       code: dto.code,
       content: dto.content,
-      maxBusinessUnits: dto.maxBusinessUnits,
+      maxSites: dto.maxSites,
       isCustom: dto.isCustom ?? false,
     });
 

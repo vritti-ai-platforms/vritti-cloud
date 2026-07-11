@@ -1,15 +1,15 @@
 import { buildDependsMap, filterGrantedByDeps } from '@vritti/quantum-ui/permission-deps';
 import type {
-  BuFeatureLocks,
-  BuMatrixApp,
-  BuMatrixFeature,
   FeatureUnlocks,
   PlatformBucket,
+  SiteFeatureLocks,
+  SiteMatrixApp,
+  SiteMatrixFeature,
 } from '@vritti/quantum-ui/types/catalog-resolver';
-import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
+import { MATRIX_PLATFORMS } from '@/schemas/cloud/site-matrix';
 
 // The in-plan permission codes of a feature on a platform — the codes the dependency DAG operates over
-function inPlanCodes(feature: BuMatrixFeature, platform: PlatformBucket): string[] {
+function inPlanCodes(feature: SiteMatrixFeature, platform: PlatformBucket): string[] {
   return feature.permissions.filter((p) => p[platform]?.inPlan).map((p) => p.code);
 }
 
@@ -27,11 +27,11 @@ function clone(selection: FeatureUnlocks): FeatureUnlocks {
   return next;
 }
 
-// Lock-mode helpers (BU editor): the value IS the deny-list (platform null = whole feature locked, string[] = those codes locked, absent = available).
+// Lock-mode helpers (site editor): the value IS the deny-list (platform null = whole feature locked, string[] = those codes locked, absent = available).
 
 // Deep-clones the deny-list so updates stay immutable for react-hook-form's change detection
-function cloneLocks(locks: BuFeatureLocks): BuFeatureLocks {
-  const next: BuFeatureLocks = {};
+function cloneLocks(locks: SiteFeatureLocks): SiteFeatureLocks {
+  const next: SiteFeatureLocks = {};
   for (const [code, entry] of Object.entries(locks)) {
     next[code] = {
       ...(entry.web !== undefined ? { web: entry.web === null ? null : [...entry.web] } : {}),
@@ -42,13 +42,13 @@ function cloneLocks(locks: BuFeatureLocks): BuFeatureLocks {
 }
 
 // The whole feature is locked on this platform (the lock switch is on)
-export function isPlatformLockedIn(locks: BuFeatureLocks, code: string, platform: PlatformBucket): boolean {
+export function isPlatformLockedIn(locks: SiteFeatureLocks, code: string, platform: PlatformBucket): boolean {
   return locks[code]?.[platform] === null;
 }
 
 // This permission is locked on this platform — directly, or via a whole-platform lock
 export function isCodeLockedIn(
-  locks: BuFeatureLocks,
+  locks: SiteFeatureLocks,
   code: string,
   platform: PlatformBucket,
   permCode: string,
@@ -58,7 +58,7 @@ export function isCodeLockedIn(
 }
 
 // The feature lock switch — on locks the whole platform (null), off clears the platform's locks entirely
-export function togglePlatformLock(locks: BuFeatureLocks, code: string, platform: PlatformBucket): BuFeatureLocks {
+export function togglePlatformLock(locks: SiteFeatureLocks, code: string, platform: PlatformBucket): SiteFeatureLocks {
   const next = cloneLocks(locks);
   const entry = next[code] ?? {};
   if (entry[platform] === null) delete entry[platform];
@@ -70,11 +70,11 @@ export function togglePlatformLock(locks: BuFeatureLocks, code: string, platform
 
 // Toggle one permission's lock (only reachable while the platform isn't fully locked)
 export function toggleCodeLock(
-  locks: BuFeatureLocks,
+  locks: SiteFeatureLocks,
   code: string,
   platform: PlatformBucket,
   permCode: string,
-): BuFeatureLocks {
+): SiteFeatureLocks {
   const next = cloneLocks(locks);
   const entry = next[code] ?? {};
   const raw = entry[platform];
@@ -88,7 +88,7 @@ export function toggleCodeLock(
 }
 
 // Locked feature-switch + locked in-plan permission tallies for the footer (out-of-plan lock codes are inert)
-export function countLocks(apps: BuMatrixApp[], locks: BuFeatureLocks): { features: number; permissions: number } {
+export function countLocks(apps: SiteMatrixApp[], locks: SiteFeatureLocks): { features: number; permissions: number } {
   let features = 0;
   let permissions = 0;
   for (const app of apps) {
@@ -161,7 +161,7 @@ export function togglePermIn(
 // Allow-list editor (SnapshotMatrix): run the platform's selected codes through the dependency filter, so deselecting `view` cascade-drops `add`/`edit`/`delete`.
 export function normalizeSelectionCell(
   selection: FeatureUnlocks,
-  feature: BuMatrixFeature,
+  feature: SiteMatrixFeature,
   platform: PlatformBucket,
 ): FeatureUnlocks {
   const codes = selection[feature.code]?.[platform];
@@ -175,12 +175,12 @@ export function normalizeSelectionCell(
   return next;
 }
 
-// Deny-list editor (BuLocksMatrix): re-derive the granted set (in-plan codes not locked) through the dependency filter, then lock everything that fell out.
+// Deny-list editor (SiteLocksMatrix): re-derive the granted set (in-plan codes not locked) through the dependency filter, then lock everything that fell out.
 export function normalizeLocksCell(
-  locks: BuFeatureLocks,
-  feature: BuMatrixFeature,
+  locks: SiteFeatureLocks,
+  feature: SiteMatrixFeature,
   platform: PlatformBucket,
-): BuFeatureLocks {
+): SiteFeatureLocks {
   const entry = locks[feature.code]?.[platform];
   // Whole-platform lock (null) locks everything already; absent (undefined) locks nothing — neither cascades
   if (entry === null || entry === undefined) return locks;

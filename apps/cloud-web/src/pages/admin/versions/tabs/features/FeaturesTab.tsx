@@ -9,12 +9,14 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
 import { BusinessFilter } from '@vritti/quantum-ui/selects/business';
 import { buildSlug } from '@vritti/quantum-ui/slug';
-import { Blocks, Eye, Plus } from 'lucide-react';
+import { Blocks, Eye, Layers, Plus } from 'lucide-react';
 import { DynamicIcon } from 'lucide-react/dynamic';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
-import type { Feature } from '@/schemas/admin/features';
+import { type Feature, SCOPE_TYPE_LABELS, SITE_TYPE_LABELS, SITE_TYPE_VALUES } from '@/schemas/admin/features';
 import { AddFeatureForm } from '../features/forms/AddFeatureForm';
+import { ChangeFeaturesScopeForm } from '../features/forms/ChangeFeaturesScopeForm';
 
 const TABLE_SLUG = 'features';
 
@@ -24,6 +26,8 @@ export const FeaturesTab = () => {
   const { versionId } = useVersionContext();
   const { data: response, isLoading } = useFeatures(versionId);
   const addDialog = useDialog();
+  const scopeDialog = useDialog();
+  const [scopeFeatureIds, setScopeFeatureIds] = useState<string[]>([]);
 
   const { table } = useDataTable({
     columns: getColumns({
@@ -87,6 +91,19 @@ export const FeaturesTab = () => {
           filename: 'features',
           onSuccess: () => queryClient.invalidateQueries({ queryKey: FEATURES_QUERY_KEY(versionId) }),
         }}
+        selectActions={(rows) => (
+          <Button
+            variant="outline"
+            size="sm"
+            startAdornment={<Layers className="size-4" />}
+            onClick={() => {
+              setScopeFeatureIds(rows.map((r) => r.original.id));
+              scopeDialog.open();
+            }}
+          >
+            Change scope of {rows.length}
+          </Button>
+        )}
         toolbarActions={{
           actions: (
             <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
@@ -114,6 +131,23 @@ export const FeaturesTab = () => {
         title="Add Feature"
         description="Define a new feature (sidebar item / screen)."
         content={(close) => <AddFeatureForm onSuccess={close} onCancel={close} />}
+      />
+
+      <Dialog
+        handle={scopeDialog}
+        icon={Layers}
+        title="Change Feature Scope"
+        description={`Set the scope for ${scopeFeatureIds.length} selected ${scopeFeatureIds.length === 1 ? 'feature' : 'features'}. Grants on role templates of a different scope will be removed.`}
+        content={(close) => (
+          <ChangeFeaturesScopeForm
+            featureIds={scopeFeatureIds}
+            onSuccess={() => {
+              table.resetRowSelection();
+              close();
+            }}
+            onCancel={close}
+          />
+        )}
       />
     </div>
   );
@@ -146,6 +180,34 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Feature, unknown>[] {
     {
       accessorKey: 'name',
       header: 'Name',
+    },
+    {
+      accessorKey: 'scope',
+      header: 'Scope',
+      cell: ({ row }) => (
+        <Badge variant="outline" className="text-xs font-medium">
+          {SCOPE_TYPE_LABELS[row.original.scope]}
+        </Badge>
+      ),
+      enableSorting: false,
+    },
+    {
+      accessorKey: 'applicableSiteTypes',
+      header: 'Site Types',
+      cell: ({ row }) => {
+        if (row.original.scope !== 'SITE') return <span className="text-muted-foreground">—</span>;
+        const applicableSiteTypes = row.original.applicableSiteTypes ?? [];
+        return (
+          <div className="flex flex-wrap gap-1">
+            {SITE_TYPE_VALUES.filter((t) => applicableSiteTypes.includes(t)).map((t) => (
+              <Badge key={t} variant="secondary" className="text-xs font-medium">
+                {SITE_TYPE_LABELS[t]}
+              </Badge>
+            ))}
+          </div>
+        );
+      },
+      enableSorting: false,
     },
     {
       accessorKey: 'permissions',

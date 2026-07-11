@@ -10,8 +10,8 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk/database';
 import { and } from '@vritti/api-sdk/drizzle-orm';
-import { NotFoundException } from '@vritti/api-sdk/exceptions';
-import { roleTemplates } from '@/db/schema';
+import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
+import { roleTemplates, type ScopeType, type SiteApplies } from '@/db/schema';
 import { RoleTemplateDto } from '@/modules/admin-api/version/business/role-template/root/dto/entity/role-template.dto';
 import { RoleTemplateTableRowDto } from '@/modules/admin-api/version/business/role-template/root/dto/entity/role-template-table-row.dto';
 import type { CreateRoleTemplateDto } from '@/modules/admin-api/version/business/role-template/root/dto/request/create-role-template.dto';
@@ -35,8 +35,20 @@ export class RoleTemplateService {
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
+  // Rejects siteType on non-SITE templates — site-type targeting is meaningful only at SITE scope
+  private assertSiteTypeScope(scope: ScopeType, siteType: SiteApplies | undefined): void {
+    if (siteType !== undefined && scope !== 'SITE') {
+      throw new BadRequestException({
+        label: 'Applies To Not Allowed',
+        detail: 'Site-type targeting is only available for SITE-scoped role templates.',
+        errors: [{ field: 'siteType', message: 'Requires SITE scope' }],
+      });
+    }
+  }
+
   // Creates a new role template (its apps are derived from the permissions it later grants)
   async create(businessId: string, dto: CreateRoleTemplateDto): Promise<CreateResponseDto<RoleTemplateDto>> {
+    this.assertSiteTypeScope(dto.scope ?? 'SITE', dto.siteType);
     const roleTemplate = await this.roleTemplateRepository.create({ ...dto, businessId });
     this.logger.log(`Created role template: ${roleTemplate.name} (${roleTemplate.id})`);
     return {
@@ -117,6 +129,7 @@ export class RoleTemplateService {
     if (!existing || existing.businessId !== businessId) {
       throw new NotFoundException('Role template not found.');
     }
+    this.assertSiteTypeScope(existing.scope, dto.siteType);
     const roleTemplate = await this.roleTemplateRepository.update(id, dto);
     this.logger.log(`Updated role template: ${roleTemplate.name} (${roleTemplate.id})`);
     return { success: true, message: `Role template "${roleTemplate.name}" updated successfully.` };

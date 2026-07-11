@@ -1,4 +1,4 @@
-import { cn } from '@vritti/quantum-ui';
+import { cn } from '@vritti/quantum-ui/cn';
 
 export interface MaterialSymbolProps {
   icon: string;

@@ -174,10 +174,30 @@ export const AppPlatformValues = {
 };
 
 // Tax regime — the indirect tax system a country operates under
-export const taxRegimeEnum = cloudSchema.enum('TaxRegime', ['GST', 'VAT', 'NONE']);
+export const taxRegimeEnum = cloudSchema.enum('TaxRegime', ['GST', 'VAT', 'SALES_TAX', 'NONE']);
 export type TaxRegime = (typeof taxRegimeEnum.enumValues)[number];
 export const TaxRegimeValues = {
   GST: 'GST' as const,
   VAT: 'VAT' as const,
+  SALES_TAX: 'SALES_TAX' as const,
   NONE: 'NONE' as const,
+};
+
+// Site-type applicability — which site types a feature (array) or role template (single) targets
+export const siteAppliesEnum = cloudSchema.enum('SiteApplies', ['OUTLET', 'WAREHOUSE', 'PRODUCTION']);
+export type SiteApplies = (typeof siteAppliesEnum.enumValues)[number];
+export const SiteAppliesValues = {
+  OUTLET: 'OUTLET' as const,
+  WAREHOUSE: 'WAREHOUSE' as const,
+  PRODUCTION: 'PRODUCTION' as const,
+};
+
+// Feature scope — the entity level a feature operates at (org, legal entity, site group, or site)
+export const scopeTypeEnum = cloudSchema.enum('ScopeType', ['ORG', 'LE', 'SITE_GROUP', 'SITE']);
+export type ScopeType = (typeof scopeTypeEnum.enumValues)[number];
+export const ScopeTypeValues = {
+  ORG: 'ORG' as const,
+  LE: 'LE' as const,
+  SITE_GROUP: 'SITE_GROUP' as const,
+  SITE: 'SITE' as const,
 };

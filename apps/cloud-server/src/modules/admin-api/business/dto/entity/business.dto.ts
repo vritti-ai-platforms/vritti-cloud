@@ -1,5 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import type { BusinessVocabulary } from '@vritti/api-sdk/catalog-resolver';
 import type { Business } from '@/db/schema';
+import { BusinessVocabularyDto } from './business-vocabulary.dto';
 
 export class BusinessDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -13,6 +15,9 @@ export class BusinessDto {
 
   @ApiPropertyOptional({ example: 'Healthcare and medical services', nullable: true })
   description: string | null;
+
+  @ApiPropertyOptional({ type: BusinessVocabularyDto, nullable: true })
+  vocabulary: BusinessVocabulary | null;
 
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
@@ -32,6 +37,7 @@ export class BusinessDto {
     dto.name = business.name;
     dto.code = business.code;
     dto.description = business.description;
+    dto.vocabulary = business.vocabulary;
     dto.createdAt = business.createdAt;
     dto.updatedAt = business.updatedAt;
     dto.canDelete = canDelete;

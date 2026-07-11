@@ -1,18 +1,18 @@
 import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { buildBuRoles, type VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
+import { buildSiteRoles, type VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import { type CatalogLicense, hashSnapshot, type OrgEntitlement, type SignedDocument } from '@vritti/api-sdk/license';
 import { signDocument } from '@vritti/api-sdk/signing';
 import type { Deployment, Organization } from '@/db/schema';
 import { CoreVersionRepository } from '../repositories/core-version.repository';
 import { requireSigningKey } from '../signing-key.util';
-import { CoreBusinessUnitService } from './core-business-unit.service';
 import { CoreCatalogService } from './core-catalog.service';
 import { CoreDeploymentService } from './core-deployment.service';
 import { CoreOrganizationService } from './core-organization.service';
 import { CoreRoleService } from './core-role.service';
+import { CoreSiteService } from './core-site.service';
 
 @Injectable()
 export class CatalogSyncService {
@@ -22,7 +22,7 @@ export class CatalogSyncService {
     private readonly coreDeploymentService: CoreDeploymentService,
     private readonly coreCatalogService: CoreCatalogService,
     private readonly coreOrganizationService: CoreOrganizationService,
-    private readonly coreBusinessUnitService: CoreBusinessUnitService,
+    private readonly coreSiteService: CoreSiteService,
     private readonly coreRoleService: CoreRoleService,
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly deploymentRepository: DeploymentRepository,
@@ -63,17 +63,17 @@ export class CatalogSyncService {
     await this.pushOrgEntitlement(org, deployment);
   }
 
-  // Pushes the BU's feature-lock overlay to core (null ⇒ the BU inherits the full plan)
-  async syncBuLocks(orgId: string, buId: string): Promise<void> {
+  // Pushes the site's feature-lock overlay to core (null ⇒ the site inherits the full plan)
+  async syncSiteLocks(orgId: string, siteId: string): Promise<void> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    await this.coreBusinessUnitService.pushBuLocks(
+    await this.coreSiteService.pushSiteLocks(
       deployment.url,
       requireSigningKey(deployment),
       org.orgIdentifier,
-      buId,
-      org.buLocks?.[buId] ?? null,
+      siteId,
+      org.siteLocks?.[siteId] ?? null,
     );
-    this.logger.log(`Synced locks for BU ${buId} (org ${orgId})`);
+    this.logger.log(`Synced locks for site ${siteId} (org ${orgId})`);
   }
 
   // Seeds/tops-up role templates for the org's business (core skips templates already provisioned)
@@ -82,7 +82,7 @@ export class CatalogSyncService {
     const snapshot = await this.loadSnapshot(deployment.version);
     if (!snapshot) return;
 
-    const roles = buildBuRoles(snapshot, org.businessCode);
+    const roles = buildSiteRoles(snapshot, org.businessCode);
     if (roles.length === 0) return;
     await this.coreRoleService.provisionRoles(deployment.url, requireSigningKey(deployment), org.orgIdentifier, roles);
     this.logger.log(`Synced ${roles.length} role template(s) for org ${orgId}`);
@@ -94,7 +94,7 @@ export class CatalogSyncService {
 
     const orgs = await this.organizationRepository.findByDeploymentId(deployment.id);
     for (const org of orgs) {
-      const roles = buildBuRoles(snapshot, org.businessCode);
+      const roles = buildSiteRoles(snapshot, org.businessCode);
       if (roles.length > 0) {
         await this.coreRoleService.provisionRoles(
           deployment.url,

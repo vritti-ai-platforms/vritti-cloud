@@ -19,7 +19,7 @@ export const plans = cloudSchema.table(
     content: text('content'),
     // Custom plans are bespoke (attached to one org via organizations.plan_code) and hidden from the public plan selector
     isCustom: boolean('is_custom').notNull().default(false),
-    maxBusinessUnits: integer('max_business_units'),
+    maxSites: integer('max_sites'),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },

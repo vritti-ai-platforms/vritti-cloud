@@ -10,11 +10,12 @@ import {
   SuccessResponseDto,
 } from '@vritti/api-sdk/database';
 import { and, sql } from '@vritti/api-sdk/drizzle-orm';
-import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
+import { BadRequestException, ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { buildExportBuffer, type ExportFormat } from '@vritti/api-sdk/xlsx';
 import { businessAppFeatures, features } from '@/db/schema';
 import { FeatureDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature.dto';
 import { FeatureMicrofrontendLinksDto } from '@/modules/admin-api/version/feature/root/dto/entity/feature-microfrontend-links.dto';
+import type { ChangeFeaturesScopeDto } from '@/modules/admin-api/version/feature/root/dto/request/change-features-scope.dto';
 import { CreateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/create-feature.dto';
 import type { SetFeatureMicrofrontendDto } from '@/modules/admin-api/version/feature/root/dto/request/set-feature-microfrontend.dto';
 import type { UpdateFeatureDto } from '@/modules/admin-api/version/feature/root/dto/request/update-feature.dto';
@@ -48,6 +49,21 @@ export class FeatureService {
     private readonly microfrontendRepository: MicrofrontendRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
+
+  // Bulk-updates the scope of the given features and removes grants left on role templates of a different scope
+  async changeScope(versionId: string, dto: ChangeFeaturesScopeDto): Promise<SuccessResponseDto> {
+    const updatedIds = await this.featureRepository.bulkUpdateScope(versionId, dto.featureIds, dto.scope);
+    if (updatedIds.length < dto.featureIds.length) {
+      const missing = dto.featureIds.filter((id) => !updatedIds.includes(id));
+      throw new BadRequestException({
+        label: 'Features Not Found',
+        detail: `The following features do not belong to this version: ${missing.join(', ')}.`,
+      });
+    }
+    await this.featureRepository.deleteMismatchedRoleTemplateGrants(dto.featureIds, dto.scope);
+    this.logger.log(`Changed scope to ${dto.scope} for ${updatedIds.length} feature(s)`);
+    return { success: true, message: `Scope changed to ${dto.scope} for ${updatedIds.length} feature(s).` };
+  }
 
   // Links a microfrontend to a feature on the given platform (sets the feature's web/mobile link columns)
   async setMicrofrontend(

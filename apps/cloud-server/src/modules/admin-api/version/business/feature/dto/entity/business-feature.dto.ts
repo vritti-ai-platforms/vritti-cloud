@@ -1,5 +1,6 @@
 import type { BusinessFeatureRow } from '@domain/version/business/app/app-feature/repositories/app-feature.repository';
 import { ApiProperty } from '@nestjs/swagger';
+import { type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema/enums';
 
 export class BusinessFeatureAppDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -22,6 +23,12 @@ export class BusinessFeatureDto {
   @ApiProperty({ example: 'package' })
   lucideIcon: string;
 
+  @ApiProperty({ enum: ScopeTypeValues, example: 'SITE' })
+  scope: ScopeType;
+
+  @ApiProperty({ enum: SiteAppliesValues, isArray: true, example: ['OUTLET'] })
+  applicableSiteTypes: SiteApplies[];
+
   @ApiProperty({ type: BusinessFeatureAppDto })
   app: BusinessFeatureAppDto;
 
@@ -35,6 +42,8 @@ export class BusinessFeatureDto {
     dto.code = row.code;
     dto.name = row.name;
     dto.lucideIcon = row.lucideIcon;
+    dto.scope = row.scope;
+    dto.applicableSiteTypes = row.applicableSiteTypes;
     dto.app = row.app;
     dto.permissionCount = row.permissionCount;
     return dto;

@@ -1,7 +1,7 @@
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { useLocation } from 'react-router-dom';
 
-// Formats a path segment into a readable title (e.g. "business-units" → "Business Units")
+// Formats a path segment into a readable title (e.g. "site-groups" → "Site Groups")
 function formatTitle(segment: string): string {
   return segment
     .split('-')

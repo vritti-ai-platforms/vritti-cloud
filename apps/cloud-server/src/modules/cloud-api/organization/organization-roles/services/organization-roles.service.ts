@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
-import type { CoreRole } from '@/modules/cloud-api/organization/organization-business-units/types';
+import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
@@ -39,7 +39,7 @@ export class OrganizationRolesService {
   }
 
   // Lists all roles for the organization from core
-  async listRoles(orgId: string): Promise<CoreRole[]> {
+  async listRoles(orgId: string): Promise<CoreRoleDto[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const roles = await this.coreRoleService.getOrgRoles(
@@ -52,7 +52,7 @@ export class OrganizationRolesService {
   }
 
   // Creates a new role in core for the organization
-  async createRole(orgId: string, data: Record<string, unknown>): Promise<CreateResponseDto<CoreRole>> {
+  async createRole(orgId: string, data: Record<string, unknown>): Promise<CreateResponseDto<CoreRoleDto>> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreRoleService.createOrgRole(

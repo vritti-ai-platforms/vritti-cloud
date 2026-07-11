@@ -38,11 +38,11 @@ export class CreatePlanDto {
   @MaxLength(100)
   code: string;
 
-  @ApiPropertyOptional({ description: 'Maximum business units allowed on this plan', example: 50 })
+  @ApiPropertyOptional({ description: 'Maximum sites allowed on this plan', example: 50 })
   @IsOptional()
   @IsInt()
   @Min(0)
-  maxBusinessUnits?: number;
+  maxSites?: number;
 
   @ApiPropertyOptional({ description: 'Rich content stored as Lexical JSON', nullable: true })
   @IsOptional()

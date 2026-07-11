@@ -1,6 +1,12 @@
 import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/types/api-response';
-import type { CreateFeatureData, Feature, FeaturesTableResponse, UpdateFeatureData } from '@/schemas/admin/features';
+import type {
+  ChangeFeaturesScopeData,
+  CreateFeatureData,
+  Feature,
+  FeaturesTableResponse,
+  UpdateFeatureData,
+} from '@/schemas/admin/features';
 
 // Fetches features for the data table — server applies filter/sort state
 export function getFeatures(versionId: string): Promise<FeaturesTableResponse> {
@@ -28,4 +34,9 @@ export function updateFeature(
 // Deletes a feature by ID
 export function deleteFeature(versionId: string, id: string): Promise<void> {
   return axios.delete(`admin-api/versions/${versionId}/features/${id}`).then(() => undefined);
+}
+
+// Bulk-changes the scope of the given features
+export function changeFeaturesScope(versionId: string, data: ChangeFeaturesScopeData): Promise<SuccessResponse> {
+  return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/features/scope`, data).then((r) => r.data);
 }

@@ -1,7 +1,19 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsIconName } from '@vritti/api-sdk/icons';
 import { Transform } from 'class-transformer';
-import { IsInt, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayNotEmpty,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Matches,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema';
 
 export class CreateFeatureDto {
   @ApiProperty({
@@ -37,6 +49,27 @@ export class CreateFeatureDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Entity scope the feature operates at (defaults to SITE)',
+    enum: ScopeTypeValues,
+    example: 'SITE',
+  })
+  @IsOptional()
+  @IsEnum(ScopeTypeValues)
+  scope?: ScopeType;
+
+  @ApiPropertyOptional({
+    description: 'Site types the feature applies at (defaults to [OUTLET])',
+    enum: SiteAppliesValues,
+    isArray: true,
+    example: ['OUTLET', 'WAREHOUSE'],
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsEnum(SiteAppliesValues, { each: true })
+  applicableSiteTypes?: SiteApplies[];
 
   @ApiProperty({ description: 'Lucide icon name (web)', example: 'clipboard-list' })
   @IsString()

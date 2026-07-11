@@ -1,0 +1,2 @@
+CREATE TYPE "cloud"."NodeApplies" AS ENUM('OUTLET', 'REGION', 'BOTH');--> statement-breakpoint
+ALTER TABLE "cloud"."features" ADD COLUMN "applies_to" "cloud"."NodeApplies" DEFAULT 'OUTLET'::"cloud"."NodeApplies" NOT NULL;

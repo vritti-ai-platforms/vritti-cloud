@@ -3762,7 +3762,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BuMatrixResponseDto"
+                  "$ref": "#/components/schemas/SiteMatrixResponseDto"
                 }
               }
             }
@@ -3779,6 +3779,309 @@
         "summary": "Organization permission catalog",
         "tags": [
           "Organization Apps"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/locks": {
+      "get": {
+        "description": "Returns the ORG-scope permission matrix built from the version snapshot — the plan ceiling minus the organization's lock deny-list stored in core.",
+        "operationId": "OrganizationLocksController_getOrgLocks",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matrix retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteMatrixResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization, deployment, or plan not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get organization lock matrix",
+        "tags": [
+          "Organization Locks"
+        ]
+      },
+      "put": {
+        "description": "Replaces the organization's ORG-scope lock deny-list (featureCode → { web?, mobile? }; platform null locks the whole feature) in core. Locks on out-of-plan codes are inert — the plan remains the ceiling.",
+        "operationId": "OrganizationLocksController_updateOrgLocks",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLocksDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Organization permissions updated successfully."
+          },
+          "400": {
+            "description": "Invalid lock shape."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace organization locks",
+        "tags": [
+          "Organization Locks"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities/{leId}/locks": {
+      "get": {
+        "description": "Returns the LE-scope permission matrix built from the version snapshot — the plan ceiling minus the legal entity's lock deny-list stored in core.",
+        "operationId": "OrganizationLocksController_getLegalEntityLocks",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matrix retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteMatrixResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization, deployment, plan, or legal entity not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get legal entity lock matrix",
+        "tags": [
+          "Organization Locks"
+        ]
+      },
+      "put": {
+        "description": "Replaces the legal entity's LE-scope lock deny-list (featureCode → { web?, mobile? }; platform null locks the whole feature) in core. Locks on out-of-plan codes are inert — the plan remains the ceiling.",
+        "operationId": "OrganizationLocksController_updateLegalEntityLocks",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLocksDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Legal entity permissions updated successfully."
+          },
+          "400": {
+            "description": "Invalid lock shape."
+          },
+          "404": {
+            "description": "Organization, deployment, or legal entity not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace legal entity locks",
+        "tags": [
+          "Organization Locks"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/site-groups/{groupId}/locks": {
+      "get": {
+        "description": "Returns the SITE_GROUP-scope permission matrix built from the version snapshot — the plan ceiling minus the site group's lock deny-list stored in core.",
+        "operationId": "OrganizationLocksController_getSiteGroupLocks",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Matrix retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteMatrixResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization, deployment, plan, or site group not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get site group lock matrix",
+        "tags": [
+          "Organization Locks"
+        ]
+      },
+      "put": {
+        "description": "Replaces the site group's SITE_GROUP-scope lock deny-list (featureCode → { web?, mobile? }; platform null locks the whole feature) in core. Locks on out-of-plan codes are inert — the plan remains the ceiling.",
+        "operationId": "OrganizationLocksController_updateSiteGroupLocks",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetLocksDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Site group permissions updated successfully."
+          },
+          "400": {
+            "description": "Invalid lock shape."
+          },
+          "404": {
+            "description": "Organization, deployment, or site group not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Replace site group locks",
+        "tags": [
+          "Organization Locks"
         ]
       }
     },
@@ -3997,10 +4300,10 @@
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/business-units": {
+    "/cloud-api/organizations/{orgId}/sites": {
       "get": {
-        "description": "Proxies to core to return all business units for the organization.",
-        "operationId": "OrganizationBusinessUnitsController_listBusinessUnits",
+        "description": "Proxies to core to return all sites for the organization.",
+        "operationId": "OrganizationSitesController_listSites",
         "parameters": [
           {
             "name": "orgId",
@@ -4014,7 +4317,14 @@
         ],
         "responses": {
           "200": {
-            "description": "Business units retrieved successfully."
+            "description": "Sites retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteListResponseDto"
+                }
+              }
+            }
           },
           "401": {
             "description": "Unauthorized."
@@ -4031,14 +4341,14 @@
             "bearer": []
           }
         ],
-        "summary": "List organization business units",
+        "summary": "List organization sites",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       },
       "post": {
-        "description": "Proxies to core to create a new business unit. Checks plan limits before creating.",
-        "operationId": "OrganizationBusinessUnitsController_createBusinessUnit",
+        "description": "Proxies to core to create a new site. Checks plan limits before creating.",
+        "operationId": "OrganizationSitesController_createSite",
         "parameters": [
           {
             "name": "orgId",
@@ -4050,15 +4360,32 @@
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSiteDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": "Business unit created successfully."
+            "description": "Site created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponseDto"
+                }
+              }
+            }
           },
           "400": {
             "description": "Validation failed."
           },
           "403": {
-            "description": "Business unit limit reached for the plan."
+            "description": "Site limit reached for the plan."
           },
           "404": {
             "description": "Organization or deployment not found."
@@ -4072,16 +4399,16 @@
             "bearer": []
           }
         ],
-        "summary": "Create a business unit",
+        "summary": "Create a site",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/business-units/{buId}": {
+    "/cloud-api/organizations/{orgId}/sites/{siteId}": {
       "get": {
-        "description": "Proxies to core to return a single business unit by ID.",
-        "operationId": "OrganizationBusinessUnitsController_getBusinessUnit",
+        "description": "Proxies to core to return a single site by ID.",
+        "operationId": "OrganizationSitesController_getSite",
         "parameters": [
           {
             "name": "orgId",
@@ -4093,10 +4420,10 @@
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
-            "description": "Business unit ID",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
@@ -4104,10 +4431,17 @@
         ],
         "responses": {
           "200": {
-            "description": "Business unit retrieved successfully."
+            "description": "Site retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteDto"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Organization, deployment, or business unit not found."
+            "description": "Organization, deployment, or site not found."
           },
           "503": {
             "description": "Deployment unreachable."
@@ -4118,14 +4452,14 @@
             "bearer": []
           }
         ],
-        "summary": "Get a business unit",
+        "summary": "Get a site",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       },
       "patch": {
-        "description": "Proxies to core to update a business unit.",
-        "operationId": "OrganizationBusinessUnitsController_updateBusinessUnit",
+        "description": "Proxies to core to update a site.",
+        "operationId": "OrganizationSitesController_updateSite",
         "parameters": [
           {
             "name": "orgId",
@@ -4137,24 +4471,34 @@
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
-            "description": "Business unit ID",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSiteDto"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
-            "description": "Business unit updated successfully."
+            "description": "Site updated successfully."
           },
           "400": {
             "description": "Validation failed."
           },
           "404": {
-            "description": "Organization, deployment, or business unit not found."
+            "description": "Organization, deployment, or site not found."
           },
           "503": {
             "description": "Deployment unreachable."
@@ -4165,14 +4509,14 @@
             "bearer": []
           }
         ],
-        "summary": "Update a business unit",
+        "summary": "Update a site",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       },
       "delete": {
-        "description": "Proxies to core to delete a business unit.",
-        "operationId": "OrganizationBusinessUnitsController_deleteBusinessUnit",
+        "description": "Proxies to core to delete a site.",
+        "operationId": "OrganizationSitesController_deleteSite",
         "parameters": [
           {
             "name": "orgId",
@@ -4184,10 +4528,10 @@
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
-            "description": "Business unit ID",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
@@ -4195,10 +4539,10 @@
         ],
         "responses": {
           "200": {
-            "description": "Business unit deleted successfully."
+            "description": "Site deleted successfully."
           },
           "404": {
-            "description": "Organization, deployment, or business unit not found."
+            "description": "Organization, deployment, or site not found."
           },
           "503": {
             "description": "Deployment unreachable."
@@ -4209,16 +4553,16 @@
             "bearer": []
           }
         ],
-        "summary": "Delete a business unit",
+        "summary": "Delete a site",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/business-units/{buId}/permissions": {
+    "/cloud-api/organizations/{orgId}/sites/{siteId}/permissions": {
       "get": {
-        "description": "Returns the BU permission matrix built from the version snapshot — the plan ceiling minus the BU's lock deny-list.",
-        "operationId": "OrganizationBusinessUnitsController_getBuPermissions",
+        "description": "Returns the site permission matrix built from the version snapshot — the plan ceiling minus the site's lock deny-list.",
+        "operationId": "OrganizationSitesController_getSitePermissions",
         "parameters": [
           {
             "name": "orgId",
@@ -4230,10 +4574,10 @@
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
-            "description": "Business unit ID",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
@@ -4245,7 +4589,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/BuMatrixResponseDto"
+                  "$ref": "#/components/schemas/SiteMatrixResponseDto"
                 }
               }
             }
@@ -4259,14 +4603,14 @@
             "bearer": []
           }
         ],
-        "summary": "Get business unit permission matrix",
+        "summary": "Get site permission matrix",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       },
       "put": {
-        "description": "Replaces the BU's lock deny-list (featureCode → { web?, mobile? }; platform null locks the whole feature) and pushes the overlay to core. Locks on out-of-plan codes are inert — the plan remains the ceiling.",
-        "operationId": "OrganizationBusinessUnitsController_updateBuPermissions",
+        "description": "Replaces the site's lock deny-list (featureCode → { web?, mobile? }; platform null locks the whole feature) and pushes the overlay to core. Locks on out-of-plan codes are inert — the plan remains the ceiling.",
+        "operationId": "OrganizationSitesController_updateSitePermissions",
         "parameters": [
           {
             "name": "orgId",
@@ -4278,10 +4622,10 @@
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
-            "description": "Business unit ID",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
@@ -4292,14 +4636,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/SetBuLocksDto"
+                "$ref": "#/components/schemas/SetLocksDto"
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Business unit permissions updated successfully."
+            "description": "Site permissions updated successfully."
           },
           "400": {
             "description": "Invalid lock shape."
@@ -4316,28 +4660,31 @@
             "bearer": []
           }
         ],
-        "summary": "Replace business unit permission locks",
+        "summary": "Replace site permission locks",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/business-units/{buId}/compatible-roles": {
+    "/cloud-api/organizations/{orgId}/sites/{siteId}/compatible-roles": {
       "get": {
-        "operationId": "OrganizationBusinessUnitsController_getCompatibleRoles",
+        "description": "Proxies to core to return roles compatible with the site's assigned apps.",
+        "operationId": "OrganizationSitesController_getCompatibleRoles",
         "parameters": [
           {
             "name": "orgId",
             "required": true,
             "in": "path",
+            "description": "Organization ID",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
@@ -4345,7 +4692,23 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Roles retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreRoleDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
           }
         },
         "security": [
@@ -4353,27 +4716,31 @@
             "bearer": []
           }
         ],
+        "summary": "Get compatible roles",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/business-units/{buId}/role-assignments": {
+    "/cloud-api/organizations/{orgId}/sites/{siteId}/role-assignments": {
       "get": {
-        "operationId": "OrganizationBusinessUnitsController_getRoleAssignments",
+        "description": "Proxies to core to return all role assignments for a site.",
+        "operationId": "OrganizationSitesController_getRoleAssignments",
         "parameters": [
           {
             "name": "orgId",
             "required": true,
             "in": "path",
+            "description": "Organization ID",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
@@ -4381,7 +4748,23 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Role assignments retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
           }
         },
         "security": [
@@ -4389,33 +4772,63 @@
             "bearer": []
           }
         ],
+        "summary": "List site role assignments",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       },
       "post": {
-        "operationId": "OrganizationBusinessUnitsController_assignRole",
+        "description": "Proxies to core to assign a role to a user at the site.",
+        "operationId": "OrganizationSitesController_assignRole",
         "parameters": [
           {
             "name": "orgId",
             "required": true,
             "in": "path",
+            "description": "Organization ID",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleDto"
+              }
+            }
+          }
+        },
         "responses": {
           "201": {
-            "description": ""
+            "description": "Role assigned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, user, or role not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
           }
         },
         "security": [
@@ -4423,27 +4836,31 @@
             "bearer": []
           }
         ],
+        "summary": "Assign a role at a site",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
         ]
       }
     },
-    "/cloud-api/organizations/{orgId}/business-units/{buId}/role-assignments/{assignmentId}": {
+    "/cloud-api/organizations/{orgId}/sites/{siteId}/role-assignments/{assignmentId}": {
       "delete": {
-        "operationId": "OrganizationBusinessUnitsController_removeRoleAssignment",
+        "description": "Proxies to core to remove a role assignment from the site.",
+        "operationId": "OrganizationSitesController_removeRoleAssignment",
         "parameters": [
           {
             "name": "orgId",
             "required": true,
             "in": "path",
+            "description": "Organization ID",
             "schema": {
               "type": "string"
             }
           },
           {
-            "name": "buId",
+            "name": "siteId",
             "required": true,
             "in": "path",
+            "description": "Site ID",
             "schema": {
               "type": "string"
             }
@@ -4452,6 +4869,7 @@
             "name": "assignmentId",
             "required": true,
             "in": "path",
+            "description": "Role assignment ID",
             "schema": {
               "type": "string"
             }
@@ -4459,7 +4877,13 @@
         ],
         "responses": {
           "200": {
-            "description": ""
+            "description": "Role assignment removed successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or assignment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
           }
         },
         "security": [
@@ -4467,8 +4891,1142 @@
             "bearer": []
           }
         ],
+        "summary": "Remove a site role assignment",
         "tags": [
-          "Organization Business Units"
+          "Organization Sites"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/structure": {
+      "get": {
+        "description": "Proxies to core to return the structure aggregate: organization, legal entities, tax registrations, sites, and site groups.",
+        "operationId": "OrganizationStructureController_getStructure",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Structure retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StructureResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get organization structure",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/site-groups/{groupId}/role-assignments": {
+      "get": {
+        "description": "Proxies to core to return all role assignments targeting the site group.",
+        "operationId": "OrganizationStructureController_getSiteGroupRoleAssignments",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role assignments retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List site group role assignments",
+        "tags": [
+          "Organization Structure"
+        ]
+      },
+      "post": {
+        "description": "Proxies to core to assign a role to a user at the site group.",
+        "operationId": "OrganizationStructureController_assignSiteGroupRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role assigned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, user, or role not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a role at a site group",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/site-groups/{groupId}/role-assignments/{assignmentId}": {
+      "delete": {
+        "description": "Proxies to core to remove a role assignment from the site group.",
+        "operationId": "OrganizationStructureController_removeSiteGroupRoleAssignment",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignmentId",
+            "required": true,
+            "in": "path",
+            "description": "Role assignment ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role assignment removed successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or assignment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a site group role assignment",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/site-groups/{groupId}/compatible-roles": {
+      "get": {
+        "description": "Proxies to core to return roles assignable at the site group — SITE_GROUP-scoped templates, SITE-scoped templates, and custom roles.",
+        "operationId": "OrganizationStructureController_getSiteGroupCompatibleRoles",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreRoleDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get site group compatible roles",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities/{leId}/role-assignments": {
+      "get": {
+        "description": "Proxies to core to return all role assignments targeting the legal entity.",
+        "operationId": "OrganizationStructureController_getLegalEntityRoleAssignments",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role assignments retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List legal entity role assignments",
+        "tags": [
+          "Organization Structure"
+        ]
+      },
+      "post": {
+        "description": "Proxies to core to assign a role to a user at the legal entity.",
+        "operationId": "OrganizationStructureController_assignLegalEntityRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role assigned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, user, or role not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a role at a legal entity",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities/{leId}/role-assignments/{assignmentId}": {
+      "delete": {
+        "description": "Proxies to core to remove a role assignment from the legal entity.",
+        "operationId": "OrganizationStructureController_removeLegalEntityRoleAssignment",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignmentId",
+            "required": true,
+            "in": "path",
+            "description": "Role assignment ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role assignment removed successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or assignment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove a legal entity role assignment",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities/{leId}/compatible-roles": {
+      "get": {
+        "description": "Proxies to core to return roles assignable at the legal entity — LE-scoped templates, SITE-scoped templates, and custom roles.",
+        "operationId": "OrganizationStructureController_getLegalEntityCompatibleRoles",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreRoleDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get legal entity compatible roles",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/role-assignments": {
+      "get": {
+        "description": "Proxies to core to return all org-wide role assignments (no site, site group, or legal entity target).",
+        "operationId": "OrganizationStructureController_getOrgRoleAssignments",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role assignments retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RoleAssignmentDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "List org-wide role assignments",
+        "tags": [
+          "Organization Structure"
+        ]
+      },
+      "post": {
+        "description": "Proxies to core to assign a role to a user across the whole organization.",
+        "operationId": "OrganizationStructureController_assignOrgRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignRoleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Role assigned successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, user, or role not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Assign a role org-wide",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/role-assignments/{assignmentId}": {
+      "delete": {
+        "description": "Proxies to core to remove an org-wide role assignment.",
+        "operationId": "OrganizationStructureController_removeOrgRoleAssignment",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "assignmentId",
+            "required": true,
+            "in": "path",
+            "description": "Role assignment ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role assignment removed successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or assignment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove an org-wide role assignment",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/compatible-roles": {
+      "get": {
+        "description": "Proxies to core to return roles assignable org-wide — ORG-scoped templates, SITE-scoped templates, and custom roles.",
+        "operationId": "OrganizationStructureController_getOrgCompatibleRoles",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Roles retrieved successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CoreRoleDto"
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get org-wide compatible roles",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/structure/site-groups": {
+      "post": {
+        "description": "Proxies to core to create a new site group for the organization.",
+        "operationId": "OrganizationStructureController_createSiteGroup",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSiteGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Site group created successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a site group",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/structure/site-groups/{groupId}": {
+      "patch": {
+        "description": "Proxies to core to update a site group (rename, re-parent, activate/deactivate).",
+        "operationId": "OrganizationStructureController_updateSiteGroup",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSiteGroupDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Site group updated successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, or site group not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a site group",
+        "tags": [
+          "Organization Structure"
+        ]
+      },
+      "delete": {
+        "description": "Proxies to core to delete a site group. Fails if sites or child groups still reference it.",
+        "operationId": "OrganizationStructureController_deleteSiteGroup",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "groupId",
+            "required": true,
+            "in": "path",
+            "description": "Site group ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Site group deleted successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or site group not found."
+          },
+          "409": {
+            "description": "Site group still has member sites or child groups."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a site group",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities": {
+      "post": {
+        "description": "Proxies to core to create a new legal entity for the organization.",
+        "operationId": "OrganizationStructureController_createLegalEntity",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLegalEntityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Legal entity created successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization or deployment not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a legal entity",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities/{leId}": {
+      "patch": {
+        "description": "Proxies to core to update a legal entity.",
+        "operationId": "OrganizationStructureController_updateLegalEntity",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateLegalEntityDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Legal entity updated successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, or legal entity not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update a legal entity",
+        "tags": [
+          "Organization Structure"
+        ]
+      },
+      "delete": {
+        "description": "Proxies to core to delete a legal entity. Fails if sites are linked to it or it has child legal entities.",
+        "operationId": "OrganizationStructureController_deleteLegalEntity",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Legal entity deleted successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, or legal entity not found."
+          },
+          "409": {
+            "description": "Legal entity is linked to sites or has child legal entities."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a legal entity",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities/{leId}/registrations": {
+      "post": {
+        "description": "Proxies to core to add a tax registration (GSTIN, TRN, VAT number) to a legal entity.",
+        "operationId": "OrganizationStructureController_addRegistration",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLeTaxRegistrationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tax registration added successfully."
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "404": {
+            "description": "Organization, deployment, or legal entity not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Add a tax registration to a legal entity",
+        "tags": [
+          "Organization Structure"
+        ]
+      }
+    },
+    "/cloud-api/organizations/{orgId}/legal-entities/{leId}/registrations/{regId}": {
+      "delete": {
+        "description": "Proxies to core to delete a tax registration from a legal entity. Fails if sites are linked to it.",
+        "operationId": "OrganizationStructureController_deleteRegistration",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "leId",
+            "required": true,
+            "in": "path",
+            "description": "Legal entity ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "regId",
+            "required": true,
+            "in": "path",
+            "description": "Tax registration ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tax registration deleted successfully."
+          },
+          "404": {
+            "description": "Organization, deployment, legal entity, or tax registration not found."
+          },
+          "409": {
+            "description": "Tax registration is linked to sites."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete a tax registration",
+        "tags": [
+          "Organization Structure"
         ]
       }
     },
@@ -6308,6 +7866,62 @@
           }
         ],
         "summary": "Delete a feature",
+        "tags": [
+          "Admin - Features"
+        ]
+      }
+    },
+    "/admin-api/versions/{versionId}/features/scope": {
+      "patch": {
+        "description": "Sets the scope on all given features; grants on role templates of a different scope are removed.",
+        "operationId": "FeatureController_changeScope",
+        "parameters": [
+          {
+            "name": "versionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangeFeaturesScopeDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Scope changed successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "No matching features found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Bulk-change feature scope",
         "tags": [
           "Admin - Features"
         ]
@@ -14226,7 +15840,7 @@
           }
         }
       },
-      "BuMatrixPlanDto": {
+      "SiteMatrixPlanDto": {
         "type": "object",
         "properties": {
           "code": {
@@ -14243,7 +15857,7 @@
           "name"
         ]
       },
-      "BuMatrixCellDto": {
+      "SiteMatrixCellDto": {
         "type": "object",
         "properties": {
           "inPlan": {
@@ -14252,7 +15866,7 @@
           },
           "selected": {
             "type": "boolean",
-            "description": "The BU currently has it enabled (never true when inPlan is false)"
+            "description": "The site currently has it enabled (never true when inPlan is false)"
           },
           "availableIn": {
             "description": "Other plan names that unlock it — upsell; only when inPlan is false",
@@ -14268,7 +15882,7 @@
           "availableIn"
         ]
       },
-      "BuMatrixPermissionDto": {
+      "SiteMatrixPermissionDto": {
         "type": "object",
         "properties": {
           "code": {
@@ -14283,7 +15897,7 @@
             "nullable": true,
             "allOf": [
               {
-                "$ref": "#/components/schemas/BuMatrixCellDto"
+                "$ref": "#/components/schemas/SiteMatrixCellDto"
               }
             ]
           },
@@ -14291,7 +15905,7 @@
             "nullable": true,
             "allOf": [
               {
-                "$ref": "#/components/schemas/BuMatrixCellDto"
+                "$ref": "#/components/schemas/SiteMatrixCellDto"
               }
             ]
           }
@@ -14303,7 +15917,7 @@
           "mobile"
         ]
       },
-      "BuMatrixFeatureDto": {
+      "SiteMatrixFeatureDto": {
         "type": "object",
         "properties": {
           "code": {
@@ -14348,7 +15962,7 @@
           "permissions": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BuMatrixPermissionDto"
+              "$ref": "#/components/schemas/SiteMatrixPermissionDto"
             }
           }
         },
@@ -14362,7 +15976,7 @@
           "permissions"
         ]
       },
-      "BuMatrixAppDto": {
+      "SiteMatrixAppDto": {
         "type": "object",
         "properties": {
           "code": {
@@ -14389,7 +16003,7 @@
           "features": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BuMatrixFeatureDto"
+              "$ref": "#/components/schemas/SiteMatrixFeatureDto"
             }
           }
         },
@@ -14402,26 +16016,52 @@
           "features"
         ]
       },
-      "BuMatrixResponseDto": {
+      "SiteMatrixResponseDto": {
         "type": "object",
         "properties": {
           "plan": {
-            "$ref": "#/components/schemas/BuMatrixPlanDto"
+            "$ref": "#/components/schemas/SiteMatrixPlanDto"
           },
           "apps": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/BuMatrixAppDto"
+              "$ref": "#/components/schemas/SiteMatrixAppDto"
             }
           },
           "locks": {
             "type": "object",
-            "description": "The stored BU deny-list — featureCode → { web?/mobile?: null (platform locked) | locked codes }"
+            "description": "The stored site deny-list — featureCode → { web?/mobile?: null (platform locked) | locked codes }"
           }
         },
         "required": [
           "plan",
           "apps",
+          "locks"
+        ]
+      },
+      "SetLocksDto": {
+        "type": "object",
+        "properties": {
+          "locks": {
+            "type": "object",
+            "description": "featureCode → { web?, mobile? } — the deny-list for this scope (full replace); platform null locks the whole feature, string[] locks those permission codes",
+            "example": {
+              "pos": {
+                "web": [
+                  "CREATE"
+                ],
+                "mobile": null
+              },
+              "items": {
+                "web": [
+                  "DELETE"
+                ]
+              }
+            },
+            "additionalProperties": true
+          }
+        },
+        "required": [
           "locks"
         ]
       },
@@ -14473,30 +16113,812 @@
           "result"
         ]
       },
-      "SetBuLocksDto": {
+      "SiteDto": {
         "type": "object",
         "properties": {
-          "locks": {
+          "id": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "organizationId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "groupId": {
             "type": "object",
-            "description": "featureCode → { web?, mobile? } — the BU deny-list (full replace); platform null locks the whole feature, string[] locks those permission codes",
-            "example": {
-              "pos": {
-                "web": [
-                  "CREATE"
-                ],
-                "mobile": null
-              },
-              "items": {
-                "web": [
-                  "DELETE"
-                ]
-              }
-            },
-            "additionalProperties": true
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "name": {
+            "type": "string",
+            "example": "Indiranagar Store"
+          },
+          "code": {
+            "type": "object",
+            "example": "BLR-IND",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "OUTLET",
+              "WAREHOUSE",
+              "PRODUCTION"
+            ],
+            "example": "OUTLET"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "example": 0
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Asia/Kolkata"
+          },
+          "legalEntityId": {
+            "type": "object",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "registrationId": {
+            "type": "object",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "metadata": {
+            "type": "object",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
           }
         },
         "required": [
-          "locks"
+          "id",
+          "organizationId",
+          "name",
+          "type",
+          "isActive",
+          "sortOrder",
+          "timezone",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SiteListResponseDto": {
+        "type": "object",
+        "properties": {
+          "result": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteDto"
+            }
+          }
+        },
+        "required": [
+          "result"
+        ]
+      },
+      "CreateSiteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Site name",
+            "example": "Indiranagar Store"
+          },
+          "code": {
+            "type": "string",
+            "description": "Site code",
+            "example": "BLR-IND"
+          },
+          "type": {
+            "type": "string",
+            "description": "Site type",
+            "enum": [
+              "OUTLET",
+              "WAREHOUSE",
+              "PRODUCTION"
+            ],
+            "example": "OUTLET"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Site group ID the site is managed under",
+            "example": "uuid-here"
+          },
+          "description": {
+            "type": "string",
+            "description": "Site description"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Site timezone",
+            "example": "Asia/Kolkata"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "description": "Owning legal entity ID",
+            "example": "uuid-here"
+          },
+          "registrationId": {
+            "type": "string",
+            "description": "Tax registration ID (must belong to the owning legal entity)",
+            "example": "uuid-here"
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address",
+            "example": "123 Main St"
+          },
+          "city": {
+            "type": "string",
+            "example": "Bengaluru"
+          },
+          "state": {
+            "type": "string",
+            "example": "Karnataka"
+          },
+          "country": {
+            "type": "string",
+            "example": "India"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 98765 43210"
+          }
+        },
+        "required": [
+          "name",
+          "code",
+          "type",
+          "timezone"
+        ]
+      },
+      "CreateResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "example": "Resource created successfully"
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "data"
+        ]
+      },
+      "UpdateSiteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Indiranagar Store"
+          },
+          "code": {
+            "type": "string",
+            "example": "BLR-IND"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "OUTLET",
+              "WAREHOUSE",
+              "PRODUCTION"
+            ],
+            "example": "OUTLET"
+          },
+          "groupId": {
+            "type": "string",
+            "description": "Site group ID the site is managed under",
+            "example": "uuid-here"
+          },
+          "description": {
+            "type": "string",
+            "description": "Site description"
+          },
+          "timezone": {
+            "type": "string",
+            "example": "Asia/Kolkata"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "description": "Owning legal entity ID",
+            "example": "uuid-here"
+          },
+          "registrationId": {
+            "type": "string",
+            "description": "Tax registration ID (must belong to the owning legal entity)",
+            "example": "uuid-here"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "address": {
+            "type": "string",
+            "description": "Street address",
+            "example": "123 Main St"
+          },
+          "city": {
+            "type": "string",
+            "example": "Bengaluru"
+          },
+          "state": {
+            "type": "string",
+            "example": "Karnataka"
+          },
+          "country": {
+            "type": "string",
+            "example": "India"
+          },
+          "phone": {
+            "type": "string",
+            "example": "+91 98765 43210"
+          }
+        }
+      },
+      "CoreRoleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "organizationId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "name": {
+            "type": "string",
+            "example": "Cashier"
+          },
+          "description": {
+            "type": "object",
+            "example": "Handles billing at the counter",
+            "nullable": true
+          },
+          "code": {
+            "type": "object",
+            "example": "cashier",
+            "nullable": true
+          },
+          "features": {
+            "type": "object",
+            "example": {
+              "pos": [
+                "VIEW",
+                "CREATE"
+              ]
+            },
+            "description": "Feature code to granted permission codes"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "organizationId",
+          "name",
+          "features",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "RoleAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "userId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "roleId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "siteId": {
+            "type": "object",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "siteGroupId": {
+            "type": "object",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "legalEntityId": {
+            "type": "object",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "assignmentType": {
+            "type": "string",
+            "example": "DIRECT"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "userName": {
+            "type": "string",
+            "example": "Jane Doe"
+          },
+          "userEmail": {
+            "type": "string",
+            "example": "jane@acme.com"
+          },
+          "roleName": {
+            "type": "string",
+            "example": "Cashier"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "roleId",
+          "assignmentType",
+          "createdAt",
+          "userName",
+          "userEmail",
+          "roleName"
+        ]
+      },
+      "AssignRoleDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "User to assign the role to",
+            "example": "uuid-here"
+          },
+          "roleId": {
+            "type": "string",
+            "description": "Role to assign",
+            "example": "uuid-here"
+          }
+        },
+        "required": [
+          "userId",
+          "roleId"
+        ]
+      },
+      "StructureOrganizationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "name": {
+            "type": "string",
+            "example": "Acme Corp"
+          },
+          "code": {
+            "type": "string",
+            "example": "acme-corp"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "code"
+        ]
+      },
+      "LegalEntityDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "organizationId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "code": {
+            "type": "string",
+            "example": "acme-india"
+          },
+          "name": {
+            "type": "string",
+            "example": "Acme Pharma Pvt Ltd"
+          },
+          "country": {
+            "type": "string",
+            "example": "IN"
+          },
+          "currencyCode": {
+            "type": "string",
+            "example": "INR"
+          },
+          "taxRegime": {
+            "type": "string",
+            "enum": [
+              "GST",
+              "VAT",
+              "SALES_TAX",
+              "NONE"
+            ],
+            "example": "GST"
+          },
+          "taxId": {
+            "type": "object",
+            "example": "AAACA1234F",
+            "nullable": true
+          },
+          "fiscalYearStart": {
+            "type": "number",
+            "example": 4
+          },
+          "parentId": {
+            "type": "object",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "organizationId",
+          "code",
+          "name",
+          "country",
+          "currencyCode",
+          "taxRegime",
+          "fiscalYearStart",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "LeTaxRegistrationDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "organizationId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "legalEntityId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "taxNumber": {
+            "type": "string",
+            "example": "29AAACA1234F1Z5"
+          },
+          "region": {
+            "type": "object",
+            "example": "Karnataka",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "organizationId",
+          "legalEntityId",
+          "taxNumber",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "SiteGroupDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "organizationId": {
+            "type": "string",
+            "example": "uuid-here"
+          },
+          "name": {
+            "type": "string",
+            "example": "South Zone"
+          },
+          "code": {
+            "type": "string",
+            "example": "south-zone"
+          },
+          "parentId": {
+            "type": "object",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          },
+          "createdAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2024-01-15T10:30:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "organizationId",
+          "name",
+          "code",
+          "isActive",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "StructureResponseDto": {
+        "type": "object",
+        "properties": {
+          "organization": {
+            "$ref": "#/components/schemas/StructureOrganizationDto"
+          },
+          "legalEntities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LegalEntityDto"
+            }
+          },
+          "taxRegistrations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LeTaxRegistrationDto"
+            }
+          },
+          "sites": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteDto"
+            }
+          },
+          "siteGroups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SiteGroupDto"
+            }
+          }
+        },
+        "required": [
+          "organization",
+          "legalEntities",
+          "taxRegistrations",
+          "sites",
+          "siteGroups"
+        ]
+      },
+      "CreateSiteGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Site group name",
+            "example": "South Zone"
+          },
+          "code": {
+            "type": "string",
+            "description": "Site group code — unique per organization",
+            "example": "south-zone"
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Parent site group ID",
+            "example": "uuid-here"
+          }
+        },
+        "required": [
+          "name",
+          "code"
+        ]
+      },
+      "UpdateSiteGroupDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "South Zone"
+          },
+          "code": {
+            "type": "string",
+            "example": "south-zone"
+          },
+          "parentId": {
+            "type": "object",
+            "description": "Parent site group ID",
+            "example": "uuid-here",
+            "nullable": true
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "CreateLegalEntityDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Legal entity code (unique per organization)",
+            "example": "acme-india"
+          },
+          "name": {
+            "type": "string",
+            "description": "Legal entity name",
+            "example": "Acme Pharma Pvt Ltd"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country (ISO 3166-1 alpha-2)",
+            "example": "IN"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "Base currency (ISO 4217)",
+            "example": "INR"
+          },
+          "taxRegime": {
+            "type": "string",
+            "description": "Tax regime",
+            "enum": [
+              "GST",
+              "VAT",
+              "SALES_TAX",
+              "NONE"
+            ],
+            "example": "GST"
+          },
+          "taxId": {
+            "type": "string",
+            "description": "Entity-level tax identifier (PAN, CR number)",
+            "example": "AAACA1234F"
+          },
+          "fiscalYearStart": {
+            "type": "number",
+            "description": "Fiscal year start month (1-12)",
+            "example": 4
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Parent legal entity ID (subsidiary)",
+            "example": "uuid-here"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "country",
+          "currencyCode",
+          "taxRegime"
+        ]
+      },
+      "UpdateLegalEntityDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "acme-india"
+          },
+          "name": {
+            "type": "string",
+            "example": "Acme Pharma Pvt Ltd"
+          },
+          "country": {
+            "type": "string",
+            "description": "Country (ISO 3166-1 alpha-2)",
+            "example": "IN"
+          },
+          "currencyCode": {
+            "type": "string",
+            "description": "Base currency (ISO 4217)",
+            "example": "INR"
+          },
+          "taxRegime": {
+            "type": "string",
+            "enum": [
+              "GST",
+              "VAT",
+              "SALES_TAX",
+              "NONE"
+            ],
+            "example": "GST"
+          },
+          "taxId": {
+            "type": "string",
+            "example": "AAACA1234F"
+          },
+          "fiscalYearStart": {
+            "type": "number",
+            "description": "Fiscal year start month (1-12)",
+            "example": 4
+          },
+          "parentId": {
+            "type": "string",
+            "description": "Parent legal entity ID (subsidiary)",
+            "example": "uuid-here"
+          },
+          "isActive": {
+            "type": "boolean",
+            "example": true
+          }
+        }
+      },
+      "CreateLeTaxRegistrationDto": {
+        "type": "object",
+        "properties": {
+          "taxNumber": {
+            "type": "string",
+            "description": "Tax registration number (GSTIN, TRN, VAT number)",
+            "example": "29AAACA1234F1Z5"
+          },
+          "region": {
+            "type": "string",
+            "description": "Registration region (state or country)",
+            "example": "Karnataka"
+          }
+        },
+        "required": [
+          "taxNumber"
         ]
       },
       "CloudBusinessDto": {
@@ -15190,27 +17612,6 @@
           "businessIds"
         ]
       },
-      "CreateResponseDto": {
-        "type": "object",
-        "properties": {
-          "success": {
-            "type": "boolean",
-            "example": true
-          },
-          "message": {
-            "type": "string",
-            "example": "Resource created successfully"
-          },
-          "data": {
-            "type": "object"
-          }
-        },
-        "required": [
-          "success",
-          "message",
-          "data"
-        ]
-      },
       "BulkCreatePermissionsDto": {
         "type": "object",
         "properties": {
@@ -15504,6 +17905,33 @@
             "description": "Optional description of the feature",
             "example": "Allows creating a new dine-in order"
           },
+          "scope": {
+            "type": "string",
+            "description": "Entity scope the feature operates at (defaults to SITE)",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE"
+          },
+          "applicableSiteTypes": {
+            "type": "array",
+            "description": "Site types the feature applies at (defaults to [OUTLET])",
+            "example": [
+              "OUTLET",
+              "WAREHOUSE"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "OUTLET",
+                "WAREHOUSE",
+                "PRODUCTION"
+              ]
+            }
+          },
           "lucideIcon": {
             "type": "string",
             "description": "Lucide icon name (web)",
@@ -15557,6 +17985,32 @@
             "type": "object",
             "example": "Allows creating a new dine-in order",
             "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE",
+            "description": "Entity scope the feature operates at"
+          },
+          "applicableSiteTypes": {
+            "type": "array",
+            "example": [
+              "OUTLET"
+            ],
+            "description": "Site types the feature applies at",
+            "items": {
+              "type": "string",
+              "enum": [
+                "OUTLET",
+                "WAREHOUSE",
+                "PRODUCTION"
+              ]
+            }
           },
           "lucideIcon": {
             "type": "string",
@@ -15626,6 +18080,8 @@
           "versionId",
           "code",
           "name",
+          "scope",
+          "applicableSiteTypes",
           "lucideIcon",
           "sfSymbol",
           "materialSymbol",
@@ -15665,6 +18121,35 @@
           "state"
         ]
       },
+      "ChangeFeaturesScopeDto": {
+        "type": "object",
+        "properties": {
+          "featureIds": {
+            "description": "Feature ids to update",
+            "example": [
+              "550e8400-e29b-41d4-a716-446655440000"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE"
+          }
+        },
+        "required": [
+          "featureIds",
+          "scope"
+        ]
+      },
       "UpdateFeatureDto": {
         "type": "object",
         "properties": {
@@ -15687,6 +18172,33 @@
             "type": "string",
             "description": "Optional description of the feature",
             "example": "Allows creating a new dine-in order"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Entity scope the feature operates at (defaults to SITE)",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE"
+          },
+          "applicableSiteTypes": {
+            "type": "array",
+            "description": "Site types the feature applies at (defaults to [OUTLET])",
+            "example": [
+              "OUTLET",
+              "WAREHOUSE"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "OUTLET",
+                "WAREHOUSE",
+                "PRODUCTION"
+              ]
+            }
           },
           "lucideIcon": {
             "type": "string",
@@ -16072,6 +18584,30 @@
             "type": "string",
             "example": "package"
           },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE"
+          },
+          "applicableSiteTypes": {
+            "type": "array",
+            "example": [
+              "OUTLET"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "OUTLET",
+                "WAREHOUSE",
+                "PRODUCTION"
+              ]
+            }
+          },
           "app": {
             "$ref": "#/components/schemas/BusinessFeatureAppDto"
           },
@@ -16086,6 +18622,8 @@
           "code",
           "name",
           "lucideIcon",
+          "scope",
+          "applicableSiteTypes",
           "app",
           "permissionCount"
         ]
@@ -16219,6 +18757,27 @@
             "type": "string",
             "description": "Optional description of the role template",
             "example": "Kitchen staff responsible for food preparation"
+          },
+          "scope": {
+            "type": "string",
+            "description": "Entity scope the role template operates at (defaults to SITE)",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE"
+          },
+          "siteType": {
+            "type": "string",
+            "description": "Site type a SITE-scoped template targets (defaults to OUTLET); only allowed when scope is SITE",
+            "enum": [
+              "OUTLET",
+              "WAREHOUSE",
+              "PRODUCTION"
+            ],
+            "example": "OUTLET"
           }
         },
         "required": [
@@ -16247,6 +18806,26 @@
             "example": "Kitchen staff responsible for food preparation",
             "nullable": true
           },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE"
+          },
+          "siteType": {
+            "type": "string",
+            "enum": [
+              "OUTLET",
+              "WAREHOUSE",
+              "PRODUCTION"
+            ],
+            "example": "OUTLET",
+            "description": "Site type the template targets (meaningful only for SITE scope)"
+          },
           "businessId": {
             "type": "string",
             "example": "550e8400-e29b-41d4-a716-446655440000"
@@ -16265,6 +18844,8 @@
           "id",
           "code",
           "name",
+          "scope",
+          "siteType",
           "businessId",
           "createdAt"
         ]
@@ -16288,6 +18869,26 @@
             "type": "object",
             "example": "Kitchen staff responsible for food preparation",
             "nullable": true
+          },
+          "scope": {
+            "type": "string",
+            "enum": [
+              "ORG",
+              "LE",
+              "SITE_GROUP",
+              "SITE"
+            ],
+            "example": "SITE"
+          },
+          "siteType": {
+            "type": "string",
+            "enum": [
+              "OUTLET",
+              "WAREHOUSE",
+              "PRODUCTION"
+            ],
+            "example": "OUTLET",
+            "description": "Site type the template targets (meaningful only for SITE scope)"
           },
           "businessId": {
             "type": "string",
@@ -16315,6 +18916,8 @@
           "id",
           "code",
           "name",
+          "scope",
+          "siteType",
           "businessId",
           "createdAt",
           "businessName",
@@ -16365,6 +18968,16 @@
             "type": "string",
             "description": "Optional description of the role template",
             "example": "Kitchen staff responsible for food preparation"
+          },
+          "siteType": {
+            "type": "string",
+            "description": "Site type a SITE-scoped template targets (defaults to OUTLET); only allowed when scope is SITE",
+            "enum": [
+              "OUTLET",
+              "WAREHOUSE",
+              "PRODUCTION"
+            ],
+            "example": "OUTLET"
           }
         }
       },
@@ -16445,9 +19058,9 @@
             "description": "Unique code identifier for the plan",
             "example": "pro"
           },
-          "maxBusinessUnits": {
+          "maxSites": {
             "type": "number",
-            "description": "Maximum business units allowed on this plan",
+            "description": "Maximum sites allowed on this plan",
             "example": 50
           },
           "content": {
@@ -16484,7 +19097,7 @@
             "type": "string",
             "example": "pro"
           },
-          "maxBusinessUnits": {
+          "maxSites": {
             "type": "object",
             "example": 50,
             "nullable": true
@@ -16599,9 +19212,9 @@
             "description": "Unique code identifier for the plan",
             "example": "pro"
           },
-          "maxBusinessUnits": {
+          "maxSites": {
             "type": "number",
-            "description": "Maximum business units allowed on this plan",
+            "description": "Maximum sites allowed on this plan",
             "example": 50
           },
           "content": {
@@ -17549,6 +20162,70 @@
           }
         }
       },
+      "VocabularyEntryDto": {
+        "type": "object",
+        "properties": {
+          "singular": {
+            "type": "string",
+            "description": "Singular display label",
+            "example": "Store"
+          },
+          "plural": {
+            "type": "string",
+            "description": "Plural display label",
+            "example": "Stores"
+          }
+        },
+        "required": [
+          "singular",
+          "plural"
+        ]
+      },
+      "BusinessVocabularyDto": {
+        "type": "object",
+        "properties": {
+          "site": {
+            "description": "Label override for \"site\"",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VocabularyEntryDto"
+              }
+            ]
+          },
+          "siteGroup": {
+            "description": "Label override for \"site group\"",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VocabularyEntryDto"
+              }
+            ]
+          },
+          "outlet": {
+            "description": "Label override for \"outlet\"",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VocabularyEntryDto"
+              }
+            ]
+          },
+          "warehouse": {
+            "description": "Label override for \"warehouse\"",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VocabularyEntryDto"
+              }
+            ]
+          },
+          "production": {
+            "description": "Label override for \"production\"",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VocabularyEntryDto"
+              }
+            ]
+          }
+        }
+      },
       "CreateBusinessDto": {
         "type": "object",
         "properties": {
@@ -17566,6 +20243,14 @@
             "type": "string",
             "description": "Optional description of the business",
             "example": "Healthcare and medical services"
+          },
+          "vocabulary": {
+            "description": "Display vocabulary overrides for site/siteGroup/outlet/warehouse/production (singular + plural)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessVocabularyDto"
+              }
+            ]
           }
         },
         "required": [
@@ -17592,6 +20277,14 @@
             "type": "object",
             "example": "Healthcare and medical services",
             "nullable": true
+          },
+          "vocabulary": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessVocabularyDto"
+              }
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -17660,6 +20353,14 @@
             "type": "string",
             "description": "Optional description of the business",
             "example": "Healthcare and medical services"
+          },
+          "vocabulary": {
+            "description": "Display vocabulary overrides for site/siteGroup/outlet/warehouse/production (singular + plural)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BusinessVocabularyDto"
+              }
+            ]
           }
         }
       },
@@ -17687,6 +20388,7 @@
             "enum": [
               "GST",
               "VAT",
+              "SALES_TAX",
               "NONE"
             ],
             "example": "GST"
@@ -17841,6 +20543,7 @@
             "enum": [
               "GST",
               "VAT",
+              "SALES_TAX",
               "NONE"
             ],
             "example": "GST"

@@ -7,30 +7,41 @@ import { Suspense } from 'react';
 import { useForm } from 'react-hook-form';
 import { PermissionMatrixSkeleton } from '@/components/permission-matrix';
 import { useVersionContext } from '@/context/VersionScopeContext';
-import type { RoleTemplateGrant } from '@/schemas/admin/role-templates';
+import { SCOPE_TYPE_LABELS, type ScopeType, type SiteType } from '@/schemas/admin/features';
+import type { RoleTemplateFeature, RoleTemplateGrant } from '@/schemas/admin/role-templates';
 import { RoleGrantMatrix } from '../components/RoleGrantMatrix';
 
 interface PermissionFormValues {
   grants: RoleTemplateGrant[];
 }
 
+interface RoleTemplatePermissionFormProps {
+  scope: ScopeType;
+  siteType?: SiteType;
+}
+
 // Suspense boundary — the editor below mounts only once the grant matrix has loaded
-export const RoleTemplatePermissionForm: React.FC = () => (
+export const RoleTemplatePermissionForm: React.FC<RoleTemplatePermissionFormProps> = ({ scope, siteType }) => (
   <Suspense fallback={<PermissionMatrixSkeleton />}>
-    <RoleGrantsEditor />
+    <RoleGrantsEditor key={`${scope}:${siteType ?? ''}`} scope={scope} siteType={siteType} />
   </Suspense>
 );
 
-const RoleGrantsEditor: React.FC = () => {
+const RoleGrantsEditor: React.FC<{ scope: ScopeType; siteType?: SiteType }> = ({ scope, siteType }) => {
   const { versionId, businessId, roleTemplateId } = useVersionContext();
 
   const { data } = useRoleTemplateGrants(versionId, businessId, roleTemplateId);
-  const apps = data.apps;
+  const grantable = (f: RoleTemplateFeature) =>
+    f.scope === scope && (scope !== 'SITE' || !siteType || (f.applicableSiteTypes ?? []).includes(siteType));
+  const apps = data.apps
+    .map((app) => ({ ...app, features: app.features.filter(grantable) }))
+    .filter((app) => app.features.length > 0);
+  const featureIds = new Set(apps.flatMap((a) => a.features.map((f) => f.id)));
   const saveMutation = useSetRoleTemplatePermissions(versionId, businessId, roleTemplateId);
 
   // Data is guaranteed present (suspense), so seed react-hook-form directly — no reset/seededRef dance
   const form = useForm<PermissionFormValues>({
-    defaultValues: { grants: apps.flatMap((a) => a.grants) },
+    defaultValues: { grants: data.apps.flatMap((a) => a.grants).filter((g) => featureIds.has(g.featureId)) },
   });
 
   if (apps.length === 0) {
@@ -39,7 +50,7 @@ const RoleGrantsEditor: React.FC = () => {
         className="min-h-120"
         icon={<Layers />}
         title="No features available"
-        description="Add features to this business’s apps to start assigning permissions."
+        description={`Add ${SCOPE_TYPE_LABELS[scope]}-scoped features to this business’s apps to start assigning permissions.`}
       />
     );
   }

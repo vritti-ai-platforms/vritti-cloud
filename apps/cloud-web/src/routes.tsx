@@ -41,14 +41,13 @@ import { MFAVerificationPage } from './pages/auth/MFAVerificationPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { HomePage } from './pages/cloud/home/HomePage';
 import { InvitationsPage } from './pages/cloud/invitations/InvitationsPage';
-import { BUViewPage } from './pages/cloud/organization/business-units/BUViewPage';
-import { BUViewPageSkeleton } from './pages/cloud/organization/business-units/BUViewPageSkeleton';
-import { OrgBusinessUnitsPage } from './pages/cloud/organization/business-units/OrgBusinessUnitsPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
 import { PlanOverviewPage } from './pages/cloud/organization/plan/PlanOverviewPage';
 import { RolesPage } from './pages/cloud/organization/roles/RolesPage';
 import { RoleViewPage } from './pages/cloud/organization/roles/RoleViewPage';
-import { OrganizationSettingsPage } from './pages/cloud/organization/settings/OrganizationSettingsPage';
+import { OrgStructurePage } from './pages/cloud/organization/structure/OrgStructurePage';
+import { SiteViewPageSkeleton } from './pages/cloud/organization/structure/SiteViewPageSkeleton';
+import { StructureDetailPage } from './pages/cloud/organization/structure/StructureDetailPage';
 import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
@@ -292,14 +291,14 @@ export const cloudRoutes: RouteObject[] = [
         element: <RoleViewPage />,
       },
       {
-        path: 'business-units',
-        element: <OrgBusinessUnitsPage />,
+        path: 'structure',
+        element: <OrgStructurePage />,
       },
       {
-        path: 'business-units/:buSlug',
+        path: 'structure/:structureSlug',
         element: (
-          <Suspense fallback={<BUViewPageSkeleton />}>
-            <BUViewPage />
+          <Suspense fallback={<SiteViewPageSkeleton />}>
+            <StructureDetailPage />
           </Suspense>
         ),
       },
@@ -313,7 +312,7 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'settings',
-        element: <OrganizationSettingsPage />,
+        element: <Navigate to="../structure" replace />,
       },
     ],
   },

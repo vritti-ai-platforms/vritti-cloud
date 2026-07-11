@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
+import { type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema';
 
 export class CreateRoleTemplateDto {
   @ApiProperty({
@@ -34,4 +35,22 @@ export class CreateRoleTemplateDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @ApiPropertyOptional({
+    description: 'Entity scope the role template operates at (defaults to SITE)',
+    enum: ScopeTypeValues,
+    example: 'SITE',
+  })
+  @IsOptional()
+  @IsEnum(ScopeTypeValues)
+  scope?: ScopeType;
+
+  @ApiPropertyOptional({
+    description: 'Site type a SITE-scoped template targets (defaults to OUTLET); only allowed when scope is SITE',
+    enum: SiteAppliesValues,
+    example: 'OUTLET',
+  })
+  @IsOptional()
+  @IsEnum(SiteAppliesValues)
+  siteType?: SiteApplies;
 }

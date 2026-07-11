@@ -4,20 +4,21 @@ import { Collapsible } from '@vritti/quantum-ui/Collapsible';
 import { CompactSwitch } from '@vritti/quantum-ui/Switch';
 import { Tooltip } from '@vritti/quantum-ui/Tooltip';
 import type {
-  BuMatrixApp,
-  BuMatrixCell,
-  BuMatrixFeature,
   FeatureUnlocks,
   PlatformBucket,
+  SiteMatrixApp,
+  SiteMatrixCell,
+  SiteMatrixFeature,
 } from '@vritti/quantum-ui/types/catalog-resolver';
 import { Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
-import { useState } from 'react';
-import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/bu-matrix';
+import { useMemo, useState } from 'react';
+import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/site-matrix';
+import { inPlanCodes, lockedOnPlatform, lockTooltip, platformUpsell } from './matrix-utils';
 import { isCheckedIn, isMemberIn, normalizeSelectionCell, toggleMemberIn, togglePermIn } from './selection';
 
 interface SnapshotMatrixProps {
-  apps: BuMatrixApp[];
+  apps: SiteMatrixApp[];
   name?: string;
   value?: FeatureUnlocks;
   onChange?: (next: FeatureUnlocks) => void;
@@ -32,37 +33,6 @@ interface MatrixHandlers {
   onToggleMember: (featureCode: string, platform: PlatformBucket, inPlanCodes: string[]) => void;
 }
 
-// The in-plan permission codes of a feature on a platform — what the feature switch grants/clears
-function inPlanCodes(feature: BuMatrixFeature, platform: PlatformBucket): string[] {
-  return feature.permissions.filter((p) => p[platform]?.inPlan).map((p) => p.code);
-}
-
-// True when the feature ships on this platform but the plan unlocks nothing there (the switch becomes a lock)
-function lockedOnPlatform(feature: BuMatrixFeature, platform: PlatformBucket): boolean {
-  return feature.platforms.includes(platform) && inPlanCodes(feature, platform).length === 0;
-}
-
-// Tooltip body for a lock chip — lists the plans that unlock it (or a fallback when none do)
-function lockTooltip(plans: string[]): React.ReactNode {
-  if (plans.length === 0) return 'Not included in your plan';
-  return (
-    <span>
-      Available in <span className="font-semibold">{plans.join(', ')}</span>
-    </span>
-  );
-}
-
-// Plan names that would unlock this feature on a given platform (union across its locked cells) — the upsell
-function platformUpsell(feature: BuMatrixFeature, platform: PlatformBucket): string[] {
-  const names = new Set<string>();
-  for (const perm of feature.permissions) {
-    const cell = perm[platform];
-    if (cell && !cell.inPlan) for (const n of cell.availableIn) names.add(n);
-  }
-  for (const n of feature.availableIn) names.add(n);
-  return [...names];
-}
-
 // One (permission, platform) cell — blank when the whole platform is plan-locked, else a lock/upsell or checkbox per state.
 function Cell({
   cell,
@@ -74,7 +44,7 @@ function Cell({
   readOnly,
   allowLockedGrants,
 }: {
-  cell: BuMatrixCell | null;
+  cell: SiteMatrixCell | null;
   platformLocked: boolean;
   member: boolean;
   checked: boolean;
@@ -130,7 +100,7 @@ function FeatureBlock({
   readOnly,
   allowLockedGrants,
 }: {
-  feature: BuMatrixFeature;
+  feature: SiteMatrixFeature;
   isMember: MatrixHandlers['isMember'];
   isChecked: MatrixHandlers['isChecked'];
   onToggle: MatrixHandlers['onToggle'];
@@ -250,7 +220,7 @@ function AppCard({
   readOnly,
   allowLockedGrants,
 }: {
-  app: BuMatrixApp;
+  app: SiteMatrixApp;
   isMember: MatrixHandlers['isMember'];
   isChecked: MatrixHandlers['isChecked'];
   onToggle: MatrixHandlers['onToggle'];
@@ -325,8 +295,11 @@ export const SnapshotMatrix: React.FC<SnapshotMatrixProps> = ({
   allowLockedGrants,
 }) => {
   // Feature lookup so a toggle can re-run its cell through the dependency filter (deps live on the feature)
-  const featureByCode = new Map<string, BuMatrixFeature>();
-  for (const app of apps) for (const feature of app.features) featureByCode.set(feature.code, feature);
+  const featureByCode = useMemo(() => {
+    const map = new Map<string, SiteMatrixFeature>();
+    for (const app of apps) for (const feature of app.features) map.set(feature.code, feature);
+    return map;
+  }, [apps]);
 
   const handlers: MatrixHandlers = {
     isMember: (code, platform) => isMemberIn(value, code, platform),

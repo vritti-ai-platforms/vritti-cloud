@@ -1,5 +1,6 @@
 import { axios } from '@vritti/quantum-ui/axios';
 import type { SuccessResponse } from '@vritti/quantum-ui/types/api-response';
+import type { ScopeType } from '@/schemas/admin/features';
 
 export type Platform = 'WEB' | 'MOBILE';
 export const PLATFORM_ORDER: Platform[] = ['WEB', 'MOBILE'];
@@ -16,6 +17,7 @@ export interface PlanMatrixFeature {
   id: string;
   code: string;
   name: string;
+  scope: ScopeType;
   lucideIcon: string | null;
   permissions: PlanPermissionOption[];
   platforms: Platform[];

@@ -1,0 +1,1 @@
+ALTER TYPE "cloud"."TaxRegime" ADD VALUE 'SALES_TAX' BEFORE 'NONE';

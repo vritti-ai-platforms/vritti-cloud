@@ -25,6 +25,7 @@ import { type ExportFormat, getExportExt, getExportMimeType } from '@vritti/api-
 import type { FastifyReply } from 'fastify';
 import { SessionTypeValues } from '@/db/schema';
 import {
+  ApiChangeFeaturesScope,
   ApiCreateFeature,
   ApiDeleteFeature,
   ApiExportFeatures,
@@ -38,6 +39,7 @@ import {
 } from '../docs/feature.docs';
 import { FeatureDto } from '../dto/entity/feature.dto';
 import { FeatureMicrofrontendLinksDto } from '../dto/entity/feature-microfrontend-links.dto';
+import { ChangeFeaturesScopeDto } from '../dto/request/change-features-scope.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { SetFeatureMicrofrontendDto } from '../dto/request/set-feature-microfrontend.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
@@ -110,6 +112,14 @@ export class FeatureController {
   findById(@Param('id') id: string): Promise<FeatureDto> {
     this.logger.log(`GET /admin-api/features/${id}`);
     return this.featureService.findById(id);
+  }
+
+  // Bulk-updates scope for the selected features
+  @Patch('scope')
+  @ApiChangeFeaturesScope()
+  changeScope(@Param('versionId') versionId: string, @Body() dto: ChangeFeaturesScopeDto): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /admin-api/versions/${versionId}/features/scope`);
+    return this.featureService.changeScope(versionId, dto);
   }
 
   // Updates a feature by ID

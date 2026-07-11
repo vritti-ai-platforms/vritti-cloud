@@ -13,12 +13,18 @@ import { OrganizationUsersController } from './controllers/organization-users.co
 // Organization Apps submodule
 import { OrganizationAppsController } from './organization-apps/controllers/organization-apps.controller';
 import { OrganizationAppsService } from './organization-apps/services/organization-apps.service';
-// Organization Business Units submodule
-import { OrganizationBusinessUnitsController } from './organization-business-units/controllers/organization-business-units.controller';
-import { OrganizationBusinessUnitsService } from './organization-business-units/services/organization-business-units.service';
+// Organization Locks submodule
+import { OrganizationLocksController } from './organization-locks/controllers/organization-locks.controller';
+import { OrganizationLocksService } from './organization-locks/services/organization-locks.service';
 // Organization Roles submodule
 import { OrganizationRolesController } from './organization-roles/controllers/organization-roles.controller';
 import { OrganizationRolesService } from './organization-roles/services/organization-roles.service';
+// Organization Sites submodule
+import { OrganizationSitesController } from './organization-sites/controllers/organization-sites.controller';
+import { OrganizationSitesService } from './organization-sites/services/organization-sites.service';
+// Organization Structure submodule
+import { OrganizationStructureController } from './organization-structure/controllers/organization-structure.controller';
+import { OrganizationStructureService } from './organization-structure/services/organization-structure.service';
 import { OrganizationService } from './services/organization.service';
 import { OrganizationUsersService } from './services/organization-users.service';
 
@@ -37,8 +43,10 @@ import { OrganizationUsersService } from './services/organization-users.service'
     OrganizationController,
     OrganizationUsersController,
     OrganizationAppsController,
+    OrganizationLocksController,
     OrganizationRolesController,
-    OrganizationBusinessUnitsController,
+    OrganizationSitesController,
+    OrganizationStructureController,
   ],
   providers: [
     // Root
@@ -46,10 +54,14 @@ import { OrganizationUsersService } from './services/organization-users.service'
     OrganizationUsersService,
     // Organization Apps
     OrganizationAppsService,
+    // Organization Locks
+    OrganizationLocksService,
     // Organization Roles
     OrganizationRolesService,
-    // Organization Business Units
-    OrganizationBusinessUnitsService,
+    // Organization Sites
+    OrganizationSitesService,
+    // Organization Structure
+    OrganizationStructureService,
   ],
   exports: [OrganizationService],
 })

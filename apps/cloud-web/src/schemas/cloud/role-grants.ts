@@ -1,5 +1,5 @@
 import type { FeatureUnlocks, PlatformBucket, RevokedGrants } from '@vritti/quantum-ui/types/catalog-resolver';
-import { MATRIX_PLATFORMS } from '@/schemas/cloud/bu-matrix';
+import { MATRIX_PLATFORMS } from '@/schemas/cloud/site-matrix';
 
 // Composes a based role's effective grants: base ∪ additions − revoked (mirrors the server's composeRoleGrants).
 export function composeGrants(

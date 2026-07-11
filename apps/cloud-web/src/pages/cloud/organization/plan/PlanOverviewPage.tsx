@@ -2,13 +2,13 @@ import { usePermissions } from '@hooks/cloud/roles/usePermissions';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import type { BuMatrixCell, BuMatrixFeature, PlatformBucket } from '@vritti/quantum-ui/types/catalog-resolver';
+import type { PlatformBucket, SiteMatrixCell, SiteMatrixFeature } from '@vritti/quantum-ui/types/catalog-resolver';
 import { Check, Layers, Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { MatrixCard, type MatrixColumn, MatrixRow, PermissionMatrixSkeleton } from '@/components/permission-matrix';
-import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/bu-matrix';
+import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/site-matrix';
 
 // Read-only view of what the org's plan includes, down to each permission — locked items show their upgrade path.
 export const PlanOverviewPage = () => {
@@ -74,7 +74,7 @@ export const PlanOverviewPage = () => {
 };
 
 // A per-platform status glyph: included = check, otherwise a lock with the upsell plans in its tooltip
-function StatusCell({ cell }: { cell: BuMatrixCell | null }) {
+function StatusCell({ cell }: { cell: SiteMatrixCell | null }) {
   if (!cell) return null;
   if (cell.inPlan) return <Check className="size-4 text-success" />;
   return (
@@ -84,7 +84,7 @@ function StatusCell({ cell }: { cell: BuMatrixCell | null }) {
   );
 }
 
-function FeatureRows({ feature, columns }: { feature: BuMatrixFeature; columns: MatrixColumn[] }) {
+function FeatureRows({ feature, columns }: { feature: SiteMatrixFeature; columns: MatrixColumn[] }) {
   const onPlatform = (key: string) => feature.platforms.includes(key as PlatformBucket);
   const includedOn = (key: string) => feature.permissions.some((p) => p[key as PlatformBucket]?.inPlan);
 

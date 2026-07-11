@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { Feature } from '@/db/schema';
+import { type Feature, type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema';
 
 export class FeatureDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -16,6 +16,17 @@ export class FeatureDto {
 
   @ApiPropertyOptional({ example: 'Allows creating a new dine-in order', nullable: true })
   description: string | null;
+
+  @ApiProperty({ enum: ScopeTypeValues, example: 'SITE', description: 'Entity scope the feature operates at' })
+  scope: ScopeType;
+
+  @ApiProperty({
+    enum: SiteAppliesValues,
+    isArray: true,
+    example: ['OUTLET'],
+    description: 'Site types the feature applies at',
+  })
+  applicableSiteTypes: SiteApplies[];
 
   @ApiProperty({ example: 'clipboard-list' })
   lucideIcon: string;
@@ -64,6 +75,8 @@ export class FeatureDto {
     dto.code = feature.code;
     dto.name = feature.name;
     dto.description = feature.description;
+    dto.scope = feature.scope;
+    dto.applicableSiteTypes = feature.applicableSiteTypes;
     dto.lucideIcon = feature.lucideIcon;
     dto.sfSymbol = feature.sfSymbol;
     dto.materialSymbol = feature.materialSymbol;

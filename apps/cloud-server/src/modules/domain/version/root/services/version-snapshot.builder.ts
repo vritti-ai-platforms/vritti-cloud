@@ -1,4 +1,5 @@
 import {
+  type BusinessVocabulary,
   type FeatureUnlocks,
   type PlatformBucket,
   type PlatformCodes,
@@ -38,7 +39,7 @@ export interface SnapshotData {
   plans: Plan[];
   planFeatures: PlanFeature[];
   planFeaturePermissions: PlanFeaturePermission[];
-  businesses: Array<{ id: string; code: string; name: string }>;
+  businesses: Array<{ id: string; code: string; name: string; vocabulary: BusinessVocabulary | null }>;
   permissionBusinesses: Array<{ featurePermissionId: string; businessId: string }>;
   permissionDependencies: Array<{ permissionId: string; dependsOnId: string }>;
 }
@@ -80,6 +81,7 @@ function buildIndex(data: SnapshotData) {
     permissionById,
     businessCodeById,
     businessNameByCode: _.mapValues(_.keyBy(data.businesses, 'code'), (b) => b.name),
+    businessVocabularyByCode: _.mapValues(_.keyBy(data.businesses, 'code'), (b) => b.vocabulary),
     businessCodesByPermissionId,
     dependsOnCodesByPermissionId,
     permsByFeatureId: _.groupBy(data.permissions, 'featureId'),
@@ -145,6 +147,8 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
       lucideIcon: f.lucideIcon,
       sfSymbol: f.sfSymbol,
       materialSymbol: f.materialSymbol,
+      scope: f.scope,
+      applicableSiteTypes: f.applicableSiteTypes,
       permissions: buildPermissions(f.id, index),
       microfrontends: buildMicrofrontends(f, index),
     };
@@ -210,7 +214,14 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
   const result: Record<string, SnapshotBusiness> = {};
   const ensure = (code: string): SnapshotBusiness => {
     if (!result[code]) {
-      result[code] = { name: index.businessNameByCode[code], apps: [], roleTemplates: {}, plans: {} };
+      const vocabulary = index.businessVocabularyByCode[code];
+      result[code] = {
+        name: index.businessNameByCode[code],
+        ...(vocabulary ? { vocabulary } : {}),
+        apps: [],
+        roleTemplates: {},
+        plans: {},
+      };
     }
     return result[code];
   };
@@ -235,6 +246,8 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
     ensure(code).roleTemplates[r.code] = {
       name: r.name,
       code: r.code,
+      scope: r.scope,
+      siteType: r.siteType,
       features: buildRoleFeatures(r.id, index),
     };
   }
@@ -246,7 +259,7 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
       code: p.code,
       name: p.name,
       isCustom: p.isCustom,
-      maxBusinessUnits: p.maxBusinessUnits ?? null,
+      maxSites: p.maxSites ?? null,
       unlockedPermissions: buildPlanUnlockedPermissions(p.id, index),
     };
   }

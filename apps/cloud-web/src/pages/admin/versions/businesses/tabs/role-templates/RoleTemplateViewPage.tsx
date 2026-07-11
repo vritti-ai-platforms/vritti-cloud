@@ -1,13 +1,15 @@
 import { useDeleteRoleTemplate, useRoleTemplate } from '@hooks/admin/versions/businesses/role-templates';
+import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Factory, Shield } from 'lucide-react';
+import { Building2, Factory, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useVersionContext } from '@/context/VersionScopeContext';
+import { SCOPE_TYPE_LABELS, SITE_TYPE_LABELS } from '@/schemas/admin/features';
 import { EditRoleTemplateForm } from './forms/EditRoleTemplateForm';
 import { RoleTemplatePermissionForm } from './forms/RoleTemplatePermissionForm';
 
@@ -51,7 +53,7 @@ export const RoleTemplateViewPage = () => {
       />
 
       {/* Role info */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-3 gap-4">
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
@@ -60,6 +62,24 @@ export const RoleTemplateViewPage = () => {
             <div>
               <p className="text-sm text-muted-foreground">Permissions</p>
               <p className="text-2xl font-semibold">{role.permissionCount}</p>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="flex items-center gap-4 p-6">
+            <div className="flex items-center justify-center size-12 rounded-lg bg-primary/10">
+              <Building2 className="size-6 text-primary" />
+            </div>
+            <div>
+              <p className="text-sm text-muted-foreground">Scope</p>
+              <div className="flex items-center gap-2">
+                <p className="text-lg font-semibold">{SCOPE_TYPE_LABELS[role.scope]}</p>
+                {role.scope === 'SITE' && role.siteType && (
+                  <Badge variant="secondary" className="text-xs font-medium">
+                    {SITE_TYPE_LABELS[role.siteType]}
+                  </Badge>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -77,7 +97,7 @@ export const RoleTemplateViewPage = () => {
       </div>
 
       {/* Permissions */}
-      <RoleTemplatePermissionForm />
+      <RoleTemplatePermissionForm scope={role.scope} siteType={role.siteType} />
 
       <DangerZone
         title="Delete this role template"

@@ -3,6 +3,7 @@ import { ApiBody, ApiOperation, ApiParam, ApiProduces, ApiResponse } from '@nest
 import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { FeatureDto } from '../dto/entity/feature.dto';
 import { FeatureMicrofrontendLinksDto } from '../dto/entity/feature-microfrontend-links.dto';
+import { ChangeFeaturesScopeDto } from '../dto/request/change-features-scope.dto';
 import { CreateFeatureDto } from '../dto/request/create-feature.dto';
 import { SetFeatureMicrofrontendDto } from '../dto/request/set-feature-microfrontend.dto';
 import { UpdateFeatureDto } from '../dto/request/update-feature.dto';
@@ -96,6 +97,21 @@ export function ApiUpdateFeature() {
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Feature not found.' }),
     ApiResponse({ status: 409, description: 'Feature with this code already exists.' }),
+  );
+}
+
+// Swagger docs for bulk-changing feature scope
+export function ApiChangeFeaturesScope() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Bulk-change feature scope',
+      description: 'Sets the scope on all given features; grants on role templates of a different scope are removed.',
+    }),
+    ApiBody({ type: ChangeFeaturesScopeDto }),
+    ApiResponse({ status: 200, description: 'Scope changed successfully.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'No matching features found.' }),
   );
 }
 
