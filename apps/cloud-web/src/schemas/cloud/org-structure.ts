@@ -69,7 +69,7 @@ export interface StructureSite {
   legalEntityId: string | null;
   registrationId: string | null;
   groupId: string | null;
-  timezone: string | null;
+  timezone: string;
 }
 
 export interface StructureOrganization {

@@ -80,7 +80,7 @@ function StructureGraphInner({
   }, [layout, setNodes, setEdges, fitView]);
 
   return (
-    <div className={`h-150 w-full rounded-lg border bg-background ${className ?? ''}`}>
+    <div className={`h-full w-full ${className ?? ''}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}

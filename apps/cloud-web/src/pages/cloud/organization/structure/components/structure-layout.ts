@@ -15,7 +15,7 @@ import type { SiteGroupNodeData } from './SiteGroupNodeCard';
 import type { SiteNodeData } from './SiteNodeCard';
 
 const NODE_WIDTH = 260;
-const NODE_HEIGHT = 112;
+const NODE_HEIGHT = 164;
 const GROUP_WIDTH = 220;
 const GROUP_HEIGHT = 96;
 const GROUP_RANK_GAP = 64;
@@ -263,6 +263,7 @@ export function buildStructureLayout(
         name: site.name,
         code: site.code,
         type: site.type,
+        timezone: site.timezone,
         registrationChip: buildRegistrationChip(site, leById, regById),
         groupName: site.groupId ? (groupById.get(site.groupId)?.name ?? null) : null,
         onOpenDetail: callbacks.onOpenDetail,

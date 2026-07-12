@@ -1,9 +1,9 @@
-import { useDeleteSiteGroup, useOrgStructure } from '@hooks/cloud/org-structure';
+import { useDeleteSiteGroup, useOrgStructureSuspense } from '@hooks/cloud/org-structure';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
+import { PageContent } from '@vritti/quantum-ui/PageContent';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Plus, Store } from 'lucide-react';
 import { useCallback, useRef, useState } from 'react';
@@ -22,10 +22,11 @@ export const OrgStructurePage = () => {
   const navigate = useNavigate();
   const confirm = useConfirm();
 
-  const { data: structure, isLoading } = useOrgStructure(orgId);
-  const legalEntities = structure?.legalEntities ?? [];
-  const taxRegistrations = structure?.taxRegistrations ?? [];
-  const siteGroups = structure?.siteGroups ?? [];
+  const { data: structure } = useOrgStructureSuspense(orgId);
+  const legalEntities = structure.legalEntities;
+  const taxRegistrations = structure.taxRegistrations;
+  const siteGroups = structure.siteGroups;
+  const hasLegalEntities = legalEntities.length > 0;
 
   const createSiteDialog = useDialog();
 
@@ -93,7 +94,9 @@ export const OrgStructurePage = () => {
         description="Legal entities own the money; sites transact; site groups manage across companies. Every site belongs to exactly one legal entity."
         actions={
           <div className="flex items-center gap-2">
-            <AddLegalEntityDialog orgId={orgId} legalEntities={legalEntities} />
+            {hasLegalEntities && (
+              <AddLegalEntityDialog orgId={orgId} legalEntities={legalEntities} variant="outline" />
+            )}
             <Button
               variant="outline"
               startAdornment={<Plus className="size-4" />}
@@ -105,21 +108,23 @@ export const OrgStructurePage = () => {
             >
               Add Site Group
             </Button>
-            <Button
-              startAdornment={<Plus className="size-4" />}
-              size="sm"
-              disabled={legalEntities.length === 0}
-              onClick={createSiteDialog.open}
-            >
-              Add Site
-            </Button>
+            {hasLegalEntities ? (
+              <Button
+                variant="default"
+                startAdornment={<Plus className="size-4" />}
+                size="sm"
+                onClick={createSiteDialog.open}
+              >
+                Add Site
+              </Button>
+            ) : (
+              <AddLegalEntityDialog orgId={orgId} legalEntities={legalEntities} variant="default" />
+            )}
           </div>
         }
       />
 
-      {isLoading && <Skeleton className="h-150 w-full rounded-lg" />}
-
-      {!isLoading && structure && (
+      <PageContent>
         <StructureGraph
           structure={structure}
           onAddRegistration={handleAddRegistration}
@@ -128,9 +133,9 @@ export const OrgStructurePage = () => {
           onEditGroup={handleEditGroup}
           onDeleteGroup={handleDeleteGroup}
         />
-      )}
+      </PageContent>
 
-      {!isLoading && legalEntities.length === 0 && (
+      {legalEntities.length === 0 && (
         <p className="text-center text-xs text-muted-foreground">
           Add a legal entity to start building your organization's structure.
         </p>

@@ -101,14 +101,15 @@ const LegalEntityForm = ({ orgId, legalEntities, onClose }: LegalEntityFormProps
 interface AddLegalEntityDialogProps {
   orgId: string;
   legalEntities: LegalEntity[];
+  variant?: 'default' | 'outline';
 }
 
-export const AddLegalEntityDialog = ({ orgId, legalEntities }: AddLegalEntityDialogProps) => {
+export const AddLegalEntityDialog = ({ orgId, legalEntities, variant = 'outline' }: AddLegalEntityDialogProps) => {
   const dialog = useDialog();
 
   return (
     <>
-      <Button variant="outline" size="sm" startAdornment={<Plus className="size-4" />} onClick={dialog.open}>
+      <Button variant={variant} size="sm" startAdornment={<Plus className="size-4" />} onClick={dialog.open}>
         Add Legal Entity
       </Button>
       <Dialog

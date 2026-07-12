@@ -46,6 +46,7 @@ import { PlanOverviewPage } from './pages/cloud/organization/plan/PlanOverviewPa
 import { RolesPage } from './pages/cloud/organization/roles/RolesPage';
 import { RoleViewPage } from './pages/cloud/organization/roles/RoleViewPage';
 import { OrgStructurePage } from './pages/cloud/organization/structure/OrgStructurePage';
+import { OrgStructurePageSkeleton } from './pages/cloud/organization/structure/OrgStructurePageSkeleton';
 import { SiteViewPageSkeleton } from './pages/cloud/organization/structure/SiteViewPageSkeleton';
 import { StructureDetailPage } from './pages/cloud/organization/structure/StructureDetailPage';
 import { UsersPage } from './pages/cloud/organization/UsersPage';
@@ -292,7 +293,11 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'structure',
-        element: <OrgStructurePage />,
+        element: (
+          <Suspense fallback={<OrgStructurePageSkeleton />}>
+            <OrgStructurePage />
+          </Suspense>
+        ),
       },
       {
         path: 'structure/:structureSlug',
