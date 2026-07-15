@@ -73,4 +73,5 @@ See `.claude/rules/` for detailed pattern documentation:
 - `apps/cloud-server/.claude/rules/backend-service-responses.md` — create() returns entity DTO, update/delete returns SuccessResponseDto
 - `apps/cloud-web/.claude/rules/frontend-service-responses.md` — No MutationResponse; create returns entity, update/delete returns SuccessResponse
 - `backend-module-structure.md` — Domain module architecture, API layer separation
+- `code-conventions.md` — Canonical entity `code` format (IsCode / codeCheck / zodCodeField)
 - `select-filter-conventions.md` — Select/Filter component conventions for quantum-ui
