@@ -1,5 +1,15 @@
 import { sql } from '@vritti/api-sdk/drizzle-orm';
-import { boolean, check, integer, text, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import {
+  boolean,
+  check,
+  codeCheck,
+  integer,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+  varchar,
+} from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { scopeTypeEnum, siteAppliesEnum } from './enums';
 import { mobileMicrofrontends } from './mobile-microfrontend';
@@ -36,9 +46,9 @@ export const features = cloudSchema.table(
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },
   (table) => [
-    uniqueIndex('feature_version_code_idx').on(table.versionId, table.code),
+    uniqueIndex('feature_version_code_scope_idx').on(table.versionId, table.code, table.scope),
     // Codes are stored lowercase (slug-style) — enforced at the DB so no path can insert a mixed-case code
-    check('feature_code_lowercase_chk', sql`${table.code} = lower(${table.code})`),
+    codeCheck('feature_code_chk', table.code),
     // The web link is all-three-set or all-three-null (an MF link always carries its module + route).
     check(
       'feature_web_mf_all_or_nothing_chk',

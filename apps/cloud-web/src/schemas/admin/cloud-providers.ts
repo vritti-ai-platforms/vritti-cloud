@@ -1,4 +1,4 @@
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 
 export interface CloudProvider {
   id: string;
@@ -15,7 +15,7 @@ export interface CloudProvider {
 
 export const cloudProviderSchema = z.object({
   name: z.string().min(1, 'Provider name is required'),
-  code: z.string().min(1, 'Provider code is required').max(100, 'Code must be 100 characters or less'),
+  code: zodCodeField({ max: 100 }),
   logoUrl: z.url('Must be a valid URL').max(500),
   logoDarkUrl: z.url('Must be a valid URL').max(500),
   sameAsLight: z.boolean().optional(), // UI-only field, not sent to the API

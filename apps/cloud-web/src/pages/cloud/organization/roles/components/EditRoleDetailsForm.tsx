@@ -6,7 +6,7 @@ import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
-import { type CreateRoleFormData, createRoleSchema, type Role } from '@/schemas/cloud/roles';
+import { type Role, type RoleDetailsFormData, roleDetailsSchema } from '@/schemas/cloud/roles';
 
 interface EditRoleDetailsFormProps {
   orgId: string;
@@ -17,12 +17,11 @@ interface EditRoleDetailsFormProps {
 
 // The role's "settings" — name/description. Permissions are edited separately on the view page.
 export const EditRoleDetailsForm: React.FC<EditRoleDetailsFormProps> = ({ orgId, role, onSuccess, onCancel }) => {
-  const form = useForm<CreateRoleFormData>({
-    resolver: zodResolver(createRoleSchema),
+  const form = useForm<RoleDetailsFormData>({
+    resolver: zodResolver(roleDetailsSchema),
     defaultValues: {
       name: role.name,
       description: role.description ?? '',
-      features: role.features,
     },
   });
   const updateMutation = useUpdateRole({ onSuccess });
@@ -31,7 +30,7 @@ export const EditRoleDetailsForm: React.FC<EditRoleDetailsFormProps> = ({ orgId,
     <Form
       form={form}
       mutation={updateMutation}
-      transformSubmit={(data: CreateRoleFormData) => ({
+      transformSubmit={(data: RoleDetailsFormData) => ({
         orgId,
         roleId: role.id,
         data: { name: data.name, description: data.description },

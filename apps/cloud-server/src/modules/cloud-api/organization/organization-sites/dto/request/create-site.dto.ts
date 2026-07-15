@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Min } from 'class-validator';
 import { SiteAppliesValues } from '@/db/schema/enums';
 
 export class CreateSiteDto {
@@ -68,4 +68,10 @@ export class CreateSiteDto {
   @IsOptional()
   @IsString()
   phone?: string;
+
+  @ApiPropertyOptional({ description: 'Sort order in the org-structure graph (lower sorts first)', example: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  sortOrder?: number;
 }

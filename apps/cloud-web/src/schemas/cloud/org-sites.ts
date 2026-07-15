@@ -1,5 +1,5 @@
 import type { SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 import { SITE_TYPE_VALUES } from '@/schemas/shared/site-types';
 
 export { SITE_TYPE_LABELS, SITE_TYPE_VALUES } from '@/schemas/shared/site-types';
@@ -12,6 +12,7 @@ export interface Site {
   legalEntityId: string | null;
   registrationId: string | null;
   groupId: string | null;
+  sortOrder: number;
   description: string | null;
   address: string | null;
   city: string | null;
@@ -29,11 +30,7 @@ export interface SitesResponse {
 
 export const createSiteSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less'),
-  code: z
-    .string()
-    .min(1, 'Code is required')
-    .max(100, 'Code must be 100 characters or less')
-    .regex(/^[A-Z0-9_-]+$/, 'Only uppercase letters, numbers, underscores, and hyphens'),
+  code: zodCodeField({ max: 100 }),
   type: z.enum(SITE_TYPE_VALUES, {
     message: 'Please select a type',
   }),

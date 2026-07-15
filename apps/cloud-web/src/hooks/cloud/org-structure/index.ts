@@ -4,6 +4,7 @@ export { useCreateTaxRegistration } from './useCreateTaxRegistration';
 export { useDeleteLegalEntity } from './useDeleteLegalEntity';
 export { useDeleteSiteGroup } from './useDeleteSiteGroup';
 export { useDeleteTaxRegistration } from './useDeleteTaxRegistration';
+export { useOptimisticStructure } from './useOptimisticStructure';
 export { ORG_STRUCTURE_QUERY_KEY, useOrgStructure } from './useOrgStructure';
 export { useOrgStructureSuspense } from './useOrgStructureSuspense';
 export { useUpdateLegalEntity } from './useUpdateLegalEntity';

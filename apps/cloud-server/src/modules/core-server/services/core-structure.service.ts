@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { FeatureLocks } from '@vritti/api-sdk/catalog-resolver';
-import type { SuccessResponseDto } from '@vritti/api-sdk/database';
+import type { SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { LeTaxRegistrationDto } from '@/modules/cloud-api/organization/organization-structure/dto/entity/le-tax-registration.dto';
 import type { LegalEntityDto } from '@/modules/cloud-api/organization/organization-structure/dto/entity/legal-entity.dto';
 import type { SiteGroupDto } from '@/modules/cloud-api/organization/organization-structure/dto/entity/site-group.dto';
@@ -10,6 +10,7 @@ import type { CreateSiteGroupDto } from '@/modules/cloud-api/organization/organi
 import type { UpdateLegalEntityDto } from '@/modules/cloud-api/organization/organization-structure/dto/request/update-legal-entity.dto';
 import type { UpdateSiteGroupDto } from '@/modules/cloud-api/organization/organization-structure/dto/request/update-site-group.dto';
 import type { StructureResponseDto } from '@/modules/cloud-api/organization/organization-structure/dto/response/structure.response.dto';
+import type { OrgStructureSelectQueryDto } from '@/modules/select-api/dto/org-structure-select-query.dto';
 import { CoreHttpService } from './core-http.service';
 
 @Injectable()
@@ -22,6 +23,38 @@ export class CoreStructureService {
   async getStructure(url: string, signingKey: string, orgId: string): Promise<StructureResponseDto> {
     const result = await this.http.get<StructureResponseDto>(url, signingKey, '/structure/internal', { orgId });
     this.logger.log(`Fetched structure from core for org: ${orgId}`);
+    return result;
+  }
+
+  // Fetches legal entity select options from core, forwarding the select query verbatim
+  async selectLegalEntities(
+    url: string,
+    signingKey: string,
+    orgId: string,
+    query: OrgStructureSelectQueryDto,
+  ): Promise<SelectQueryResult> {
+    const { orgId: _localOrgId, ...params } = query;
+    const result = await this.http.get<SelectQueryResult>(url, signingKey, '/legal-entities/internal/select', {
+      orgId,
+      params,
+    });
+    this.logger.log(`Fetched legal entity select options from core for org: ${orgId}`);
+    return result;
+  }
+
+  // Fetches site group select options from core, forwarding the select query verbatim
+  async selectSiteGroups(
+    url: string,
+    signingKey: string,
+    orgId: string,
+    query: OrgStructureSelectQueryDto,
+  ): Promise<SelectQueryResult> {
+    const { orgId: _localOrgId, ...params } = query;
+    const result = await this.http.get<SelectQueryResult>(url, signingKey, '/site-groups/internal/select', {
+      orgId,
+      params,
+    });
+    this.logger.log(`Fetched site group select options from core for org: ${orgId}`);
     return result;
   }
 
@@ -59,6 +92,24 @@ export class CoreStructureService {
       { orgId },
     );
     this.logger.log(`Updated legal entity ${legalEntityId} in core`);
+    return result;
+  }
+
+  // Reorders a batch of sibling legal entities in core
+  async reorderLegalEntities(
+    url: string,
+    signingKey: string,
+    orgId: string,
+    ids: string[],
+  ): Promise<SuccessResponseDto> {
+    const result = await this.http.patch<SuccessResponseDto>(
+      url,
+      signingKey,
+      '/legal-entities/internal/reorder',
+      { orgId, ids },
+      { orgId },
+    );
+    this.logger.log(`Reordered ${ids.length} legal entit${ids.length === 1 ? 'y' : 'ies'} for org ${orgId} in core`);
     return result;
   }
 
@@ -115,7 +166,7 @@ export class CoreStructureService {
     return result;
   }
 
-  // Replaces a legal entity's feature-lock deny-list in core (null ⇒ inherit the full plan)
+  // Replaces a legal entity's feature-lock deny-list in core
   async pushLegalEntityLocks(
     url: string,
     signingKey: string,
@@ -151,7 +202,7 @@ export class CoreStructureService {
     return result;
   }
 
-  // Replaces a site group's feature-lock deny-list in core (null ⇒ inherit the full plan)
+  // Replaces a site group's feature-lock deny-list in core
   async pushSiteGroupLocks(
     url: string,
     signingKey: string,
@@ -204,6 +255,38 @@ export class CoreStructureService {
       { orgId },
     );
     this.logger.log(`Updated site group ${siteGroupId} in core`);
+    return result;
+  }
+
+  // Reorders a batch of sibling site groups in core
+  async reorderSiteGroups(url: string, signingKey: string, orgId: string, ids: string[]): Promise<SuccessResponseDto> {
+    const result = await this.http.patch<SuccessResponseDto>(
+      url,
+      signingKey,
+      '/site-groups/internal/reorder',
+      { orgId, ids },
+      { orgId },
+    );
+    this.logger.log(`Reordered ${ids.length} site group(s) for org ${orgId} in core`);
+    return result;
+  }
+
+  // Reparents a site group under a new parent (null = root) in core
+  async reparentSiteGroup(
+    url: string,
+    signingKey: string,
+    orgId: string,
+    siteGroupId: string,
+    parentId: string | null,
+  ): Promise<SuccessResponseDto> {
+    const result = await this.http.patch<SuccessResponseDto>(
+      url,
+      signingKey,
+      `/site-groups/internal/${siteGroupId}/reparent`,
+      { parentId },
+      { orgId },
+    );
+    this.logger.log(`Reparented site group ${siteGroupId} under ${parentId ?? 'root'} in core`);
     return result;
   }
 

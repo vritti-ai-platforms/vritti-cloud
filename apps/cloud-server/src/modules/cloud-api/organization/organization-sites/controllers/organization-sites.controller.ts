@@ -17,10 +17,12 @@ import {
   ApiGetSitePermissions,
   ApiListSites,
   ApiRemoveSiteRoleAssignment,
+  ApiReorderSites,
   ApiUpdateSite,
   ApiUpdateSitePermissions,
 } from '../docs/organization-sites.docs';
 import { CreateSiteDto } from '../dto/request/create-site.dto';
+import { ReorderSitesDto } from '../dto/request/reorder-sites.dto';
 import { UpdateSiteDto } from '../dto/request/update-site.dto';
 import type { SiteListResponseDto } from '../dto/response/site-list.response.dto';
 import { OrganizationSitesService } from '../services/organization-sites.service';
@@ -58,6 +60,14 @@ export class OrganizationSitesController {
     return this.orgSitesService.getSite(orgId, siteId);
   }
 
+  // Reorders sibling sites within a legal entity (proxied to core)
+  @Patch('reorder')
+  @ApiReorderSites()
+  async reorderSites(@Param('orgId') orgId: string, @Body() dto: ReorderSitesDto): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /organizations/${orgId}/sites/reorder`);
+    return this.orgSitesService.reorderSites(orgId, dto);
+  }
+
   // Updates a site in core
   @Patch(':siteId')
   @ApiUpdateSite()
@@ -70,7 +80,7 @@ export class OrganizationSitesController {
     return this.orgSitesService.updateSite(orgId, siteId, data);
   }
 
-  // Returns the site permission matrix (plan ceiling minus the site's lock deny-list) for the lock editor
+  // Returns the site permission matrix for the lock editor
   @Get(':siteId/permissions')
   @ApiGetSitePermissions()
   async getSitePermissions(

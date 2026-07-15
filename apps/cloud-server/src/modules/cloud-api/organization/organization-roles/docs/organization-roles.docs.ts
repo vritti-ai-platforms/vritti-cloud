@@ -1,34 +1,22 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
-import { RoleTemplateListResponseDto } from '../dto/response/role-template.response.dto';
-
-export function ApiGetOrgRoleTemplates() {
-  return applyDecorators(
-    ApiOperation({
-      summary: 'Get role templates',
-      description: 'Returns role templates from the app version snapshot for the organization deployment.',
-    }),
-    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
-    ApiResponse({
-      status: 200,
-      description: 'Role templates retrieved successfully.',
-      type: RoleTemplateListResponseDto,
-    }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Organization, deployment, or snapshot not found.' }),
-  );
-}
+import { RoleScopeSectionDto } from '../dto/response/role-sections.response.dto';
 
 export function ApiListOrgRoles() {
   return applyDecorators(
     ApiOperation({
       summary: 'List organization roles',
-      description: 'Proxies to core to return all roles for the organization.',
+      description: "Returns the organization's roles as render-ready sections (templates + custom roles per scope).",
     }),
     ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
-    ApiResponse({ status: 200, description: 'Roles retrieved successfully.' }),
+    ApiResponse({
+      status: 200,
+      description: 'Role sections retrieved successfully.',
+      type: RoleScopeSectionDto,
+      isArray: true,
+    }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Organization or deployment not found.' }),
+    ApiResponse({ status: 404, description: 'Organization, deployment, or snapshot not found.' }),
     ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
   );
 }

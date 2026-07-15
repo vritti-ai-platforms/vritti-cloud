@@ -169,7 +169,7 @@ export class FeatureService {
 
   // Creates a new feature; throws ConflictException on duplicate code
   async create(dto: CreateFeatureDto): Promise<CreateResponseDto<FeatureDto>> {
-    const existingCode = await this.featureRepository.findByCode(dto.code);
+    const existingCode = await this.featureRepository.findByVersionCodeScope(dto.versionId, dto.code, dto.scope ?? 'SITE');
     if (existingCode) {
       throw new ConflictException({
         label: 'Code Already Exists',
@@ -247,8 +247,10 @@ export class FeatureService {
     if (!existing) {
       throw new NotFoundException('Feature not found.');
     }
-    if (dto.code) {
-      const existingCode = await this.featureRepository.findByCode(dto.code);
+    if (dto.code || dto.scope) {
+      const targetCode = dto.code ?? existing.code;
+      const targetScope = dto.scope ?? existing.scope;
+      const existingCode = await this.featureRepository.findByVersionCodeScope(existing.versionId, targetCode, targetScope);
       if (existingCode && existingCode.id !== id) {
         throw new ConflictException({
           label: 'Code Already Exists',
@@ -296,7 +298,8 @@ export class FeatureService {
     let updated = 0;
     let skipped = 0;
     for (const row of result.rows) {
-      const existing = await this.featureRepository.findByCode(row.data.code);
+      // Imports create SITE-scoped features, so upsert on the (version, code, SITE) identity
+      const existing = await this.featureRepository.findByVersionCodeScope(versionId, row.data.code, 'SITE');
 
       if (existing) {
         const incomingDesc = row.data.description || null;

@@ -1,4 +1,4 @@
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 
 export interface Plan {
   id: string;
@@ -19,7 +19,7 @@ export interface Plan {
 
 export const createPlanSchema = z.object({
   name: z.string().min(1, 'Plan name is required').max(100, 'Name must be 100 characters or less'),
-  code: z.string().min(1, 'Plan code is required').max(100, 'Code must be 100 characters or less'),
+  code: zodCodeField({ max: 100 }),
   isCustom: z.boolean().optional(),
   // Required for standard plans; for custom plans the business is derived from the attached org.
   businessId: z.string().uuid().optional(),

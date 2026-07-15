@@ -1,5 +1,5 @@
 import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 
 export interface App {
   id: string;
@@ -20,11 +20,7 @@ export interface App {
 export type AppsTableResponse = TableResponse<App>;
 
 export const createAppSchema = z.object({
-  code: z
-    .string()
-    .min(1, 'App code is required')
-    .max(100, 'Code must be 100 characters or less')
-    .regex(/^[a-z][a-z0-9-]*$/, 'Must be lowercase alphanumeric with hyphens'),
+  code: zodCodeField({ max: 100 }),
   name: z.string().min(1, 'App name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
   icon: z.string().min(1, 'Icon is required').max(255),
@@ -33,12 +29,7 @@ export const createAppSchema = z.object({
 });
 
 export const updateAppSchema = z.object({
-  code: z
-    .string()
-    .min(1, 'App code is required')
-    .max(100)
-    .regex(/^[a-z][a-z0-9-]*$/, 'Must be lowercase alphanumeric with hyphens')
-    .optional(),
+  code: zodCodeField({ max: 100 }).optional(),
   name: z.string().min(1, 'App name is required').max(255).optional(),
   description: z.string().optional(),
   icon: z.string().min(1, 'Icon is required').max(255).optional(),

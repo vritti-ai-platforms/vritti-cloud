@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsCode } from '@vritti/api-sdk/decorators';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
+import { IsEnum, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 import { type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema';
 
 export class CreateRoleTemplateDto {
@@ -18,7 +19,7 @@ export class CreateRoleTemplateDto {
   })
   @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @IsString()
-  @Matches(/^[a-z][a-z0-9-]*$/, { message: 'code must be a single lowercase word (hyphens allowed)' })
+  @IsCode()
   @MaxLength(255)
   code: string;
 

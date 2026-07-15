@@ -44,11 +44,13 @@ import { InvitationsPage } from './pages/cloud/invitations/InvitationsPage';
 import { PlaceholderPage } from './pages/cloud/organization/PlaceholderPage';
 import { PlanOverviewPage } from './pages/cloud/organization/plan/PlanOverviewPage';
 import { RolesPage } from './pages/cloud/organization/roles/RolesPage';
+import { RolesPageSkeleton } from './pages/cloud/organization/roles/RolesPageSkeleton';
 import { RoleViewPage } from './pages/cloud/organization/roles/RoleViewPage';
+import { RoleViewPageSkeleton } from './pages/cloud/organization/roles/RoleViewPageSkeleton';
 import { OrgStructurePage } from './pages/cloud/organization/structure/OrgStructurePage';
 import { OrgStructurePageSkeleton } from './pages/cloud/organization/structure/OrgStructurePageSkeleton';
-import { SiteViewPageSkeleton } from './pages/cloud/organization/structure/SiteViewPageSkeleton';
 import { StructureDetailPage } from './pages/cloud/organization/structure/StructureDetailPage';
+import { SiteViewPageSkeleton } from './pages/cloud/organization/structure/site/SiteViewPageSkeleton';
 import { UsersPage } from './pages/cloud/organization/UsersPage';
 import { CreateOrganizationPage } from './pages/cloud/organizations/CreateOrganizationPage';
 import { OrganizationsPage } from './pages/cloud/organizations/OrganizationsPage';
@@ -285,11 +287,19 @@ export const cloudRoutes: RouteObject[] = [
       },
       {
         path: 'roles',
-        element: <RolesPage />,
+        element: (
+          <Suspense fallback={<RolesPageSkeleton />}>
+            <RolesPage />
+          </Suspense>
+        ),
       },
       {
         path: 'roles/:roleSlug',
-        element: <RoleViewPage />,
+        element: (
+          <Suspense fallback={<RoleViewPageSkeleton />}>
+            <RoleViewPage />
+          </Suspense>
+        ),
       },
       {
         path: 'structure',

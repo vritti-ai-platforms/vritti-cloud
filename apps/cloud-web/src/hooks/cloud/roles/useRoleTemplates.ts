@@ -1,18 +1,21 @@
 import { type UseQueryOptions, useQuery } from '@tanstack/react-query';
 import type { AxiosError } from 'axios';
-import type { RoleTemplate } from '@/schemas/cloud/roles';
-import { getRoleTemplates } from '../../../services/cloud/roles.service';
+import { type RoleScopeSection, type RoleTemplate, sectionTemplates } from '@/schemas/cloud/roles';
+import { getRoles } from '../../../services/cloud/roles.service';
+import { ROLES_QUERY_KEY } from './useRoles';
 
-const ROLE_TEMPLATES_QUERY_KEY = (orgId: string) => ['organizations', orgId, 'role-templates'] as const;
+type UseRoleTemplatesOptions = Omit<
+  UseQueryOptions<RoleScopeSection[], AxiosError, RoleTemplate[]>,
+  'queryKey' | 'queryFn' | 'select'
+>;
 
-type UseRoleTemplatesOptions = Omit<UseQueryOptions<RoleTemplate[], AxiosError>, 'queryKey' | 'queryFn'>;
-
-// Fetches available role templates for the organization
+// Selects the flat template list from the shared role-sections query — no extra request
 export function useRoleTemplates(orgId: string, options?: UseRoleTemplatesOptions) {
-  return useQuery<RoleTemplate[], AxiosError>({
-    queryKey: ROLE_TEMPLATES_QUERY_KEY(orgId),
-    queryFn: () => getRoleTemplates(orgId),
+  return useQuery<RoleScopeSection[], AxiosError, RoleTemplate[]>({
+    queryKey: ROLES_QUERY_KEY(orgId),
+    queryFn: () => getRoles(orgId),
     enabled: !!orgId,
+    select: sectionTemplates,
     ...options,
   });
 }

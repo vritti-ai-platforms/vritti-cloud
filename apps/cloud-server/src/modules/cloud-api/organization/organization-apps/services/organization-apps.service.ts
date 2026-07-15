@@ -1,4 +1,4 @@
-import { buildSiteMatrix } from '@domain/catalog/site-matrix.builder';
+import { buildPlanMatrix } from '@domain/catalog/site-matrix.builder';
 import { VersionRepository } from '@domain/version/root/repositories/version.repository';
 import type { VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
@@ -23,8 +23,8 @@ export class OrganizationAppsService {
     if (!snapshot) {
       throw new NotFoundException('No snapshot available for this deployment.');
     }
-    // No site overlay here — the role picker/plan overview aren't lock editors, so locks resolve to {}
-    const matrix = buildSiteMatrix(snapshot, org.businessCode, org.planCode, undefined);
+    // All scopes, no site overlay — the role picker/plan overview aren't lock editors, so locks resolve to {}
+    const matrix = buildPlanMatrix(snapshot, org.businessCode, org.planCode, undefined);
     this.logger.log(`Resolved permission catalog (${matrix.apps.length} apps) for org ${orgId}`);
     return matrix;
   }

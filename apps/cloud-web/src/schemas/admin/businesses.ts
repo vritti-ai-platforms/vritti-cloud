@@ -1,6 +1,6 @@
 import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
 import type { BusinessVocabulary, VocabularyEntry } from '@vritti/quantum-ui/types/catalog-resolver';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 
 export type { BusinessVocabulary, VocabularyEntry } from '@vritti/quantum-ui/types/catalog-resolver';
 
@@ -71,7 +71,7 @@ export function cleanVocabulary(vocabulary: VocabularyFormData): BusinessVocabul
 
 export const createBusinessSchema = z.object({
   name: z.string().min(1, 'Business name is required'),
-  code: z.string().min(1, 'Business code is required').max(100, 'Code must be 100 characters or less'),
+  code: zodCodeField({ max: 100 }),
   description: z.string().optional(),
 });
 
@@ -79,7 +79,7 @@ export type CreateBusinessData = z.infer<typeof createBusinessSchema>;
 
 export const updateBusinessSchema = z.object({
   name: z.string().min(1, 'Business name is required'),
-  code: z.string().min(1, 'Business code is required').max(100, 'Code must be 100 characters or less'),
+  code: zodCodeField({ max: 100 }),
   description: z.string().optional(),
   vocabulary: vocabularySchema.optional(),
 });

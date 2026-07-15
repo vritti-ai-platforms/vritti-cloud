@@ -12,7 +12,7 @@ import type {
   UpdateSiteGroupData,
 } from '@/schemas/cloud/org-structure';
 
-// Fetches the organization's full structure (legal entities, registrations, site groups, sites)
+// Fetches the organization's full structure
 export function getOrgStructure(orgId: string): Promise<OrgStructureResponse> {
   return axios.get<OrgStructureResponse>(`cloud-api/organizations/${orgId}/structure`).then((r) => r.data);
 }
@@ -42,6 +42,13 @@ export function updateLegalEntity({
 }): Promise<SuccessResponse> {
   return axios
     .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/legal-entities/${leId}`, data)
+    .then((r) => r.data);
+}
+
+// Reorders sibling legal entities
+export function reorderLegalEntities({ orgId, ids }: { orgId: string; ids: string[] }): Promise<SuccessResponse> {
+  return axios
+    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/legal-entities/reorder`, { ids })
     .then((r) => r.data);
 }
 
@@ -93,6 +100,28 @@ export function updateSiteGroup({
 }): Promise<SuccessResponse> {
   return axios
     .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/structure/site-groups/${groupId}`, data)
+    .then((r) => r.data);
+}
+
+// Reorders sibling site groups
+export function reorderSiteGroups({ orgId, ids }: { orgId: string; ids: string[] }): Promise<SuccessResponse> {
+  return axios
+    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/structure/site-groups/reorder`, { ids })
+    .then((r) => r.data);
+}
+
+// Reparents a site group under a new parent
+export function reparentSiteGroup({
+  orgId,
+  groupId,
+  parentId,
+}: {
+  orgId: string;
+  groupId: string;
+  parentId: string | null;
+}): Promise<SuccessResponse> {
+  return axios
+    .patch<SuccessResponse>(`cloud-api/organizations/${orgId}/structure/site-groups/${groupId}/reparent`, { parentId })
     .then((r) => r.data);
 }
 

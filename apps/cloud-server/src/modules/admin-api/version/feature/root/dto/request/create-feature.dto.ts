@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsCode } from '@vritti/api-sdk/decorators';
 import { IsIconName } from '@vritti/api-sdk/icons';
 import { Transform } from 'class-transformer';
 import {
@@ -9,7 +10,6 @@ import {
   IsOptional,
   IsString,
   IsUUID,
-  Matches,
   MaxLength,
   MinLength,
 } from 'class-validator';
@@ -31,9 +31,7 @@ export class CreateFeatureDto {
   @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @MinLength(1)
   @MaxLength(255)
-  @Matches(/^[a-z][a-z0-9-]*$/, {
-    message: 'Code must be a single lowercase word (letters, numbers, hyphens; e.g. "inventory-items")',
-  })
+  @IsCode()
   code: string;
 
   @ApiProperty({ description: 'Display name of the feature', example: 'Create Dine-In Order' })

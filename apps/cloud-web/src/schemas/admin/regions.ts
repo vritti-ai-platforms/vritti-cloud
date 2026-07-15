@@ -1,5 +1,5 @@
 import type { TableViewState } from '@vritti/quantum-ui/types/table-filter';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 
 export interface RegionProvider {
   id: string;
@@ -36,7 +36,7 @@ export interface RegionsResponse {
 
 export const createRegionSchema = z.object({
   name: z.string().min(1, 'Region name is required'),
-  code: z.string().min(1, 'Region code is required').max(100, 'Code must be 100 characters or less'),
+  code: zodCodeField({ max: 100 }),
   country: z.string().min(1, 'Country is required').max(100),
   state: z.string().min(1, 'State is required').max(100),
   city: z.string().min(1, 'City is required').max(100),

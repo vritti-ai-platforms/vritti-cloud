@@ -13,6 +13,9 @@ import type { SiteGroupDto } from '../dto/entity/site-group.dto';
 import type { CreateLeTaxRegistrationDto } from '../dto/request/create-le-tax-registration.dto';
 import type { CreateLegalEntityDto } from '../dto/request/create-legal-entity.dto';
 import type { CreateSiteGroupDto } from '../dto/request/create-site-group.dto';
+import type { ReorderLegalEntitiesDto } from '../dto/request/reorder-legal-entities.dto';
+import type { ReorderSiteGroupsDto } from '../dto/request/reorder-site-groups.dto';
+import type { ReparentSiteGroupDto } from '../dto/request/reparent-site-group.dto';
 import type { UpdateLegalEntityDto } from '../dto/request/update-legal-entity.dto';
 import type { UpdateSiteGroupDto } from '../dto/request/update-site-group.dto';
 import type { StructureResponseDto } from '../dto/response/structure.response.dto';
@@ -89,7 +92,7 @@ export class OrganizationStructureService {
     return result;
   }
 
-  // Removes a role assignment (core deletes by assignment ID regardless of target)
+  // Removes a role assignment
   async removeRoleAssignment(orgId: string, assignmentId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
@@ -141,7 +144,7 @@ export class OrganizationStructureService {
     );
   }
 
-  // Assigns a role at a target in core then returns the created assignment from the refreshed list
+  // Assigns a role at a target and returns the assignment
   private async assignRoleAtTarget(
     orgId: string,
     data: AssignRoleDto,
@@ -163,7 +166,7 @@ export class OrganizationStructureService {
     };
   }
 
-  // Fetches the assignment list for the given target (no target = org-wide)
+  // Fetches the assignment list for the given target
   private async fetchAssignments(
     url: string,
     signingKey: string,
@@ -225,6 +228,20 @@ export class OrganizationStructureService {
     return result;
   }
 
+  // Reorders sibling legal entities in core
+  async reorderLegalEntities(orgId: string, dto: ReorderLegalEntitiesDto): Promise<SuccessResponseDto> {
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+
+    const result = await this.coreStructureService.reorderLegalEntities(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      dto.ids,
+    );
+    this.logger.log(`Reordered ${dto.ids.length} legal entit${dto.ids.length === 1 ? 'y' : 'ies'} for org ${orgId}`);
+    return result;
+  }
+
   // Adds a tax registration to a legal entity in core
   async addRegistration(
     orgId: string,
@@ -274,6 +291,35 @@ export class OrganizationStructureService {
       dto,
     );
     this.logger.log(`Updated site group ${siteGroupId} for org ${orgId}`);
+    return result;
+  }
+
+  // Reorders sibling site groups in core
+  async reorderSiteGroups(orgId: string, dto: ReorderSiteGroupsDto): Promise<SuccessResponseDto> {
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+
+    const result = await this.coreStructureService.reorderSiteGroups(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      dto.ids,
+    );
+    this.logger.log(`Reordered ${dto.ids.length} site group(s) for org ${orgId}`);
+    return result;
+  }
+
+  // Reparents a site group in core
+  async reparentSiteGroup(orgId: string, siteGroupId: string, dto: ReparentSiteGroupDto): Promise<SuccessResponseDto> {
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+
+    const result = await this.coreStructureService.reparentSiteGroup(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      siteGroupId,
+      dto.parentId,
+    );
+    this.logger.log(`Reparented site group ${siteGroupId} for org ${orgId}`);
     return result;
   }
 

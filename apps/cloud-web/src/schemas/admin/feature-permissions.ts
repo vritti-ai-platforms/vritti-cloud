@@ -1,4 +1,4 @@
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 
 export interface FeaturePermission {
   id: string;
@@ -31,10 +31,7 @@ export interface PermissionUsage {
   roleTemplateCount: number;
 }
 
-const codeField = z
-  .string()
-  .min(1, 'Code is required')
-  .regex(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, 'Code must be dot-separated lowercase (e.g. add.salt)');
+const codeField = zodCodeField({ dotted: true });
 
 const labelField = z.string().min(1, 'Label is required');
 

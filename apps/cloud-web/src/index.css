@@ -47,6 +47,58 @@
   user-select: none;
 }
 
+/**
+ * Site-group palette — 12 theme-aware color keys used by the org-structure graph and the
+ * Add/Edit Site Group color picker. A group's color is a nullable key (null → default primary).
+ * Light values sit on white cards; dark values are lighter/more luminous for the dark canvas.
+ * Rendered via var(--group-<key>) — never a raw hex in TSX.
+ */
+:root {
+  --group-blue: oklch(0.55 0.18 255);
+  --group-green: oklch(0.6 0.16 150);
+  --group-amber: oklch(0.72 0.15 75);
+  --group-rose: oklch(0.6 0.2 15);
+  --group-violet: oklch(0.55 0.2 300);
+  --group-teal: oklch(0.62 0.12 185);
+  --group-orange: oklch(0.65 0.18 45);
+  --group-lime: oklch(0.68 0.17 130);
+  --group-cyan: oklch(0.65 0.12 210);
+  --group-indigo: oklch(0.52 0.19 280);
+  --group-fuchsia: oklch(0.6 0.22 330);
+  --group-slate: oklch(0.55 0.03 255);
+}
+
+.dark {
+  --group-blue: oklch(0.68 0.16 255);
+  --group-green: oklch(0.72 0.15 150);
+  --group-amber: oklch(0.82 0.14 75);
+  --group-rose: oklch(0.7 0.18 15);
+  --group-violet: oklch(0.7 0.18 300);
+  --group-teal: oklch(0.74 0.12 185);
+  --group-orange: oklch(0.75 0.16 45);
+  --group-lime: oklch(0.8 0.16 130);
+  --group-cyan: oklch(0.78 0.12 210);
+  --group-indigo: oklch(0.66 0.17 280);
+  --group-fuchsia: oklch(0.72 0.2 330);
+  --group-slate: oklch(0.7 0.03 255);
+}
+
+/* Expose the group tokens to Tailwind so text-group-*/bg-group-* utilities exist too. */
+@theme inline {
+  --color-group-blue: var(--group-blue);
+  --color-group-green: var(--group-green);
+  --color-group-amber: var(--group-amber);
+  --color-group-rose: var(--group-rose);
+  --color-group-violet: var(--group-violet);
+  --color-group-teal: var(--group-teal);
+  --color-group-orange: var(--group-orange);
+  --color-group-lime: var(--group-lime);
+  --color-group-cyan: var(--group-cyan);
+  --color-group-indigo: var(--group-indigo);
+  --color-group-fuchsia: var(--group-fuchsia);
+  --color-group-slate: var(--group-slate);
+}
+
 @layer base {
   * {
     @apply border-border; /* border-color: var(--color-border); */
@@ -56,6 +108,15 @@
     /* background-color: var(--color-background); color: var(--color-foreground); */
     @apply bg-background text-foreground;
   }
+}
+
+/* Scroll without a visible scrollbar — overrides quantum-ui's global thin scrollbar */
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 /**
  * @source - Tell Tailwind which files to scan for utility classes.

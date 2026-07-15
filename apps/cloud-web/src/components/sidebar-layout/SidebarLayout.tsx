@@ -16,7 +16,7 @@ export const SidebarLayout = ({ groups, outletContext }: SidebarLayoutProps) => 
       <Sidebar groups={groups} topOffset={14} />
       <SidebarInset className="pt-14 h-svh overflow-hidden">
         <main className="flex-1 overflow-auto p-4 sm:p-6">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-7xl mx-auto flex min-h-full flex-col [&>*]:min-h-0 [&>*]:flex-1">
             <QueryErrorBoundary>
               <Outlet context={outletContext} />
             </QueryErrorBoundary>

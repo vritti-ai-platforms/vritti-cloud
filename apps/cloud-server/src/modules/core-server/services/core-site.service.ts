@@ -55,6 +55,19 @@ export class CoreSiteService {
     return result;
   }
 
+  // Reorders a batch of sites within a legal entity in core
+  async reorderSites(url: string, signingKey: string, orgId: string, ids: string[]): Promise<SuccessResponseDto> {
+    const result = await this.http.patch<SuccessResponseDto>(
+      url,
+      signingKey,
+      '/sites/internal/reorder',
+      { orgId, ids },
+      { orgId },
+    );
+    this.logger.log(`Reordered ${ids.length} site(s) for org ${orgId} in core`);
+    return result;
+  }
+
   // Fetches role assignments for a site from core
   async getRoleAssignments(
     url: string,
@@ -72,7 +85,7 @@ export class CoreSiteService {
     return result;
   }
 
-  // Replaces a site's feature-lock overlay in core (null ⇒ the site inherits the full plan)
+  // Replaces a site's feature-lock overlay in core
   async pushSiteLocks(
     url: string,
     signingKey: string,

@@ -1,5 +1,6 @@
 import type { SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
+import { GROUP_COLOR_KEYS } from '@/pages/cloud/organization/structure/graph/group-colors';
 
 export const TAX_REGIME_VALUES = ['GST', 'VAT', 'SALES_TAX', 'NONE'] as const;
 
@@ -40,6 +41,7 @@ export interface LegalEntity {
   taxId: string | null;
   fiscalYearStart: number;
   parentId: string | null;
+  sortOrder: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -58,6 +60,8 @@ export interface SiteGroup {
   name: string;
   code: string;
   parentId: string | null;
+  color?: string | null;
+  sortOrder: number;
   isActive: boolean;
 }
 
@@ -69,6 +73,7 @@ export interface StructureSite {
   legalEntityId: string | null;
   registrationId: string | null;
   groupId: string | null;
+  sortOrder: number;
   timezone: string;
 }
 
@@ -88,11 +93,7 @@ export interface OrgStructureResponse {
 
 export const createLegalEntitySchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less'),
-  code: z
-    .string()
-    .min(1, 'Code is required')
-    .max(100, 'Code must be 100 characters or less')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, underscores, and hyphens'),
+  code: zodCodeField({ max: 100 }),
   country: z.string().length(2, 'Country is required'),
   currencyCode: z.string().regex(/^[A-Z]{3}$/, 'Currency is required'),
   taxRegime: z.enum(TAX_REGIME_VALUES, { message: 'Please select a tax regime' }),
@@ -101,7 +102,9 @@ export const createLegalEntitySchema = z.object({
   parentId: z.string().uuid().optional().or(z.literal('')),
 });
 
-export const updateLegalEntitySchema = createLegalEntitySchema.partial();
+export const updateLegalEntitySchema = createLegalEntitySchema.partial().extend({
+  parentId: z.string().uuid().nullable().optional().or(z.literal('')),
+});
 
 export const createTaxRegistrationSchema = z.object({
   taxNumber: z.string().min(1, 'Tax number is required').max(100, 'Tax number must be 100 characters or less'),
@@ -110,12 +113,9 @@ export const createTaxRegistrationSchema = z.object({
 
 export const createSiteGroupSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less'),
-  code: z
-    .string()
-    .min(1, 'Code is required')
-    .max(100, 'Code must be 100 characters or less')
-    .regex(/^[a-zA-Z0-9_-]+$/, 'Only letters, numbers, underscores, and hyphens'),
+  code: zodCodeField({ max: 100 }),
   parentId: z.string().uuid().optional().or(z.literal('')),
+  color: z.enum(GROUP_COLOR_KEYS).nullable().optional(),
 });
 
 export const updateSiteGroupSchema = createSiteGroupSchema.partial().extend({

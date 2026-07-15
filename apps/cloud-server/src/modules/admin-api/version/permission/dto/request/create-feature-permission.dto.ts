@@ -1,16 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsCode } from '@vritti/api-sdk/decorators';
 import { Transform } from 'class-transformer';
-import {
-  IsArray,
-  IsBoolean,
-  IsInt,
-  IsOptional,
-  IsString,
-  IsUUID,
-  Matches,
-  MaxLength,
-  MinLength,
-} from 'class-validator';
+import { IsArray, IsBoolean, IsInt, IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class CreateFeaturePermissionDto {
   @ApiProperty({ description: 'Feature this permission belongs to', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -22,9 +13,7 @@ export class CreateFeaturePermissionDto {
   @Transform(({ value }) => (typeof value === 'string' ? value.trim().toLowerCase() : value))
   @MinLength(1)
   @MaxLength(50)
-  @Matches(/^[a-z][a-z0-9-]*(\.[a-z][a-z0-9-]*)*$/, {
-    message: 'Code must be dot-separated lowercase segments (e.g. "add.salt")',
-  })
+  @IsCode({ dotted: true })
   code: string;
 
   @ApiProperty({ description: 'Human-readable permission label', example: 'Add Salt' })

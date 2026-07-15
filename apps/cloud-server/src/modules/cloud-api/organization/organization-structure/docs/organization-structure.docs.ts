@@ -7,6 +7,9 @@ import { AssignRoleDto } from '../../dto/request/assign-role.dto';
 import { CreateLeTaxRegistrationDto } from '../dto/request/create-le-tax-registration.dto';
 import { CreateLegalEntityDto } from '../dto/request/create-legal-entity.dto';
 import { CreateSiteGroupDto } from '../dto/request/create-site-group.dto';
+import { ReorderLegalEntitiesDto } from '../dto/request/reorder-legal-entities.dto';
+import { ReorderSiteGroupsDto } from '../dto/request/reorder-site-groups.dto';
+import { ReparentSiteGroupDto } from '../dto/request/reparent-site-group.dto';
 import { UpdateLegalEntityDto } from '../dto/request/update-legal-entity.dto';
 import { UpdateSiteGroupDto } from '../dto/request/update-site-group.dto';
 import { StructureResponseDto } from '../dto/response/structure.response.dto';
@@ -53,6 +56,22 @@ export function ApiUpdateLegalEntity() {
     ApiResponse({ status: 200, description: 'Legal entity updated successfully.' }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
     ApiResponse({ status: 404, description: 'Organization, deployment, or legal entity not found.' }),
+    ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
+  );
+}
+
+export function ApiReorderLegalEntities() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Reorder legal entities',
+      description:
+        'Proxies to core to reassign sort order for a batch of sibling legal entities in their new left-to-right order.',
+    }),
+    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
+    ApiBody({ type: ReorderLegalEntitiesDto }),
+    ApiResponse({ status: 200, description: 'Legal entities reordered successfully.' }),
+    ApiResponse({ status: 400, description: 'One or more legal entities do not belong to the organization.' }),
+    ApiResponse({ status: 404, description: 'Organization or deployment not found.' }),
     ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
   );
 }
@@ -115,6 +134,39 @@ export function ApiUpdateSiteGroup() {
     ApiBody({ type: UpdateSiteGroupDto }),
     ApiResponse({ status: 200, description: 'Site group updated successfully.' }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 404, description: 'Organization, deployment, or site group not found.' }),
+    ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
+  );
+}
+
+export function ApiReorderSiteGroups() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Reorder site groups',
+      description:
+        'Proxies to core to reassign sort order for a batch of sibling site groups in their new left-to-right order.',
+    }),
+    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
+    ApiBody({ type: ReorderSiteGroupsDto }),
+    ApiResponse({ status: 200, description: 'Site groups reordered successfully.' }),
+    ApiResponse({ status: 400, description: 'One or more site groups do not belong to the organization.' }),
+    ApiResponse({ status: 404, description: 'Organization or deployment not found.' }),
+    ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
+  );
+}
+
+export function ApiReparentSiteGroup() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Reparent a site group',
+      description:
+        'Proxies to core to nest a site group under a new parent (null detaches it to root) and append it to the end of that parent.',
+    }),
+    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
+    ApiParam({ name: 'groupId', type: String, description: 'Site group ID' }),
+    ApiBody({ type: ReparentSiteGroupDto }),
+    ApiResponse({ status: 200, description: 'Site group reparented successfully.' }),
+    ApiResponse({ status: 400, description: 'Invalid parent (foreign or cycle).' }),
     ApiResponse({ status: 404, description: 'Organization, deployment, or site group not found.' }),
     ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
   );

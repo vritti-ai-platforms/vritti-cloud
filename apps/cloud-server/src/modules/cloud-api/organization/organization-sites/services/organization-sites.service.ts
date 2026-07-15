@@ -21,6 +21,7 @@ import type { SiteMatrixResponseDto } from '../../dto/response/site-matrix.respo
 import { loadPlanContext } from '../../utils/load-plan-context';
 import { validateLocksShape } from '../../utils/validate-locks-shape';
 import type { CreateSiteDto } from '../dto/request/create-site.dto';
+import type { ReorderSitesDto } from '../dto/request/reorder-sites.dto';
 import type { UpdateSiteDto } from '../dto/request/update-site.dto';
 import type { SiteListResponseDto } from '../dto/response/site-list.response.dto';
 
@@ -50,7 +51,6 @@ export class OrganizationSitesService {
   async createSite(orgId: string, data: CreateSiteDto): Promise<CreateResponseDto<SiteDto>> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    // Check plan site limits before creating
     await this.checkSiteLimit(org, deployment);
 
     const site = await this.coreSiteService.createSite(
@@ -59,13 +59,12 @@ export class OrganizationSitesService {
       org.orgIdentifier,
       this.packMetadata(data),
     );
-    // Seed the org's role templates (idempotent); a new site has no lock overlay and resolves from the deployment catalog
     await this.catalogSyncService.syncRoles(orgId);
     this.logger.log(`Created site for org ${orgId}`);
     return { success: true, message: `Site "${site.name}" created successfully.`, data: site };
   }
 
-  // Fetches a single site from core; throws NotFound when it doesn't exist
+  // Fetches a single site from core
   async getSite(orgId: string, siteId: string): Promise<SiteDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
@@ -93,6 +92,20 @@ export class OrganizationSitesService {
       this.packMetadata(data),
     );
     this.logger.log(`Updated site ${siteId} for org ${orgId}`);
+    return result;
+  }
+
+  // Reorders a batch of sites within a legal entity in core
+  async reorderSites(orgId: string, dto: ReorderSitesDto): Promise<SuccessResponseDto> {
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+
+    const result = await this.coreSiteService.reorderSites(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      dto.ids,
+    );
+    this.logger.log(`Reordered ${dto.ids.length} site(s) for org ${orgId}`);
     return result;
   }
 
@@ -154,7 +167,6 @@ export class OrganizationSitesService {
   async removeRoleAssignment(orgId: string, assignmentId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    // Core-server deletes by assignment ID regardless of target
     return this.coreRoleService.removeRoleAssignment(
       deployment.url,
       requireSigningKey(deployment),
@@ -163,7 +175,7 @@ export class OrganizationSitesService {
     );
   }
 
-  // Returns the site permission matrix from the version snapshot plus the raw stored deny-list so the editor seeds faithfully
+  // Returns the site permission matrix for the lock editor
   async getSiteMatrix(orgId: string, siteId: string): Promise<SiteMatrixResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await loadPlanContext(this.coreVersionRepository, org, deployment);
@@ -183,14 +195,14 @@ export class OrganizationSitesService {
     return list.find((site) => site?.id === siteId) ?? list[0];
   }
 
-  // Narrows the core site's type string to a SiteType so the matrix can filter by site-type applicability
+  // Narrows the core site's type string to a SiteType
   private resolveSiteType(site: SiteDto | undefined): SiteType | undefined {
     return site && (siteAppliesEnum.enumValues as readonly string[]).includes(site.type)
       ? (site.type as SiteType)
       : undefined;
   }
 
-  // Replaces the site's lock deny-list and pushes the overlay to core (plan stays the ceiling, so an out-of-plan lock is inert)
+  // Replaces the site's lock deny-list and pushes it to core
   async updateSiteLocks(orgId: string, siteId: string, dto: SetLocksDto): Promise<SuccessResponseDto> {
     const { org } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
@@ -198,7 +210,6 @@ export class OrganizationSitesService {
     siteLocks[siteId] = validateLocksShape(dto.locks);
     await this.organizationRepository.update(orgId, { siteLocks });
 
-    // Push the site's lock overlay so the new locks take effect on the next resolution in core
     await this.catalogSyncService.syncSiteLocks(orgId, siteId);
     this.logger.log(`Updated locks for site ${siteId} in org ${orgId}`);
     return { success: true, message: 'Site permissions updated successfully.' };
@@ -216,7 +227,7 @@ export class OrganizationSitesService {
     );
   }
 
-  // Extracts location fields into metadata for core-server while keeping timezone as a top-level site field
+  // Packs location fields into site metadata
   private packMetadata(data: CreateSiteDto | UpdateSiteDto): Record<string, unknown> {
     const { address, city, state, country, phone, ...rest } = data;
     const metadata: Record<string, unknown> = {};
@@ -233,7 +244,6 @@ export class OrganizationSitesService {
   private async checkSiteLimit(org: Organization, deployment: Deployment): Promise<void> {
     const { plan } = await loadPlanContext(this.coreVersionRepository, org, deployment);
 
-    // null maxSites means unlimited
     if (plan.maxSites === null) return;
 
     const sites = await this.coreSiteService.getSites(deployment.url, requireSigningKey(deployment), org.orgIdentifier);

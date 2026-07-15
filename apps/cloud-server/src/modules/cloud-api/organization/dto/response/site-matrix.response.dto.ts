@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import type { PlatformBucket, SiteFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
+import type { PlatformBucket, ScopeType, SiteFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 
 export class SiteMatrixCellDto {
   @ApiProperty({ description: "The org's plan unlocks this (feature, platform, permission)" })
@@ -35,6 +35,9 @@ export class SiteMatrixFeatureDto {
 
   @ApiProperty({ nullable: true, example: 'monitor' })
   icon: string | null;
+
+  @ApiProperty({ enum: ['ORG', 'LE', 'SITE_GROUP', 'SITE'], example: 'SITE', description: "The feature's real scope" })
+  scope: ScopeType;
 
   @ApiProperty({
     enum: ['web', 'mobile'],

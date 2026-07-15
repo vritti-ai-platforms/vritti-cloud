@@ -2,14 +2,8 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Pat
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
-import {
-  ApiCreateOrgRole,
-  ApiDeleteOrgRole,
-  ApiGetOrgRoleTemplates,
-  ApiListOrgRoles,
-  ApiUpdateOrgRole,
-} from '../docs/organization-roles.docs';
-import type { RoleTemplateListResponseDto } from '../dto/response/role-template.response.dto';
+import { ApiCreateOrgRole, ApiDeleteOrgRole, ApiListOrgRoles, ApiUpdateOrgRole } from '../docs/organization-roles.docs';
+import type { RoleScopeSectionDto } from '../dto/response/role-sections.response.dto';
 import { OrganizationRolesService } from '../services/organization-roles.service';
 
 @ApiTags('Organization Roles')
@@ -20,20 +14,12 @@ export class OrganizationRolesController {
 
   constructor(private readonly orgRolesService: OrganizationRolesService) {}
 
-  // Lists all roles for the organization (proxied from core)
+  // Returns the organization's roles as render-ready sections (templates + custom roles per scope)
   @Get()
   @ApiListOrgRoles()
-  async listRoles(@Param('orgId') orgId: string): Promise<CoreRoleDto[]> {
+  async listRoles(@Param('orgId') orgId: string): Promise<RoleScopeSectionDto[]> {
     this.logger.log(`GET /organizations/${orgId}/roles`);
-    return this.orgRolesService.listRoles(orgId);
-  }
-
-  // Returns role templates from the app version snapshot
-  @Get('templates')
-  @ApiGetOrgRoleTemplates()
-  async getTemplates(@Param('orgId') orgId: string): Promise<RoleTemplateListResponseDto> {
-    this.logger.log(`GET /organizations/${orgId}/roles/templates`);
-    return this.orgRolesService.getTemplates(orgId);
+    return this.orgRolesService.getRoleSections(orgId);
   }
 
   // Creates a new role for the organization (proxied to core)

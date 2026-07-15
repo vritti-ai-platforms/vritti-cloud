@@ -1,4 +1,5 @@
 import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@vritti/quantum-ui/types/catalog-resolver';
+import { snapshotFeatureKey } from '@vritti/quantum-ui/types/catalog-resolver';
 import { ChevronDown, ChevronRight, Layers, Shield, Zap } from 'lucide-react';
 import { useState } from 'react';
 
@@ -16,10 +17,11 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
   );
   const totalPerms = featureEntries.reduce((sum, [, codes]) => sum + codes.length, 0);
 
-  // Derive apps from feature permissions (deduplicated) — the snapshot template carries no explicit app list
+  // Derive apps from feature permissions (deduplicated) — the snapshot template carries no explicit app list.
+  // Role grants are bare-code; the template's own scope disambiguates same-code features into the composite key.
   const derivedApps: Record<string, SnapshotApp> = {};
   for (const [featureCode] of featureEntries) {
-    const app = featureToApp[featureCode];
+    const app = featureToApp[snapshotFeatureKey(featureCode, role.scope)];
     if (app) derivedApps[app.code] = app;
   }
   const roleApps = Object.values(derivedApps);
@@ -77,7 +79,7 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
               </span>
               <div className="rounded-lg border border-border/40 bg-card overflow-hidden divide-y divide-border/30">
                 {featureEntries.map(([featureCode, perms]) => {
-                  const feature = featureByCode[featureCode];
+                  const feature = featureByCode[snapshotFeatureKey(featureCode, role.scope)];
                   return (
                     <div key={featureCode} className="flex items-center gap-3 px-3 py-2">
                       <Zap className="size-3 text-success shrink-0" />

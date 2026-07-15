@@ -1,8 +1,9 @@
 import type { RoleItem } from '@domain/catalog/catalog.builder';
 import { Injectable, Logger } from '@nestjs/common';
-import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
+import type { CreateResponseDto, SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
 import type { RoleAssignmentDto } from '@/modules/cloud-api/organization/dto/entity/role-assignment.dto';
+import type { RolesByScopeDto } from '@/modules/cloud-api/organization/organization-roles/dto/response/roles-by-scope.response.dto';
 import { CoreHttpService } from './core-http.service';
 
 export type RoleAssignmentTarget = { siteId?: string; siteGroupId?: string; legalEntityId?: string };
@@ -14,13 +15,13 @@ export class CoreRoleService {
 
   constructor(private readonly http: CoreHttpService) {}
 
-  // Fetches all roles for an organization from core
-  async getOrgRoles(url: string, signingKey: string, orgId: string): Promise<CoreRoleDto[]> {
-    const result = await this.http.get<CoreRoleDto[]>(url, signingKey, '/organizations/internal/roles', {
+  // Fetches an organization's roles from core, grouped by scope (SITE by site type)
+  async getOrgRoles(url: string, signingKey: string, orgId: string): Promise<RolesByScopeDto> {
+    const result = await this.http.get<RolesByScopeDto>(url, signingKey, '/organizations/internal/roles', {
       orgId,
       params: { orgId },
     });
-    this.logger.log(`Fetched ${result.length} roles from core for org: ${orgId}`);
+    this.logger.log(`Fetched grouped roles from core for org: ${orgId}`);
     return result;
   }
 
@@ -97,6 +98,29 @@ export class CoreRoleService {
       params: { targetType, ...(targetId ? { targetId } : {}) },
     });
     this.logger.log(`Fetched compatible roles for ${targetType} target from core for org: ${orgId}`);
+    return result;
+  }
+
+  // Fetches the org's roles matching an exact scope as select options from core
+  async selectRoles(
+    url: string,
+    signingKey: string,
+    orgId: string,
+    params: {
+      scope: string;
+      siteId?: string;
+      search?: string;
+      limit?: number;
+      offset?: number;
+      values?: string;
+      excludeIds?: string;
+    },
+  ): Promise<SelectQueryResult> {
+    const result = await this.http.get<SelectQueryResult>(url, signingKey, '/organizations/internal/roles/select', {
+      orgId,
+      params,
+    });
+    this.logger.log(`Fetched role select options (scope=${params.scope}) from core for org: ${orgId}`);
     return result;
   }
 

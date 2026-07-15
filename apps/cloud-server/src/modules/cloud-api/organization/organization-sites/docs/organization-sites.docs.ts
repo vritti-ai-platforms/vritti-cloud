@@ -8,6 +8,7 @@ import { AssignRoleDto } from '../../dto/request/assign-role.dto';
 import { SetLocksDto } from '../../dto/request/set-locks.dto';
 import { SiteMatrixResponseDto } from '../../dto/response/site-matrix.response.dto';
 import { CreateSiteDto } from '../dto/request/create-site.dto';
+import { ReorderSitesDto } from '../dto/request/reorder-sites.dto';
 import { UpdateSiteDto } from '../dto/request/update-site.dto';
 import { SiteListResponseDto } from '../dto/response/site-list.response.dto';
 
@@ -51,6 +52,22 @@ export function ApiGetSite() {
     ApiParam({ name: 'siteId', type: String, description: 'Site ID' }),
     ApiResponse({ status: 200, description: 'Site retrieved successfully.', type: SiteDto }),
     ApiResponse({ status: 404, description: 'Organization, deployment, or site not found.' }),
+    ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
+  );
+}
+
+export function ApiReorderSites() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Reorder sites',
+      description:
+        'Proxies to core to reassign sort order for a batch of sibling sites in their new left-to-right order.',
+    }),
+    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
+    ApiBody({ type: ReorderSitesDto }),
+    ApiResponse({ status: 200, description: 'Sites reordered successfully.' }),
+    ApiResponse({ status: 400, description: 'One or more sites do not belong to the organization.' }),
+    ApiResponse({ status: 404, description: 'Organization or deployment not found.' }),
     ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
   );
 }

@@ -6,7 +6,7 @@ import { getOrgSite } from '@/services/cloud/org-sites.service';
 export const ORG_SITE_DETAIL_QUERY_KEY = (orgId: string, siteId: string) =>
   ['organizations', orgId, 'sites', siteId] as const;
 
-// Fetches a single site by ID — suspends until data is ready
+// Fetches a single site by ID, suspending until ready
 export function useOrgSite(orgId: string, siteId: string) {
   return useSuspenseQuery<Site, AxiosError>({
     queryKey: ORG_SITE_DETAIL_QUERY_KEY(orgId, siteId),

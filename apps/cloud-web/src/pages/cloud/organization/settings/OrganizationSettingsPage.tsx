@@ -296,7 +296,7 @@ export const OrganizationSettingsPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="flex flex-col gap-6">
       <PageHeader title="Organization Settings" description="Manage your organization details and configuration" />
 
       <Tabs

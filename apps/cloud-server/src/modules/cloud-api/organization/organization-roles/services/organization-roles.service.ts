@@ -1,13 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
-import type { VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
+import type { ScopeType, SiteType, SnapshotRoleTemplate, VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
+import type { RolesByScopeDto } from '@/modules/cloud-api/organization/organization-roles/dto/response/roles-by-scope.response.dto';
 import { requireSigningKey } from '@/modules/core-server/signing-key.util';
-import type { RoleTemplateListResponseDto } from '../dto/response/role-template.response.dto';
+import type { RoleScopeSectionDto } from '../dto/response/role-sections.response.dto';
+
+const SCOPE_ORDER: ScopeType[] = ['ORG', 'LE', 'SITE_GROUP', 'SITE'];
+const SITE_TYPE_ORDER: SiteType[] = ['OUTLET', 'WAREHOUSE', 'PRODUCTION'];
+
+const byName = (a: { name: string }, b: { name: string }) => a.name.localeCompare(b.name);
 
 @Injectable()
 export class OrganizationRolesService {
@@ -19,8 +25,8 @@ export class OrganizationRolesService {
     private readonly coreVersionRepository: CoreVersionRepository,
   ) {}
 
-  // Returns role templates from the deployment's app version snapshot, scoped to the org's business
-  async getTemplates(orgId: string): Promise<RoleTemplateListResponseDto> {
+  // Returns the organization's roles as render-ready sections: templates (with their enabled role) + custom roles per scope
+  async getRoleSections(orgId: string): Promise<RoleScopeSectionDto[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     if (!deployment.version) {
@@ -32,23 +38,51 @@ export class OrganizationRolesService {
     }
 
     const snapshot = appVersion.snapshot as VersionSnapshot;
-    const roleTemplates = Object.values(snapshot.businesses?.[org.businessCode]?.roleTemplates ?? {});
-
-    this.logger.log(`Fetched ${roleTemplates.length} role templates for org ${orgId}`);
-    return { result: roleTemplates };
-  }
-
-  // Lists all roles for the organization from core
-  async listRoles(orgId: string): Promise<CoreRoleDto[]> {
-    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-
+    const templates = Object.values(snapshot.businesses?.[org.businessCode]?.roleTemplates ?? {});
     const roles = await this.coreRoleService.getOrgRoles(
       deployment.url,
       requireSigningKey(deployment),
       org.orgIdentifier,
     );
-    this.logger.log(`Fetched roles for org ${orgId}`);
-    return roles;
+
+    this.logger.log(`Assembled role sections for org ${orgId} (${templates.length} templates)`);
+    return this.assembleSections(roles, templates);
+  }
+
+  // Merges snapshot templates with grouped DB roles into scope sections; SITE splits by site type
+  private assembleSections(roles: RolesByScopeDto, templates: SnapshotRoleTemplate[]): RoleScopeSectionDto[] {
+    const templateByCode = new Map(templates.map((t) => [t.code, t]));
+    const isCustom = (role: CoreRoleDto) => !role.code || templateByCode.get(role.code)?.name !== role.name;
+
+    // A template plus its enabled default-role instance (same code and name), if one exists
+    const toTemplateRow = (template: SnapshotRoleTemplate, scopeRoles: CoreRoleDto[]) => ({
+      template,
+      role: scopeRoles.find((r) => r.code === template.code && r.name === template.name) ?? null,
+    });
+
+    return SCOPE_ORDER.map((scope) => {
+      const scopeTemplates = templates.filter((t) => t.scope === scope).sort(byName);
+
+      if (scope === 'SITE') {
+        const siteTypeGroups = SITE_TYPE_ORDER.map((siteType) => {
+          const siteRoles = roles.SITE[siteType] ?? [];
+          return {
+            siteType,
+            templates: scopeTemplates.filter((t) => t.siteType === siteType).map((t) => toTemplateRow(t, siteRoles)),
+            customRoles: siteRoles.filter(isCustom).sort(byName),
+          };
+        }).filter((group) => group.templates.length > 0 || group.customRoles.length > 0);
+        return { scope, templates: [], customRoles: [], siteTypeGroups };
+      }
+
+      const scopeRoles = roles[scope] ?? [];
+      return {
+        scope,
+        templates: scopeTemplates.map((t) => toTemplateRow(t, scopeRoles)),
+        customRoles: scopeRoles.filter(isCustom).sort(byName),
+        siteTypeGroups: [],
+      };
+    });
   }
 
   // Creates a new role in core for the organization

@@ -24,6 +24,9 @@ import {
   ApiRemoveLegalEntityRoleAssignment,
   ApiRemoveOrgRoleAssignment,
   ApiRemoveSiteGroupRoleAssignment,
+  ApiReorderLegalEntities,
+  ApiReorderSiteGroups,
+  ApiReparentSiteGroup,
   ApiUpdateLegalEntity,
   ApiUpdateSiteGroup,
 } from '../docs/organization-structure.docs';
@@ -33,6 +36,9 @@ import type { SiteGroupDto } from '../dto/entity/site-group.dto';
 import { CreateLeTaxRegistrationDto } from '../dto/request/create-le-tax-registration.dto';
 import { CreateLegalEntityDto } from '../dto/request/create-legal-entity.dto';
 import { CreateSiteGroupDto } from '../dto/request/create-site-group.dto';
+import { ReorderLegalEntitiesDto } from '../dto/request/reorder-legal-entities.dto';
+import { ReorderSiteGroupsDto } from '../dto/request/reorder-site-groups.dto';
+import { ReparentSiteGroupDto } from '../dto/request/reparent-site-group.dto';
 import { UpdateLegalEntityDto } from '../dto/request/update-legal-entity.dto';
 import { UpdateSiteGroupDto } from '../dto/request/update-site-group.dto';
 import type { StructureResponseDto } from '../dto/response/structure.response.dto';
@@ -202,6 +208,29 @@ export class OrganizationStructureController {
     return this.orgStructureService.createSiteGroup(orgId, dto);
   }
 
+  // Reorders sibling site groups (proxied to core)
+  @Patch('structure/site-groups/reorder')
+  @ApiReorderSiteGroups()
+  async reorderSiteGroups(
+    @Param('orgId') orgId: string,
+    @Body() dto: ReorderSiteGroupsDto,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /organizations/${orgId}/structure/site-groups/reorder`);
+    return this.orgStructureService.reorderSiteGroups(orgId, dto);
+  }
+
+  // Reparents a site group (proxied to core)
+  @Patch('structure/site-groups/:groupId/reparent')
+  @ApiReparentSiteGroup()
+  async reparentSiteGroup(
+    @Param('orgId') orgId: string,
+    @Param('groupId') groupId: string,
+    @Body() dto: ReparentSiteGroupDto,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /organizations/${orgId}/structure/site-groups/${groupId}/reparent`);
+    return this.orgStructureService.reparentSiteGroup(orgId, groupId, dto);
+  }
+
   // Updates a site group (proxied to core)
   @Patch('structure/site-groups/:groupId')
   @ApiUpdateSiteGroup()
@@ -233,6 +262,17 @@ export class OrganizationStructureController {
   ): Promise<CreateResponseDto<LegalEntityDto>> {
     this.logger.log(`POST /organizations/${orgId}/legal-entities`);
     return this.orgStructureService.createLegalEntity(orgId, dto);
+  }
+
+  // Reorders sibling legal entities (proxied to core)
+  @Patch('legal-entities/reorder')
+  @ApiReorderLegalEntities()
+  async reorderLegalEntities(
+    @Param('orgId') orgId: string,
+    @Body() dto: ReorderLegalEntitiesDto,
+  ): Promise<SuccessResponseDto> {
+    this.logger.log(`PATCH /organizations/${orgId}/legal-entities/reorder`);
+    return this.orgStructureService.reorderLegalEntities(orgId, dto);
   }
 
   // Updates a legal entity (proxied to core)

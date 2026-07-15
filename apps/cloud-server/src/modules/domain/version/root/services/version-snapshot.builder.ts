@@ -8,6 +8,7 @@ import {
   type SnapshotFeature,
   type SnapshotMicrofrontends,
   type SnapshotPermission,
+  snapshotFeatureKey,
   type VersionSnapshot,
 } from '@vritti/api-sdk/catalog-resolver';
 import _ from '@vritti/api-sdk/lodash';
@@ -137,11 +138,11 @@ function buildPermissions(featureId: string, index: SnapshotIndex): SnapshotPerm
   }));
 }
 
-// Feature dictionary keyed by code
+// Flat feature dictionary keyed by `${scope}.${code}` — feature identity is (code, scope), so same-code features at different scopes all survive
 function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string, SnapshotFeature> {
   const result: Record<string, SnapshotFeature> = {};
   for (const f of data.features) {
-    result[f.code] = {
+    result[snapshotFeatureKey(f.code, f.scope)] = {
       code: f.code,
       name: f.name,
       lucideIcon: f.lucideIcon,
@@ -235,8 +236,9 @@ function buildBusinesses(data: SnapshotData, index: SnapshotIndex): Record<strin
       icon: a.icon,
       sortOrder: a.sortOrder,
       features: (index.appFeaturesByAppId[a.id] ?? [])
-        .map((af) => index.featureById[af.featureId]?.code)
-        .filter((c): c is string => Boolean(c)),
+        .map((af) => index.featureById[af.featureId])
+        .filter((f): f is Feature => Boolean(f))
+        .map((f) => ({ code: f.code, scope: f.scope })),
     });
   }
 

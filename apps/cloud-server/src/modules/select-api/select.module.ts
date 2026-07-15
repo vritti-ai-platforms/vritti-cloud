@@ -9,6 +9,7 @@ import { RegionDomainModule } from '@domain/region/region.module';
 import { VersionDomainModule } from '@domain/version/version.module';
 import { Module } from '@nestjs/common';
 import { OrganizationModule } from '../cloud-api/organization/organization.module';
+import { CoreServerModule } from '../core-server/core-server.module';
 import { AppCodeSelectController } from './controllers/app-code-select.controller';
 import { AppSelectController } from './controllers/app-select.controller';
 import { BillingCycleSelectController } from './controllers/billing-cycle-select.controller';
@@ -18,12 +19,17 @@ import { CountrySelectController } from './controllers/country-select.controller
 import { DeploymentSelectController } from './controllers/deployment-select.controller';
 import { FeaturePermissionSelectController } from './controllers/feature-permission-select.controller';
 import { FeatureSelectController } from './controllers/feature-select.controller';
+import { LegalEntitySelectController } from './controllers/legal-entity-select.controller';
 import { MicrofrontendSelectController } from './controllers/microfrontend-select.controller';
 import { OrganizationSelectController } from './controllers/organization-select.controller';
 import { PlanSelectController } from './controllers/plan-select.controller';
 import { RegionSelectController } from './controllers/region-select.controller';
+import { RoleSelectController } from './controllers/role-select.controller';
 import { RoleTemplateSelectController } from './controllers/role-template-select.controller';
+import { SiteGroupSelectController } from './controllers/site-group-select.controller';
 import { VersionSelectController } from './controllers/version-select.controller';
+import { OrgStructureSelectService } from './services/org-structure-select.service';
+import { RoleSelectService } from './services/role-select.service';
 
 @Module({
   imports: [
@@ -37,6 +43,7 @@ import { VersionSelectController } from './controllers/version-select.controller
     RegionDomainModule,
     BillingCycleDomainModule,
     OrganizationModule,
+    CoreServerModule,
   ],
   controllers: [
     BusinessSelectController,
@@ -54,6 +61,10 @@ import { VersionSelectController } from './controllers/version-select.controller
     RoleTemplateSelectController,
     MicrofrontendSelectController,
     OrganizationSelectController,
+    LegalEntitySelectController,
+    SiteGroupSelectController,
+    RoleSelectController,
   ],
+  providers: [OrgStructureSelectService, RoleSelectService],
 })
 export class SelectModule {}

@@ -1,5 +1,5 @@
 import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 
 export interface Microfrontend {
   id: string;
@@ -16,11 +16,7 @@ export type MicrofrontendsTableResponse = TableResponse<Microfrontend>;
 
 export type MicrofrontendPlatformParam = 'web' | 'mobile';
 
-const codeRule = z
-  .string()
-  .min(1, 'Code is required')
-  .max(100, 'Code must be 100 characters or less')
-  .regex(/^[a-z][a-z0-9-]*$/, 'Lowercase alphanumeric with hyphens');
+const codeRule = zodCodeField({ max: 100 });
 
 const nameRule = z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less');
 

@@ -1,5 +1,5 @@
 import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 import { SITE_TYPE_LABELS, SITE_TYPE_VALUES } from '@/schemas/shared/site-types';
 import { SCOPE_TYPE_VALUES, type ScopeType, type SiteType } from './features';
 
@@ -66,7 +66,7 @@ export const createRoleTemplateSchema = z.object({
   code: z
     .string()
     .transform((v) => v.trim().toLowerCase())
-    .pipe(z.string().regex(/^[a-z][a-z0-9-]*$/, 'Single lowercase word (hyphens allowed)')),
+    .pipe(zodCodeField()),
   name: z.string().min(1, 'Role name is required').max(255, 'Name must be 255 characters or less'),
   description: z.string().optional(),
   scope: z.enum(SCOPE_TYPE_VALUES).default('SITE'),

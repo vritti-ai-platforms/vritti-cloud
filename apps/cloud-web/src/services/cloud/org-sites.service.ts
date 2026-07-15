@@ -34,3 +34,8 @@ export function updateOrgSite({
 export function deleteOrgSite({ orgId, siteId }: { orgId: string; siteId: string }): Promise<SuccessResponse> {
   return axios.delete<SuccessResponse>(`cloud-api/organizations/${orgId}/sites/${siteId}`).then((r) => r.data);
 }
+
+// Re-sequences a legal entity's sites
+export function reorderSites({ orgId, ids }: { orgId: string; ids: string[] }): Promise<SuccessResponse> {
+  return axios.patch<SuccessResponse>(`cloud-api/organizations/${orgId}/sites/reorder`, { ids }).then((r) => r.data);
+}

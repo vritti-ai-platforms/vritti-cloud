@@ -1,4 +1,5 @@
-import { useDeleteRole, useRoles, useRoleTemplates } from '@hooks/cloud/roles';
+import { useDeleteRole, useRoles } from '@hooks/cloud/roles';
+import { Alert } from '@vritti/quantum-ui/Alert';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
@@ -6,12 +7,11 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { KeyRound, Layers, Shield } from 'lucide-react';
 import { useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { composeGrants } from '@/schemas/cloud/role-grants';
-import { isDefaultRole, type Role } from '@/schemas/cloud/roles';
+import { isDefaultRole, type Role, sectionRoles, sectionTemplates } from '@/schemas/cloud/roles';
 import { EditRoleDetailsForm } from './components/EditRoleDetailsForm';
 import { RolePermissionForm } from './components/RolePermissionForm';
 
@@ -46,24 +46,10 @@ export const RoleViewPage = () => {
   const editDialog = useDialog();
   const confirm = useConfirm();
 
-  const { data: roles = [], isLoading } = useRoles(orgId);
-  const role = useMemo(() => roles.find((r) => r.id === roleId), [roles, roleId]);
-  const { data: templates = [], isLoading: templatesLoading } = useRoleTemplates(orgId);
+  const { data: sections } = useRoles(orgId);
+  const role = useMemo(() => sectionRoles(sections).find((r) => r.id === roleId), [sections, roleId]);
+  const templates = useMemo(() => sectionTemplates(sections), [sections]);
   const deleteMutation = useDeleteRole();
-
-  if (isLoading) {
-    return (
-      <div className="flex flex-col gap-6">
-        <Skeleton className="h-10 w-64" />
-        <div className="grid grid-cols-2 gap-4">
-          {[1, 2].map((i) => (
-            <Skeleton key={i} className="h-24 rounded-xl" />
-          ))}
-        </div>
-        <Skeleton className="h-96 rounded-xl" />
-      </div>
-    );
-  }
 
   if (!role) {
     return (
@@ -74,9 +60,10 @@ export const RoleViewPage = () => {
   }
 
   // Stats count the EFFECTIVE grants (template ∪ additions − revoked)
-  const baseTemplate = templates.find((t) => t.code === role.code);
+  const templateByCode = new Map(templates.map((t) => [t.code, t]));
+  const baseTemplate = templateByCode.get(role.code);
   const stats = summarize(composeGrants(baseTemplate?.features ?? {}, role.features, role.revoked));
-  const isDefault = isDefaultRole(role);
+  const isDefault = isDefaultRole(role, templateByCode);
 
   // Confirm then delete, returning to the roles list
   const handleDelete = async () => {
@@ -95,53 +82,63 @@ export const RoleViewPage = () => {
       <PageHeader
         title={role.name}
         titleSlot={
-          !templatesLoading &&
-          (baseTemplate ? (
-            <span className="flex items-center gap-2">
-              <Badge variant="secondary" className="text-xs">
-                Based on {baseTemplate.name}
-              </Badge>
-              {!isDefault && (
-                <Badge variant="outline" className="text-xs">
-                  Customized
-                </Badge>
-              )}
-            </span>
-          ) : (
+          !baseTemplate ? (
             <Badge variant="outline" className="border-warning/40 text-xs text-warning">
               Base template missing
             </Badge>
-          ))
+          ) : isDefault ? (
+            <Badge variant="secondary" className="text-xs">
+              Default role
+            </Badge>
+          ) : (
+            <Badge variant="secondary" className="text-xs">
+              Based on {baseTemplate.name}
+            </Badge>
+          )
         }
         description={role.description || 'Manage this role'}
         actions={
-          <Button variant="outline" size="sm" onClick={editDialog.open}>
-            Edit
-          </Button>
+          isDefault ? undefined : (
+            <Button variant="outline" size="sm" onClick={editDialog.open}>
+              Edit
+            </Button>
+          )
         }
       />
+
+      {isDefault && (
+        <Alert
+          variant="info"
+          title="This is a default role"
+          description="Default roles track their template and can't be edited — create a custom role to customize permissions."
+        />
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <StatCard icon={<KeyRound className="size-6" />} label="Permissions" value={stats.permissions} />
         <StatCard icon={<Layers className="size-6" />} label="Features" value={stats.features} />
       </div>
 
-      <RolePermissionForm orgId={orgId} role={role} />
+      <RolePermissionForm orgId={orgId} role={role} readOnly={isDefault} />
 
-      <DangerZone
-        title="Delete this role"
-        description="This action cannot be undone. All associated permission assignments will be removed."
-        buttonText="Delete Role"
-        onClick={handleDelete}
-      />
+      {!isDefault && (
+        <>
+          <DangerZone
+            title="Delete this role"
+            description="This action cannot be undone. All associated permission assignments will be removed."
+            buttonText="Delete Role"
+            onClick={handleDelete}
+          />
 
-      <Dialog
-        handle={editDialog}
-        icon={Shield}
-        title="Role Settings"
-        description="Update this role's name and description."
-        content={(close) => <EditRoleDetailsForm orgId={orgId} role={role} onSuccess={close} onCancel={close} />}
-      />
+          <Dialog
+            handle={editDialog}
+            icon={Shield}
+            title="Role Settings"
+            description="Update this role's name and description."
+            content={(close) => <EditRoleDetailsForm orgId={orgId} role={role} onSuccess={close} onCancel={close} />}
+          />
+        </>
+      )}
     </div>
   );
 };

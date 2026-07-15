@@ -6,6 +6,7 @@ import { Select } from '@vritti/quantum-ui/Select';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
+import { useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { type CreateRoleFormData, createRoleSchema, type Role } from '@/schemas/cloud/roles';
 
@@ -15,22 +16,47 @@ interface AddRoleFormProps {
   onCancel: () => void;
 }
 
-// Create-role dialog — every role builds on a template, then permissions are customized on the role's view page.
 export const AddRoleForm: React.FC<AddRoleFormProps> = ({ orgId, onCreated, onCancel }) => {
+  const { data: templates = [] } = useRoleTemplates(orgId);
+  const templateByCode = useMemo(() => new Map(templates.map((t) => [t.code, t])), [templates]);
+  const baseOptions = useMemo(() => templates.map((t) => ({ value: t.code, label: t.name })), [templates]);
+
+  const resolver = useMemo(
+    () =>
+      zodResolver(
+        createRoleSchema.superRefine((data, ctx) => {
+          const base = templateByCode.get(data.code);
+          if (base && data.name.trim() === base.name) {
+            ctx.addIssue({ code: 'custom', path: ['name'], message: 'Choose a name different from the base role.' });
+          }
+        }),
+      ),
+    [templateByCode],
+  );
+
   const form = useForm<CreateRoleFormData>({
-    resolver: zodResolver(createRoleSchema),
+    resolver,
     defaultValues: { code: '', name: '', description: '', features: {} },
   });
-  const { data: templates = [] } = useRoleTemplates(orgId);
   const createMutation = useCreateRole({ onSuccess: (res) => onCreated(res.data) });
 
-  const baseOptions = templates.map((t) => ({ value: t.code, label: t.name }));
-
   return (
-    <Form form={form} mutation={createMutation} transformSubmit={(data: CreateRoleFormData) => ({ orgId, data })}>
+    <Form
+      form={form}
+      mutation={createMutation}
+      transformSubmit={(data: CreateRoleFormData) => ({
+        orgId,
+        data: {
+          code: data.code,
+          name: data.name,
+          description: data.description,
+          features: {},
+        },
+      })}
+    >
+      <Select name="code" label="Base Role" placeholder="Select a base role" options={baseOptions} />
       <TextField name="name" label="Role Name" placeholder="e.g. Regional Manager" />
       <TextField name="description" label="Description" placeholder="Optional description" />
-      <Select name="code" label="Base Role" placeholder="Select the role to build on" options={baseOptions} />
 
       <DialogActions>
         <Button variant="outline" type="button" onClick={onCancel}>

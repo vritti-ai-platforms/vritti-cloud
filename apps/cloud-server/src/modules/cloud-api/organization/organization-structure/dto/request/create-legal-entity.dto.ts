@@ -1,4 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsCountry } from '@vritti/api-sdk/decorators';
 import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, IsUUID, Length, Max, Min } from 'class-validator';
 import { type TaxRegime, TaxRegimeValues } from '@/db/schema/enums';
 
@@ -15,7 +16,7 @@ export class CreateLegalEntityDto {
 
   @ApiProperty({ description: 'Country (ISO 3166-1 alpha-2)', example: 'IN' })
   @IsString()
-  @Length(2, 2)
+  @IsCountry()
   country: string;
 
   @ApiProperty({ description: 'Base currency (ISO 4217)', example: 'INR' })
@@ -43,4 +44,10 @@ export class CreateLegalEntityDto {
   @IsOptional()
   @IsUUID()
   parentId?: string;
+
+  @ApiPropertyOptional({ description: 'Sort order in the org-structure graph (lower sorts first)', example: 0 })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  sortOrder?: number;
 }

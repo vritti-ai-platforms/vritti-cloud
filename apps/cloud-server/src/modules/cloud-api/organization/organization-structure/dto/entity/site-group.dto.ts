@@ -13,11 +13,17 @@ export class SiteGroupDto {
   @ApiProperty({ example: 'south-zone' })
   code: string;
 
+  @ApiPropertyOptional({ example: 'blue', nullable: true })
+  color: string | null;
+
   @ApiPropertyOptional({ example: 'uuid-here', nullable: true })
   parentId: string | null;
 
   @ApiProperty({ example: true })
   isActive: boolean;
+
+  @ApiProperty({ example: 0 })
+  sortOrder: number;
 
   @ApiProperty({ example: '2024-01-15T10:30:00Z' })
   createdAt: string;

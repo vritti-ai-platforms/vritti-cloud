@@ -14,25 +14,34 @@ import type { Role } from '@/schemas/cloud/roles';
 interface RolePermissionFormProps {
   orgId: string;
   role: Role;
+  readOnly?: boolean;
 }
 
 // Inline permission editor for a role — shared snapshot matrix over the role's EFFECTIVE grants; on save the selection is diffed against the template so only deltas persist.
-export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, role }) => {
+export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, role, readOnly }) => {
   const { data: matrix, isLoading } = usePermissions(orgId);
   // The template's grants are needed both to compose the initial selection and to diff on save
   const { data: templates = [], isLoading: templatesLoading } = useRoleTemplates(orgId);
   const template = templates.find((t) => t.code === role.code);
   const allApps = matrix?.apps ?? [];
 
-  const apps =
-    template?.scope === 'SITE' && template.siteType
-      ? allApps
-          .map((app) => ({
-            ...app,
-            features: app.features.filter((f) => (f.applicableSiteTypes ?? []).includes(template.siteType)),
-          }))
-          .filter((app) => app.features.length > 0)
-      : allApps;
+  // The endpoint now returns features across every scope; a scoped role only picks features at its own scope
+  // (a SITE role additionally narrows to features applicable to its site type).
+  const roleScope = template?.scope;
+  const apps = roleScope
+    ? allApps
+        .map((app) => ({
+          ...app,
+          features: app.features.filter(
+            (f) =>
+              f.scope === roleScope &&
+              (roleScope !== 'SITE' ||
+                !template?.siteType ||
+                (f.applicableSiteTypes ?? []).includes(template.siteType)),
+          ),
+        }))
+        .filter((app) => app.features.length > 0)
+    : allApps;
 
   const base = template?.features;
   const loading = isLoading || templatesLoading;
@@ -41,7 +50,7 @@ export const RolePermissionForm: React.FC<RolePermissionFormProps> = ({ orgId, r
     return <PermissionMatrixSkeleton />;
   }
 
-  return <RolePermissionFormInner orgId={orgId} role={role} apps={apps} base={base} />;
+  return <RolePermissionFormInner orgId={orgId} role={role} apps={apps} base={base} readOnly={readOnly} />;
 };
 
 // Split so the form's defaultValues are computed once, after the base template has loaded
@@ -50,7 +59,8 @@ const RolePermissionFormInner: React.FC<{
   role: Role;
   apps: NonNullable<ReturnType<typeof usePermissions>['data']>['apps'];
   base: FeatureUnlocks | undefined;
-}> = ({ orgId, role, apps, base }) => {
+  readOnly?: boolean;
+}> = ({ orgId, role, apps, base, readOnly }) => {
   const form = useForm<{ features: FeatureUnlocks }>({
     defaultValues: { features: composeGrants(base ?? {}, role.features, role.revoked) },
   });
@@ -76,9 +86,11 @@ const RolePermissionFormInner: React.FC<{
             Mobile are tracked separately. Locked items can still be granted — they activate when your plan unlocks
             them.
           </p>
-          <Button type="submit" size="sm" disabled={!form.formState.isDirty} loadingText="Saving...">
-            Save Permissions
-          </Button>
+          {!readOnly && (
+            <Button type="submit" size="sm" disabled={!form.formState.isDirty} loadingText="Saving...">
+              Save Permissions
+            </Button>
+          )}
         </div>
 
         {apps.length === 0 ? (
@@ -89,7 +101,7 @@ const RolePermissionFormInner: React.FC<{
             description="Features will appear here once your plan is configured."
           />
         ) : (
-          <SnapshotMatrix name="features" apps={apps} allowLockedGrants />
+          <SnapshotMatrix name="features" apps={apps} allowLockedGrants readOnly={readOnly} />
         )}
       </div>
     </Form>

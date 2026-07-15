@@ -1,5 +1,4 @@
-import { sql } from '@vritti/api-sdk/drizzle-orm';
-import { boolean, check, integer, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { boolean, codeCheck, integer, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { features } from './feature';
 import { versions } from './version';
@@ -22,7 +21,7 @@ export const featurePermissions = cloudSchema.table(
   (table) => [
     uniqueIndex('feature_permission_unique_idx').on(table.featureId, table.code),
     // Permission codes are stored lowercase — enforced at the DB so no path can insert a mixed-case code
-    check('feature_permission_code_lowercase_chk', sql`${table.code} = lower(${table.code})`),
+    codeCheck('feature_permission_code_chk', table.code, { dotted: true }),
   ],
 );
 

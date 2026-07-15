@@ -1,18 +1,15 @@
 import { useOrgUsers } from '@hooks/cloud/organizations/useOrgUsers';
-import {
-  useAssignRole,
-  useCompatibleRoles,
-  useRemoveRoleAssignment,
-  useRoleAssignments,
-} from '@hooks/cloud/role-assignments';
+import { useAssignRole, useRemoveRoleAssignment, useRoleAssignments } from '@hooks/cloud/role-assignments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { Dialog, DialogActions } from '@vritti/quantum-ui/Dialog';
+import { Empty } from '@vritti/quantum-ui/Empty';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
+import { RoleSelector } from '@vritti/quantum-ui/selects/role';
 import { Pencil, Shield, Trash2, UserPlus, Users } from 'lucide-react';
 import { useRef } from 'react';
 import { useForm } from 'react-hook-form';
@@ -24,6 +21,13 @@ const TARGET_NOUN: Record<RoleAssignmentTarget['kind'], string> = {
   legalEntity: 'legal entity',
   siteGroup: 'site group',
   site: 'site',
+};
+
+const SCOPE_BY_KIND: Record<RoleAssignmentTarget['kind'], 'ORG' | 'LE' | 'SITE_GROUP' | 'SITE'> = {
+  org: 'ORG',
+  legalEntity: 'LE',
+  siteGroup: 'SITE_GROUP',
+  site: 'SITE',
 };
 
 interface RoleAssignmentsTabProps {
@@ -53,7 +57,7 @@ export const RoleAssignmentsTab = ({ target }: RoleAssignmentsTabProps) => {
   }
 
   return (
-    <div className="flex flex-col gap-4 pt-4">
+    <div className="flex min-h-0 flex-1 flex-col gap-4 pt-4">
       <div className="flex items-center justify-between">
         <p className="text-sm text-muted-foreground">
           {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}
@@ -79,21 +83,17 @@ export const RoleAssignmentsTab = ({ target }: RoleAssignmentsTabProps) => {
       )}
 
       {!isLoading && assignments.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-16 text-center">
-          <Users className="size-10 text-muted-foreground mb-3" />
-          <p className="text-sm font-medium text-foreground">No users assigned</p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Assign roles to users at this {targetNoun} to grant permissions.
-          </p>
-          <Button
-            startAdornment={<UserPlus className="size-4" />}
-            size="sm"
-            className="mt-4"
-            onClick={assignDialog.open}
-          >
-            Assign Role
-          </Button>
-        </div>
+        <Empty
+          className="flex-1"
+          icon={<Users />}
+          title="No users assigned"
+          description={`Assign roles to users at this ${targetNoun} to grant permissions.`}
+          action={
+            <Button startAdornment={<UserPlus className="size-4" />} size="sm" onClick={assignDialog.open}>
+              Assign Role
+            </Button>
+          }
+        />
       )}
 
       {!isLoading &&
@@ -174,12 +174,10 @@ const AssignRoleForm = ({ target, defaultUserId, defaultRoleId, onSuccess, onCan
   });
 
   const { data: usersResponse } = useOrgUsers(target.orgId);
-  const { data: roles = [] } = useCompatibleRoles(target);
 
   const userList = usersResponse?.result ?? [];
 
   const userOptions = userList.map((u) => ({ value: u.id, label: `${u.fullName} (${u.email})` }));
-  const roleOptions = roles.map((r) => ({ value: r.id, label: r.name }));
 
   const mutation = useAssignRole({ onSuccess });
 
@@ -195,7 +193,15 @@ const AssignRoleForm = ({ target, defaultUserId, defaultRoleId, onSuccess, onCan
         searchable
         disabled={isChangingRole}
       />
-      <Select name="roleId" label="Role" placeholder="Select role" options={roleOptions} searchable />
+      <RoleSelector
+        name="roleId"
+        params={{
+          orgId: target.orgId,
+          scope: SCOPE_BY_KIND[target.kind],
+          ...(target.kind === 'site' ? { siteId: target.siteId } : {}),
+        }}
+        searchable
+      />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

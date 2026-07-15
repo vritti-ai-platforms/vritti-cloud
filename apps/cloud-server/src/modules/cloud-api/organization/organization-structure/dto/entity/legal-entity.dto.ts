@@ -35,6 +35,9 @@ export class LegalEntityDto {
   @ApiProperty({ example: true })
   isActive: boolean;
 
+  @ApiProperty({ example: 0 })
+  sortOrder: number;
+
   @ApiProperty({ example: '2024-01-15T10:30:00Z' })
   createdAt: string;
 

@@ -1,6 +1,6 @@
 import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
 import type { ScopeType, SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 import type { IconName } from 'lucide-react/dynamic';
 import { SITE_TYPE_LABELS, SITE_TYPE_VALUES } from '@/schemas/shared/site-types';
 
@@ -90,11 +90,7 @@ export interface FeatureMicrofrontendLinks {
 export type FeaturesTableResponse = TableResponse<Feature>;
 
 export const createFeatureSchema = z.object({
-  code: z
-    .string()
-    .min(1, 'Feature code is required')
-    .max(255, 'Code must be 255 characters or less')
-    .regex(/^[a-z][a-z0-9-]*$/, 'Single lowercase word, hyphens allowed (e.g. inventory-items)'),
+  code: zodCodeField({ max: 255 }),
   name: z.string().min(1, 'Feature name is required').max(255, 'Name must be 255 characters or less'),
   versionId: z.string().uuid('App version is required'),
   scope: z.enum(SCOPE_TYPE_VALUES).default('SITE'),
@@ -109,12 +105,7 @@ export const createFeatureSchema = z.object({
 });
 
 export const updateFeatureSchema = z.object({
-  code: z
-    .string()
-    .min(1, 'Feature code is required')
-    .max(255, 'Code must be 255 characters or less')
-    .regex(/^[a-z][a-z0-9-]*$/, 'Single lowercase word, hyphens allowed (e.g. inventory-items)')
-    .optional(),
+  code: zodCodeField({ max: 255 }).optional(),
   name: z.string().min(1, 'Feature name is required').max(255).optional(),
   scope: z.enum(SCOPE_TYPE_VALUES).optional(),
   applicableSiteTypes: z.array(z.enum(SITE_TYPE_VALUES)).min(1, 'Select at least one site type').optional(),

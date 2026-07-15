@@ -45,8 +45,8 @@ export const FeatureLocksTab: React.FC<FeatureLocksTabProps> = ({ scope }) => {
 
   if (apps.length === 0) {
     return (
-      <Card>
-        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
+      <Card className="flex flex-col">
+        <CardContent className="flex flex-1 flex-col items-center justify-center py-12 text-center">
           <Layers className="mb-3 size-8 text-muted-foreground" />
           <p className="text-sm font-medium text-foreground">No features at this scope yet</p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -58,7 +58,7 @@ export const FeatureLocksTab: React.FC<FeatureLocksTabProps> = ({ scope }) => {
   }
 
   return (
-    <Form form={form} mutation={saveMutation} resetOnSuccess={false} className="flex min-h-100 flex-col gap-4">
+    <Form form={form} mutation={saveMutation} resetOnSuccess={false} className="flex flex-col gap-4">
       {/* Toolbar */}
       <div className="flex items-center justify-between gap-4">
         <p className="text-sm text-muted-foreground">

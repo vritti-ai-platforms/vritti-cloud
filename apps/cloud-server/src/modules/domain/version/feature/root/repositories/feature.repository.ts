@@ -85,9 +85,9 @@ export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
       );
   }
 
-  // Finds a feature by its unique code
-  async findByCode(code: string): Promise<Feature | undefined> {
-    return this.model.findFirst({ where: { code } });
+  // Finds a feature by its identity within a version — codes are unique per (version, code, scope)
+  async findByVersionCodeScope(versionId: string, code: string, scope: ScopeType): Promise<Feature | undefined> {
+    return this.model.findFirst({ where: { versionId, code, scope } });
   }
 
   // Finds all features for a given app version
