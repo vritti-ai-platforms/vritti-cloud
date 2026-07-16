@@ -9,6 +9,7 @@
     "dev": "tsc --noEmit && rsbuild dev --host local.vrittiai.com",
     "dev:ssl": "tsc --noEmit && USE_HTTPS=true rsbuild dev --host local.vrittiai.com",
     "dev:ssl:w": "tsc --noEmit && cross-env USE_HTTPS=true rsbuild dev --host local.vrittiai.com",
+    "dev:ssl:vm": "tsc --noEmit && USE_HTTPS=true rsbuild dev --host 0.0.0.0",
     "dev:ssl:cloud": "tsc --noEmit && cross-env USE_HTTPS=true DEV_HOST=cloud.local.vrittiai.com rsbuild dev",
     "dev:ssl:admin": "tsc --noEmit && cross-env USE_HTTPS=true DEV_HOST=admin.local.vrittiai.com rsbuild dev",
     "format": "biome format --write .",
