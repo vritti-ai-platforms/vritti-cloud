@@ -59,9 +59,9 @@ mkcert \
     -key-file "_wildcard.local.vrittiai.com+4-key.pem" \
     -cert-file "_wildcard.local.vrittiai.com+4.pem" \
     "*.local.vrittiai.com" \
+    "*.localm.vrittiai.com" \
     "local.vrittiai.com" \
     "localm.vrittiai.com" \
-    "cloud.localm.vrittiai.com" \
     "localhost" \
     "127.0.0.1" \
     "::1"
