@@ -5,7 +5,7 @@ import { Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import type React from 'react';
 import { useState } from 'react';
-import { MatrixCard, type MatrixColumn, MatrixRow } from '@/components/permission-matrix';
+import { MatrixCard, type MatrixColumn, MatrixDash, MatrixRow } from '@/components/permission-matrix';
 import { SCOPE_SECTION_ORDER, SCOPE_TYPE_LABELS } from '@/schemas/admin/features';
 import {
   PLATFORM_LABEL,
@@ -111,7 +111,7 @@ export const PlanMatrix: React.FC<PlanMatrixProps> = ({ apps, value = [], onChan
           {section.apps.map((app) => {
             const cardKey = `${section.scope}:${app.id}`;
             const platforms = appPlatforms(app);
-            const columns: MatrixColumn[] = platforms.map((p) => ({ key: p, label: PLATFORM_LABEL[p] }));
+            const columns: MatrixColumn[] = PLATFORM_ORDER.map((p) => ({ key: p, label: PLATFORM_LABEL[p] }));
             const total = app.features.length;
             const unlocked = app.features.filter((f) => platforms.some((p) => isOn(f.id, p))).length;
 
@@ -208,7 +208,9 @@ function PlanFeatureRows({
         renderCell={(key) =>
           onPlatform(key) ? (
             <CompactSwitch checked={on(key)} onCheckedChange={() => onToggleUnlock(key as Platform)} />
-          ) : null
+          ) : (
+            <MatrixDash />
+          )
         }
       />
 
@@ -220,6 +222,7 @@ function PlanFeatureRows({
             labelClassName="text-sm font-medium text-foreground/80"
             columns={columns}
             renderCell={(key) => {
+              if (!onPlatform(key)) return <MatrixDash />;
               const set = on(key) ? perms(feature.id, key as Platform) : undefined;
               if (!set) return null;
               const allOn = allIds.length > 0 && allIds.every((id) => set.has(id));
@@ -240,15 +243,16 @@ function PlanFeatureRows({
               label={perm.label}
               labelClassName="text-sm text-muted-foreground"
               columns={columns}
-              renderCell={(key) =>
-                on(key) ? (
+              renderCell={(key) => {
+                if (!onPlatform(key)) return <MatrixDash />;
+                return on(key) ? (
                   <Checkbox
                     checked={perms(feature.id, key as Platform)?.has(perm.featurePermissionId) ?? false}
                     disabled={!perm.dependsOn.every((dep) => grantedCodes(key).has(dep))}
                     onCheckedChange={() => onTogglePermission(perm.featurePermissionId, key as Platform)}
                   />
-                ) : null
-              }
+                ) : null;
+              }}
             />
           ))}
         </div>

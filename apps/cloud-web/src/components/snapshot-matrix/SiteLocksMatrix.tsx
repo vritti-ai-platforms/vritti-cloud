@@ -135,7 +135,11 @@ function FeatureBlock({
         <div className="flex">
           {MATRIX_PLATFORMS.map((platform) => {
             if (!feature.platforms.includes(platform)) {
-              return <div key={platform} className="w-24" />;
+              return (
+                <div key={platform} className="flex w-24 justify-center">
+                  <span className="text-xs text-muted-foreground">—</span>
+                </div>
+              );
             }
             if (lockedOnPlatform(feature, platform)) {
               return (

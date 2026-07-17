@@ -67,11 +67,8 @@ export const FeatureViewPage = () => {
         buttonText="Delete Feature"
         onClick={handleDelete}
         disabled={!feature.canDelete}
-        warning={
-          !feature.canDelete
-            ? 'This feature has active dependencies. Remove all associations before deleting.'
-            : undefined
-        }
+        warning="This feature has active dependencies. Remove all associations before deleting."
+        showWarning={!feature.canDelete}
       />
 
       {/* Edit dialog */}

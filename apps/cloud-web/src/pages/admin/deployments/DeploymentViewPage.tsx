@@ -120,11 +120,8 @@ export const DeploymentViewPage = () => {
                   buttonText="Delete Deployment"
                   onClick={handleDelete}
                   disabled={!!deployment.organizationCount}
-                  warning={
-                    deployment.organizationCount
-                      ? `This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`
-                      : undefined
-                  }
+                  warning={`This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`}
+                  showWarning={!!deployment.organizationCount}
                 />
               </div>
             ),

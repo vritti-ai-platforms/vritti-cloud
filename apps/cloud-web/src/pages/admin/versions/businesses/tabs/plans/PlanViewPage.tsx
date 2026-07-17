@@ -87,7 +87,8 @@ export const PlanViewPage = () => {
         buttonText="Delete Plan"
         onClick={handleDelete}
         disabled={!plan.canDelete}
-        warning={!plan.canDelete ? buildDeleteWarning(plan) : undefined}
+        warning={buildDeleteWarning(plan)}
+        showWarning={!plan.canDelete}
       />
 
       {/* Edit dialog */}

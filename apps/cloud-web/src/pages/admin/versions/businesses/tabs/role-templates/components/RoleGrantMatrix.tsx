@@ -5,7 +5,7 @@ import { Shield } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
 import type React from 'react';
 import { useState } from 'react';
-import { MatrixCard, type MatrixColumn, MatrixRow } from '@/components/permission-matrix';
+import { MatrixCard, type MatrixColumn, MatrixDash, MatrixRow } from '@/components/permission-matrix';
 import type { Platform, RoleTemplateApp, RoleTemplateFeature, RoleTemplateGrant } from '@/schemas/admin/role-templates';
 import { PLATFORM_LABEL, PLATFORM_ORDER } from '@/services/admin/versions/businesses/plans/permissions.service';
 
@@ -102,7 +102,7 @@ export const RoleGrantMatrix: React.FC<RoleGrantMatrixProps> = ({ apps, value = 
     <div className="flex flex-1 flex-col gap-3">
       {apps.map((app) => {
         const platforms = appPlatforms(app);
-        const columns: MatrixColumn[] = platforms.map((p) => ({ key: p, label: PLATFORM_LABEL[p] }));
+        const columns: MatrixColumn[] = PLATFORM_ORDER.map((p) => ({ key: p, label: PLATFORM_LABEL[p] }));
         const total = app.features.length;
         const granted = app.features.filter((f) => platforms.some((p) => isOn(f.id, p))).length;
 
@@ -195,7 +195,9 @@ function RoleFeatureRows({
         renderCell={(key) =>
           onPlatform(key) ? (
             <CompactSwitch checked={on(key)} onCheckedChange={() => onToggleGrant(key as Platform)} />
-          ) : null
+          ) : (
+            <MatrixDash />
+          )
         }
       />
 
@@ -207,6 +209,7 @@ function RoleFeatureRows({
             labelClassName="text-sm font-medium text-foreground/80"
             columns={columns}
             renderCell={(key) => {
+              if (!onPlatform(key)) return <MatrixDash />;
               const set = on(key) ? perms(feature.id, key as Platform) : undefined;
               if (!set) return null;
               const allOn = allIds.length > 0 && allIds.every((id) => set.has(id));
@@ -227,15 +230,16 @@ function RoleFeatureRows({
               label={perm.label}
               labelClassName="text-sm text-muted-foreground"
               columns={columns}
-              renderCell={(key) =>
-                on(key) ? (
+              renderCell={(key) => {
+                if (!onPlatform(key)) return <MatrixDash />;
+                return on(key) ? (
                   <Checkbox
                     checked={perms(feature.id, key as Platform)?.has(perm.featurePermissionId) ?? false}
                     disabled={!perm.dependsOn.every((dep) => grantedCodes(key).has(dep))}
                     onCheckedChange={() => onTogglePermission(perm.featurePermissionId, key as Platform)}
                   />
-                ) : null
-              }
+                ) : null;
+              }}
             />
           ))}
         </div>

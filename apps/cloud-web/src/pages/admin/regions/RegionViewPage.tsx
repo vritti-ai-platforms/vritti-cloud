@@ -184,11 +184,8 @@ export const RegionViewPage = () => {
         buttonText="Delete Region"
         onClick={handleDelete}
         disabled={!region.canDelete}
-        warning={
-          !region.canDelete
-            ? `This region has ${region.deploymentCount} deployment(s) and ${region.priceCount} price(s) associated with it. Remove all deployments and prices before deleting.`
-            : undefined
-        }
+        warning={`This region has ${region.deploymentCount} deployment(s) and ${region.priceCount} price(s) associated with it. Remove all deployments and prices before deleting.`}
+        showWarning={!region.canDelete}
       />
 
       {/* Edit dialog */}
