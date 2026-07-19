@@ -1,5 +1,5 @@
 import { buildSiteMatrix } from '@domain/catalog/site-matrix.builder';
-import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
+import { CloudOrganizationDomainRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import type { SiteType } from '@vritti/api-sdk/catalog-resolver';
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
@@ -31,7 +31,7 @@ export class OrganizationSitesService {
 
   constructor(
     private readonly coreDeploymentService: CoreDeploymentService,
-    private readonly organizationRepository: OrganizationRepository,
+    private readonly organizationRepository: CloudOrganizationDomainRepository,
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly coreSiteService: CoreSiteService,
     private readonly catalogSyncService: CatalogSyncService,

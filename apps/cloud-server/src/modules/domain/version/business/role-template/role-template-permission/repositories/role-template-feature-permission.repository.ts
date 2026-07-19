@@ -39,7 +39,7 @@ export interface AvailableApp {
 }
 
 @Injectable()
-export class RoleTemplateFeaturePermissionRepository extends PrimaryBaseRepository<
+export class RoleTemplateFeaturePermissionDomainRepository extends PrimaryBaseRepository<
   typeof roleTemplateFeaturePermissions
 > {
   constructor(database: PrimaryDatabaseService) {

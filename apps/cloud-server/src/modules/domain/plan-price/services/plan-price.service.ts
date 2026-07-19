@@ -4,13 +4,13 @@ import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import { type CurrencyAmountDto, type CurrencyCode, majorToMinor } from '@vritti/api-sdk/money';
 import { PlanPriceDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/entity/plan-price.dto';
 import type { CreatePlanPricesDto } from '@/modules/admin-api/version/business/plan/plan-price/dto/request/create-plan-prices.dto';
-import { PlanPriceRepository } from '../repositories/plan-price.repository';
+import { PlanPriceDomainRepository } from '../repositories/plan-price.repository';
 
 @Injectable()
-export class PlanPriceService {
-  private readonly logger = new Logger(PlanPriceService.name);
+export class PlanPriceDomainService {
+  private readonly logger = new Logger(PlanPriceDomainService.name);
 
-  constructor(private readonly planPriceRepository: PlanPriceRepository) {}
+  constructor(private readonly planPriceRepository: PlanPriceDomainRepository) {}
 
   // Lists all prices for a plan with country and billing cycle details
   async findByPlan(planId: string): Promise<PlanPriceDto[]> {

@@ -1,4 +1,4 @@
-import { BillingCycleService } from '@domain/billing-cycle/services/billing-cycle.service';
+import { BillingCycleDomainService } from '@domain/billing-cycle/services/billing-cycle.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { BillingCycleSelectQueryDto } from '../dto/billing-cycle-select-query.dt
 export class BillingCycleSelectController {
   private readonly logger = new Logger(BillingCycleSelectController.name);
 
-  constructor(private readonly billingCycleService: BillingCycleService) {}
+  constructor(private readonly billingCycleService: BillingCycleDomainService) {}
 
   // Returns paginated billing cycle options for the select component
   @Get()

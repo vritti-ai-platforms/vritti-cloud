@@ -1,4 +1,4 @@
-import { DeploymentService } from '@domain/deployment/services/deployment.service';
+import { DeploymentDomainService } from '@domain/deployment/services/deployment.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -25,7 +25,7 @@ import { DeploymentsResponseDto } from '../dto/response/deployments-response.dto
 export class DeploymentController {
   private readonly logger = new Logger(DeploymentController.name);
 
-  constructor(private readonly deploymentService: DeploymentService) {}
+  constructor(private readonly deploymentService: DeploymentDomainService) {}
 
   // Creates a new deployment
   @Post()

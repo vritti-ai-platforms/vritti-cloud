@@ -1,11 +1,11 @@
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
-import { TotpService } from '@domain/mfa/services/totp.service';
-import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import { MfaDomainRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeDomainService } from '@domain/mfa/services/backup-code.service';
+import { TotpDomainService } from '@domain/mfa/services/totp.service';
+import { WebAuthnDomainService } from '@domain/mfa/services/webauthn.service';
 import type { AuthenticatorTransportFuture, RegistrationResponseJSON } from '@domain/mfa/types/webauthn.types';
-import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
-import { SessionService } from '@domain/session/services/session.service';
-import { UserService } from '@domain/user/services/user.service';
+import { OAuthProviderDomainRepository } from '@domain/oauth/repositories/oauth-provider.repository';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { hashToken } from '@vritti/api-sdk/auth';
@@ -25,15 +25,15 @@ export class SecurityService {
   private readonly logger = new Logger(SecurityService.name);
 
   constructor(
-    private readonly userService: UserService,
-    private readonly sessionService: SessionService,
+    private readonly userService: UserDomainService,
+    private readonly sessionService: SessionDomainService,
     private readonly encryptionService: EncryptionService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly totpService: TotpService,
-    private readonly webAuthnService: WebAuthnService,
-    private readonly backupCodeService: BackupCodeService,
-    private readonly mfaRepo: MfaRepository,
-    private readonly oauthProviderRepo: OAuthProviderRepository,
+    private readonly totpService: TotpDomainService,
+    private readonly webAuthnService: WebAuthnDomainService,
+    private readonly backupCodeService: BackupCodeDomainService,
+    private readonly mfaRepo: MfaDomainRepository,
+    private readonly oauthProviderRepo: OAuthProviderDomainRepository,
   ) {}
 
   // Verifies current password and updates to a new one

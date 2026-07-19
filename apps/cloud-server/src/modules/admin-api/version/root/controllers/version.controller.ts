@@ -1,4 +1,4 @@
-import { VersionService } from '@domain/version/root/services/version.service';
+import { VersionDomainService } from '@domain/version/root/services/version.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -28,7 +28,7 @@ export class VersionController {
   private readonly logger = new Logger(VersionController.name);
 
   constructor(
-    private readonly versionService: VersionService,
+    private readonly versionService: VersionDomainService,
     private readonly versionSnapshotService: VersionSnapshotService,
   ) {}
 

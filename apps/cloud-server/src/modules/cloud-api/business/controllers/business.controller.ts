@@ -1,4 +1,4 @@
-import { BusinessService } from '@domain/business/services/business.service';
+import { BusinessDomainService } from '@domain/business/services/business.service';
 import { Controller, Get, Logger } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ApiGetBusinesses } from '../docs/business.docs';
@@ -9,7 +9,7 @@ import { CloudBusinessDto } from '../dto/entity/business.dto';
 export class BusinessController {
   private readonly logger = new Logger(BusinessController.name);
 
-  constructor(private readonly businessService: BusinessService) {}
+  constructor(private readonly businessService: BusinessDomainService) {}
 
   // Returns all available business types
   @Get()

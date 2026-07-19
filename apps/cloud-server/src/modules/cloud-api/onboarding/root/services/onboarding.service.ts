@@ -1,5 +1,5 @@
-import { SessionService } from '@domain/session/services/session.service';
-import { UserService } from '@domain/user/services/user.service';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException } from '@vritti/api-sdk/exceptions';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
@@ -12,9 +12,9 @@ export class OnboardingService {
   private readonly logger = new Logger(OnboardingService.name);
 
   constructor(
-    private readonly userService: UserService,
+    private readonly userService: UserDomainService,
     private readonly encryptionService: EncryptionService,
-    private readonly sessionService: SessionService,
+    private readonly sessionService: SessionDomainService,
   ) {}
 
   // Fetches the user and maps their profile to an onboarding status response

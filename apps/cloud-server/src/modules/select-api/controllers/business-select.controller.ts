@@ -1,4 +1,4 @@
-import { BusinessService } from '@domain/business/services/business.service';
+import { BusinessDomainService } from '@domain/business/services/business.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { BusinessSelectQueryDto } from '../dto/business-select-query.dto';
 export class BusinessSelectController {
   private readonly logger = new Logger(BusinessSelectController.name);
 
-  constructor(private readonly businessService: BusinessService) {}
+  constructor(private readonly businessService: BusinessDomainService) {}
 
   // Returns paginated business options for the select component, optionally excluding businesses already assigned to a version
   @Get()

@@ -29,7 +29,7 @@ export interface BusinessFeatureRow {
 }
 
 @Injectable()
-export class AppFeatureRepository extends PrimaryBaseRepository<typeof businessAppFeatures> {
+export class AppFeatureDomainRepository extends PrimaryBaseRepository<typeof businessAppFeatures> {
   constructor(database: PrimaryDatabaseService) {
     super(database, businessAppFeatures);
   }

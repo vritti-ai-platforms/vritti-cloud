@@ -1,4 +1,4 @@
-import { RoleTemplateService } from '@domain/version/business/role-template/root/services/role-template.service';
+import { RoleTemplateDomainService } from '@domain/version/business/role-template/root/services/role-template.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { RoleTemplateSelectQueryDto } from '../dto/role-template-select-query.dt
 export class RoleTemplateSelectController {
   private readonly logger = new Logger(RoleTemplateSelectController.name);
 
-  constructor(private readonly roleTemplateService: RoleTemplateService) {}
+  constructor(private readonly roleTemplateService: RoleTemplateDomainService) {}
 
   // Returns paginated role template options for the select component
   @Get()

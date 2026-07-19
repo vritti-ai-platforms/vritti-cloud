@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { DeploymentRepository } from './repositories/deployment.repository';
-import { DeploymentService } from './services/deployment.service';
+import { DeploymentDomainRepository } from './repositories/deployment.repository';
+import { DeploymentDomainService } from './services/deployment.service';
 
 @Module({
-  providers: [DeploymentService, DeploymentRepository],
-  exports: [DeploymentService, DeploymentRepository],
+  providers: [DeploymentDomainService, DeploymentDomainRepository],
+  exports: [DeploymentDomainService, DeploymentDomainRepository],
 })
 export class DeploymentDomainModule {}

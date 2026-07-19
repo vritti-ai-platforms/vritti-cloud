@@ -1,4 +1,4 @@
-import { UserService } from '@domain/user/services/user.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ApiFindAllUsers, ApiFindUserById } from '../docs/user.docs';
@@ -10,7 +10,7 @@ import { UserDto } from '../dto/entity/user.dto';
 export class UserController {
   private readonly logger = new Logger(UserController.name);
 
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserDomainService) {}
 
   // Retrieves all users in the system
   @Get()

@@ -4,7 +4,7 @@ import { lt } from '@vritti/api-sdk/drizzle-orm';
 import { type OAuthState, oauthStates } from '@/db/schema';
 
 @Injectable()
-export class OAuthStateRepository extends PrimaryBaseRepository<typeof oauthStates> {
+export class OAuthStateDomainRepository extends PrimaryBaseRepository<typeof oauthStates> {
   constructor(database: PrimaryDatabaseService) {
     super(database, oauthStates);
   }

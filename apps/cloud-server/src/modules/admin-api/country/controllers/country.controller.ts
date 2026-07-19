@@ -1,4 +1,4 @@
-import { CountryService } from '@domain/country/services/country.service';
+import { CountryDomainService } from '@domain/country/services/country.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -23,7 +23,7 @@ import { CountryTableResponseDto } from '../dto/response/countries-response.dto'
 export class CountryController {
   private readonly logger = new Logger(CountryController.name);
 
-  constructor(private readonly countryService: CountryService) {}
+  constructor(private readonly countryService: CountryDomainService) {}
 
   // Creates a new country
   @Post()

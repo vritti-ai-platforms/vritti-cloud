@@ -5,7 +5,7 @@ import type { RoleTemplate } from '@/db/schema';
 import { businesses, roleTemplateFeaturePermissions, roleTemplates } from '@/db/schema';
 
 @Injectable()
-export class RoleTemplateRepository extends PrimaryBaseRepository<typeof roleTemplates> {
+export class RoleTemplateDomainRepository extends PrimaryBaseRepository<typeof roleTemplates> {
   constructor(database: PrimaryDatabaseService) {
     super(database, roleTemplates);
   }

@@ -1,4 +1,4 @@
-import { FeaturePermissionService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
+import { FeaturePermissionDomainService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { FeaturePermissionSelectQueryDto } from '../dto/feature-permission-selec
 export class FeaturePermissionSelectController {
   private readonly logger = new Logger(FeaturePermissionSelectController.name);
 
-  constructor(private readonly featurePermissionService: FeaturePermissionService) {}
+  constructor(private readonly featurePermissionService: FeaturePermissionDomainService) {}
 
   // Returns sibling permission options for the "depends on" selector, scoped to a feature
   @Get()

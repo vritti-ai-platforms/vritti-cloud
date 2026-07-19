@@ -11,7 +11,7 @@ export interface PlanUnlock {
 }
 
 @Injectable()
-export class PlanFeatureRepository extends PrimaryBaseRepository<typeof planFeatures> {
+export class PlanFeatureDomainRepository extends PrimaryBaseRepository<typeof planFeatures> {
   constructor(database: PrimaryDatabaseService) {
     super(database, planFeatures);
   }

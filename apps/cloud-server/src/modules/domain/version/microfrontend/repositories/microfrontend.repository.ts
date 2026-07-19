@@ -23,7 +23,7 @@ export interface MobileMicrofrontendUpsert {
 }
 
 @Injectable()
-export class MicrofrontendRepository extends PrimaryBaseRepository<typeof microfrontends> {
+export class MicrofrontendDomainRepository extends PrimaryBaseRepository<typeof microfrontends> {
   constructor(database: PrimaryDatabaseService) {
     super(database, microfrontends);
   }

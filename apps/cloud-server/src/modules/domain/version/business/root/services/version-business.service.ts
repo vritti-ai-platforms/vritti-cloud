@@ -6,11 +6,11 @@ import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions
 import { businesses } from '@/db/schema';
 import { VersionBusinessDto } from '@/modules/admin-api/business/dto/entity/version-business.dto';
 import { VersionBusinessTableResponseDto } from '@/modules/admin-api/version/business/root/dto/response/version-business-table-response.dto';
-import { VersionBusinessRepository } from '../repositories/version-business.repository';
+import { VersionBusinessDomainRepository } from '../repositories/version-business.repository';
 
 @Injectable()
-export class VersionBusinessService {
-  private readonly logger = new Logger(VersionBusinessService.name);
+export class VersionBusinessDomainService {
+  private readonly logger = new Logger(VersionBusinessDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: businesses.name, type: 'string' },
@@ -18,7 +18,7 @@ export class VersionBusinessService {
   };
 
   constructor(
-    private readonly versionBusinessRepository: VersionBusinessRepository,
+    private readonly versionBusinessRepository: VersionBusinessDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -29,10 +29,10 @@ export class VersionBusinessService {
       `version-businesses-${versionId}`,
     );
     const where = and(
-      FilterProcessor.buildWhere(state.filters, VersionBusinessService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, VersionBusinessService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, VersionBusinessDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, VersionBusinessDomainService.FIELD_MAP),
     );
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, VersionBusinessService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, VersionBusinessDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.versionBusinessRepository.findAllForTable(versionId, {
       where,

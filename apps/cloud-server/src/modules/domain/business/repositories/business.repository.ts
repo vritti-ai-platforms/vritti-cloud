@@ -10,7 +10,7 @@ import type { Business } from '@/db/schema';
 import { businessApps, businesses, organizations, plans, roleTemplates, versionBusinesses } from '@/db/schema';
 
 @Injectable()
-export class BusinessRepository extends PrimaryBaseRepository<typeof businesses> {
+export class BusinessDomainRepository extends PrimaryBaseRepository<typeof businesses> {
   constructor(database: PrimaryDatabaseService) {
     super(database, businesses);
   }

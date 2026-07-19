@@ -7,14 +7,14 @@ import { businessAppFeatures, businessApps, features } from '@/db/schema';
 import { BusinessFeatureDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature.dto';
 import { BusinessFeaturePermissionDto } from '@/modules/admin-api/version/business/feature/dto/entity/business-feature-permission.dto';
 import type { BusinessFeatureTableResponseDto } from '@/modules/admin-api/version/business/feature/dto/response/business-feature-table-response.dto';
-import { FeaturePermissionRepository } from '../../../feature/feature-permission/repositories/feature-permission.repository';
-import { FeatureRepository } from '../../../feature/root/repositories/feature.repository';
-import { AppFeatureRepository } from '../../app/app-feature/repositories/app-feature.repository';
-import { AppRepository } from '../../app/root/repositories/app.repository';
+import { FeaturePermissionDomainRepository } from '../../../feature/feature-permission/repositories/feature-permission.repository';
+import { FeatureDomainRepository } from '../../../feature/root/repositories/feature.repository';
+import { AppFeatureDomainRepository } from '../../app/app-feature/repositories/app-feature.repository';
+import { AppDomainRepository } from '../../app/root/repositories/app.repository';
 
 @Injectable()
-export class BusinessFeatureService {
-  private readonly logger = new Logger(BusinessFeatureService.name);
+export class BusinessFeatureDomainService {
+  private readonly logger = new Logger(BusinessFeatureDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: features.name, type: 'string' },
@@ -26,10 +26,10 @@ export class BusinessFeatureService {
   };
 
   constructor(
-    private readonly appFeatureRepository: AppFeatureRepository,
-    private readonly appRepository: AppRepository,
-    private readonly featureRepository: FeatureRepository,
-    private readonly featurePermissionRepository: FeaturePermissionRepository,
+    private readonly appFeatureRepository: AppFeatureDomainRepository,
+    private readonly appRepository: AppDomainRepository,
+    private readonly featureRepository: FeatureDomainRepository,
+    private readonly featurePermissionRepository: FeaturePermissionDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -40,10 +40,10 @@ export class BusinessFeatureService {
       `business-features-${businessId}`,
     );
     const where = and(
-      FilterProcessor.buildWhere(state.filters, BusinessFeatureService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, BusinessFeatureService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, BusinessFeatureDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, BusinessFeatureDomainService.FIELD_MAP),
     );
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, BusinessFeatureService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, BusinessFeatureDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.appFeatureRepository.findBusinessFeaturesForTable(versionId, businessId, {
       where,

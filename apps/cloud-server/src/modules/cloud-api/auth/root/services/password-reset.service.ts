@@ -1,6 +1,6 @@
-import { SessionService } from '@domain/session/services/session.service';
-import { UserService } from '@domain/user/services/user.service';
-import { VerificationService } from '@domain/verification/services/verification.service';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainService } from '@domain/user/services/user.service';
+import { VerificationDomainService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EmailService } from '@vritti/api-sdk/email';
 import { BadRequestException } from '@vritti/api-sdk/exceptions';
@@ -16,11 +16,11 @@ export class PasswordResetService {
   private readonly RESET_WINDOW_MINUTES = 10;
 
   constructor(
-    private readonly verificationService: VerificationService,
+    private readonly verificationService: VerificationDomainService,
     private readonly emailService: EmailService,
     private readonly encryptionService: EncryptionService,
-    private readonly userService: UserService,
-    private readonly sessionService: SessionService,
+    private readonly userService: UserDomainService,
+    private readonly sessionService: SessionDomainService,
   ) {}
 
   // Security message — identical for found and not-found cases to prevent email enumeration

@@ -1,4 +1,4 @@
-import { VersionService } from '@domain/version/root/services/version.service';
+import { VersionDomainService } from '@domain/version/root/services/version.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -12,7 +12,7 @@ import { SessionTypeValues } from '@/db/schema';
 export class VersionSelectController {
   private readonly logger = new Logger(VersionSelectController.name);
 
-  constructor(private readonly versionService: VersionService) {}
+  constructor(private readonly versionService: VersionDomainService) {}
 
   // Returns paginated version options for the select component
   @Get()

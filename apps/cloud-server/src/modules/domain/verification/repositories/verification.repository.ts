@@ -5,7 +5,7 @@ import { type Verification, verifications } from '@/db/schema';
 import type { VerificationChannel } from '@/db/schema/enums';
 
 @Injectable()
-export class VerificationRepository extends PrimaryBaseRepository<typeof verifications> {
+export class VerificationDomainRepository extends PrimaryBaseRepository<typeof verifications> {
   constructor(database: PrimaryDatabaseService) {
     super(database, verifications);
   }

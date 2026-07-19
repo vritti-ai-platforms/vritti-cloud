@@ -1,6 +1,6 @@
 import {
   type PlanAppWithUnlocks,
-  PlanFeaturePermissionService,
+  PlanFeaturePermissionDomainService,
 } from '@domain/plan/services/plan-feature-permission.service';
 import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
@@ -16,7 +16,7 @@ import { SetPlanUnlockedDto } from '../dto/request/set-plan-unlocked.dto';
 export class PlanFeaturePermissionController {
   private readonly logger = new Logger(PlanFeaturePermissionController.name);
 
-  constructor(private readonly service: PlanFeaturePermissionService) {}
+  constructor(private readonly service: PlanFeaturePermissionDomainService) {}
 
   // Returns the matrix — apps each with the plan's current unlocks (with their unlocked permissions) nested
   @Get()

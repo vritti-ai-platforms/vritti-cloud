@@ -4,11 +4,11 @@ import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { NewPlanFeature, NewPlanFeaturePermission } from '@/db/schema';
 import type { SetPlanUnlockedDto } from '@/modules/admin-api/version/business/plan/plan-feature-permission/dto/request/set-plan-unlocked.dto';
-import { PlanRepository } from '../repositories/plan.repository';
-import { PlanFeatureRepository, type PlanUnlock } from '../repositories/plan-feature.repository';
+import { PlanDomainRepository } from '../repositories/plan.repository';
+import { PlanFeatureDomainRepository, type PlanUnlock } from '../repositories/plan-feature.repository';
 import {
   type AvailablePlanApp,
-  PlanFeaturePermissionRepository,
+  PlanFeaturePermissionDomainRepository,
 } from '../repositories/plan-feature-permission.repository';
 
 export interface PlanAppWithUnlocks extends AvailablePlanApp {
@@ -16,13 +16,13 @@ export interface PlanAppWithUnlocks extends AvailablePlanApp {
 }
 
 @Injectable()
-export class PlanFeaturePermissionService {
-  private readonly logger = new Logger(PlanFeaturePermissionService.name);
+export class PlanFeaturePermissionDomainService {
+  private readonly logger = new Logger(PlanFeaturePermissionDomainService.name);
 
   constructor(
-    private readonly planFeatureRepository: PlanFeatureRepository,
-    private readonly planFeaturePermissionRepository: PlanFeaturePermissionRepository,
-    private readonly planRepository: PlanRepository,
+    private readonly planFeatureRepository: PlanFeatureDomainRepository,
+    private readonly planFeaturePermissionRepository: PlanFeaturePermissionDomainRepository,
+    private readonly planRepository: PlanDomainRepository,
   ) {}
 
   // Returns the matrix source — apps (catalog) each with the plan's current unlocks nested under it.

@@ -5,7 +5,7 @@ import { parseExpiryToMs } from '@vritti/api-sdk/utils';
 import type { Verification, VerificationChannel } from '@/db/schema';
 import { VerificationChannelValues } from '@/db/schema/enums';
 import { EncryptionService } from '../../../../services';
-import { VerificationRepository } from '../repositories/verification.repository';
+import { VerificationDomainRepository } from '../repositories/verification.repository';
 
 export interface CreateVerificationResult {
   verificationId: string;
@@ -14,13 +14,13 @@ export interface CreateVerificationResult {
 }
 
 @Injectable()
-export class VerificationService {
-  private readonly logger = new Logger(VerificationService.name);
+export class VerificationDomainService {
+  private readonly logger = new Logger(VerificationDomainService.name);
   private readonly expiryMs: number;
   private readonly maxAttempts: number;
 
   constructor(
-    private readonly verificationRepo: VerificationRepository,
+    private readonly verificationRepo: VerificationDomainRepository,
     private readonly encryptionService: EncryptionService,
     private readonly configService: ConfigService,
   ) {

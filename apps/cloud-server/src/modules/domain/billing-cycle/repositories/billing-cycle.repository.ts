@@ -5,7 +5,7 @@ import type { BillingCycle } from '@/db/schema';
 import { billingCycles } from '@/db/schema';
 
 @Injectable()
-export class BillingCycleRepository extends PrimaryBaseRepository<typeof billingCycles> {
+export class BillingCycleDomainRepository extends PrimaryBaseRepository<typeof billingCycles> {
   constructor(database: PrimaryDatabaseService) {
     super(database, billingCycles);
   }

@@ -1,4 +1,4 @@
-import { PlanService } from '@domain/plan/services/plan.service';
+import { PlanDomainService } from '@domain/plan/services/plan.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -12,7 +12,7 @@ import { SessionTypeValues } from '@/db/schema';
 export class PlanSelectController {
   private readonly logger = new Logger(PlanSelectController.name);
 
-  constructor(private readonly planService: PlanService) {}
+  constructor(private readonly planService: PlanDomainService) {}
 
   // Returns paginated plan options for the select component
   @Get()

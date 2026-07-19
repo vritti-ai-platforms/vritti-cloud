@@ -1,4 +1,4 @@
-import { AppService } from '@domain/version/business/app/root/services/app.service';
+import { AppDomainService } from '@domain/version/business/app/root/services/app.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -28,7 +28,7 @@ import { AppTableResponseDto } from '../dto/response/app-table-response.dto';
 export class AppController {
   private readonly logger = new Logger(AppController.name);
 
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppDomainService) {}
 
   // Creates a new app
   @Post()

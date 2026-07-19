@@ -15,7 +15,7 @@ export type OrganizationMemberRow = {
 };
 
 @Injectable()
-export class OrganizationMemberRepository extends PrimaryBaseRepository<typeof users> {
+export class OrganizationMemberDomainRepository extends PrimaryBaseRepository<typeof users> {
   constructor(database: PrimaryDatabaseService) {
     super(database, users);
   }

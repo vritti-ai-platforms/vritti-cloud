@@ -1,4 +1,4 @@
-import { PlanPriceService } from '@domain/plan-price/services/plan-price.service';
+import { PlanPriceDomainService } from '@domain/plan-price/services/plan-price.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -21,7 +21,7 @@ import { UpdatePlanPriceAmountDto } from '../dto/request/update-plan-price-amoun
 export class PlanPriceController {
   private readonly logger = new Logger(PlanPriceController.name);
 
-  constructor(private readonly planPriceService: PlanPriceService) {}
+  constructor(private readonly planPriceService: PlanPriceDomainService) {}
 
   // Lists all prices for a plan
   @Get()

@@ -1,26 +1,26 @@
 import { Module } from '@nestjs/common';
 import { CoreServerModule } from '@/modules/core-server/core-server.module';
-import { PlanRepository } from './repositories/plan.repository';
-import { PlanFeatureRepository } from './repositories/plan-feature.repository';
-import { PlanFeaturePermissionRepository } from './repositories/plan-feature-permission.repository';
-import { PlanService } from './services/plan.service';
-import { PlanFeaturePermissionService } from './services/plan-feature-permission.service';
+import { PlanDomainRepository } from './repositories/plan.repository';
+import { PlanFeatureDomainRepository } from './repositories/plan-feature.repository';
+import { PlanFeaturePermissionDomainRepository } from './repositories/plan-feature-permission.repository';
+import { PlanDomainService } from './services/plan.service';
+import { PlanFeaturePermissionDomainService } from './services/plan-feature-permission.service';
 
 @Module({
   imports: [CoreServerModule],
   providers: [
-    PlanService,
-    PlanRepository,
-    PlanFeaturePermissionService,
-    PlanFeatureRepository,
-    PlanFeaturePermissionRepository,
+    PlanDomainService,
+    PlanDomainRepository,
+    PlanFeaturePermissionDomainService,
+    PlanFeatureDomainRepository,
+    PlanFeaturePermissionDomainRepository,
   ],
   exports: [
-    PlanService,
-    PlanRepository,
-    PlanFeaturePermissionService,
-    PlanFeatureRepository,
-    PlanFeaturePermissionRepository,
+    PlanDomainService,
+    PlanDomainRepository,
+    PlanFeaturePermissionDomainService,
+    PlanFeatureDomainRepository,
+    PlanFeaturePermissionDomainRepository,
   ],
 })
 export class PlanDomainModule {}

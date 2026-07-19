@@ -1,88 +1,88 @@
 import { Module } from '@nestjs/common';
 // App Feature
-import { AppFeatureRepository } from './business/app/app-feature/repositories/app-feature.repository';
+import { AppFeatureDomainRepository } from './business/app/app-feature/repositories/app-feature.repository';
 // App
-import { AppRepository } from './business/app/root/repositories/app.repository';
-import { AppService } from './business/app/root/services/app.service';
+import { AppDomainRepository } from './business/app/root/repositories/app.repository';
+import { AppDomainService } from './business/app/root/services/app.service';
 // Business Feature (feature ↔ app assignment within a business)
-import { BusinessFeatureService } from './business/feature/services/business-feature.service';
+import { BusinessFeatureDomainService } from './business/feature/services/business-feature.service';
 // Role Template Permission
-import { RoleTemplateFeatureRepository } from './business/role-template/role-template-permission/repositories/role-template-feature.repository';
-import { RoleTemplateFeaturePermissionRepository } from './business/role-template/role-template-permission/repositories/role-template-feature-permission.repository';
-import { RoleTemplatePermissionService } from './business/role-template/role-template-permission/services/role-template-permission.service';
-import { RoleTemplateRepository } from './business/role-template/root/repositories/role-template.repository';
+import { RoleTemplateFeatureDomainRepository } from './business/role-template/role-template-permission/repositories/role-template-feature.repository';
+import { RoleTemplateFeaturePermissionDomainRepository } from './business/role-template/role-template-permission/repositories/role-template-feature-permission.repository';
+import { RoleTemplatePermissionDomainService } from './business/role-template/role-template-permission/services/role-template-permission.service';
+import { RoleTemplateDomainRepository } from './business/role-template/root/repositories/role-template.repository';
 // Role Template
-import { RoleTemplateService } from './business/role-template/root/services/role-template.service';
+import { RoleTemplateDomainService } from './business/role-template/root/services/role-template.service';
 // Version Business (junction)
-import { VersionBusinessRepository } from './business/root/repositories/version-business.repository';
-import { VersionBusinessService } from './business/root/services/version-business.service';
+import { VersionBusinessDomainRepository } from './business/root/repositories/version-business.repository';
+import { VersionBusinessDomainService } from './business/root/services/version-business.service';
 // Feature Permission
-import { FeaturePermissionRepository } from './feature/feature-permission/repositories/feature-permission.repository';
-import { FeaturePermissionService } from './feature/feature-permission/services/feature-permission.service';
+import { FeaturePermissionDomainRepository } from './feature/feature-permission/repositories/feature-permission.repository';
+import { FeaturePermissionDomainService } from './feature/feature-permission/services/feature-permission.service';
 // Feature
-import { FeatureRepository } from './feature/root/repositories/feature.repository';
-import { FeatureService } from './feature/root/services/feature.service';
+import { FeatureDomainRepository } from './feature/root/repositories/feature.repository';
+import { FeatureDomainService } from './feature/root/services/feature.service';
 // Microfrontend
-import { MicrofrontendRepository } from './microfrontend/repositories/microfrontend.repository';
-import { MicrofrontendService } from './microfrontend/services/microfrontend.service';
+import { MicrofrontendDomainRepository } from './microfrontend/repositories/microfrontend.repository';
+import { MicrofrontendDomainService } from './microfrontend/services/microfrontend.service';
 // Version (root)
-import { VersionRepository } from './root/repositories/version.repository';
-import { VersionService } from './root/services/version.service';
+import { VersionDomainRepository } from './root/repositories/version.repository';
+import { VersionDomainService } from './root/services/version.service';
 
 @Module({
   providers: [
     // Version (root)
-    VersionService,
-    VersionRepository,
+    VersionDomainService,
+    VersionDomainRepository,
     // Version Business (junction)
-    VersionBusinessService,
-    VersionBusinessRepository,
+    VersionBusinessDomainService,
+    VersionBusinessDomainRepository,
     // Microfrontend
-    MicrofrontendService,
-    MicrofrontendRepository,
+    MicrofrontendDomainService,
+    MicrofrontendDomainRepository,
     // Feature
-    FeatureService,
-    FeatureRepository,
+    FeatureDomainService,
+    FeatureDomainRepository,
     // Feature Permission
-    FeaturePermissionService,
-    FeaturePermissionRepository,
+    FeaturePermissionDomainService,
+    FeaturePermissionDomainRepository,
     // App
-    AppService,
-    AppRepository,
+    AppDomainService,
+    AppDomainRepository,
     // App Feature
-    AppFeatureRepository,
+    AppFeatureDomainRepository,
     // Business Feature
-    BusinessFeatureService,
+    BusinessFeatureDomainService,
     // Role Template
-    RoleTemplateService,
-    RoleTemplateRepository,
+    RoleTemplateDomainService,
+    RoleTemplateDomainRepository,
     // Role Template Permission
-    RoleTemplatePermissionService,
-    RoleTemplateFeatureRepository,
-    RoleTemplateFeaturePermissionRepository,
+    RoleTemplatePermissionDomainService,
+    RoleTemplateFeatureDomainRepository,
+    RoleTemplateFeaturePermissionDomainRepository,
   ],
   exports: [
     // Repositories
-    VersionRepository,
-    VersionBusinessRepository,
-    MicrofrontendRepository,
-    FeatureRepository,
-    FeaturePermissionRepository,
-    AppRepository,
-    AppFeatureRepository,
-    RoleTemplateRepository,
-    RoleTemplateFeatureRepository,
-    RoleTemplateFeaturePermissionRepository,
+    VersionDomainRepository,
+    VersionBusinessDomainRepository,
+    MicrofrontendDomainRepository,
+    FeatureDomainRepository,
+    FeaturePermissionDomainRepository,
+    AppDomainRepository,
+    AppFeatureDomainRepository,
+    RoleTemplateDomainRepository,
+    RoleTemplateFeatureDomainRepository,
+    RoleTemplateFeaturePermissionDomainRepository,
     // Services
-    VersionService,
-    VersionBusinessService,
-    AppService,
-    FeatureService,
-    RoleTemplateService,
-    MicrofrontendService,
-    BusinessFeatureService,
-    FeaturePermissionService,
-    RoleTemplatePermissionService,
+    VersionDomainService,
+    VersionBusinessDomainService,
+    AppDomainService,
+    FeatureDomainService,
+    RoleTemplateDomainService,
+    MicrofrontendDomainService,
+    BusinessFeatureDomainService,
+    FeaturePermissionDomainService,
+    RoleTemplatePermissionDomainService,
   ],
 })
 export class VersionDomainModule {}

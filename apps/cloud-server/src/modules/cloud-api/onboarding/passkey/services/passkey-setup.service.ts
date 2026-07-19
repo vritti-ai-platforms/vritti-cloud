@@ -1,8 +1,8 @@
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
-import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import { MfaDomainRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeDomainService } from '@domain/mfa/services/backup-code.service';
+import { WebAuthnDomainService } from '@domain/mfa/services/webauthn.service';
 import type { RegistrationResponseJSON } from '@domain/mfa/types/webauthn.types';
-import { UserService } from '@domain/user/services/user.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
@@ -14,10 +14,10 @@ export class PasskeySetupService {
   private readonly logger = new Logger(PasskeySetupService.name);
 
   constructor(
-    private readonly mfaRepo: MfaRepository,
-    private readonly webAuthnService: WebAuthnService,
-    private readonly backupCodeService: BackupCodeService,
-    private readonly userService: UserService,
+    private readonly mfaRepo: MfaDomainRepository,
+    private readonly webAuthnService: WebAuthnDomainService,
+    private readonly backupCodeService: BackupCodeDomainService,
+    private readonly userService: UserDomainService,
   ) {}
 
   // Generates WebAuthn registration options and stores the challenge as a pending DB record

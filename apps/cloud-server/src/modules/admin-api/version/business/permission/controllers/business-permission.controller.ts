@@ -1,4 +1,4 @@
-import { FeaturePermissionService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
+import { FeaturePermissionDomainService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
 import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -14,7 +14,7 @@ import { BusinessPermissionTableResponseDto } from '../dto/response/business-per
 export class BusinessPermissionController {
   private readonly logger = new Logger(BusinessPermissionController.name);
 
-  constructor(private readonly featurePermissionService: FeaturePermissionService) {}
+  constructor(private readonly featurePermissionService: FeaturePermissionDomainService) {}
 
   // Returns permissions visible to a business (global or linked), optionally filtered by feature
   @Get('table')

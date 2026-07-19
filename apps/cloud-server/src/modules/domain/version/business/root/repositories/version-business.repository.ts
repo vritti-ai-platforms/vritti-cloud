@@ -7,7 +7,7 @@ import { businessApps, businesses, roleTemplates, versionBusinesses, versions } 
 export type VersionBusinessRow = Business & { appCount: number };
 
 @Injectable()
-export class VersionBusinessRepository extends PrimaryBaseRepository<typeof versionBusinesses> {
+export class VersionBusinessDomainRepository extends PrimaryBaseRepository<typeof versionBusinesses> {
   constructor(database: PrimaryDatabaseService) {
     super(database, versionBusinesses);
   }

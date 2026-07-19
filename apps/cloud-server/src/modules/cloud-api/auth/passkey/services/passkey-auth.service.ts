@@ -1,8 +1,8 @@
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import { MfaDomainRepository } from '@domain/mfa/repositories/mfa.repository';
+import { WebAuthnDomainService } from '@domain/mfa/services/webauthn.service';
 import type { AuthenticationResponseJSON, AuthenticatorTransportFuture } from '@domain/mfa/types/webauthn.types';
-import { SessionService } from '@domain/session/services/session.service';
-import { UserService } from '@domain/user/services/user.service';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
@@ -25,10 +25,10 @@ export class PasskeyAuthService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly webAuthnService: WebAuthnService,
-    private readonly mfaRepo: MfaRepository,
-    private readonly userService: UserService,
-    private readonly sessionService: SessionService,
+    private readonly webAuthnService: WebAuthnDomainService,
+    private readonly mfaRepo: MfaDomainRepository,
+    private readonly userService: UserDomainService,
+    private readonly sessionService: SessionDomainService,
   ) {}
 
   // Generates WebAuthn authentication options, optionally scoped to a user's passkeys

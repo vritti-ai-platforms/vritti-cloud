@@ -1,4 +1,4 @@
-import { BillingCycleService } from '@domain/billing-cycle/services/billing-cycle.service';
+import { BillingCycleDomainService } from '@domain/billing-cycle/services/billing-cycle.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -23,7 +23,7 @@ import { BillingCycleTableResponseDto } from '../dto/response/billing-cycles-res
 export class BillingCycleController {
   private readonly logger = new Logger(BillingCycleController.name);
 
-  constructor(private readonly billingCycleService: BillingCycleService) {}
+  constructor(private readonly billingCycleService: BillingCycleDomainService) {}
 
   // Returns billing cycles for the data table with server-stored filter/sort/search/pagination state
   @Get()

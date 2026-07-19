@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MfaRepository } from './repositories/mfa.repository';
-import { BackupCodeService } from './services/backup-code.service';
-import { TotpService } from './services/totp.service';
-import { WebAuthnService } from './services/webauthn.service';
+import { MfaDomainRepository } from './repositories/mfa.repository';
+import { BackupCodeDomainService } from './services/backup-code.service';
+import { TotpDomainService } from './services/totp.service';
+import { WebAuthnDomainService } from './services/webauthn.service';
 
 @Module({
-  providers: [TotpService, WebAuthnService, BackupCodeService, MfaRepository],
-  exports: [TotpService, WebAuthnService, BackupCodeService, MfaRepository],
+  providers: [TotpDomainService, WebAuthnDomainService, BackupCodeDomainService, MfaDomainRepository],
+  exports: [TotpDomainService, WebAuthnDomainService, BackupCodeDomainService, MfaDomainRepository],
 })
 export class MfaModule {}

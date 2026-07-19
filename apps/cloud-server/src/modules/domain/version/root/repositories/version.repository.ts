@@ -24,7 +24,7 @@ import {
 import type { SnapshotData } from '../services/version-snapshot.builder';
 
 @Injectable()
-export class VersionRepository extends PrimaryBaseRepository<typeof versions> {
+export class VersionDomainRepository extends PrimaryBaseRepository<typeof versions> {
   constructor(database: PrimaryDatabaseService) {
     super(database, versions);
   }

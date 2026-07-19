@@ -1,4 +1,4 @@
-import { RegionService } from '@domain/region/services/region.service';
+import { RegionDomainService } from '@domain/region/services/region.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { RegionSelectQueryDto } from '../dto/region-select-query.dto';
 export class RegionSelectController {
   private readonly logger = new Logger(RegionSelectController.name);
 
-  constructor(private readonly regionService: RegionService) {}
+  constructor(private readonly regionService: RegionDomainService) {}
 
   // Returns paginated region options for the select component
   @Get()

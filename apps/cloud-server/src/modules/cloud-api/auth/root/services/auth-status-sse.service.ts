@@ -1,5 +1,6 @@
 import { Injectable, Logger, type MessageEvent, OnModuleDestroy } from '@nestjs/common';
-import { Subject } from 'rxjs';
+import { concat, merge, NEVER, type Observable, of, Subject } from 'rxjs';
+import { AuthService } from './auth.service';
 
 interface UserConnection {
   subject: Subject<MessageEvent>;
@@ -13,7 +14,7 @@ export class AuthStatusSseService implements OnModuleDestroy {
   private readonly connections = new Map<string, UserConnection[]>();
   private cleanupInterval: NodeJS.Timeout;
 
-  constructor() {
+  constructor(private readonly authService: AuthService) {
     this.cleanupInterval = setInterval(() => this.cleanupClosedConnections(), 60000);
   }
 
@@ -26,6 +27,23 @@ export class AuthStatusSseService implements OnModuleDestroy {
       }
     }
     this.connections.clear();
+  }
+
+  async streamAuthStatus(refreshToken: string | undefined): Promise<Observable<MessageEvent>> {
+    const authResponse = await this.authService.getAuthStatus(refreshToken);
+
+    // Not authenticated — send auth state and keep connection open (prevents reconnect loop)
+    if (!authResponse.isAuthenticated || !authResponse.user) {
+      const initial$ = of({ type: 'auth-state', data: JSON.stringify(authResponse) } as MessageEvent);
+      return concat(initial$, NEVER);
+    }
+
+    // Register SSE connection for real-time updates, keyed by sessionId
+    const connection$ = this.addConnection(authResponse.user.id, authResponse.sessionId as string);
+
+    // Push initial auth state, then stream updates
+    const initial$ = of({ type: 'auth-state', data: JSON.stringify(authResponse) } as MessageEvent);
+    return merge(initial$, connection$.asObservable());
   }
 
   // Adds a new SSE connection for the user, tagged with sessionId

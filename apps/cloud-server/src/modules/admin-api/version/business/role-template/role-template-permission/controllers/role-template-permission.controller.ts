@@ -1,5 +1,5 @@
 import {
-  RoleTemplatePermissionService,
+  RoleTemplatePermissionDomainService,
   type RoleTemplatePermissionsResponse,
 } from '@domain/version/business/role-template/role-template-permission/services/role-template-permission.service';
 import { Body, Controller, Get, Logger, Param, Put } from '@nestjs/common';
@@ -17,7 +17,7 @@ import { AssignRoleTemplatePermissionsDto } from '../dto/request/assign-role-tem
 export class RoleTemplatePermissionController {
   private readonly logger = new Logger(RoleTemplatePermissionController.name);
 
-  constructor(private readonly roleTemplatePermissionService: RoleTemplatePermissionService) {}
+  constructor(private readonly roleTemplatePermissionService: RoleTemplatePermissionDomainService) {}
 
   // Returns the matrix payload — the role template's apps (each with its features) + the full grant set
   @Get()

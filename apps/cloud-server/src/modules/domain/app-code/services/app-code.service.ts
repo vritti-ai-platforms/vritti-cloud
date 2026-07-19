@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { SelectOptionsQueryDto, SelectQueryResult } from '@vritti/api-sdk/database';
-import { AppCodeRepository } from '../repositories/app-code.repository';
+import { AppCodeDomainRepository } from '../repositories/app-code.repository';
 
 @Injectable()
-export class AppCodeService {
-  private readonly logger = new Logger(AppCodeService.name);
+export class AppCodeDomainService {
+  private readonly logger = new Logger(AppCodeDomainService.name);
 
-  constructor(private readonly appCodeRepository: AppCodeRepository) {}
+  constructor(private readonly appCodeRepository: AppCodeDomainRepository) {}
 
   // Returns distinct feature codes for a given app code
   findFeatureCodesForSelect(appCode: string, query: SelectOptionsQueryDto) {

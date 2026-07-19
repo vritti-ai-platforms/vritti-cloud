@@ -15,11 +15,11 @@ import { CountryDto } from '@/modules/admin-api/country/dto/entity/country.dto';
 import type { CreateCountryDto } from '@/modules/admin-api/country/dto/request/create-country.dto';
 import type { UpdateCountryDto } from '@/modules/admin-api/country/dto/request/update-country.dto';
 import { CountryTableResponseDto } from '@/modules/admin-api/country/dto/response/countries-response.dto';
-import { CountryRepository } from '../repositories/country.repository';
+import { CountryDomainRepository } from '../repositories/country.repository';
 
 @Injectable()
-export class CountryService {
-  private readonly logger = new Logger(CountryService.name);
+export class CountryDomainService {
+  private readonly logger = new Logger(CountryDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     code: { column: countries.code, type: 'string' },
@@ -30,7 +30,7 @@ export class CountryService {
   };
 
   constructor(
-    private readonly countryRepository: CountryRepository,
+    private readonly countryRepository: CountryDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -77,13 +77,13 @@ export class CountryService {
   async findForTable(userId: string): Promise<CountryTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'countries');
     const where = and(
-      FilterProcessor.buildWhere(state.filters, CountryService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, CountryService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, CountryDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, CountryDomainService.FIELD_MAP),
     );
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.countryRepository.findAllWithCount({
       where,
-      orderBy: FilterProcessor.buildOrderBy(state.sort, CountryService.FIELD_MAP),
+      orderBy: FilterProcessor.buildOrderBy(state.sort, CountryDomainService.FIELD_MAP),
       limit,
       offset,
     });

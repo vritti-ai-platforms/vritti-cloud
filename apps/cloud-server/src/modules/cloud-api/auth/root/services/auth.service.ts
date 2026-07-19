@@ -1,6 +1,6 @@
-import { MediaService } from '@domain/media/services/media.service';
-import { SessionService } from '@domain/session/services/session.service';
-import { UserService } from '@domain/user/services/user.service';
+import { MediaDomainService } from '@domain/media/services/media.service';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { TokenService, TokenType } from '@vritti/api-sdk/auth';
 import { ConflictException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
@@ -20,11 +20,11 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
   constructor(
-    private readonly userService: UserService,
+    private readonly userService: UserDomainService,
     private readonly encryptionService: EncryptionService,
-    private readonly sessionService: SessionService,
+    private readonly sessionService: SessionDomainService,
     private readonly tokenService: TokenService,
-    private readonly mediaService: MediaService,
+    private readonly mediaService: MediaDomainService,
     @Inject(forwardRef(() => MfaVerificationService))
     private readonly mfaVerificationService: MfaVerificationService,
   ) {}

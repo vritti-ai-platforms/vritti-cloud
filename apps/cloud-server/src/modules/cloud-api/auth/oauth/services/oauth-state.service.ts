@@ -1,4 +1,4 @@
-import { OAuthStateRepository } from '@domain/oauth/repositories/oauth-state.repository';
+import { OAuthStateDomainRepository } from '@domain/oauth/repositories/oauth-state.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { OAuthProviderType } from '@/db/schema';
@@ -11,7 +11,7 @@ export class OAuthStateService {
   private readonly STATE_EXPIRY_MINUTES = 10;
 
   constructor(
-    private readonly stateRepository: OAuthStateRepository,
+    private readonly stateRepository: OAuthStateDomainRepository,
     private readonly oauthCryptoService: OAuthCryptoService,
   ) {}
 

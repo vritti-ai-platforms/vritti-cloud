@@ -1,6 +1,6 @@
 import {
+  MicrofrontendDomainService,
   type MicrofrontendPlatformParam,
-  MicrofrontendService,
 } from '@domain/version/microfrontend/services/microfrontend.service';
 import {
   BadRequestException,
@@ -41,7 +41,7 @@ function parsePlatform(platform: string): MicrofrontendPlatformParam {
 export class MicrofrontendController {
   private readonly logger = new Logger(MicrofrontendController.name);
 
-  constructor(private readonly microfrontendService: MicrofrontendService) {}
+  constructor(private readonly microfrontendService: MicrofrontendDomainService) {}
 
   // Returns microfrontends for the data table filtered by version
   @Get('table')

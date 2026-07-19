@@ -10,7 +10,7 @@ import type { Organization } from '@/db/schema';
 import { organizationMembers, organizations, plans } from '@/db/schema';
 
 @Injectable()
-export class OrganizationRepository extends PrimaryBaseRepository<typeof organizations> {
+export class CloudOrganizationDomainRepository extends PrimaryBaseRepository<typeof organizations> {
   constructor(database: PrimaryDatabaseService) {
     super(database, organizations);
   }

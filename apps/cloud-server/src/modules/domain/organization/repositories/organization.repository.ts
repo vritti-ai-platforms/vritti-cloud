@@ -25,7 +25,7 @@ export type OrganizationDetail = Organization & {
 };
 
 @Injectable()
-export class OrganizationRepository extends PrimaryBaseRepository<typeof organizations> {
+export class OrganizationDomainRepository extends PrimaryBaseRepository<typeof organizations> {
   constructor(database: PrimaryDatabaseService) {
     super(database, organizations);
   }

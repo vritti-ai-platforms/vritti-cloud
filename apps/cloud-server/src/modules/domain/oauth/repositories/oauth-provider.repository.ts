@@ -5,7 +5,7 @@ import { type OAuthProvider, oauthProviders } from '@/db/schema';
 import type { OAuthUserProfile } from '@/modules/cloud-api/auth/oauth/interfaces/oauth-user-profile.interface';
 
 @Injectable()
-export class OAuthProviderRepository extends PrimaryBaseRepository<typeof oauthProviders> {
+export class OAuthProviderDomainRepository extends PrimaryBaseRepository<typeof oauthProviders> {
   constructor(database: PrimaryDatabaseService) {
     super(database, oauthProviders);
   }

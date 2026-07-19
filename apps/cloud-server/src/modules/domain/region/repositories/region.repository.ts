@@ -17,7 +17,7 @@ type RegionWithProviders = Region & {
 };
 
 @Injectable()
-export class RegionRepository extends PrimaryBaseRepository<typeof regions> {
+export class RegionDomainRepository extends PrimaryBaseRepository<typeof regions> {
   constructor(database: PrimaryDatabaseService) {
     super(database, regions);
   }

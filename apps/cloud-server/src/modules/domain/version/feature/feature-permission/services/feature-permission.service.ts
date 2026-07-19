@@ -20,12 +20,12 @@ import type {
   PermissionUsageBusinessDto,
   PermissionUsageResponseDto,
 } from '@/modules/admin-api/version/permission/dto/response/permission-usage-response.dto';
-import { FeatureRepository } from '../../root/repositories/feature.repository';
-import { FeaturePermissionRepository } from '../repositories/feature-permission.repository';
+import { FeatureDomainRepository } from '../../root/repositories/feature.repository';
+import { FeaturePermissionDomainRepository } from '../repositories/feature-permission.repository';
 
 @Injectable()
-export class FeaturePermissionService {
-  private readonly logger = new Logger(FeaturePermissionService.name);
+export class FeaturePermissionDomainService {
+  private readonly logger = new Logger(FeaturePermissionDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     code: { column: featurePermissions.code, type: 'string' },
@@ -34,8 +34,8 @@ export class FeaturePermissionService {
   };
 
   constructor(
-    private readonly featurePermissionRepository: FeaturePermissionRepository,
-    private readonly featureRepository: FeatureRepository,
+    private readonly featurePermissionRepository: FeaturePermissionDomainRepository,
+    private readonly featureRepository: FeatureDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -51,10 +51,10 @@ export class FeaturePermissionService {
       `business-permissions-${businessId}`,
     );
     const where = and(
-      FilterProcessor.buildWhere(state.filters, FeaturePermissionService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, FeaturePermissionService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, FeaturePermissionDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, FeaturePermissionDomainService.FIELD_MAP),
     );
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, FeaturePermissionService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, FeaturePermissionDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.featurePermissionRepository.findForBusinessTable(versionId, businessId, {
       featureId,

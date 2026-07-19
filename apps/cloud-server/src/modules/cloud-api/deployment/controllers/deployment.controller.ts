@@ -1,4 +1,4 @@
-import { DeploymentService } from '@domain/deployment/services/deployment.service';
+import { DeploymentDomainService } from '@domain/deployment/services/deployment.service';
 import { Controller, Get, Logger, Param, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Public } from '@vritti/api-sdk/auth';
@@ -14,7 +14,7 @@ import type { PlanOptionDto } from '../dto/response/plan-option.dto';
 export class CloudDeploymentController {
   private readonly logger = new Logger(CloudDeploymentController.name);
 
-  constructor(private readonly deploymentService: DeploymentService) {}
+  constructor(private readonly deploymentService: DeploymentDomainService) {}
 
   // Returns every deployment for public discovery
   @Get('all')

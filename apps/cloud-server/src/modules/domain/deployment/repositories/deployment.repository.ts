@@ -13,7 +13,7 @@ export type DeploymentWithNames = Deployment & {
 };
 
 @Injectable()
-export class DeploymentRepository extends PrimaryBaseRepository<typeof deployments> {
+export class DeploymentDomainRepository extends PrimaryBaseRepository<typeof deployments> {
   constructor(database: PrimaryDatabaseService) {
     super(database, deployments);
   }

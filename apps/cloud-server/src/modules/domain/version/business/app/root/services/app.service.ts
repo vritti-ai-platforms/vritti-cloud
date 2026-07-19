@@ -20,11 +20,11 @@ import type { UpdateAppDto } from '@/modules/admin-api/version/business/app/dto/
 import { AppTableResponseDto } from '@/modules/admin-api/version/business/app/dto/response/app-table-response.dto';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
 import { validateImportRows } from '@/utils/validate-import-rows';
-import { AppRepository } from '../repositories/app.repository';
+import { AppDomainRepository } from '../repositories/app.repository';
 
 @Injectable()
-export class AppService {
-  private readonly logger = new Logger(AppService.name);
+export class AppDomainService {
+  private readonly logger = new Logger(AppDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: businessApps.name, type: 'string' },
@@ -34,7 +34,7 @@ export class AppService {
   };
 
   constructor(
-    private readonly appRepository: AppRepository,
+    private readonly appRepository: AppDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -64,10 +64,10 @@ export class AppService {
       { field: 'businessId', operator: 'equals', value: businessId },
       ...state.filters,
     ];
-    const filterWhere = FilterProcessor.buildWhere(scopeFilters, AppService.FIELD_MAP);
-    const searchWhere = FilterProcessor.buildSearch(state.search, AppService.FIELD_MAP);
+    const filterWhere = FilterProcessor.buildWhere(scopeFilters, AppDomainService.FIELD_MAP);
+    const searchWhere = FilterProcessor.buildSearch(state.search, AppDomainService.FIELD_MAP);
     const where = and(filterWhere, searchWhere);
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, AppService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, AppDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.appRepository.findAllWithCounts(where, orderBy, limit, offset);
     const result = rows.map((row) => AppDto.from(row, row.featureCount));

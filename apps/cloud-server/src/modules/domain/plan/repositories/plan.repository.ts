@@ -7,7 +7,7 @@ import { businesses, organizations, planPrices, plans } from '@/db/schema';
 export type PlanRow = Plan & { priceCount: number; businessName: string; countryCount: number };
 
 @Injectable()
-export class PlanRepository extends PrimaryBaseRepository<typeof plans> {
+export class PlanDomainRepository extends PrimaryBaseRepository<typeof plans> {
   constructor(database: PrimaryDatabaseService) {
     super(database, plans);
   }

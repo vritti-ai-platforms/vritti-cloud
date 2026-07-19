@@ -4,7 +4,7 @@ import { and, eq } from '@vritti/api-sdk/drizzle-orm';
 import { type MfaAuth, type MfaMethod, MfaMethodValues, mfaAuth, type NewMfaAuth } from '@/db/schema';
 
 @Injectable()
-export class MfaRepository extends PrimaryBaseRepository<typeof mfaAuth> {
+export class MfaDomainRepository extends PrimaryBaseRepository<typeof mfaAuth> {
   constructor(database: PrimaryDatabaseService) {
     super(database, mfaAuth);
   }

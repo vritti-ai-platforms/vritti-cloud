@@ -1,5 +1,5 @@
-import { AppCodeService } from '@domain/app-code/services/app-code.service';
-import { FeatureService } from '@domain/version/feature/root/services/feature.service';
+import { AppCodeDomainService } from '@domain/app-code/services/app-code.service';
+import { FeatureDomainService } from '@domain/version/feature/root/services/feature.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -15,8 +15,8 @@ export class FeatureSelectController {
   private readonly logger = new Logger(FeatureSelectController.name);
 
   constructor(
-    private readonly featureService: FeatureService,
-    private readonly appCodeService: AppCodeService,
+    private readonly featureService: FeatureDomainService,
+    private readonly appCodeService: AppCodeDomainService,
   ) {}
 
   // Returns paginated feature options, optionally filtered by app code or versionId

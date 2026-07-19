@@ -1,4 +1,4 @@
-import { MicrofrontendService } from '@domain/version/microfrontend/services/microfrontend.service';
+import { MicrofrontendDomainService } from '@domain/version/microfrontend/services/microfrontend.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { MicrofrontendSelectQueryDto } from '../dto/microfrontend-select-query.d
 export class MicrofrontendSelectController {
   private readonly logger = new Logger(MicrofrontendSelectController.name);
 
-  constructor(private readonly microfrontendService: MicrofrontendService) {}
+  constructor(private readonly microfrontendService: MicrofrontendDomainService) {}
 
   // Returns microfrontend options for a select component, optionally grouped by version
   @Get()

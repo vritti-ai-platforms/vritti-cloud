@@ -1,4 +1,4 @@
-import { CountryService } from '@domain/country/services/country.service';
+import { CountryDomainService } from '@domain/country/services/country.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { CountrySelectQueryDto } from '../dto/country-select-query.dto';
 export class CountrySelectController {
   private readonly logger = new Logger(CountrySelectController.name);
 
-  constructor(private readonly countryService: CountryService) {}
+  constructor(private readonly countryService: CountryDomainService) {}
 
   // Returns paginated country options for the select component
   @Get()

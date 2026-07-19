@@ -1,6 +1,6 @@
 import {
+  FeatureDomainService,
   type FeatureMicrofrontendPlatformParam,
-  FeatureService,
 } from '@domain/version/feature/root/services/feature.service';
 import {
   BadRequestException,
@@ -58,7 +58,7 @@ function parseFeatureMfPlatform(platform: string): FeatureMicrofrontendPlatformP
 export class FeatureController {
   private readonly logger = new Logger(FeatureController.name);
 
-  constructor(private readonly featureService: FeatureService) {}
+  constructor(private readonly featureService: FeatureDomainService) {}
 
   // Creates a new feature
   @Post()

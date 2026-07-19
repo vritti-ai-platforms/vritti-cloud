@@ -15,12 +15,12 @@ import { BillingCycleDto } from '@/modules/admin-api/billing-cycle/dto/entity/bi
 import type { CreateBillingCycleDto } from '@/modules/admin-api/billing-cycle/dto/request/create-billing-cycle.dto';
 import type { UpdateBillingCycleDto } from '@/modules/admin-api/billing-cycle/dto/request/update-billing-cycle.dto';
 import { BillingCycleTableResponseDto } from '@/modules/admin-api/billing-cycle/dto/response/billing-cycles-response.dto';
-import { PlanPriceRepository } from '@/modules/domain/plan-price/repositories/plan-price.repository';
-import { BillingCycleRepository } from '../repositories/billing-cycle.repository';
+import { PlanPriceDomainRepository } from '@/modules/domain/plan-price/repositories/plan-price.repository';
+import { BillingCycleDomainRepository } from '../repositories/billing-cycle.repository';
 
 @Injectable()
-export class BillingCycleService {
-  private readonly logger = new Logger(BillingCycleService.name);
+export class BillingCycleDomainService {
+  private readonly logger = new Logger(BillingCycleDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: billingCycles.name, type: 'string' },
@@ -29,9 +29,9 @@ export class BillingCycleService {
   };
 
   constructor(
-    private readonly billingCycleRepository: BillingCycleRepository,
+    private readonly billingCycleRepository: BillingCycleDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
-    private readonly planPriceRepository: PlanPriceRepository,
+    private readonly planPriceRepository: PlanPriceDomainRepository,
   ) {}
 
   // Returns paginated billing cycle options for the select component
@@ -77,13 +77,13 @@ export class BillingCycleService {
   async findForTable(userId: string): Promise<BillingCycleTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'billing-cycles');
     const where = and(
-      FilterProcessor.buildWhere(state.filters, BillingCycleService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, BillingCycleService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, BillingCycleDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, BillingCycleDomainService.FIELD_MAP),
     );
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.billingCycleRepository.findAllForTable({
       where,
-      orderBy: FilterProcessor.buildOrderBy(state.sort, BillingCycleService.FIELD_MAP),
+      orderBy: FilterProcessor.buildOrderBy(state.sort, BillingCycleDomainService.FIELD_MAP),
       limit,
       offset,
     });

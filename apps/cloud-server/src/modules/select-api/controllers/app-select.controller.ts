@@ -1,4 +1,4 @@
-import { AppService } from '@domain/version/business/app/root/services/app.service';
+import { AppDomainService } from '@domain/version/business/app/root/services/app.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { AppSelectQueryDto } from '../dto/app-select-query.dto';
 export class AppSelectController {
   private readonly logger = new Logger(AppSelectController.name);
 
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppDomainService) {}
 
   // Returns paginated app options for the select component
   @Get()

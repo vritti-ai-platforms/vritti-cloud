@@ -1,4 +1,4 @@
-import { RoleTemplateService } from '@domain/version/business/role-template/root/services/role-template.service';
+import { RoleTemplateDomainService } from '@domain/version/business/role-template/root/services/role-template.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -23,7 +23,7 @@ import { RoleTemplateTableResponseDto } from '../dto/response/role-template-tabl
 export class RoleTemplateController {
   private readonly logger = new Logger(RoleTemplateController.name);
 
-  constructor(private readonly roleTemplateService: RoleTemplateService) {}
+  constructor(private readonly roleTemplateService: RoleTemplateDomainService) {}
 
   // Creates a new role template for a business
   @Post()

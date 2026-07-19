@@ -16,11 +16,11 @@ import type { CreateBusinessDto } from '@/modules/admin-api/business/dto/request
 import type { UpdateBusinessDto } from '@/modules/admin-api/business/dto/request/update-business.dto';
 import { BusinessTableResponseDto } from '@/modules/admin-api/business/dto/response/businesses-response.dto';
 import { CloudBusinessDto } from '@/modules/cloud-api/business/dto/entity/business.dto';
-import { BusinessRepository } from '../repositories/business.repository';
+import { BusinessDomainRepository } from '../repositories/business.repository';
 
 @Injectable()
-export class BusinessService {
-  private readonly logger = new Logger(BusinessService.name);
+export class BusinessDomainService {
+  private readonly logger = new Logger(BusinessDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: businesses.name, type: 'string' },
@@ -28,7 +28,7 @@ export class BusinessService {
   };
 
   constructor(
-    private readonly businessRepository: BusinessRepository,
+    private readonly businessRepository: BusinessDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -85,11 +85,11 @@ export class BusinessService {
   async findForTable(userId: string, searchColumn?: string, searchValue?: string): Promise<BusinessTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'businesses');
     const filters: FilterCondition[] = [...state.filters];
-    if (searchColumn && searchValue && BusinessService.FIELD_MAP[searchColumn]) {
+    if (searchColumn && searchValue && BusinessDomainService.FIELD_MAP[searchColumn]) {
       filters.push({ field: searchColumn, operator: 'contains', value: searchValue });
     }
-    const where = FilterProcessor.buildWhere(filters, BusinessService.FIELD_MAP);
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, BusinessService.FIELD_MAP);
+    const where = FilterProcessor.buildWhere(filters, BusinessDomainService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, BusinessDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.businessRepository.findAllAndCount({ where, orderBy, limit, offset });
     const referencedIds = await this.businessRepository.findReferencedIds(result.map((r) => r.id));

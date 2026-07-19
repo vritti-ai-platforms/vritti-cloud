@@ -15,14 +15,14 @@ import { RegionDto } from '@/modules/admin-api/region/dto/entity/region.dto';
 import type { CreateRegionDto } from '@/modules/admin-api/region/dto/request/create-region.dto';
 import type { UpdateRegionDto } from '@/modules/admin-api/region/dto/request/update-region.dto';
 import { RegionTableResponseDto } from '@/modules/admin-api/region/dto/response/regions-response.dto';
-import { CloudProviderRepository } from '@/modules/domain/cloud-provider/repositories/cloud-provider.repository';
-import { DeploymentRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
-import { RegionRepository } from '../repositories/region.repository';
-import { RegionProviderRepository } from '../repositories/region-provider.repository';
+import { CloudProviderDomainRepository } from '@/modules/domain/cloud-provider/repositories/cloud-provider.repository';
+import { DeploymentDomainRepository } from '@/modules/domain/deployment/repositories/deployment.repository';
+import { RegionDomainRepository } from '../repositories/region.repository';
+import { RegionProviderDomainRepository } from '../repositories/region-provider.repository';
 
 @Injectable()
-export class RegionService {
-  private readonly logger = new Logger(RegionService.name);
+export class RegionDomainService {
+  private readonly logger = new Logger(RegionDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: regions.name, type: 'string' },
@@ -38,11 +38,11 @@ export class RegionService {
   };
 
   constructor(
-    private readonly regionRepository: RegionRepository,
-    private readonly regionProviderRepository: RegionProviderRepository,
-    private readonly cloudProviderRepository: CloudProviderRepository,
+    private readonly regionRepository: RegionDomainRepository,
+    private readonly regionProviderRepository: RegionProviderDomainRepository,
+    private readonly cloudProviderRepository: CloudProviderDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
-    private readonly deploymentRepository: DeploymentRepository,
+    private readonly deploymentRepository: DeploymentDomainRepository,
   ) {}
 
   // Returns paginated region options for the select component
@@ -84,13 +84,13 @@ export class RegionService {
   async findForTable(userId: string): Promise<RegionTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'regions');
     const where = and(
-      FilterProcessor.buildWhere(state.filters, RegionService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, RegionService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, RegionDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, RegionDomainService.FIELD_MAP),
     );
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.regionRepository.findAllWithCounts({
       where,
-      orderBy: FilterProcessor.buildOrderBy(state.sort, RegionService.FIELD_MAP),
+      orderBy: FilterProcessor.buildOrderBy(state.sort, RegionDomainService.FIELD_MAP),
       limit,
       offset,
     });

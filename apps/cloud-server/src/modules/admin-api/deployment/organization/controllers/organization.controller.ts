@@ -1,4 +1,4 @@
-import { OrganizationService } from '@domain/organization/services/organization.service';
+import { OrganizationDomainService } from '@domain/organization/services/organization.service';
 import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -15,7 +15,7 @@ import { OrganizationTableResponseDto } from '../dto/response/organizations-resp
 export class OrganizationController {
   private readonly logger = new Logger(OrganizationController.name);
 
-  constructor(private readonly organizationService: OrganizationService) {}
+  constructor(private readonly organizationService: OrganizationDomainService) {}
 
   // Returns organizations on the deployment for the data table with server-stored filter/sort/search/pagination state
   @Get('table')

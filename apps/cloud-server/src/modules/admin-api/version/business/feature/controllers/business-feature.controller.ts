@@ -1,4 +1,4 @@
-import { BusinessFeatureService } from '@domain/version/business/feature/services/business-feature.service';
+import { BusinessFeatureDomainService } from '@domain/version/business/feature/services/business-feature.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -24,7 +24,7 @@ import { BusinessFeatureTableResponseDto } from '../dto/response/business-featur
 export class BusinessFeatureController {
   private readonly logger = new Logger(BusinessFeatureController.name);
 
-  constructor(private readonly businessFeatureService: BusinessFeatureService) {}
+  constructor(private readonly businessFeatureService: BusinessFeatureDomainService) {}
 
   // Returns the features visible to a business (each grouped with its permissions and apps) for the data table
   @Get('table')

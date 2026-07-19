@@ -11,7 +11,7 @@ export interface RoleTemplateGrant {
 }
 
 @Injectable()
-export class RoleTemplateFeatureRepository extends PrimaryBaseRepository<typeof roleTemplateFeatures> {
+export class RoleTemplateFeatureDomainRepository extends PrimaryBaseRepository<typeof roleTemplateFeatures> {
   constructor(database: PrimaryDatabaseService) {
     super(database, roleTemplateFeatures);
   }

@@ -1,7 +1,7 @@
-import { MediaService } from '@domain/media/services/media.service';
-import { SessionService } from '@domain/session/services/session.service';
-import { UserService } from '@domain/user/services/user.service';
-import { VerificationService } from '@domain/verification/services/verification.service';
+import { MediaDomainService } from '@domain/media/services/media.service';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainService } from '@domain/user/services/user.service';
+import { VerificationDomainService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { SuccessResponseDto } from '@vritti/api-sdk/database';
@@ -24,12 +24,12 @@ export class ProfileService {
   private readonly logger = new Logger(ProfileService.name);
 
   constructor(
-    private readonly verificationService: VerificationService,
+    private readonly verificationService: VerificationDomainService,
     private readonly emailService: EmailService,
     private readonly smsService: SmsService,
-    private readonly userService: UserService,
-    private readonly sessionService: SessionService,
-    private readonly mediaService: MediaService,
+    private readonly userService: UserDomainService,
+    private readonly sessionService: SessionDomainService,
+    private readonly mediaService: MediaDomainService,
     private readonly eventEmitter: EventEmitter2,
   ) {}
 

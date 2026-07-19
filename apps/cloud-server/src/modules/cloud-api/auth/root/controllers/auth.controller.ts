@@ -25,7 +25,7 @@ import {
   UserId,
 } from '@vritti/api-sdk/auth';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { concat, merge, NEVER, type Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { SessionTypeValues } from '@/db/schema';
 import {
   ApiForgotPassword,
@@ -114,22 +114,7 @@ export class AuthController {
   @ApiGetAuthStatus()
   async getAuthStatus(@RefreshTokenCookie() refreshToken: string | undefined): Promise<Observable<MessageEvent>> {
     this.logger.log('SSE /auth/status - Establishing auth status stream');
-
-    const authResponse = await this.authService.getAuthStatus(refreshToken);
-
-    // Not authenticated — send auth state and keep connection open (prevents reconnect loop)
-    if (!authResponse.isAuthenticated || !authResponse.user) {
-      const initial$ = of({ type: 'auth-state', data: JSON.stringify(authResponse) } as MessageEvent);
-      return concat(initial$, NEVER);
-    }
-
-    // Register SSE connection for real-time updates, keyed by sessionId
-    const userId = authResponse.user.id;
-    const connection$ = this.authStatusSse.addConnection(userId, authResponse.sessionId as string);
-
-    // Push initial auth state, then stream updates
-    const initial$ = of({ type: 'auth-state', data: JSON.stringify(authResponse) } as MessageEvent);
-    return merge(initial$, connection$.asObservable());
+    return this.authStatusSse.streamAuthStatus(refreshToken);
   }
 
   // Recovers session from httpOnly cookie without rotating the refresh token

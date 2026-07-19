@@ -1,4 +1,4 @@
-import { FeaturePermissionService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
+import { FeaturePermissionDomainService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
 import { Body, Controller, Delete, Get, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -24,7 +24,7 @@ import type { PermissionUsageResponseDto } from '../dto/response/permission-usag
 export class PermissionController {
   private readonly logger = new Logger(PermissionController.name);
 
-  constructor(private readonly featurePermissionService: FeaturePermissionService) {}
+  constructor(private readonly featurePermissionService: FeaturePermissionDomainService) {}
 
   // Creates a feature permission (global or linked to businesses)
   @Post()

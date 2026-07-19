@@ -1,5 +1,5 @@
 import { buildPlanMatrix } from '@domain/catalog/site-matrix.builder';
-import { VersionRepository } from '@domain/version/root/repositories/version.repository';
+import { VersionDomainRepository } from '@domain/version/root/repositories/version.repository';
 import type { VersionSnapshot } from '@domain/version/root/services/version-snapshot.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
@@ -12,7 +12,7 @@ export class OrganizationAppsService {
 
   constructor(
     private readonly coreDeploymentService: CoreDeploymentService,
-    private readonly versionRepository: VersionRepository,
+    private readonly versionRepository: VersionDomainRepository,
   ) {}
 
   // The org's full apps/features/permissions catalog from the version snapshot (per-platform inPlan/availableIn), powering the Create Custom Role picker and read-only Plan Overview

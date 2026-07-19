@@ -1,5 +1,5 @@
-import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
-import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
+import { CloudOrganizationDomainRepository } from '@domain/cloud-organization/repositories/organization.repository';
+import { DeploymentDomainRepository } from '@domain/deployment/repositories/deployment.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { buildSiteRoles, type VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
@@ -25,8 +25,8 @@ export class CatalogSyncService {
     private readonly coreSiteService: CoreSiteService,
     private readonly coreRoleService: CoreRoleService,
     private readonly coreVersionRepository: CoreVersionRepository,
-    private readonly deploymentRepository: DeploymentRepository,
-    private readonly organizationRepository: OrganizationRepository,
+    private readonly deploymentRepository: DeploymentDomainRepository,
+    private readonly organizationRepository: CloudOrganizationDomainRepository,
   ) {}
 
   // Pushes the signed catalog license + per-org roles and entitlements to every deployment pinned to a version

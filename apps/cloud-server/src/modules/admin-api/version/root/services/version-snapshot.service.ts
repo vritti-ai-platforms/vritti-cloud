@@ -1,4 +1,4 @@
-import { VersionService } from '@domain/version/root/services/version.service';
+import { VersionDomainService } from '@domain/version/root/services/version.service';
 import { Injectable, Logger } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
@@ -8,7 +8,7 @@ export class VersionSnapshotService {
   private readonly logger = new Logger(VersionSnapshotService.name);
 
   constructor(
-    private readonly versionService: VersionService,
+    private readonly versionService: VersionDomainService,
     private readonly catalogSyncService: CatalogSyncService,
   ) {}
 

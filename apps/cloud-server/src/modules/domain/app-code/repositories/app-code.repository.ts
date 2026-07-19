@@ -4,7 +4,7 @@ import { eq, ilike, or, sql } from '@vritti/api-sdk/drizzle-orm';
 import { businessAppFeatures, businessApps, features } from '@/db/schema';
 
 @Injectable()
-export class AppCodeRepository extends PrimaryBaseRepository<typeof businessApps> {
+export class AppCodeDomainRepository extends PrimaryBaseRepository<typeof businessApps> {
   constructor(database: PrimaryDatabaseService) {
     super(database, businessApps);
   }

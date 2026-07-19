@@ -15,14 +15,14 @@ import type { MobileMicrofrontendBodyDto } from '@/modules/admin-api/version/mic
 import type { WebMicrofrontendBodyDto } from '@/modules/admin-api/version/microfrontend/dto/request/web-microfrontend-body.dto';
 import type { MicrofrontendTableResponseDto } from '@/modules/admin-api/version/microfrontend/dto/response/microfrontend-table-response.dto';
 import type { MicrofrontendSelectQueryDto } from '@/modules/select-api/dto/microfrontend-select-query.dto';
-import { MicrofrontendRepository } from '../repositories/microfrontend.repository';
+import { MicrofrontendDomainRepository } from '../repositories/microfrontend.repository';
 
 // The URL platform param, lowercase
 export type MicrofrontendPlatformParam = 'web' | 'mobile';
 
 @Injectable()
-export class MicrofrontendService {
-  private readonly logger = new Logger(MicrofrontendService.name);
+export class MicrofrontendDomainService {
+  private readonly logger = new Logger(MicrofrontendDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     code: { column: microfrontends.code, type: 'string' },
@@ -31,7 +31,7 @@ export class MicrofrontendService {
   };
 
   constructor(
-    private readonly microfrontendRepository: MicrofrontendRepository,
+    private readonly microfrontendRepository: MicrofrontendDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -41,11 +41,11 @@ export class MicrofrontendService {
       userId,
       `microfrontends-${versionId}`,
     );
-    const filterWhere = FilterProcessor.buildWhere(state.filters, MicrofrontendService.FIELD_MAP);
-    const searchWhere = FilterProcessor.buildSearch(state.search, MicrofrontendService.FIELD_MAP);
+    const filterWhere = FilterProcessor.buildWhere(state.filters, MicrofrontendDomainService.FIELD_MAP);
+    const searchWhere = FilterProcessor.buildSearch(state.search, MicrofrontendDomainService.FIELD_MAP);
     const versionWhere = eq(microfrontends.versionId, versionId);
     const where = and(versionWhere, filterWhere, searchWhere);
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, MicrofrontendService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, MicrofrontendDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.microfrontendRepository.findAllAndCount({ where, orderBy, limit, offset });
     this.logger.log(`Fetched microfrontends table for version: ${versionId} (${count} results)`);

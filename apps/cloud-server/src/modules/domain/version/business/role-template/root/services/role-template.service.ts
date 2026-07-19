@@ -17,12 +17,12 @@ import { RoleTemplateTableRowDto } from '@/modules/admin-api/version/business/ro
 import type { CreateRoleTemplateDto } from '@/modules/admin-api/version/business/role-template/root/dto/request/create-role-template.dto';
 import type { UpdateRoleTemplateDto } from '@/modules/admin-api/version/business/role-template/root/dto/request/update-role-template.dto';
 import { RoleTemplateTableResponseDto } from '@/modules/admin-api/version/business/role-template/root/dto/response/role-template-table-response.dto';
-import { RoleTemplateFeaturePermissionRepository } from '../../role-template-permission/repositories/role-template-feature-permission.repository';
-import { RoleTemplateRepository } from '../repositories/role-template.repository';
+import { RoleTemplateFeaturePermissionDomainRepository } from '../../role-template-permission/repositories/role-template-feature-permission.repository';
+import { RoleTemplateDomainRepository } from '../repositories/role-template.repository';
 
 @Injectable()
-export class RoleTemplateService {
-  private readonly logger = new Logger(RoleTemplateService.name);
+export class RoleTemplateDomainService {
+  private readonly logger = new Logger(RoleTemplateDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: roleTemplates.name, type: 'string' },
@@ -30,8 +30,8 @@ export class RoleTemplateService {
   };
 
   constructor(
-    private readonly roleTemplateRepository: RoleTemplateRepository,
-    private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionRepository,
+    private readonly roleTemplateRepository: RoleTemplateDomainRepository,
+    private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -65,10 +65,10 @@ export class RoleTemplateService {
     if (businessId) {
       filters.push({ field: 'businessId', operator: 'equals', value: businessId });
     }
-    const filterWhere = FilterProcessor.buildWhere(filters, RoleTemplateService.FIELD_MAP);
-    const searchWhere = FilterProcessor.buildSearch(state.search, RoleTemplateService.FIELD_MAP);
+    const filterWhere = FilterProcessor.buildWhere(filters, RoleTemplateDomainService.FIELD_MAP);
+    const searchWhere = FilterProcessor.buildSearch(state.search, RoleTemplateDomainService.FIELD_MAP);
     const where = and(filterWhere, searchWhere);
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, RoleTemplateService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, RoleTemplateDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.roleTemplateRepository.findAllWithCounts({ where, orderBy, limit, offset });
     this.logger.log(`Fetched role templates table (${count} results, limit: ${limit}, offset: ${offset})`);

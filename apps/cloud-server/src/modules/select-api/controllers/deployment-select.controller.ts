@@ -1,4 +1,4 @@
-import { DeploymentService } from '@domain/deployment/services/deployment.service';
+import { DeploymentDomainService } from '@domain/deployment/services/deployment.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { DeploymentSelectQueryDto } from '../../admin-api/deployment/dto/request
 export class DeploymentSelectController {
   private readonly logger = new Logger(DeploymentSelectController.name);
 
-  constructor(private readonly deploymentService: DeploymentService) {}
+  constructor(private readonly deploymentService: DeploymentDomainService) {}
 
   // Returns paginated deployment options for the select component
   @Get()

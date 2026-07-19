@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { CloudProviderRepository } from './repositories/cloud-provider.repository';
-import { CloudProviderService } from './services/cloud-provider.service';
+import { CloudProviderDomainRepository } from './repositories/cloud-provider.repository';
+import { CloudProviderDomainService } from './services/cloud-provider.service';
 
 @Module({
-  providers: [CloudProviderService, CloudProviderRepository],
-  exports: [CloudProviderService, CloudProviderRepository],
+  providers: [CloudProviderDomainService, CloudProviderDomainRepository],
+  exports: [CloudProviderDomainService, CloudProviderDomainRepository],
 })
 export class CloudProviderDomainModule {}

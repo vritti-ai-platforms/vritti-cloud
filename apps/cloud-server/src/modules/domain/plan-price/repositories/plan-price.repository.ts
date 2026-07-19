@@ -14,7 +14,7 @@ export type PlanPriceWithDetails = PlanPrice & {
 };
 
 @Injectable()
-export class PlanPriceRepository extends PrimaryBaseRepository<typeof planPrices> {
+export class PlanPriceDomainRepository extends PrimaryBaseRepository<typeof planPrices> {
   constructor(database: PrimaryDatabaseService) {
     super(database, planPrices);
   }

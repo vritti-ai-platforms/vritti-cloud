@@ -1,7 +1,7 @@
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
-import { TotpService } from '@domain/mfa/services/totp.service';
-import { UserService } from '@domain/user/services/user.service';
+import { MfaDomainRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeDomainService } from '@domain/mfa/services/backup-code.service';
+import { TotpDomainService } from '@domain/mfa/services/totp.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
@@ -13,10 +13,10 @@ export class TotpSetupService {
   private readonly logger = new Logger(TotpSetupService.name);
 
   constructor(
-    private readonly mfaRepo: MfaRepository,
-    private readonly totpService: TotpService,
-    private readonly backupCodeService: BackupCodeService,
-    private readonly userService: UserService,
+    private readonly mfaRepo: MfaDomainRepository,
+    private readonly totpService: TotpDomainService,
+    private readonly backupCodeService: BackupCodeDomainService,
+    private readonly userService: UserDomainService,
   ) {}
 
   // Generates a TOTP secret, persists a pending record in the DB, and returns the QR code

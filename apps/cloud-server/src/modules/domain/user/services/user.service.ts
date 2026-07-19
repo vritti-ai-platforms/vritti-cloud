@@ -4,13 +4,13 @@ import { SignupMethod, SignupMethodValues, User } from '@/db/schema';
 import { UserDto } from '@/modules/cloud-api/user/dto/entity/user.dto';
 import type { CreateUserDto } from '@/modules/cloud-api/user/dto/request/create-user.dto';
 import type { UpdateUserDto } from '@/modules/cloud-api/user/dto/request/update-user.dto';
-import { UserRepository } from '../repositories/user.repository';
+import { UserDomainRepository } from '../repositories/user.repository';
 
 @Injectable()
-export class UserService {
-  private readonly logger = new Logger(UserService.name);
+export class UserDomainService {
+  private readonly logger = new Logger(UserDomainService.name);
 
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(private readonly userRepository: UserDomainRepository) {}
 
   // Creates a new user with optional password hash and email uniqueness check
   async create(

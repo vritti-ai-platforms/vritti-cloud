@@ -1,6 +1,6 @@
-import { OAuthProviderRepository } from '@domain/oauth/repositories/oauth-provider.repository';
-import { SessionService } from '@domain/session/services/session.service';
-import { UserRepository } from '@domain/user/repositories/user.repository';
+import { OAuthProviderDomainRepository } from '@domain/oauth/repositories/oauth-provider.repository';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainRepository } from '@domain/user/repositories/user.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
@@ -30,11 +30,11 @@ export class OAuthService {
   private readonly providers: Map<OAuthProviderType, IOAuthProvider>;
 
   constructor(
-    private readonly userRepository: UserRepository,
+    private readonly userRepository: UserDomainRepository,
     private readonly oauthStateService: OAuthStateService,
-    private readonly oauthProviderRepository: OAuthProviderRepository,
+    private readonly oauthProviderRepository: OAuthProviderDomainRepository,
     private readonly oauthCryptoService: OAuthCryptoService,
-    private readonly sessionService: SessionService,
+    private readonly sessionService: SessionDomainService,
     readonly configService: ConfigService,
     private readonly googleProvider: GoogleOAuthProvider,
     private readonly microsoftProvider: MicrosoftOAuthProvider,

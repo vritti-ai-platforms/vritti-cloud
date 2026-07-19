@@ -14,13 +14,13 @@ import type {
 } from '@/modules/cloud-api/deployment/dto/request/deployment-filter.dto';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
-import { DeploymentRepository } from '../repositories/deployment.repository';
+import { DeploymentDomainRepository } from '../repositories/deployment.repository';
 
 @Injectable()
-export class DeploymentService {
-  private readonly logger = new Logger(DeploymentService.name);
+export class DeploymentDomainService {
+  private readonly logger = new Logger(DeploymentDomainService.name);
 
-  constructor(private readonly deploymentRepository: DeploymentRepository) {}
+  constructor(private readonly deploymentRepository: DeploymentDomainRepository) {}
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
   findForSelect(query: DeploymentSelectQueryDto): Promise<SelectQueryResult> {

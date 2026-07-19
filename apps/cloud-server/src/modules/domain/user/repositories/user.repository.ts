@@ -12,7 +12,7 @@ import {
 } from '@/db/schema';
 
 @Injectable()
-export class UserRepository extends PrimaryBaseRepository<typeof users> {
+export class UserDomainRepository extends PrimaryBaseRepository<typeof users> {
   constructor(database: PrimaryDatabaseService) {
     super(database, users);
   }

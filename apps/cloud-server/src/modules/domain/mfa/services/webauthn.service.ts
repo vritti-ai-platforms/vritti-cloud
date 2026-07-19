@@ -14,8 +14,8 @@ import type {
 } from '../types/webauthn.types';
 
 @Injectable()
-export class WebAuthnService {
-  private readonly logger = new Logger(WebAuthnService.name);
+export class WebAuthnDomainService {
+  private readonly logger = new Logger(WebAuthnDomainService.name);
   private readonly rpName: string;
   private readonly rpID: string;
   private readonly origin: string;

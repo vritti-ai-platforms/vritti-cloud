@@ -17,12 +17,12 @@ import type { CreateVersionDto } from '@/modules/admin-api/version/root/dto/requ
 import type { PushArtifactsDto } from '@/modules/admin-api/version/root/dto/request/push-artifacts.dto';
 import type { UpdateVersionDto } from '@/modules/admin-api/version/root/dto/request/update-version.dto';
 import type { VersionTableResponseDto } from '@/modules/admin-api/version/root/dto/response/version-table-response.dto';
-import { VersionRepository } from '../repositories/version.repository';
+import { VersionDomainRepository } from '../repositories/version.repository';
 import { buildVersionSnapshot } from './version-snapshot.builder';
 
 @Injectable()
-export class VersionService {
-  private readonly logger = new Logger(VersionService.name);
+export class VersionDomainService {
+  private readonly logger = new Logger(VersionDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     version: { column: versions.version, type: 'string' },
@@ -31,7 +31,7 @@ export class VersionService {
   };
 
   constructor(
-    private readonly versionRepository: VersionRepository,
+    private readonly versionRepository: VersionDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -60,10 +60,10 @@ export class VersionService {
   // Returns all versions with server-stored filter/sort/search/pagination state applied
   async findForTable(userId: string): Promise<VersionTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'versions');
-    const filterWhere = FilterProcessor.buildWhere(state.filters, VersionService.FIELD_MAP);
-    const searchWhere = FilterProcessor.buildSearch(state.search, VersionService.FIELD_MAP);
+    const filterWhere = FilterProcessor.buildWhere(state.filters, VersionDomainService.FIELD_MAP);
+    const searchWhere = FilterProcessor.buildSearch(state.search, VersionDomainService.FIELD_MAP);
     const where = and(filterWhere, searchWhere);
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, VersionService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, VersionDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.versionRepository.findAllAndCount({ where, orderBy, limit, offset });
     this.logger.log(`Fetched versions table (${count} results, limit: ${limit}, offset: ${offset})`);

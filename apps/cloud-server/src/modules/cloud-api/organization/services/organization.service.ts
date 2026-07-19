@@ -1,10 +1,10 @@
-import { BusinessRepository } from '@domain/business/repositories/business.repository';
-import { OrganizationRepository } from '@domain/cloud-organization/repositories/organization.repository';
-import { OrganizationMemberRepository } from '@domain/cloud-organization/repositories/organization-member.repository';
-import { CountryRepository } from '@domain/country/repositories/country.repository';
-import { DeploymentRepository } from '@domain/deployment/repositories/deployment.repository';
-import { MediaService } from '@domain/media/services/media.service';
-import { PlanRepository } from '@domain/plan/repositories/plan.repository';
+import { BusinessDomainRepository } from '@domain/business/repositories/business.repository';
+import { CloudOrganizationDomainRepository } from '@domain/cloud-organization/repositories/organization.repository';
+import { CloudOrganizationMemberDomainRepository } from '@domain/cloud-organization/repositories/organization-member.repository';
+import { CountryDomainRepository } from '@domain/country/repositories/country.repository';
+import { DeploymentDomainRepository } from '@domain/deployment/repositories/deployment.repository';
+import { MediaDomainService } from '@domain/media/services/media.service';
+import { PlanDomainRepository } from '@domain/plan/repositories/plan.repository';
 import { Injectable, Logger } from '@nestjs/common';
 import { type SelectOptionsQueryDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import {
@@ -36,15 +36,15 @@ export class OrganizationService {
   private readonly logger = new Logger(OrganizationService.name);
 
   constructor(
-    private readonly orgRepository: OrganizationRepository,
-    private readonly orgMemberRepository: OrganizationMemberRepository,
-    private readonly mediaService: MediaService,
+    private readonly orgRepository: CloudOrganizationDomainRepository,
+    private readonly orgMemberRepository: CloudOrganizationMemberDomainRepository,
+    private readonly mediaService: MediaDomainService,
     private readonly coreOrganizationService: CoreOrganizationService,
-    private readonly deploymentRepository: DeploymentRepository,
+    private readonly deploymentRepository: DeploymentDomainRepository,
     private readonly coreVersionRepository: CoreVersionRepository,
-    private readonly countryRepository: CountryRepository,
-    private readonly planRepository: PlanRepository,
-    private readonly businessRepository: BusinessRepository,
+    private readonly countryRepository: CountryDomainRepository,
+    private readonly planRepository: PlanDomainRepository,
+    private readonly businessRepository: BusinessDomainRepository,
     private readonly catalogSyncService: CatalogSyncService,
   ) {}
 

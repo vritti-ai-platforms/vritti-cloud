@@ -1,4 +1,4 @@
-import { MediaService } from '@domain/media/services/media.service';
+import { MediaDomainService } from '@domain/media/services/media.service';
 import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post, Query, Req, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserId } from '@vritti/api-sdk/auth';
@@ -24,7 +24,7 @@ import type { PresignedUrlResponseDto } from '../dto/response/presigned-url-resp
 export class MediaController {
   private readonly logger = new Logger(MediaController.name);
 
-  constructor(private readonly mediaService: MediaService) {}
+  constructor(private readonly mediaService: MediaDomainService) {}
 
   // Uploads a single file
   @Post('upload')

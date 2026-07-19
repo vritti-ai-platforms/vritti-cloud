@@ -1,5 +1,5 @@
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { UserService } from '@domain/user/services/user.service';
+import { MfaDomainRepository } from '@domain/mfa/repositories/mfa.repository';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { AccountStatusValues, OnboardingStepValues } from '@/db/schema';
 import { MfaStatusResponseDto } from '../../../../account/security/dto/response/mfa-status-response.dto';
@@ -9,8 +9,8 @@ export class MfaStatusService {
   private readonly logger = new Logger(MfaStatusService.name);
 
   constructor(
-    private readonly mfaRepo: MfaRepository,
-    private readonly userService: UserService,
+    private readonly mfaRepo: MfaDomainRepository,
+    private readonly userService: UserDomainService,
   ) {}
 
   // Clears any pending setup and marks onboarding as complete without enabling MFA

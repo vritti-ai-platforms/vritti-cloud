@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { EncryptionService } from '../../../../services';
 
 @Injectable()
-export class BackupCodeService {
+export class BackupCodeDomainService {
   private readonly BACKUP_CODE_COUNT = 10;
   private readonly BACKUP_CODE_LENGTH = 8;
 

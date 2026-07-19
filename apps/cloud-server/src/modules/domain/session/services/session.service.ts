@@ -7,14 +7,14 @@ import type { FastifyRequest } from 'fastify';
 import { type Session, type SessionType, SessionTypeValues, sessions } from '@/db/schema';
 import { GeoipService } from '@/services';
 import { extractDeviceInfo, extractIpAddress } from '@/utils/request-metadata';
-import { SessionRepository } from '../repositories/session.repository';
+import { SessionDomainRepository } from '../repositories/session.repository';
 
 @Injectable()
-export class SessionService {
-  private readonly logger = new Logger(SessionService.name);
+export class SessionDomainService {
+  private readonly logger = new Logger(SessionDomainService.name);
 
   constructor(
-    private readonly sessionRepository: SessionRepository,
+    private readonly sessionRepository: SessionDomainRepository,
     private readonly tokenService: TokenService,
     private readonly geoipService: GeoipService,
   ) {}

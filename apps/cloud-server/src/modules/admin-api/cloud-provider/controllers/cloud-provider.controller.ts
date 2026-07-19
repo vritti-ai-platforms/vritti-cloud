@@ -1,4 +1,4 @@
-import { CloudProviderService } from '@domain/cloud-provider/services/cloud-provider.service';
+import { CloudProviderDomainService } from '@domain/cloud-provider/services/cloud-provider.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -22,7 +22,7 @@ import { CloudProviderTableResponseDto } from '../dto/response/cloud-providers-r
 export class CloudProviderController {
   private readonly logger = new Logger(CloudProviderController.name);
 
-  constructor(private readonly cloudProviderService: CloudProviderService) {}
+  constructor(private readonly cloudProviderService: CloudProviderDomainService) {}
 
   // Creates a new cloud provider
   @Post()

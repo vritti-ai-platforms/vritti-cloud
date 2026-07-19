@@ -26,7 +26,7 @@ export type FeatureTableRow = Feature & {
 };
 
 @Injectable()
-export class FeatureRepository extends PrimaryBaseRepository<typeof features> {
+export class FeatureDomainRepository extends PrimaryBaseRepository<typeof features> {
   constructor(database: PrimaryDatabaseService) {
     super(database, features);
   }

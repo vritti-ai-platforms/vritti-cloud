@@ -1,4 +1,4 @@
-import { RegionService } from '@domain/region/services/region.service';
+import { RegionDomainService } from '@domain/region/services/region.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -25,7 +25,7 @@ import { RegionTableResponseDto } from '../dto/response/regions-response.dto';
 export class RegionController {
   private readonly logger = new Logger(RegionController.name);
 
-  constructor(private readonly regionService: RegionService) {}
+  constructor(private readonly regionService: RegionDomainService) {}
 
   // Creates a new region
   @Post()

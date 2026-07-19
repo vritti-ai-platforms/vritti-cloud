@@ -46,7 +46,7 @@ export interface PermissionUsageRef {
 }
 
 @Injectable()
-export class FeaturePermissionRepository extends PrimaryBaseRepository<typeof featurePermissions> {
+export class FeaturePermissionDomainRepository extends PrimaryBaseRepository<typeof featurePermissions> {
   constructor(database: PrimaryDatabaseService) {
     super(database, featurePermissions);
   }

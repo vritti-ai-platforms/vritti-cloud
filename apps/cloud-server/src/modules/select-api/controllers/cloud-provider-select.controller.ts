@@ -1,4 +1,4 @@
-import { CloudProviderService } from '@domain/cloud-provider/services/cloud-provider.service';
+import { CloudProviderDomainService } from '@domain/cloud-provider/services/cloud-provider.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { CloudProviderSelectQueryDto } from '../dto/cloud-provider-select-query.
 export class CloudProviderSelectController {
   private readonly logger = new Logger(CloudProviderSelectController.name);
 
-  constructor(private readonly cloudProviderService: CloudProviderService) {}
+  constructor(private readonly cloudProviderService: CloudProviderDomainService) {}
 
   // Returns paginated cloud provider options for the select component
   @Get()

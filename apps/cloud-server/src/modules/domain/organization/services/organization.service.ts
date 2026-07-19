@@ -8,11 +8,11 @@ import { OrganizationDto } from '@/modules/admin-api/deployment/organization/dto
 import { OrganizationDetailDto } from '@/modules/admin-api/deployment/organization/dto/entity/organization-detail.dto';
 import { OrganizationTableResponseDto } from '@/modules/admin-api/deployment/organization/dto/response/organizations-response.dto';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
-import { OrganizationRepository } from '../repositories/organization.repository';
+import { OrganizationDomainRepository } from '../repositories/organization.repository';
 
 @Injectable()
-export class OrganizationService {
-  private readonly logger = new Logger(OrganizationService.name);
+export class OrganizationDomainService {
+  private readonly logger = new Logger(OrganizationDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: organizations.name, type: 'string' },
@@ -30,7 +30,7 @@ export class OrganizationService {
   };
 
   constructor(
-    private readonly organizationRepository: OrganizationRepository,
+    private readonly organizationRepository: OrganizationDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
     private readonly catalogSyncService: CatalogSyncService,
   ) {}
@@ -39,14 +39,14 @@ export class OrganizationService {
   async findForTable(userId: string, deploymentId?: string): Promise<OrganizationTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'organizations');
     const where = and(
-      FilterProcessor.buildWhere(state.filters, OrganizationService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, OrganizationService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, OrganizationDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, OrganizationDomainService.FIELD_MAP),
       deploymentId ? eq(organizations.deploymentId, deploymentId) : undefined,
     );
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.organizationRepository.findAllWithCounts({
       where,
-      orderBy: FilterProcessor.buildOrderBy(state.sort, OrganizationService.FIELD_MAP),
+      orderBy: FilterProcessor.buildOrderBy(state.sort, OrganizationDomainService.FIELD_MAP),
       limit,
       offset,
     });

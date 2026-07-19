@@ -1,11 +1,11 @@
-import { MfaRepository } from '@domain/mfa/repositories/mfa.repository';
-import { BackupCodeService } from '@domain/mfa/services/backup-code.service';
-import { TotpService } from '@domain/mfa/services/totp.service';
-import { WebAuthnService } from '@domain/mfa/services/webauthn.service';
+import { MfaDomainRepository } from '@domain/mfa/repositories/mfa.repository';
+import { BackupCodeDomainService } from '@domain/mfa/services/backup-code.service';
+import { TotpDomainService } from '@domain/mfa/services/totp.service';
+import { WebAuthnDomainService } from '@domain/mfa/services/webauthn.service';
 import type { AuthenticationResponseJSON } from '@domain/mfa/types/webauthn.types';
-import { SessionService } from '@domain/session/services/session.service';
-import { UserService } from '@domain/user/services/user.service';
-import { VerificationService } from '@domain/verification/services/verification.service';
+import { SessionDomainService } from '@domain/session/services/session.service';
+import { UserDomainService } from '@domain/user/services/user.service';
+import { VerificationDomainService } from '@domain/verification/services/verification.service';
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { BadRequestException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
@@ -26,14 +26,14 @@ export class MfaVerificationService {
 
   constructor(
     private readonly mfaChallengeStore: MfaChallengeStore,
-    private readonly totpService: TotpService,
-    private readonly backupCodeService: BackupCodeService,
-    private readonly verificationService: VerificationService,
-    private readonly webAuthnService: WebAuthnService,
-    private readonly mfaRepo: MfaRepository,
-    private readonly userService: UserService,
-    @Inject(forwardRef(() => SessionService))
-    private readonly sessionService: SessionService,
+    private readonly totpService: TotpDomainService,
+    private readonly backupCodeService: BackupCodeDomainService,
+    private readonly verificationService: VerificationDomainService,
+    private readonly webAuthnService: WebAuthnDomainService,
+    private readonly mfaRepo: MfaDomainRepository,
+    private readonly userService: UserDomainService,
+    @Inject(forwardRef(() => SessionDomainService))
+    private readonly sessionService: SessionDomainService,
   ) {}
 
   // Creates an MFA challenge if the user has MFA enabled, returning null otherwise

@@ -11,7 +11,7 @@ import type { MediaQueryDto } from '@/modules/cloud-api/media/dto/request/media-
 import type { UploadQueryDto } from '@/modules/cloud-api/media/dto/request/upload-query.dto';
 import type { BatchUploadResponseDto } from '@/modules/cloud-api/media/dto/response/batch-upload-response.dto';
 import type { PresignedUrlResponseDto } from '@/modules/cloud-api/media/dto/response/presigned-url-response.dto';
-import { MediaRepository } from '../repositories/media.repository';
+import { MediaDomainRepository } from '../repositories/media.repository';
 import { StorageFactory } from '../storage/storage.factory';
 
 const DEFAULT_ALLOWED_MIME_TYPES = [
@@ -36,8 +36,8 @@ interface FilePayload {
 }
 
 @Injectable()
-export class MediaService {
-  private readonly logger = new Logger(MediaService.name);
+export class MediaDomainService {
+  private readonly logger = new Logger(MediaDomainService.name);
   private readonly defaultBucket: string;
   private readonly maxFileSize: number;
   private readonly maxBatchSize: number;
@@ -45,7 +45,7 @@ export class MediaService {
   private readonly defaultProvider: string;
 
   constructor(
-    private readonly mediaRepository: MediaRepository,
+    private readonly mediaRepository: MediaDomainRepository,
     private readonly storageFactory: StorageFactory,
     private readonly configService: ConfigService,
   ) {

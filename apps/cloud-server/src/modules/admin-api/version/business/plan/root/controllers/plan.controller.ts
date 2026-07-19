@@ -1,4 +1,4 @@
-import { PlanService } from '@domain/plan/services/plan.service';
+import { PlanDomainService } from '@domain/plan/services/plan.service';
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Patch, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -17,7 +17,7 @@ import { PlansTableResponseDto } from '../dto/response/plans-table-response.dto'
 export class PlanController {
   private readonly logger = new Logger(PlanController.name);
 
-  constructor(private readonly planService: PlanService) {}
+  constructor(private readonly planService: PlanDomainService) {}
 
   // Creates a new plan under the version + business
   @Post()

@@ -1,5 +1,5 @@
-import { UserService } from '@domain/user/services/user.service';
-import { VerificationService } from '@domain/verification/services/verification.service';
+import { UserDomainService } from '@domain/user/services/user.service';
+import { VerificationDomainService } from '@domain/verification/services/verification.service';
 import { Injectable, Logger, type MessageEvent } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -22,9 +22,9 @@ export class MobileVerificationService {
   private readonly smsBusinessNumber: string;
 
   constructor(
-    private readonly userService: UserService,
+    private readonly userService: UserDomainService,
     private readonly configService: ConfigService,
-    private readonly verificationService: VerificationService,
+    private readonly verificationService: VerificationDomainService,
     private readonly eventEmitter: EventEmitter2,
     private readonly sseConnectionService: SseConnectionService,
     private readonly smsService: SmsService,

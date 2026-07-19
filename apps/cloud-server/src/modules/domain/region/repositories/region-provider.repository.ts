@@ -5,7 +5,7 @@ import type { CloudProvider } from '@/db/schema';
 import { cloudProviders, regionCloudProviders } from '@/db/schema';
 
 @Injectable()
-export class RegionProviderRepository {
+export class RegionProviderDomainRepository {
   constructor(private readonly database: PrimaryDatabaseService) {}
 
   // Inserts a single region-cloud-provider pair; skips if already assigned

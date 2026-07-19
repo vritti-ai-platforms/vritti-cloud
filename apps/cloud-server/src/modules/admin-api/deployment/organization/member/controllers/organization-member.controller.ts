@@ -1,4 +1,4 @@
-import { OrganizationMemberService } from '@domain/organization-member/services/organization-member.service';
+import { OrganizationMemberDomainService } from '@domain/organization-member/services/organization-member.service';
 import { Controller, Get, Logger, Param } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -13,7 +13,7 @@ import { OrganizationMemberTableResponseDto } from '../dto/response/organization
 export class OrganizationMemberController {
   private readonly logger = new Logger(OrganizationMemberController.name);
 
-  constructor(private readonly organizationMemberService: OrganizationMemberService) {}
+  constructor(private readonly organizationMemberService: OrganizationMemberDomainService) {}
 
   // Returns organization members for the data table with server-stored state
   @Get()

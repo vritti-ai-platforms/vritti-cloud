@@ -1,4 +1,4 @@
-import { FeaturePermissionService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
+import { FeaturePermissionDomainService } from '@domain/version/feature/feature-permission/services/feature-permission.service';
 import { Body, Controller, Get, Logger, Param, Patch } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -15,7 +15,7 @@ import { ApiListFeaturePermissions, ApiReorderPermissions } from '../docs/featur
 export class FeaturePermissionController {
   private readonly logger = new Logger(FeaturePermissionController.name);
 
-  constructor(private readonly featurePermissionService: FeaturePermissionService) {}
+  constructor(private readonly featurePermissionService: FeaturePermissionDomainService) {}
 
   // Lists the permissions owned by a feature in display order
   @Get()

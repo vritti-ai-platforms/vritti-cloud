@@ -4,14 +4,14 @@ import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { NewRoleTemplateFeature, NewRoleTemplateFeaturePermission, RoleTemplate } from '@/db/schema';
 import type { AssignRoleTemplatePermissionsDto } from '@/modules/admin-api/version/business/role-template/role-template-permission/dto/request/assign-role-template-permissions.dto';
-import { RoleTemplateRepository } from '../../root/repositories/role-template.repository';
+import { RoleTemplateDomainRepository } from '../../root/repositories/role-template.repository';
 import {
-  RoleTemplateFeatureRepository,
+  RoleTemplateFeatureDomainRepository,
   type RoleTemplateGrant,
 } from '../repositories/role-template-feature.repository';
 import {
   type AvailableApp,
-  RoleTemplateFeaturePermissionRepository,
+  RoleTemplateFeaturePermissionDomainRepository,
 } from '../repositories/role-template-feature-permission.repository';
 
 // An app (catalog) plus the role's current grants for its features
@@ -30,13 +30,13 @@ function cellKey(featureId: string, platform: RoleTemplateGrant['platform']): st
 }
 
 @Injectable()
-export class RoleTemplatePermissionService {
-  private readonly logger = new Logger(RoleTemplatePermissionService.name);
+export class RoleTemplatePermissionDomainService {
+  private readonly logger = new Logger(RoleTemplatePermissionDomainService.name);
 
   constructor(
-    private readonly roleTemplateRepository: RoleTemplateRepository,
-    private readonly roleTemplateFeatureRepository: RoleTemplateFeatureRepository,
-    private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionRepository,
+    private readonly roleTemplateRepository: RoleTemplateDomainRepository,
+    private readonly roleTemplateFeatureRepository: RoleTemplateFeatureDomainRepository,
+    private readonly roleTemplateFeaturePermissionRepository: RoleTemplateFeaturePermissionDomainRepository,
   ) {}
 
   // Returns the matrix — the business's app/feature catalog with the role's current grants nested under each app

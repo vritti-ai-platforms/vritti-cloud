@@ -16,11 +16,11 @@ import type { CreatePlanDto } from '@/modules/admin-api/version/business/plan/ro
 import type { UpdatePlanDto } from '@/modules/admin-api/version/business/plan/root/dto/request/update-plan.dto';
 import { PlansTableResponseDto } from '@/modules/admin-api/version/business/plan/root/dto/response/plans-table-response.dto';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
-import { PlanRepository } from '../repositories/plan.repository';
+import { PlanDomainRepository } from '../repositories/plan.repository';
 
 @Injectable()
-export class PlanService {
-  private readonly logger = new Logger(PlanService.name);
+export class PlanDomainService {
+  private readonly logger = new Logger(PlanDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: plans.name, type: 'string' },
@@ -50,7 +50,7 @@ export class PlanService {
   };
 
   constructor(
-    private readonly planRepository: PlanRepository,
+    private readonly planRepository: PlanDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
     private readonly catalogSyncService: CatalogSyncService,
   ) {}
@@ -149,13 +149,13 @@ export class PlanService {
     const where = and(
       eq(plans.versionId, versionId),
       eq(plans.businessId, businessId),
-      FilterProcessor.buildWhere(state.filters, PlanService.FIELD_MAP),
-      FilterProcessor.buildSearch(state.search, PlanService.FIELD_MAP),
+      FilterProcessor.buildWhere(state.filters, PlanDomainService.FIELD_MAP),
+      FilterProcessor.buildSearch(state.search, PlanDomainService.FIELD_MAP),
     );
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.planRepository.findAllWithCounts({
       where,
-      orderBy: FilterProcessor.buildOrderBy(state.sort, PlanService.FIELD_MAP),
+      orderBy: FilterProcessor.buildOrderBy(state.sort, PlanDomainService.FIELD_MAP),
       limit,
       offset,
     });

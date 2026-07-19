@@ -1,5 +1,5 @@
-import { MediaService } from '@domain/media/services/media.service';
-import { UserService } from '@domain/user/services/user.service';
+import { MediaDomainService } from '@domain/media/services/media.service';
+import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger, type MessageEvent } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { AUTH_STATUS_EVENTS, ProfileUpdatedEvent, SessionRevokedEvent } from '../events/auth-status.events';
@@ -11,8 +11,8 @@ export class AuthStatusEventListener {
 
   constructor(
     private readonly authStatusSse: AuthStatusSseService,
-    private readonly userService: UserService,
-    private readonly mediaService: MediaService,
+    private readonly userService: UserDomainService,
+    private readonly mediaService: MediaDomainService,
   ) {}
 
   // Re-pushes full auth-state with fresh user data

@@ -22,14 +22,14 @@ import type { UpdateFeatureDto } from '@/modules/admin-api/version/feature/root/
 import { FeatureTableResponseDto } from '@/modules/admin-api/version/feature/root/dto/response/feature-table-response.dto';
 import { parseSpreadsheet } from '@/utils/parse-spreadsheet';
 import { validateImportRows } from '@/utils/validate-import-rows';
-import { MicrofrontendRepository } from '../../../microfrontend/repositories/microfrontend.repository';
-import { FeatureRepository } from '../repositories/feature.repository';
+import { MicrofrontendDomainRepository } from '../../../microfrontend/repositories/microfrontend.repository';
+import { FeatureDomainRepository } from '../repositories/feature.repository';
 
 export type FeatureMicrofrontendPlatformParam = 'web' | 'mobile';
 
 @Injectable()
-export class FeatureService {
-  private readonly logger = new Logger(FeatureService.name);
+export class FeatureDomainService {
+  private readonly logger = new Logger(FeatureDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: features.name, type: 'string' },
@@ -45,8 +45,8 @@ export class FeatureService {
   };
 
   constructor(
-    private readonly featureRepository: FeatureRepository,
-    private readonly microfrontendRepository: MicrofrontendRepository,
+    private readonly featureRepository: FeatureDomainRepository,
+    private readonly microfrontendRepository: MicrofrontendDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -189,10 +189,10 @@ export class FeatureService {
   // Returns all features with server-stored filter/sort/search/pagination state applied
   async findForTable(userId: string): Promise<FeatureTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'features');
-    const filterWhere = FilterProcessor.buildWhere(state.filters, FeatureService.FIELD_MAP);
-    const searchWhere = FilterProcessor.buildSearch(state.search, FeatureService.FIELD_MAP);
+    const filterWhere = FilterProcessor.buildWhere(state.filters, FeatureDomainService.FIELD_MAP);
+    const searchWhere = FilterProcessor.buildSearch(state.search, FeatureDomainService.FIELD_MAP);
     const where = and(filterWhere, searchWhere);
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, FeatureService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, FeatureDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { result, count } = await this.featureRepository.findAllForTable({ where, orderBy, limit, offset });
     this.logger.log(`Fetched features table (${count} results, limit: ${limit}, offset: ${offset})`);

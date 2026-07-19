@@ -1,4 +1,4 @@
-import { AppCodeService } from '@domain/app-code/services/app-code.service';
+import { AppCodeDomainService } from '@domain/app-code/services/app-code.service';
 import { Controller, Get, Logger, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
@@ -12,7 +12,7 @@ import { SessionTypeValues } from '@/db/schema';
 export class AppCodeSelectController {
   private readonly logger = new Logger(AppCodeSelectController.name);
 
-  constructor(private readonly appCodeService: AppCodeService) {}
+  constructor(private readonly appCodeService: AppCodeDomainService) {}
 
   // Returns paginated app code options for the select component
   @Get()

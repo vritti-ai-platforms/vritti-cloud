@@ -5,7 +5,7 @@ import type { App } from '@/db/schema';
 import { businessAppFeatures, businessApps } from '@/db/schema';
 
 @Injectable()
-export class AppRepository extends PrimaryBaseRepository<typeof businessApps> {
+export class AppDomainRepository extends PrimaryBaseRepository<typeof businessApps> {
   constructor(database: PrimaryDatabaseService) {
     super(database, businessApps);
   }

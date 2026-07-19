@@ -1,4 +1,4 @@
-import { VersionBusinessService } from '@domain/version/business/root/services/version-business.service';
+import { VersionBusinessDomainService } from '@domain/version/business/root/services/version-business.service';
 import { Body, Controller, Delete, Get, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
@@ -21,7 +21,7 @@ import { VersionBusinessTableResponseDto } from '../dto/response/version-busines
 export class VersionBusinessController {
   private readonly logger = new Logger(VersionBusinessController.name);
 
-  constructor(private readonly versionBusinessService: VersionBusinessService) {}
+  constructor(private readonly versionBusinessService: VersionBusinessDomainService) {}
 
   // Returns businesses assigned to a version for the data table (server-stored state)
   @Get('table')

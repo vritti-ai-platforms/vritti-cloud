@@ -5,7 +5,7 @@ import type { Country } from '@/db/schema';
 import { countries, planPrices } from '@/db/schema';
 
 @Injectable()
-export class CountryRepository extends PrimaryBaseRepository<typeof countries> {
+export class CountryDomainRepository extends PrimaryBaseRepository<typeof countries> {
   constructor(database: PrimaryDatabaseService) {
     super(database, countries);
   }

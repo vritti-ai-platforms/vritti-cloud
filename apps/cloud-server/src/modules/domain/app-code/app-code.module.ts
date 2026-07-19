@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { AppCodeRepository } from './repositories/app-code.repository';
-import { AppCodeService } from './services/app-code.service';
+import { AppCodeDomainRepository } from './repositories/app-code.repository';
+import { AppCodeDomainService } from './services/app-code.service';
 
 @Module({
-  providers: [AppCodeService, AppCodeRepository],
-  exports: [AppCodeService],
+  providers: [AppCodeDomainService, AppCodeDomainRepository],
+  exports: [AppCodeDomainService],
 })
 export class AppCodeDomainModule {}

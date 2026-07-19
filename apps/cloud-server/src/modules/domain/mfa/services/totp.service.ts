@@ -3,8 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { authenticator } from 'otplib';
 
 @Injectable()
-export class TotpService {
-  private readonly logger = new Logger(TotpService.name);
+export class TotpDomainService {
+  private readonly logger = new Logger(TotpDomainService.name);
   private readonly issuer: string;
 
   constructor(private readonly configService: ConfigService) {

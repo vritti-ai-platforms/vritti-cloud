@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { OrganizationMemberRepository } from './repositories/organization-member.repository';
-import { OrganizationMemberService } from './services/organization-member.service';
+import { OrganizationMemberDomainRepository } from './repositories/organization-member.repository';
+import { OrganizationMemberDomainService } from './services/organization-member.service';
 
 @Module({
-  providers: [OrganizationMemberService, OrganizationMemberRepository],
-  exports: [OrganizationMemberService, OrganizationMemberRepository],
+  providers: [OrganizationMemberDomainService, OrganizationMemberDomainRepository],
+  exports: [OrganizationMemberDomainService, OrganizationMemberDomainRepository],
 })
 export class OrganizationMemberDomainModule {}

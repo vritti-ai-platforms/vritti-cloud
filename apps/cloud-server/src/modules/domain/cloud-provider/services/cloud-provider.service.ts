@@ -15,11 +15,11 @@ import type { CreateCloudProviderDto } from '@/modules/admin-api/cloud-provider/
 import type { UpdateCloudProviderDto } from '@/modules/admin-api/cloud-provider/dto/request/update-cloud-provider.dto';
 import { CloudProviderTableResponseDto } from '@/modules/admin-api/cloud-provider/dto/response/cloud-providers-response.dto';
 import type { CloudProviderSelectQueryDto } from '@/modules/select-api/dto/cloud-provider-select-query.dto';
-import { CloudProviderRepository } from '../repositories/cloud-provider.repository';
+import { CloudProviderDomainRepository } from '../repositories/cloud-provider.repository';
 
 @Injectable()
-export class CloudProviderService {
-  private readonly logger = new Logger(CloudProviderService.name);
+export class CloudProviderDomainService {
+  private readonly logger = new Logger(CloudProviderDomainService.name);
 
   private static readonly FIELD_MAP: FieldMap = {
     name: { column: cloudProviders.name, type: 'string' },
@@ -27,7 +27,7 @@ export class CloudProviderService {
   };
 
   constructor(
-    private readonly cloudProviderRepository: CloudProviderRepository,
+    private readonly cloudProviderRepository: CloudProviderDomainRepository,
     private readonly dataTableStateService: DataTableStateService,
   ) {}
 
@@ -80,10 +80,10 @@ export class CloudProviderService {
   // Returns paginated cloud providers with region counts, applying server-stored filter/sort/search/pagination state
   async findForTable(userId: string): Promise<CloudProviderTableResponseDto> {
     const { state, activeViewId } = await this.dataTableStateService.getCurrentState(userId, 'cloud-providers');
-    const filterWhere = FilterProcessor.buildWhere(state.filters, CloudProviderService.FIELD_MAP);
-    const searchWhere = FilterProcessor.buildSearch(state.search, CloudProviderService.FIELD_MAP);
+    const filterWhere = FilterProcessor.buildWhere(state.filters, CloudProviderDomainService.FIELD_MAP);
+    const searchWhere = FilterProcessor.buildSearch(state.search, CloudProviderDomainService.FIELD_MAP);
     const where = and(filterWhere, searchWhere);
-    const orderBy = FilterProcessor.buildOrderBy(state.sort, CloudProviderService.FIELD_MAP);
+    const orderBy = FilterProcessor.buildOrderBy(state.sort, CloudProviderDomainService.FIELD_MAP);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
     const { rows, total } = await this.cloudProviderRepository.findAllWithCounts(where, orderBy, limit, offset);
     const result = rows.map((provider) =>
