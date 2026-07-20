@@ -34,7 +34,7 @@ const LegalEntityForm = ({ orgId, onClose }: LegalEntityFormProps) => {
       taxRegime: 'GST',
       taxId: '',
       fiscalYearStart: 4,
-      parentId: '',
+      parentId: null,
     },
   });
 
@@ -44,10 +44,7 @@ const LegalEntityForm = ({ orgId, onClose }: LegalEntityFormProps) => {
     <Form
       form={form}
       mutation={createMutation}
-      transformSubmit={(data) => ({
-        orgId,
-        data: { ...data, taxId: data.taxId || undefined, parentId: data.parentId || undefined },
-      })}
+      transformSubmit={(data) => ({ orgId, data })}
       onCancel={onClose}
     >
       <div className="space-y-6">

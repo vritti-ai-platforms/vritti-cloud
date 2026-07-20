@@ -31,11 +31,7 @@ const RegistrationForm = ({ orgId, legalEntity, onClose }: RegistrationFormProps
     <Form
       form={form}
       mutation={createMutation}
-      transformSubmit={(data) => ({
-        orgId,
-        leId: legalEntity.id,
-        data: { ...data, region: data.region || undefined },
-      })}
+      transformSubmit={(data) => ({ orgId, leId: legalEntity.id, data })}
       onCancel={onClose}
     >
       <TextField name="taxNumber" label="Tax Number" placeholder="e.g. 29AAECS7712C1Z2" />

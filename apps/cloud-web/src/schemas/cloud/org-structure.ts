@@ -99,7 +99,7 @@ export const createLegalEntitySchema = z.object({
   taxRegime: z.enum(TAX_REGIME_VALUES, { message: 'Please select a tax regime' }),
   taxId: z.string().max(100).optional(),
   fiscalYearStart: z.number().int().min(1).max(12),
-  parentId: z.string().uuid().optional().or(z.literal('')),
+  parentId: z.string().uuid().nullable().optional(),
 });
 
 export const updateLegalEntitySchema = createLegalEntitySchema.partial().extend({
@@ -114,7 +114,7 @@ export const createTaxRegistrationSchema = z.object({
 export const createSiteGroupSchema = z.object({
   name: z.string().min(1, 'Name is required').max(255, 'Name must be 255 characters or less'),
   code: zodCodeField({ max: 100 }),
-  parentId: z.string().uuid().optional().or(z.literal('')),
+  parentId: z.string().uuid().nullable().optional(),
   color: z.enum(GROUP_COLOR_KEYS).nullable().optional(),
 });
 

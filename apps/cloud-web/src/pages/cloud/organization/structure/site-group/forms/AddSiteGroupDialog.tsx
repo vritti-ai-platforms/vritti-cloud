@@ -41,7 +41,7 @@ const AddSiteGroupForm = ({
 }) => {
   const form = useForm<CreateSiteGroupData>({
     resolver: zodResolver(createSiteGroupSchema),
-    defaultValues: { name: '', code: '', parentId: defaultParentId ?? '', color: null },
+    defaultValues: { name: '', code: '', parentId: defaultParentId ?? null, color: null },
   });
   const createMutation = useCreateSiteGroup({ onSuccess: onClose });
 
@@ -52,7 +52,7 @@ const AddSiteGroupForm = ({
       onCancel={onClose}
       transformSubmit={(data) => ({
         orgId,
-        data: { ...data, parentId: data.parentId || undefined, color: data.color ?? null },
+        data: { ...data, color: data.color ?? null },
       })}
     >
       <FormSection title="Details">

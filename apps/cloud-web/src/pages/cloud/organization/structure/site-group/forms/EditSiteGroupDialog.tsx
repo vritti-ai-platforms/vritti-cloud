@@ -36,7 +36,7 @@ const EditSiteGroupForm = ({ orgId, group, onClose }: { orgId: string; group: Si
     defaultValues: {
       name: group.name,
       code: group.code,
-      parentId: group.parentId ?? '',
+      parentId: group.parentId ?? null,
       color: (group.color ?? null) as CreateSiteGroupData['color'],
     },
   });
@@ -51,7 +51,7 @@ const EditSiteGroupForm = ({ orgId, group, onClose }: { orgId: string; group: Si
       transformSubmit={(data) => ({
         orgId,
         groupId: group.id,
-        data: { ...data, parentId: data.parentId ? data.parentId : null, color: data.color ?? null },
+        data: { ...data, color: data.color ?? null },
       })}
     >
       <FormSection title="Details">

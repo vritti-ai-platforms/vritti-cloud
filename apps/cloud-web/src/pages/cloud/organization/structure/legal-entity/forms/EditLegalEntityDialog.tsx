@@ -36,7 +36,7 @@ const EditLegalEntityForm = ({ orgId, legalEntity, onClose }: EditLegalEntityFor
       taxRegime: legalEntity.taxRegime,
       taxId: legalEntity.taxId ?? '',
       fiscalYearStart: legalEntity.fiscalYearStart,
-      parentId: legalEntity.parentId ?? '',
+      parentId: legalEntity.parentId ?? null,
     },
   });
 
@@ -46,11 +46,7 @@ const EditLegalEntityForm = ({ orgId, legalEntity, onClose }: EditLegalEntityFor
     <Form
       form={form}
       mutation={updateMutation}
-      transformSubmit={(data) => ({
-        orgId,
-        leId: legalEntity.id,
-        data: { ...data, taxId: data.taxId || undefined, parentId: data.parentId || null },
-      })}
+      transformSubmit={(data) => ({ orgId, leId: legalEntity.id, data })}
       onCancel={onClose}
     >
       <div className="space-y-6">

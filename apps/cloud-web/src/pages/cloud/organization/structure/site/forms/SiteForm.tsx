@@ -30,11 +30,6 @@ const typeOptions = [
   { value: 'PRODUCTION', label: 'Production', description: 'Manufacturing — central kitchen, plant, workshop' },
 ];
 
-// Clears empty optional selects so the payload carries real ids only
-function cleanSiteData(data: CreateSiteData): CreateSiteData {
-  return { ...data, registrationId: data.registrationId || undefined, groupId: data.groupId || undefined };
-}
-
 export const SiteForm: React.FC<SiteFormProps> = ({
   orgId,
   site,
@@ -50,8 +45,8 @@ export const SiteForm: React.FC<SiteFormProps> = ({
       code: site?.code ?? '',
       type: site?.type ?? 'OUTLET',
       legalEntityId: site?.legalEntityId ?? defaultLegalEntityId ?? '',
-      registrationId: site?.registrationId ?? '',
-      groupId: site?.groupId ?? defaultGroupId ?? '',
+      registrationId: site?.registrationId ?? null,
+      groupId: site?.groupId ?? defaultGroupId ?? null,
       timezone: site?.timezone ?? '',
     },
   });
@@ -65,7 +60,7 @@ export const SiteForm: React.FC<SiteFormProps> = ({
   useEffect(() => {
     if (previousLegalEntityId.current !== legalEntityId) {
       previousLegalEntityId.current = legalEntityId;
-      form.setValue('registrationId', '');
+      form.setValue('registrationId', null);
     }
   }, [legalEntityId, form]);
 
@@ -133,7 +128,7 @@ export const SiteForm: React.FC<SiteFormProps> = ({
       <Form
         form={form}
         mutation={updateMutation}
-        transformSubmit={(data) => ({ orgId, siteId: site.id, data: cleanSiteData(data) })}
+        transformSubmit={(data) => ({ orgId, siteId: site.id, data })}
         onCancel={onClose}
       >
         {fields}
@@ -145,7 +140,7 @@ export const SiteForm: React.FC<SiteFormProps> = ({
     <Form
       form={form}
       mutation={createMutation}
-      transformSubmit={(data) => ({ orgId, data: cleanSiteData(data) })}
+      transformSubmit={(data) => ({ orgId, data })}
       onCancel={onClose}
     >
       {fields}

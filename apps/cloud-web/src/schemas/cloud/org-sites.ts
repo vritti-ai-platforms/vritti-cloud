@@ -35,8 +35,8 @@ export const createSiteSchema = z.object({
     message: 'Please select a type',
   }),
   legalEntityId: z.string().uuid('Please select a legal entity'),
-  registrationId: z.string().uuid().optional().or(z.literal('')),
-  groupId: z.string().uuid().optional().or(z.literal('')),
+  registrationId: z.string().uuid().nullable().optional(),
+  groupId: z.string().uuid().nullable().optional(),
   timezone: z.string().trim().min(1, 'Timezone is required').max(50),
 });
 
