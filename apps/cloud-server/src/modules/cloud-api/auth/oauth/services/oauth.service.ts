@@ -103,15 +103,13 @@ export class OAuthService {
       if (error) {
         this.logger.warn(`OAuth error: ${error} - ${errorDescription || 'No description'}`);
 
-        // Normalize error message for user cancellation
-        const normalizedDescription =
-          error === 'access_denied'
-            ? 'You cancelled the authentication process. Please try again if you want to continue.'
-            : errorDescription || 'Authentication failed. Please try again.';
-
+        // Reflect only a normalized code + our own copy — never the provider's raw error/description text
+        const isCancelled = error === 'access_denied';
         const params = new URLSearchParams({
-          error,
-          error_description: normalizedDescription,
+          error: isCancelled ? 'access_denied' : 'authentication_failed',
+          error_description: isCancelled
+            ? 'You cancelled the authentication process. Please try again if you want to continue.'
+            : 'Authentication failed. Please try again.',
         });
         const redirectUrl = `${redirectBase}/auth-error?${params.toString()}`;
         return { redirectUrl, refreshToken: '' };
@@ -174,8 +172,11 @@ export class OAuthService {
       return await this.handleNewUser(profile, tokens, request, redirectBase);
     } catch (error) {
       this.logger.error('OAuth callback error', error);
-      const message = error instanceof Error ? error.message : 'Authentication failed. Please try again.';
-      const params = new URLSearchParams({ error: message });
+      // Never reflect internal/exception text into the URL — send a fixed generic code + message
+      const params = new URLSearchParams({
+        error: 'authentication_failed',
+        error_description: 'Authentication failed. Please try again.',
+      });
       const redirectUrl = `${redirectBase}/auth-error?${params.toString()}`;
       return { redirectUrl, refreshToken: '' };
     }

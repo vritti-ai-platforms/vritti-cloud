@@ -122,8 +122,7 @@ export class MicrosoftOAuthProvider implements IOAuthProvider {
         idToken: response.data.id_token,
       };
     } catch (error) {
-      const detail = axios.isAxiosError(error) ? JSON.stringify(error.response?.data) : String(error);
-      this.logger.error(`Failed to exchange Microsoft authorization code: ${detail}`);
+      this.logger.error('Failed to exchange Microsoft authorization code', error);
       throw new Error('Failed to exchange authorization code');
     }
   }

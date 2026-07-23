@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
-import { eq } from '@vritti/api-sdk/drizzle-orm';
+import { eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import {
   AccountStatusValues,
   OnboardingStepValues,
@@ -27,10 +27,10 @@ export class UserDomainRepository extends PrimaryBaseRepository<typeof users> {
 
   // Finds a user by email address
   async findByEmail(email: string): Promise<User | undefined> {
-    this.logger.debug(`Finding user by email: ${email}`);
-    return this.model.findFirst({
-      where: { email },
-    });
+    const normalized = email.trim().toLowerCase();
+    this.logger.debug(`Finding user by email: ${normalized}`);
+    const rows = await this.db.select().from(users).where(sql`lower(${users.email}) = ${normalized}`).limit(1);
+    return rows[0] as User | undefined;
   }
 
   // Finds a user by ID with their active OAuth profile picture URL
@@ -59,8 +59,13 @@ export class UserDomainRepository extends PrimaryBaseRepository<typeof users> {
 
   // Returns true if any user exists with this email (LIMIT 1 index lookup)
   async existsByEmail(email: string): Promise<boolean> {
-    const row = await this.model.findFirst({ where: { email } });
-    return row !== undefined;
+    const normalized = email.trim().toLowerCase();
+    const rows = await this.db
+      .select({ id: users.id })
+      .from(users)
+      .where(sql`lower(${users.email}) = ${normalized}`)
+      .limit(1);
+    return rows.length > 0;
   }
 
   // Finds a user by phone number
@@ -165,7 +170,7 @@ export class UserDomainRepository extends PrimaryBaseRepository<typeof users> {
     const displayName = data.displayName || this.extractFirstWord(fullName);
 
     return this.create({
-      email: data.email,
+      email: data.email.trim().toLowerCase(),
       fullName,
       displayName,
       passwordHash: null, // OAuth users don't have password initially
