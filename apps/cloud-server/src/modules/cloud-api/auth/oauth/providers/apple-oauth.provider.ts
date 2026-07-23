@@ -111,6 +111,7 @@ export class AppleOAuthProvider implements IOAuthProvider {
         provider: OAuthProviderTypeValues.APPLE,
         providerId: decoded.sub,
         email: decoded.email,
+        emailVerified: true,
         fullName: undefined, // Not available after first auth
         displayName: undefined, // Not available after first auth
         profilePictureUrl: undefined,

@@ -7,6 +7,8 @@ export interface OAuthUserProfile {
 
   email: string;
 
+  emailVerified: boolean;
+
   fullName?: string;
 
   displayName?: string;

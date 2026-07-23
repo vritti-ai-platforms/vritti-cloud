@@ -1,9 +1,35 @@
-import { Controller, Get, Logger, Param, Query, Redirect, Req, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  Param,
+  Post,
+  Query,
+  Redirect,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { CookieName, type CookieSerializeOptions, Public, RefreshCookieOptions } from '@vritti/api-sdk/auth';
+import {
+  CookieName,
+  type CookieSerializeOptions,
+  Public,
+  RefreshCookieOptions,
+  RequireSession,
+  Subdomain,
+  UserId,
+} from '@vritti/api-sdk/auth';
 import type { FastifyReply, FastifyRequest } from 'fastify';
-import { ApiHandleOAuthCallback, ApiInitiateOAuth } from '../docs/oauth.docs';
+import { SessionTypeValues } from '@/db/schema';
+import { ApiHandleOAuthCallback, ApiInitiateOAuth, ApiResendOAuthOtp, ApiVerifyOAuthEmail } from '../docs/oauth.docs';
 import { OAuthCallbackQueryDto } from '../dto/request/oauth-callback-query.dto';
+import { OAuthInitiateQueryDto } from '../dto/request/oauth-initiate-query.dto';
+import { OAuthVerifyEmailDto } from '../dto/request/oauth-verify-email.dto';
+import { OAuthResendOtpResponseDto } from '../dto/response/oauth-resend-otp-response.dto';
+import { OAuthVerifyEmailResponseDto } from '../dto/response/oauth-verify-email-response.dto';
 import { OAuthService } from '../services/oauth.service';
 
 @ApiTags('OAuth')
@@ -18,9 +44,12 @@ export class OAuthController {
   @Public()
   @Redirect()
   @ApiInitiateOAuth()
-  async initiateOAuth(@Param('provider') provider: string): Promise<{ url: string }> {
-    this.logger.log(`Initiating OAuth for: ${provider}`);
-    return this.oauthService.initiateOAuth(provider);
+  async initiateOAuth(
+    @Param('provider') provider: string,
+    @Query() query: OAuthInitiateQueryDto,
+  ): Promise<{ url: string }> {
+    this.logger.log(`GET /auth/oauth/${provider}`);
+    return this.oauthService.initiateOAuth(provider, query.origin);
   }
 
   // Handles the OAuth provider callback, sets refresh cookie, and redirects to frontend
@@ -50,11 +79,50 @@ export class OAuthController {
       errorDescription,
     );
 
-    // Set refresh token cookie only on success (non-empty token)
+    // Set refresh token cookie only on success — host-bound (via x-forwarded-host) to the initiating subdomain
     if (refreshToken) {
       res.setCookie(cookieName, refreshToken, cookieOptions);
     }
 
     res.redirect(redirectUrl, 302);
+  }
+
+  // Verifies the OTP for an unverified-email collision, commits the pending link, and completes login
+  @Post('verify-email')
+  @RequireSession(SessionTypeValues.OAUTH_VERIFY)
+  @HttpCode(HttpStatus.OK)
+  @ApiVerifyOAuthEmail()
+  async verifyEmail(
+    @UserId() userId: string,
+    @Body() dto: OAuthVerifyEmailDto,
+    @Subdomain() subdomain: string | undefined,
+    @CookieName() cookieName: string,
+    @RefreshCookieOptions() cookieOptions: CookieSerializeOptions,
+    @Res({ passthrough: true }) res: FastifyReply,
+    @Req() request: FastifyRequest,
+  ): Promise<OAuthVerifyEmailResponseDto> {
+    this.logger.log(`POST /auth/oauth/verify-email - User: ${userId}`);
+    const { refreshToken, ...response } = await this.oauthService.verifyEmailAndLink(
+      userId,
+      dto.code,
+      subdomain,
+      request,
+    );
+
+    // Set the full-session refresh token cookie on success
+    res.setCookie(cookieName, refreshToken, cookieOptions);
+
+    return new OAuthVerifyEmailResponseDto(response);
+  }
+
+  // Resends the OTP for an in-flight OAuth email-collision link
+  @Post('resend-otp')
+  @RequireSession(SessionTypeValues.OAUTH_VERIFY)
+  @HttpCode(HttpStatus.OK)
+  @ApiResendOAuthOtp()
+  async resendOtp(@UserId() userId: string): Promise<OAuthResendOtpResponseDto> {
+    this.logger.log(`POST /auth/oauth/resend-otp - User: ${userId}`);
+    const response = await this.oauthService.resendVerificationOtp(userId);
+    return new OAuthResendOtpResponseDto(response);
   }
 }

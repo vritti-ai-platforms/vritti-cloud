@@ -1267,6 +1267,15 @@
               ],
               "type": "string"
             }
+          },
+          {
+            "name": "origin",
+            "required": true,
+            "in": "query",
+            "description": "The initiating frontend origin, must be one of ALLOWED_ORIGINS",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -1274,7 +1283,7 @@
             "description": "Redirects to OAuth provider authorization page."
           },
           "400": {
-            "description": "Invalid or unsupported OAuth provider."
+            "description": "Invalid provider, or missing/untrusted origin."
           }
         },
         "summary": "Initiate OAuth flow",
@@ -1411,6 +1420,81 @@
           }
         },
         "summary": "Handle OAuth callback",
+        "tags": [
+          "OAuth"
+        ]
+      }
+    },
+    "/auth/oauth/verify-email": {
+      "post": {
+        "description": "Completes an OAuth login that collided with an existing account on an unverified email. Requires an OAUTH_VERIFY session. Validates the OTP sent to the account email, commits the pending provider link, and issues a full login session (refresh cookie set on success).",
+        "operationId": "OAuthController_verifyEmail",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuthVerifyEmailDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Email verified, provider linked, and login completed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthVerifyEmailResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired verification code."
+          },
+          "401": {
+            "description": "Missing/invalid OAUTH_VERIFY session, or the pending link has expired."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Verify OAuth email and link provider",
+        "tags": [
+          "OAuth"
+        ]
+      }
+    },
+    "/auth/oauth/resend-otp": {
+      "post": {
+        "description": "Resends the email OTP for an in-flight OAuth email-collision link. Requires an OAUTH_VERIFY session and an unexpired pending link.",
+        "operationId": "OAuthController_resendOtp",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "A new verification code was sent to the account email.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OAuthResendOtpResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing/invalid OAUTH_VERIFY session, or the pending link has expired."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Resend OAuth verification code",
         "tags": [
           "OAuth"
         ]
@@ -14571,7 +14655,7 @@
   ],
   "servers": [
     {
-      "url": "https://local.vrittiai.com:3000",
+      "url": "https://api.local.vrittiai.com:3000",
       "description": "Local Development"
     }
   ],
@@ -15387,6 +15471,65 @@
           "accessToken",
           "expiresIn",
           "sessionType"
+        ]
+      },
+      "OAuthVerifyEmailDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Six-digit one-time password sent to the account email to confirm ownership before linking",
+            "example": "123456",
+            "minLength": 6,
+            "maxLength": 6
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "OAuthVerifyEmailResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates whether the email was verified and the provider linked successfully",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable result message",
+            "example": "Your email has been verified and your account is now linked."
+          },
+          "requiresOnboarding": {
+            "type": "boolean",
+            "description": "Whether the user must still complete onboarding before accessing the dashboard",
+            "example": false
+          }
+        },
+        "required": [
+          "success",
+          "message",
+          "requiresOnboarding"
+        ]
+      },
+      "OAuthResendOtpResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Indicates whether a new verification code was sent",
+            "example": true
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable result message",
+            "example": "A new verification code has been sent to your email."
+          }
+        },
+        "required": [
+          "success",
+          "message"
         ]
       },
       "StartPasskeyAuthDto": {

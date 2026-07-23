@@ -13,7 +13,7 @@ import { MfaChallengeStore } from './mfa-verification/services/mfa-challenge.sto
 import { MfaVerificationService } from './mfa-verification/services/mfa-verification.service';
 // OAuth submodule
 import { OAuthController } from './oauth/controllers/oauth.controller';
-import { AppleOAuthProvider } from './oauth/providers/apple-oauth.provider';
+// import { AppleOAuthProvider } from './oauth/providers/apple-oauth.provider';
 import { FacebookOAuthProvider } from './oauth/providers/facebook-oauth.provider';
 import { GoogleOAuthProvider } from './oauth/providers/google-oauth.provider';
 import { MicrosoftOAuthProvider } from './oauth/providers/microsoft-oauth.provider';
@@ -63,7 +63,7 @@ import { PasswordResetService } from './root/services/password-reset.service';
     OAuthStateService,
     GoogleOAuthProvider,
     MicrosoftOAuthProvider,
-    AppleOAuthProvider,
+    // AppleOAuthProvider,
     FacebookOAuthProvider,
     TwitterOAuthProvider,
     // MFA verification

@@ -152,6 +152,17 @@ export class SessionDomainService {
     }
   }
 
+  // Deletes all sessions of a given type for a user
+  async deleteSessionsByType(userId: string, type: SessionType): Promise<void> {
+    const condition = and(eq(sessions.userId, userId), eq(sessions.type, type));
+    if (condition) {
+      const result = await this.sessionRepository.deleteMany(condition);
+      if (result.count > 0) {
+        this.logger.log(`Deleted ${result.count} ${type} sessions for user: ${userId}`);
+      }
+    }
+  }
+
   // Deletes all onboarding sessions for a user after onboarding completes
   async deleteOnboardingSessions(userId: string): Promise<void> {
     const condition = and(eq(sessions.userId, userId), eq(sessions.type, SessionTypeValues.ONBOARDING));

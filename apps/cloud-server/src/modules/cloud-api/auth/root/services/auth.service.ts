@@ -201,8 +201,8 @@ export class AuthService {
         });
       }
 
-      // RESET sessions are temporary password-reset flows, not authenticated
-      if (sessionType === SessionTypeValues.RESET) {
+      // RESET and OAUTH_VERIFY sessions are temporary, single-purpose flows, not authenticated
+      if (sessionType === SessionTypeValues.RESET || sessionType === SessionTypeValues.OAUTH_VERIFY) {
         return new AuthStatusResponse({ isAuthenticated: false });
       }
 

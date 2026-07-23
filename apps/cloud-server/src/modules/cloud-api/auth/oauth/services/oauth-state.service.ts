@@ -16,7 +16,12 @@ export class OAuthStateService {
   ) {}
 
   // Generates a signed state token with PKCE verifier and stores it in the database
-  async generateState(provider: OAuthProviderType, userId: string | undefined, codeVerifier: string): Promise<string> {
+  async generateState(
+    provider: OAuthProviderType,
+    userId: string | undefined,
+    codeVerifier: string,
+    origin: string,
+  ): Promise<string> {
     const stateToken = this.oauthCryptoService.generateRandomToken();
     const signedStateToken = this.oauthCryptoService.signToken(stateToken);
 
@@ -30,6 +35,7 @@ export class OAuthStateService {
       provider,
       userId,
       codeVerifier,
+      origin,
       expiresAt,
     });
 
@@ -72,7 +78,18 @@ export class OAuthStateService {
       provider: stateRecord.provider,
       userId: stateRecord.userId || undefined,
       codeVerifier: stateRecord.codeVerifier,
+      origin: stateRecord.origin,
     };
+  }
+
+  // Returns the stored frontend origin for a state token without consuming it
+  async peekOrigin(stateToken: string): Promise<string | undefined> {
+    if (!this.oauthCryptoService.verifyToken(stateToken)) {
+      return undefined;
+    }
+
+    const stateRecord = await this.stateRepository.findByToken(stateToken);
+    return stateRecord?.origin;
   }
 
   // Removes all expired OAuth state records from the database

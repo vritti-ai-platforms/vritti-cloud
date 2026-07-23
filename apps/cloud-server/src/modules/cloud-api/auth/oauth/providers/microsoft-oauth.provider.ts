@@ -26,7 +26,6 @@ export class MicrosoftOAuthProvider implements IOAuthProvider {
   private readonly logger = new Logger(MicrosoftOAuthProvider.name);
   private readonly clientId: string;
   private readonly clientSecret: string;
-  private readonly redirectUri: string;
 
   private readonly AUTHORIZATION_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/authorize';
   private readonly TOKEN_URL = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
@@ -36,7 +35,6 @@ export class MicrosoftOAuthProvider implements IOAuthProvider {
   constructor(private readonly configService: ConfigService) {
     this.clientId = this.configService.getOrThrow<string>('MICROSOFT_CLIENT_ID');
     this.clientSecret = this.configService.getOrThrow<string>('MICROSOFT_CLIENT_SECRET');
-    this.redirectUri = this.configService.getOrThrow<string>('MICROSOFT_CALLBACK_URL');
   }
 
   // Extracts first word from fullName for auto-deriving displayName
@@ -75,10 +73,10 @@ export class MicrosoftOAuthProvider implements IOAuthProvider {
   }
 
   // Builds the Microsoft OAuth authorization URL with PKCE support
-  getAuthorizationUrl(state: string, codeChallenge?: string): string {
+  getAuthorizationUrl(state: string, redirectUri: string, codeChallenge?: string): string {
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: this.redirectUri,
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: 'openid email profile User.Read',
       state,
@@ -97,13 +95,13 @@ export class MicrosoftOAuthProvider implements IOAuthProvider {
   }
 
   // Exchanges the authorization code for Microsoft access and refresh tokens
-  async exchangeCodeForToken(code: string, codeVerifier?: string): Promise<OAuthTokens> {
+  async exchangeCodeForToken(code: string, redirectUri: string, codeVerifier?: string): Promise<OAuthTokens> {
     try {
       const data: OAuthTokenExchangePayload = {
         code,
         client_id: this.clientId,
         client_secret: this.clientSecret,
-        redirect_uri: this.redirectUri,
+        redirect_uri: redirectUri,
         grant_type: 'authorization_code',
         code_verifier: codeVerifier,
       };
@@ -124,7 +122,8 @@ export class MicrosoftOAuthProvider implements IOAuthProvider {
         idToken: response.data.id_token,
       };
     } catch (error) {
-      this.logger.error('Failed to exchange Microsoft authorization code', error);
+      const detail = axios.isAxiosError(error) ? JSON.stringify(error.response?.data) : String(error);
+      this.logger.error(`Failed to exchange Microsoft authorization code: ${detail}`);
       throw new Error('Failed to exchange authorization code');
     }
   }
@@ -145,13 +144,17 @@ export class MicrosoftOAuthProvider implements IOAuthProvider {
       const fullName = data.displayName || '';
       const displayName = data.givenName || this.extractFirstWord(fullName) || '';
 
+      // UPN is a domain-verified identifier; a bare `mail` value is not verified
+      const email = data.userPrincipalName || data.mail || '';
+
       // Fetch profile photo (returns undefined if not available)
       const profilePictureUrl = await this.fetchProfilePhoto(accessToken);
 
       return {
         provider: OAuthProviderTypeValues.MICROSOFT,
         providerId: data.id,
-        email: data.userPrincipalName || data.mail || '',
+        email,
+        emailVerified: Boolean(data.userPrincipalName),
         fullName,
         displayName,
         profilePictureUrl,

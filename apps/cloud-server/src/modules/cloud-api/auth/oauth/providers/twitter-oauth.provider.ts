@@ -19,7 +19,6 @@ export class TwitterOAuthProvider implements IOAuthProvider {
   private readonly logger = new Logger(TwitterOAuthProvider.name);
   private readonly clientId: string;
   private readonly clientSecret: string;
-  private readonly redirectUri: string;
 
   private readonly AUTHORIZATION_URL = 'https://twitter.com/i/oauth2/authorize';
   private readonly TOKEN_URL = 'https://api.twitter.com/2/oauth2/token';
@@ -28,7 +27,6 @@ export class TwitterOAuthProvider implements IOAuthProvider {
   constructor(private readonly configService: ConfigService) {
     this.clientId = this.configService.getOrThrow<string>('X_CLIENT_ID');
     this.clientSecret = this.configService.getOrThrow<string>('X_CLIENT_SECRET');
-    this.redirectUri = this.configService.getOrThrow<string>('X_CALLBACK_URL');
   }
 
   // Extracts first word from fullName for auto-deriving displayName
@@ -38,10 +36,10 @@ export class TwitterOAuthProvider implements IOAuthProvider {
   }
 
   // Builds the X (Twitter) OAuth 2.0 authorization URL with required PKCE
-  getAuthorizationUrl(state: string, codeChallenge?: string): string {
+  getAuthorizationUrl(state: string, redirectUri: string, codeChallenge?: string): string {
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: this.redirectUri,
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: 'tweet.read users.read offline.access users.email',
       state,
@@ -61,14 +59,14 @@ export class TwitterOAuthProvider implements IOAuthProvider {
   }
 
   // Exchanges the authorization code for X (Twitter) tokens using Basic Auth
-  async exchangeCodeForToken(code: string, codeVerifier?: string): Promise<OAuthTokens> {
+  async exchangeCodeForToken(code: string, redirectUri: string, codeVerifier?: string): Promise<OAuthTokens> {
     try {
       // Twitter uses Basic Auth header for client authentication
       const data: Omit<OAuthTokenExchangePayload, 'client_secret'> = {
         code,
         grant_type: 'authorization_code',
         client_id: this.clientId,
-        redirect_uri: this.redirectUri,
+        redirect_uri: redirectUri,
         code_verifier: codeVerifier,
       };
 
@@ -124,6 +122,7 @@ export class TwitterOAuthProvider implements IOAuthProvider {
         provider: OAuthProviderTypeValues.X,
         providerId: data.id,
         email: data.confirmed_email || '',
+        emailVerified: Boolean(data.confirmed_email),
         fullName,
         displayName,
         profilePictureUrl: data.profile_image_url,

@@ -40,7 +40,14 @@ export const oauthProviderTypeEnum = cloudSchema.enum('OAuthProviderType', [
 export const signupMethodEnum = cloudSchema.enum('SignupMethod', ['email', 'oauth']);
 
 // Session enums
-export const sessionTypeEnum = cloudSchema.enum('SessionType', ['ONBOARDING', 'CLOUD', 'COMPANY', 'RESET', 'ADMIN']);
+export const sessionTypeEnum = cloudSchema.enum('SessionType', [
+  'ONBOARDING',
+  'CLOUD',
+  'COMPANY',
+  'RESET',
+  'ADMIN',
+  'OAUTH_VERIFY',
+]);
 
 export type DatabaseType = (typeof databaseTypeEnum.enumValues)[number];
 export type TenantStatus = (typeof tenantStatusEnum.enumValues)[number];
@@ -111,6 +118,7 @@ export const SessionTypeValues = {
   COMPANY: 'COMPANY' as const,
   RESET: 'RESET' as const,
   ADMIN: 'ADMIN' as const,
+  OAUTH_VERIFY: 'OAUTH_VERIFY' as const,
 };
 
 export const mediaStatusEnum = cloudSchema.enum('MediaStatus', ['pending', 'ready', 'failed', 'deleted']);

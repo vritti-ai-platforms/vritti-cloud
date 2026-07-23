@@ -21,7 +21,6 @@ export class GoogleOAuthProvider implements IOAuthProvider {
   private readonly logger = new Logger(GoogleOAuthProvider.name);
   private readonly clientId: string;
   private readonly clientSecret: string;
-  private readonly redirectUri: string;
 
   private readonly AUTHORIZATION_URL = 'https://accounts.google.com/o/oauth2/v2/auth';
   private readonly TOKEN_URL = 'https://oauth2.googleapis.com/token';
@@ -30,7 +29,6 @@ export class GoogleOAuthProvider implements IOAuthProvider {
   constructor(private readonly configService: ConfigService) {
     this.clientId = this.configService.getOrThrow<string>('GOOGLE_CLIENT_ID');
     this.clientSecret = this.configService.getOrThrow<string>('GOOGLE_CLIENT_SECRET');
-    this.redirectUri = this.configService.getOrThrow<string>('GOOGLE_CALLBACK_URL');
   }
 
   // Extracts first word from fullName for auto-deriving displayName
@@ -40,10 +38,10 @@ export class GoogleOAuthProvider implements IOAuthProvider {
   }
 
   // Builds the Google OAuth consent screen URL with PKCE support
-  getAuthorizationUrl(state: string, codeChallenge?: string): string {
+  getAuthorizationUrl(state: string, redirectUri: string, codeChallenge?: string): string {
     const params = new URLSearchParams({
       client_id: this.clientId,
-      redirect_uri: this.redirectUri,
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: 'openid email profile',
       state,
@@ -63,13 +61,13 @@ export class GoogleOAuthProvider implements IOAuthProvider {
   }
 
   // Exchanges the authorization code for Google access and refresh tokens
-  async exchangeCodeForToken(code: string, codeVerifier?: string): Promise<OAuthTokens> {
+  async exchangeCodeForToken(code: string, redirectUri: string, codeVerifier?: string): Promise<OAuthTokens> {
     try {
       const data: OAuthTokenExchangePayload = {
         code,
         client_id: this.clientId,
         client_secret: this.clientSecret,
-        redirect_uri: this.redirectUri,
+        redirect_uri: redirectUri,
         grant_type: 'authorization_code',
         code_verifier: codeVerifier,
       };
@@ -115,6 +113,7 @@ export class GoogleOAuthProvider implements IOAuthProvider {
         provider: OAuthProviderTypeValues.GOOGLE,
         providerId: data.id,
         email: data.email,
+        emailVerified: data.verified_email ?? false,
         fullName,
         displayName,
         profilePictureUrl: data.picture,

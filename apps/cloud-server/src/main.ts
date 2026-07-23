@@ -20,37 +20,27 @@ const ENV = {
   useHttps: process.env.USE_HTTPS === 'true',
   logProvider: process.env.LOG_PROVIDER,
   port: process.env.PORT ?? 3000,
-  host: process.env.APP_HOST ?? 'local.vrittiai.com',
   refreshCookieName: process.env.REFRESH_COOKIE_NAME,
-  refreshCookieDomain: process.env.REFRESH_COOKIE_DOMAIN ?? 'local.vrittiai.com',
+  refreshCookieDomain: process.env.BASE_DOMAIN ?? 'local.vrittiai.com',
 } as const;
 
-const protocol = ENV.useHttps ? 'https' : 'http';
-const baseUrl = `${protocol}://${ENV.host}:${ENV.port}`;
-
-const CORS_ORIGINS = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(',').map((origin) => origin.trim())
-  : [
-      'http://localhost:5173', // Host app
-      'http://localhost:3001', // Auth MF
-      'http://localhost:3012', // Host app main port
-      'http://localhost:5174', // Other possible ports
-      `http://${ENV.host}:3012`,
-      `http://cloud.${ENV.host}:3012`,
-      `http://admin.${ENV.host}:3012`,
-      `https://${ENV.host}:3012`,
-      `https://cloud.${ENV.host}:3012`,
-      `https://admin.${ENV.host}:3012`,
-    ];
-
-const CORS_CONFIG = {
-  origin: CORS_ORIGINS,
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
-};
-
 // Configuration Functions
+
+// Build CORS config from the validated ALLOWED_ORIGINS env (trusted frontend origins)
+function createCorsConfig(configService: ConfigService) {
+  const origins = configService
+    .getOrThrow<string>('ALLOWED_ORIGINS')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter((origin) => origin.length > 0);
+
+  return {
+    origin: origins,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+  };
+}
 
 // Create Swagger/OpenAPI configuration
 function createSwaggerConfig() {
@@ -64,7 +54,7 @@ function createSwaggerConfig() {
       bearerFormat: 'JWT',
       description: 'Enter your JWT access token',
     })
-    .addServer(baseUrl, 'Local Development')
+    .addServer('https://api.local.vrittiai.com:3000', 'Local Development')
     .addTag('Health', 'Health check endpoints')
     .addTag('CSRF', 'CSRF token management')
     .addTag('Auth', 'Authentication endpoints')
@@ -189,29 +179,42 @@ async function bootstrap() {
   );
 
   // Enable CORS for frontend applications
-  app.enableCors(CORS_CONFIG);
+  app.enableCors(createCorsConfig(configService));
 
-  // Configure Swagger/OpenAPI documentation
-  const swaggerConfig = createSwaggerConfig();
-  const document = SwaggerModule.createDocument(app, swaggerConfig);
+  // Configure Swagger/OpenAPI documentation (non-production only)
+  if (ENV.nodeEnv !== 'production') {
+    const swaggerConfig = createSwaggerConfig();
+    const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-  // Export OpenAPI spec to file for Mintlify docs
-  const openApiPath = join(process.cwd(), 'openapi.json');
-  writeFileSync(openApiPath, JSON.stringify(document, null, 2));
+    // Export OpenAPI spec to file for Mintlify docs
+    const openApiPath = join(process.cwd(), 'openapi.json');
+    writeFileSync(openApiPath, JSON.stringify(document, null, 2));
 
-  // Setup Swagger UI at /api/docs
-  SwaggerModule.setup('api/docs', app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-  });
+    // Setup Swagger UI at /docs
+    SwaggerModule.setup('docs', app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+        withCredentials: true,
+        requestInterceptor: async (req: { method?: string; url: string; headers: Record<string, string> }) => {
+          const method = (req.method ?? 'GET').toUpperCase();
+          if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+            const origin = new URL(req.url).origin;
+            const response = await fetch(`${origin}/csrf/token`, { credentials: 'include' });
+            const data = (await response.json()) as { csrfToken: string };
+            req.headers['X-CSRF-Token'] = data.csrfToken;
+          }
+          return req;
+        },
+      },
+    });
+  }
 
   // Start the server
   await app.listen(ENV.port, '0.0.0.0');
 
   // Get logger from DI container for final bootstrap message
   const logger = app.get(LoggerService);
-  logger.log(`Cloud Server running on ${baseUrl}`, 'Bootstrap');
+  logger.log(`Cloud Server running on port ${ENV.port}`, 'Bootstrap');
 }
 
 bootstrap();

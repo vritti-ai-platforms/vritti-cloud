@@ -239,3 +239,35 @@ export function resetPassword(newPassword: string): Promise<ResetPasswordRespons
     )
     .then((r) => r.data);
 }
+
+export interface OAuthVerifyEmailResponse {
+  success: boolean;
+  message: string;
+  requiresOnboarding: boolean;
+}
+
+// Verifies the OTP for an unverified-email OAuth collision, commits the pending link, and upgrades the session
+export function verifyOAuthEmail(code: string): Promise<OAuthVerifyEmailResponse> {
+  return axios
+    .post<OAuthVerifyEmailResponse>(
+      'auth/oauth/verify-email',
+      { code },
+      {
+        showSuccessToast: false,
+      },
+    )
+    .then((r) => r.data);
+}
+
+// Resends the OTP for an in-flight OAuth email-collision link (OAUTH_VERIFY session)
+export function resendOAuthOtp(): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(
+      'auth/oauth/resend-otp',
+      {},
+      {
+        showSuccessToast: false,
+      },
+    )
+    .then((r) => r.data);
+}

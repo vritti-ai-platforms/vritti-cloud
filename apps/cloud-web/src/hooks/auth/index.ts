@@ -7,4 +7,6 @@ export {
   useVerifySms,
   useVerifyTotp,
 } from './useMFAVerification';
+export { useResendOAuthOtp } from './useResendOAuthOtp';
 export { useSignup } from './useSignup';
+export { useVerifyOAuthEmail } from './useVerifyOAuthEmail';

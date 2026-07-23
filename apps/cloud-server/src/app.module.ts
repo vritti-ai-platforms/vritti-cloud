@@ -100,7 +100,7 @@ import { ServicesModule } from './services/services.module';
           refreshCookieName: config.get('REFRESH_COOKIE_NAME', 'vritti_refresh'),
           refreshCookieSecure: config.get('NODE_ENV') === 'production',
           refreshCookieSameSite: 'strict' as const,
-          refreshCookieDomain: config.get('REFRESH_COOKIE_DOMAIN'),
+          refreshCookieDomain: config.get('BASE_DOMAIN'),
         },
       }),
     }),

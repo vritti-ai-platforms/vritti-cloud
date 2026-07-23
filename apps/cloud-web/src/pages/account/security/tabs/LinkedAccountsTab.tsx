@@ -5,7 +5,7 @@ import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import type React from 'react';
 
-const ALL_PROVIDERS = ['GOOGLE', 'MICROSOFT', 'APPLE', 'FACEBOOK', 'X'];
+const ALL_PROVIDERS = ['GOOGLE', 'MICROSOFT', 'FACEBOOK', 'X'];
 
 export const LinkedAccountsTab: React.FC = () => {
   const { data, isLoading } = useLinkedAccounts();

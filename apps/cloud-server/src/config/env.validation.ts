@@ -22,6 +22,9 @@ class EnvironmentVariables {
   @Transform(({ value }) => value === 'true')
   USE_HTTPS: boolean;
 
+  @IsString()
+  ALLOWED_ORIGINS: string;
+
   // Security
   @IsString()
   @MinLength(32)
@@ -41,10 +44,6 @@ class EnvironmentVariables {
 
   @IsString()
   REFRESH_TOKEN_EXPIRY: string;
-
-  // Frontend
-  @IsString()
-  FRONTEND_BASE_URL: string;
 
   // Logging
   @IsString()
@@ -115,7 +114,7 @@ class EnvironmentVariables {
   REFRESH_COOKIE_NAME: string;
 
   @IsString()
-  REFRESH_COOKIE_DOMAIN: string;
+  BASE_DOMAIN: string;
 
   @IsNumber()
   @Min(1)
@@ -206,18 +205,12 @@ class EnvironmentVariables {
   @IsString()
   GOOGLE_CLIENT_SECRET: string;
 
-  @IsString()
-  GOOGLE_CALLBACK_URL: string;
-
   // OAuth — Facebook (Meta)
   @IsString()
   META_CLIENT_ID: string;
 
   @IsString()
   META_CLIENT_SECRET: string;
-
-  @IsString()
-  FACEBOOK_CALLBACK_URL: string;
 
   // OAuth — Microsoft
   @IsString()
@@ -226,34 +219,12 @@ class EnvironmentVariables {
   @IsString()
   MICROSOFT_CLIENT_SECRET: string;
 
-  @IsString()
-  MICROSOFT_CALLBACK_URL: string;
-
   // OAuth — X (Twitter)
   @IsString()
   X_CLIENT_ID: string;
 
   @IsString()
   X_CLIENT_SECRET: string;
-
-  @IsString()
-  X_CALLBACK_URL: string;
-
-  // OAuth — Apple
-  @IsString()
-  APPLE_CLIENT_ID: string;
-
-  @IsString()
-  APPLE_TEAM_ID: string;
-
-  @IsString()
-  APPLE_KEY_ID: string;
-
-  @IsString()
-  APPLE_PRIVATE_KEY: string;
-
-  @IsString()
-  APPLE_CALLBACK_URL: string;
 
   // Redis Cache
   @IsString()

@@ -38,6 +38,7 @@ import { AuthSuccessPage } from './pages/auth/AuthSuccessPage';
 import { ForgotPasswordPage } from './pages/auth/forgot-password';
 import { LoginPage } from './pages/auth/LoginPage';
 import { MFAVerificationPage } from './pages/auth/MFAVerificationPage';
+import { OAuthVerifyEmailPage } from './pages/auth/OAuthVerifyEmailPage';
 import { SignupPage } from './pages/auth/SignupPage';
 import { HomePage } from './pages/cloud/home/HomePage';
 import { InvitationsPage } from './pages/cloud/invitations/InvitationsPage';
@@ -104,6 +105,10 @@ export const publicRoutes: RouteObject[] = [
       {
         path: 'auth-error',
         element: <AuthErrorPage />,
+      },
+      {
+        path: 'oauth-verify-email',
+        element: <OAuthVerifyEmailPage />,
       },
       {
         path: 'forgot-password',

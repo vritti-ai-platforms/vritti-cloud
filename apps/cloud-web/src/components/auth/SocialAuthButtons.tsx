@@ -1,13 +1,13 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import type React from 'react';
-import { AppleIcon } from '../icons/AppleIcon';
+// import { AppleIcon } from '../icons/AppleIcon';
 import { FacebookIcon } from '../icons/FacebookIcon';
 import { GoogleIcon } from '../icons/GoogleIcon';
 import { MicrosoftIcon } from '../icons/MicrosoftIcon';
 import { XIcon } from '../icons/XIcon';
 
 interface SocialButtonProps {
-  provider: 'google' | 'x' | 'facebook' | 'apple' | 'microsoft';
+  provider: 'google' | 'x' | 'facebook' | 'microsoft';
   onClick?: () => void;
 }
 
@@ -37,14 +37,14 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
       textColor: 'text-card-foreground',
       borderColor: 'border-transparent',
     },
-    apple: {
-      icon: <AppleIcon className="h-6 w-6" />,
-      label: 'Apple',
-      bgColor: 'bg-card',
-      hoverColor: 'hover:bg-secondary',
-      textColor: 'text-card-foreground',
-      borderColor: 'border-transparent',
-    },
+    // apple: {
+    //   icon: <AppleIcon className="h-6 w-6" />,
+    //   label: 'Apple',
+    //   bgColor: 'bg-card',
+    //   hoverColor: 'hover:bg-secondary',
+    //   textColor: 'text-card-foreground',
+    //   borderColor: 'border-transparent',
+    // },
     microsoft: {
       icon: <MicrosoftIcon className="h-6 w-6" />,
       label: 'Microsoft',
@@ -71,8 +71,10 @@ const SocialButton: React.FC<SocialButtonProps> = ({ provider, onClick }) => {
 
 export const SocialAuthButtons: React.FC = () => {
   const handleOAuthLogin = (provider: string) => {
+    // Pass the current app origin so the backend can validate it and scope the session/redirect back here
+    const origin = encodeURIComponent(window.location.origin);
     // Relative /api path works in dev (Rsbuild proxy) and prod (Nginx proxy)
-    window.location.href = `/api/auth/oauth/${provider}`;
+    window.location.href = `/api/auth/oauth/${provider}?origin=${origin}`;
   };
 
   return (

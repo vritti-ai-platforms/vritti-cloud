@@ -61,6 +61,7 @@ export const oauthStates = cloudSchema.table(
     provider: oauthProviderTypeEnum('provider').notNull(),
     userId: uuid('user_id'),
     codeVerifier: varchar('code_verifier', { length: 255 }).notNull(),
+    origin: varchar('origin', { length: 255 }).notNull(),
     expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -70,9 +71,35 @@ export const oauthStates = cloudSchema.table(
   ],
 );
 
+// Server-side stash for an OAuth link awaiting email OTP verification (unverified-email collision path)
+export const oauthPendingLinks = cloudSchema.table(
+  'oauth_pending_links',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    provider: oauthProviderTypeEnum('provider').notNull(),
+    providerId: varchar('provider_id', { length: 255 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull(),
+    profilePictureUrl: text('profile_picture_url'),
+    accessToken: text('access_token'),
+    refreshToken: text('refresh_token'),
+    tokenExpiresAt: timestamp('token_expires_at', { withTimezone: true }),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    unique('oauth_pending_links_user_id_key').on(table.userId),
+    index('oauth_pending_links_expires_at_idx').on(table.expiresAt),
+  ],
+);
+
 export type Session = typeof sessions.$inferSelect;
 export type NewSession = typeof sessions.$inferInsert;
 export type OAuthProvider = typeof oauthProviders.$inferSelect;
 export type NewOAuthProvider = typeof oauthProviders.$inferInsert;
 export type OAuthState = typeof oauthStates.$inferSelect;
 export type NewOAuthState = typeof oauthStates.$inferInsert;
+export type OAuthPendingLink = typeof oauthPendingLinks.$inferSelect;
+export type NewOAuthPendingLink = typeof oauthPendingLinks.$inferInsert;

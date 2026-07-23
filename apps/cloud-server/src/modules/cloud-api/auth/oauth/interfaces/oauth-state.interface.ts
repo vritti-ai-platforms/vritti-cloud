@@ -6,4 +6,6 @@ export interface OAuthStateData {
   userId?: string;
 
   codeVerifier: string;
+
+  origin: string;
 }

@@ -18,15 +18,20 @@ export class WebAuthnDomainService {
   private readonly logger = new Logger(WebAuthnDomainService.name);
   private readonly rpName: string;
   private readonly rpID: string;
-  private readonly origin: string;
+  private readonly allowedOrigins: string[];
 
   constructor(private readonly configService: ConfigService) {
     this.rpName = this.configService.getOrThrow<string>('APP_NAME');
-    const frontendBaseUrl = this.configService.getOrThrow<string>('FRONTEND_BASE_URL');
-    this.origin = frontendBaseUrl;
-    this.rpID = new URL(frontendBaseUrl).hostname;
+    this.rpID = this.configService.getOrThrow<string>('BASE_DOMAIN');
+    this.allowedOrigins = this.configService
+      .getOrThrow<string>('ALLOWED_ORIGINS')
+      .split(',')
+      .map((origin) => origin.trim())
+      .filter((origin) => origin.length > 0);
 
-    this.logger.log(`WebAuthn initialized - RP: ${this.rpName}, ID: ${this.rpID}, Origin: ${this.origin}`);
+    this.logger.log(
+      `WebAuthn initialized - RP: ${this.rpName}, ID: ${this.rpID}, Origins: ${this.allowedOrigins.join(', ')}`,
+    );
   }
 
   // Builds WebAuthn registration options with platform authenticator preferences
@@ -65,7 +70,7 @@ export class WebAuthnDomainService {
     const verification = await verifyRegistrationResponse({
       response,
       expectedChallenge,
-      expectedOrigin: this.origin,
+      expectedOrigin: this.allowedOrigins,
       expectedRPID: this.rpID,
       requireUserVerification: true,
     });
@@ -108,7 +113,7 @@ export class WebAuthnDomainService {
     const verification = await verifyAuthenticationResponse({
       response,
       expectedChallenge,
-      expectedOrigin: this.origin,
+      expectedOrigin: this.allowedOrigins,
       expectedRPID: this.rpID,
       requireUserVerification: false,
       credential: {
