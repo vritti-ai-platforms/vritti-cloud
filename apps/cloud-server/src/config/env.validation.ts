@@ -25,6 +25,10 @@ class EnvironmentVariables {
   @IsString()
   ALLOWED_ORIGINS: string;
 
+  // GeoIP
+  @IsString()
+  GEOIP_DB_PATH: string;
+
   // Security
   @IsString()
   @MinLength(32)

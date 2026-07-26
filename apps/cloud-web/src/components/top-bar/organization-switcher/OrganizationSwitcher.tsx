@@ -77,7 +77,8 @@ export const OrganizationSwitcher = ({ currentOrgId, currentOrgName }: Organizat
         </>
       }
       onOptionSelect={(option) => {
-        if (option) {
+        // Ignore the mount-time fire when the select initializes to the current org — only navigate on an actual switch
+        if (option && String(option.value) !== currentOrgId) {
           const newOrgSlug = `org-${buildSlug(String(option.label), String(option.value))}`;
           // Swap only the org segment, preserving the current top-level section (e.g. /users)
           const section = pathname.split('/')[2] ?? '';

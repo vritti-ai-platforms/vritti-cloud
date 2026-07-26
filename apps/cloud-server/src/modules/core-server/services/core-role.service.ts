@@ -1,4 +1,3 @@
-import type { RoleItem } from '@domain/catalog/catalog.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import type { CreateResponseDto, SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
@@ -59,19 +58,6 @@ export class CoreRoleService {
       { orgId },
     );
     this.logger.log(`Updated role ${roleId} in core`);
-    return result;
-  }
-
-  // Provisions role templates for an organization in core (idempotent — core upserts existing by code)
-  async provisionRoles(url: string, signingKey: string, orgId: string, roles: RoleItem[]): Promise<SuccessResponseDto> {
-    const result = await this.http.post<SuccessResponseDto>(
-      url,
-      signingKey,
-      '/organizations/internal/roles',
-      { orgId, roles },
-      { orgId },
-    );
-    this.logger.log(`Provisioned ${roles.length} role template(s) for org ${orgId} in core`);
     return result;
   }
 
@@ -201,6 +187,19 @@ export class CoreRoleService {
       },
     );
     this.logger.log(`Removed role assignment ${assignmentId} in core`);
+    return result;
+  }
+
+  // Resets a role to its template in core (clears the role's deltas)
+  async resetRole(url: string, signingKey: string, orgId: string, roleId: string): Promise<SuccessResponseDto> {
+    const result = await this.http.post<SuccessResponseDto>(
+      url,
+      signingKey,
+      `/organizations/internal/roles/${roleId}/reset`,
+      undefined,
+      { orgId },
+    );
+    this.logger.log(`Reset role ${roleId} to template in core`);
     return result;
   }
 

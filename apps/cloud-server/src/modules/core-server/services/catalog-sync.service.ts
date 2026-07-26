@@ -1,7 +1,8 @@
 import { CloudOrganizationDomainRepository } from '@domain/cloud-organization/repositories/organization.repository';
 import { DeploymentDomainRepository } from '@domain/deployment/repositories/deployment.repository';
 import { Injectable, Logger } from '@nestjs/common';
-import { buildSiteRoles, type VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
+import type { VersionSnapshot } from '@vritti/api-sdk/catalog-resolver';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import { type CatalogLicense, hashSnapshot, type OrgEntitlement, type SignedDocument } from '@vritti/api-sdk/license';
 import { signDocument } from '@vritti/api-sdk/signing';
@@ -11,7 +12,6 @@ import { requireSigningKey } from '../signing-key.util';
 import { CoreCatalogService } from './core-catalog.service';
 import { CoreDeploymentService } from './core-deployment.service';
 import { CoreOrganizationService } from './core-organization.service';
-import { CoreRoleService } from './core-role.service';
 import { CoreSiteService } from './core-site.service';
 
 @Injectable()
@@ -23,7 +23,6 @@ export class CatalogSyncService {
     private readonly coreCatalogService: CoreCatalogService,
     private readonly coreOrganizationService: CoreOrganizationService,
     private readonly coreSiteService: CoreSiteService,
-    private readonly coreRoleService: CoreRoleService,
     private readonly coreVersionRepository: CoreVersionRepository,
     private readonly deploymentRepository: DeploymentDomainRepository,
     private readonly organizationRepository: CloudOrganizationDomainRepository,
@@ -57,6 +56,19 @@ export class CatalogSyncService {
     this.logger.log(`Resynced deployment ${deploymentId} (${orgCount} orgs)`);
   }
 
+  // Idempotently re-pushes only the catalog license for one deployment (does not touch orgs)
+  async syncCatalog(deploymentId: string): Promise<SuccessResponseDto> {
+    const deployment = await this.deploymentRepository.findById(deploymentId);
+    if (!deployment) throw new NotFoundException('Deployment not found.');
+
+    const snapshot = await this.loadSnapshot(deployment.version);
+    if (!snapshot) throw new NotFoundException('No published snapshot for this deployment version.');
+
+    await this.pushCatalogLicense(deployment, snapshot);
+    this.logger.log(`Synced catalog license for deployment ${deploymentId}`);
+    return { success: true, message: 'Catalog license synced to core.' };
+  }
+
   // Signs and pushes the org's plan/business entitlement to its deployment
   async syncOrgEntitlement(orgId: string): Promise<void> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
@@ -76,33 +88,12 @@ export class CatalogSyncService {
     this.logger.log(`Synced locks for site ${siteId} (org ${orgId})`);
   }
 
-  // Seeds/tops-up role templates for the org's business (core skips templates already provisioned)
-  async syncRoles(orgId: string): Promise<void> {
-    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    const snapshot = await this.loadSnapshot(deployment.version);
-    if (!snapshot) return;
-
-    const roles = buildSiteRoles(snapshot, org.businessCode);
-    if (roles.length === 0) return;
-    await this.coreRoleService.provisionRoles(deployment.url, requireSigningKey(deployment), org.orgIdentifier, roles);
-    this.logger.log(`Synced ${roles.length} role template(s) for org ${orgId}`);
-  }
-
   // Pushes the catalog license, then each org's role templates and entitlement, to one deployment
   private async syncDeployment(deployment: Deployment, snapshot: VersionSnapshot): Promise<number> {
     await this.pushCatalogLicense(deployment, snapshot);
 
     const orgs = await this.organizationRepository.findByDeploymentId(deployment.id);
     for (const org of orgs) {
-      const roles = buildSiteRoles(snapshot, org.businessCode);
-      if (roles.length > 0) {
-        await this.coreRoleService.provisionRoles(
-          deployment.url,
-          requireSigningKey(deployment),
-          org.orgIdentifier,
-          roles,
-        );
-      }
       await this.pushOrgEntitlement(org, deployment);
     }
     return orgs.length;

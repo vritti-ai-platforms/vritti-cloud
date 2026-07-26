@@ -114,6 +114,20 @@ export class OrganizationRolesService {
     return result;
   }
 
+  // Resets a role to its template in core
+  async resetRole(orgId: string, roleId: string): Promise<SuccessResponseDto> {
+    const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
+
+    const result = await this.coreRoleService.resetRole(
+      deployment.url,
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      roleId,
+    );
+    this.logger.log(`Reset role ${roleId} for org ${orgId}`);
+    return result;
+  }
+
   // Deletes a role in core
   async deleteRole(orgId: string, roleId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);

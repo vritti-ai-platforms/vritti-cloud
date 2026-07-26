@@ -1,4 +1,4 @@
-import { useDeleteRole, useRoles } from '@hooks/cloud/roles';
+import { useDeleteRole, useResetRole, useRoles } from '@hooks/cloud/roles';
 import { Alert } from '@vritti/quantum-ui/Alert';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
@@ -50,6 +50,7 @@ export const RoleViewPage = () => {
   const role = useMemo(() => sectionRoles(sections).find((r) => r.id === roleId), [sections, roleId]);
   const templates = useMemo(() => sectionTemplates(sections), [sections]);
   const deleteMutation = useDeleteRole();
+  const resetMutation = useResetRole();
 
   if (!role) {
     return (
@@ -77,6 +78,16 @@ export const RoleViewPage = () => {
       deleteMutation.mutate({ orgId, roleId: role.id }, { onSuccess: () => navigate('..', { relative: 'path' }) });
   };
 
+  // Confirm then reset the role's permissions back to its base template
+  const handleReset = async () => {
+    const confirmed = await confirm({
+      title: `Reset ${role.name} to its template?`,
+      description: 'All custom permission changes will be lost.',
+      confirmLabel: 'Reset',
+    });
+    if (confirmed) resetMutation.mutate({ orgId, roleId: role.id });
+  };
+
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -99,9 +110,20 @@ export const RoleViewPage = () => {
         description={role.description || 'Manage this role'}
         actions={
           isDefault ? undefined : (
-            <Button variant="outline" size="sm" onClick={editDialog.open}>
-              Edit
-            </Button>
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleReset}
+                isLoading={resetMutation.isPending}
+                loadingText="Resetting..."
+              >
+                Reset to Template
+              </Button>
+              <Button variant="outline" size="sm" onClick={editDialog.open}>
+                Edit
+              </Button>
+            </>
           )
         }
       />
@@ -119,7 +141,7 @@ export const RoleViewPage = () => {
         <StatCard icon={<Layers className="size-6" />} label="Features" value={stats.features} />
       </div>
 
-      <RolePermissionForm orgId={orgId} role={role} readOnly={isDefault} />
+      <RolePermissionForm key={role.updatedAt} orgId={orgId} role={role} readOnly={isDefault} />
 
       {!isDefault && (
         <>

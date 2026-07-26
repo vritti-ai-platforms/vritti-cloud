@@ -4,12 +4,14 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
 import { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
+import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import {
   ApiCreateDeployment,
   ApiDeleteDeployment,
   ApiFindAllDeployments,
   ApiFindDeploymentById,
   ApiRegenerateSigningKey,
+  ApiSyncCatalog,
   ApiUpdateDeployment,
 } from '../docs/deployment.docs';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
@@ -25,7 +27,10 @@ import { DeploymentsResponseDto } from '../dto/response/deployments-response.dto
 export class DeploymentController {
   private readonly logger = new Logger(DeploymentController.name);
 
-  constructor(private readonly deploymentService: DeploymentDomainService) {}
+  constructor(
+    private readonly deploymentService: DeploymentDomainService,
+    private readonly catalogSyncService: CatalogSyncService,
+  ) {}
 
   // Creates a new deployment
   @Post()
@@ -59,6 +64,15 @@ export class DeploymentController {
   regenerateSigningKey(@Param('id') id: string): Promise<CreateResponseDto<SigningKeyDto>> {
     this.logger.log(`POST /admin-api/deployments/${id}/signing-key`);
     return this.deploymentService.regenerateSigningKey(id);
+  }
+
+  // Re-pushes the signed catalog license snapshot to the deployment's core
+  @Post(':id/sync-catalog')
+  @HttpCode(HttpStatus.OK)
+  @ApiSyncCatalog()
+  syncCatalog(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/deployments/${id}/sync-catalog`);
+    return this.catalogSyncService.syncCatalog(id);
   }
 
   // Updates a deployment by ID

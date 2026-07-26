@@ -4350,6 +4350,59 @@
         ]
       }
     },
+    "/cloud-api/organizations/{orgId}/roles/{roleId}/reset": {
+      "post": {
+        "description": "Proxies to core to clear the role's deltas, resetting it to its template.",
+        "operationId": "OrganizationRolesController_resetRole",
+        "parameters": [
+          {
+            "name": "orgId",
+            "required": true,
+            "in": "path",
+            "description": "Organization ID",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roleId",
+            "required": true,
+            "in": "path",
+            "description": "Role ID to reset",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Role reset successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Organization, deployment, or role not found."
+          },
+          "503": {
+            "description": "Deployment unreachable."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reset an organization role to its template",
+        "tags": [
+          "Organization Roles"
+        ]
+      }
+    },
     "/cloud-api/organizations/{orgId}/sites": {
       "get": {
         "description": "Proxies to core to return all sites for the organization.",
@@ -10335,6 +10388,51 @@
         ]
       }
     },
+    "/admin-api/deployments/{id}/sync-catalog": {
+      "post": {
+        "description": "Re-pushes the signed feature/permission catalog snapshot to the deployment's core. Does not touch any organization's roles or entitlements.",
+        "operationId": "DeploymentController_syncCatalog",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Deployment UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Catalog license synced successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Deployment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sync catalog license",
+        "tags": [
+          "Admin - Deployments"
+        ]
+      }
+    },
     "/admin-api/deployments/{deploymentId}/organizations/table": {
       "get": {
         "operationId": "OrganizationController_findForTable",
@@ -10420,8 +10518,8 @@
     },
     "/admin-api/deployments/{deploymentId}/organizations/{id}/sync-features": {
       "post": {
-        "description": "Re-pushes the deployment catalog, org entitlements and roles.",
-        "operationId": "OrganizationController_resyncDeployment",
+        "description": "Re-pushes the role templates and entitlement for this org (no catalog, no other orgs).",
+        "operationId": "OrganizationController_syncFeatures",
         "parameters": [
           {
             "name": "id",
@@ -10436,7 +10534,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Deployment resynced successfully.",
+            "description": "Organization features synced successfully.",
             "content": {
               "application/json": {
                 "schema": {
@@ -10457,7 +10555,7 @@
             "bearer": []
           }
         ],
-        "summary": "Resync the organization's deployment",
+        "summary": "Sync the organization's features",
         "tags": [
           "Admin - Organizations"
         ]

@@ -23,11 +23,60 @@
     "e2e": {
       "cache": false
     },
-    "dev": { "cache": false },
-    "dev:ssl": { "cache": false },
-    "dev:ssl:w": { "cache": false },
-    "dev:ssl:cloud": { "cache": false },
-    "dev:ssl:admin": { "cache": false }
+    "dev": {
+      "cache": false
+    },
+    "dev:ssl": {
+      "cache": false
+    },
+    "dev:ssl:w": {
+      "cache": false
+    },
+    "dev:ssl:cloud": {
+      "cache": false
+    },
+    "dev:ssl:admin": {
+      "cache": false
+    },
+    "db:generate": {
+      "cache": false
+    },
+    "db:generate:custom": {
+      "cache": false
+    },
+    "db:migrate": {
+      "cache": false
+    },
+    "db:deploy": {
+      "cache": false
+    },
+    "db:studio": {
+      "cache": false
+    },
+    "db:start": {
+      "cache": false
+    },
+    "db:stop": {
+      "cache": false
+    },
+    "db:generate:w": {
+      "cache": false
+    },
+    "db:generate:custom:w": {
+      "cache": false
+    },
+    "db:migrate:w": {
+      "cache": false
+    },
+    "db:studio:w": {
+      "cache": false
+    },
+    "db:push": {
+      "cache": false
+    },
+    "db:reset": {
+      "cache": false
+    }
   },
   "release": {
     "projects": ["vritti-cloud-server", "vritti-cloud-web"],

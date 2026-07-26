@@ -1,5 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { DeploymentDto } from '../dto/entity/deployment.dto';
 import { SigningKeyDto } from '../dto/entity/signing-key.dto';
 import { CreateDeploymentDto } from '../dto/request/create-deployment.dto';
@@ -29,6 +30,20 @@ export function ApiRegenerateSigningKey() {
     }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiResponse({ status: 200, description: 'Signing key regenerated successfully.', type: SigningKeyDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Deployment not found.' }),
+  );
+}
+
+export function ApiSyncCatalog() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Sync catalog license',
+      description:
+        "Re-pushes the signed feature/permission catalog snapshot to the deployment's core. Does not touch any organization's roles or entitlements.",
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'Catalog license synced successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Deployment not found.' }),
   );

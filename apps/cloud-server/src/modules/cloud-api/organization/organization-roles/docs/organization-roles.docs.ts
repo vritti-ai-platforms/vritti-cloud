@@ -1,5 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { RoleScopeSectionDto } from '../dto/response/role-sections.response.dto';
 
 export function ApiListOrgRoles() {
@@ -45,6 +46,20 @@ export function ApiUpdateOrgRole() {
     ApiParam({ name: 'roleId', type: String, description: 'Role ID to update' }),
     ApiResponse({ status: 200, description: 'Role updated successfully.' }),
     ApiResponse({ status: 400, description: 'Validation failed.' }),
+    ApiResponse({ status: 404, description: 'Organization, deployment, or role not found.' }),
+    ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
+  );
+}
+
+export function ApiResetRole() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Reset an organization role to its template',
+      description: "Proxies to core to clear the role's deltas, resetting it to its template.",
+    }),
+    ApiParam({ name: 'orgId', type: String, description: 'Organization ID' }),
+    ApiParam({ name: 'roleId', type: String, description: 'Role ID to reset' }),
+    ApiResponse({ status: 200, description: 'Role reset successfully.', type: SuccessResponseDto }),
     ApiResponse({ status: 404, description: 'Organization, deployment, or role not found.' }),
     ApiResponse({ status: 503, description: 'Deployment unreachable.' }),
   );

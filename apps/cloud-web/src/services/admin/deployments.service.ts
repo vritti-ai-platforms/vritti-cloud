@@ -39,6 +39,15 @@ export function regenerateSigningKey(id: string): Promise<CreateResponse<Deploym
     .then((r) => r.data);
 }
 
+// Re-pushes the signed feature/permission catalog snapshot to this deployment's core
+export function syncDeploymentCatalog(deploymentId: string): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(`admin-api/deployments/${deploymentId}/sync-catalog`, undefined, {
+      showSuccessToast: false,
+    })
+    .then((r) => r.data);
+}
+
 // Deletes a deployment by ID
 export function deleteDeployment(id: string): Promise<void> {
   return axios.delete(`admin-api/deployments/${id}`).then(() => undefined);

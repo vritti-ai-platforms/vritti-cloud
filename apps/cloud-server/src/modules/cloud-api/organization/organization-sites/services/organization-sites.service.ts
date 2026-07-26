@@ -59,7 +59,6 @@ export class OrganizationSitesService {
       org.orgIdentifier,
       this.packMetadata(data),
     );
-    await this.catalogSyncService.syncRoles(orgId);
     this.logger.log(`Created site for org ${orgId}`);
     return { success: true, message: `Site "${site.name}" created successfully.`, data: site };
   }

@@ -29,3 +29,10 @@ export function updateRole({
 export function deleteRole({ orgId, roleId }: { orgId: string; roleId: string }): Promise<void> {
   return axios.delete(`cloud-api/organizations/${orgId}/roles/${roleId}`).then(() => undefined);
 }
+
+// Resets a custom role's permissions back to its base template
+export function resetRole({ orgId, roleId }: { orgId: string; roleId: string }): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(`cloud-api/organizations/${orgId}/roles/${roleId}/reset`)
+    .then((r) => r.data);
+}

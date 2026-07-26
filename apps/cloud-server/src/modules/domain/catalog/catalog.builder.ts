@@ -3,12 +3,6 @@
 export type {
   CatalogPermission,
   LockReason,
-  RoleItem,
   SiteFeatureLocks,
 } from '@vritti/api-sdk/catalog-resolver';
-export {
-  buildSiteCatalog,
-  buildSiteRoles,
-  isPlanMember,
-  isSiteLockedOnPlatform,
-} from '@vritti/api-sdk/catalog-resolver';
+export { buildSiteCatalog, isPlanMember, isSiteLockedOnPlatform } from '@vritti/api-sdk/catalog-resolver';

@@ -1,4 +1,9 @@
-import { useDeleteDeployment, useDeployment, useRegenerateSigningKey } from '@hooks/admin/deployments';
+import {
+  useDeleteDeployment,
+  useDeployment,
+  useRegenerateSigningKey,
+  useSyncDeploymentCatalog,
+} from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
@@ -8,7 +13,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
-import { KeyRound, Server } from 'lucide-react';
+import { KeyRound, RefreshCw, Server } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import type { DeploymentSigningKey } from '@/schemas/admin/deployments';
@@ -39,6 +44,19 @@ export const DeploymentViewPage = () => {
       signingKeyDialog.open();
     },
   });
+
+  const syncCatalogMutation = useSyncDeploymentCatalog();
+
+  // Confirm the outward-facing push, then re-push the catalog to this deployment's core
+  const handleSyncCatalog = async () => {
+    if (!id) return;
+    const confirmed = await confirm({
+      title: 'Sync catalog?',
+      description: "Re-push the feature catalog to this deployment's core?",
+      confirmLabel: 'Sync Catalog',
+    });
+    if (confirmed) syncCatalogMutation.mutate(id);
+  };
 
   // Warn about invalidating the current key, then regenerate and reveal the new public key
   const handleRegenerateSigningKey = async () => {
@@ -72,6 +90,16 @@ export const DeploymentViewPage = () => {
         description={deployment.type}
         actions={
           <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSyncCatalog}
+              isLoading={syncCatalogMutation.isPending}
+              loadingText="Syncing..."
+              startAdornment={<RefreshCw className="size-4" />}
+            >
+              Sync Catalog
+            </Button>
             <Button
               variant="outline"
               size="sm"

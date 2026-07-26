@@ -65,14 +65,14 @@ export class OrganizationDomainService {
     return OrganizationDetailDto.from(org);
   }
 
-  // Re-pushes the deployment catalog, org entitlements and roles for the org's deployment
-  async resyncDeployment(orgId: string): Promise<SuccessResponseDto> {
+  // Re-pushes this org's role templates and entitlement to its deployment (catalog is synced separately)
+  async syncFeatures(orgId: string): Promise<SuccessResponseDto> {
     const org = await this.organizationRepository.findById(orgId);
     if (!org) throw new NotFoundException('Organization not found.');
 
-    await this.catalogSyncService.resyncDeployment(org.deploymentId);
+    await this.catalogSyncService.syncOrgEntitlement(orgId);
 
-    this.logger.log(`Resynced deployment ${org.deploymentId} for org ${orgId}`);
-    return { success: true, message: 'Deployment catalog, entitlements and roles re-pushed successfully.' };
+    this.logger.log(`Synced entitlement for org ${orgId}`);
+    return { success: true, message: 'Entitlement synced to core.' };
   }
 }

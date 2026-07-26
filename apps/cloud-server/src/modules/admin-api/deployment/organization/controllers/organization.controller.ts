@@ -4,7 +4,7 @@ import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
 import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
-import { ApiFindForTableOrganizations, ApiFindOrganizationById, ApiResyncDeployment } from '../docs/organization.docs';
+import { ApiFindForTableOrganizations, ApiFindOrganizationById, ApiSyncOrgFeatures } from '../docs/organization.docs';
 import { OrganizationDetailDto } from '../dto/entity/organization-detail.dto';
 import { OrganizationTableResponseDto } from '../dto/response/organizations-response.dto';
 
@@ -36,12 +36,12 @@ export class OrganizationController {
     return this.organizationService.findById(id);
   }
 
-  // Re-pushes the deployment catalog, org entitlements and roles for this org's deployment
+  // Re-pushes this org's role templates and entitlement to its deployment
   @Post(':id/sync-features')
   @HttpCode(HttpStatus.OK)
-  @ApiResyncDeployment()
-  resyncDeployment(@Param('id') id: string): Promise<SuccessResponseDto> {
+  @ApiSyncOrgFeatures()
+  syncFeatures(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`POST /admin-api/organizations/${id}/sync-features`);
-    return this.organizationService.resyncDeployment(id);
+    return this.organizationService.syncFeatures(id);
   }
 }

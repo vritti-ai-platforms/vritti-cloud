@@ -2,7 +2,13 @@ import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Pat
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
-import { ApiCreateOrgRole, ApiDeleteOrgRole, ApiListOrgRoles, ApiUpdateOrgRole } from '../docs/organization-roles.docs';
+import {
+  ApiCreateOrgRole,
+  ApiDeleteOrgRole,
+  ApiListOrgRoles,
+  ApiResetRole,
+  ApiUpdateOrgRole,
+} from '../docs/organization-roles.docs';
 import type { RoleScopeSectionDto } from '../dto/response/role-sections.response.dto';
 import { OrganizationRolesService } from '../services/organization-roles.service';
 
@@ -44,6 +50,15 @@ export class OrganizationRolesController {
   ): Promise<SuccessResponseDto> {
     this.logger.log(`PATCH /organizations/${orgId}/roles/${roleId}`);
     return this.orgRolesService.updateRole(orgId, roleId, data);
+  }
+
+  // Resets a role to its template for the organization (proxied to core)
+  @Post(':roleId/reset')
+  @HttpCode(HttpStatus.OK)
+  @ApiResetRole()
+  async resetRole(@Param('orgId') orgId: string, @Param('roleId') roleId: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /organizations/${orgId}/roles/${roleId}/reset`);
+    return this.orgRolesService.resetRole(orgId, roleId);
   }
 
   // Deletes a role for the organization (proxied to core)
