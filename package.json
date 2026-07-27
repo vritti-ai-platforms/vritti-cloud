@@ -5,11 +5,8 @@
   "packageManager": "pnpm@10.28.0",
   "scripts": {
     "dev": "nx run-many --target=dev --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
-    "dev:ssl": "nx run-many --target=dev:ssl --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
-    "dev:ssl:vm": "nx run-many --target=dev:ssl:vm --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
-    "dev:ssl:w": "nx run-many --target=dev:ssl:w --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
-    "dev:ssl:cloud": "nx run vritti-cloud-server:dev:ssl & nx run vritti-cloud-web:dev:ssl:cloud",
-    "dev:ssl:admin": "nx run vritti-cloud-server:dev:ssl & nx run vritti-cloud-web:dev:ssl:admin",
+    "dev:prod": "nx run-many --target=dev:prod --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
+    "dev:vm": "nx run vritti-cloud-server:dev & nx run vritti-cloud-web:dev:vm",
     "build": "nx run-many --target=build --all",
     "lint": "nx run-many --target=lint --all",
     "test": "nx run-many --target=test --all",
@@ -19,12 +16,12 @@
     "release": "nx release",
     "db:generate": "nx run vritti-cloud-server:db:generate",
     "db:migrate": "nx run vritti-cloud-server:db:migrate",
+    "db:migrate:prod": "nx run vritti-cloud-server:db:migrate:prod",
     "db:studio": "nx run vritti-cloud-server:db:studio",
+    "db:studio:prod": "nx run vritti-cloud-server:db:studio:prod",
     "db:start": "nx run vritti-cloud-server:db:start",
     "db:stop": "nx run vritti-cloud-server:db:stop",
-    "db:generate:w": "nx run vritti-cloud-server:db:generate:w",
-    "db:migrate:w": "nx run vritti-cloud-server:db:migrate:w",
-    "db:studio:w": "nx run vritti-cloud-server:db:studio:w"
+    "db:tunnel": "nx run vritti-cloud-server:db:tunnel"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",

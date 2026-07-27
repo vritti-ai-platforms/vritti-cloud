@@ -1,0 +1,29 @@
+# Local dev backing services for cloud-server (the `local` env). Postgres + Redis on the standard
+# ports so PRIMARY_DB_HOST=localhost / REDIS_URL=redis://localhost:6379/0 just work.
+#   docker compose -f local-db-compose.yml up -d
+# NOTE: this is a throwaway local DB — run migrations to create the schema. Postgres 18 does NOT
+# auto-upgrade a Postgres 17 data dir, so if you had the old pg17 volume: `... down -v` first.
+services:
+  postgres:
+    image: postgres:18
+    container_name: vritti-cloud-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: localdev
+      POSTGRES_DB: vritti_db
+    volumes:
+      # Mount the PARENT, not .../data — postgres:18 refuses a volume mounted directly at the data dir.
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:8-alpine
+    container_name: vritti-cloud-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+volumes:
+  pgdata:
