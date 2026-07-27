@@ -11,7 +11,7 @@ pnpm workspace monorepo containing the Vritti Cloud backend and frontend.
 
 ## External Dependencies
 
-`@vritti/quantum-ui` and `@vritti/api-sdk` are linked via pnpm overrides (see `pnpm-workspace.yaml`). They live outside this repo at `../quantum-ui` and `../api-sdk`.
+`@vritti/quantum-ui` and `@vritti/api-sdk` are consumed as published npm packages (pinned in each app's `package.json`). Their source lives outside this repo at `../quantum-ui` and `../api-sdk`; for local development against unpublished changes, use `pnpm link` or a temporary `overrides:` block in `pnpm-workspace.yaml` (do not commit it — CI resolves from the registry).
 
 ## Commands
 
