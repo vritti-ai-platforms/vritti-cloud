@@ -3195,6 +3195,7 @@
             "required": true,
             "in": "query",
             "schema": {
+              "maxLength": 40,
               "example": "acme-corp",
               "type": "string"
             }

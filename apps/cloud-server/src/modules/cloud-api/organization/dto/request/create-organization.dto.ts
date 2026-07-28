@@ -1,7 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MinLength } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID, Matches, MaxLength, MinLength } from 'class-validator';
 import type { OrgSize } from '@/db/schema';
 import { OrgSizeValues } from '@/db/schema';
+
+// Subdomains are used verbatim as namespaces in downstream systems; git hosting caps names at 40
+export const SUBDOMAIN_MAX_LENGTH = 40;
 
 export class CreateOrganizationDto {
   @ApiProperty({ description: 'Display name of the organization', example: 'Acme Corp' })
@@ -10,11 +13,14 @@ export class CreateOrganizationDto {
   name: string;
 
   @ApiProperty({
-    description: 'Unique subdomain for the organization. Lowercase letters, numbers, and hyphens only.',
+    description:
+      'Unique subdomain for the organization. Lowercase letters, numbers, and hyphens only, at most 40 characters. The cap is what downstream systems that namespace by subdomain (e.g. git hosting) allow.',
     example: 'acme-corp',
     pattern: '^[a-z0-9-]+$',
+    maxLength: SUBDOMAIN_MAX_LENGTH,
   })
   @IsString()
+  @MaxLength(SUBDOMAIN_MAX_LENGTH)
   @Matches(/^[a-z0-9-]+$/, { message: 'Subdomain can only contain lowercase letters, numbers, and hyphens' })
   subdomain: string;
 
