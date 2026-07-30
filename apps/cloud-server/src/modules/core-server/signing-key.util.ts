@@ -6,7 +6,7 @@ export function requireSigningKey(deployment: Deployment): string {
   if (!deployment.signingKey) {
     throw new BadRequestException({
       label: 'Signing Key Missing',
-      detail: `Deployment "${deployment.name}" has no signing key. Regenerate the deployment's signing key, update the core deployment's CLOUD_PUBLIC_KEY env, then resync.`,
+      detail: `Deployment "${deployment.name}" has no signing key. Regenerate the deployment's signing key, update the core deployment's LICENSE_PUBLIC_KEY env, then resync.`,
     });
   }
   return deployment.signingKey;

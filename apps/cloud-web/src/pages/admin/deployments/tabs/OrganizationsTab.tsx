@@ -38,6 +38,7 @@ export const OrganizationsTab: React.FC<OrganizationsTabProps> = ({ deploymentId
   return (
     <DataTable
       table={table}
+      mode="tab"
       isLoading={isLoading}
       searchConfig={{
         columns: [

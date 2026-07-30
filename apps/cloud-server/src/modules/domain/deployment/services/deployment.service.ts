@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateResponseDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
+import { DeploymentManagementModeValues, DeploymentStatusValues, DeploymentTypeValues } from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
 import type { SigningKeyDto } from '@/modules/admin-api/deployment/dto/entity/signing-key.dto';
 import type { CreateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/create-deployment.dto';
@@ -14,6 +15,7 @@ import type {
 } from '@/modules/cloud-api/deployment/dto/request/deployment-filter.dto';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
+import { LOCAL_CLOUD_PROVIDER_ID, LOCAL_REGION_ID } from '../local-deployment.constants';
 import { DeploymentDomainRepository } from '../repositories/deployment.repository';
 
 @Injectable()
@@ -46,28 +48,37 @@ export class DeploymentDomainService {
     });
   }
 
-  // Creates a new deployment with a fresh signing keypair; the public key is returned once and never persisted
+  // Creates a new deployment without a signing key; manual deployments use the sentinel local region/provider
   async create(dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
-    const { privateKey, publicKey } = generateSigningKeyPair();
-    const deployment = await this.deploymentRepository.create({ ...dto, signingKey: privateKey });
+    const isManual = dto.managementMode === DeploymentManagementModeValues.manual;
+    const deployment = await this.deploymentRepository.create({
+      name: dto.name,
+      url: dto.url,
+      version: dto.version,
+      managementMode: dto.managementMode,
+      type: dto.type ?? DeploymentTypeValues.dedicated,
+      regionId: dto.regionId ?? LOCAL_REGION_ID,
+      cloudProviderId: dto.cloudProviderId ?? LOCAL_CLOUD_PROVIDER_ID,
+      status: dto.status ?? (isManual ? DeploymentStatusValues.active : DeploymentStatusValues.Provisioning),
+      signingKey: null,
+      signingPublicKey: null,
+    });
     this.logger.log(`Created deployment: ${deployment.name} (${deployment.id})`);
-    const data = DeploymentDto.from(deployment);
-    data.publicKey = publicKey;
     return {
       success: true,
       message: `Deployment "${deployment.name}" created successfully.`,
-      data,
+      data: DeploymentDto.from(deployment),
     };
   }
 
-  // Regenerates the deployment's signing keypair; returns the new public key once — it is never retrievable again
+  // Regenerates the deployment's signing keypair and returns the new public key
   async regenerateSigningKey(id: string): Promise<CreateResponseDto<SigningKeyDto>> {
     const existing = await this.deploymentRepository.findById(id);
     if (!existing) {
       throw new NotFoundException('Deployment not found.');
     }
     const { privateKey, publicKey } = generateSigningKeyPair();
-    await this.deploymentRepository.update(id, { signingKey: privateKey });
+    await this.deploymentRepository.update(id, { signingKey: privateKey, signingPublicKey: publicKey });
     this.logger.log(`Regenerated signing key for deployment: ${existing.name} (${id})`);
     return {
       success: true,

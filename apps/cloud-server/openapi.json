@@ -10133,7 +10133,7 @@
     },
     "/admin-api/deployments": {
       "post": {
-        "description": "Generates an Ed25519 signing keypair for the deployment. The response includes publicKey exactly once — it is never retrievable afterward. Use POST /admin-api/deployments/:id/signing-key to regenerate.",
+        "description": "Generates an Ed25519 signing keypair for the deployment. regionId/cloudProviderId are required only for managementMode=agent; manual deployments use the sentinel local region/provider. The response includes publicKey exactly once — it is never retrievable afterward. Use POST /admin-api/deployments/:id/signing-key to regenerate.",
         "operationId": "DeploymentController_create",
         "parameters": [],
         "requestBody": {
@@ -18339,6 +18339,13 @@
               "dedicated"
             ]
           },
+          "managementMode": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "agent"
+            ]
+          },
           "version": {
             "type": "object",
             "example": "1.0.0",
@@ -18376,7 +18383,7 @@
           "publicKey": {
             "type": "string",
             "example": "MCowBQYDK2VwAyEA0V5v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v8=",
-            "description": "Ed25519 signing public key (base64). Present only in the create response — shown once, never retrievable again."
+            "description": "Ed25519 signing public key (base64). Returned once on create/regenerate for manual deployments — shown once, then rotated if lost."
           }
         },
         "required": [
@@ -18387,6 +18394,7 @@
           "cloudProviderId",
           "status",
           "type",
+          "managementMode",
           "createdAt",
           "organizationCount"
         ]
@@ -20643,18 +20651,24 @@
           },
           "url": {
             "type": "string",
-            "description": "Base URL of the api-nexus instance",
+            "description": "Base URL of the core instance",
             "example": "https://nexus-us-east.vritti.io"
+          },
+          "managementMode": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "agent"
+            ],
+            "description": "How the deployment is operated"
           },
           "regionId": {
             "type": "string",
-            "description": "Region UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "description": "Region UUID — required for agent-managed deployments"
           },
           "cloudProviderId": {
             "type": "string",
-            "description": "Cloud provider UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "description": "Cloud provider UUID — required for agent-managed deployments"
           },
           "status": {
             "type": "string",
@@ -20672,7 +20686,7 @@
               "shared",
               "dedicated"
             ],
-            "description": "Deployment type"
+            "description": "Deployment type — defaults to dedicated for manual"
           },
           "version": {
             "type": "string",
@@ -20683,9 +20697,7 @@
         "required": [
           "name",
           "url",
-          "regionId",
-          "cloudProviderId",
-          "type",
+          "managementMode",
           "version"
         ]
       },
@@ -20717,18 +20729,24 @@
           },
           "url": {
             "type": "string",
-            "description": "Base URL of the api-nexus instance",
+            "description": "Base URL of the core instance",
             "example": "https://nexus-us-east.vritti.io"
+          },
+          "managementMode": {
+            "type": "string",
+            "enum": [
+              "manual",
+              "agent"
+            ],
+            "description": "How the deployment is operated"
           },
           "regionId": {
             "type": "string",
-            "description": "Region UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "description": "Region UUID — required for agent-managed deployments"
           },
           "cloudProviderId": {
             "type": "string",
-            "description": "Cloud provider UUID",
-            "example": "550e8400-e29b-41d4-a716-446655440000"
+            "description": "Cloud provider UUID — required for agent-managed deployments"
           },
           "status": {
             "type": "string",
@@ -20746,7 +20764,7 @@
               "shared",
               "dedicated"
             ],
-            "description": "Deployment type"
+            "description": "Deployment type — defaults to dedicated for manual"
           },
           "version": {
             "type": "string",

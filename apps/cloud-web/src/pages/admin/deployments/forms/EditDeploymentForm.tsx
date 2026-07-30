@@ -35,6 +35,8 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
 
   const updateMutation = useUpdateDeployment({ onSuccess });
 
+  const isManual = deployment.managementMode === 'manual';
+
   return (
     <Form
       form={form}
@@ -45,13 +47,17 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
     >
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vrittiai.com" />
-      <RegionSelector
-        name="regionId"
-        label="Region"
-        placeholder="Select region"
-        onOptionSelect={() => form.setValue('cloudProviderId', '')}
-      />
-      <CloudProviderSelector name="cloudProviderId" label="Cloud Provider" placeholder="Select provider" />
+      {!isManual && (
+        <>
+          <RegionSelector
+            name="regionId"
+            label="Region"
+            placeholder="Select region"
+            onOptionSelect={() => form.setValue('cloudProviderId', '')}
+          />
+          <CloudProviderSelector name="cloudProviderId" label="Cloud Provider" placeholder="Select provider" />
+        </>
+      )}
       <VersionSelector name="version" label="Version" placeholder="Select version" />
       <Select
         name="type"

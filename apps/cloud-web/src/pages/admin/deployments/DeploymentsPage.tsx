@@ -2,34 +2,18 @@ import { useDeployments } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
-import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Eye, Plus, Server } from 'lucide-react';
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Deployment, DeploymentSigningKey } from '@/schemas/admin/deployments';
-import { AddDeploymentForm } from './forms/AddDeploymentForm';
-import { SigningKeyRevealDialog } from './SigningKeyRevealDialog';
+import type { Deployment } from '@/schemas/admin/deployments';
 
 const TABLE_SLUG = 'deployments';
 
 export const DeploymentsPage = () => {
   const navigate = useNavigate();
   const { data: response, isLoading } = useDeployments();
-  const addDialog = useDialog();
-  const signingKeyDialog = useDialog();
-  const [signingKey, setSigningKey] = useState<DeploymentSigningKey | null>(null);
 
-  // Close the add dialog and reveal the new deployment's signing public key (shown only once)
-  const handleCreated = (close: () => void) => (deployment: Deployment) => {
-    close();
-    if (deployment.publicKey) {
-      setSigningKey({ deploymentId: deployment.id, publicKey: deployment.publicKey });
-      signingKeyDialog.open();
-    }
-  };
   const { table } = useDataTable({
     columns: getColumns({
       onView: (d) => navigate(`/deployments/${buildSlug(d.name, d.id)}`),
@@ -51,7 +35,7 @@ export const DeploymentsPage = () => {
         isLoading={isLoading}
         toolbarActions={{
           actions: (
-            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={addDialog.open}>
+            <Button startAdornment={<Plus className="size-4" />} size="sm" onClick={() => navigate('/deployments/new')}>
               Add Deployment
             </Button>
           ),
@@ -61,23 +45,13 @@ export const DeploymentsPage = () => {
           title: 'No deployments found',
           description: 'Add your first deployment to get started.',
           action: (
-            <Button size="sm" onClick={addDialog.open}>
+            <Button size="sm" onClick={() => navigate('/deployments/new')}>
               <Plus className="size-4" />
               Add Deployment
             </Button>
           ),
         }}
       />
-
-      <Dialog
-        handle={addDialog}
-        icon={Server}
-        title="Add Deployment"
-        description="Configure a new deployment environment."
-        content={(close) => <AddDeploymentForm onSuccess={handleCreated(close)} onCancel={close} />}
-      />
-
-      <SigningKeyRevealDialog handle={signingKeyDialog} signingKey={signingKey} />
     </div>
   );
 };
@@ -145,6 +119,13 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Deployment, unknown>[]
         <Badge variant="outline" className="capitalize">
           {row.original.type}
         </Badge>
+      ),
+    },
+    {
+      accessorKey: 'managementMode',
+      header: 'Mode',
+      cell: ({ row }) => (
+        <Badge variant="secondary">{row.original.managementMode === 'agent' ? 'Managed' : 'Local'}</Badge>
       ),
     },
     {

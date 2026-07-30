@@ -1,6 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, IsUrl, IsUUID, MaxLength, MinLength } from 'class-validator';
-import { type DeploymentStatus, DeploymentStatusValues, type DeploymentType, DeploymentTypeValues } from '@/db/schema';
+import { IsEnum, IsOptional, IsString, IsUrl, IsUUID, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import {
+  type DeploymentManagementMode,
+  DeploymentManagementModeValues,
+  type DeploymentStatus,
+  DeploymentStatusValues,
+  type DeploymentType,
+  DeploymentTypeValues,
+} from '@/db/schema';
 
 export class CreateDeploymentDto {
   @ApiProperty({ description: 'Display name of the deployment', example: 'US East Production' })
@@ -9,28 +16,38 @@ export class CreateDeploymentDto {
   @MaxLength(255)
   name: string;
 
-  @ApiProperty({ description: 'Base URL of the api-nexus instance', example: 'https://nexus-us-east.vritti.io' })
+  @ApiProperty({ description: 'Base URL of the core instance', example: 'https://nexus-us-east.vritti.io' })
   @IsString()
   @IsUrl({ require_tld: false })
   @MaxLength(500)
   url: string;
 
-  @ApiProperty({ description: 'Region UUID', example: '550e8400-e29b-41d4-a716-446655440000' })
-  @IsUUID()
-  regionId: string;
+  @ApiProperty({ enum: DeploymentManagementModeValues, description: 'How the deployment is operated' })
+  @IsEnum(DeploymentManagementModeValues)
+  managementMode: DeploymentManagementMode;
 
-  @ApiProperty({ description: 'Cloud provider UUID', example: '550e8400-e29b-41d4-a716-446655440000' })
+  @ApiPropertyOptional({ description: 'Region UUID — required for agent-managed deployments' })
+  @ValidateIf((o) => o.managementMode === DeploymentManagementModeValues.agent)
   @IsUUID()
-  cloudProviderId: string;
+  regionId?: string;
+
+  @ApiPropertyOptional({ description: 'Cloud provider UUID — required for agent-managed deployments' })
+  @ValidateIf((o) => o.managementMode === DeploymentManagementModeValues.agent)
+  @IsUUID()
+  cloudProviderId?: string;
 
   @ApiPropertyOptional({ enum: DeploymentStatusValues, default: 'Provisioning', description: 'Deployment status' })
   @IsOptional()
   @IsEnum(DeploymentStatusValues)
   status?: DeploymentStatus;
 
-  @ApiProperty({ enum: DeploymentTypeValues, description: 'Deployment type' })
+  @ApiPropertyOptional({
+    enum: DeploymentTypeValues,
+    description: 'Deployment type — defaults to dedicated for manual',
+  })
+  @IsOptional()
   @IsEnum(DeploymentTypeValues)
-  type: DeploymentType;
+  type?: DeploymentType;
 
   @ApiProperty({ description: 'App version string this deployment runs', example: '1.0.0' })
   @IsString()

@@ -31,6 +31,7 @@
     "db:start": "docker compose -f docker-compose.local.yml up -d",
     "db:stop": "docker compose -f docker-compose.local.yml down",
     "db:tunnel": "cloudflared access tcp --hostname clouddb.vrittiai.com --url localhost:5432",
+    "db:tunnel:stop": "pkill -f 'cloudflared access tcp.*clouddb.vrittiai.com' && echo 'Stopped clouddb tunnel.' || echo 'No clouddb tunnel running.'",
     "webhook": "cloudflared tunnel --no-tls-verify --url https://local.vrittiai.com:3000 run vritti-webhook"
   },
   "dependencies": {

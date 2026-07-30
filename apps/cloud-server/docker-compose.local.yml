@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: localdev
+      POSTGRES_PASSWORD: Vritti@0322
       POSTGRES_DB: vritti_db
     volumes:
       # Mount the PARENT, not .../data — postgres:18 refuses a volume mounted directly at the data dir.

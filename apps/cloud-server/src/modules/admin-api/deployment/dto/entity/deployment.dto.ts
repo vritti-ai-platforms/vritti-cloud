@@ -1,7 +1,14 @@
 import type { DeploymentWithNames } from '@domain/deployment/repositories/deployment.repository';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Deployment } from '@/db/schema';
-import { type DeploymentStatus, DeploymentStatusValues, type DeploymentType, DeploymentTypeValues } from '@/db/schema';
+import {
+  type DeploymentManagementMode,
+  DeploymentManagementModeValues,
+  type DeploymentStatus,
+  DeploymentStatusValues,
+  type DeploymentType,
+  DeploymentTypeValues,
+} from '@/db/schema';
 
 export class DeploymentDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -24,6 +31,9 @@ export class DeploymentDto {
 
   @ApiProperty({ enum: DeploymentTypeValues })
   type: DeploymentType;
+
+  @ApiProperty({ enum: DeploymentManagementModeValues })
+  managementMode: DeploymentManagementMode;
 
   @ApiPropertyOptional({ example: '1.0.0', nullable: true })
   version: string | null;
@@ -49,10 +59,22 @@ export class DeploymentDto {
   @ApiProperty({ example: 0 })
   organizationCount: number;
 
+  @ApiProperty({ example: true })
+  hasSigningKey: boolean;
+
+  @ApiProperty({ example: true })
+  catalogSynced: boolean;
+
+  @ApiPropertyOptional({
+    example: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    nullable: true,
+  })
+  lastPushedHash: string | null;
+
   @ApiPropertyOptional({
     example: 'MCowBQYDK2VwAyEA0V5v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v8=',
     description:
-      'Ed25519 signing public key (base64). Present only in the create response — shown once, never retrievable again.',
+      'Ed25519 signing public key (base64). Returned once on create/regenerate for manual deployments — shown once, then rotated if lost.',
   })
   publicKey?: string;
 
@@ -66,10 +88,14 @@ export class DeploymentDto {
     dto.cloudProviderId = deployment.cloudProviderId;
     dto.status = deployment.status;
     dto.type = deployment.type;
+    dto.managementMode = deployment.managementMode;
     dto.version = deployment.version;
     dto.createdAt = deployment.createdAt;
     dto.updatedAt = deployment.updatedAt;
     dto.organizationCount = organizationCount;
+    dto.hasSigningKey = deployment.signingPublicKey != null;
+    dto.catalogSynced = deployment.lastPushedHash != null;
+    dto.lastPushedHash = deployment.lastPushedHash;
     if ('region' in deployment && deployment.region) {
       const withNames = deployment as DeploymentWithNames;
       dto.regionName = withNames.region.name;

@@ -12,7 +12,7 @@ export function ApiCreateDeployment() {
     ApiOperation({
       summary: 'Create a new deployment',
       description:
-        'Generates an Ed25519 signing keypair for the deployment. The response includes publicKey exactly once — it is never retrievable afterward. Use POST /admin-api/deployments/:id/signing-key to regenerate.',
+        'Creates a bare deployment record with no signing key yet. regionId/cloudProviderId are required only for managementMode=agent; manual deployments use the sentinel local region/provider. Generate the signing key later via POST /admin-api/deployments/:id/signing-key, which reveals the public key once.',
     }),
     ApiBody({ type: CreateDeploymentDto }),
     ApiResponse({ status: 201, description: 'Deployment created successfully.', type: DeploymentDto }),
@@ -24,9 +24,9 @@ export function ApiCreateDeployment() {
 export function ApiRegenerateSigningKey() {
   return applyDecorators(
     ApiOperation({
-      summary: "Regenerate a deployment's signing keypair",
+      summary: "Generate or regenerate a deployment's signing keypair",
       description:
-        'Replaces the deployment signing key and returns the new public key exactly once — it is never retrievable afterward. The previous key stops verifying immediately; update the core deployment env (CLOUD_PUBLIC_KEY) and resync.',
+        'Generates the deployment signing keypair on first use, or regenerates it if one already exists, and returns the public key exactly once — it is never retrievable afterward. On regeneration the previous key stops verifying immediately; update the core deployment env (LICENSE_PUBLIC_KEY) and resync.',
     }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiResponse({ status: 200, description: 'Signing key regenerated successfully.', type: SigningKeyDto }),

@@ -1,7 +1,7 @@
 import { text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudProviders } from './cloud-provider';
 import { cloudSchema } from './cloud-schema';
-import { deploymentStatusEnum, deploymentTypeEnum } from './enums';
+import { deploymentManagementModeEnum, deploymentStatusEnum, deploymentTypeEnum } from './enums';
 import { regions } from './region';
 
 // Infrastructure deployment instances — linked to an app version by version string (no FK)
@@ -20,8 +20,10 @@ export const deployments = cloudSchema.table('deployments', {
   lastPushedHash: varchar('last_pushed_hash', { length: 64 }),
   // Ed25519 private key (base64) that signs this deployment's requests, licenses, and entitlements — nullable for pre-existing rows
   signingKey: text('signing_key'),
+  signingPublicKey: text('signing_public_key'),
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
   type: deploymentTypeEnum('type').notNull(),
+  managementMode: deploymentManagementModeEnum('management_mode').notNull().default('agent'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

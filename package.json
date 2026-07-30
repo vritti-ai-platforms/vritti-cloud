@@ -21,7 +21,8 @@
     "db:studio:prod": "nx run vritti-cloud-server:db:studio:prod",
     "db:start": "nx run vritti-cloud-server:db:start",
     "db:stop": "nx run vritti-cloud-server:db:stop",
-    "db:tunnel": "nx run vritti-cloud-server:db:tunnel"
+    "db:tunnel": "nx run vritti-cloud-server:db:tunnel",
+    "db:tunnel:stop": "nx run vritti-cloud-server:db:tunnel:stop"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.2",
