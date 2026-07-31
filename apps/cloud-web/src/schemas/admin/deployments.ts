@@ -32,6 +32,28 @@ export interface DeploymentSigningKey {
   publicKey: string;
 }
 
+export interface EnrollToken {
+  token: string;
+  expiresAt: string;
+  deploymentPubKey: string;
+}
+
+type AgentEnrollmentStatus = 'pending' | 'enrolled' | 'revoked';
+
+export interface AgentStatus {
+  deploymentId: string;
+  enrolled: boolean;
+  status: AgentEnrollmentStatus | null;
+  agentVersion: string | null;
+  lastHeartbeatAt: string | null;
+  lastPhase: string | null;
+  lastMessage: string | null;
+  lastGeneration: number | null;
+  desiredGeneration: number;
+  giteaProvisioned: boolean;
+  deploymentPubKey: string | null;
+}
+
 export const createDeploymentSchema = z
   .object({
     name: z.string().min(1, 'Name is required').max(255),

@@ -8,6 +8,7 @@ export * from './enums';
 export * from './business';
 export * from './country';
 export * from './deployment';
+export * from './deployment-agent';
 export * from './organization';
 export * from './plan';
 export * from './plan-feature';

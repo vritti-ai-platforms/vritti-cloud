@@ -150,10 +150,13 @@ export const OrgMemberRoleValues = { Owner: 'Owner' as const, Admin: 'Admin' as 
 export const deploymentStatusEnum = cloudSchema.enum('DeploymentStatus', ['active', 'stopped', 'Provisioning']);
 export const deploymentTypeEnum = cloudSchema.enum('DeploymentType', ['shared', 'dedicated']);
 export const deploymentManagementModeEnum = cloudSchema.enum('DeploymentManagementMode', ['manual', 'agent']);
+// Lifecycle of an agent enrolled against an agent-managed deployment
+export const deploymentAgentStatusEnum = cloudSchema.enum('DeploymentAgentStatus', ['pending', 'enrolled', 'revoked']);
 
 export type DeploymentStatus = (typeof deploymentStatusEnum.enumValues)[number];
 export type DeploymentType = (typeof deploymentTypeEnum.enumValues)[number];
 export type DeploymentManagementMode = (typeof deploymentManagementModeEnum.enumValues)[number];
+export type DeploymentAgentStatus = (typeof deploymentAgentStatusEnum.enumValues)[number];
 
 export const DeploymentStatusValues = {
   active: 'active' as const,
@@ -169,6 +172,12 @@ export const DeploymentTypeValues = {
 export const DeploymentManagementModeValues = {
   manual: 'manual' as const,
   agent: 'agent' as const,
+};
+
+export const DeploymentAgentStatusValues = {
+  pending: 'pending' as const,
+  enrolled: 'enrolled' as const,
+  revoked: 'revoked' as const,
 };
 
 // Version lifecycle status

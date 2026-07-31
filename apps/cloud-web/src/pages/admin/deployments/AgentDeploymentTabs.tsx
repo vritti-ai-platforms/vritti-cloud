@@ -9,20 +9,20 @@ import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { Server } from 'lucide-react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Deployment } from '@/schemas/admin/deployments';
+import type { AgentStatus, Deployment } from '@/schemas/admin/deployments';
 import { EditDeploymentForm } from './forms/EditDeploymentForm';
+import { AgentTab } from './tabs/AgentTab';
 import { CatalogTab } from './tabs/CatalogTab';
-import { OrganizationsTab } from './tabs/OrganizationsTab';
 import { OverviewTab } from './tabs/OverviewTab';
 import { SigningKeyTab } from './tabs/SigningKeyTab';
 
-interface DeploymentTabsProps {
+interface AgentDeploymentTabsProps {
   deployment: Deployment;
-  deploymentSlug: string;
+  agent: AgentStatus;
   id: string;
 }
 
-export const DeploymentTabs: React.FC<DeploymentTabsProps> = ({ deployment, deploymentSlug, id }) => {
+export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deployment, agent, id }) => {
   const navigate = useNavigate();
   const editDialog = useDialog();
   const confirm = useConfirm();
@@ -45,7 +45,7 @@ export const DeploymentTabs: React.FC<DeploymentTabsProps> = ({ deployment, depl
     <div className="flex flex-col gap-6">
       <PageHeader
         title={deployment.name}
-        titleSlot={<Badge variant="secondary">Local</Badge>}
+        titleSlot={<Badge variant="secondary">Managed</Badge>}
         description={deployment.type}
         actions={
           <Button variant="outline" size="sm" onClick={editDialog.open}>
@@ -58,11 +58,7 @@ export const DeploymentTabs: React.FC<DeploymentTabsProps> = ({ deployment, depl
         defaultValue="overview"
         tabs={[
           { value: 'overview', label: 'Overview', content: <OverviewTab deployment={deployment} /> },
-          {
-            value: 'organizations',
-            label: 'Organizations',
-            content: <OrganizationsTab deploymentId={id} deploymentSlug={deploymentSlug} />,
-          },
+          { value: 'agent', label: 'Agent', content: <AgentTab deployment={deployment} agent={agent} /> },
           { value: 'signing-key', label: 'Signing Key', content: <SigningKeyTab deployment={deployment} /> },
           { value: 'catalog', label: 'Catalog', content: <CatalogTab deployment={deployment} /> },
         ]}

@@ -112,12 +112,14 @@ async function bootstrap() {
     secret: configService.getOrThrow<string>('COOKIE_SECRET'),
   });
 
-  // Register raw body plugin for webhook signature validation (rawBody needed for webhooks)
+  // Register raw body plugin for webhook signature validation (rawBody needed for webhooks + agent Ed25519 verification)
   await app.register(fastifyRawBody, {
     field: 'rawBody',
     global: false,
     encoding: 'utf8',
     runFirst: true, // Run before other hooks
+    // Opt-in routes whose Ed25519 signature is verified over the exact raw body (GET is auto-skipped by the plugin)
+    routes: ['/agent/enroll', '/agent/deployments/:id/status'],
   });
 
   // Register multipart support for file uploads

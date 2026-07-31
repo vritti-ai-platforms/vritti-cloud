@@ -1,9 +1,11 @@
 import { axios } from '@vritti/quantum-ui/axios';
 import type { CreateResponse, SuccessResponse } from '@vritti/quantum-ui/types/api-response';
 import type {
+  AgentStatus,
   CreateDeploymentData,
   Deployment,
   DeploymentSigningKey,
+  EnrollToken,
   UpdateDeploymentData,
 } from '@/schemas/admin/deployments';
 
@@ -46,6 +48,16 @@ export function syncDeploymentCatalog(deploymentId: string): Promise<SuccessResp
       showSuccessToast: false,
     })
     .then((r) => r.data);
+}
+
+// Issues a one-time agent enroll token and ensures the deployment's agent keypair exists
+export function issueEnrollToken(id: string): Promise<CreateResponse<EnrollToken>> {
+  return axios.post<CreateResponse<EnrollToken>>(`admin-api/deployments/${id}/agent/enroll-token`).then((r) => r.data);
+}
+
+// Fetches the live agent connection and reconciliation status for a deployment
+export function getAgentStatus(id: string): Promise<AgentStatus> {
+  return axios.get<AgentStatus>(`admin-api/deployments/${id}/agent`).then((r) => r.data);
 }
 
 // Deletes a deployment by ID

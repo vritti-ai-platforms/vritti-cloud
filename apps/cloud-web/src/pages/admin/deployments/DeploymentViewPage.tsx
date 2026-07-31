@@ -1,7 +1,7 @@
 import { useDeployment } from '@hooks/admin/deployments';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { useParams } from 'react-router-dom';
-import { AgentDeploymentSetupWizard } from './AgentDeploymentSetupWizard';
+import { AgentDeploymentView } from './AgentDeploymentView';
 import { DeploymentSetupWizard } from './DeploymentSetupWizard';
 import { DeploymentTabs } from './DeploymentTabs';
 
@@ -15,7 +15,7 @@ export const DeploymentViewPage = () => {
   const setupComplete = deployment.hasSigningKey && deployment.catalogSynced;
 
   if (!isManual) {
-    return <AgentDeploymentSetupWizard deployment={deployment} />;
+    return <AgentDeploymentView deployment={deployment} id={id ?? ''} />;
   }
 
   if (!setupComplete) {

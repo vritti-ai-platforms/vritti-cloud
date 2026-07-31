@@ -1,0 +1,118 @@
+import { Injectable } from '@nestjs/common';
+import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
+import { and, eq, gt, sql } from '@vritti/api-sdk/drizzle-orm';
+import type { Deployment, DeploymentAgent, NewDeploymentAgent } from '@/db/schema';
+import { deploymentAgents, deployments } from '@/db/schema';
+
+@Injectable()
+export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeof deploymentAgents> {
+  constructor(database: PrimaryDatabaseService) {
+    super(database, deploymentAgents);
+  }
+
+  // Returns the single agent row for a deployment (one active agent per deployment for MVP)
+  async findByDeploymentId(deploymentId: string): Promise<DeploymentAgent | undefined> {
+    return this.model.findFirst({ where: { deploymentId } });
+  }
+
+  // Returns the enrolled agent for a deployment, if any
+  async findEnrolledByDeploymentId(deploymentId: string): Promise<DeploymentAgent | undefined> {
+    return this.model.findFirst({ where: { deploymentId, status: 'enrolled' } });
+  }
+
+  // Finds a pending agent row matching an unexpired enroll-token hash
+  async findPendingByTokenHash(deploymentId: string, tokenHash: string): Promise<DeploymentAgent | undefined> {
+    const rows = await this.db
+      .select()
+      .from(deploymentAgents)
+      .where(
+        and(
+          eq(deploymentAgents.deploymentId, deploymentId),
+          eq(deploymentAgents.status, 'pending'),
+          eq(deploymentAgents.enrollTokenHash, tokenHash),
+          gt(deploymentAgents.enrollTokenExpiresAt, new Date()),
+        ),
+      )
+      .limit(1);
+    return rows[0];
+  }
+
+  // Replaces any existing agent for a deployment with a fresh pending enroll-token row
+  async replaceWithPending(deploymentId: string, tokenHash: string, expiresAt: Date): Promise<DeploymentAgent> {
+    await this.db.delete(deploymentAgents).where(eq(deploymentAgents.deploymentId, deploymentId));
+    return this.create({
+      deploymentId,
+      enrollTokenHash: tokenHash,
+      enrollTokenExpiresAt: expiresAt,
+    } as NewDeploymentAgent);
+  }
+
+  // Marks an agent enrolled, storing its public keys, version, and credential hash, and burning the enroll token
+  async markEnrolled(
+    id: string,
+    data: {
+      agentSigningPubKey: string;
+      agentSealingPubKey: string | null;
+      agentVersion: string | null;
+      agentCredentialHash: string;
+    },
+  ): Promise<DeploymentAgent> {
+    return this.update(id, {
+      status: 'enrolled',
+      agentSigningPubKey: data.agentSigningPubKey,
+      agentSealingPubKey: data.agentSealingPubKey,
+      agentVersion: data.agentVersion,
+      agentCredentialHash: data.agentCredentialHash,
+      enrollTokenHash: null,
+      enrollTokenExpiresAt: null,
+    });
+  }
+
+  // Records a heartbeat from the agent
+  async recordHeartbeat(
+    id: string,
+    data: { generation: number; phase: string; message: string | null; giteaProvisioned: boolean },
+  ): Promise<void> {
+    await this.db
+      .update(deploymentAgents)
+      .set({
+        lastHeartbeatAt: new Date(),
+        lastGeneration: data.generation,
+        lastPhase: data.phase,
+        lastMessage: data.message,
+        giteaProvisioned: data.giteaProvisioned,
+      })
+      .where(eq(deploymentAgents.id, id));
+  }
+
+  // Cross-table read: returns the deployment row (needed for keys, version, base domain, generation)
+  async findDeploymentById(deploymentId: string): Promise<Deployment | undefined> {
+    const rows = await this.db.select().from(deployments).where(eq(deployments.id, deploymentId)).limit(1);
+    return rows[0];
+  }
+
+  // Cross-table write: persists the lazily generated Keypair B on the deployment row
+  async setAgentSigningKey(deploymentId: string, privateKey: string, publicKey: string): Promise<void> {
+    await this.db
+      .update(deployments)
+      .set({ agentSigningKey: privateKey, agentSigningPublicKey: publicKey })
+      .where(eq(deployments.id, deploymentId));
+  }
+
+  // Cross-table write: bumps the desired-state generation and stores the new payload hash
+  async setDesiredState(deploymentId: string, generation: number, hash: string): Promise<void> {
+    await this.db
+      .update(deployments)
+      .set({ desiredGeneration: generation, lastDesiredHash: hash })
+      .where(eq(deployments.id, deploymentId));
+  }
+
+  // Returns the number of organizations bound to a deployment (informational, unused by MVP flow)
+  async countAgents(deploymentId: string): Promise<number> {
+    const result = await this.db
+      .select({ count: sql<number>`count(*)` })
+      .from(deploymentAgents)
+      .where(eq(deploymentAgents.deploymentId, deploymentId));
+    return Number(result[0]?.count ?? 0);
+  }
+}

@@ -19,6 +19,7 @@ import { AdminCountryModule } from './modules/admin-api/country/country.module';
 import { AdminDeploymentModule } from './modules/admin-api/deployment/deployment.module';
 import { AdminRegionModule } from './modules/admin-api/region/region.module';
 import { AdminVersionModule } from './modules/admin-api/version/version.module';
+import { AgentModule } from './modules/agent-api/agent.module';
 import { AuthModule } from './modules/cloud-api/auth/auth.module';
 import { BusinessModule } from './modules/cloud-api/business/business.module';
 import { CloudDeploymentModule } from './modules/cloud-api/deployment/deployment.module';
@@ -119,6 +120,8 @@ import { ServicesModule } from './services/services.module';
     BusinessModule,
     DataTableModule.forRoot({ tableViews: schema.tableViews }),
     CloudDeploymentModule,
+    // Agent API module (top-level /agent, Ed25519 request auth)
+    AgentModule,
     // Admin API modules
     AdminVersionModule,
     AdminDeploymentModule,
@@ -137,7 +140,7 @@ import { ServicesModule } from './services/services.module';
       },
       {
         path: '',
-        children: [AuthModule, OnboardingModule, AccountModule],
+        children: [AuthModule, OnboardingModule, AccountModule, AgentModule],
       },
       {
         path: 'admin-api',

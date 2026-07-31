@@ -138,6 +138,8 @@ export const relations = defineRelations(schema, (r) => ({
   // Deployment relations
   deployments: {
     organizations: r.many.organizations(),
+    agents: r.many.deploymentAgents(),
+    secrets: r.many.deploymentSecrets(),
     region: r.one.regions({
       from: r.deployments.regionId,
       to: r.regions.id,
@@ -145,6 +147,22 @@ export const relations = defineRelations(schema, (r) => ({
     cloudProvider: r.one.cloudProviders({
       from: r.deployments.cloudProviderId,
       to: r.cloudProviders.id,
+    }),
+  },
+
+  // Deployment agent relations
+  deploymentAgents: {
+    deployment: r.one.deployments({
+      from: r.deploymentAgents.deploymentId,
+      to: r.deployments.id,
+    }),
+  },
+
+  // Deployment secret relations
+  deploymentSecrets: {
+    deployment: r.one.deployments({
+      from: r.deploymentSecrets.deploymentId,
+      to: r.deployments.id,
     }),
   },
 
