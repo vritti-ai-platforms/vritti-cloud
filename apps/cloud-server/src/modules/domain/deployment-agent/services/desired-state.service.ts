@@ -26,11 +26,11 @@ export class DesiredStateDomainService {
     // managed = agent runs its own Postgres container; external = agent connects to an existing DB (creds from the secret store)
     dto.mode = deployment.mode === 'external' ? DesiredStateModeValues.external : DesiredStateModeValues.managed;
     dto.baseDomain = this.resolveBaseDomain(deployment.url);
-    // MVP: managed deployments run their own nginx+certbot edge
-    dto.edge = DesiredStateEdgeValues.managed;
+    // managed = agent runs its own nginx+certbot edge for `domains`; external = another proxy fronts core
+    dto.edge = deployment.edge === 'external' ? DesiredStateEdgeValues.external : DesiredStateEdgeValues.managed;
     dto.images = this.resolveImages();
-    // MVP is core-only — add-ons stay off until per-deployment add-on flags exist
-    dto.addOns = { pgBackRest: false, gitea: false };
+    // Per-deployment add-on toggles; their runtime secrets (R2 creds, gitea admin) ride the secret store
+    dto.addOns = { pgBackRest: deployment.addonPgbackrest, gitea: deployment.addonGitea };
     dto.domains = deployment.domains ?? [];
     dto.acmeEmail = this.resolveAcmeEmail(deployment);
     // Default OFF — a managed prod edge must opt IN to the untrusted Let's Encrypt staging CA

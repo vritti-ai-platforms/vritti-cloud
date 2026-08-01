@@ -2,16 +2,14 @@ import { useUpdateDeployment } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
-import { PasswordField } from '@vritti/quantum-ui/PasswordField';
 import { Select } from '@vritti/quantum-ui/Select';
 import { CloudProviderSelector } from '@vritti/quantum-ui/selects/cloud-provider';
 import { RegionSelector } from '@vritti/quantum-ui/selects/region';
 import { VersionSelector } from '@vritti/quantum-ui/selects/version';
 import { TextField } from '@vritti/quantum-ui/TextField';
-import { Typography } from '@vritti/quantum-ui/Typography';
 import { zodResolver } from '@vritti/quantum-ui/zod';
-import { Plus, Trash2 } from 'lucide-react';
 import type React from 'react';
+import { useEffect } from 'react';
 import { useFieldArray, useForm, useWatch } from 'react-hook-form';
 import type { Deployment } from '@/schemas/admin/deployments';
 import {
@@ -20,11 +18,11 @@ import {
   DEPLOYMENT_DB_MODE_OPTIONS,
   DEPLOYMENT_STATUS_OPTIONS,
   SECRET_AUTH_METHOD_FIELDS,
-  SECRET_AUTH_METHODS,
-  SECRET_PROVIDER_TYPES,
+  type SecretAuthMethod,
   type UpdateDeploymentData,
   updateDeploymentSchema,
 } from '@/schemas/admin/deployments';
+import { renderAddonToggles, renderEdgeFields, renderSecretStoreFields } from '../components/configFields';
 
 interface EditDeploymentFormProps {
   deployment: Deployment;
@@ -41,6 +39,9 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       name: deployment.name,
       url: deployment.url,
       mode: deployment.mode,
+      edge: deployment.edge,
+      addonPgbackrest: deployment.addonPgbackrest,
+      addonGitea: deployment.addonGitea,
       regionId: deployment.regionId,
       cloudProviderId: deployment.cloudProviderId,
       type: deployment.type,
@@ -54,18 +55,26 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
   });
 
   const dbMode = useWatch({ control: form.control, name: 'mode' });
-  const authMethod = useWatch({ control: form.control, name: 'secretProvider.auth.method' });
+  const edge = useWatch({ control: form.control, name: 'edge' });
+  const isManaged = edge !== 'external';
 
-  const {
-    fields: domainFields,
-    append: appendDomain,
-    remove: removeDomain,
-  } = useFieldArray({
-    control: form.control,
-    name: 'domains',
-  });
+  const domains = useFieldArray({ control: form.control, name: 'domains' });
 
-  const authFields = authMethod ? SECRET_AUTH_METHOD_FIELDS[authMethod] : [];
+  // Keep the domains array consistent with the edge choice (external → none, managed → at least one).
+  useEffect(() => {
+    if (isManual) return;
+    const current = form.getValues('domains') ?? [];
+    if (edge === 'external') {
+      if (current.length > 0) domains.replace([]);
+    } else if (current.length === 0) {
+      domains.replace([{ host: '', upstream: '' }]);
+    }
+  }, [edge, isManual, form, domains.replace]);
+
+  const authMethod = useWatch({ control: form.control, name: 'secretProvider.auth.method' }) as
+    | SecretAuthMethod
+    | undefined;
+  const authFields = authMethod ? (SECRET_AUTH_METHOD_FIELDS[authMethod] ?? []) : [];
 
   const updateMutation = useUpdateDeployment({ onSuccess });
 
@@ -103,85 +112,15 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
               those creds.
             </p>
           )}
-          <TextField name="acmeEmail" label="ACME Email" placeholder="admin@vrittiai.com" />
 
-          <div className="space-y-3">
-            <div>
-              <Typography variant="subtitle2">Domains</Typography>
-              <Typography variant="body2" intent="muted">
-                Each host is served by nginx and proxied to its upstream service:port.
-              </Typography>
-            </div>
-            {domainFields.map((field, index) => (
-              <div key={field.id} className="flex items-start gap-2">
-                <div className="flex-1">
-                  <TextField name={`domains.${index}.host`} label="Host" placeholder="app.example.com" />
-                </div>
-                <div className="flex-1">
-                  <TextField name={`domains.${index}.upstream`} label="Upstream" placeholder="web:3000" />
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon-sm"
-                  className="mt-8 text-destructive hover:text-destructive"
-                  onClick={() => removeDomain(index)}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </div>
-            ))}
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              startAdornment={<Plus className="size-4" />}
-              onClick={() => appendDomain({ host: '', upstream: '' })}
-            >
-              Add domain
-            </Button>
-          </div>
-
-          <div className="space-y-3">
-            <div>
-              <Typography variant="subtitle2">Secret Store</Typography>
-              <Typography variant="body2" intent="muted">
-                Tells the agent where and how to fetch this deployment's secrets.
-              </Typography>
-            </div>
-            <Select
-              name="secretProvider.type"
-              label="Type"
-              placeholder="Select type"
-              options={SECRET_PROVIDER_TYPES.map((type) => ({ value: type.value, label: type.label }))}
-            />
-            <TextField name="secretProvider.url" label="URL" placeholder="https://infisical.vrittiai.com" />
-            <TextField name="secretProvider.projectId" label="Project ID" placeholder="Infisical project id" />
-            <TextField name="secretProvider.env" label="Environment" placeholder="e.g. apw1" />
-            <Select
-              name="secretProvider.auth.method"
-              label="Auth Method"
-              placeholder="Select auth method"
-              options={SECRET_AUTH_METHODS.map((method) => ({ value: method.value, label: method.label }))}
-            />
-            {authFields.map((field) =>
-              field.secret ? (
-                <PasswordField
-                  key={field.key}
-                  name={`secretProviderSecrets.${field.key}`}
-                  label={field.label}
-                  placeholder="Leave blank to keep existing"
-                />
-              ) : (
-                <TextField
-                  key={field.key}
-                  name={`secretProvider.auth.params.${field.key}`}
-                  label={field.label}
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                />
-              ),
-            )}
-          </div>
+          {renderEdgeFields({
+            isManaged,
+            domainFields: domains.fields,
+            onAddDomain: () => domains.append({ host: '', upstream: '' }),
+            onRemoveDomain: domains.remove,
+          })}
+          {renderAddonToggles()}
+          {renderSecretStoreFields({ authFields, existing: !!deployment.secretProvider })}
         </>
       )}
       <VersionSelector name="version" label="Version" placeholder="Select version" />

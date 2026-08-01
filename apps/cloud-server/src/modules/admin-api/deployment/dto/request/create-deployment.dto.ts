@@ -3,6 +3,7 @@ import { Trim } from '@vritti/api-sdk/decorators';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsEmail,
   IsEnum,
   IsObject,
@@ -18,6 +19,8 @@ import {
 import {
   type DeploymentDbMode,
   DeploymentDbModeValues,
+  type DeploymentEdge,
+  DeploymentEdgeValues,
   type DeploymentManagementMode,
   DeploymentManagementModeValues,
   type DeploymentStatus,
@@ -77,6 +80,32 @@ export class CreateDeploymentDto {
   @IsOptional()
   @IsEnum(DeploymentDbModeValues)
   mode?: DeploymentDbMode;
+
+  @ApiPropertyOptional({
+    enum: DeploymentEdgeValues,
+    default: 'managed',
+    description:
+      'HTTP edge mode — managed = agent runs its own nginx+certbot edge for domains; external = another proxy fronts core',
+  })
+  @IsOptional()
+  @IsEnum(DeploymentEdgeValues)
+  edge?: DeploymentEdge;
+
+  @ApiPropertyOptional({
+    default: false,
+    description: 'Enable the pgBackRest add-on — R2 credentials are supplied via the secret store',
+  })
+  @IsOptional()
+  @IsBoolean()
+  addonPgbackrest?: boolean;
+
+  @ApiPropertyOptional({
+    default: false,
+    description: 'Enable the Gitea add-on — admin credentials are supplied via the secret store',
+  })
+  @IsOptional()
+  @IsBoolean()
+  addonGitea?: boolean;
 
   @ApiProperty({ description: 'App version string this deployment runs', example: '1.0.0' })
   @IsString()

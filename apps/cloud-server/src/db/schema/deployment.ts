@@ -1,7 +1,13 @@
-import { integer, jsonb, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { boolean, integer, jsonb, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudProviders } from './cloud-provider';
 import { cloudSchema } from './cloud-schema';
-import { deploymentDbModeEnum, deploymentManagementModeEnum, deploymentStatusEnum, deploymentTypeEnum } from './enums';
+import {
+  deploymentDbModeEnum,
+  deploymentEdgeEnum,
+  deploymentManagementModeEnum,
+  deploymentStatusEnum,
+  deploymentTypeEnum,
+} from './enums';
 import { regions } from './region';
 
 // Non-secret secret-store config the agent uses to fetch runtime secrets — the auth SECRET half rides deployment_secrets
@@ -49,6 +55,12 @@ export const deployments = cloudSchema.table('deployments', {
   managementMode: deploymentManagementModeEnum('management_mode').notNull().default('agent'),
   // DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB (creds from the secret store)
   mode: deploymentDbModeEnum('mode').notNull().default('managed'),
+  // HTTP edge mode — managed = agent runs its own nginx+certbot edge for `domains`; external = another proxy fronts core (nginx off)
+  edge: deploymentEdgeEnum('edge').notNull().default('managed'),
+  // pgBackRest add-on toggle — R2 credentials ride the secret store, only the on/off flag lives here
+  addonPgbackrest: boolean('addon_pgbackrest').notNull().default(false),
+  // Gitea add-on toggle — admin credentials ride the secret store, only the on/off flag lives here
+  addonGitea: boolean('addon_gitea').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

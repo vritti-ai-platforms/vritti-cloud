@@ -1,9 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { CreateResponseDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
-import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
+import { BadRequestException, ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
 import {
   DeploymentDbModeValues,
+  type DeploymentEdge,
+  DeploymentEdgeValues,
   DeploymentManagementModeValues,
   DeploymentStatusValues,
   DeploymentTypeValues,
@@ -63,12 +65,17 @@ export class DeploymentDomainService {
   // Creates a new deployment without a signing key; manual deployments use the sentinel local region/provider
   async create(dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
     const isManual = dto.managementMode === DeploymentManagementModeValues.manual;
+    const edge = dto.edge ?? DeploymentEdgeValues.managed;
+    this.validateAgentDeployment(dto, edge);
     const deployment = await this.deploymentRepository.create({
       name: dto.name,
       url: dto.url,
       version: dto.version,
       managementMode: dto.managementMode,
       mode: dto.mode ?? DeploymentDbModeValues.managed,
+      edge,
+      addonPgbackrest: dto.addonPgbackrest ?? false,
+      addonGitea: dto.addonGitea ?? false,
       type: dto.type ?? DeploymentTypeValues.dedicated,
       regionId: dto.regionId ?? LOCAL_REGION_ID,
       cloudProviderId: dto.cloudProviderId ?? LOCAL_CLOUD_PROVIDER_ID,
@@ -86,6 +93,24 @@ export class DeploymentDomainService {
       message: `Deployment "${deployment.name}" created successfully.`,
       data: DeploymentDto.from(deployment),
     };
+  }
+
+  // Enforces cross-field requirements for agent-managed deployments only; manual/local deployments are unaffected
+  private validateAgentDeployment(dto: CreateDeploymentDto, edge: DeploymentEdge): void {
+    if (dto.managementMode !== DeploymentManagementModeValues.agent) return;
+    const errors: { field: string; message: string }[] = [];
+    if (!dto.secretProvider) {
+      errors.push({ field: 'secretProvider', message: 'Secret store required' });
+    }
+    if (edge === DeploymentEdgeValues.managed && (dto.domains?.length ?? 0) === 0) {
+      errors.push({ field: 'domains', message: 'At least one domain required' });
+    }
+    if (errors.length === 0) return;
+    throw new BadRequestException({
+      label: 'Incomplete Agent Deployment',
+      detail: 'Agent-managed deployments need a secret store, and a managed edge must serve at least one domain.',
+      errors,
+    });
   }
 
   // Regenerates the deployment's signing keypair and returns the new public key

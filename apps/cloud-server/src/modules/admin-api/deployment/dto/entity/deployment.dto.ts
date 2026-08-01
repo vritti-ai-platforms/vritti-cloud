@@ -4,6 +4,8 @@ import type { Deployment } from '@/db/schema';
 import {
   type DeploymentDbMode,
   DeploymentDbModeValues,
+  type DeploymentEdge,
+  DeploymentEdgeValues,
   type DeploymentManagementMode,
   DeploymentManagementModeValues,
   type DeploymentStatus,
@@ -41,6 +43,15 @@ export class DeploymentDto {
 
   @ApiProperty({ enum: DeploymentDbModeValues })
   mode: DeploymentDbMode;
+
+  @ApiProperty({ enum: DeploymentEdgeValues })
+  edge: DeploymentEdge;
+
+  @ApiProperty({ example: false, description: 'pgBackRest add-on enabled' })
+  addonPgbackrest: boolean;
+
+  @ApiProperty({ example: false, description: 'Gitea add-on enabled' })
+  addonGitea: boolean;
 
   @ApiPropertyOptional({ example: '1.0.0', nullable: true })
   version: string | null;
@@ -110,6 +121,9 @@ export class DeploymentDto {
     dto.type = deployment.type;
     dto.managementMode = deployment.managementMode;
     dto.mode = deployment.mode;
+    dto.edge = deployment.edge;
+    dto.addonPgbackrest = deployment.addonPgbackrest;
+    dto.addonGitea = deployment.addonGitea;
     dto.version = deployment.version;
     dto.acmeEmail = deployment.acmeEmail;
     dto.domains = deployment.domains ?? [];

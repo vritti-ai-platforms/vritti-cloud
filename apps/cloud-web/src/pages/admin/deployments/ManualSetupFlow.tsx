@@ -1,32 +1,56 @@
-import { deploymentQueryKey, useRegenerateSigningKey, useSyncDeploymentCatalog } from '@hooks/admin/deployments';
+import {
+  deploymentQueryKey,
+  useDeleteDeployment,
+  useRegenerateSigningKey,
+  useSyncDeploymentCatalog,
+} from '@hooks/admin/deployments';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
+import { DangerZone } from '@vritti/quantum-ui/DangerZone';
+import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { type StepDef, StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
+import { StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { ArrowLeft, ArrowRight, KeyRound, RefreshCw } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Deployment, DeploymentSigningKey } from '@/schemas/admin/deployments';
 import { SigningKeyReveal } from './components/SigningKeyReveal';
+import {
+  deriveManualLifecycleStep,
+  MANUAL_WIZARD_STEPS,
+  type ManualStepId,
+  stepNumber,
+  toStepDefs,
+} from './wizardSteps';
 
-const SETUP_STEPS: StepDef[] = [
-  { label: 'Signing Key', icon: <KeyRound className="h-4 w-4" /> },
-  { label: 'Catalog', icon: <RefreshCw className="h-4 w-4" /> },
-];
+type LifecycleStep = Extract<ManualStepId, 'signing-key' | 'sync'>;
 
-type SetupStep = 1 | 2;
-
-interface DeploymentSetupWizardProps {
+interface ManualSetupFlowProps {
   deployment: Deployment;
 }
 
-export const DeploymentSetupWizard: React.FC<DeploymentSetupWizardProps> = ({ deployment }) => {
+export const ManualSetupFlow: React.FC<ManualSetupFlowProps> = ({ deployment }) => {
   const queryClient = useQueryClient();
-  const [step, setStep] = useState<SetupStep>(deployment.hasSigningKey ? 2 : 1);
+  const navigate = useNavigate();
+  const confirm = useConfirm();
+  const [step, setStep] = useState<LifecycleStep>(() => deriveManualLifecycleStep(deployment));
   const [signingKey, setSigningKey] = useState<DeploymentSigningKey | null>(null);
+
+  const deleteMutation = useDeleteDeployment({ onSuccess: () => navigate('/deployments') });
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: `Delete ${deployment.name}?`,
+      description: 'This action cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+    });
+    if (confirmed) deleteMutation.mutate(deployment.id);
+  };
 
   const invalidateDeployment = () => queryClient.invalidateQueries({ queryKey: deploymentQueryKey(deployment.id) });
 
@@ -49,9 +73,12 @@ export const DeploymentSetupWizard: React.FC<DeploymentSetupWizardProps> = ({ de
         description="Complete setup to start using this deployment"
       />
 
-      <StepProgressIndicator steps={SETUP_STEPS} currentStep={step} />
+      <StepProgressIndicator
+        steps={toStepDefs(MANUAL_WIZARD_STEPS)}
+        currentStep={stepNumber(MANUAL_WIZARD_STEPS, step)}
+      />
 
-      {step === 1 && (
+      {step === 'signing-key' && (
         <Card>
           <CardContent className="flex flex-col gap-4 py-6">
             <div className="space-y-1">
@@ -66,7 +93,7 @@ export const DeploymentSetupWizard: React.FC<DeploymentSetupWizardProps> = ({ de
               <>
                 <SigningKeyReveal signingKey={signingKey} />
                 <div className="flex justify-end">
-                  <Button onClick={() => setStep(2)} endAdornment={<ArrowRight className="size-4" />}>
+                  <Button onClick={() => setStep('sync')} endAdornment={<ArrowRight className="size-4" />}>
                     Continue
                   </Button>
                 </div>
@@ -86,7 +113,7 @@ export const DeploymentSetupWizard: React.FC<DeploymentSetupWizardProps> = ({ de
                   >
                     Regenerate Signing Key
                   </Button>
-                  <Button onClick={() => setStep(2)} endAdornment={<ArrowRight className="size-4" />}>
+                  <Button onClick={() => setStep('sync')} endAdornment={<ArrowRight className="size-4" />}>
                     Continue
                   </Button>
                 </div>
@@ -107,7 +134,7 @@ export const DeploymentSetupWizard: React.FC<DeploymentSetupWizardProps> = ({ de
         </Card>
       )}
 
-      {step === 2 && (
+      {step === 'sync' && (
         <Card>
           <CardContent className="flex flex-col gap-4 py-6">
             <div className="space-y-1">
@@ -118,13 +145,18 @@ export const DeploymentSetupWizard: React.FC<DeploymentSetupWizardProps> = ({ de
             </div>
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(1)} startAdornment={<ArrowLeft className="size-4" />}>
+              <Button
+                variant="outline"
+                onClick={() => setStep('signing-key')}
+                startAdornment={<ArrowLeft className="size-4" />}
+              >
                 Back
               </Button>
               <Button
                 onClick={() => syncCatalogMutation.mutate(deployment.id)}
                 isLoading={syncCatalogMutation.isPending}
                 loadingText="Syncing..."
+                disabled={!deployment.hasSigningKey}
                 startAdornment={<RefreshCw className="size-4" />}
               >
                 Sync Catalog
@@ -133,6 +165,16 @@ export const DeploymentSetupWizard: React.FC<DeploymentSetupWizardProps> = ({ de
           </CardContent>
         </Card>
       )}
+
+      <DangerZone
+        title="Delete this deployment"
+        description="Remove this deployment. This cannot be undone."
+        buttonText="Delete Deployment"
+        onClick={handleDelete}
+        disabled={!!deployment.organizationCount}
+        warning={`This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`}
+        showWarning={!!deployment.organizationCount}
+      />
     </div>
   );
 };

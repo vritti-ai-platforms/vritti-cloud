@@ -2,96 +2,70 @@ import {
   agentStatusQueryKey,
   deploymentQueryKey,
   useAgentStatus,
+  useDeleteDeployment,
   useIssueEnrollToken,
   useSyncDeploymentCatalog,
-  useUpdateDeployment,
 } from '@hooks/admin/deployments';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
+import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { DetailField } from '@vritti/quantum-ui/DetailField';
-import { Form } from '@vritti/quantum-ui/Form';
+import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
-import { PasswordField } from '@vritti/quantum-ui/PasswordField';
-import { Select } from '@vritti/quantum-ui/Select';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
-import { type StepDef, StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
-import { TextField } from '@vritti/quantum-ui/TextField';
+import { StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
 import { Typography } from '@vritti/quantum-ui/Typography';
-import { z, zodResolver } from '@vritti/quantum-ui/zod';
-import {
-  AlertCircle,
-  ArrowLeft,
-  ArrowRight,
-  Boxes,
-  CheckCircle2,
-  KeyRound,
-  Link2,
-  RefreshCw,
-  ServerCog,
-} from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, RefreshCw, ServerCog } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useNavigate } from 'react-router-dom';
 import type { AgentStatus, Deployment, EnrollToken } from '@/schemas/admin/deployments';
-import {
-  assembleSecretProvider,
-  DEFAULT_SECRET_PROVIDER,
-  SECRET_AUTH_METHOD_FIELDS,
-  SECRET_AUTH_METHODS,
-  SECRET_PROVIDER_TYPES,
-  secretProviderField,
-  secretProviderSecretsField,
-  validateSecretProvider,
-} from '@/schemas/admin/deployments';
 import { AgentEnrollReveal } from './components/AgentEnrollReveal';
+import {
+  AGENT_WIZARD_STEPS,
+  type AgentStepId,
+  deriveAgentLifecycleStep,
+  isFailingPhase,
+  isReconcileReady,
+  stepNumber,
+  toStepDefs,
+} from './wizardSteps';
 
-const AGENT_SETUP_STEPS: StepDef[] = [
-  { label: 'Enroll Agent', icon: <ServerCog className="h-4 w-4" /> },
-  { label: 'Connect', icon: <Link2 className="h-4 w-4" /> },
-  { label: 'Secret Store', icon: <KeyRound className="h-4 w-4" /> },
-  { label: 'Provision', icon: <Boxes className="h-4 w-4" /> },
-  { label: 'Sync', icon: <RefreshCw className="h-4 w-4" /> },
-];
+type LifecycleStep = Extract<AgentStepId, 'enroll' | 'connect' | 'provision' | 'sync'>;
 
-type AgentSetupStep = 1 | 2 | 3 | 4 | 5;
-
-// The agent has finished reconciling the desired state and is running the requested generation.
-function isReconcileReady(agent: AgentStatus): boolean {
-  return (
-    agent.lastPhase === 'ready' && agent.lastGeneration != null && agent.lastGeneration === agent.desiredGeneration
-  );
-}
-
-// The agent reported a phase that is not progressing toward ready.
-function isFailingPhase(agent: AgentStatus): boolean {
-  return /error|fail/i.test(agent.lastPhase ?? '');
-}
-
-function deriveInitialStep(agent: AgentStatus, deployment: Deployment): AgentSetupStep {
-  if (!agent.enrolled) return agent.status === 'pending' ? 2 : 1;
-  if (!deployment.secretProvider) return 3;
-  if (!isReconcileReady(agent)) return 4;
-  return 5;
-}
-
-interface AgentDeploymentSetupWizardProps {
+interface AgentSetupFlowProps {
   deployment: Deployment;
+  // Resolved once by the caller — drives the initial resume step; live updates come from the query below.
   agent: AgentStatus;
 }
 
-export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProps> = ({ deployment, agent }) => {
+export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agent: initialAgent }) => {
   const queryClient = useQueryClient();
-  const [step, setStep] = useState<AgentSetupStep>(() => deriveInitialStep(agent, deployment));
+  const navigate = useNavigate();
+  const confirm = useConfirm();
+  const [step, setStep] = useState<LifecycleStep>(() => deriveAgentLifecycleStep(initialAgent));
   const [enrollToken, setEnrollToken] = useState<EnrollToken | null>(null);
 
+  const deleteMutation = useDeleteDeployment({ onSuccess: () => navigate('/deployments') });
+
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: `Delete ${deployment.name}?`,
+      description: 'This action cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+    });
+    if (confirmed) deleteMutation.mutate(deployment.id);
+  };
+
   // Live agent status — polls faster while provisioning so the reconcile gate updates promptly.
-  const { data: liveAgent } = useAgentStatus(deployment.id, {
+  const { data: agent } = useAgentStatus(deployment.id, {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!data) return 5000;
-      if (step === 4 && !isReconcileReady(data) && !isFailingPhase(data)) return 3000;
+      if (step === 'provision' && !isReconcileReady(data) && !isFailingPhase(data)) return 3000;
       return data.enrolled ? 15000 : 5000;
     },
   });
@@ -109,14 +83,13 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
     onSuccess: () => queryClient.invalidateQueries({ queryKey: deploymentQueryKey(deployment.id) }),
   });
 
-  // Auto-advance from Connect to Secret Store only when the agent FIRST connects while the user is
-  // waiting on step 2 — NOT on every render. Otherwise an already-enrolled agent bounces the user
-  // forward the instant they navigate Back, making it impossible to return and re-enroll.
-  const wasEnrolled = useRef(agent.enrolled);
+  // Auto-advance from Connect to Provision only when the agent FIRST connects while the user waits on
+  // Connect — NOT on every render, so navigating Back to re-enroll doesn't bounce the user forward.
+  const wasEnrolled = useRef(initialAgent.enrolled);
   useEffect(() => {
-    if (step === 2 && liveAgent.enrolled && !wasEnrolled.current) setStep(3);
-    wasEnrolled.current = liveAgent.enrolled;
-  }, [step, liveAgent.enrolled]);
+    if (step === 'connect' && agent.enrolled && !wasEnrolled.current) setStep('provision');
+    wasEnrolled.current = agent.enrolled;
+  }, [step, agent.enrolled]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -126,9 +99,12 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
         description="Complete setup to start using this deployment"
       />
 
-      <StepProgressIndicator steps={AGENT_SETUP_STEPS} currentStep={step} />
+      <StepProgressIndicator
+        steps={toStepDefs(AGENT_WIZARD_STEPS)}
+        currentStep={stepNumber(AGENT_WIZARD_STEPS, step)}
+      />
 
-      {step === 1 && (
+      {step === 'enroll' && (
         <Card>
           <CardContent className="flex flex-col gap-4 py-6">
             <div className="space-y-1">
@@ -143,12 +119,12 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
               <>
                 <AgentEnrollReveal enrollToken={enrollToken} deploymentId={deployment.id} />
                 <div className="flex justify-end">
-                  <Button onClick={() => setStep(2)} endAdornment={<ArrowRight className="size-4" />}>
+                  <Button onClick={() => setStep('connect')} endAdornment={<ArrowRight className="size-4" />}>
                     Continue
                   </Button>
                 </div>
               </>
-            ) : liveAgent.status === 'pending' ? (
+            ) : agent.status === 'pending' ? (
               <>
                 <Typography variant="body2" intent="muted">
                   An enroll token was already issued and is waiting for the agent to connect. Regenerate if it expired
@@ -164,7 +140,7 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
                   >
                     Regenerate Token
                   </Button>
-                  <Button onClick={() => setStep(2)} endAdornment={<ArrowRight className="size-4" />}>
+                  <Button onClick={() => setStep('connect')} endAdornment={<ArrowRight className="size-4" />}>
                     Continue
                   </Button>
                 </div>
@@ -185,7 +161,7 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
         </Card>
       )}
 
-      {step === 2 && (
+      {step === 'connect' && (
         <Card>
           <CardContent className="flex flex-col gap-4 py-6">
             <div className="space-y-1">
@@ -196,14 +172,14 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
               </Typography>
             </div>
 
-            {liveAgent.enrolled ? (
+            {agent.enrolled ? (
               <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4">
                 <CheckCircle2 className="size-5 shrink-0 text-success" />
                 <div className="w-full space-y-4">
                   <p className="text-sm font-medium">Agent connected</p>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <DetailField label="Agent Version" type="string" value={liveAgent.agentVersion} mono />
-                    <DetailField label="Last Heartbeat" type="dateTime" value={liveAgent.lastHeartbeatAt} />
+                    <DetailField label="Agent Version" type="string" value={agent.agentVersion} mono />
+                    <DetailField label="Last Heartbeat" type="dateTime" value={agent.lastHeartbeatAt} />
                   </div>
                 </div>
               </div>
@@ -220,12 +196,16 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
             )}
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(1)} startAdornment={<ArrowLeft className="size-4" />}>
+              <Button
+                variant="outline"
+                onClick={() => setStep('enroll')}
+                startAdornment={<ArrowLeft className="size-4" />}
+              >
                 Back
               </Button>
               <Button
-                onClick={() => setStep(3)}
-                disabled={!liveAgent.enrolled}
+                onClick={() => setStep('provision')}
+                disabled={!agent.enrolled}
                 endAdornment={<ArrowRight className="size-4" />}
               >
                 Continue
@@ -235,11 +215,11 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
         </Card>
       )}
 
-      {step === 3 && <SecretStoreStep deployment={deployment} onBack={() => setStep(2)} onSaved={() => setStep(4)} />}
+      {step === 'provision' && (
+        <ProvisionStep agent={agent} onBack={() => setStep('connect')} onContinue={() => setStep('sync')} />
+      )}
 
-      {step === 4 && <ProvisionStep agent={liveAgent} onBack={() => setStep(3)} onContinue={() => setStep(5)} />}
-
-      {step === 5 && (
+      {step === 'sync' && (
         <Card>
           <CardContent className="flex flex-col gap-4 py-6">
             <div className="space-y-1">
@@ -250,13 +230,18 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
             </div>
 
             <div className="flex justify-between">
-              <Button variant="outline" onClick={() => setStep(4)} startAdornment={<ArrowLeft className="size-4" />}>
+              <Button
+                variant="outline"
+                onClick={() => setStep('provision')}
+                startAdornment={<ArrowLeft className="size-4" />}
+              >
                 Back
               </Button>
               <Button
                 onClick={() => syncCatalogMutation.mutate(deployment.id)}
                 isLoading={syncCatalogMutation.isPending}
                 loadingText="Syncing..."
+                disabled={!isReconcileReady(agent)}
                 startAdornment={<RefreshCw className="size-4" />}
               >
                 Sync Catalog
@@ -265,125 +250,17 @@ export const AgentDeploymentSetupWizard: React.FC<AgentDeploymentSetupWizardProp
           </CardContent>
         </Card>
       )}
+
+      <DangerZone
+        title="Delete this deployment"
+        description="Remove this deployment and its enrollment. This cannot be undone."
+        buttonText="Delete Deployment"
+        onClick={handleDelete}
+        disabled={!!deployment.organizationCount}
+        warning={`This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`}
+        showWarning={!!deployment.organizationCount}
+      />
     </div>
-  );
-};
-
-interface SecretStoreStepProps {
-  deployment: Deployment;
-  onBack: () => void;
-  onSaved: () => void;
-}
-
-const SecretStoreStep: React.FC<SecretStoreStepProps> = ({ deployment, onBack, onSaved }) => {
-  const existing = deployment.secretProvider;
-  const requireSecrets = !existing;
-
-  const secretStoreSchema = z
-    .object({
-      secretProvider: secretProviderField,
-      secretProviderSecrets: secretProviderSecretsField.optional(),
-    })
-    .superRefine((data, ctx) =>
-      validateSecretProvider(data.secretProvider, data.secretProviderSecrets, ctx, requireSecrets),
-    );
-
-  const form = useForm<z.infer<typeof secretStoreSchema>>({
-    resolver: zodResolver(secretStoreSchema),
-    defaultValues: {
-      secretProvider: existing
-        ? {
-            type: existing.type,
-            url: existing.url,
-            projectId: existing.projectId,
-            env: existing.env,
-            auth: { method: existing.auth.method, params: existing.auth.params },
-          }
-        : DEFAULT_SECRET_PROVIDER,
-      secretProviderSecrets: {},
-    },
-  });
-
-  const updateMutation = useUpdateDeployment({ onSuccess: onSaved });
-
-  const authMethod = useWatch({ control: form.control, name: 'secretProvider.auth.method' });
-  const authFields = SECRET_AUTH_METHOD_FIELDS[authMethod] ?? [];
-  const secretPlaceholder = (label: string) =>
-    existing ? 'Leave blank to keep existing' : `Enter ${label.toLowerCase()}`;
-
-  return (
-    <Card>
-      <CardContent className="flex flex-col gap-4 py-6">
-        <div className="space-y-1">
-          <Typography variant="h6">Secret store</Typography>
-          <Typography variant="body2" intent="muted">
-            Configure where the agent sources runtime secrets. Saving reconfigures the desired state so the agent can
-            bring up the stack.
-          </Typography>
-          {deployment.mode === 'external' && (
-            <Typography variant="body2" intent="muted">
-              This deployment uses an external database — include its connection credentials in the secret store.
-            </Typography>
-          )}
-        </div>
-
-        <Form
-          form={form}
-          mutation={updateMutation}
-          resetOnSuccess={false}
-          transformSubmit={(data) => ({ id: deployment.id, data: assembleSecretProvider(data) })}
-        >
-          <div className="space-y-3">
-            <div>
-              <Typography variant="subtitle2">Secret Store</Typography>
-              <Typography variant="body2" intent="muted">
-                Tells the agent where and how to fetch this deployment's secrets.
-              </Typography>
-            </div>
-            <Select
-              name="secretProvider.type"
-              label="Type"
-              placeholder="Select type"
-              options={SECRET_PROVIDER_TYPES.map((type) => ({ value: type.value, label: type.label }))}
-            />
-            <TextField name="secretProvider.url" label="URL" placeholder="https://infisical.vrittiai.com" />
-            <TextField name="secretProvider.projectId" label="Project ID" placeholder="Infisical project id" />
-            <TextField name="secretProvider.env" label="Environment" placeholder="e.g. apw1" />
-            <Select
-              name="secretProvider.auth.method"
-              label="Auth Method"
-              placeholder="Select auth method"
-              options={SECRET_AUTH_METHODS.map((method) => ({ value: method.value, label: method.label }))}
-            />
-            {authFields.map((field) =>
-              field.secret ? (
-                <PasswordField
-                  key={field.key}
-                  name={`secretProviderSecrets.${field.key}`}
-                  label={field.label}
-                  placeholder={secretPlaceholder(field.label)}
-                />
-              ) : (
-                <TextField
-                  key={field.key}
-                  name={`secretProvider.auth.params.${field.key}`}
-                  label={field.label}
-                  placeholder={`Enter ${field.label.toLowerCase()}`}
-                />
-              ),
-            )}
-          </div>
-          <div className="flex justify-between">
-            <Button type="button" variant="outline" onClick={onBack} startAdornment={<ArrowLeft className="size-4" />}>
-              Back
-            </Button>
-            <Button type="submit" loadingText="Saving..." endAdornment={<ArrowRight className="size-4" />}>
-              Save & Continue
-            </Button>
-          </div>
-        </Form>
-      </CardContent>
-    </Card>
   );
 };
 

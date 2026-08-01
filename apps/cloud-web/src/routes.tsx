@@ -15,10 +15,10 @@ import { BillingCyclesPage } from './pages/admin/billing-cycles/BillingCyclesPag
 import { BusinessesPage } from './pages/admin/businesses/BusinessesPage';
 import { CloudProvidersPage } from './pages/admin/cloud-providers/CloudProvidersPage';
 import { CountriesPage } from './pages/admin/countries/CountriesPage';
-import { CreateDeploymentPage } from './pages/admin/deployments/CreateDeploymentPage';
 import { DeploymentsPage } from './pages/admin/deployments/DeploymentsPage';
 import { DeploymentViewPage } from './pages/admin/deployments/DeploymentViewPage';
 import { DeploymentViewPageSkeleton } from './pages/admin/deployments/DeploymentViewPageSkeleton';
+import { DeploymentWizard } from './pages/admin/deployments/DeploymentWizard';
 import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/deployments/organizations/OrganizationViewPage';
 import { OrganizationViewPageSkeleton } from './pages/admin/deployments/organizations/OrganizationViewPageSkeleton';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
@@ -179,7 +179,7 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'deployments/new',
-        element: <CreateDeploymentPage />,
+        element: <DeploymentWizard />,
       },
       {
         path: 'deployments/:deploymentSlug',

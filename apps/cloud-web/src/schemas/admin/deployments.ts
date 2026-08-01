@@ -28,6 +28,17 @@ export const DEPLOYMENT_DB_MODE_OPTIONS: { value: DeploymentDbMode; label: strin
   { value: 'external', label: 'External' },
 ];
 
+// Canonical deployment edge values — must byte-match the backend deployment `edge` enum.
+// 'managed' = the agent runs nginx + terminates TLS (ACME) for the configured domains;
+// 'external' = TLS/routing is handled outside the agent (an existing ingress/load balancer).
+export const DEPLOYMENT_EDGE_VALUES = ['managed', 'external'] as const;
+export type DeploymentEdgeMode = (typeof DEPLOYMENT_EDGE_VALUES)[number];
+
+export const DEPLOYMENT_EDGE_OPTIONS: { value: DeploymentEdgeMode; label: string }[] = [
+  { value: 'managed', label: 'Managed' },
+  { value: 'external', label: 'External' },
+];
+
 type DeploymentType = 'shared' | 'dedicated';
 type DeploymentManagementMode = 'manual' | 'agent';
 
@@ -151,6 +162,9 @@ export interface Deployment {
   url: string;
   managementMode: DeploymentManagementMode;
   mode: DeploymentDbMode;
+  edge: DeploymentEdgeMode;
+  addonPgbackrest: boolean;
+  addonGitea: boolean;
   regionId: string;
   cloudProviderId: string;
   status: DeploymentStatus;
@@ -317,6 +331,9 @@ export const createDeploymentSchema = z
     url: z.string().url('Must be a valid URL').max(500),
     managementMode: z.enum(['manual', 'agent']),
     mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
+    edge: z.enum(DEPLOYMENT_EDGE_VALUES).optional(),
+    addonPgbackrest: z.boolean().optional(),
+    addonGitea: z.boolean().optional(),
     regionId: z.string().uuid('Please select a region').optional().or(z.literal('')),
     cloudProviderId: z.string().uuid('Please select a cloud provider').optional().or(z.literal('')),
     type: z.enum(['shared', 'dedicated']).optional(),
@@ -339,8 +356,23 @@ export const createDeploymentSchema = z
         message: 'Please select a cloud provider',
       });
     }
-    if (data.secretProvider) {
+    // Agent-managed deployments must declare a secret store — the agent sources runtime secrets from it.
+    if (!data.secretProvider) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['secretProvider'],
+        message: 'Secret store is required',
+      });
+    } else {
       validateSecretProvider(data.secretProvider, data.secretProviderSecrets, ctx, true);
+    }
+    // Managed edge terminates TLS for the configured hosts, so at least one domain is required.
+    if ((data.edge ?? 'managed') === 'managed' && data.domains.length === 0) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['domains'],
+        message: 'Add at least one domain for a managed edge',
+      });
     }
   });
 
@@ -349,6 +381,9 @@ export const updateDeploymentSchema = z
     name: z.string().min(1, 'Name is required').max(255).optional(),
     url: z.string().url('Must be a valid URL').max(500).optional(),
     mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
+    edge: z.enum(DEPLOYMENT_EDGE_VALUES).optional(),
+    addonPgbackrest: z.boolean().optional(),
+    addonGitea: z.boolean().optional(),
     regionId: z.string().uuid().optional(),
     cloudProviderId: z.string().uuid().optional(),
     type: z.enum(['shared', 'dedicated']).optional(),
