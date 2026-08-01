@@ -16,6 +16,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import {
+  type DeploymentDbMode,
+  DeploymentDbModeValues,
   type DeploymentManagementMode,
   DeploymentManagementModeValues,
   type DeploymentStatus,
@@ -65,6 +67,16 @@ export class CreateDeploymentDto {
   @IsOptional()
   @IsEnum(DeploymentTypeValues)
   type?: DeploymentType;
+
+  @ApiPropertyOptional({
+    enum: DeploymentDbModeValues,
+    default: 'managed',
+    description:
+      'DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB',
+  })
+  @IsOptional()
+  @IsEnum(DeploymentDbModeValues)
+  mode?: DeploymentDbMode;
 
   @ApiProperty({ description: 'App version string this deployment runs', example: '1.0.0' })
   @IsString()

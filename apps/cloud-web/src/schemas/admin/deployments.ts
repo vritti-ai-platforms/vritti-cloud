@@ -17,6 +17,17 @@ export const DEPLOYMENT_STATUS_VARIANT: Record<DeploymentStatus, 'success' | 'wa
   stopped: 'secondary',
 };
 
+// Canonical deployment database mode values — must byte-match the backend deployment `mode` enum
+// (apps/cloud-server). 'managed' = agent runs its own Postgres; 'external' = agent connects to an
+// existing DB whose creds live in the deployment's secret store.
+export const DEPLOYMENT_DB_MODE_VALUES = ['managed', 'external'] as const;
+export type DeploymentDbMode = (typeof DEPLOYMENT_DB_MODE_VALUES)[number];
+
+export const DEPLOYMENT_DB_MODE_OPTIONS: { value: DeploymentDbMode; label: string }[] = [
+  { value: 'managed', label: 'Managed' },
+  { value: 'external', label: 'External' },
+];
+
 type DeploymentType = 'shared' | 'dedicated';
 type DeploymentManagementMode = 'manual' | 'agent';
 
@@ -25,8 +36,25 @@ export interface Domain {
   upstream: string;
 }
 
+export const SECRET_AUTH_METHOD_VALUES = [
+  'universal',
+  'token',
+  'aws-iam',
+  'gcp-id-token',
+  'gcp-iam',
+  'azure',
+  'kubernetes',
+  'kubernetes-token',
+  'oidc',
+  'jwt',
+  'ldap',
+  'oci',
+] as const;
+
+export type SecretAuthMethod = (typeof SECRET_AUTH_METHOD_VALUES)[number];
+
 export interface SecretProviderAuth {
-  method: string;
+  method: SecretAuthMethod;
   params: Record<string, string>;
 }
 
@@ -46,7 +74,7 @@ export interface SecretAuthField {
 
 export const SECRET_PROVIDER_TYPES = [{ value: 'infisical', label: 'Infisical' }] as const;
 
-export const SECRET_AUTH_METHODS = [
+export const SECRET_AUTH_METHODS: { value: SecretAuthMethod; label: string }[] = [
   { value: 'universal', label: 'Universal Auth' },
   { value: 'token', label: 'Token' },
   { value: 'aws-iam', label: 'AWS IAM' },
@@ -59,9 +87,7 @@ export const SECRET_AUTH_METHODS = [
   { value: 'jwt', label: 'JWT' },
   { value: 'ldap', label: 'LDAP' },
   { value: 'oci', label: 'OCI' },
-] as const;
-
-export type SecretAuthMethod = (typeof SECRET_AUTH_METHODS)[number]['value'];
+];
 
 export const SECRET_AUTH_METHOD_FIELDS: Record<SecretAuthMethod, SecretAuthField[]> = {
   universal: [
@@ -124,6 +150,7 @@ export interface Deployment {
   name: string;
   url: string;
   managementMode: DeploymentManagementMode;
+  mode: DeploymentDbMode;
   regionId: string;
   cloudProviderId: string;
   status: DeploymentStatus;
@@ -192,7 +219,8 @@ const acmeEmailUpdateField = z
   .string()
   .email('Must be a valid email')
   .nullable()
-  .or(z.literal('').transform(() => null));
+  .or(z.literal('').transform(() => null))
+  .optional();
 
 const domainsField = z.array(
   z.object({
@@ -201,22 +229,24 @@ const domainsField = z.array(
   }),
 );
 
-const secretProviderField = z.object({
+export const secretProviderField = z.object({
   type: z.string(),
   url: z.string(),
   projectId: z.string(),
   env: z.string(),
   auth: z.object({
-    method: z.string(),
+    method: z.enum(SECRET_AUTH_METHOD_VALUES),
     params: z.record(z.string(), z.string()),
   }),
 });
 
-const secretProviderSecretsField = z.record(z.string(), z.string());
+// Secret values are optional per key: a blank PasswordField (e.g. "leave blank to keep existing")
+// yields undefined, and required-ness is enforced by validateSecretProvider, not the record itself.
+export const secretProviderSecretsField = z.record(z.string(), z.string().optional());
 
-function validateSecretProvider(
+export function validateSecretProvider(
   provider: z.infer<typeof secretProviderField>,
-  secrets: Record<string, string> | undefined,
+  secrets: Record<string, string | undefined> | undefined,
   ctx: z.RefinementCtx,
   requireSecrets: boolean,
 ) {
@@ -231,7 +261,7 @@ function validateSecretProvider(
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['secretProvider', key], message: 'Required' });
     }
   }
-  const fields = SECRET_AUTH_METHOD_FIELDS[provider.auth.method as SecretAuthMethod] ?? [];
+  const fields = SECRET_AUTH_METHOD_FIELDS[provider.auth.method] ?? [];
   for (const field of fields) {
     if (field.secret) {
       if (requireSecrets && !secrets?.[field.key]) {
@@ -253,11 +283,11 @@ function validateSecretProvider(
 
 export function assembleSecretProvider(data: {
   secretProvider?: SecretProvider;
-  secretProviderSecrets?: Record<string, string>;
+  secretProviderSecrets?: Record<string, string | undefined>;
 }): { secretProvider?: SecretProvider; secretProviderSecrets?: Record<string, string> } {
   const provider = data.secretProvider;
   if (!provider) return { secretProvider: undefined, secretProviderSecrets: undefined };
-  const fields = SECRET_AUTH_METHOD_FIELDS[provider.auth.method as SecretAuthMethod] ?? [];
+  const fields = SECRET_AUTH_METHOD_FIELDS[provider.auth.method] ?? [];
   const params: Record<string, string> = {};
   const secrets: Record<string, string> = {};
   for (const field of fields) {
@@ -286,6 +316,7 @@ export const createDeploymentSchema = z
     name: z.string().min(1, 'Name is required').max(255),
     url: z.string().url('Must be a valid URL').max(500),
     managementMode: z.enum(['manual', 'agent']),
+    mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
     regionId: z.string().uuid('Please select a region').optional().or(z.literal('')),
     cloudProviderId: z.string().uuid('Please select a cloud provider').optional().or(z.literal('')),
     type: z.enum(['shared', 'dedicated']).optional(),
@@ -317,13 +348,14 @@ export const updateDeploymentSchema = z
   .object({
     name: z.string().min(1, 'Name is required').max(255).optional(),
     url: z.string().url('Must be a valid URL').max(500).optional(),
+    mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
     regionId: z.string().uuid().optional(),
     cloudProviderId: z.string().uuid().optional(),
     type: z.enum(['shared', 'dedicated']).optional(),
     status: z.enum(DEPLOYMENT_STATUS_VALUES).optional(),
     version: z.string().max(50).optional().or(z.literal('')),
     acmeEmail: acmeEmailUpdateField,
-    domains: domainsField,
+    domains: domainsField.optional(),
     secretProvider: secretProviderField.optional(),
     secretProviderSecrets: secretProviderSecretsField.optional(),
   })

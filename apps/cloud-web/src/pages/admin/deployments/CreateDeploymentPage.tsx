@@ -35,6 +35,7 @@ export const CreateDeploymentPage: React.FC = () => {
     defaultValues: {
       name: '',
       url: '',
+      mode: 'managed',
       type: 'shared',
       version: '',
       acmeEmail: '',

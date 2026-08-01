@@ -2,7 +2,12 @@ import { Injectable, Logger } from '@nestjs/common';
 import { CreateResponseDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
-import { DeploymentManagementModeValues, DeploymentStatusValues, DeploymentTypeValues } from '@/db/schema';
+import {
+  DeploymentDbModeValues,
+  DeploymentManagementModeValues,
+  DeploymentStatusValues,
+  DeploymentTypeValues,
+} from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
 import type { SigningKeyDto } from '@/modules/admin-api/deployment/dto/entity/signing-key.dto';
 import type { CreateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/create-deployment.dto';
@@ -63,6 +68,7 @@ export class DeploymentDomainService {
       url: dto.url,
       version: dto.version,
       managementMode: dto.managementMode,
+      mode: dto.mode ?? DeploymentDbModeValues.managed,
       type: dto.type ?? DeploymentTypeValues.dedicated,
       regionId: dto.regionId ?? LOCAL_REGION_ID,
       cloudProviderId: dto.cloudProviderId ?? LOCAL_CLOUD_PROVIDER_ID,

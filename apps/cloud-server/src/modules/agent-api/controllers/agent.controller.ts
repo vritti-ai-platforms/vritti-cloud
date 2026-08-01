@@ -11,6 +11,7 @@ import { ApiAgentEnroll, ApiAgentStatus, ApiGetDesiredState } from '../docs/agen
 import { EnrollResponseDto } from '../dto/response/enroll-response.dto';
 import { SignedDesiredStateDto } from '../dto/response/signed-desired-state.dto';
 import { AgentSignatureGuard } from '../guards/agent-signature.guard';
+import { agentHeader, agentSignedMessage } from '../guards/agent-signed-message';
 
 // Fastify request carrying the raw body (rawBody plugin) and the guard-resolved agent
 type AgentFastifyRequest = FastifyRequest & { rawBody?: string; deploymentAgent?: DeploymentAgent };
@@ -32,9 +33,11 @@ export class AgentController {
     this.logger.log('POST /agent/enroll');
     return this.agentService.enroll(dto, {
       deploymentId: dto.deploymentId,
-      agentKeyB64: singleHeader(request, 'x-vritti-agent-key'),
-      signatureB64: singleHeader(request, 'x-vritti-signature'),
-      rawBody: request.rawBody ?? '',
+      agentKeyB64: agentHeader(request, 'x-vritti-agent-key'),
+      signatureB64: agentHeader(request, 'x-vritti-signature'),
+      // Same signed-message contract as the guard: `<timestamp>.<raw body>` (+ freshness check),
+      // not the bare body — the agent signs every request, enroll included, this way.
+      rawBody: agentSignedMessage(request),
       bearer: undefined,
     });
   }
@@ -66,10 +69,4 @@ export class AgentController {
     await this.agentService.recordStatus(request.deploymentAgent as DeploymentAgent, dto);
     return { success: true, message: 'Status recorded.' };
   }
-}
-
-// Returns a single-valued header from a Fastify request
-function singleHeader(request: AgentFastifyRequest, name: string): string | undefined {
-  const value = request.headers[name];
-  return Array.isArray(value) ? value[0] : value;
 }

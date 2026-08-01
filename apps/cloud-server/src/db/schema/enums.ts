@@ -150,12 +150,15 @@ export const OrgMemberRoleValues = { Owner: 'Owner' as const, Admin: 'Admin' as 
 export const deploymentStatusEnum = cloudSchema.enum('DeploymentStatus', ['active', 'stopped', 'Provisioning']);
 export const deploymentTypeEnum = cloudSchema.enum('DeploymentType', ['shared', 'dedicated']);
 export const deploymentManagementModeEnum = cloudSchema.enum('DeploymentManagementMode', ['manual', 'agent']);
+// DB provisioning mode — managed = agent runs its own Postgres container; external = agent connects to an existing DB
+export const deploymentDbModeEnum = cloudSchema.enum('DeploymentDbMode', ['managed', 'external']);
 // Lifecycle of an agent enrolled against an agent-managed deployment
 export const deploymentAgentStatusEnum = cloudSchema.enum('DeploymentAgentStatus', ['pending', 'enrolled', 'revoked']);
 
 export type DeploymentStatus = (typeof deploymentStatusEnum.enumValues)[number];
 export type DeploymentType = (typeof deploymentTypeEnum.enumValues)[number];
 export type DeploymentManagementMode = (typeof deploymentManagementModeEnum.enumValues)[number];
+export type DeploymentDbMode = (typeof deploymentDbModeEnum.enumValues)[number];
 export type DeploymentAgentStatus = (typeof deploymentAgentStatusEnum.enumValues)[number];
 
 export const DeploymentStatusValues = {
@@ -172,6 +175,11 @@ export const DeploymentTypeValues = {
 export const DeploymentManagementModeValues = {
   manual: 'manual' as const,
   agent: 'agent' as const,
+};
+
+export const DeploymentDbModeValues = {
+  managed: 'managed' as const,
+  external: 'external' as const,
 };
 
 export const DeploymentAgentStatusValues = {

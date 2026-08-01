@@ -1,0 +1,2 @@
+CREATE TYPE "cloud"."DeploymentDbMode" AS ENUM('managed', 'external');--> statement-breakpoint
+ALTER TABLE "cloud"."deployments" ADD COLUMN "mode" "cloud"."DeploymentDbMode" DEFAULT 'managed'::"cloud"."DeploymentDbMode" NOT NULL;

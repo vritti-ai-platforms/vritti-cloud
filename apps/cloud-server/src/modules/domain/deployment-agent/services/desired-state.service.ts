@@ -23,8 +23,8 @@ export class DesiredStateDomainService {
     dto.generation = 0;
     dto.deploymentId = deployment.id;
     dto.version = deployment.version;
-    // MVP: apw1 runs a managed containerized Postgres; external mode arrives with a sealed connection secret later
-    dto.mode = DesiredStateModeValues.managed;
+    // managed = agent runs its own Postgres container; external = agent connects to an existing DB (creds from the secret store)
+    dto.mode = deployment.mode === 'external' ? DesiredStateModeValues.external : DesiredStateModeValues.managed;
     dto.baseDomain = this.resolveBaseDomain(deployment.url);
     // MVP: managed deployments run their own nginx+certbot edge
     dto.edge = DesiredStateEdgeValues.managed;

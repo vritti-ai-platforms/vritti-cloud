@@ -2,6 +2,8 @@ import type { DeploymentWithNames } from '@domain/deployment/repositories/deploy
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Deployment } from '@/db/schema';
 import {
+  type DeploymentDbMode,
+  DeploymentDbModeValues,
   type DeploymentManagementMode,
   DeploymentManagementModeValues,
   type DeploymentStatus,
@@ -36,6 +38,9 @@ export class DeploymentDto {
 
   @ApiProperty({ enum: DeploymentManagementModeValues })
   managementMode: DeploymentManagementMode;
+
+  @ApiProperty({ enum: DeploymentDbModeValues })
+  mode: DeploymentDbMode;
 
   @ApiPropertyOptional({ example: '1.0.0', nullable: true })
   version: string | null;
@@ -104,6 +109,7 @@ export class DeploymentDto {
     dto.status = deployment.status;
     dto.type = deployment.type;
     dto.managementMode = deployment.managementMode;
+    dto.mode = deployment.mode;
     dto.version = deployment.version;
     dto.acmeEmail = deployment.acmeEmail;
     dto.domains = deployment.domains ?? [];

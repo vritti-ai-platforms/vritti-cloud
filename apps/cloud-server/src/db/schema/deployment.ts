@@ -1,7 +1,7 @@
 import { integer, jsonb, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudProviders } from './cloud-provider';
 import { cloudSchema } from './cloud-schema';
-import { deploymentManagementModeEnum, deploymentStatusEnum, deploymentTypeEnum } from './enums';
+import { deploymentDbModeEnum, deploymentManagementModeEnum, deploymentStatusEnum, deploymentTypeEnum } from './enums';
 import { regions } from './region';
 
 // Non-secret secret-store config the agent uses to fetch runtime secrets — the auth SECRET half rides deployment_secrets
@@ -47,6 +47,8 @@ export const deployments = cloudSchema.table('deployments', {
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
   type: deploymentTypeEnum('type').notNull(),
   managementMode: deploymentManagementModeEnum('management_mode').notNull().default('agent'),
+  // DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB (creds from the secret store)
+  mode: deploymentDbModeEnum('mode').notNull().default('managed'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });
