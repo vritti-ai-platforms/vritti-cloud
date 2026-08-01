@@ -6,7 +6,7 @@ import { TokenService, TokenType } from '@vritti/api-sdk/auth';
 import { ConflictException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
-import { EncryptionService } from '../../../../../services';
+import { CryptoService } from '../../../../../services';
 import { UserDto } from '../../../user/dto/entity/user.dto';
 import { MfaVerificationService } from '../../mfa-verification/services/mfa-verification.service';
 import { LoginDto } from '../dto/request/login.dto';
@@ -21,7 +21,7 @@ export class AuthService {
 
   constructor(
     private readonly userService: UserDomainService,
-    private readonly encryptionService: EncryptionService,
+    private readonly cryptoService: CryptoService,
     private readonly sessionService: SessionDomainService,
     private readonly tokenService: TokenService,
     private readonly mediaService: MediaDomainService,
@@ -47,7 +47,7 @@ export class AuthService {
     }
 
     // New user
-    const passwordHash = await this.encryptionService.hashPassword(dto.password);
+    const passwordHash = await this.cryptoService.hashPassword(dto.password);
 
     const user = await this.userService.create(
       {
@@ -92,7 +92,7 @@ export class AuthService {
       });
     }
 
-    const isPasswordValid = await this.encryptionService.comparePassword(dto.password, user.passwordHash);
+    const isPasswordValid = await this.cryptoService.comparePassword(dto.password, user.passwordHash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException({

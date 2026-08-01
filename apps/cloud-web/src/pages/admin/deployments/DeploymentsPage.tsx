@@ -7,6 +7,7 @@ import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Eye, Plus, Server } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import type { Deployment } from '@/schemas/admin/deployments';
+import { DEPLOYMENT_STATUS_VARIANT } from '@/schemas/admin/deployments';
 
 const TABLE_SLUG = 'deployments';
 
@@ -93,24 +94,11 @@ function getColumns({ onView }: ColumnActions): ColumnDef<Deployment, unknown>[]
     {
       accessorKey: 'status',
       header: 'Status',
-      cell: ({ row }) => {
-        const status = row.original.status;
-        if (status === 'active') {
-          return <Badge className="bg-success/15 text-success border-success/30 capitalize">{status}</Badge>;
-        }
-        if (status === 'stopped') {
-          return (
-            <Badge variant="destructive" className="capitalize">
-              {status}
-            </Badge>
-          );
-        }
-        return (
-          <Badge variant="secondary" className="capitalize">
-            {status}
-          </Badge>
-        );
-      },
+      cell: ({ row }) => (
+        <Badge variant={DEPLOYMENT_STATUS_VARIANT[row.original.status]} className="capitalize">
+          {row.original.status}
+        </Badge>
+      ),
     },
     {
       accessorKey: 'type',

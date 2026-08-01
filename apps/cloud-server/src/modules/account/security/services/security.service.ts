@@ -12,7 +12,7 @@ import { hashToken } from '@vritti/api-sdk/auth';
 import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import type { OAuthProviderType } from '@/db/schema';
-import { EncryptionService } from '@/services';
+import { CryptoService } from '@/services';
 import { SessionResponse } from '../../../cloud-api/auth/root/dto/entity/session-response.dto';
 import { AUTH_STATUS_EVENTS, SessionRevokedEvent } from '../../../cloud-api/auth/root/events/auth-status.events';
 import { BackupCodesResponseDto } from '../dto/response/backup-codes-response.dto';
@@ -27,7 +27,7 @@ export class SecurityService {
   constructor(
     private readonly userService: UserDomainService,
     private readonly sessionService: SessionDomainService,
-    private readonly encryptionService: EncryptionService,
+    private readonly cryptoService: CryptoService,
     private readonly eventEmitter: EventEmitter2,
     private readonly totpService: TotpDomainService,
     private readonly webAuthnService: WebAuthnDomainService,
@@ -53,13 +53,13 @@ export class SecurityService {
       });
     }
 
-    const isCurrentPasswordValid = await this.encryptionService.comparePassword(currentPassword, user.passwordHash);
+    const isCurrentPasswordValid = await this.cryptoService.comparePassword(currentPassword, user.passwordHash);
 
     if (!isCurrentPasswordValid) {
       throw new UnauthorizedException('The current password you entered is incorrect. Please try again.');
     }
 
-    const isSamePassword = await this.encryptionService.comparePassword(newPassword, user.passwordHash);
+    const isSamePassword = await this.cryptoService.comparePassword(newPassword, user.passwordHash);
     if (isSamePassword) {
       throw new BadRequestException({
         label: 'Password Already In Use',
@@ -68,7 +68,7 @@ export class SecurityService {
       });
     }
 
-    const newPasswordHash = await this.encryptionService.hashPassword(newPassword);
+    const newPasswordHash = await this.cryptoService.hashPassword(newPassword);
 
     await this.userService.update(user.id, { passwordHash: newPasswordHash });
 

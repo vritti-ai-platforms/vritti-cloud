@@ -29,6 +29,21 @@ export class ContainerReportDto {
   memoryBytes: number;
 }
 
+// One managed-edge certificate the agent currently holds (matches cloudapi.CertificateReport)
+export class CertificateReportDto {
+  @ApiProperty({ example: 'api.apw1.vrittiai.com' })
+  @IsString()
+  host: string;
+
+  @ApiProperty({ description: 'RFC3339 certificate expiry', example: '2026-10-29T12:00:00Z' })
+  @IsString()
+  notAfter: string;
+
+  @ApiProperty({ description: 'RFC3339 certificate issuance', example: '2026-07-31T12:00:00Z' })
+  @IsString()
+  issuedAt: string;
+}
+
 // Periodic heartbeat pushed by the agent (matches cloudapi.StatusReport)
 export class StatusReportDto {
   @ApiProperty({ description: 'Deployment this heartbeat is for', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -59,4 +74,14 @@ export class StatusReportDto {
   @IsOptional()
   @IsBoolean()
   giteaProvisioned?: boolean;
+
+  @ApiPropertyOptional({
+    type: [CertificateReportDto],
+    description: 'Managed-edge certificates the agent currently holds',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CertificateReportDto)
+  certificates?: CertificateReportDto[];
 }

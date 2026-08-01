@@ -9,6 +9,8 @@ import {
   type DeploymentType,
   DeploymentTypeValues,
 } from '@/db/schema';
+import { DomainInputDto } from '../request/domain-input.dto';
+import { SecretProviderDto } from './secret-provider.dto';
 
 export class DeploymentDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -37,6 +39,19 @@ export class DeploymentDto {
 
   @ApiPropertyOptional({ example: '1.0.0', nullable: true })
   version: string | null;
+
+  @ApiPropertyOptional({ example: 'ops@vrittiai.com', nullable: true })
+  acmeEmail: string | null;
+
+  @ApiProperty({ type: [DomainInputDto], description: 'Managed-edge hosts + upstreams' })
+  domains: Array<{ host: string; upstream: string }>;
+
+  @ApiPropertyOptional({
+    type: SecretProviderDto,
+    nullable: true,
+    description: 'Non-secret secret-store config for form prefill — the secret auth half is never returned',
+  })
+  secretProvider: SecretProviderDto | null;
 
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
@@ -90,6 +105,9 @@ export class DeploymentDto {
     dto.type = deployment.type;
     dto.managementMode = deployment.managementMode;
     dto.version = deployment.version;
+    dto.acmeEmail = deployment.acmeEmail;
+    dto.domains = deployment.domains ?? [];
+    dto.secretProvider = deployment.secretProvider ? SecretProviderDto.from(deployment.secretProvider) : null;
     dto.createdAt = deployment.createdAt;
     dto.updatedAt = deployment.updatedAt;
     dto.organizationCount = organizationCount;

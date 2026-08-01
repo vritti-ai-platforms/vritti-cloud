@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."deployments" ADD COLUMN "secret_provider" jsonb;

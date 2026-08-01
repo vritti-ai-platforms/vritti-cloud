@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
-import { and, eq, gt, sql } from '@vritti/api-sdk/drizzle-orm';
+import { and, desc, eq, gt, ne, sql } from '@vritti/api-sdk/drizzle-orm';
 import type { Deployment, DeploymentAgent, NewDeploymentAgent } from '@/db/schema';
 import { deploymentAgents, deployments } from '@/db/schema';
 
@@ -10,9 +10,15 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
     super(database, deploymentAgents);
   }
 
-  // Returns the single agent row for a deployment (one active agent per deployment for MVP)
+  // Returns the current (latest non-revoked) agent row for a deployment — revoked history rows are ignored
   async findByDeploymentId(deploymentId: string): Promise<DeploymentAgent | undefined> {
-    return this.model.findFirst({ where: { deploymentId } });
+    const rows = await this.db
+      .select()
+      .from(deploymentAgents)
+      .where(and(eq(deploymentAgents.deploymentId, deploymentId), ne(deploymentAgents.status, 'revoked')))
+      .orderBy(desc(deploymentAgents.createdAt))
+      .limit(1);
+    return rows[0];
   }
 
   // Returns the enrolled agent for a deployment, if any
@@ -37,9 +43,12 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
     return rows[0];
   }
 
-  // Replaces any existing agent for a deployment with a fresh pending enroll-token row
+  // Revokes any existing agent(s) for a deployment (preserving history + heartbeat/gitea state) and inserts a fresh pending enroll-token row
   async replaceWithPending(deploymentId: string, tokenHash: string, expiresAt: Date): Promise<DeploymentAgent> {
-    await this.db.delete(deploymentAgents).where(eq(deploymentAgents.deploymentId, deploymentId));
+    await this.db
+      .update(deploymentAgents)
+      .set({ status: 'revoked', enrollTokenHash: null, enrollTokenExpiresAt: null })
+      .where(and(eq(deploymentAgents.deploymentId, deploymentId), ne(deploymentAgents.status, 'revoked')));
     return this.create({
       deploymentId,
       enrollTokenHash: tokenHash,

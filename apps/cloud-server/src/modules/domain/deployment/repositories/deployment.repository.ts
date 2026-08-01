@@ -3,7 +3,7 @@ import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/d
 import { and, eq, sql } from '@vritti/api-sdk/drizzle-orm';
 import { CurrencyAmountDto } from '@vritti/api-sdk/money';
 import type { CloudProvider, Deployment, Region } from '@/db/schema';
-import { countries, deployments, organizations, planPrices, plans, versions } from '@/db/schema';
+import { countries, deploymentSecrets, deployments, organizations, planPrices, plans, versions } from '@/db/schema';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
 
@@ -29,6 +29,17 @@ export class DeploymentDomainRepository extends PrimaryBaseRepository<typeof dep
   // Finds a deployment by its unique identifier
   async findById(id: string): Promise<Deployment | undefined> {
     return this.model.findFirst({ where: { id } });
+  }
+
+  // Upserts an encrypted-at-rest deployment secret by (deployment, name)
+  async upsertSecret(deploymentId: string, name: string, encryptedValue: string): Promise<void> {
+    await this.db
+      .insert(deploymentSecrets)
+      .values({ deploymentId, name, encryptedValue })
+      .onConflictDoUpdate({
+        target: [deploymentSecrets.deploymentId, deploymentSecrets.name],
+        set: { encryptedValue },
+      });
   }
 
   // Returns all deployments using the given version string

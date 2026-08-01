@@ -1,12 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Deployment } from '@/db/schema';
+import { DeploymentManagementModeValues } from '@/db/schema';
+import { DEFAULT_STACK_IMAGES, IMAGE_ENV_KEYS } from '../deployment-agent.constants';
 import {
   DesiredStateDto,
+  DesiredStateEdgeValues,
   DesiredStateModeValues,
   type ImagesDto,
-} from '@/modules/agent-api/dto/entity/desired-state.dto';
-import { DEFAULT_STACK_IMAGES, IMAGE_ENV_KEYS } from '../deployment-agent.constants';
+  type SecretProviderDto,
+} from '../dto/entity/desired-state.dto';
 
 @Injectable()
 export class DesiredStateDomainService {
@@ -23,13 +26,45 @@ export class DesiredStateDomainService {
     // MVP: apw1 runs a managed containerized Postgres; external mode arrives with a sealed connection secret later
     dto.mode = DesiredStateModeValues.managed;
     dto.baseDomain = this.resolveBaseDomain(deployment.url);
+    // MVP: managed deployments run their own nginx+certbot edge
+    dto.edge = DesiredStateEdgeValues.managed;
     dto.images = this.resolveImages();
     // MVP is core-only — add-ons stay off until per-deployment add-on flags exist
-    dto.addOns = { pgBackRest: false, gitea: false, nginx: false };
+    dto.addOns = { pgBackRest: false, gitea: false };
+    dto.domains = deployment.domains ?? [];
+    dto.acmeEmail = this.resolveAcmeEmail(deployment);
+    // Default OFF — a managed prod edge must opt IN to the untrusted Let's Encrypt staging CA
+    dto.acmeStaging = this.configService.get<boolean>('ACME_STAGING') ?? false;
     dto.config = this.buildConfig(deployment);
+    // Non-secret secret-store config; the sealed auth secret half is carried alongside in sealedSecrets
+    dto.secretProvider = this.resolveSecretProvider(deployment);
     dto.sealedSecrets = sealedSecrets;
     this.logger.log(`Built desired-state for deployment ${deployment.id} (base ${dto.baseDomain})`);
     return dto;
+  }
+
+  // Resolves the per-deployment ACME email (warns but does not fail when domains exist without one)
+  private resolveAcmeEmail(deployment: Deployment): string {
+    const email = deployment.acmeEmail ?? '';
+    if (!email && (deployment.domains?.length ?? 0) > 0) {
+      this.logger.warn(
+        `Deployment ${deployment.id} has managed-edge domains but no acmeEmail — certbot cannot register with Let's Encrypt`,
+      );
+    }
+    return email;
+  }
+
+  // Resolves the secret-store config (warns when an agent-managed deployment has none — the agent cannot source core/commerce env)
+  private resolveSecretProvider(deployment: Deployment): SecretProviderDto | null {
+    if (!deployment.secretProvider) {
+      if (deployment.managementMode === DeploymentManagementModeValues.agent) {
+        this.logger.warn(
+          `Deployment ${deployment.id} is agent-managed but has no secretProvider — the agent cannot source core-server/commerce runtime env`,
+        );
+      }
+      return null;
+    }
+    return deployment.secretProvider;
   }
 
   // Plaintext non-secret config passed through to core-server env — machine secrets are NEVER placed here

@@ -1,6 +1,18 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { DeploymentAgent, DeploymentAgentStatus } from '@/db/schema';
+import type { DeploymentAgent, DeploymentAgentStatus, DeploymentCertificate } from '@/db/schema';
 import { DeploymentAgentStatusValues } from '@/db/schema';
+
+// One tracked certificate for the deployment (expiry surfaced to the admin console)
+export class AgentCertificateDto {
+  @ApiProperty({ example: 'api.apw1.vrittiai.com' })
+  host: string;
+
+  @ApiProperty({ type: 'string', format: 'date-time' })
+  notAfter: Date;
+
+  @ApiProperty({ type: 'string', format: 'date-time' })
+  issuedAt: Date;
+}
 
 // Agent status for the admin console / connect polling
 export class AgentStatusDto {
@@ -37,12 +49,16 @@ export class AgentStatusDto {
   @ApiPropertyOptional({ nullable: true, description: 'Deployment public key (base64 raw 32-byte Ed25519, Keypair B)' })
   deploymentPubKey: string | null;
 
-  // Maps an agent row (may be absent) plus deployment desired-generation and public key to the API shape
+  @ApiProperty({ type: [AgentCertificateDto], description: 'Certificates tracked for this deployment' })
+  certificates: AgentCertificateDto[];
+
+  // Maps an agent row (may be absent) plus deployment desired-generation, public key, and tracked certs to the API shape
   static from(
     deploymentId: string,
     agent: DeploymentAgent | undefined,
     desiredGeneration: number,
     deploymentPubKey: string | null,
+    certificates: DeploymentCertificate[],
   ): AgentStatusDto {
     const dto = new AgentStatusDto();
     dto.deploymentId = deploymentId;
@@ -56,6 +72,11 @@ export class AgentStatusDto {
     dto.desiredGeneration = desiredGeneration;
     dto.giteaProvisioned = agent?.giteaProvisioned ?? false;
     dto.deploymentPubKey = deploymentPubKey;
+    dto.certificates = certificates.map((cert) => ({
+      host: cert.host,
+      notAfter: cert.notAfter,
+      issuedAt: cert.issuedAt,
+    }));
     return dto;
   }
 }

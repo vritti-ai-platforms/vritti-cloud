@@ -12,7 +12,7 @@ export function ApiCreateDeployment() {
     ApiOperation({
       summary: 'Create a new deployment',
       description:
-        'Creates a bare deployment record with no signing key yet. regionId/cloudProviderId are required only for managementMode=agent; manual deployments use the sentinel local region/provider. Generate the signing key later via POST /admin-api/deployments/:id/signing-key, which reveals the public key once.',
+        'Creates a bare deployment record with no signing key yet. regionId/cloudProviderId are required only for managementMode=agent; manual deployments use the sentinel local region/provider. acmeEmail and domains (managed-edge host → upstream list) apply only to agent/managed-edge deployments and are pushed to the agent in the desired-state; omit them otherwise. Generate the signing key later via POST /admin-api/deployments/:id/signing-key, which reveals the public key once.',
     }),
     ApiBody({ type: CreateDeploymentDto }),
     ApiResponse({ status: 201, description: 'Deployment created successfully.', type: DeploymentDto }),
@@ -69,7 +69,11 @@ export function ApiFindDeploymentById() {
 
 export function ApiUpdateDeployment() {
   return applyDecorators(
-    ApiOperation({ summary: 'Update a deployment' }),
+    ApiOperation({
+      summary: 'Update a deployment',
+      description:
+        'Updates any deployment field. For agent/managed-edge deployments, acmeEmail and domains (managed-edge host → upstream list) are pushed to the agent in the next desired-state.',
+    }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiBody({ type: UpdateDeploymentDto }),
     ApiResponse({ status: 200, description: 'Deployment updated successfully.', type: DeploymentDto }),

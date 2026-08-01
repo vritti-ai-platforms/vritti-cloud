@@ -29,8 +29,15 @@ export class DeploymentAgentController {
   // Returns the deployment's agent status
   @Get()
   @ApiGetAgentStatus()
-  getAgentStatus(@Param('id') id: string): Promise<AgentStatusDto> {
+  async getAgentStatus(@Param('id') id: string): Promise<AgentStatusDto> {
     this.logger.log(`GET /admin-api/deployments/${id}/agent`);
-    return this.agentService.getAgentStatus(id);
+    const status = await this.agentService.getAgentStatus(id);
+    return AgentStatusDto.from(
+      status.deploymentId,
+      status.agent,
+      status.desiredGeneration,
+      status.deploymentPubKey,
+      status.certificates,
+    );
   }
 }

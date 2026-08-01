@@ -6,7 +6,7 @@ import { ArrowLeft, Check } from 'lucide-react';
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import type { useCreateDeployment } from '@/hooks/admin/deployments';
-import type { CreateDeploymentData } from '@/schemas/admin/deployments';
+import { assembleSecretProvider, type CreateDeploymentData } from '@/schemas/admin/deployments';
 
 interface ReviewStepProps {
   form: UseFormReturn<CreateDeploymentData>;
@@ -60,8 +60,14 @@ export const ReviewStep: React.FC<ReviewStepProps> = ({ form, createMutation, on
         resetOnSuccess={false}
         transformSubmit={(data) =>
           data.managementMode === 'manual'
-            ? { name: data.name, url: data.url, managementMode: data.managementMode, version: data.version }
-            : data
+            ? {
+                name: data.name,
+                url: data.url,
+                managementMode: data.managementMode,
+                version: data.version,
+                domains: data.domains,
+              }
+            : { ...data, ...assembleSecretProvider(data) }
         }
       >
         <div className="flex justify-between pt-2">

@@ -4,7 +4,7 @@ import { BadRequestException, NotFoundException, UnauthorizedException } from '@
 import { parseExpiryToMs } from '@vritti/api-sdk/utils';
 import type { Verification, VerificationChannel } from '@/db/schema';
 import { VerificationChannelValues } from '@/db/schema/enums';
-import { EncryptionService } from '../../../../services';
+import { CryptoService } from '../../../../services';
 import { VerificationDomainRepository } from '../repositories/verification.repository';
 
 export interface CreateVerificationResult {
@@ -21,7 +21,7 @@ export class VerificationDomainService {
 
   constructor(
     private readonly verificationRepo: VerificationDomainRepository,
-    private readonly encryptionService: EncryptionService,
+    private readonly cryptoService: CryptoService,
     private readonly configService: ConfigService,
   ) {
     this.expiryMs = parseExpiryToMs(this.configService.getOrThrow<string>('OTP_EXPIRY'));
@@ -43,8 +43,8 @@ export class VerificationDomainService {
     const expiresAt = this.getOtpExpiryTime();
 
     const { code: otp, hash } = isOutboundVerification
-      ? await this.encryptionService.issueOtp()
-      : this.encryptionService.issueHexCode();
+      ? await this.cryptoService.issueOtp()
+      : this.cryptoService.issueHexCode();
 
     const record = await this.verificationRepo.upsertByUserIdAndChannel(userId, channel, {
       target,
@@ -68,7 +68,7 @@ export class VerificationDomainService {
 
     const verification = isOutboundVerification
       ? await this.verificationRepo.findByUserIdAndChannel(userId, channel)
-      : await this.verificationRepo.findByHashAndChannel(this.encryptionService.hmacDigestHexCode(code), channel);
+      : await this.verificationRepo.findByHashAndChannel(this.cryptoService.hmacDigestHexCode(code), channel);
 
     if (!verification) {
       throw new NotFoundException(
@@ -79,7 +79,7 @@ export class VerificationDomainService {
     this.validateState(verification);
 
     if (isOutboundVerification) {
-      const isValid = await this.encryptionService.compareOtp(code, verification.hash);
+      const isValid = await this.cryptoService.compareOtp(code, verification.hash);
 
       if (!isValid) {
         await this.verificationRepo.incrementAttempts(verification.id);

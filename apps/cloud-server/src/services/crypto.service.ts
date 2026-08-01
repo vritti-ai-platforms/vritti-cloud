@@ -1,11 +1,18 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
+import {
+  createCipheriv,
+  createDecipheriv,
+  createHash,
+  createHmac,
+  randomBytes,
+  timingSafeEqual,
+} from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
-export class EncryptionService {
-  private readonly logger = new Logger(EncryptionService.name);
+export class CryptoService {
+  private readonly logger = new Logger(CryptoService.name);
 
   constructor(private readonly configService: ConfigService) {}
 
@@ -72,6 +79,32 @@ export class EncryptionService {
   compareHexCode(a: string, b: string): boolean {
     if (a.length !== b.length) return false;
     return timingSafeEqual(Buffer.from(a, 'hex'), Buffer.from(b, 'hex'));
+  }
+
+  // Encrypts a value at rest with AES-256-GCM; returns base64(iv || authTag || ciphertext)
+  encrypt(plaintext: string): string {
+    const iv = randomBytes(12);
+    const cipher = createCipheriv('aes-256-gcm', this.deriveAesKey(), iv);
+    const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+    const authTag = cipher.getAuthTag();
+    return Buffer.concat([iv, authTag, ciphertext]).toString('base64');
+  }
+
+  // Decrypts a value produced by encrypt()
+  decrypt(ciphertext: string): string {
+    const raw = Buffer.from(ciphertext, 'base64');
+    const iv = raw.subarray(0, 12);
+    const authTag = raw.subarray(12, 28);
+    const encrypted = raw.subarray(28);
+    const decipher = createDecipheriv('aes-256-gcm', this.deriveAesKey(), iv);
+    decipher.setAuthTag(authTag);
+    return Buffer.concat([decipher.update(encrypted), decipher.final()]).toString('utf8');
+  }
+
+  // Derives a 32-byte AES key from the configured ENCRYPTION_KEY
+  private deriveAesKey(): Buffer {
+    const secret = this.configService.getOrThrow<string>('ENCRYPTION_KEY');
+    return createHash('sha256').update(secret, 'utf8').digest();
   }
 
   private generateOtp(): string {

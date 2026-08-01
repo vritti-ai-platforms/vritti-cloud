@@ -46,7 +46,26 @@ export const deploymentSecrets = cloudSchema.table(
   (table) => [unique('deployment_secret_name_unique').on(table.deploymentId, table.name)],
 );
 
+// Certificates the managed edge holds per deployment — cloud-server is the system of record for expiry tracking
+export const deploymentCertificates = cloudSchema.table(
+  'deployment_certificates',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    deploymentId: uuid('deployment_id')
+      .notNull()
+      .references(() => deployments.id, { onDelete: 'cascade' }),
+    host: text('host').notNull(),
+    notAfter: timestamp('not_after', { withTimezone: true }).notNull(),
+    issuedAt: timestamp('issued_at', { withTimezone: true }).notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
+  },
+  (table) => [unique('deployment_certificate_host_unique').on(table.deploymentId, table.host)],
+);
+
 export type DeploymentAgent = typeof deploymentAgents.$inferSelect;
 export type NewDeploymentAgent = typeof deploymentAgents.$inferInsert;
 export type DeploymentSecret = typeof deploymentSecrets.$inferSelect;
 export type NewDeploymentSecret = typeof deploymentSecrets.$inferInsert;
+export type DeploymentCertificate = typeof deploymentCertificates.$inferSelect;
+export type NewDeploymentCertificate = typeof deploymentCertificates.$inferInsert;

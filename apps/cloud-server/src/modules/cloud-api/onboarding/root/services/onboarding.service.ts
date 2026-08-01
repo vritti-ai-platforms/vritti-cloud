@@ -3,7 +3,7 @@ import { UserDomainService } from '@domain/user/services/user.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { BadRequestException } from '@vritti/api-sdk/exceptions';
 import { AccountStatusValues, OnboardingStepValues, SessionTypeValues } from '@/db/schema';
-import { EncryptionService } from '../../../../../services';
+import { CryptoService } from '../../../../../services';
 import { OnboardingStatusResponseDto } from '../dto/entity/onboarding-status-response.dto';
 import { StartOnboardingResponseDto } from '../dto/response/start-onboarding-response.dto';
 
@@ -13,7 +13,7 @@ export class OnboardingService {
 
   constructor(
     private readonly userService: UserDomainService,
-    private readonly encryptionService: EncryptionService,
+    private readonly cryptoService: CryptoService,
     private readonly sessionService: SessionDomainService,
   ) {}
 
@@ -44,7 +44,7 @@ export class OnboardingService {
       );
     }
 
-    const passwordHash = await this.encryptionService.hashPassword(password);
+    const passwordHash = await this.cryptoService.hashPassword(password);
 
     await this.userService.update(userId, {
       passwordHash,

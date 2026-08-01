@@ -1,5 +1,20 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEnum, IsOptional, IsString, IsUrl, IsUUID, MaxLength, MinLength, ValidateIf } from 'class-validator';
+import { Trim } from '@vritti/api-sdk/decorators';
+import { Type } from 'class-transformer';
+import {
+  IsArray,
+  IsEmail,
+  IsEnum,
+  IsObject,
+  IsOptional,
+  IsString,
+  IsUrl,
+  IsUUID,
+  MaxLength,
+  MinLength,
+  ValidateIf,
+  ValidateNested,
+} from 'class-validator';
 import {
   type DeploymentManagementMode,
   DeploymentManagementModeValues,
@@ -8,6 +23,8 @@ import {
   type DeploymentType,
   DeploymentTypeValues,
 } from '@/db/schema';
+import { DomainInputDto } from './domain-input.dto';
+import { SecretProviderInputDto } from './secret-provider-input.dto';
 
 export class CreateDeploymentDto {
   @ApiProperty({ description: 'Display name of the deployment', example: 'US East Production' })
@@ -54,4 +71,45 @@ export class CreateDeploymentDto {
   @MinLength(1)
   @MaxLength(50)
   version: string;
+
+  @ApiPropertyOptional({
+    description: "Let's Encrypt registration email for the managed edge — agent/managed-edge deployments only",
+    example: 'ops@vrittiai.com',
+  })
+  @IsOptional()
+  @IsEmail()
+  @Trim()
+  acmeEmail?: string;
+
+  @ApiPropertyOptional({
+    type: [DomainInputDto],
+    description: 'Managed-edge hosts + upstreams — agent/managed-edge deployments only',
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DomainInputDto)
+  domains?: DomainInputDto[];
+
+  @ApiPropertyOptional({
+    type: SecretProviderInputDto,
+    description: 'Non-secret secret-store config pushed to the agent — agent-managed deployments only',
+  })
+  @IsOptional()
+  @IsObject()
+  @ValidateNested()
+  @Type(() => SecretProviderInputDto)
+  secretProvider?: SecretProviderInputDto;
+
+  @ApiPropertyOptional({
+    type: 'object',
+    additionalProperties: { type: 'string' },
+    description:
+      'Secret auth params (client secret, token, jwt, password, …); each is encrypted at rest and stored as secretProvider.<key> — write-only, never returned',
+    example: { clientSecret: 'st.…' },
+  })
+  @IsOptional()
+  @IsObject()
+  @Type(() => Object)
+  secretProviderSecrets?: Record<string, string>;
 }

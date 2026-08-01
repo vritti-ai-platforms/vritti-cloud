@@ -5,12 +5,7 @@ import { DetailField } from '@vritti/quantum-ui/DetailField';
 import { Server } from 'lucide-react';
 import type React from 'react';
 import type { Deployment } from '@/schemas/admin/deployments';
-
-const DEPLOYMENT_STATUS_VARIANT: Record<Deployment['status'], 'success' | 'warning' | 'secondary'> = {
-  active: 'success',
-  provisioning: 'warning',
-  stopped: 'secondary',
-};
+import { DEPLOYMENT_STATUS_VARIANT } from '@/schemas/admin/deployments';
 
 function titleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);

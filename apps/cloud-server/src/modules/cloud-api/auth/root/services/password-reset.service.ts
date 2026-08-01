@@ -6,7 +6,7 @@ import { EmailService } from '@vritti/api-sdk/email';
 import { BadRequestException } from '@vritti/api-sdk/exceptions';
 import type { FastifyRequest } from 'fastify';
 import { OnboardingStepValues, SessionTypeValues, VerificationChannelValues } from '@/db/schema';
-import { EncryptionService } from '../../../../../services';
+import { CryptoService } from '../../../../../services';
 
 @Injectable()
 export class PasswordResetService {
@@ -18,7 +18,7 @@ export class PasswordResetService {
   constructor(
     private readonly verificationService: VerificationDomainService,
     private readonly emailService: EmailService,
-    private readonly encryptionService: EncryptionService,
+    private readonly cryptoService: CryptoService,
     private readonly userService: UserDomainService,
     private readonly sessionService: SessionDomainService,
   ) {}
@@ -138,7 +138,7 @@ export class PasswordResetService {
     }
 
     // Hash and update password
-    const passwordHash = await this.encryptionService.hashPassword(newPassword);
+    const passwordHash = await this.cryptoService.hashPassword(newPassword);
     await this.userService.update(userId, { passwordHash });
 
     // Determine the correct session type based on onboarding status

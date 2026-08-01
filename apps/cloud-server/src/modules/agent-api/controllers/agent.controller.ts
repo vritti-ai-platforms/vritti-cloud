@@ -1,3 +1,5 @@
+import { EnrollRequestDto } from '@domain/deployment-agent/dto/request/enroll-request.dto';
+import { StatusReportDto } from '@domain/deployment-agent/dto/request/status-report.dto';
 import { DeploymentAgentDomainService } from '@domain/deployment-agent/services/deployment-agent.service';
 import { Body, Controller, Get, HttpCode, HttpStatus, Logger, Param, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
@@ -6,8 +8,6 @@ import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { FastifyRequest } from 'fastify';
 import type { DeploymentAgent } from '@/db/schema';
 import { ApiAgentEnroll, ApiAgentStatus, ApiGetDesiredState } from '../docs/agent.docs';
-import { EnrollRequestDto } from '../dto/request/enroll-request.dto';
-import { StatusReportDto } from '../dto/request/status-report.dto';
 import { EnrollResponseDto } from '../dto/response/enroll-response.dto';
 import { SignedDesiredStateDto } from '../dto/response/signed-desired-state.dto';
 import { AgentSignatureGuard } from '../guards/agent-signature.guard';

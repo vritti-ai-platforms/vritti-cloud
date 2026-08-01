@@ -15,14 +15,21 @@ import type {
 } from '@/modules/cloud-api/deployment/dto/request/deployment-filter.dto';
 import type { DeploymentOptionDto } from '@/modules/cloud-api/deployment/dto/response/deployment-option.dto';
 import type { PlanOptionDto } from '@/modules/cloud-api/deployment/dto/response/plan-option.dto';
+import { CryptoService } from '@/services';
 import { LOCAL_CLOUD_PROVIDER_ID, LOCAL_REGION_ID } from '../local-deployment.constants';
 import { DeploymentDomainRepository } from '../repositories/deployment.repository';
+
+// Reserved prefix for secret-store auth secret params carried in deployment_secrets
+const SECRET_PROVIDER_SECRET_PREFIX = 'secretProvider.';
 
 @Injectable()
 export class DeploymentDomainService {
   private readonly logger = new Logger(DeploymentDomainService.name);
 
-  constructor(private readonly deploymentRepository: DeploymentDomainRepository) {}
+  constructor(
+    private readonly deploymentRepository: DeploymentDomainRepository,
+    private readonly cryptoService: CryptoService,
+  ) {}
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
   findForSelect(query: DeploymentSelectQueryDto): Promise<SelectQueryResult> {
@@ -60,9 +67,13 @@ export class DeploymentDomainService {
       regionId: dto.regionId ?? LOCAL_REGION_ID,
       cloudProviderId: dto.cloudProviderId ?? LOCAL_CLOUD_PROVIDER_ID,
       status: dto.status ?? (isManual ? DeploymentStatusValues.active : DeploymentStatusValues.Provisioning),
+      acmeEmail: dto.acmeEmail ?? null,
+      domains: dto.domains ?? [],
+      secretProvider: dto.secretProvider ?? null,
       signingKey: null,
       signingPublicKey: null,
     });
+    await this.writeSecretProviderSecrets(deployment.id, dto.secretProviderSecrets);
     this.logger.log(`Created deployment: ${deployment.name} (${deployment.id})`);
     return {
       success: true,
@@ -114,9 +125,22 @@ export class DeploymentDomainService {
     if (!existing) {
       throw new NotFoundException('Deployment not found.');
     }
-    const deployment = await this.deploymentRepository.update(id, dto);
+    // secretProviderSecrets is not a column — it rides deployment_secrets, so keep it out of the row update
+    const { secretProviderSecrets, ...columns } = dto;
+    const deployment = await this.deploymentRepository.update(id, columns);
+    await this.writeSecretProviderSecrets(id, secretProviderSecrets);
     this.logger.log(`Updated deployment: ${deployment.name} (${deployment.id})`);
     return { success: true, message: `Deployment "${deployment.name}" updated successfully.` };
+  }
+
+  // Encrypts each secret-store auth param at rest and upserts it into deployment_secrets under the reserved prefix
+  private async writeSecretProviderSecrets(deploymentId: string, secrets?: Record<string, string>): Promise<void> {
+    if (!secrets) return;
+    for (const [name, value] of Object.entries(secrets)) {
+      const encrypted = this.cryptoService.encrypt(value);
+      await this.deploymentRepository.upsertSecret(deploymentId, `${SECRET_PROVIDER_SECRET_PREFIX}${name}`, encrypted);
+    }
+    this.logger.log(`Stored ${Object.keys(secrets).length} secret-provider secret(s) for deployment ${deploymentId}`);
   }
 
   // Deletes a deployment by ID; throws NotFoundException if not found, ConflictException if orgs reference it

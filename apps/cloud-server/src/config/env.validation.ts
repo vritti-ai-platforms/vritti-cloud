@@ -44,6 +44,10 @@ class EnvironmentVariables {
   JWT_SECRET: string;
 
   @IsString()
+  @MinLength(32)
+  ENCRYPTION_KEY: string;
+
+  @IsString()
   ACCESS_TOKEN_EXPIRY: string;
 
   @IsString()
@@ -241,6 +245,11 @@ class EnvironmentVariables {
   @IsNumber()
   @Min(1)
   TABLE_VIEWS_CACHE_TTL: number;
+
+  // Managed-edge ACME (Let's Encrypt) — pushed to agents in the desired-state
+  @IsBoolean()
+  @Transform(({ value }) => value === true || value === 'true')
+  ACME_STAGING: boolean;
 }
 
 // Validates environment variables at application startup
@@ -266,6 +275,7 @@ export function validate(config: Record<string, unknown>): Record<string, unknow
       : undefined,
     TABLE_STATE_CACHE_TTL: config.TABLE_STATE_CACHE_TTL ? parseInt(config.TABLE_STATE_CACHE_TTL as string, 10) : 3600,
     TABLE_VIEWS_CACHE_TTL: config.TABLE_VIEWS_CACHE_TTL ? parseInt(config.TABLE_VIEWS_CACHE_TTL as string, 10) : 86400,
+    ACME_STAGING: config.ACME_STAGING === undefined ? false : config.ACME_STAGING === 'true',
   };
 
   const validatedConfig = plainToInstance(EnvironmentVariables, processedConfig, {

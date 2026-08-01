@@ -1,8 +1,17 @@
-import { integer, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { integer, jsonb, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudProviders } from './cloud-provider';
 import { cloudSchema } from './cloud-schema';
 import { deploymentManagementModeEnum, deploymentStatusEnum, deploymentTypeEnum } from './enums';
 import { regions } from './region';
+
+// Non-secret secret-store config the agent uses to fetch runtime secrets — the auth SECRET half rides deployment_secrets
+export type DeploymentSecretProvider = {
+  type: string;
+  url: string;
+  projectId: string;
+  env: string;
+  auth: { method: string; params: Record<string, string> };
+};
 
 // Infrastructure deployment instances — linked to an app version by version string (no FK)
 export const deployments = cloudSchema.table('deployments', {
@@ -29,6 +38,12 @@ export const deployments = cloudSchema.table('deployments', {
   desiredGeneration: integer('desired_generation').notNull().default(0),
   // sha256 of the last built desired-state payload (generation excluded) — staleness check for the generation bump
   lastDesiredHash: text('last_desired_hash'),
+  // Per-deployment Let's Encrypt registration email for the managed edge (operator input)
+  acmeEmail: text('acme_email'),
+  // Managed-edge hosts + upstreams the agent serves and issues certs for (operator input)
+  domains: jsonb('domains').$type<Array<{ host: string; upstream: string }>>().notNull().default([]),
+  // Non-secret secret-store config pushed to the agent in the desired-state; the auth secret half lives in deployment_secrets
+  secretProvider: jsonb('secret_provider').$type<DeploymentSecretProvider>(),
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
   type: deploymentTypeEnum('type').notNull(),
   managementMode: deploymentManagementModeEnum('management_mode').notNull().default('agent'),

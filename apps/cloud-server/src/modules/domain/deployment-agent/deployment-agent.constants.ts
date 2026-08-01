@@ -1,11 +1,14 @@
 // Enroll token lifetime (1 hour) — the operator pastes it into the agent before it expires
 export const ENROLL_TOKEN_TTL_MS = 60 * 60 * 1000;
 
+// Allowed clock skew (seconds) between the agent's X-Vritti-Timestamp and the server clock — replay window guard
+export const AGENT_TIMESTAMP_SKEW_SECONDS = 300;
+
 // Default pinned stack images for a managed deployment — overridable per key via AGENT_IMAGE_* env
 export const DEFAULT_STACK_IMAGES = {
   coreServer: 'ghcr.io/vritti-ai-platforms/core-server:latest-main',
   commerceService: 'ghcr.io/vritti-ai-platforms/commerce-service:latest-main',
-  postgres: 'postgres:18',
+  postgres: 'ghcr.io/vritti-ai-platforms/postgres-pgbackrest:18.4',
   redis: 'redis:7',
   nats: 'nats:2',
   gitea: 'gitea/gitea:1.23',

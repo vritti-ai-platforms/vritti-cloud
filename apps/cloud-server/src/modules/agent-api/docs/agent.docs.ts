@@ -1,8 +1,8 @@
+import { EnrollRequestDto } from '@domain/deployment-agent/dto/request/enroll-request.dto';
+import { StatusReportDto } from '@domain/deployment-agent/dto/request/status-report.dto';
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiHeader, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { SuccessResponseDto } from '@vritti/api-sdk/database';
-import { EnrollRequestDto } from '../dto/request/enroll-request.dto';
-import { StatusReportDto } from '../dto/request/status-report.dto';
 import { EnrollResponseDto } from '../dto/response/enroll-response.dto';
 import { SignedDesiredStateDto } from '../dto/response/signed-desired-state.dto';
 
@@ -27,12 +27,16 @@ export function ApiGetDesiredState() {
     ApiOperation({
       summary: 'Get signed desired-state',
       description:
-        'Returns the signed desired-state the agent reconciles toward. Authenticated by the agent bearer credential plus an Ed25519 signature over the (empty) raw body. The generation bumps only when the built payload changes.',
+        'Returns the signed desired-state the agent reconciles toward. Authenticated by the agent bearer credential plus an Ed25519 signature over `<X-Vritti-Timestamp>.<raw body>` (body empty for this GET). The generation bumps only when the built payload changes.',
     }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiHeader({ name: 'Authorization', description: 'Bearer <agentCredential>' }),
     ApiHeader({ name: 'X-Vritti-Agent-Key', description: 'Agent Ed25519 public key (base64 raw 32-byte)' }),
-    ApiHeader({ name: 'X-Vritti-Signature', description: 'Ed25519 signature over the raw body (base64)' }),
+    ApiHeader({
+      name: 'X-Vritti-Timestamp',
+      description: 'Unix time in seconds (decimal string); rejected beyond ±5min skew',
+    }),
+    ApiHeader({ name: 'X-Vritti-Signature', description: 'Ed25519 signature over `<timestamp>.<raw body>` (base64)' }),
     ApiResponse({ status: 200, description: 'Signed desired-state.', type: SignedDesiredStateDto }),
     ApiResponse({ status: 401, description: 'Unauthenticated agent request.' }),
     ApiResponse({ status: 404, description: 'Deployment not found.' }),
@@ -44,12 +48,16 @@ export function ApiAgentStatus() {
     ApiOperation({
       summary: 'Report agent status',
       description:
-        'Records an agent heartbeat (phase, applied generation, container states, Gitea provisioning). Authenticated like the desired-state endpoint.',
+        'Records an agent heartbeat (phase, applied generation, container states, Gitea provisioning). Authenticated like the desired-state endpoint (Ed25519 over `<X-Vritti-Timestamp>.<raw body>`).',
     }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiHeader({ name: 'Authorization', description: 'Bearer <agentCredential>' }),
     ApiHeader({ name: 'X-Vritti-Agent-Key', description: 'Agent Ed25519 public key (base64 raw 32-byte)' }),
-    ApiHeader({ name: 'X-Vritti-Signature', description: 'Ed25519 signature over the raw body (base64)' }),
+    ApiHeader({
+      name: 'X-Vritti-Timestamp',
+      description: 'Unix time in seconds (decimal string); rejected beyond ±5min skew',
+    }),
+    ApiHeader({ name: 'X-Vritti-Signature', description: 'Ed25519 signature over `<timestamp>.<raw body>` (base64)' }),
     ApiBody({ type: StatusReportDto }),
     ApiResponse({ status: 200, description: 'Status recorded.', type: SuccessResponseDto }),
     ApiResponse({ status: 401, description: 'Unauthenticated agent request.' }),

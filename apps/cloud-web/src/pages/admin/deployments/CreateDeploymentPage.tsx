@@ -9,7 +9,11 @@ import type React from 'react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
-import { type CreateDeploymentData, createDeploymentSchema } from '@/schemas/admin/deployments';
+import {
+  type CreateDeploymentData,
+  createDeploymentSchema,
+  DEFAULT_SECRET_PROVIDER,
+} from '@/schemas/admin/deployments';
 import { DetailsStep } from './steps/DetailsStep';
 import { ModeStep } from './steps/ModeStep';
 import { ReviewStep } from './steps/ReviewStep';
@@ -28,7 +32,16 @@ export const CreateDeploymentPage: React.FC = () => {
 
   const form = useForm<CreateDeploymentData>({
     resolver: zodResolver(createDeploymentSchema),
-    defaultValues: { name: '', url: '', type: 'shared', version: '' },
+    defaultValues: {
+      name: '',
+      url: '',
+      type: 'shared',
+      version: '',
+      acmeEmail: '',
+      domains: [],
+      secretProvider: DEFAULT_SECRET_PROVIDER,
+      secretProviderSecrets: {},
+    },
   });
 
   const createMutation = useCreateDeployment({

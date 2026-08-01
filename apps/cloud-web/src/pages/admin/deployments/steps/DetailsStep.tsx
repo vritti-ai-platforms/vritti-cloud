@@ -10,6 +10,7 @@ import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import type { CreateDeploymentData } from '@/schemas/admin/deployments';
+import { AgentDomainsAndSecretStore } from '../components/AgentDomainsAndSecretStore';
 
 interface DetailsStepProps {
   form: UseFormReturn<CreateDeploymentData>;
@@ -51,6 +52,8 @@ export const DetailsStep: React.FC<DetailsStepProps> = ({ form, onBack, onContin
             disabled={!regionId}
             params={regionId ? { regionId: String(regionId) } : undefined}
           />
+          <TextField name="acmeEmail" label="ACME Email" placeholder="admin@vrittiai.com" />
+          <AgentDomainsAndSecretStore secretPlaceholder={(label) => `Enter ${label.toLowerCase()}`} />
         </>
       )}
 

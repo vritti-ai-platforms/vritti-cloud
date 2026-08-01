@@ -11,7 +11,14 @@ import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
 import { useForm } from 'react-hook-form';
 import type { Deployment } from '@/schemas/admin/deployments';
-import { type UpdateDeploymentData, updateDeploymentSchema } from '@/schemas/admin/deployments';
+import {
+  assembleSecretProvider,
+  DEFAULT_SECRET_PROVIDER,
+  DEPLOYMENT_STATUS_OPTIONS,
+  type UpdateDeploymentData,
+  updateDeploymentSchema,
+} from '@/schemas/admin/deployments';
+import { AgentDomainsAndSecretStore } from '../components/AgentDomainsAndSecretStore';
 
 interface EditDeploymentFormProps {
   deployment: Deployment;
@@ -20,6 +27,8 @@ interface EditDeploymentFormProps {
 }
 
 export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployment, onSuccess, onCancel }) => {
+  const isManual = deployment.managementMode === 'manual';
+
   const form = useForm<UpdateDeploymentData>({
     resolver: zodResolver(updateDeploymentSchema),
     defaultValues: {
@@ -30,12 +39,14 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       type: deployment.type,
       status: deployment.status,
       version: deployment.version ?? '',
+      acmeEmail: deployment.acmeEmail ?? '',
+      domains: deployment.domains,
+      secretProvider: isManual ? undefined : (deployment.secretProvider ?? DEFAULT_SECRET_PROVIDER),
+      secretProviderSecrets: {},
     },
   });
 
   const updateMutation = useUpdateDeployment({ onSuccess });
-
-  const isManual = deployment.managementMode === 'manual';
 
   return (
     <Form
@@ -43,7 +54,10 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       mutation={updateMutation}
       resetOnSuccess={false}
       onCancel={onCancel}
-      transformSubmit={(data) => ({ id: deployment.id, data })}
+      transformSubmit={(data) => ({
+        id: deployment.id,
+        data: isManual ? data : { ...data, ...assembleSecretProvider(data) },
+      })}
     >
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="URL" placeholder="https://nexus-us-east.vrittiai.com" />
@@ -56,6 +70,8 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
             onOptionSelect={() => form.setValue('cloudProviderId', '')}
           />
           <CloudProviderSelector name="cloudProviderId" label="Cloud Provider" placeholder="Select provider" />
+          <TextField name="acmeEmail" label="ACME Email" placeholder="admin@vrittiai.com" />
+          <AgentDomainsAndSecretStore secretPlaceholder={() => 'Leave blank to keep existing'} />
         </>
       )}
       <VersionSelector name="version" label="Version" placeholder="Select version" />
@@ -67,15 +83,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
           { value: 'dedicated', label: 'Dedicated' },
         ]}
       />
-      <Select
-        name="status"
-        label="Status"
-        options={[
-          { value: 'active', label: 'Active' },
-          { value: 'stopped', label: 'Stopped' },
-          { value: 'provisioning', label: 'Provisioning' },
-        ]}
-      />
+      <Select name="status" label="Status" options={DEPLOYMENT_STATUS_OPTIONS} />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>
           Cancel

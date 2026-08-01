@@ -10,4 +10,7 @@ export class EnrollTokenDto {
 
   @ApiProperty({ description: 'Deployment public key (base64 raw 32-byte Ed25519, Keypair B) for the connect step' })
   deploymentPubKey: string;
+
+  @ApiProperty({ description: 'Agent API base URL to set as VRITTI_CLOUD_API_URL on the deployment VM' })
+  cloudApiUrl: string;
 }

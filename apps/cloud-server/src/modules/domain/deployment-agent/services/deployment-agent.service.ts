@@ -1,35 +1,66 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { hashToken } from '@vritti/api-sdk/auth';
 import { CreateResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import { canonicalStringify, generateSigningKeyPair } from '@vritti/api-sdk/signing';
-import type { Deployment, DeploymentAgent } from '@/db/schema';
+import type { Deployment, DeploymentAgent, DeploymentCertificate, DeploymentSecret } from '@/db/schema';
 import { DeploymentManagementModeValues } from '@/db/schema';
-import { AgentStatusDto } from '@/modules/admin-api/deployment/agent/dto/entity/agent-status.dto';
-import { EnrollTokenDto } from '@/modules/admin-api/deployment/agent/dto/response/enroll-token.dto';
-import type { EnrollRequestDto } from '@/modules/agent-api/dto/request/enroll-request.dto';
-import type { StatusReportDto } from '@/modules/agent-api/dto/request/status-report.dto';
-import type { EnrollResponseDto } from '@/modules/agent-api/dto/response/enroll-response.dto';
-import type { SignedDesiredStateDto } from '@/modules/agent-api/dto/response/signed-desired-state.dto';
+import { CryptoService } from '@/services';
 import {
   generateOpaqueToken,
+  sealToAgent,
   signEd25519B64,
   spkiToRawEd25519PubB64,
   verifyEd25519RawPubB64,
 } from '../agent-crypto.util';
 import { ENROLL_TOKEN_TTL_MS } from '../deployment-agent.constants';
+import type { EnrollRequestDto } from '../dto/request/enroll-request.dto';
+import type { CertificateReportDto, StatusReportDto } from '../dto/request/status-report.dto';
 import { DeploymentAgentDomainRepository } from '../repositories/deployment-agent.repository';
+import { DeploymentCertificateDomainRepository } from '../repositories/deployment-certificate.repository';
 import { DeploymentSecretDomainRepository } from '../repositories/deployment-secret.repository';
 import { DesiredStateDomainService } from './desired-state.service';
 
-// Context extracted from the signed agent request (raw body + Ed25519 signature headers)
+// Context extracted from the signed agent request (signed message bytes + Ed25519 signature headers)
 export interface AgentRequestContext {
   deploymentId: string | undefined;
   agentKeyB64: string | undefined;
   signatureB64: string | undefined;
   rawBody: string;
   bearer: string | undefined;
+}
+
+// One-time enroll token payload (the controller shapes this into the admin EnrollTokenDto)
+export interface EnrollTokenData {
+  token: string;
+  expiresAt: Date;
+  deploymentPubKey: string;
+  cloudApiUrl: string;
+}
+
+// Successful-enrollment result (the controller shapes this into the agent-api EnrollResponseDto)
+export interface EnrollResult {
+  agentCredential: string;
+  deploymentPubKey: string;
+  nonce: string;
+  nonceSignature: string;
+}
+
+// Raw agent-status pieces (the controller shapes these into the admin AgentStatusDto)
+export interface AgentStatusData {
+  deploymentId: string;
+  agent: DeploymentAgent | undefined;
+  desiredGeneration: number;
+  deploymentPubKey: string | null;
+  certificates: DeploymentCertificate[];
+}
+
+// Signed desired-state bytes + signature (the controller shapes these into the agent-api SignedDesiredStateDto)
+export interface SignedDesiredState {
+  payloadB64: string;
+  signature: string;
 }
 
 @Injectable()
@@ -39,11 +70,14 @@ export class DeploymentAgentDomainService {
   constructor(
     private readonly agentRepository: DeploymentAgentDomainRepository,
     private readonly secretRepository: DeploymentSecretDomainRepository,
+    private readonly certificateRepository: DeploymentCertificateDomainRepository,
     private readonly desiredStateService: DesiredStateDomainService,
+    private readonly configService: ConfigService,
+    private readonly cryptoService: CryptoService,
   ) {}
 
   // Issues a one-time enroll token for a managed deployment, ensuring Keypair B exists first (admin)
-  async issueEnrollToken(deploymentId: string): Promise<CreateResponseDto<EnrollTokenDto>> {
+  async issueEnrollToken(deploymentId: string): Promise<CreateResponseDto<EnrollTokenData>> {
     const deployment = await this.requireDeployment(deploymentId);
     if (deployment.managementMode !== DeploymentManagementModeValues.agent) {
       throw new BadRequestException({
@@ -56,26 +90,29 @@ export class DeploymentAgentDomainService {
     const expiresAt = new Date(Date.now() + ENROLL_TOKEN_TTL_MS);
     await this.agentRepository.replaceWithPending(deploymentId, hashToken(token), expiresAt);
     this.logger.log(`Issued enroll token for deployment ${deploymentId}`);
+    // The agent API is served on the api. subdomain of the cloud's base domain (VRITTI_CLOUD_API_URL).
+    const cloudApiUrl = `https://api.${this.configService.getOrThrow<string>('BASE_DOMAIN')}`;
     return {
       success: true,
       message: 'Enroll token issued. Copy it now — it is shown only once.',
-      data: { token, expiresAt, deploymentPubKey: rawPublicKeyB64 },
+      data: { token, expiresAt, deploymentPubKey: rawPublicKeyB64, cloudApiUrl },
     };
   }
 
-  // Returns agent status for the admin console / connect polling
-  async getAgentStatus(deploymentId: string): Promise<AgentStatusDto> {
+  // Returns raw agent-status pieces for the admin console / connect polling (shaped by the controller)
+  async getAgentStatus(deploymentId: string): Promise<AgentStatusData> {
     const deployment = await this.requireDeployment(deploymentId);
     const agent = await this.agentRepository.findByDeploymentId(deploymentId);
+    const certificates = await this.certificateRepository.findByDeploymentId(deploymentId);
     const deploymentPubKey = deployment.agentSigningPublicKey
       ? spkiToRawEd25519PubB64(deployment.agentSigningPublicKey)
       : null;
     this.logger.log(`Fetched agent status for deployment ${deploymentId}`);
-    return AgentStatusDto.from(deploymentId, agent, deployment.desiredGeneration, deploymentPubKey);
+    return { deploymentId, agent, desiredGeneration: deployment.desiredGeneration, deploymentPubKey, certificates };
   }
 
   // Completes the one-time enrollment handshake: trust-on-first-use signature + enroll token
-  async enroll(dto: EnrollRequestDto, ctx: AgentRequestContext): Promise<EnrollResponseDto> {
+  async enroll(dto: EnrollRequestDto, ctx: AgentRequestContext): Promise<EnrollResult> {
     // Trust-on-first-use: the request body must be signed by the signing key presented in the body
     if (ctx.agentKeyB64 !== dto.signingPubKey || !ctx.signatureB64) {
       throw new UnauthorizedException('Enrollment signature key mismatch.');
@@ -127,38 +164,67 @@ export class DeploymentAgentDomainService {
   }
 
   // Builds, generation-stamps, and signs the desired-state for an enrolled deployment
-  async getSignedDesiredState(deploymentId: string): Promise<SignedDesiredStateDto> {
+  async getSignedDesiredState(deploymentId: string): Promise<SignedDesiredState> {
     const deployment = await this.requireDeployment(deploymentId);
     if (!deployment.agentSigningKey) {
       throw new BadRequestException('Deployment has no agent signing key. Re-issue an enroll token.');
     }
-    const sealedSecrets = await this.resolveSealedSecrets(deployment);
-    const payload = this.desiredStateService.build(deployment, sealedSecrets);
 
-    // Hash the content (generation still 0) so the generation only bumps when the real payload changes
-    const hash = createHash('sha256').update(canonicalStringify(payload), 'utf8').digest('hex');
+    // Load operator secrets + the enrolled agent once — used for both the staleness fingerprint and the sealing
+    const secrets = await this.secretRepository.findByDeploymentId(deployment.id);
+    const agent = await this.agentRepository.findEnrolledByDeploymentId(deployment.id);
+
+    // Build the desired-state WITHOUT sealed ciphertext, then hash a DETERMINISTIC representation.
+    // crypto_box_seal uses a fresh ephemeral keypair per call, so the sealed bytes differ on every build;
+    // hashing the pre-seal payload + a secret fingerprint (name + updatedAt) keeps the generation stable across polls.
+    const payload = this.desiredStateService.build(deployment, {});
+    const hash = createHash('sha256')
+      .update(canonicalStringify({ payload, secrets: this.secretFingerprint(secrets) }), 'utf8')
+      .digest('hex');
+
     let generation = deployment.desiredGeneration;
     if (hash !== deployment.lastDesiredHash) {
       generation = deployment.desiredGeneration + 1;
       await this.agentRepository.setDesiredState(deploymentId, generation, hash);
       this.logger.log(`Bumped desired-state generation for deployment ${deploymentId} → ${generation}`);
     }
+
+    // Seal secrets and finalize the payload only after the generation decision (sealing never affects the hash)
+    payload.sealedSecrets = await this.sealSecrets(deployment, secrets, agent);
     payload.generation = generation;
 
     const payloadB64 = canonicalStringify(payload);
     const signature = signEd25519B64(deployment.agentSigningKey, payloadB64);
-    return { payload, payloadB64, signature };
+    return { payloadB64, signature };
   }
 
-  // Records an agent heartbeat (phase, generation, gitea provisioning)
+  // Records an agent heartbeat (phase, generation, gitea provisioning) and tracks reported certificates
   async recordStatus(agent: DeploymentAgent, dto: StatusReportDto): Promise<void> {
+    // The guard-resolved agent is authoritative — reject a body whose deploymentId disagrees
+    if (dto.deploymentId !== agent.deploymentId) {
+      throw new BadRequestException('Status report deploymentId does not match the authenticated agent.');
+    }
     await this.agentRepository.recordHeartbeat(agent.id, {
       generation: dto.generation,
       phase: dto.phase,
       message: dto.message ?? null,
       giteaProvisioned: dto.giteaProvisioned ?? false,
     });
-    this.logger.log(`Recorded status for deployment ${dto.deploymentId} (phase ${dto.phase}, gen ${dto.generation})`);
+    await this.recordCertificates(agent.deploymentId, dto.certificates);
+    this.logger.log(`Recorded status for deployment ${agent.deploymentId} (phase ${dto.phase}, gen ${dto.generation})`);
+  }
+
+  // Upserts each reported certificate by (deployment, host) — cloud-server is the system of record for expiry
+  private async recordCertificates(deploymentId: string, certificates?: CertificateReportDto[]): Promise<void> {
+    if (!certificates?.length) return;
+    for (const cert of certificates) {
+      await this.certificateRepository.upsertByHost(deploymentId, {
+        host: cert.host,
+        notAfter: new Date(cert.notAfter),
+        issuedAt: new Date(cert.issuedAt),
+      });
+    }
+    this.logger.log(`Tracked ${certificates.length} certificate(s) for deployment ${deploymentId}`);
   }
 
   // Ensures Keypair B exists on the deployment, generating and persisting it lazily; returns the private + raw public key
@@ -177,16 +243,35 @@ export class DeploymentAgentDomainService {
     return { privateKey, rawPublicKeyB64: spkiToRawEd25519PubB64(publicKey) };
   }
 
-  // Resolves operator secrets to sealed ciphertext for the agent — MVP returns empty (reseal not yet implemented)
-  private async resolveSealedSecrets(deployment: Deployment): Promise<Record<string, string>> {
-    const secrets = await this.secretRepository.findByDeploymentId(deployment.id);
+  // Deterministic per-secret fingerprint (name → updatedAt/createdAt ISO) — excludes the ciphertext so re-sealing never churns the hash
+  private secretFingerprint(secrets: DeploymentSecret[]): Record<string, string> {
+    const fingerprint: Record<string, string> = {};
+    for (const secret of secrets) {
+      fingerprint[secret.name] = (secret.updatedAt ?? secret.createdAt).toISOString();
+    }
+    return fingerprint;
+  }
+
+  // Decrypts each operator secret at rest and reseals it to the enrolled agent's X25519 sealing pubkey (name → sealed b64)
+  private async sealSecrets(
+    deployment: Deployment,
+    secrets: DeploymentSecret[],
+    agent: DeploymentAgent | undefined,
+  ): Promise<Record<string, string>> {
     if (secrets.length === 0) return {};
-    // TODO(agent-secrets): decrypt-at-rest then reseal each to the agent's X25519 sealing pubkey via crypto_box_seal.
-    // Blocked until a libsodium-compatible dep is added (see agent-crypto.util.sealToAgentX25519).
-    this.logger.warn(
-      `Deployment ${deployment.id} has ${secrets.length} operator secret(s) but sealing is not implemented — omitting from desired-state`,
-    );
-    return {};
+    if (!agent?.agentSealingPubKey) {
+      this.logger.warn(
+        `Deployment ${deployment.id} has ${secrets.length} operator secret(s) but no enrolled agent sealing key — omitting from desired-state`,
+      );
+      return {};
+    }
+    const sealed: Record<string, string> = {};
+    for (const secret of secrets) {
+      const plaintext = this.cryptoService.decrypt(secret.encryptedValue);
+      sealed[secret.name] = await sealToAgent(plaintext, agent.agentSealingPubKey);
+    }
+    this.logger.log(`Sealed ${secrets.length} operator secret(s) for deployment ${deployment.id}`);
+    return sealed;
   }
 
   // Constant-time comparison of a bearer credential against its stored sha256 hash
