@@ -1,5 +1,5 @@
 import type { StepDef } from '@vritti/quantum-ui/StepProgressIndicator';
-import { Blocks, Boxes, Database, KeyRound, Link2, RefreshCw, ServerCog, Settings2 } from 'lucide-react';
+import { Blocks, Boxes, Database, FileSignature, KeyRound, Link2, RefreshCw, ServerCog, Settings2 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { AgentStatus, Deployment } from '@/schemas/admin/deployments';
 
@@ -8,6 +8,7 @@ export type AgentStepId =
   | 'database'
   | 'addons'
   | 'secret-store'
+  | 'signing-key'
   | 'enroll'
   | 'connect'
   | 'provision'
@@ -27,6 +28,7 @@ export const AGENT_WIZARD_STEPS: WizardStep<AgentStepId>[] = [
   { id: 'database', label: 'Database', icon: <Database className="h-4 w-4" /> },
   { id: 'addons', label: 'Add-ons', icon: <Blocks className="h-4 w-4" /> },
   { id: 'secret-store', label: 'Secret Store', icon: <KeyRound className="h-4 w-4" /> },
+  { id: 'signing-key', label: 'Signing Key', icon: <FileSignature className="h-4 w-4" /> },
   { id: 'enroll', label: 'Enroll', icon: <ServerCog className="h-4 w-4" /> },
   { id: 'connect', label: 'Connect', icon: <Link2 className="h-4 w-4" /> },
   { id: 'provision', label: 'Provision', icon: <Boxes className="h-4 w-4" /> },
@@ -63,8 +65,12 @@ export function isFailingPhase(agent: AgentStatus): boolean {
 // Resume: for an agent deployment whose config is already persisted, re-enter the lifecycle half at
 // the first incomplete step.
 export function deriveAgentLifecycleStep(
+  deployment: Deployment,
   agent: AgentStatus,
-): Extract<AgentStepId, 'enroll' | 'connect' | 'provision' | 'sync'> {
+): Extract<AgentStepId, 'signing-key' | 'enroll' | 'connect' | 'provision' | 'sync'> {
+  // The license signing key (LICENSE_PUBLIC_KEY) must exist before the agent provisions core-server,
+  // so it gates the lifecycle: no enrolling until the key is generated.
+  if (!deployment.hasSigningKey) return 'signing-key';
   if (!agent.enrolled) return agent.status === 'pending' ? 'connect' : 'enroll';
   if (!isReconcileReady(agent)) return 'provision';
   return 'sync';

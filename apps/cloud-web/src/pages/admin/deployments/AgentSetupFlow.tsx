@@ -4,6 +4,7 @@ import {
   useAgentStatus,
   useDeleteDeployment,
   useIssueEnrollToken,
+  useRegenerateSigningKey,
   useSyncDeploymentCatalog,
 } from '@hooks/admin/deployments';
 import { useQueryClient } from '@tanstack/react-query';
@@ -17,12 +18,13 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Spinner } from '@vritti/quantum-ui/Spinner';
 import { StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator';
 import { Typography } from '@vritti/quantum-ui/Typography';
-import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, RefreshCw, ServerCog } from 'lucide-react';
+import { AlertCircle, ArrowLeft, ArrowRight, CheckCircle2, KeyRound, RefreshCw, ServerCog } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { AgentStatus, Deployment, EnrollToken } from '@/schemas/admin/deployments';
+import type { AgentStatus, Deployment, DeploymentSigningKey, EnrollToken } from '@/schemas/admin/deployments';
 import { AgentEnrollReveal } from './components/AgentEnrollReveal';
+import { SigningKeyReveal } from './components/SigningKeyReveal';
 import {
   AGENT_WIZARD_STEPS,
   type AgentStepId,
@@ -33,7 +35,7 @@ import {
   toStepDefs,
 } from './wizardSteps';
 
-type LifecycleStep = Extract<AgentStepId, 'enroll' | 'connect' | 'provision' | 'sync'>;
+type LifecycleStep = Extract<AgentStepId, 'signing-key' | 'enroll' | 'connect' | 'provision' | 'sync'>;
 
 interface AgentSetupFlowProps {
   deployment: Deployment;
@@ -45,8 +47,9 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const [step, setStep] = useState<LifecycleStep>(() => deriveAgentLifecycleStep(initialAgent));
+  const [step, setStep] = useState<LifecycleStep>(() => deriveAgentLifecycleStep(deployment, initialAgent));
   const [enrollToken, setEnrollToken] = useState<EnrollToken | null>(null);
+  const [signingKey, setSigningKey] = useState<DeploymentSigningKey | null>(null);
 
   const deleteMutation = useDeleteDeployment({ onSuccess: () => navigate('/deployments') });
 
@@ -79,6 +82,13 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
     },
   });
 
+  const regenerateMutation = useRegenerateSigningKey({
+    onSuccess: (response) => {
+      setSigningKey(response.data);
+      queryClient.invalidateQueries({ queryKey: deploymentQueryKey(deployment.id) });
+    },
+  });
+
   const syncCatalogMutation = useSyncDeploymentCatalog({
     onSuccess: () => queryClient.invalidateQueries({ queryKey: deploymentQueryKey(deployment.id) }),
   });
@@ -104,6 +114,63 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
         currentStep={stepNumber(AGENT_WIZARD_STEPS, step)}
       />
 
+      {step === 'signing-key' && (
+        <Card>
+          <CardContent className="flex flex-col gap-4 py-6">
+            <div className="space-y-1">
+              <Typography variant="h6">Generate signing key</Typography>
+              <Typography variant="body2" intent="muted">
+                Generate this deployment's keypair. Its public key is embedded in core-server as the license key so it
+                can verify signed catalog + entitlement pushes from cloud. Generate it before enrolling so the agent
+                provisions with the real key.
+              </Typography>
+            </div>
+
+            {signingKey ? (
+              <>
+                <SigningKeyReveal signingKey={signingKey} />
+                <div className="flex justify-end">
+                  <Button onClick={() => setStep('enroll')} endAdornment={<ArrowRight className="size-4" />}>
+                    Continue
+                  </Button>
+                </div>
+              </>
+            ) : deployment.hasSigningKey ? (
+              <>
+                <Typography variant="body2" intent="muted">
+                  Signing key already generated — regenerate if you've lost it (takes effect on the next provision).
+                </Typography>
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => regenerateMutation.mutate(deployment.id)}
+                    isLoading={regenerateMutation.isPending}
+                    loadingText="Regenerating..."
+                    startAdornment={<KeyRound className="size-4" />}
+                  >
+                    Regenerate Signing Key
+                  </Button>
+                  <Button onClick={() => setStep('enroll')} endAdornment={<ArrowRight className="size-4" />}>
+                    Continue
+                  </Button>
+                </div>
+              </>
+            ) : (
+              <div className="flex justify-end">
+                <Button
+                  onClick={() => regenerateMutation.mutate(deployment.id)}
+                  isLoading={regenerateMutation.isPending}
+                  loadingText="Generating..."
+                  startAdornment={<KeyRound className="size-4" />}
+                >
+                  Generate Signing Key
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {step === 'enroll' && (
         <Card>
           <CardContent className="flex flex-col gap-4 py-6">
@@ -118,7 +185,14 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
             {enrollToken ? (
               <>
                 <AgentEnrollReveal enrollToken={enrollToken} deploymentId={deployment.id} />
-                <div className="flex justify-end">
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setStep('signing-key')}
+                    startAdornment={<ArrowLeft className="size-4" />}
+                  >
+                    Back
+                  </Button>
                   <Button onClick={() => setStep('connect')} endAdornment={<ArrowRight className="size-4" />}>
                     Continue
                   </Button>
@@ -133,20 +207,36 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
                 <div className="flex justify-between">
                   <Button
                     variant="outline"
-                    onClick={() => enrollMutation.mutate(deployment.id)}
-                    isLoading={enrollMutation.isPending}
-                    loadingText="Generating..."
-                    startAdornment={<RefreshCw className="size-4" />}
+                    onClick={() => setStep('signing-key')}
+                    startAdornment={<ArrowLeft className="size-4" />}
                   >
-                    Regenerate Token
+                    Back
                   </Button>
-                  <Button onClick={() => setStep('connect')} endAdornment={<ArrowRight className="size-4" />}>
-                    Continue
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => enrollMutation.mutate(deployment.id)}
+                      isLoading={enrollMutation.isPending}
+                      loadingText="Generating..."
+                      startAdornment={<RefreshCw className="size-4" />}
+                    >
+                      Regenerate Token
+                    </Button>
+                    <Button onClick={() => setStep('connect')} endAdornment={<ArrowRight className="size-4" />}>
+                      Continue
+                    </Button>
+                  </div>
                 </div>
               </>
             ) : (
-              <div className="flex justify-end">
+              <div className="flex justify-between">
+                <Button
+                  variant="outline"
+                  onClick={() => setStep('signing-key')}
+                  startAdornment={<ArrowLeft className="size-4" />}
+                >
+                  Back
+                </Button>
                 <Button
                   onClick={() => enrollMutation.mutate(deployment.id)}
                   isLoading={enrollMutation.isPending}
