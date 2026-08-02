@@ -1,5 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { type Feature, type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema';
+import {
+  type Feature,
+  type ScopeType,
+  ScopeTypeValues,
+  type ServiceType,
+  ServiceTypeValues,
+  type SiteApplies,
+  SiteAppliesValues,
+} from '@/db/schema';
 
 export class FeatureDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -55,6 +63,14 @@ export class FeatureDto {
   @ApiProperty({ example: ['WEB', 'MOBILE'], type: [String] })
   platforms: string[];
 
+  @ApiProperty({
+    enum: ServiceTypeValues,
+    isArray: true,
+    example: ['GITEA'],
+    description: 'External services the org must have provisioned before this feature unlocks',
+  })
+  services: ServiceType[];
+
   @ApiProperty({ example: 2, description: 'Number of businesses whose apps include this feature' })
   businessCount: number;
 
@@ -68,6 +84,7 @@ export class FeatureDto {
     permissions: string[] = [],
     platforms: string[] = [],
     appRefCount = 0,
+    services: ServiceType[] = [],
   ): FeatureDto {
     const dto = new FeatureDto();
     dto.id = feature.id;
@@ -86,6 +103,7 @@ export class FeatureDto {
     dto.updatedAt = feature.updatedAt;
     dto.permissions = permissions;
     dto.platforms = platforms;
+    dto.services = services;
     dto.businessCount = businessCount;
     dto.canDelete = appRefCount === 0;
     return dto;

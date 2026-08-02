@@ -148,16 +148,20 @@ export const OrgMemberRoleValues = { Owner: 'Owner' as const, Admin: 'Admin' as 
 
 // Deployment enums
 export const deploymentStatusEnum = cloudSchema.enum('DeploymentStatus', ['active', 'stopped', 'Provisioning']);
-export const deploymentTypeEnum = cloudSchema.enum('DeploymentType', ['shared', 'dedicated']);
+// Tenancy of the deployment — shared = many orgs on one instance; dedicated = a single org owns it
+export const deploymentTenantTypeEnum = cloudSchema.enum('DeploymentTenantType', ['shared', 'dedicated']);
 export const deploymentManagementModeEnum = cloudSchema.enum('DeploymentManagementMode', ['manual', 'agent']);
 // DB provisioning mode — managed = agent runs its own Postgres container; external = agent connects to an existing DB
 export const deploymentDbModeEnum = cloudSchema.enum('DeploymentDbMode', ['managed', 'external']);
 // HTTP edge mode — managed = agent runs its own nginx+certbot edge; external = another proxy fronts core (nginx off)
 export const deploymentEdgeEnum = cloudSchema.enum('DeploymentEdge', ['managed', 'external']);
+// Where core-server answers — deployed = behind an edge that serves it on `api.<host>`; local = served directly on `url`
+export const deploymentTypeEnum = cloudSchema.enum('DeploymentType', ['deployed', 'local']);
 // Lifecycle of an agent enrolled against an agent-managed deployment
 export const deploymentAgentStatusEnum = cloudSchema.enum('DeploymentAgentStatus', ['pending', 'enrolled', 'revoked']);
 
 export type DeploymentStatus = (typeof deploymentStatusEnum.enumValues)[number];
+export type DeploymentTenantType = (typeof deploymentTenantTypeEnum.enumValues)[number];
 export type DeploymentType = (typeof deploymentTypeEnum.enumValues)[number];
 export type DeploymentManagementMode = (typeof deploymentManagementModeEnum.enumValues)[number];
 export type DeploymentDbMode = (typeof deploymentDbModeEnum.enumValues)[number];
@@ -170,9 +174,14 @@ export const DeploymentStatusValues = {
   Provisioning: 'Provisioning' as const,
 };
 
-export const DeploymentTypeValues = {
+export const DeploymentTenantTypeValues = {
   shared: 'shared' as const,
   dedicated: 'dedicated' as const,
+};
+
+export const DeploymentTypeValues = {
+  deployed: 'deployed' as const,
+  local: 'local' as const,
 };
 
 export const DeploymentManagementModeValues = {
@@ -230,6 +239,13 @@ export const SiteAppliesValues = {
   OUTLET: 'OUTLET' as const,
   WAREHOUSE: 'WAREHOUSE' as const,
   PRODUCTION: 'PRODUCTION' as const,
+};
+
+// External services a feature depends on — the org must have the service provisioned before the feature unlocks
+export const serviceTypeEnum = cloudSchema.enum('ServiceType', ['GITEA']);
+export type ServiceType = (typeof serviceTypeEnum.enumValues)[number];
+export const ServiceTypeValues = {
+  GITEA: 'GITEA' as const,
 };
 
 // Feature scope — the entity level a feature operates at (org, legal entity, site group, or site)

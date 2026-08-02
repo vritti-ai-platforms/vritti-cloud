@@ -7,6 +7,7 @@ import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import { type CatalogLicense, hashSnapshot, type OrgEntitlement, type SignedDocument } from '@vritti/api-sdk/license';
 import { signDocument } from '@vritti/api-sdk/signing';
 import type { Deployment, Organization } from '@/db/schema';
+import { coreBaseUrl } from '../core-url.util';
 import { CoreVersionRepository } from '../repositories/core-version.repository';
 import { requireSigningKey } from '../signing-key.util';
 import { CoreCatalogService } from './core-catalog.service';
@@ -79,7 +80,7 @@ export class CatalogSyncService {
   async syncSiteLocks(orgId: string, siteId: string): Promise<void> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     await this.coreSiteService.pushSiteLocks(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteId,
@@ -110,7 +111,7 @@ export class CatalogSyncService {
       issuedAt: new Date().toISOString(),
     };
     await this.coreCatalogService.pushCatalog(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       this.sign(license, deployment),
     );
@@ -128,7 +129,7 @@ export class CatalogSyncService {
         issuedAt: new Date().toISOString(),
       };
       await this.coreOrganizationService.pushEntitlement(
-        deployment.url,
+        coreBaseUrl(deployment),
         requireSigningKey(deployment),
         org.orgIdentifier,
         this.sign(entitlement, deployment),

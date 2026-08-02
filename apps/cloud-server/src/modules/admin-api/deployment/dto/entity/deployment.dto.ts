@@ -10,6 +10,8 @@ import {
   DeploymentManagementModeValues,
   type DeploymentStatus,
   DeploymentStatusValues,
+  type DeploymentTenantType,
+  DeploymentTenantTypeValues,
   type DeploymentType,
   DeploymentTypeValues,
 } from '@/db/schema';
@@ -35,7 +37,13 @@ export class DeploymentDto {
   @ApiProperty({ enum: DeploymentStatusValues })
   status: DeploymentStatus;
 
-  @ApiProperty({ enum: DeploymentTypeValues })
+  @ApiProperty({ enum: DeploymentTenantTypeValues })
+  tenantType: DeploymentTenantType;
+
+  @ApiProperty({
+    enum: DeploymentTypeValues,
+    description: 'deployed = core sits behind an edge on `api.<host>`; local = core answers directly on the url',
+  })
   type: DeploymentType;
 
   @ApiProperty({ enum: DeploymentManagementModeValues })
@@ -118,6 +126,7 @@ export class DeploymentDto {
     dto.regionId = deployment.regionId;
     dto.cloudProviderId = deployment.cloudProviderId;
     dto.status = deployment.status;
+    dto.tenantType = deployment.tenantType;
     dto.type = deployment.type;
     dto.managementMode = deployment.managementMode;
     dto.mode = deployment.mode;

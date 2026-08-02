@@ -30,7 +30,7 @@ export interface AdminOrganizationMember {
 export interface AdminOrganizationDetail extends AdminOrganization {
   planId: string;
   deploymentId: string;
-  deploymentType: string;
+  deploymentTenantType: string;
   businessId: string;
   regionName: string;
   regionCode: string;

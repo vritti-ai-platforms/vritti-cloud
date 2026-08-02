@@ -31,6 +31,7 @@ export * from './microfrontend';
 export * from './feature';
 export * from './feature-permission';
 export * from './feature-permission-dependency';
+export * from './feature-service';
 export * from './permission-business';
 export * from './app';
 export * from './app-feature';

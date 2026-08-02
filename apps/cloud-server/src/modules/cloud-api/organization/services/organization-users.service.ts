@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { DataTableStateService } from '@vritti/api-sdk/data-table';
 import type { SuccessResponseDto } from '@vritti/api-sdk/database';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreUserService } from '@/modules/core-server/services/core-user.service';
 import { requireSigningKey } from '@/modules/core-server/signing-key.util';
@@ -23,14 +24,18 @@ export class OrganizationUsersService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { limit = 20, offset = 0 } = state.pagination ?? {};
 
-    const { result, count } = await this.coreUserService.getUsersTable(deployment.url, requireSigningKey(deployment), {
-      orgId: org.orgIdentifier,
-      filters: state.filters?.length ? JSON.stringify(state.filters) : undefined,
-      search: state.search?.value ? JSON.stringify(state.search) : undefined,
-      sort: state.sort?.length ? JSON.stringify(state.sort) : undefined,
-      limit,
-      offset,
-    });
+    const { result, count } = await this.coreUserService.getUsersTable(
+      coreBaseUrl(deployment),
+      requireSigningKey(deployment),
+      {
+        orgId: org.orgIdentifier,
+        filters: state.filters?.length ? JSON.stringify(state.filters) : undefined,
+        search: state.search?.value ? JSON.stringify(state.search) : undefined,
+        sort: state.sort?.length ? JSON.stringify(state.sort) : undefined,
+        limit,
+        offset,
+      },
+    );
 
     return { result, count, state, activeViewId };
   }
@@ -38,13 +43,13 @@ export class OrganizationUsersService {
   // Returns all nexus portal users for the organization
   async getUsers(orgId: string): Promise<NexusUserResponseDto[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.getUsers(deployment.url, requireSigningKey(deployment), org.orgIdentifier);
+    return this.coreUserService.getUsers(coreBaseUrl(deployment), requireSigningKey(deployment), org.orgIdentifier);
   }
 
   // Invites a user to the organization in nexus
   async inviteUser(orgId: string, dto: InviteUserDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.inviteUser(deployment.url, requireSigningKey(deployment), {
+    return this.coreUserService.inviteUser(coreBaseUrl(deployment), requireSigningKey(deployment), {
       orgId: org.orgIdentifier,
       email: dto.email,
       fullName: dto.fullName,
@@ -57,7 +62,7 @@ export class OrganizationUsersService {
   async updateUser(orgId: string, userId: string, dto: UpdateOrgUserDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     return this.coreUserService.updateUser(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       userId,
@@ -68,6 +73,11 @@ export class OrganizationUsersService {
   // Resends invitation email to a pending user in nexus
   async resendInvite(orgId: string, userId: string): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
-    return this.coreUserService.resendInvite(deployment.url, requireSigningKey(deployment), org.orgIdentifier, userId);
+    return this.coreUserService.resendInvite(
+      coreBaseUrl(deployment),
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      userId,
+    );
   }
 }

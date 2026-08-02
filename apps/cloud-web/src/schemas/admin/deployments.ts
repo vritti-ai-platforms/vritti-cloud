@@ -39,7 +39,26 @@ export const DEPLOYMENT_EDGE_OPTIONS: { value: DeploymentEdgeMode; label: string
   { value: 'external', label: 'External' },
 ];
 
-type DeploymentType = 'shared' | 'dedicated';
+// Canonical deployment type values — must byte-match the backend deployment `type` enum.
+// 'deployed' = an edge fronts core and serves it on `api.<host>`; 'local' = core answers directly
+// on the deployment url (dev tunnel, or core on its own port) with no `api.` host to resolve.
+export const DEPLOYMENT_TYPE_VALUES = ['deployed', 'local'] as const;
+export type DeploymentType = (typeof DEPLOYMENT_TYPE_VALUES)[number];
+
+export const DEPLOYMENT_TYPE_OPTIONS: { value: DeploymentType; label: string }[] = [
+  { value: 'deployed', label: 'Deployed' },
+  { value: 'local', label: 'Local' },
+];
+
+// Tenancy of the deployment — must byte-match the backend `tenantType` enum.
+export const DEPLOYMENT_TENANT_TYPE_VALUES = ['shared', 'dedicated'] as const;
+export type DeploymentTenantType = (typeof DEPLOYMENT_TENANT_TYPE_VALUES)[number];
+
+export const DEPLOYMENT_TENANT_TYPE_OPTIONS: { value: DeploymentTenantType; label: string }[] = [
+  { value: 'shared', label: 'Shared' },
+  { value: 'dedicated', label: 'Dedicated' },
+];
+
 type DeploymentManagementMode = 'manual' | 'agent';
 
 export interface Domain {
@@ -168,6 +187,7 @@ export interface Deployment {
   regionId: string;
   cloudProviderId: string;
   status: DeploymentStatus;
+  tenantType: DeploymentTenantType;
   type: DeploymentType;
   version: string | null;
   acmeEmail: string | null;
@@ -336,7 +356,8 @@ export const createDeploymentSchema = z
     addonGitea: z.boolean().optional(),
     regionId: z.string().uuid('Please select a region').optional().or(z.literal('')),
     cloudProviderId: z.string().uuid('Please select a cloud provider').optional().or(z.literal('')),
-    type: z.enum(['shared', 'dedicated']).optional(),
+    tenantType: z.enum(DEPLOYMENT_TENANT_TYPE_VALUES).optional(),
+    type: z.enum(DEPLOYMENT_TYPE_VALUES).optional(),
     status: z.enum(DEPLOYMENT_STATUS_VALUES).optional(),
     version: z.string().min(1, 'Version is required').max(50),
     acmeEmail: acmeEmailCreateField,
@@ -386,7 +407,8 @@ export const updateDeploymentSchema = z
     addonGitea: z.boolean().optional(),
     regionId: z.string().uuid().optional(),
     cloudProviderId: z.string().uuid().optional(),
-    type: z.enum(['shared', 'dedicated']).optional(),
+    tenantType: z.enum(DEPLOYMENT_TENANT_TYPE_VALUES).optional(),
+    type: z.enum(DEPLOYMENT_TYPE_VALUES).optional(),
     status: z.enum(DEPLOYMENT_STATUS_VALUES).optional(),
     version: z.string().max(50).optional().or(z.literal('')),
     acmeEmail: acmeEmailUpdateField,

@@ -23,6 +23,8 @@ import {
   createDeploymentSchema,
   DEFAULT_SECRET_PROVIDER,
   DEPLOYMENT_DB_MODE_OPTIONS,
+  DEPLOYMENT_TENANT_TYPE_OPTIONS,
+  DEPLOYMENT_TYPE_OPTIONS,
   SECRET_AUTH_METHOD_FIELDS,
   type SecretAuthMethod,
 } from '@/schemas/admin/deployments';
@@ -74,7 +76,8 @@ export const DeploymentWizard: React.FC = () => {
       edge: 'managed',
       addonPgbackrest: false,
       addonGitea: false,
-      type: 'shared',
+      tenantType: 'shared',
+      type: 'deployed',
       version: '',
       acmeEmail: '',
       domains: [{ host: '', upstream: '' }],
@@ -172,16 +175,20 @@ const GeneralStep: React.FC<GeneralStepProps> = ({ form, isAgent, createMutation
       />
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="Endpoint URL" placeholder="https://nexus-us-east.vrittiai.com" />
+      <Select
+        name="type"
+        label="Deployment Type"
+        placeholder="Select type"
+        description="Deployed routes core through an edge at api.<host>; local reaches core directly on the URL above."
+        options={DEPLOYMENT_TYPE_OPTIONS}
+      />
       {isAgent && (
         <>
           <Select
-            name="type"
-            label="Deployment Type"
-            placeholder="Select type"
-            options={[
-              { value: 'shared', label: 'Shared' },
-              { value: 'dedicated', label: 'Dedicated' },
-            ]}
+            name="tenantType"
+            label="Tenancy"
+            placeholder="Select tenancy"
+            options={DEPLOYMENT_TENANT_TYPE_OPTIONS}
           />
           <RegionSelector
             name="regionId"

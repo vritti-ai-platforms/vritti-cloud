@@ -6,11 +6,12 @@ import {
   type SelectQueryResult,
 } from '@vritti/api-sdk/database';
 import { and, countDistinct, eq, inArray, ne, type SQL, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { Feature, ScopeType } from '@/db/schema';
+import type { Feature, NewFeature, ScopeType, ServiceType } from '@/db/schema';
 import {
   businessAppFeatures,
   businessApps,
   featurePermissions,
+  featureServices,
   features,
   permissionBusinesses,
   roleTemplateFeaturePermissions,
@@ -21,6 +22,7 @@ import {
 export type FeatureTableRow = Feature & {
   permissions: string[];
   platforms: string[];
+  services: ServiceType[];
   appFeatureCount: number;
   businessCount: number;
 };
@@ -153,11 +155,16 @@ export class FeatureDomainRepository extends PrimaryBaseRepository<typeof featur
           mapFromDriverValue: (value: unknown) =>
             Array.isArray(value) ? value : value === '{}' || !value ? [] : String(value).slice(1, -1).split(','),
         }),
+        services: sql<string[]>`array_remove(array_agg(distinct ${featureServices.service}), null)`.mapWith({
+          mapFromDriverValue: (value: unknown) =>
+            Array.isArray(value) ? value : value === '{}' || !value ? [] : String(value).slice(1, -1).split(','),
+        }),
         appFeatureCount: countDistinct(businessAppFeatures.id),
         businessCount: countDistinct(businessApps.businessId),
       },
       leftJoins: [
         { table: featurePermissions, on: eq(featurePermissions.featureId, features.id) },
+        { table: featureServices, on: eq(featureServices.featureId, features.id) },
         { table: businessAppFeatures, on: eq(businessAppFeatures.featureId, features.id) },
         { table: businessApps, on: eq(businessApps.id, businessAppFeatures.appId) },
       ],
@@ -208,6 +215,53 @@ export class FeatureDomainRepository extends PrimaryBaseRepository<typeof featur
         where af.feature_id = ${features.id} and a.business_id = ${businessId}
       )`;
     return this.findForSelect({ ...config, conditions: [...(config.conditions ?? []), available] });
+  }
+
+  // Inserts a feature row (and its required-service rows) in a transaction and returns it
+  async createWithServices(row: NewFeature, services: ServiceType[]): Promise<Feature> {
+    return this.transaction(async (tx) => {
+      const [created] = (await tx.insert(features).values(row).returning()) as Feature[];
+      if (services.length > 0) {
+        await tx.insert(featureServices).values(
+          services.map((service) => ({
+            versionId: created.versionId,
+            featureId: created.id,
+            service,
+          })),
+        );
+      }
+      return created;
+    });
+  }
+
+  // Updates a feature row and replaces its required-service rows in a transaction and returns it
+  async updateWithServices(
+    id: string,
+    versionId: string,
+    values: Partial<NewFeature>,
+    services: ServiceType[] | undefined,
+  ): Promise<Feature> {
+    return this.transaction(async (tx) => {
+      const [updated] = (await tx.update(features).set(values).where(eq(features.id, id)).returning()) as Feature[];
+
+      // Undefined means the caller didn't touch services — a partial PATCH must not wipe them
+      if (services !== undefined) {
+        await tx.delete(featureServices).where(eq(featureServices.featureId, id));
+        if (services.length > 0) {
+          await tx.insert(featureServices).values(services.map((service) => ({ versionId, featureId: id, service })));
+        }
+      }
+      return updated;
+    });
+  }
+
+  // Returns the service codes a feature requires
+  async findServices(featureId: string): Promise<ServiceType[]> {
+    const rows = await this.db
+      .select({ service: featureServices.service })
+      .from(featureServices)
+      .where(eq(featureServices.featureId, featureId));
+    return rows.map((row) => row.service);
   }
 
   // Sets the feature's web microfrontend link columns

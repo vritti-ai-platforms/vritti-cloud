@@ -22,6 +22,11 @@ export const OverviewTab = ({ feature }: OverviewTabProps) => {
               type="string"
               value={feature.scope === 'SITE' ? formatApplicableSiteTypes(feature.applicableSiteTypes ?? []) : null}
             />
+            <DetailField
+              label="Required Services"
+              type="string"
+              value={feature.services?.length ? feature.services.join(', ') : null}
+            />
           </div>
           <DetailField label="Description" type="string" value={feature.description} />
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">

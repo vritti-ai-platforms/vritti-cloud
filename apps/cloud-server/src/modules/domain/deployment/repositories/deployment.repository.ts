@@ -85,7 +85,7 @@ export class DeploymentDomainRepository extends PrimaryBaseRepository<typeof dep
       .selectDistinct({
         id: deployments.id,
         name: deployments.name,
-        type: deployments.type,
+        tenantType: deployments.tenantType,
       })
       .from(deployments)
       .innerJoin(versions, eq(versions.version, deployments.version))

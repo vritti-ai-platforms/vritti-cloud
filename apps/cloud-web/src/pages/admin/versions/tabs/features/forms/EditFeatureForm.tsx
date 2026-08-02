@@ -3,6 +3,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
 import { Select } from '@vritti/quantum-ui/Select';
+import { Switch } from '@vritti/quantum-ui/Switch';
 import { IconSelect } from '@vritti/quantum-ui/selects/icon';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
@@ -39,6 +40,7 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
       sfSymbol: feature.sfSymbol,
       materialSymbol: feature.materialSymbol,
       description: feature.description ?? '',
+      requiresGitea: feature.services?.includes('GITEA') ?? false,
     },
   });
 
@@ -75,6 +77,11 @@ export const EditFeatureForm: React.FC<EditFeatureFormProps> = ({ feature, onSuc
         clearable={false}
       />
       <TextField name="description" label="Description" placeholder="Optional description" />
+      <Switch
+        name="requiresGitea"
+        label="Requires Gitea"
+        description="Locks the feature until the org has a git organization. Never set this on the organization feature itself — it owns the setup screen."
+      />
 
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

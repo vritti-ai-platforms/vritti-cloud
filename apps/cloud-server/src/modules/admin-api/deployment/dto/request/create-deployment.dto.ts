@@ -25,6 +25,8 @@ import {
   DeploymentManagementModeValues,
   type DeploymentStatus,
   DeploymentStatusValues,
+  type DeploymentTenantType,
+  DeploymentTenantTypeValues,
   type DeploymentType,
   DeploymentTypeValues,
 } from '@/db/schema';
@@ -64,8 +66,18 @@ export class CreateDeploymentDto {
   status?: DeploymentStatus;
 
   @ApiPropertyOptional({
+    enum: DeploymentTenantTypeValues,
+    description: 'Deployment tenancy — defaults to dedicated for manual',
+  })
+  @IsOptional()
+  @IsEnum(DeploymentTenantTypeValues)
+  tenantType?: DeploymentTenantType;
+
+  @ApiPropertyOptional({
     enum: DeploymentTypeValues,
-    description: 'Deployment type — defaults to dedicated for manual',
+    default: 'deployed',
+    description:
+      'Where core answers — deployed = an edge serves it on `api.<host>`; local = core is reached directly on the url',
   })
   @IsOptional()
   @IsEnum(DeploymentTypeValues)

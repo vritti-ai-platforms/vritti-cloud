@@ -222,6 +222,7 @@ export const relations = defineRelations(schema, (r) => ({
       to: r.versions.id,
     }),
     featurePermissions: r.many.featurePermissions(),
+    featureServices: r.many.featureServices(),
     businessAppFeatures: r.many.businessAppFeatures(),
   },
 
@@ -269,6 +270,18 @@ export const relations = defineRelations(schema, (r) => ({
     }),
     permissionBusinesses: r.many.permissionBusinesses(),
     roleTemplateFeaturePermissions: r.many.roleTemplateFeaturePermissions(),
+  },
+
+  // Feature service relations
+  featureServices: {
+    appVersion: r.one.versions({
+      from: r.featureServices.versionId,
+      to: r.versions.id,
+    }),
+    feature: r.one.features({
+      from: r.featureServices.featureId,
+      to: r.features.id,
+    }),
   },
 
   // Permission-business junction relations

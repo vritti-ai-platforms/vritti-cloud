@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { SelectQueryResult } from '@vritti/api-sdk/database';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreStructureService } from '@/modules/core-server/services/core-structure.service';
 import { requireSigningKey } from '@/modules/core-server/signing-key.util';
@@ -16,7 +17,7 @@ export class OrgStructureSelectService {
   async findLegalEntitiesForSelect(query: OrgStructureSelectQueryDto): Promise<SelectQueryResult> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(query.orgId);
     return this.coreStructureService.selectLegalEntities(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       query,
@@ -27,7 +28,7 @@ export class OrgStructureSelectService {
   async findSiteGroupsForSelect(query: OrgStructureSelectQueryDto): Promise<SelectQueryResult> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(query.orgId);
     return this.coreStructureService.selectSiteGroups(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       query,

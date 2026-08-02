@@ -13,7 +13,14 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { type ScopeType, ScopeTypeValues, type SiteApplies, SiteAppliesValues } from '@/db/schema';
+import {
+  type ScopeType,
+  ScopeTypeValues,
+  type ServiceType,
+  ServiceTypeValues,
+  type SiteApplies,
+  SiteAppliesValues,
+} from '@/db/schema';
 
 export class CreateFeatureDto {
   @ApiProperty({
@@ -83,6 +90,17 @@ export class CreateFeatureDto {
   @IsString()
   @IsIconName('material')
   materialSymbol: string;
+
+  @ApiPropertyOptional({
+    description: 'External services the org must have provisioned before this feature unlocks',
+    enum: ServiceTypeValues,
+    isArray: true,
+    example: ['GITEA'],
+  })
+  @IsOptional()
+  @IsArray()
+  @IsEnum(ServiceTypeValues, { each: true })
+  services?: ServiceType[];
 
   @ApiPropertyOptional({ description: 'Sort order for display', example: 0 })
   @IsOptional()

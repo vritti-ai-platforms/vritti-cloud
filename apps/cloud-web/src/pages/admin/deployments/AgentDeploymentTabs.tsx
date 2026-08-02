@@ -46,7 +46,7 @@ export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deploy
       <PageHeader
         title={deployment.name}
         titleSlot={<Badge variant="secondary">Managed</Badge>}
-        description={deployment.type}
+        description={deployment.tenantType}
         actions={
           <Button variant="outline" size="sm" onClick={editDialog.open}>
             Edit

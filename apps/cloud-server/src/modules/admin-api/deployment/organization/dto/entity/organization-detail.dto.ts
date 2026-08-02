@@ -1,6 +1,6 @@
 import type { OrganizationDetail } from '@domain/organization/repositories/organization.repository';
 import { ApiProperty } from '@nestjs/swagger';
-import { DeploymentTypeValues } from '@/db/schema';
+import { DeploymentTenantTypeValues } from '@/db/schema';
 
 export class OrganizationDetailDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -30,8 +30,8 @@ export class OrganizationDetailDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   deploymentId: string;
 
-  @ApiProperty({ enum: DeploymentTypeValues })
-  deploymentType: string;
+  @ApiProperty({ enum: DeploymentTenantTypeValues })
+  deploymentTenantType: string;
 
   @ApiProperty({ example: 'Technology' })
   businessName: string;
@@ -68,7 +68,7 @@ export class OrganizationDetailDto {
     dto.deploymentName = org.deployment.name;
     dto.deploymentUrl = org.deployment.url;
     dto.deploymentId = org.deploymentId;
-    dto.deploymentType = org.deployment.type;
+    dto.deploymentTenantType = org.deployment.tenantType;
     dto.businessName = org.business.name;
     dto.businessCode = org.businessCode;
     dto.regionName = org.deployment.region.name;

@@ -3,10 +3,11 @@ import type { ScopeType, SiteType, SnapshotRoleTemplate, VersionSnapshot } from 
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { CoreRoleDto } from '@/modules/cloud-api/organization/dto/entity/core-role.dto';
+import type { RolesByScopeDto } from '@/modules/cloud-api/organization/organization-roles/dto/response/roles-by-scope.response.dto';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
-import type { RolesByScopeDto } from '@/modules/cloud-api/organization/organization-roles/dto/response/roles-by-scope.response.dto';
 import { requireSigningKey } from '@/modules/core-server/signing-key.util';
 import type { RoleScopeSectionDto } from '../dto/response/role-sections.response.dto';
 
@@ -40,7 +41,7 @@ export class OrganizationRolesService {
     const snapshot = appVersion.snapshot as VersionSnapshot;
     const templates = Object.values(snapshot.businesses?.[org.businessCode]?.roleTemplates ?? {});
     const roles = await this.coreRoleService.getOrgRoles(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
     );
@@ -90,7 +91,7 @@ export class OrganizationRolesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreRoleService.createOrgRole(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       data,
@@ -104,7 +105,7 @@ export class OrganizationRolesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreRoleService.updateOrgRole(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       roleId,
@@ -119,7 +120,7 @@ export class OrganizationRolesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreRoleService.resetRole(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       roleId,
@@ -133,7 +134,7 @@ export class OrganizationRolesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreRoleService.deleteOrgRole(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       roleId,

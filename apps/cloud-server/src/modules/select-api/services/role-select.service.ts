@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import type { SelectQueryResult } from '@vritti/api-sdk/database';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService } from '@/modules/core-server/services/core-role.service';
 import { requireSigningKey } from '@/modules/core-server/signing-key.util';
@@ -16,6 +17,11 @@ export class RoleSelectService {
   async findRolesForSelect(query: RoleSelectQueryDto): Promise<SelectQueryResult> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(query.orgId);
     const { orgId: _orgId, ...params } = query;
-    return this.coreRoleService.selectRoles(deployment.url, requireSigningKey(deployment), org.orgIdentifier, params);
+    return this.coreRoleService.selectRoles(
+      coreBaseUrl(deployment),
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+      params,
+    );
   }
 }

@@ -17,6 +17,7 @@ import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
 import { OrgMemberRoleValues } from '@/db/schema';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
@@ -115,7 +116,7 @@ export class OrganizationService {
     }
     // Create the organization in core-server first to get the nexus org ID
     const nexusOrg: { id: string } = await this.coreOrganizationService.createOrganization(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       {
         name: dto.name,
@@ -255,7 +256,7 @@ export class OrganizationService {
       const deployment = await this.deploymentRepository.findById(org.deploymentId);
       if (deployment) {
         await this.coreOrganizationService.deleteOrganization(
-          deployment.url,
+          coreBaseUrl(deployment),
           requireSigningKey(deployment),
           org.orgIdentifier,
         );
@@ -312,7 +313,7 @@ export class OrganizationService {
         if (Object.keys(webhookData).length > 0) {
           try {
             await this.coreOrganizationService.updateOrganization(
-              deployment.url,
+              coreBaseUrl(deployment),
               requireSigningKey(deployment),
               org.orgIdentifier,
               webhookData,

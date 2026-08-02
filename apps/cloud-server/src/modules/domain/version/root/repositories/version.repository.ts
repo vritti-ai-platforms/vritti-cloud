@@ -8,6 +8,7 @@ import {
   businesses,
   featurePermissionDependencies,
   featurePermissions,
+  featureServices,
   features,
   mobileMicrofrontends,
   permissionBusinesses,
@@ -54,6 +55,7 @@ export class VersionDomainRepository extends PrimaryBaseRepository<typeof versio
     const [
       featureRows,
       permissionRows,
+      featureServiceRows,
       webMfRows,
       mobileMfRows,
       appRows,
@@ -69,6 +71,7 @@ export class VersionDomainRepository extends PrimaryBaseRepository<typeof versio
     ] = await Promise.all([
       this.db.select().from(features).where(eq(features.versionId, versionId)),
       this.db.select().from(featurePermissions).where(eq(featurePermissions.versionId, versionId)),
+      this.db.select().from(featureServices).where(eq(featureServices.versionId, versionId)),
       this.db.select().from(webMicrofrontends).where(eq(webMicrofrontends.versionId, versionId)),
       this.db.select().from(mobileMicrofrontends).where(eq(mobileMicrofrontends.versionId, versionId)),
       this.db.select().from(businessApps).where(eq(businessApps.versionId, versionId)),
@@ -108,6 +111,7 @@ export class VersionDomainRepository extends PrimaryBaseRepository<typeof versio
     return {
       features: featureRows,
       permissions: permissionRows,
+      featureServices: featureServiceRows,
       webMicrofrontends: webMfRows,
       mobileMicrofrontends: mobileMfRows,
       apps: appRows,

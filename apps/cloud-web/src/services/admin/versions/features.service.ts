@@ -18,9 +18,16 @@ export function getFeature(versionId: string, id: string): Promise<Feature> {
   return axios.get<Feature>(`admin-api/versions/${versionId}/features/${id}`).then((r) => r.data);
 }
 
+// The form models each required service as its own switch; the API takes the service array
+function toServices({ requiresGitea, ...rest }: { requiresGitea?: boolean }): Record<string, unknown> {
+  return requiresGitea === undefined ? rest : { ...rest, services: requiresGitea ? ['GITEA'] : [] };
+}
+
 // Creates a new feature
 export function createFeature(versionId: string, data: CreateFeatureData): Promise<CreateResponse<Feature>> {
-  return axios.post<CreateResponse<Feature>>(`admin-api/versions/${versionId}/features`, data).then((r) => r.data);
+  return axios
+    .post<CreateResponse<Feature>>(`admin-api/versions/${versionId}/features`, toServices(data))
+    .then((r) => r.data);
 }
 
 // Updates a feature by ID
@@ -28,7 +35,9 @@ export function updateFeature(
   versionId: string,
   { id, data }: { id: string; data: UpdateFeatureData },
 ): Promise<SuccessResponse> {
-  return axios.patch<SuccessResponse>(`admin-api/versions/${versionId}/features/${id}`, data).then((r) => r.data);
+  return axios
+    .patch<SuccessResponse>(`admin-api/versions/${versionId}/features/${id}`, toServices(data))
+    .then((r) => r.data);
 }
 
 // Deletes a feature by ID

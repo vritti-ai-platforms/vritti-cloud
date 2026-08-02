@@ -120,7 +120,7 @@ export const OrganizationViewPage = () => {
             <div className="flex items-center gap-3">
               <Server className="size-4 text-muted-foreground" />
               <span className="text-sm font-medium">{org.deploymentName}</span>
-              <Badge variant="secondary">{org.deploymentType}</Badge>
+              <Badge variant="secondary">{org.deploymentTenantType}</Badge>
             </div>
             <div className="flex items-center gap-3">
               <MapPin className="size-4 text-muted-foreground" />

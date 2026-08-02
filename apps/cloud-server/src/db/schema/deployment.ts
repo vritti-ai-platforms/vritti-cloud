@@ -6,6 +6,7 @@ import {
   deploymentEdgeEnum,
   deploymentManagementModeEnum,
   deploymentStatusEnum,
+  deploymentTenantTypeEnum,
   deploymentTypeEnum,
 } from './enums';
 import { regions } from './region';
@@ -51,12 +52,14 @@ export const deployments = cloudSchema.table('deployments', {
   // Non-secret secret-store config pushed to the agent in the desired-state; the auth secret half lives in deployment_secrets
   secretProvider: jsonb('secret_provider').$type<DeploymentSecretProvider>(),
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
-  type: deploymentTypeEnum('type').notNull(),
+  tenantType: deploymentTenantTypeEnum('tenant_type').notNull(),
   managementMode: deploymentManagementModeEnum('management_mode').notNull().default('agent'),
   // DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB (creds from the secret store)
   mode: deploymentDbModeEnum('mode').notNull().default('managed'),
   // HTTP edge mode — managed = agent runs its own nginx+certbot edge for `domains`; external = another proxy fronts core (nginx off)
   edge: deploymentEdgeEnum('edge').notNull().default('managed'),
+  // Where core answers — deployed = an edge serves it on `api.<host>`; local = core is reached directly on `url`
+  type: deploymentTypeEnum('type').notNull().default('deployed'),
   // pgBackRest add-on toggle — R2 credentials ride the secret store, only the on/off flag lives here
   addonPgbackrest: boolean('addon_pgbackrest').notNull().default(false),
   // Gitea add-on toggle — admin credentials ride the secret store, only the on/off flag lives here

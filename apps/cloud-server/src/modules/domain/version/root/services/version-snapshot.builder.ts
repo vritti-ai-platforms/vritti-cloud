@@ -3,6 +3,7 @@ import {
   type FeatureUnlocks,
   type PlatformBucket,
   type PlatformCodes,
+  type ServiceCode,
   SNAPSHOT_SCHEMA_VERSION,
   type SnapshotBusiness,
   type SnapshotFeature,
@@ -17,6 +18,7 @@ import type {
   AppFeature,
   Feature,
   FeaturePermission,
+  FeatureService,
   MobileMicrofrontend,
   Plan,
   PlanFeature,
@@ -30,6 +32,7 @@ import type {
 export interface SnapshotData {
   features: Feature[];
   permissions: FeaturePermission[];
+  featureServices: FeatureService[];
   webMicrofrontends: WebMicrofrontend[];
   mobileMicrofrontends: MobileMicrofrontend[];
   apps: App[];
@@ -86,6 +89,7 @@ function buildIndex(data: SnapshotData) {
     businessCodesByPermissionId,
     dependsOnCodesByPermissionId,
     permsByFeatureId: _.groupBy(data.permissions, 'featureId'),
+    servicesByFeatureId: _.groupBy(data.featureServices, 'featureId'),
     appFeaturesByAppId: _.groupBy(data.businessAppFeatures, 'appId'),
     rolePermsByRoleId: _.groupBy(data.roleTemplatePermissions, 'roleTemplateId'),
     planPermsByPlanId: _.groupBy(data.planFeaturePermissions, 'planId'),
@@ -138,6 +142,11 @@ function buildPermissions(featureId: string, index: SnapshotIndex): SnapshotPerm
   }));
 }
 
+// External services a feature depends on — the resolver locks the feature until the org has them all
+function buildServices(featureId: string, index: SnapshotIndex): ServiceCode[] {
+  return (index.servicesByFeatureId[featureId] ?? []).map((s) => s.service);
+}
+
 // Flat feature dictionary keyed by `${scope}.${code}` — feature identity is (code, scope), so same-code features at different scopes all survive
 function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string, SnapshotFeature> {
   const result: Record<string, SnapshotFeature> = {};
@@ -151,6 +160,7 @@ function buildFeatures(data: SnapshotData, index: SnapshotIndex): Record<string,
       scope: f.scope,
       applicableSiteTypes: f.applicableSiteTypes,
       permissions: buildPermissions(f.id, index),
+      requiredServices: buildServices(f.id, index),
       microfrontends: buildMicrofrontends(f, index),
     };
   }

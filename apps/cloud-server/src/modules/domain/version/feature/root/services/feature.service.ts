@@ -89,7 +89,7 @@ export class FeatureDomainService {
       return {
         success: true,
         message: `Microfrontend "${mf.name}" linked to "${feature.name}" successfully.`,
-        data: FeatureDto.from(updated),
+        data: FeatureDto.from(updated, 0, [], [], 0, await this.featureRepository.findServices(featureId)),
       };
     }
     const mf = await this.microfrontendRepository.findMobileById(dto.microfrontendId);
@@ -105,7 +105,7 @@ export class FeatureDomainService {
     return {
       success: true,
       message: `Microfrontend "${mf.name}" linked to "${feature.name}" successfully.`,
-      data: FeatureDto.from(updated),
+      data: FeatureDto.from(updated, 0, [], [], 0, await this.featureRepository.findServices(featureId)),
     };
   }
 
@@ -169,7 +169,11 @@ export class FeatureDomainService {
 
   // Creates a new feature; throws ConflictException on duplicate code
   async create(dto: CreateFeatureDto): Promise<CreateResponseDto<FeatureDto>> {
-    const existingCode = await this.featureRepository.findByVersionCodeScope(dto.versionId, dto.code, dto.scope ?? 'SITE');
+    const existingCode = await this.featureRepository.findByVersionCodeScope(
+      dto.versionId,
+      dto.code,
+      dto.scope ?? 'SITE',
+    );
     if (existingCode) {
       throw new ConflictException({
         label: 'Code Already Exists',
@@ -177,12 +181,14 @@ export class FeatureDomainService {
         errors: [{ field: 'code', message: 'Duplicate code' }],
       });
     }
-    const feature = await this.featureRepository.create(dto);
+    // services lives in its own table — keep it out of the feature insert
+    const { services, ...row } = dto;
+    const feature = await this.featureRepository.createWithServices(row, services ?? []);
     this.logger.log(`Created feature: ${feature.name} (${feature.id})`);
     return {
       success: true,
       message: `Feature "${feature.name}" created successfully.`,
-      data: FeatureDto.from(feature),
+      data: FeatureDto.from(feature, 0, [], [], 0, services ?? []),
     };
   }
 
@@ -197,7 +203,9 @@ export class FeatureDomainService {
     const { result, count } = await this.featureRepository.findAllForTable({ where, orderBy, limit, offset });
     this.logger.log(`Fetched features table (${count} results, limit: ${limit}, offset: ${offset})`);
     return {
-      result: result.map((r) => FeatureDto.from(r, r.businessCount, r.permissions, r.platforms, r.appFeatureCount)),
+      result: result.map((r) =>
+        FeatureDto.from(r, r.businessCount, r.permissions, r.platforms, r.appFeatureCount, r.services),
+      ),
       count,
       state,
       activeViewId,
@@ -237,8 +245,9 @@ export class FeatureDomainService {
       throw new NotFoundException('Feature not found.');
     }
     const refs = await this.featureRepository.countAppFeatureReferences(id);
+    const services = await this.featureRepository.findServices(id);
     this.logger.log(`Fetched feature: ${id}`);
-    return FeatureDto.from(feature, 0, [], [], refs);
+    return FeatureDto.from(feature, 0, [], [], refs, services);
   }
 
   // Updates a feature by ID; throws NotFoundException if not found, ConflictException on duplicate code
@@ -250,7 +259,11 @@ export class FeatureDomainService {
     if (dto.code || dto.scope) {
       const targetCode = dto.code ?? existing.code;
       const targetScope = dto.scope ?? existing.scope;
-      const existingCode = await this.featureRepository.findByVersionCodeScope(existing.versionId, targetCode, targetScope);
+      const existingCode = await this.featureRepository.findByVersionCodeScope(
+        existing.versionId,
+        targetCode,
+        targetScope,
+      );
       if (existingCode && existingCode.id !== id) {
         throw new ConflictException({
           label: 'Code Already Exists',
@@ -259,7 +272,9 @@ export class FeatureDomainService {
         });
       }
     }
-    const feature = await this.featureRepository.update(id, dto);
+    // services lives in its own table; undefined leaves the existing rows alone
+    const { services, ...values } = dto;
+    const feature = await this.featureRepository.updateWithServices(id, existing.versionId, values, services);
     this.logger.log(`Updated feature: ${feature.name} (${feature.id})`);
     return { success: true, message: `Feature "${existing.name}" updated successfully.` };
   }

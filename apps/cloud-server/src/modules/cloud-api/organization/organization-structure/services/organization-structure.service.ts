@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreRoleService, type RoleAssignmentTarget } from '@/modules/core-server/services/core-role.service';
 import { CoreStructureService } from '@/modules/core-server/services/core-structure.service';
@@ -35,7 +36,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreRoleService.getSiteGroupRoleAssignments(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteGroupId,
@@ -58,7 +59,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreRoleService.getLegalEntityRoleAssignments(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       legalEntityId,
@@ -82,7 +83,11 @@ export class OrganizationStructureService {
   async getOrgRoleAssignments(orgId: string): Promise<RoleAssignmentDto[]> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    return this.coreRoleService.getOrgRoleAssignments(deployment.url, requireSigningKey(deployment), org.orgIdentifier);
+    return this.coreRoleService.getOrgRoleAssignments(
+      coreBaseUrl(deployment),
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+    );
   }
 
   // Assigns a role to a user org-wide and returns the created assignment
@@ -97,7 +102,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreRoleService.removeRoleAssignment(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       assignmentId,
@@ -111,7 +116,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreRoleService.getCompatibleRolesForTarget(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       'SITE_GROUP',
@@ -124,7 +129,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreRoleService.getCompatibleRolesForTarget(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       'LE',
@@ -137,7 +142,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreRoleService.getCompatibleRolesForTarget(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       'ORG',
@@ -153,11 +158,11 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const signingKey = requireSigningKey(deployment);
 
-    await this.coreRoleService.assignRole(deployment.url, signingKey, org.orgIdentifier, data.userId, {
+    await this.coreRoleService.assignRole(coreBaseUrl(deployment), signingKey, org.orgIdentifier, data.userId, {
       roleId: data.roleId,
       ...target,
     });
-    const assignments = await this.fetchAssignments(deployment.url, signingKey, org.orgIdentifier, target);
+    const assignments = await this.fetchAssignments(coreBaseUrl(deployment), signingKey, org.orgIdentifier, target);
     const assignment = assignments.find((a) => a.userId === data.userId && a.roleId === data.roleId) ?? null;
     return {
       success: true,
@@ -187,7 +192,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.getStructure(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
     );
@@ -200,7 +205,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const legalEntity = await this.coreStructureService.createLegalEntity(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       dto,
@@ -218,7 +223,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.updateLegalEntity(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       legalEntityId,
@@ -233,7 +238,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.reorderLegalEntities(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       dto.ids,
@@ -251,7 +256,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const registration = await this.coreStructureService.createRegistration(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       legalEntityId,
@@ -270,7 +275,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const siteGroup = await this.coreStructureService.createSiteGroup(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       dto,
@@ -284,7 +289,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.updateSiteGroup(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteGroupId,
@@ -299,7 +304,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.reorderSiteGroups(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       dto.ids,
@@ -313,7 +318,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.reparentSiteGroup(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteGroupId,
@@ -328,7 +333,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.deleteSiteGroup(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteGroupId,
@@ -342,7 +347,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.deleteLegalEntity(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       legalEntityId,
@@ -356,7 +361,7 @@ export class OrganizationStructureService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreStructureService.deleteRegistration(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       legalEntityId,

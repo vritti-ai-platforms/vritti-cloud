@@ -6867,6 +6867,213 @@
         ]
       }
     },
+    "/agent/enroll": {
+      "post": {
+        "description": "One-time enrollment. Authenticated by the enroll token plus a trust-on-first-use Ed25519 signature over the raw request body (verified against signingPubKey in the body). Returns the long-lived agent credential, the deployment public key (Keypair B), and a signed connectivity nonce.",
+        "operationId": "AgentController_enroll",
+        "parameters": [
+          {
+            "name": "X-Vritti-Agent-Key",
+            "in": "header",
+            "description": "Agent Ed25519 public key (base64 raw 32-byte)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Vritti-Signature",
+            "in": "header",
+            "description": "Ed25519 signature over the raw request body (base64)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnrollRequestDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Agent enrolled successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid token or signature."
+          },
+          "404": {
+            "description": "Deployment not found."
+          }
+        },
+        "summary": "Enroll an agent",
+        "tags": [
+          "Agent"
+        ]
+      }
+    },
+    "/agent/deployments/{id}/desired-state": {
+      "get": {
+        "description": "Returns the signed desired-state the agent reconciles toward. Authenticated by the agent bearer credential plus an Ed25519 signature over `<X-Vritti-Timestamp>.<raw body>` (body empty for this GET). The generation bumps only when the built payload changes.",
+        "operationId": "AgentController_getDesiredState",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Deployment UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer <agentCredential>",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Vritti-Agent-Key",
+            "in": "header",
+            "description": "Agent Ed25519 public key (base64 raw 32-byte)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Vritti-Timestamp",
+            "in": "header",
+            "description": "Unix time in seconds (decimal string); rejected beyond ±5min skew",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Vritti-Signature",
+            "in": "header",
+            "description": "Ed25519 signature over `<timestamp>.<raw body>` (base64)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Signed desired-state.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SignedDesiredStateDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated agent request."
+          },
+          "404": {
+            "description": "Deployment not found."
+          }
+        },
+        "summary": "Get signed desired-state",
+        "tags": [
+          "Agent"
+        ]
+      }
+    },
+    "/agent/deployments/{id}/status": {
+      "post": {
+        "description": "Records an agent heartbeat (phase, applied generation, container states, Gitea provisioning). Authenticated like the desired-state endpoint (Ed25519 over `<X-Vritti-Timestamp>.<raw body>`).",
+        "operationId": "AgentController_reportStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Deployment UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer <agentCredential>",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Vritti-Agent-Key",
+            "in": "header",
+            "description": "Agent Ed25519 public key (base64 raw 32-byte)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Vritti-Timestamp",
+            "in": "header",
+            "description": "Unix time in seconds (decimal string); rejected beyond ±5min skew",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "X-Vritti-Signature",
+            "in": "header",
+            "description": "Ed25519 signature over `<timestamp>.<raw body>` (base64)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusReportDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status recorded.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthenticated agent request."
+          }
+        },
+        "summary": "Report agent status",
+        "tags": [
+          "Agent"
+        ]
+      }
+    },
     "/admin-api/versions": {
       "post": {
         "operationId": "VersionController_create",
@@ -10133,7 +10340,7 @@
     },
     "/admin-api/deployments": {
       "post": {
-        "description": "Generates an Ed25519 signing keypair for the deployment. regionId/cloudProviderId are required only for managementMode=agent; manual deployments use the sentinel local region/provider. The response includes publicKey exactly once — it is never retrievable afterward. Use POST /admin-api/deployments/:id/signing-key to regenerate.",
+        "description": "Creates a bare deployment record with no signing key yet. regionId/cloudProviderId are required only for managementMode=agent; manual deployments use the sentinel local region/provider. acmeEmail and domains (managed-edge host → upstream list) apply only to agent/managed-edge deployments and are pushed to the agent in the desired-state; omit them otherwise. Generate the signing key later via POST /admin-api/deployments/:id/signing-key, which reveals the public key once.",
         "operationId": "DeploymentController_create",
         "parameters": [],
         "requestBody": {
@@ -10247,6 +10454,7 @@
         ]
       },
       "patch": {
+        "description": "Updates any deployment field. For agent/managed-edge deployments, acmeEmail and domains (managed-edge host → upstream list) are pushed to the agent in the next desired-state.",
         "operationId": "DeploymentController_update",
         "parameters": [
           {
@@ -10346,7 +10554,7 @@
     },
     "/admin-api/deployments/{id}/signing-key": {
       "post": {
-        "description": "Replaces the deployment signing key and returns the new public key exactly once — it is never retrievable afterward. The previous key stops verifying immediately; update the core deployment env (CLOUD_PUBLIC_KEY) and resync.",
+        "description": "Generates the deployment signing keypair on first use, or regenerates it if one already exists, and returns the public key exactly once — it is never retrievable afterward. On regeneration the previous key stops verifying immediately; update the core deployment env (LICENSE_PUBLIC_KEY) and resync.",
         "operationId": "DeploymentController_regenerateSigningKey",
         "parameters": [
           {
@@ -10383,7 +10591,7 @@
             "bearer": []
           }
         ],
-        "summary": "Regenerate a deployment's signing keypair",
+        "summary": "Generate or regenerate a deployment's signing keypair",
         "tags": [
           "Admin - Deployments"
         ]
@@ -10431,6 +10639,99 @@
         "summary": "Sync catalog license",
         "tags": [
           "Admin - Deployments"
+        ]
+      }
+    },
+    "/admin-api/deployments/{id}/agent/enroll-token": {
+      "post": {
+        "description": "Creates (or replaces) a pending agent enrollment for a managed deployment and returns a one-time enroll token, shown only once. Ensures the deployment agent signing keypair (Keypair B) exists so the connect step can display the deployment public key.",
+        "operationId": "DeploymentAgentController_issueEnrollToken",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Deployment UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Enroll token issued.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnrollTokenDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Not an agent-managed deployment."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Deployment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Issue an agent enroll token",
+        "tags": [
+          "Admin - Deployment Agents"
+        ]
+      }
+    },
+    "/admin-api/deployments/{id}/agent": {
+      "get": {
+        "description": "Returns the enrolled agent status (phase, heartbeat, generation, version, gitea provisioning).",
+        "operationId": "DeploymentAgentController_getAgentStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "Deployment UUID",
+            "schema": {
+              "example": "550e8400-e29b-41d4-a716-446655440000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agent status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentStatusDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Deployment not found."
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get agent status",
+        "tags": [
+          "Admin - Deployment Agents"
         ]
       }
     },
@@ -18301,6 +18602,76 @@
           "isShared"
         ]
       },
+      "DomainInputDto": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string",
+            "description": "Hostname the managed edge serves + issues a cert for",
+            "example": "api.apw1.vrittiai.com"
+          },
+          "upstream": {
+            "type": "string",
+            "description": "Upstream service:port the host proxies to",
+            "example": "core-server:3002"
+          }
+        },
+        "required": [
+          "host",
+          "upstream"
+        ]
+      },
+      "SecretProviderAuthDto": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "example": "universal"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Non-secret auth params"
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ]
+      },
+      "SecretProviderDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "example": "infisical"
+          },
+          "url": {
+            "type": "string",
+            "example": "https://infisical.vrittiai.com"
+          },
+          "projectId": {
+            "type": "string",
+            "example": "e0bae9e7-…"
+          },
+          "env": {
+            "type": "string",
+            "example": "apw1"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/SecretProviderAuthDto"
+          }
+        },
+        "required": [
+          "type",
+          "url",
+          "projectId",
+          "env",
+          "auth"
+        ]
+      },
       "DeploymentDto": {
         "type": "object",
         "properties": {
@@ -18346,10 +18717,55 @@
               "agent"
             ]
           },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "managed",
+              "external"
+            ]
+          },
+          "edge": {
+            "type": "string",
+            "enum": [
+              "managed",
+              "external"
+            ]
+          },
+          "addonPgbackrest": {
+            "type": "boolean",
+            "example": false,
+            "description": "pgBackRest add-on enabled"
+          },
+          "addonGitea": {
+            "type": "boolean",
+            "example": false,
+            "description": "Gitea add-on enabled"
+          },
           "version": {
             "type": "object",
             "example": "1.0.0",
             "nullable": true
+          },
+          "acmeEmail": {
+            "type": "object",
+            "example": "ops@vrittiai.com",
+            "nullable": true
+          },
+          "domains": {
+            "description": "Managed-edge hosts + upstreams",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DomainInputDto"
+            }
+          },
+          "secretProvider": {
+            "nullable": true,
+            "description": "Non-secret secret-store config for form prefill — the secret auth half is never returned",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SecretProviderDto"
+              }
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -18380,6 +18796,19 @@
             "type": "number",
             "example": 0
           },
+          "hasSigningKey": {
+            "type": "boolean",
+            "example": true
+          },
+          "catalogSynced": {
+            "type": "boolean",
+            "example": true
+          },
+          "lastPushedHash": {
+            "type": "object",
+            "example": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+            "nullable": true
+          },
           "publicKey": {
             "type": "string",
             "example": "MCowBQYDK2VwAyEA0V5v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v9v0v8=",
@@ -18395,8 +18824,15 @@
           "status",
           "type",
           "managementMode",
+          "mode",
+          "edge",
+          "addonPgbackrest",
+          "addonGitea",
+          "domains",
           "createdAt",
-          "organizationCount"
+          "organizationCount",
+          "hasSigningKey",
+          "catalogSynced"
         ]
       },
       "DeploymentsResponseDto": {
@@ -18484,6 +18920,190 @@
           "name",
           "code",
           "price"
+        ]
+      },
+      "EnrollRequestDto": {
+        "type": "object",
+        "properties": {
+          "deploymentId": {
+            "type": "string",
+            "description": "Deployment this agent manages",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "enrollToken": {
+            "type": "string",
+            "description": "One-time enroll token issued from the admin console"
+          },
+          "signingPubKey": {
+            "type": "string",
+            "description": "Agent Ed25519 signing public key (base64 raw 32-byte) — authenticates agent→cloud"
+          },
+          "sealingPubKey": {
+            "type": "string",
+            "description": "Agent X25519 sealing public key (base64 raw 32-byte) — operator secrets seal target"
+          },
+          "agentVersion": {
+            "type": "string",
+            "description": "Reported agent version",
+            "example": "0.1.0"
+          }
+        },
+        "required": [
+          "deploymentId",
+          "enrollToken",
+          "signingPubKey"
+        ]
+      },
+      "EnrollResponseDto": {
+        "type": "object",
+        "properties": {
+          "agentCredential": {
+            "type": "string",
+            "description": "Long-lived bearer credential sent on every subsequent request"
+          },
+          "deploymentPubKey": {
+            "type": "string",
+            "description": "Deployment public key — base64 raw 32-byte Ed25519 (Keypair B), used to verify cloud signatures"
+          },
+          "nonce": {
+            "type": "string",
+            "description": "Random challenge string for the connectivity test"
+          },
+          "nonceSignature": {
+            "type": "string",
+            "description": "Nonce signed by the deployment private key (Keypair B)"
+          }
+        },
+        "required": [
+          "agentCredential",
+          "deploymentPubKey",
+          "nonce",
+          "nonceSignature"
+        ]
+      },
+      "SignedDesiredStateDto": {
+        "type": "object",
+        "properties": {
+          "payloadB64": {
+            "type": "string",
+            "description": "Canonical JSON of the full DesiredState — the exact bytes the signature is computed over"
+          },
+          "signature": {
+            "type": "string",
+            "description": "Base64 Ed25519 signature by the deployment key (Keypair B) over Buffer.from(payloadB64)"
+          }
+        },
+        "required": [
+          "payloadB64",
+          "signature"
+        ]
+      },
+      "ContainerReportDto": {
+        "type": "object",
+        "properties": {
+          "service": {
+            "type": "string",
+            "example": "core-server"
+          },
+          "name": {
+            "type": "string",
+            "example": "vritti-apw1-core-server"
+          },
+          "state": {
+            "type": "string",
+            "example": "running"
+          },
+          "health": {
+            "type": "string",
+            "example": "healthy"
+          },
+          "cpuPercent": {
+            "type": "number",
+            "example": 1.5
+          },
+          "memoryBytes": {
+            "type": "number",
+            "example": 134217728
+          }
+        },
+        "required": [
+          "service",
+          "name",
+          "state",
+          "health",
+          "cpuPercent",
+          "memoryBytes"
+        ]
+      },
+      "CertificateReportDto": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string",
+            "example": "api.apw1.vrittiai.com"
+          },
+          "notAfter": {
+            "type": "string",
+            "description": "RFC3339 certificate expiry",
+            "example": "2026-10-29T12:00:00Z"
+          },
+          "issuedAt": {
+            "type": "string",
+            "description": "RFC3339 certificate issuance",
+            "example": "2026-07-31T12:00:00Z"
+          }
+        },
+        "required": [
+          "host",
+          "notAfter",
+          "issuedAt"
+        ]
+      },
+      "StatusReportDto": {
+        "type": "object",
+        "properties": {
+          "deploymentId": {
+            "type": "string",
+            "description": "Deployment this heartbeat is for",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "generation": {
+            "type": "number",
+            "description": "Desired-state generation currently applied",
+            "example": 3
+          },
+          "phase": {
+            "type": "string",
+            "description": "Lifecycle phase",
+            "example": "ready"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable status detail"
+          },
+          "containers": {
+            "description": "Per-service container states",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContainerReportDto"
+            }
+          },
+          "giteaProvisioned": {
+            "type": "boolean",
+            "description": "Whether the Gitea app user + PAT are provisioned"
+          },
+          "certificates": {
+            "description": "Managed-edge certificates the agent currently holds",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CertificateReportDto"
+            }
+          }
+        },
+        "required": [
+          "deploymentId",
+          "generation",
+          "phase"
         ]
       },
       "CreateVersionDto": {
@@ -19178,6 +19798,19 @@
             "description": "Android Material Symbol name",
             "example": "shopping_cart"
           },
+          "services": {
+            "type": "array",
+            "description": "External services the org must have provisioned before this feature unlocks",
+            "example": [
+              "GITEA"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "GITEA"
+              ]
+            }
+          },
           "sortOrder": {
             "type": "number",
             "description": "Sort order for display",
@@ -19295,6 +19928,19 @@
               "type": "string"
             }
           },
+          "services": {
+            "type": "array",
+            "example": [
+              "GITEA"
+            ],
+            "description": "External services the org must have provisioned before this feature unlocks",
+            "items": {
+              "type": "string",
+              "enum": [
+                "GITEA"
+              ]
+            }
+          },
           "businessCount": {
             "type": "number",
             "example": 2,
@@ -19321,6 +19967,7 @@
           "createdAt",
           "permissions",
           "platforms",
+          "services",
           "businessCount",
           "canDelete"
         ]
@@ -19445,6 +20092,19 @@
             "type": "string",
             "description": "Android Material Symbol name",
             "example": "shopping_cart"
+          },
+          "services": {
+            "type": "array",
+            "description": "External services the org must have provisioned before this feature unlocks",
+            "example": [
+              "GITEA"
+            ],
+            "items": {
+              "type": "string",
+              "enum": [
+                "GITEA"
+              ]
+            }
           },
           "sortOrder": {
             "type": "number",
@@ -20641,6 +21301,65 @@
           "unlocks"
         ]
       },
+      "SecretProviderAuthInputDto": {
+        "type": "object",
+        "properties": {
+          "method": {
+            "type": "string",
+            "description": "Auth method the agent uses to reach the secret store",
+            "example": "universal"
+          },
+          "params": {
+            "type": "object",
+            "description": "Non-secret auth params (the secret half is submitted via secretProviderSecrets)",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "example": {
+              "clientId": "7f3c…"
+            }
+          }
+        },
+        "required": [
+          "method",
+          "params"
+        ]
+      },
+      "SecretProviderInputDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Secret-store type",
+            "example": "infisical"
+          },
+          "url": {
+            "type": "string",
+            "description": "Secret-store base URL",
+            "example": "https://infisical.vrittiai.com"
+          },
+          "projectId": {
+            "type": "string",
+            "description": "Secret-store project identifier",
+            "example": "e0bae9e7-…"
+          },
+          "env": {
+            "type": "string",
+            "description": "Secret-store environment slug",
+            "example": "apw1"
+          },
+          "auth": {
+            "$ref": "#/components/schemas/SecretProviderAuthInputDto"
+          }
+        },
+        "required": [
+          "type",
+          "url",
+          "projectId",
+          "env",
+          "auth"
+        ]
+      },
       "CreateDeploymentDto": {
         "type": "object",
         "properties": {
@@ -20688,10 +21407,68 @@
             ],
             "description": "Deployment type — defaults to dedicated for manual"
           },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "managed",
+              "external"
+            ],
+            "default": "managed",
+            "description": "DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB"
+          },
+          "edge": {
+            "type": "string",
+            "enum": [
+              "managed",
+              "external"
+            ],
+            "default": "managed",
+            "description": "HTTP edge mode — managed = agent runs its own nginx+certbot edge for domains; external = another proxy fronts core"
+          },
+          "addonPgbackrest": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable the pgBackRest add-on — R2 credentials are supplied via the secret store"
+          },
+          "addonGitea": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable the Gitea add-on — admin credentials are supplied via the secret store"
+          },
           "version": {
             "type": "string",
             "description": "App version string this deployment runs",
             "example": "1.0.0"
+          },
+          "acmeEmail": {
+            "type": "string",
+            "description": "Let's Encrypt registration email for the managed edge — agent/managed-edge deployments only",
+            "example": "ops@vrittiai.com"
+          },
+          "domains": {
+            "description": "Managed-edge hosts + upstreams — agent/managed-edge deployments only",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DomainInputDto"
+            }
+          },
+          "secretProvider": {
+            "description": "Non-secret secret-store config pushed to the agent — agent-managed deployments only",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SecretProviderInputDto"
+              }
+            ]
+          },
+          "secretProviderSecrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Secret auth params (client secret, token, jwt, password, …); each is encrypted at rest and stored as secretProvider.<key> — write-only, never returned",
+            "example": {
+              "clientSecret": "st.…"
+            }
           }
         },
         "required": [
@@ -20766,12 +21543,196 @@
             ],
             "description": "Deployment type — defaults to dedicated for manual"
           },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "managed",
+              "external"
+            ],
+            "default": "managed",
+            "description": "DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB"
+          },
+          "edge": {
+            "type": "string",
+            "enum": [
+              "managed",
+              "external"
+            ],
+            "default": "managed",
+            "description": "HTTP edge mode — managed = agent runs its own nginx+certbot edge for domains; external = another proxy fronts core"
+          },
+          "addonPgbackrest": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable the pgBackRest add-on — R2 credentials are supplied via the secret store"
+          },
+          "addonGitea": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable the Gitea add-on — admin credentials are supplied via the secret store"
+          },
           "version": {
             "type": "string",
             "description": "App version string this deployment runs",
             "example": "1.0.0"
+          },
+          "acmeEmail": {
+            "type": "string",
+            "description": "Let's Encrypt registration email for the managed edge — agent/managed-edge deployments only",
+            "example": "ops@vrittiai.com"
+          },
+          "domains": {
+            "description": "Managed-edge hosts + upstreams — agent/managed-edge deployments only",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DomainInputDto"
+            }
+          },
+          "secretProvider": {
+            "description": "Non-secret secret-store config pushed to the agent — agent-managed deployments only",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SecretProviderInputDto"
+              }
+            ]
+          },
+          "secretProviderSecrets": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Secret auth params (client secret, token, jwt, password, …); each is encrypted at rest and stored as secretProvider.<key> — write-only, never returned",
+            "example": {
+              "clientSecret": "st.…"
+            }
           }
         }
+      },
+      "EnrollTokenDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "One-time enroll token — paste into the agent; shown only once"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the token expires"
+          },
+          "deploymentPubKey": {
+            "type": "string",
+            "description": "Deployment public key (base64 raw 32-byte Ed25519, Keypair B) for the connect step"
+          },
+          "cloudApiUrl": {
+            "type": "string",
+            "description": "Agent API base URL to set as VRITTI_CLOUD_API_URL on the deployment VM"
+          }
+        },
+        "required": [
+          "token",
+          "expiresAt",
+          "deploymentPubKey",
+          "cloudApiUrl"
+        ]
+      },
+      "AgentCertificateDto": {
+        "type": "object",
+        "properties": {
+          "host": {
+            "type": "string",
+            "example": "api.apw1.vrittiai.com"
+          },
+          "notAfter": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "issuedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "host",
+          "notAfter",
+          "issuedAt"
+        ]
+      },
+      "AgentStatusDto": {
+        "type": "object",
+        "properties": {
+          "deploymentId": {
+            "type": "string",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
+          "enrolled": {
+            "type": "boolean",
+            "description": "Whether an agent has enrolled",
+            "example": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "enrolled",
+              "revoked"
+            ],
+            "nullable": true
+          },
+          "agentVersion": {
+            "type": "object",
+            "nullable": true,
+            "example": "0.1.0"
+          },
+          "lastHeartbeatAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "lastPhase": {
+            "type": "object",
+            "nullable": true,
+            "example": "ready"
+          },
+          "lastMessage": {
+            "type": "object",
+            "nullable": true,
+            "example": "reconciled 6 services"
+          },
+          "lastGeneration": {
+            "type": "object",
+            "nullable": true,
+            "example": 3
+          },
+          "desiredGeneration": {
+            "type": "number",
+            "description": "Current desired-state generation the cloud has built",
+            "example": 3
+          },
+          "giteaProvisioned": {
+            "type": "boolean",
+            "example": false
+          },
+          "deploymentPubKey": {
+            "type": "object",
+            "nullable": true,
+            "description": "Deployment public key (base64 raw 32-byte Ed25519, Keypair B)"
+          },
+          "certificates": {
+            "description": "Certificates tracked for this deployment",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AgentCertificateDto"
+            }
+          }
+        },
+        "required": [
+          "deploymentId",
+          "enrolled",
+          "desiredGeneration",
+          "giteaProvisioned",
+          "certificates"
+        ]
       },
       "OrganizationDto": {
         "type": "object",

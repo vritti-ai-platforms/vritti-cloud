@@ -4,6 +4,8 @@ import { signRequestHeaders } from '@vritti/api-sdk/signing';
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import { rethrowCoreError } from '../core-error.util';
 
+// Signed transport to a core-server deployment. Callers pass an already-resolved core origin —
+// see `coreBaseUrl()`, which decides whether the deployment's url carries an `api.` host prefix.
 @Injectable()
 export class CoreHttpService {
   private readonly httpsAgent = new https.Agent({ rejectUnauthorized: false });
@@ -35,16 +37,6 @@ export class CoreHttpService {
     return data === undefined ? undefined : JSON.stringify(data);
   }
 
-  // core-server is served on the `api.` subdomain of the deployment's base host — the agent's nginx
-  // edge terminates TLS for `api.<base>` and proxies to core-server. Callers pass the deployment's
-  // base url (e.g. https://apw1.vrittiai.com), so prepend `api.` to reach the actual core endpoint.
-  // Idempotent when the host already starts with `api.`.
-  private coreUrl(baseUrl: string): string {
-    const u = new URL(baseUrl);
-    if (!u.hostname.startsWith('api.')) u.hostname = `api.${u.hostname}`;
-    return u.origin;
-  }
-
   // Runs a core call, translating failures: core's HTTP errors pass through verbatim, transport failures become 503
   private async send<T>(fn: () => Promise<AxiosResponse<T>>): Promise<T> {
     try {
@@ -63,7 +55,7 @@ export class CoreHttpService {
   ): Promise<T> {
     return this.send(() =>
       axios.get<T>(
-        `${this.coreUrl(url)}${path}`,
+        `${url}${path}`,
         this.config('GET', path, signingKey, options?.orgId, undefined, { params: options?.params }),
       ),
     );
@@ -79,7 +71,7 @@ export class CoreHttpService {
   ): Promise<T> {
     const body = this.serialize(data);
     return this.send(() =>
-      axios.post<T>(`${this.coreUrl(url)}${path}`, body, this.config('POST', path, signingKey, options?.orgId, body)),
+      axios.post<T>(`${url}${path}`, body, this.config('POST', path, signingKey, options?.orgId, body)),
     );
   }
 
@@ -93,7 +85,7 @@ export class CoreHttpService {
   ): Promise<T> {
     const body = this.serialize(data);
     return this.send(() =>
-      axios.patch<T>(`${this.coreUrl(url)}${path}`, body, this.config('PATCH', path, signingKey, options?.orgId, body)),
+      axios.patch<T>(`${url}${path}`, body, this.config('PATCH', path, signingKey, options?.orgId, body)),
     );
   }
 
@@ -107,12 +99,12 @@ export class CoreHttpService {
   ): Promise<T> {
     const body = this.serialize(data);
     return this.send(() =>
-      axios.put<T>(`${this.coreUrl(url)}${path}`, body, this.config('PUT', path, signingKey, options?.orgId, body)),
+      axios.put<T>(`${url}${path}`, body, this.config('PUT', path, signingKey, options?.orgId, body)),
     );
   }
 
   // Sends a signed DELETE request and returns the response body
   async delete<T>(url: string, signingKey: string, path: string, options?: { orgId?: string }): Promise<T> {
-    return this.send(() => axios.delete<T>(`${this.coreUrl(url)}${path}`, this.config('DELETE', path, signingKey, options?.orgId)));
+    return this.send(() => axios.delete<T>(`${url}${path}`, this.config('DELETE', path, signingKey, options?.orgId)));
   }
 }

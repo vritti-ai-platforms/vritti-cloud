@@ -1,6 +1,7 @@
 import { buildScopedMatrix } from '@domain/catalog/site-matrix.builder';
 import { Injectable, Logger } from '@nestjs/common';
 import type { SuccessResponseDto } from '@vritti/api-sdk/database';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
 import { CoreOrganizationService } from '@/modules/core-server/services/core-organization.service';
@@ -27,7 +28,7 @@ export class OrganizationLocksService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await loadPlanContext(this.coreVersionRepository, org, deployment);
     const { featureLocks } = await this.coreOrganizationService.getOrgLocks(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
     );
@@ -38,7 +39,7 @@ export class OrganizationLocksService {
   async updateOrgLocks(orgId: string, dto: SetLocksDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     await this.coreOrganizationService.pushOrgLocks(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       validateLocksShape(dto.locks),
@@ -52,7 +53,7 @@ export class OrganizationLocksService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await loadPlanContext(this.coreVersionRepository, org, deployment);
     const { featureLocks } = await this.coreStructureService.getLegalEntityLocks(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       leId,
@@ -64,7 +65,7 @@ export class OrganizationLocksService {
   async updateLegalEntityLocks(orgId: string, leId: string, dto: SetLocksDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     await this.coreStructureService.pushLegalEntityLocks(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       leId,
@@ -79,7 +80,7 @@ export class OrganizationLocksService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await loadPlanContext(this.coreVersionRepository, org, deployment);
     const { featureLocks } = await this.coreStructureService.getSiteGroupLocks(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       groupId,
@@ -91,7 +92,7 @@ export class OrganizationLocksService {
   async updateSiteGroupLocks(orgId: string, groupId: string, dto: SetLocksDto): Promise<SuccessResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     await this.coreStructureService.pushSiteGroupLocks(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       groupId,

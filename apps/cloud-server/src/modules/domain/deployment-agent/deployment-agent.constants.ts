@@ -11,7 +11,7 @@ export const DEFAULT_STACK_IMAGES = {
   postgres: 'ghcr.io/vritti-ai-platforms/postgres-pgbackrest:18.4',
   redis: 'redis:7',
   nats: 'nats:2',
-  gitea: 'gitea/gitea:1.23',
+  gitea: 'gitea/gitea:1.27',
   nginx: 'nginx:1',
 } as const;
 

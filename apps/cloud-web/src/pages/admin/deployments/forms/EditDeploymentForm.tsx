@@ -17,6 +17,8 @@ import {
   DEFAULT_SECRET_PROVIDER,
   DEPLOYMENT_DB_MODE_OPTIONS,
   DEPLOYMENT_STATUS_OPTIONS,
+  DEPLOYMENT_TENANT_TYPE_OPTIONS,
+  DEPLOYMENT_TYPE_OPTIONS,
   SECRET_AUTH_METHOD_FIELDS,
   type SecretAuthMethod,
   type UpdateDeploymentData,
@@ -44,6 +46,7 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       addonGitea: deployment.addonGitea,
       regionId: deployment.regionId,
       cloudProviderId: deployment.cloudProviderId,
+      tenantType: deployment.tenantType,
       type: deployment.type,
       status: deployment.status,
       version: deployment.version ?? '',
@@ -127,11 +130,10 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       <Select
         name="type"
         label="Deployment Type"
-        options={[
-          { value: 'shared', label: 'Shared' },
-          { value: 'dedicated', label: 'Dedicated' },
-        ]}
+        description="Deployed routes core through an edge at api.<host>; local reaches core directly on the URL above."
+        options={DEPLOYMENT_TYPE_OPTIONS}
       />
+      <Select name="tenantType" label="Tenancy" options={DEPLOYMENT_TENANT_TYPE_OPTIONS} />
       <Select name="status" label="Status" options={DEPLOYMENT_STATUS_OPTIONS} />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

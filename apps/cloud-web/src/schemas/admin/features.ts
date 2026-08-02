@@ -1,10 +1,10 @@
 import type { TableResponse } from '@vritti/quantum-ui/types/api-response';
-import type { ScopeType, SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
+import type { ScopeType, ServiceCode, SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
 import { z, zodCodeField } from '@vritti/quantum-ui/zod';
 import type { IconName } from 'lucide-react/dynamic';
 import { SITE_TYPE_LABELS, SITE_TYPE_VALUES } from '@/schemas/shared/site-types';
 
-export type { ScopeType, SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
+export type { ScopeType, ServiceCode, SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
 export { SITE_TYPE_LABELS, SITE_TYPE_VALUES } from '@/schemas/shared/site-types';
 
 export const SCOPE_TYPE_VALUES = ['ORG', 'LE', 'SITE_GROUP', 'SITE'] as const;
@@ -56,6 +56,7 @@ export interface Feature {
   description: string | null;
   permissions: string[];
   platforms: string[];
+  services: ServiceCode[];
   businessCount: number;
   sortOrder: number;
   createdAt: string;
@@ -102,6 +103,8 @@ export const createFeatureSchema = z.object({
   sfSymbol: z.string().min(1, 'Please select an SF Symbol').max(255),
   materialSymbol: z.string().min(1, 'Please select a Material Symbol').max(255),
   description: z.string().optional(),
+  // The form carries a boolean per service; the wire carries the service array (see features.service.ts)
+  requiresGitea: z.boolean().default(false),
 });
 
 export const updateFeatureSchema = z.object({
@@ -113,6 +116,7 @@ export const updateFeatureSchema = z.object({
   sfSymbol: z.string().min(1, 'Please select an SF Symbol').max(255).optional(),
   materialSymbol: z.string().min(1, 'Please select a Material Symbol').max(255).optional(),
   description: z.string().optional(),
+  requiresGitea: z.boolean().optional(),
 });
 
 export const changeFeaturesScopeSchema = z.object({

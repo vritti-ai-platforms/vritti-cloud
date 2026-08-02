@@ -8,6 +8,7 @@ import {
   DeploymentEdgeValues,
   DeploymentManagementModeValues,
   DeploymentStatusValues,
+  DeploymentTenantTypeValues,
   DeploymentTypeValues,
 } from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
@@ -76,7 +77,8 @@ export class DeploymentDomainService {
       edge,
       addonPgbackrest: dto.addonPgbackrest ?? false,
       addonGitea: dto.addonGitea ?? false,
-      type: dto.type ?? DeploymentTypeValues.dedicated,
+      tenantType: dto.tenantType ?? DeploymentTenantTypeValues.dedicated,
+      type: dto.type ?? DeploymentTypeValues.deployed,
       regionId: dto.regionId ?? LOCAL_REGION_ID,
       cloudProviderId: dto.cloudProviderId ?? LOCAL_CLOUD_PROVIDER_ID,
       status: dto.status ?? (isManual ? DeploymentStatusValues.active : DeploymentStatusValues.Provisioning),

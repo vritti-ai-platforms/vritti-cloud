@@ -6,6 +6,7 @@ import type { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/data
 import { ForbiddenException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import type { Deployment, Organization } from '@/db/schema';
 import { siteAppliesEnum } from '@/db/schema/enums';
+import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
 import { CoreDeploymentService } from '@/modules/core-server/services/core-deployment.service';
@@ -42,7 +43,11 @@ export class OrganizationSitesService {
   async listSites(orgId: string): Promise<SiteListResponseDto> {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
-    const sites = await this.coreSiteService.getSites(deployment.url, requireSigningKey(deployment), org.orgIdentifier);
+    const sites = await this.coreSiteService.getSites(
+      coreBaseUrl(deployment),
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+    );
     this.logger.log(`Fetched sites for org ${orgId}`);
     return { result: sites };
   }
@@ -54,7 +59,7 @@ export class OrganizationSitesService {
     await this.checkSiteLimit(org, deployment);
 
     const site = await this.coreSiteService.createSite(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       this.packMetadata(data),
@@ -68,7 +73,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreSiteService.getSite(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteId,
@@ -84,7 +89,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreSiteService.updateSite(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteId,
@@ -99,7 +104,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreSiteService.reorderSites(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       dto.ids,
@@ -113,7 +118,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     const result = await this.coreSiteService.deleteSite(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteId,
@@ -127,7 +132,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreSiteService.getRoleAssignments(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteId,
@@ -143,12 +148,12 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const signingKey = requireSigningKey(deployment);
 
-    await this.coreRoleService.assignRole(deployment.url, signingKey, org.orgIdentifier, data.userId, {
+    await this.coreRoleService.assignRole(coreBaseUrl(deployment), signingKey, org.orgIdentifier, data.userId, {
       roleId: data.roleId,
       siteId,
     });
     const assignments = await this.coreSiteService.getRoleAssignments(
-      deployment.url,
+      coreBaseUrl(deployment),
       signingKey,
       org.orgIdentifier,
       siteId,
@@ -167,7 +172,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreRoleService.removeRoleAssignment(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       assignmentId,
@@ -179,7 +184,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
     const { snapshot } = await loadPlanContext(this.coreVersionRepository, org, deployment);
     const result = await this.coreSiteService.getSite(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteId,
@@ -219,7 +224,7 @@ export class OrganizationSitesService {
     const { org, deployment } = await this.coreDeploymentService.resolveOrgDeployment(orgId);
 
     return this.coreRoleService.getCompatibleRoles(
-      deployment.url,
+      coreBaseUrl(deployment),
       requireSigningKey(deployment),
       org.orgIdentifier,
       siteId,
@@ -245,7 +250,11 @@ export class OrganizationSitesService {
 
     if (plan.maxSites === null) return;
 
-    const sites = await this.coreSiteService.getSites(deployment.url, requireSigningKey(deployment), org.orgIdentifier);
+    const sites = await this.coreSiteService.getSites(
+      coreBaseUrl(deployment),
+      requireSigningKey(deployment),
+      org.orgIdentifier,
+    );
     const currentCount = Array.isArray(sites) ? sites.length : 0;
 
     if (currentCount >= plan.maxSites) {

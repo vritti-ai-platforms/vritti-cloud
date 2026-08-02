@@ -56,6 +56,7 @@ export const OverviewTab: React.FC<OverviewTabProps> = ({ deployment }) => {
               }
             />
             <DetailField label="Type" type="string" value={titleCase(deployment.type)} />
+            <DetailField label="Tenancy" type="string" value={titleCase(deployment.tenantType)} />
             <DetailField label="Management Mode" type="string" value={titleCase(deployment.managementMode)} />
             <DetailField label="Organizations" type="number" value={deployment.organizationCount ?? 0} />
             <DetailField label="Created" type="date" value={deployment.createdAt} />
