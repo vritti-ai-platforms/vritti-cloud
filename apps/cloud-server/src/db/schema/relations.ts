@@ -141,6 +141,7 @@ export const relations = defineRelations(schema, (r) => ({
     agents: r.many.deploymentAgents(),
     secrets: r.many.deploymentSecrets(),
     certificates: r.many.deploymentCertificates(),
+    events: r.many.deploymentEvents(),
     region: r.one.regions({
       from: r.deployments.regionId,
       to: r.regions.id,
@@ -171,6 +172,14 @@ export const relations = defineRelations(schema, (r) => ({
   deploymentCertificates: {
     deployment: r.one.deployments({
       from: r.deploymentCertificates.deploymentId,
+      to: r.deployments.id,
+    }),
+  },
+
+  // Deployment event relations
+  deploymentEvents: {
+    deployment: r.one.deployments({
+      from: r.deploymentEvents.deploymentId,
       to: r.deployments.id,
     }),
   },

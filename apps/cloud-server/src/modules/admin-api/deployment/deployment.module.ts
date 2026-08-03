@@ -1,5 +1,6 @@
 import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
 import { DeploymentAgentDomainModule } from '@domain/deployment-agent/deployment-agent.module';
+import { DeploymentEventDomainModule } from '@domain/deployment-event/deployment-event.module';
 import { OrganizationDomainModule } from '@domain/organization/organization.module';
 import { OrganizationMemberDomainModule } from '@domain/organization-member/organization-member.module';
 import { Module } from '@nestjs/common';
@@ -13,6 +14,7 @@ import { OrganizationMemberController } from './organization/member/controllers/
   imports: [
     DeploymentDomainModule,
     DeploymentAgentDomainModule,
+    DeploymentEventDomainModule,
     OrganizationDomainModule,
     OrganizationMemberDomainModule,
     CoreServerModule,

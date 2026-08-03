@@ -21,6 +21,11 @@ import { DeploymentViewPageSkeleton } from './pages/admin/deployments/Deployment
 import { DeploymentWizard } from './pages/admin/deployments/DeploymentWizard';
 import { OrganizationViewPage as AdminOrganizationViewPage } from './pages/admin/deployments/organizations/OrganizationViewPage';
 import { OrganizationViewPageSkeleton } from './pages/admin/deployments/organizations/OrganizationViewPageSkeleton';
+import { ComponentPageSkeleton } from './pages/admin/deployments/view/components/ComponentPageSkeleton';
+import { CoreStackPage } from './pages/admin/deployments/view/components/CoreStackPage';
+import { DatabasePage } from './pages/admin/deployments/view/components/DatabasePage';
+import { EdgePage } from './pages/admin/deployments/view/components/EdgePage';
+import { GiteaPage } from './pages/admin/deployments/view/components/GiteaPage';
 import { RegionsPage } from './pages/admin/regions/RegionsPage';
 import { RegionViewPage } from './pages/admin/regions/RegionViewPage';
 import { RegionViewPageSkeleton } from './pages/admin/regions/RegionViewPageSkeleton';
@@ -186,6 +191,38 @@ export const adminRoutes: RouteObject[] = [
         element: (
           <Suspense fallback={<DeploymentViewPageSkeleton />}>
             <DeploymentViewPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'deployments/:deploymentSlug/core-stack',
+        element: (
+          <Suspense fallback={<ComponentPageSkeleton />}>
+            <CoreStackPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'deployments/:deploymentSlug/database',
+        element: (
+          <Suspense fallback={<ComponentPageSkeleton />}>
+            <DatabasePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'deployments/:deploymentSlug/edge',
+        element: (
+          <Suspense fallback={<ComponentPageSkeleton />}>
+            <EdgePage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'deployments/:deploymentSlug/gitea',
+        element: (
+          <Suspense fallback={<ComponentPageSkeleton />}>
+            <GiteaPage />
           </Suspense>
         ),
       },

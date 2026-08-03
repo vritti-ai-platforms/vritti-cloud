@@ -1,7 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, desc, eq, gt, ne, sql } from '@vritti/api-sdk/drizzle-orm';
-import type { Deployment, DeploymentAgent, NewDeploymentAgent } from '@/db/schema';
+import type {
+  AcmeDelegation,
+  Condition,
+  Deployment,
+  DeploymentAgent,
+  HostMetrics,
+  NewDeploymentAgent,
+  ServiceStatus,
+} from '@/db/schema';
 import { deploymentAgents, deployments } from '@/db/schema';
 
 @Injectable()
@@ -77,25 +85,15 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
     });
   }
 
-  // Records a heartbeat from the agent
+  // Records a heartbeat from the agent (conditions/services/host/delegation snapshots + applied generation)
   async recordHeartbeat(
     id: string,
     data: {
       generation: number;
-      phase: string;
-      message: string | null;
-      giteaProvisioned: boolean;
-      acmeDelegation: { name: string; target: string; zone: string; nameserver: string; serverIp: string } | null;
-      containers:
-        | { service: string; name: string; state: string; health: string; cpuPercent: number; memoryBytes: number }[]
-        | null;
-      hostMetrics: {
-        cpuPercent: number;
-        memTotalBytes: number;
-        memUsedBytes: number;
-        diskTotalBytes: number;
-        diskUsedBytes: number;
-      } | null;
+      conditions: Condition[];
+      services: ServiceStatus[];
+      host: HostMetrics | null;
+      delegation: AcmeDelegation | null;
     },
   ): Promise<void> {
     await this.db
@@ -103,12 +101,10 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
       .set({
         lastHeartbeatAt: new Date(),
         lastGeneration: data.generation,
-        lastPhase: data.phase,
-        lastMessage: data.message,
-        giteaProvisioned: data.giteaProvisioned,
-        acmeDelegation: data.acmeDelegation,
-        containers: data.containers,
-        hostMetrics: data.hostMetrics,
+        conditions: data.conditions,
+        services: data.services,
+        host: data.host,
+        delegation: data.delegation,
       })
       .where(eq(deploymentAgents.id, id));
   }

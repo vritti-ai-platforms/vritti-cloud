@@ -1,12 +1,13 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { DeploymentEventDomainService } from '@domain/deployment-event/services/deployment-event.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { hashToken } from '@vritti/api-sdk/auth';
 import { CreateResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import { canonicalStringify, generateSigningKeyPair } from '@vritti/api-sdk/signing';
-import type { Deployment, DeploymentAgent, DeploymentCertificate, DeploymentSecret } from '@/db/schema';
-import { DeploymentManagementModeValues } from '@/db/schema';
+import type { Condition, Deployment, DeploymentAgent, DeploymentCertificate, DeploymentSecret } from '@/db/schema';
+import { DeploymentManagementTypeValues } from '@/db/schema';
 import { CryptoService } from '@/services';
 import {
   generateOpaqueToken,
@@ -17,7 +18,7 @@ import {
 } from '../agent-crypto.util';
 import { ENROLL_TOKEN_TTL_MS } from '../deployment-agent.constants';
 import type { EnrollRequestDto } from '../dto/request/enroll-request.dto';
-import type { CertificateReportDto, StatusReportDto } from '../dto/request/status-report.dto';
+import type { CertificateReportDto, StatusEventDto, StatusReportDto } from '../dto/request/status-report.dto';
 import { DeploymentAgentDomainRepository } from '../repositories/deployment-agent.repository';
 import { DeploymentCertificateDomainRepository } from '../repositories/deployment-certificate.repository';
 import { DeploymentSecretDomainRepository } from '../repositories/deployment-secret.repository';
@@ -72,6 +73,7 @@ export class DeploymentAgentDomainService {
     private readonly secretRepository: DeploymentSecretDomainRepository,
     private readonly certificateRepository: DeploymentCertificateDomainRepository,
     private readonly desiredStateService: DesiredStateDomainService,
+    private readonly eventService: DeploymentEventDomainService,
     private readonly configService: ConfigService,
     private readonly cryptoService: CryptoService,
   ) {}
@@ -79,10 +81,10 @@ export class DeploymentAgentDomainService {
   // Issues a one-time enroll token for a managed deployment, ensuring Keypair B exists first (admin)
   async issueEnrollToken(deploymentId: string): Promise<CreateResponseDto<EnrollTokenData>> {
     const deployment = await this.requireDeployment(deploymentId);
-    if (deployment.managementMode !== DeploymentManagementModeValues.agent) {
+    if (deployment.managementType !== DeploymentManagementTypeValues.managed) {
       throw new BadRequestException({
-        label: 'Not an Agent Deployment',
-        detail: 'Enroll tokens can only be issued for agent-managed deployments.',
+        label: 'Not a Managed Deployment',
+        detail: 'Enroll tokens can only be issued for managed deployments.',
       });
     }
     const { rawPublicKeyB64 } = await this.ensureAgentKeypair(deployment);
@@ -198,25 +200,84 @@ export class DeploymentAgentDomainService {
     return { payloadB64, signature };
   }
 
-  // Records an agent heartbeat (phase, generation, gitea provisioning) and tracks reported certificates
+  // Records an agent heartbeat (conditions/services/host/delegation), tracks certs, and appends timeline events
   async recordStatus(agent: DeploymentAgent, dto: StatusReportDto): Promise<void> {
     // The guard-resolved agent is authoritative — reject a body whose deploymentId disagrees
     if (dto.deploymentId !== agent.deploymentId) {
       throw new BadRequestException('Status report deploymentId does not match the authenticated agent.');
     }
+    // Snapshot the previously stored conditions before overwriting — the transition diff is against these
+    const previousConditions = agent.conditions ?? [];
     await this.agentRepository.recordHeartbeat(agent.id, {
       generation: dto.generation,
-      phase: dto.phase,
-      message: dto.message ?? null,
-      giteaProvisioned: dto.giteaProvisioned ?? false,
+      conditions: dto.conditions,
+      services: dto.services,
+      // Latest live snapshot — null clears whole-VM usage when the agent stops reporting it
+      host: dto.host ?? null,
       // Null clears the stored delegation once the agent stops reporting it (wildcard issued)
-      acmeDelegation: dto.acmeDelegation ?? null,
-      // Latest live snapshots — per-service states + whole-VM resource usage
-      containers: dto.containers ?? null,
-      hostMetrics: dto.host ?? null,
+      delegation: dto.delegation ?? null,
     });
     await this.recordCertificates(agent.deploymentId, dto.certificates);
-    this.logger.log(`Recorded status for deployment ${agent.deploymentId} (phase ${dto.phase}, gen ${dto.generation})`);
+    // A changed/new condition is a control-plane transition worth surfacing on the timeline
+    await this.recordConditionTransitions(agent.deploymentId, dto.generation, previousConditions, dto.conditions);
+    // Notable transitions the agent explicitly asked us to record (issuing wildcard, backup complete, …)
+    await this.recordReportedEvents(agent.deploymentId, dto.generation, dto.events);
+    this.logger.log(`Recorded status for deployment ${agent.deploymentId} (gen ${dto.generation})`);
+  }
+
+  // Appends a timeline event for each condition that is new or whose status/reason changed since the last heartbeat
+  private async recordConditionTransitions(
+    deploymentId: string,
+    generation: number,
+    previous: Condition[],
+    current: Condition[],
+  ): Promise<void> {
+    const previousByKey = new Map(previous.map((condition) => [this.conditionKey(condition), condition]));
+    for (const condition of current) {
+      const prior = previousByKey.get(this.conditionKey(condition));
+      if (prior && prior.status === condition.status && prior.reason === condition.reason) continue;
+      await this.eventService.append(deploymentId, {
+        generation,
+        level: this.conditionLevel(condition),
+        component: condition.component ?? null,
+        reason: condition.reason,
+        message: condition.message,
+      });
+    }
+  }
+
+  // Appends each agent-reported event, skipping runs of identical consecutive entries
+  private async recordReportedEvents(
+    deploymentId: string,
+    generation: number,
+    events?: StatusEventDto[],
+  ): Promise<void> {
+    if (!events?.length) return;
+    let previousKey: string | null = null;
+    for (const event of events) {
+      const key = `${event.level}|${event.component ?? ''}|${event.reason}|${event.message}`;
+      if (key === previousKey) continue;
+      previousKey = key;
+      await this.eventService.append(deploymentId, {
+        generation,
+        level: event.level,
+        component: event.component ?? null,
+        reason: event.reason,
+        message: event.message,
+      });
+    }
+  }
+
+  // Stable identity of a condition for transition diffing — its type scoped to the component it targets
+  private conditionKey(condition: Pick<Condition, 'type' | 'component'>): string {
+    return `${condition.type}:${condition.component ?? ''}`;
+  }
+
+  // Maps a condition to an event severity — Degraded/errors are errors, Blocked is a warning, the rest informational
+  private conditionLevel(condition: Pick<Condition, 'type' | 'reason'>): 'info' | 'warn' | 'error' {
+    if (condition.type === 'Degraded' || /error/i.test(condition.reason)) return 'error';
+    if (condition.type === 'Blocked') return 'warn';
+    return 'info';
   }
 
   // Upserts each reported certificate by (deployment, host) — cloud-server is the system of record for expiry

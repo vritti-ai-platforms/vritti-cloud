@@ -4,6 +4,7 @@ import type {
   AgentStatus,
   CreateDeploymentData,
   Deployment,
+  DeploymentEventsResponse,
   DeploymentSigningKey,
   EnrollToken,
   UpdateDeploymentData,
@@ -58,6 +59,15 @@ export function issueEnrollToken(id: string): Promise<CreateResponse<EnrollToken
 // Fetches the live agent connection and reconciliation status for a deployment
 export function getAgentStatus(id: string): Promise<AgentStatus> {
   return axios.get<AgentStatus>(`admin-api/deployments/${id}/agent`).then((r) => r.data);
+}
+
+// Fetches a newest-first, cursor-paginated page of the deployment's reconcile event timeline
+export function getDeploymentEvents(id: string, cursor?: string): Promise<DeploymentEventsResponse> {
+  return axios
+    .get<DeploymentEventsResponse>(`admin-api/deployments/${id}/agent/events`, {
+      params: cursor ? { cursor } : undefined,
+    })
+    .then((r) => r.data);
 }
 
 // Deletes a deployment by ID

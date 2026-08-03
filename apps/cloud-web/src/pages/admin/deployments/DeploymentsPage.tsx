@@ -16,7 +16,7 @@ const TABLE_SLUG = 'deployments';
 // "Agent Setup" stage (the wizard pinpoints enroll/provision/sync from live agent status on open).
 function deriveSetupStage(deployment: Deployment): { label: string; complete: boolean } {
   if (deployment.catalogSynced) return { label: 'Complete', complete: true };
-  if (deployment.managementMode === 'manual') {
+  if (deployment.managementType === 'manual') {
     return { label: deployment.hasSigningKey ? 'Sync' : 'Signing Key', complete: false };
   }
   return { label: 'Agent Setup', complete: false };
@@ -116,19 +116,10 @@ function getColumns({ onView, onResume }: ColumnActions): ColumnDef<Deployment, 
       ),
     },
     {
-      accessorKey: 'type',
+      accessorKey: 'managementType',
       header: 'Type',
       cell: ({ row }) => (
-        <Badge variant="outline" className="capitalize">
-          {row.original.type}
-        </Badge>
-      ),
-    },
-    {
-      accessorKey: 'managementMode',
-      header: 'Mode',
-      cell: ({ row }) => (
-        <Badge variant="secondary">{row.original.managementMode === 'agent' ? 'Managed' : 'Local'}</Badge>
+        <Badge variant="secondary">{row.original.managementType === 'managed' ? 'Managed' : 'Manual'}</Badge>
       ),
     },
     {

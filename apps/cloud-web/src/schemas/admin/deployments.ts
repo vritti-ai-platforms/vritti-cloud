@@ -17,37 +17,33 @@ export const DEPLOYMENT_STATUS_VARIANT: Record<DeploymentStatus, 'success' | 'wa
   stopped: 'secondary',
 };
 
-// Canonical deployment database mode values — must byte-match the backend deployment `mode` enum
-// (apps/cloud-server). 'managed' = agent runs its own Postgres; 'external' = agent connects to an
-// existing DB whose creds live in the deployment's secret store.
-export const DEPLOYMENT_DB_MODE_VALUES = ['managed', 'external'] as const;
-export type DeploymentDbMode = (typeof DEPLOYMENT_DB_MODE_VALUES)[number];
+// Component mode — 'managed' = the agent runs it; 'external' = something else provides it. Shared by
+// the database and edge components; must byte-match the backend ComponentModeInputValues.
+export const COMPONENT_MODE_VALUES = ['managed', 'external'] as const;
+export type ComponentMode = (typeof COMPONENT_MODE_VALUES)[number];
 
-export const DEPLOYMENT_DB_MODE_OPTIONS: { value: DeploymentDbMode; label: string }[] = [
+export const COMPONENT_MODE_OPTIONS: { value: ComponentMode; label: string }[] = [
   { value: 'managed', label: 'Managed' },
   { value: 'external', label: 'External' },
 ];
 
-// Canonical deployment edge values — must byte-match the backend deployment `edge` enum.
-// 'managed' = the agent runs nginx + terminates TLS (ACME) for the configured domains;
-// 'external' = TLS/routing is handled outside the agent (an existing ingress/load balancer).
-export const DEPLOYMENT_EDGE_VALUES = ['managed', 'external'] as const;
-export type DeploymentEdgeMode = (typeof DEPLOYMENT_EDGE_VALUES)[number];
+// The one who-runs-it fork — must byte-match the backend DeploymentManagementTypeValues enum.
+// 'managed' = Vritti's agent runs + observes the stack; 'manual' = customer self-hosts (cloud is
+// licensing-only).
+export const MANAGEMENT_TYPE_VALUES = ['managed', 'manual'] as const;
+export type DeploymentManagementType = (typeof MANAGEMENT_TYPE_VALUES)[number];
 
-export const DEPLOYMENT_EDGE_OPTIONS: { value: DeploymentEdgeMode; label: string }[] = [
-  { value: 'managed', label: 'Managed' },
-  { value: 'external', label: 'External' },
-];
-
-// Canonical deployment type values — must byte-match the backend deployment `type` enum.
-// 'deployed' = an edge fronts core and serves it on `api.<host>`; 'local' = core answers directly
-// on the deployment url (dev tunnel, or core on its own port) with no `api.` host to resolve.
-export const DEPLOYMENT_TYPE_VALUES = ['deployed', 'local'] as const;
-export type DeploymentType = (typeof DEPLOYMENT_TYPE_VALUES)[number];
-
-export const DEPLOYMENT_TYPE_OPTIONS: { value: DeploymentType; label: string }[] = [
-  { value: 'deployed', label: 'Deployed' },
-  { value: 'local', label: 'Local' },
+export const MANAGEMENT_TYPE_OPTIONS: { value: DeploymentManagementType; label: string; description: string }[] = [
+  {
+    value: 'managed',
+    label: 'Managed',
+    description: 'Provisioned and operated by an agent on a cloud region and provider.',
+  },
+  {
+    value: 'manual',
+    label: 'Manual',
+    description: 'Self-hosted deployment you run yourself. A signing key is issued at creation.',
+  },
 ];
 
 // Tenancy of the deployment — must byte-match the backend `tenantType` enum.
@@ -58,8 +54,6 @@ export const DEPLOYMENT_TENANT_TYPE_OPTIONS: { value: DeploymentTenantType; labe
   { value: 'shared', label: 'Shared' },
   { value: 'dedicated', label: 'Dedicated' },
 ];
-
-type DeploymentManagementMode = 'manual' | 'agent';
 
 export const SECRET_AUTH_METHOD_VALUES = [
   'universal',
@@ -170,31 +164,61 @@ export const DEFAULT_SECRET_PROVIDER: SecretProvider = {
   auth: { method: 'universal', params: {} },
 };
 
+// The typed stack-component spec (deployments.spec jsonb). Absent components are omitted; a manual
+// deployment carries { specVersion: 1, components: {} }.
+export interface SpecCore {
+  enabled: boolean;
+}
+
+export interface SpecDatabaseBackup {
+  retention: number;
+}
+
+export interface SpecDatabase {
+  mode: ComponentMode;
+  backup?: SpecDatabaseBackup;
+}
+
+export interface SpecEdge {
+  mode: ComponentMode;
+  acmeEmail?: string;
+}
+
+export interface SpecGitea {
+  enabled: boolean;
+}
+
+export interface DeploymentSpecComponents {
+  core?: SpecCore;
+  database?: SpecDatabase;
+  edge?: SpecEdge;
+  gitea?: SpecGitea;
+  secretStore?: SecretProvider;
+}
+
+export interface DeploymentSpec {
+  specVersion: number;
+  components: DeploymentSpecComponents;
+}
+
 export interface Deployment {
   id: string;
   name: string;
   url: string;
-  managementMode: DeploymentManagementMode;
-  mode: DeploymentDbMode;
-  edge: DeploymentEdgeMode;
-  addonPgbackrest: boolean;
-  backupRetention: number;
-  addonGitea: boolean;
   regionId: string;
   cloudProviderId: string;
   status: DeploymentStatus;
   tenantType: DeploymentTenantType;
-  type: DeploymentType;
+  managementType: DeploymentManagementType;
+  spec: DeploymentSpec;
   version: string | null;
-  acmeEmail: string | null;
-  secretProvider: SecretProvider | null;
   regionName?: string;
   regionCode?: string;
   cloudProviderName?: string;
   cloudProviderCode?: string;
   createdAt: string;
   updatedAt: string | null;
-  organizationCount?: number;
+  organizationCount: number;
   publicKey?: string;
   hasSigningKey: boolean;
   catalogSynced: boolean;
@@ -221,13 +245,36 @@ export interface Certificate {
   issuedAt: string;
 }
 
-// Latest reported per-service container state (from the most recent heartbeat).
-export interface AgentContainer {
+// One reconcile condition from the most recent heartbeat (Kubernetes-style status axis).
+export interface Condition {
+  type: 'Ready' | 'Reconciling' | 'Blocked' | 'Degraded';
+  status: 'true' | 'false' | 'unknown';
+  reason: string;
+  message: string;
+  component?: 'core' | 'database' | 'edge' | 'gitea' | 'secretStore';
+  since: string;
+}
+
+// One service's latest reported runtime state, tagged by the component it belongs to.
+export interface ServiceStatus {
+  component: string;
   service: string;
+  name: string;
   state: string;
   health: string;
   cpuPercent: number;
   memoryBytes: number;
+}
+
+// One append-only timeline event surfaced from the agent's reconcile transitions.
+export interface DeploymentEvent {
+  id: string;
+  generation: number | null;
+  level: string;
+  component: string | null;
+  reason: string;
+  message: string;
+  createdAt: string;
 }
 
 // Latest reported whole-VM resource usage (from the most recent heartbeat).
@@ -239,44 +286,47 @@ export interface HostMetrics {
   diskUsedBytes: number;
 }
 
+// Pending DNS delegation the operator must add before the wildcard cert can be issued. name/target =
+// the challenge CNAME; zone/nameserver/serverIp = the one-time zone delegation (`zone NS nameserver`
+// + `nameserver A serverIp`). Null once the wildcard cert has issued.
+export interface AcmeDelegation {
+  name: string;
+  target: string;
+  zone: string;
+  nameserver: string;
+  serverIp: string;
+}
+
 export interface AgentStatus {
   deploymentId: string;
   enrolled: boolean;
   status: AgentEnrollmentStatus | null;
   agentVersion: string | null;
   lastHeartbeatAt: string | null;
-  lastPhase: string | null;
-  lastMessage: string | null;
   lastGeneration: number | null;
   desiredGeneration: number;
-  giteaProvisioned: boolean;
   deploymentPubKey: string | null;
-  certificates: Certificate[];
-  // Present while the wildcard cert is waiting on the operator's DNS; null once the cert is issued.
-  // name/target = the challenge CNAME; zone/nameserver/serverIp = the one-time zone delegation
-  // (`zone NS nameserver` + `nameserver A serverIp`).
-  acmeDelegation?: { name: string; target: string; zone: string; nameserver: string; serverIp: string } | null;
-  // Latest heartbeat snapshots: per-service container states + whole-VM resource usage.
-  containers: AgentContainer[];
+  conditions: Condition[];
+  services: ServiceStatus[];
   host: HostMetrics | null;
+  certificates: Certificate[];
+  delegation: AcmeDelegation | null;
+}
+
+// A newest-first page of a deployment's event timeline plus the cursor for the next (older) page.
+export interface DeploymentEventsResponse {
+  result: DeploymentEvent[];
+  nextCursor: string | null;
 }
 
 // Create: an empty ACME email means "not set" — send undefined (omit from payload).
-const acmeEmailCreateField = z
+const acmeEmailField = z
   .string()
   .email('Must be a valid email')
   .optional()
   .or(z.literal('').transform(() => undefined));
 
-// Edit: an empty ACME email means "clear it" — send null so the backend nullifies a previously-set value.
-const acmeEmailUpdateField = z
-  .string()
-  .email('Must be a valid email')
-  .nullable()
-  .or(z.literal('').transform(() => null))
-  .optional();
-
-export const secretProviderField = z.object({
+export const secretStoreField = z.object({
   type: z.string(),
   url: z.string(),
   projectId: z.string(),
@@ -291,13 +341,15 @@ export const secretProviderField = z.object({
 // yields undefined, and required-ness is enforced by validateSecretProvider, not the record itself.
 export const secretProviderSecretsField = z.record(z.string(), z.string().optional());
 
+// Validates a secret-store config + its (optionally-required) secret values, adding issues at the
+// nested components.secretStore / secretProviderSecrets form paths.
 export function validateSecretProvider(
-  provider: z.infer<typeof secretProviderField>,
+  provider: z.infer<typeof secretStoreField>,
   secrets: Record<string, string | undefined> | undefined,
   ctx: z.RefinementCtx,
   requireSecrets: boolean,
 ) {
-  const baseFields: [keyof z.infer<typeof secretProviderField>, string][] = [
+  const baseFields: [keyof z.infer<typeof secretStoreField>, string][] = [
     ['type', provider.type],
     ['url', provider.url],
     ['projectId', provider.projectId],
@@ -305,7 +357,7 @@ export function validateSecretProvider(
   ];
   for (const [key, value] of baseFields) {
     if (!value) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['secretProvider', key], message: 'Required' });
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['components', 'secretStore', key], message: 'Required' });
     }
   }
   const fields = SECRET_AUTH_METHOD_FIELDS[provider.auth.method] ?? [];
@@ -321,19 +373,21 @@ export function validateSecretProvider(
     } else if (!provider.auth.params?.[field.key]) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        path: ['secretProvider', 'auth', 'params', field.key],
+        path: ['components', 'secretStore', 'auth', 'params', field.key],
         message: `${field.label} is required`,
       });
     }
   }
 }
 
+// Splits a form's secret-store config into the non-secret store config (clean params for the selected
+// method) and the write-only secret values submitted at the top-level secretProviderSecrets key.
 export function assembleSecretProvider(data: {
-  secretProvider?: SecretProvider;
+  components?: { secretStore?: SecretProvider };
   secretProviderSecrets?: Record<string, string | undefined>;
-}): { secretProvider?: SecretProvider; secretProviderSecrets?: Record<string, string> } {
-  const provider = data.secretProvider;
-  if (!provider) return { secretProvider: undefined, secretProviderSecrets: undefined };
+}): { secretStore?: SecretProvider; secretProviderSecrets?: Record<string, string> } {
+  const provider = data.components?.secretStore;
+  if (!provider) return { secretStore: undefined, secretProviderSecrets: undefined };
   const fields = SECRET_AUTH_METHOD_FIELDS[provider.auth.method] ?? [];
   const params: Record<string, string> = {};
   const secrets: Record<string, string> = {};
@@ -347,7 +401,7 @@ export function assembleSecretProvider(data: {
     }
   }
   return {
-    secretProvider: {
+    secretStore: {
       type: provider.type,
       url: provider.url,
       projectId: provider.projectId,
@@ -358,28 +412,78 @@ export function assembleSecretProvider(data: {
   };
 }
 
+const databaseComponentField = z
+  .object({
+    mode: z.enum(COMPONENT_MODE_VALUES),
+    backup: z.object({ retention: zodNumericField({ integer: true, min: 1, max: 52 }) }).optional(),
+  })
+  .optional();
+
+const edgeComponentField = z
+  .object({
+    mode: z.enum(COMPONENT_MODE_VALUES),
+    acmeEmail: acmeEmailField,
+  })
+  .optional();
+
+const componentsField = z
+  .object({
+    core: z.object({ enabled: z.boolean().optional() }).optional(),
+    database: databaseComponentField,
+    edge: edgeComponentField,
+    gitea: z.object({ enabled: z.boolean() }).optional(),
+    secretStore: secretStoreField.optional(),
+  })
+  .optional();
+
+// Enforces the same component dependencies as the backend validateSpec: managed needs a secret store;
+// a managed edge needs an ACME email; a database backup requires a managed database.
+function refineComponents(
+  data: { components?: z.infer<typeof componentsField>; secretProviderSecrets?: Record<string, string | undefined> },
+  ctx: z.RefinementCtx,
+  requireSecretStore: boolean,
+) {
+  const components = data.components;
+  if (requireSecretStore && !components?.secretStore) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['components', 'secretStore'],
+      message: 'Secret store is required',
+    });
+  } else if (components?.secretStore) {
+    validateSecretProvider(components.secretStore, data.secretProviderSecrets, ctx, requireSecretStore);
+  }
+  if (components?.edge?.mode === 'managed' && !components.edge.acmeEmail) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['components', 'edge', 'acmeEmail'],
+      message: 'ACME email is required for a managed edge',
+    });
+  }
+  if (components?.database?.backup && components.database.mode !== 'managed') {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ['components', 'database', 'backup'],
+      message: 'Backups require a managed database',
+    });
+  }
+}
+
 export const createDeploymentSchema = z
   .object({
     name: z.string().min(1, 'Name is required').max(255),
     url: z.string().url('Must be a valid URL').max(500),
-    managementMode: z.enum(['manual', 'agent']),
-    mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
-    edge: z.enum(DEPLOYMENT_EDGE_VALUES).optional(),
-    addonPgbackrest: z.boolean().optional(),
-    backupRetention: zodNumericField({ integer: true, min: 1, max: 52 }).optional(),
-    addonGitea: z.boolean().optional(),
+    managementType: z.enum(MANAGEMENT_TYPE_VALUES),
     regionId: z.string().uuid('Please select a region').optional().or(z.literal('')),
     cloudProviderId: z.string().uuid('Please select a cloud provider').optional().or(z.literal('')),
     tenantType: z.enum(DEPLOYMENT_TENANT_TYPE_VALUES).optional(),
-    type: z.enum(DEPLOYMENT_TYPE_VALUES).optional(),
     status: z.enum(DEPLOYMENT_STATUS_VALUES).optional(),
     version: z.string().min(1, 'Version is required').max(50),
-    acmeEmail: acmeEmailCreateField,
-    secretProvider: secretProviderField.optional(),
+    components: componentsField,
     secretProviderSecrets: secretProviderSecretsField.optional(),
   })
   .superRefine((data, ctx) => {
-    if (data.managementMode !== 'agent') return;
+    if (data.managementType !== 'managed') return;
     if (!data.regionId) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['regionId'], message: 'Please select a region' });
     }
@@ -390,57 +494,34 @@ export const createDeploymentSchema = z
         message: 'Please select a cloud provider',
       });
     }
-    // Agent-managed deployments must declare a secret store — the agent sources runtime secrets from it.
-    if (!data.secretProvider) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['secretProvider'],
-        message: 'Secret store is required',
-      });
-    } else {
-      validateSecretProvider(data.secretProvider, data.secretProviderSecrets, ctx, true);
-    }
-    // pgBackRest backs up the agent-run Postgres, so it only applies to a managed database.
-    if (data.addonPgbackrest && data.mode === 'external') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['addonPgbackrest'],
-        message: 'pgBackRest requires a managed database',
-      });
-    }
+    // Secret store is no longer collected at create — it's a provisioning prerequisite entered in the
+    // in-view setup flow. Only validate the components authored here (edge email, db backup).
+    refineComponents(data, ctx, false);
   });
 
 export const updateDeploymentSchema = z
   .object({
     name: z.string().min(1, 'Name is required').max(255).optional(),
     url: z.string().url('Must be a valid URL').max(500).optional(),
-    mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
-    edge: z.enum(DEPLOYMENT_EDGE_VALUES).optional(),
-    addonPgbackrest: z.boolean().optional(),
-    backupRetention: zodNumericField({ integer: true, min: 1, max: 52 }).optional(),
-    addonGitea: z.boolean().optional(),
     regionId: z.string().uuid().optional(),
     cloudProviderId: z.string().uuid().optional(),
     tenantType: z.enum(DEPLOYMENT_TENANT_TYPE_VALUES).optional(),
-    type: z.enum(DEPLOYMENT_TYPE_VALUES).optional(),
     status: z.enum(DEPLOYMENT_STATUS_VALUES).optional(),
     version: z.string().max(50).optional().or(z.literal('')),
-    acmeEmail: acmeEmailUpdateField,
-    secretProvider: secretProviderField.optional(),
+    components: componentsField,
     secretProviderSecrets: secretProviderSecretsField.optional(),
   })
-  .superRefine((data, ctx) => {
-    if (data.secretProvider) {
-      validateSecretProvider(data.secretProvider, data.secretProviderSecrets, ctx, false);
-    }
-    if (data.addonPgbackrest && data.mode === 'external') {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['addonPgbackrest'],
-        message: 'pgBackRest requires a managed database',
-      });
-    }
-  });
+  .superRefine((data, ctx) => refineComponents(data, ctx, false));
 
 export type CreateDeploymentData = z.infer<typeof createDeploymentSchema>;
 export type UpdateDeploymentData = z.infer<typeof updateDeploymentSchema>;
+
+// Service → component map (mirrors the agent + cloud-server): postgres → database; nginx, acme-dns →
+// edge; gitea → gitea; everything else → core.
+export const COMPONENT_KEYS = ['core', 'database', 'edge', 'gitea'] as const;
+export type ComponentKey = (typeof COMPONENT_KEYS)[number];
+
+// Filters the agent's reported services to those belonging to a component.
+export function servicesForComponent(services: ServiceStatus[], component: ComponentKey): ServiceStatus[] {
+  return services.filter((service) => service.component === component);
+}

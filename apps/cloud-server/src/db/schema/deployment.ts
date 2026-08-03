@@ -1,14 +1,7 @@
-import { boolean, integer, jsonb, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import { integer, jsonb, text, timestamp, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudProviders } from './cloud-provider';
 import { cloudSchema } from './cloud-schema';
-import {
-  deploymentDbModeEnum,
-  deploymentEdgeEnum,
-  deploymentManagementModeEnum,
-  deploymentStatusEnum,
-  deploymentTenantTypeEnum,
-  deploymentTypeEnum,
-} from './enums';
+import { deploymentManagementTypeEnum, deploymentStatusEnum, deploymentTenantTypeEnum } from './enums';
 import { regions } from './region';
 
 // Non-secret secret-store config the agent uses to fetch runtime secrets — the auth SECRET half rides deployment_secrets
@@ -19,6 +12,46 @@ export type DeploymentSecretProvider = {
   env: string;
   auth: { method: string; params: Record<string, string> };
 };
+
+// The core stack component — always present on a managed deployment (the agent runs core-server/commerce/nats/redis)
+export type DeploymentCoreComponent = {
+  enabled: boolean;
+};
+
+// The database component — managed = agent runs its own Postgres; external = agent connects to an existing DB
+export type DeploymentDatabaseComponent = {
+  mode: 'managed' | 'external';
+  // pgBackRest backup config — only valid when mode='managed' (there's no agent-run Postgres to back up otherwise)
+  backup?: { retention: number };
+};
+
+// The HTTP edge component — managed = agent runs its own nginx + wildcard cert; external = another proxy fronts core
+export type DeploymentEdgeComponent = {
+  mode: 'managed' | 'external';
+  // Let's Encrypt registration email — required when mode='managed'
+  acmeEmail?: string;
+};
+
+// The Gitea component — a post-setup opt-in add-on
+export type DeploymentGiteaComponent = {
+  enabled: boolean;
+};
+
+// A composition of the stack components the operator wants — the typed spec document the agent reconciles toward.
+// A manual deployment has no components ({ specVersion: 1, components: {} }).
+export type DeploymentSpec = {
+  specVersion: 1;
+  components: {
+    core?: DeploymentCoreComponent;
+    database?: DeploymentDatabaseComponent;
+    edge?: DeploymentEdgeComponent;
+    gitea?: DeploymentGiteaComponent;
+    secretStore?: DeploymentSecretProvider;
+  };
+};
+
+// The empty spec written for manual deployments (and the column default)
+export const EMPTY_DEPLOYMENT_SPEC: DeploymentSpec = { specVersion: 1, components: {} };
 
 // Infrastructure deployment instances — linked to an app version by version string (no FK)
 export const deployments = cloudSchema.table('deployments', {
@@ -45,28 +78,12 @@ export const deployments = cloudSchema.table('deployments', {
   desiredGeneration: integer('desired_generation').notNull().default(0),
   // sha256 of the last built desired-state payload (generation excluded) — staleness check for the generation bump
   lastDesiredHash: text('last_desired_hash'),
-  // Per-deployment Let's Encrypt registration email for the managed edge (operator input)
-  acmeEmail: text('acme_email'),
-  // Managed-edge hosts + upstreams the agent serves and issues certs for (operator input)
-  domains: jsonb('domains').$type<Array<{ host: string; upstream: string }>>().notNull().default([]),
-  // Non-secret secret-store config pushed to the agent in the desired-state; the auth secret half lives in deployment_secrets
-  secretProvider: jsonb('secret_provider').$type<DeploymentSecretProvider>(),
+  // Typed composition of stack components the operator wants — the source of truth the agent reconciles toward
+  spec: jsonb('spec').$type<DeploymentSpec>().notNull().default(EMPTY_DEPLOYMENT_SPEC),
   status: deploymentStatusEnum('status').notNull().default('Provisioning'),
   tenantType: deploymentTenantTypeEnum('tenant_type').notNull(),
-  managementMode: deploymentManagementModeEnum('management_mode').notNull().default('agent'),
-  // DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB (creds from the secret store)
-  mode: deploymentDbModeEnum('mode').notNull().default('managed'),
-  // HTTP edge mode — managed = agent runs its own nginx+certbot edge for `domains`; external = another proxy fronts core (nginx off)
-  edge: deploymentEdgeEnum('edge').notNull().default('managed'),
-  // Where core answers — deployed = an edge serves it on `api.<host>`; local = core is reached directly on `url`
-  type: deploymentTypeEnum('type').notNull().default('deployed'),
-  // pgBackRest add-on toggle — R2 credentials ride the secret store, only the on/off flag lives here.
-  // Only valid when mode='managed' (there's no agent-run Postgres to back up otherwise).
-  addonPgbackrest: boolean('addon_pgbackrest').notNull().default(false),
-  // pgBackRest retention — number of full backups kept (repo*-retention-full). Only meaningful when pgBackRest is on.
-  backupRetention: integer('backup_retention').notNull().default(4),
-  // Gitea add-on toggle — admin credentials ride the secret store, only the on/off flag lives here
-  addonGitea: boolean('addon_gitea').notNull().default(false),
+  // Who runs the stack — managed = Vritti's agent; manual = customer self-hosts (cloud is licensing-only)
+  managementType: deploymentManagementTypeEnum('management_type').notNull().default('managed'),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

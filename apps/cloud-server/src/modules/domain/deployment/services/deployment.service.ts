@@ -3,16 +3,15 @@ import { CreateResponseDto, type SelectQueryResult, SuccessResponseDto } from '@
 import { BadRequestException, ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
 import {
-  DeploymentDbModeValues,
-  type DeploymentEdge,
-  DeploymentEdgeValues,
-  DeploymentManagementModeValues,
+  type DeploymentManagementType,
+  DeploymentManagementTypeValues,
+  type DeploymentSpec,
   DeploymentStatusValues,
   DeploymentTenantTypeValues,
-  DeploymentTypeValues,
 } from '@/db/schema';
 import { DeploymentDto } from '@/modules/admin-api/deployment/dto/entity/deployment.dto';
 import type { SigningKeyDto } from '@/modules/admin-api/deployment/dto/entity/signing-key.dto';
+import type { ComponentsInputDto } from '@/modules/admin-api/deployment/dto/request/components-input.dto';
 import type { CreateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/create-deployment.dto';
 import type { DeploymentSelectQueryDto } from '@/modules/admin-api/deployment/dto/request/deployment-select-query.dto';
 import type { UpdateDeploymentDto } from '@/modules/admin-api/deployment/dto/request/update-deployment.dto';
@@ -28,7 +27,7 @@ import { LOCAL_CLOUD_PROVIDER_ID, LOCAL_REGION_ID } from '../local-deployment.co
 import { DeploymentDomainRepository } from '../repositories/deployment.repository';
 
 // Reserved prefix for secret-store auth secret params carried in deployment_secrets
-const SECRET_PROVIDER_SECRET_PREFIX = 'secretProvider.';
+const SECRET_PROVIDER_SECRET_PREFIX = 'secretStore.';
 
 @Injectable()
 export class DeploymentDomainService {
@@ -65,27 +64,19 @@ export class DeploymentDomainService {
 
   // Creates a new deployment without a signing key; manual deployments use the sentinel local region/provider
   async create(dto: CreateDeploymentDto): Promise<CreateResponseDto<DeploymentDto>> {
-    const isManual = dto.managementMode === DeploymentManagementModeValues.manual;
-    const edge = dto.edge ?? DeploymentEdgeValues.managed;
-    this.validateAgentDeployment(dto, edge);
+    const isManaged = dto.managementType === DeploymentManagementTypeValues.managed;
+    const spec = this.buildSpec(dto.managementType, dto.components);
+    this.validateSpec(dto.managementType, spec);
     const deployment = await this.deploymentRepository.create({
       name: dto.name,
       url: dto.url,
       version: dto.version,
-      managementMode: dto.managementMode,
-      mode: dto.mode ?? DeploymentDbModeValues.managed,
-      edge,
-      addonPgbackrest: dto.addonPgbackrest ?? false,
-      backupRetention: dto.backupRetention ?? 4,
-      addonGitea: dto.addonGitea ?? false,
+      managementType: dto.managementType,
+      spec,
       tenantType: dto.tenantType ?? DeploymentTenantTypeValues.dedicated,
-      type: dto.type ?? DeploymentTypeValues.deployed,
       regionId: dto.regionId ?? LOCAL_REGION_ID,
       cloudProviderId: dto.cloudProviderId ?? LOCAL_CLOUD_PROVIDER_ID,
-      status: dto.status ?? (isManual ? DeploymentStatusValues.active : DeploymentStatusValues.Provisioning),
-      acmeEmail: dto.acmeEmail ?? null,
-      domains: dto.domains ?? [],
-      secretProvider: dto.secretProvider ?? null,
+      status: dto.status ?? (isManaged ? DeploymentStatusValues.Provisioning : DeploymentStatusValues.active),
       signingKey: null,
       signingPublicKey: null,
     });
@@ -98,27 +89,80 @@ export class DeploymentDomainService {
     };
   }
 
-  // Enforces cross-field requirements for agent-managed deployments only; manual/local deployments are unaffected
-  private validateAgentDeployment(dto: CreateDeploymentDto, edge: DeploymentEdge): void {
-    if (dto.managementMode !== DeploymentManagementModeValues.agent) return;
-    const errors: { field: string; message: string }[] = [];
-    if (!dto.secretProvider) {
-      errors.push({ field: 'secretProvider', message: 'Secret store required' });
+  // Builds the initial spec from the create DTO — manual deployments get an empty spec, managed get their components
+  private buildSpec(managementType: DeploymentManagementType, input: ComponentsInputDto | undefined): DeploymentSpec {
+    if (managementType !== DeploymentManagementTypeValues.managed) {
+      return { specVersion: 1, components: {} };
     }
-    // A managed edge issues a single *.<base> wildcard via Let's Encrypt (routing is derived from the
-    // base domain), so it needs an ACME registration email — not an operator-supplied domain list.
-    if (edge === DeploymentEdgeValues.managed && !dto.acmeEmail) {
-      errors.push({ field: 'acmeEmail', message: 'ACME email required' });
+    const derived = this.componentsFromInput(input ?? {});
+    // core is always present on a managed deployment (defaults enabled); explicit input still overrides
+    return { specVersion: 1, components: { core: { enabled: true }, ...derived } };
+  }
+
+  // Merges a partial component input into the existing spec, replacing each provided component wholesale
+  private mergeSpec(
+    existing: DeploymentSpec,
+    managementType: DeploymentManagementType,
+    input: ComponentsInputDto | undefined,
+  ): DeploymentSpec {
+    if (managementType !== DeploymentManagementTypeValues.managed) {
+      return { specVersion: 1, components: {} };
+    }
+    if (!input) return existing;
+    return { specVersion: 1, components: { ...existing.components, ...this.componentsFromInput(input) } };
+  }
+
+  // Projects a component input onto the stored spec-components shape, including only the components present
+  private componentsFromInput(input: ComponentsInputDto): DeploymentSpec['components'] {
+    const components: DeploymentSpec['components'] = {};
+    if (input.core !== undefined) {
+      components.core = { enabled: input.core.enabled ?? true };
+    }
+    if (input.database !== undefined) {
+      components.database = {
+        mode: input.database.mode,
+        ...(input.database.backup ? { backup: { retention: input.database.backup.retention } } : {}),
+      };
+    }
+    if (input.edge !== undefined) {
+      components.edge = { mode: input.edge.mode, ...(input.edge.acmeEmail ? { acmeEmail: input.edge.acmeEmail } : {}) };
+    }
+    if (input.gitea !== undefined) {
+      components.gitea = { enabled: input.gitea.enabled };
+    }
+    if (input.secretStore !== undefined) {
+      components.secretStore = {
+        type: input.secretStore.type,
+        url: input.secretStore.url,
+        projectId: input.secretStore.projectId,
+        env: input.secretStore.env,
+        auth: { method: input.secretStore.auth.method, params: input.secretStore.auth.params },
+      };
+    }
+    return components;
+  }
+
+  // Enforces cross-component requirements for managed deployments only; manual deployments are unaffected
+  private validateSpec(managementType: DeploymentManagementType, spec: DeploymentSpec): void {
+    if (managementType !== DeploymentManagementTypeValues.managed) return;
+    const components = spec.components;
+    const errors: { field: string; message: string }[] = [];
+    // NOTE: secretStore is deliberately NOT required at create/update time — it is configured during the
+    // in-view setup flow (it's a provisioning prerequisite the agent needs, alongside enroll), and the
+    // agent reports an `AwaitingSecretStore` Blocked condition until it is set. See the deployment setup flow.
+    // A managed edge issues a single *.<base> wildcard via Let's Encrypt, so it needs an ACME registration email.
+    if (components.edge?.mode === 'managed' && !components.edge.acmeEmail) {
+      errors.push({ field: 'components.edge.acmeEmail', message: 'ACME email required' });
     }
     // pgBackRest backs up the agent-run Postgres, so it's only valid with a managed database.
-    if (dto.addonPgbackrest && (dto.mode ?? DeploymentDbModeValues.managed) === DeploymentDbModeValues.external) {
-      errors.push({ field: 'addonPgbackrest', message: 'Requires a managed database' });
+    if (components.database?.backup && components.database.mode !== 'managed') {
+      errors.push({ field: 'components.database.backup', message: 'Requires a managed database' });
     }
     if (errors.length === 0) return;
     throw new BadRequestException({
-      label: 'Incomplete Agent Deployment',
+      label: 'Incomplete Managed Deployment',
       detail:
-        'Agent-managed deployments need a secret store, a managed edge needs an ACME email for its wildcard certificate, and pgBackRest requires a managed database.',
+        'Managed deployments need a secret store, a managed edge needs an ACME email for its wildcard certificate, and pgBackRest requires a managed database.',
       errors,
     });
   }
@@ -160,15 +204,18 @@ export class DeploymentDomainService {
     return DeploymentDto.from(deployment, organizationCount);
   }
 
-  // Updates a deployment by ID; throws NotFoundException if not found
+  // Updates a deployment by ID; merges any partial component input into the spec. Throws NotFoundException if not found
   async update(id: string, dto: UpdateDeploymentDto): Promise<SuccessResponseDto> {
     const existing = await this.deploymentRepository.findById(id);
     if (!existing) {
       throw new NotFoundException('Deployment not found.');
     }
-    // secretProviderSecrets is not a column — it rides deployment_secrets, so keep it out of the row update
-    const { secretProviderSecrets, ...columns } = dto;
-    const deployment = await this.deploymentRepository.update(id, columns);
+    // components + secretProviderSecrets are not plain columns — the former folds into the spec jsonb, the latter rides deployment_secrets
+    const { components, secretProviderSecrets, ...columns } = dto;
+    const managementType = columns.managementType ?? existing.managementType;
+    const spec = this.mergeSpec(existing.spec, managementType, components);
+    this.validateSpec(managementType, spec);
+    const deployment = await this.deploymentRepository.update(id, { ...columns, spec });
     await this.writeSecretProviderSecrets(id, secretProviderSecrets);
     this.logger.log(`Updated deployment: ${deployment.name} (${deployment.id})`);
     return { success: true, message: `Deployment "${deployment.name}" updated successfully.` };

@@ -1,21 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Deployment } from '@/db/schema';
-import { DeploymentManagementModeValues } from '@/db/schema';
+import { DeploymentManagementTypeValues } from '@/db/schema';
 import {
   DEFAULT_STACK_IMAGES,
   DEFAULT_WEB_BUNDLES,
   IMAGE_ENV_KEYS,
   WEB_BUNDLES_ENV_KEY,
 } from '../deployment-agent.constants';
-import {
-  DesiredStateDto,
-  DesiredStateEdgeValues,
-  DesiredStateModeValues,
-  type ImagesDto,
-  type SecretProviderDto,
-  type WebBundleDto,
-} from '../dto/entity/desired-state.dto';
+import { ComponentsDto, DesiredStateDto, type ImagesDto, type WebBundleDto } from '../dto/entity/desired-state.dto';
 
 @Injectable()
 export class DesiredStateDomainService {
@@ -29,41 +22,50 @@ export class DesiredStateDomainService {
     dto.generation = 0;
     dto.deploymentId = deployment.id;
     dto.version = deployment.version;
-    // managed = agent runs its own Postgres container; external = agent connects to an existing DB (creds from the secret store)
-    dto.mode = deployment.mode === 'external' ? DesiredStateModeValues.external : DesiredStateModeValues.managed;
+    dto.specVersion = deployment.spec.specVersion;
     dto.baseDomain = this.resolveBaseDomain(deployment.url);
-    // managed = agent runs its own nginx edge + wildcard cert (routing derived from baseDomain); external = another proxy fronts core
-    dto.edge = deployment.edge === 'external' ? DesiredStateEdgeValues.external : DesiredStateEdgeValues.managed;
+    // The resolved component composition (absent components are null) — the agent reconciles toward this
+    dto.components = this.buildComponents(deployment);
     dto.images = this.resolveImages();
     // Static web artifacts (core-web host + MF remotes) the managed edge serves off *.<base>
     dto.webBundles = this.resolveWebBundles();
-    // Per-deployment add-on toggles; their runtime secrets (R2 creds, gitea admin) ride the secret store
-    dto.addOns = {
-      pgBackRest: deployment.addonPgbackrest,
-      backupRetention: deployment.backupRetention,
-      gitea: deployment.addonGitea,
-    };
-    dto.acmeEmail = this.resolveAcmeEmail(deployment);
     // Default OFF — a managed prod edge must opt IN to the untrusted Let's Encrypt staging CA
     dto.acmeStaging = this.configService.get<boolean>('ACME_STAGING') ?? false;
     dto.config = this.buildConfig(deployment);
-    // Non-secret secret-store config; the sealed auth secret half is carried alongside in sealedSecrets
-    dto.secretProvider = this.resolveSecretProvider(deployment);
     dto.sealedSecrets = sealedSecrets;
     this.logger.log(`Built desired-state for deployment ${deployment.id} (base ${dto.baseDomain})`);
     return dto;
   }
 
-  // Resolves the per-deployment ACME email (warns but does not fail when a managed edge lacks one —
-  // the agent cannot register the wildcard cert with Let's Encrypt without it)
-  private resolveAcmeEmail(deployment: Deployment): string {
-    const email = deployment.acmeEmail ?? '';
-    if (!email && deployment.edge !== 'external') {
+  // Projects the stored spec.components onto the wire ComponentsDto, defaulting core.enabled and nulling absent components
+  private buildComponents(deployment: Deployment): ComponentsDto {
+    const spec = deployment.spec.components;
+    const components = new ComponentsDto();
+    // core is always present on a managed deployment (defaults enabled); the agent runs core-server/commerce/nats/redis
+    components.core = { enabled: spec.core?.enabled ?? true };
+    components.database = spec.database
+      ? {
+          mode: spec.database.mode,
+          ...(spec.database.backup ? { backup: { retention: spec.database.backup.retention } } : {}),
+        }
+      : null;
+    components.edge = spec.edge
+      ? { mode: spec.edge.mode, ...(spec.edge.acmeEmail ? { acmeEmail: spec.edge.acmeEmail } : {}) }
+      : null;
+    components.gitea = spec.gitea ? { enabled: spec.gitea.enabled } : null;
+    // Non-secret secret-store config; the sealed auth secret half is carried alongside in sealedSecrets
+    components.secretStore = spec.secretStore ?? null;
+    if (!components.secretStore && deployment.managementType === DeploymentManagementTypeValues.managed) {
+      this.logger.warn(
+        `Deployment ${deployment.id} is managed but has no secretStore component — the agent cannot source core-server/commerce runtime env`,
+      );
+    }
+    if (components.edge?.mode === 'managed' && !components.edge.acmeEmail) {
       this.logger.warn(
         `Deployment ${deployment.id} has a managed edge but no acmeEmail — the agent cannot register the wildcard cert with Let's Encrypt`,
       );
     }
-    return email;
+    return components;
   }
 
   // Resolves the static web bundles the managed edge serves (core-web host + MF remotes), allowing a
@@ -85,19 +87,6 @@ export class DesiredStateDomainService {
       }
     }
     return DEFAULT_WEB_BUNDLES.map((b) => ({ ...b }));
-  }
-
-  // Resolves the secret-store config (warns when an agent-managed deployment has none — the agent cannot source core/commerce env)
-  private resolveSecretProvider(deployment: Deployment): SecretProviderDto | null {
-    if (!deployment.secretProvider) {
-      if (deployment.managementMode === DeploymentManagementModeValues.agent) {
-        this.logger.warn(
-          `Deployment ${deployment.id} is agent-managed but has no secretProvider — the agent cannot source core-server/commerce runtime env`,
-        );
-      }
-      return null;
-    }
-    return deployment.secretProvider;
   }
 
   // Plaintext non-secret config passed through to core-server env — machine secrets are NEVER placed here

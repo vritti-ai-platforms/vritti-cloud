@@ -10,7 +10,6 @@ import { RegionSelector } from '@vritti/quantum-ui/selects/region';
 import { VersionSelector } from '@vritti/quantum-ui/selects/version';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { TextField } from '@vritti/quantum-ui/TextField';
-import { Typography } from '@vritti/quantum-ui/Typography';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import type React from 'react';
@@ -18,47 +17,19 @@ import { useState } from 'react';
 import { type FieldPath, type UseFormReturn, useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
-  assembleSecretProvider,
   type CreateDeploymentData,
   createDeploymentSchema,
-  DEFAULT_SECRET_PROVIDER,
-  DEPLOYMENT_DB_MODE_OPTIONS,
   DEPLOYMENT_TENANT_TYPE_OPTIONS,
-  DEPLOYMENT_TYPE_OPTIONS,
-  SECRET_AUTH_METHOD_FIELDS,
-  type SecretAuthMethod,
+  MANAGEMENT_TYPE_OPTIONS,
 } from '@/schemas/admin/deployments';
-import { renderAddonToggles, renderSecretStoreFields } from './components/configFields';
-import { AGENT_WIZARD_STEPS, MANUAL_WIZARD_STEPS, toStepDefs } from './wizardSteps';
+import { renderWizardDatabaseFields, renderWizardEdgeFields } from './components/configFields';
+import { MANAGED_WIZARD_STEPS, toStepDefs } from './wizardSteps';
 
 type DeploymentForm = UseFormReturn<CreateDeploymentData>;
 
-const MANAGEMENT_MODE_OPTIONS = [
-  {
-    value: 'agent',
-    label: 'Managed',
-    description: 'Provisioned and operated by an agent on a cloud region and provider.',
-  },
-  {
-    value: 'manual',
-    label: 'Local',
-    description: 'Self-hosted deployment you manage manually. A signing key is issued at creation.',
-  },
-];
-
-// The full create payload for an agent deployment (secretProvider/secrets assembled from form state).
-function toAgentCreatePayload(data: CreateDeploymentData): CreateDeploymentData {
-  return { ...data, ...assembleSecretProvider(data) };
-}
-
-// Local deployments only carry general fields — the lifecycle (signing key, sync) runs post-create.
+// Manual deployments carry only general fields — the lifecycle (signing key, sync) runs post-create.
 function toManualCreatePayload(data: CreateDeploymentData): CreateDeploymentData {
-  return {
-    name: data.name,
-    url: data.url,
-    managementMode: 'manual',
-    version: data.version,
-  };
+  return { name: data.name, url: data.url, managementType: 'manual', version: data.version };
 }
 
 export const DeploymentWizard: React.FC = () => {
@@ -70,23 +41,18 @@ export const DeploymentWizard: React.FC = () => {
     defaultValues: {
       name: '',
       url: '',
-      managementMode: 'agent',
-      mode: 'managed',
-      edge: 'managed',
-      addonPgbackrest: false,
-      addonGitea: false,
-      tenantType: 'shared',
-      type: 'deployed',
+      managementType: 'managed',
+      tenantType: 'dedicated',
       version: '',
-      acmeEmail: '',
-      secretProvider: DEFAULT_SECRET_PROVIDER,
-      secretProviderSecrets: {},
+      components: {
+        database: { mode: 'managed' },
+        edge: { mode: 'managed', acmeEmail: '' },
+      },
     },
   });
 
-  const managementMode = useWatch({ control: form.control, name: 'managementMode' });
-  const isAgent = managementMode === 'agent';
-  const steps = isAgent ? AGENT_WIZARD_STEPS : MANUAL_WIZARD_STEPS;
+  const managementType = useWatch({ control: form.control, name: 'managementType' });
+  const isManaged = managementType === 'managed';
 
   const createMutation = useCreateDeployment({
     onSuccess: (response) => {
@@ -113,33 +79,32 @@ export const DeploymentWizard: React.FC = () => {
         />
       </div>
 
-      <div className="px-6 pt-6">
-        <StepProgressIndicator steps={toStepDefs(steps)} currentStep={configStep} />
-      </div>
+      {isManaged && (
+        <div className="px-6 pt-6">
+          <StepProgressIndicator steps={toStepDefs(MANAGED_WIZARD_STEPS)} currentStep={configStep} />
+        </div>
+      )}
 
       <div className="px-6 py-6">
         {configStep === 1 && (
           <GeneralStep
             form={form}
-            isAgent={isAgent}
+            isManaged={isManaged}
             createMutation={createMutation}
             onContinue={next}
             onCancel={cancel}
           />
         )}
 
-        {isAgent && configStep === 2 && <DatabaseStep form={form} onBack={back} onContinue={next} />}
+        {isManaged && configStep === 2 && <DatabaseStep form={form} onBack={back} onContinue={next} />}
 
-        {isAgent && configStep === 3 && <AddonsStep form={form} onBack={back} onContinue={next} />}
-
-        {isAgent && configStep === 4 && <SecretStoreStep form={form} createMutation={createMutation} onBack={back} />}
+        {isManaged && configStep === 3 && <EdgeStep form={form} createMutation={createMutation} onBack={back} />}
       </div>
     </div>
   );
 };
 
-// Validate-and-advance for non-final config steps — partial validation of just this step's fields,
-// so later-step requirements (secret store, domains) don't block navigation.
+// Validate-and-advance for non-final steps — partial validation of just this step's fields.
 function useAdvance(form: DeploymentForm, fields: FieldPath<CreateDeploymentData>[], onContinue: () => void) {
   return async () => {
     if (await form.trigger(fields)) onContinue();
@@ -148,39 +113,32 @@ function useAdvance(form: DeploymentForm, fields: FieldPath<CreateDeploymentData
 
 interface GeneralStepProps {
   form: DeploymentForm;
-  isAgent: boolean;
+  isManaged: boolean;
   createMutation: ReturnType<typeof useCreateDeployment>;
   onContinue: () => void;
   onCancel: () => void;
 }
 
-const GeneralStep: React.FC<GeneralStepProps> = ({ form, isAgent, createMutation, onContinue, onCancel }) => {
+const GeneralStep: React.FC<GeneralStepProps> = ({ form, isManaged, createMutation, onContinue, onCancel }) => {
   const regionId = useWatch({ control: form.control, name: 'regionId' });
   const advance = useAdvance(
     form,
-    ['name', 'url', 'managementMode', 'type', 'regionId', 'cloudProviderId', 'version'],
+    ['name', 'url', 'managementType', 'regionId', 'cloudProviderId', 'version'],
     onContinue,
   );
 
   const fields = (
     <div className="space-y-4">
       <RadioGroup
-        name="managementMode"
-        label="Management Mode"
+        name="managementType"
+        label="Management Type"
         variant="card"
         orientation="horizontal"
-        options={MANAGEMENT_MODE_OPTIONS}
+        options={MANAGEMENT_TYPE_OPTIONS}
       />
       <TextField name="name" label="Deployment Name" placeholder="e.g. US East Production" />
       <TextField name="url" label="Endpoint URL" placeholder="https://nexus-us-east.vrittiai.com" />
-      <Select
-        name="type"
-        label="Deployment Type"
-        placeholder="Select type"
-        description="Deployed routes core through an edge at api.<host>; local reaches core directly on the URL above."
-        options={DEPLOYMENT_TYPE_OPTIONS}
-      />
-      {isAgent && (
+      {isManaged && (
         <>
           <Select
             name="tenantType"
@@ -207,11 +165,16 @@ const GeneralStep: React.FC<GeneralStepProps> = ({ form, isAgent, createMutation
     </div>
   );
 
-  // Local deployments finish config here — this step submits the create call.
-  if (!isAgent) {
+  // Manual deployments finish config here — this step submits the create call.
+  if (!isManaged) {
     return (
       <Form form={form} mutation={createMutation} resetOnSuccess={false} transformSubmit={toManualCreatePayload}>
         {fields}
+        <p className="mt-4 rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
+          Manual deployments collect only these general fields. There is no region, database, edge, add-on or
+          secret-store configuration — you run the stack yourself; cloud only issues the signing key and syncs the
+          catalog.
+        </p>
         <div className="flex justify-between pt-6">
           <Button type="button" variant="outline" onClick={onCancel} startAdornment={<ArrowLeft className="size-4" />}>
             Cancel
@@ -244,76 +207,40 @@ const GeneralStep: React.FC<GeneralStepProps> = ({ form, isAgent, createMutation
   );
 };
 
-interface StepProps {
-  form: DeploymentForm;
-  onBack: () => void;
-  onContinue: () => void;
-}
-
-const DatabaseStep: React.FC<StepProps> = ({ form, onBack, onContinue }) => {
-  const dbMode = useWatch({ control: form.control, name: 'mode' });
-  const advance = useAdvance(form, ['mode'], onContinue);
+const DatabaseStep: React.FC<{ form: DeploymentForm; onBack: () => void; onContinue: () => void }> = ({
+  form,
+  onBack,
+  onContinue,
+}) => {
+  const dbMode = useWatch({ control: form.control, name: 'components.database.mode' });
+  const advance = useAdvance(form, ['components.database.mode'], onContinue);
 
   return (
     <Form form={form} resetOnSuccess={false}>
-      <div className="space-y-4">
-        <div>
-          <Typography variant="subtitle2">Database</Typography>
-          <Typography variant="body2" intent="muted">
-            Choose whether the agent runs its own Postgres or connects to an existing database.
-          </Typography>
-        </div>
-        <RadioGroup
-          name="mode"
-          variant="card"
-          orientation="horizontal"
-          options={DEPLOYMENT_DB_MODE_OPTIONS.map((option) => ({
-            value: option.value,
-            label: option.label,
-            description:
-              option.value === 'managed'
-                ? 'The agent runs and manages a Postgres instance.'
-                : 'The agent connects to an existing database using credentials from the secret store.',
-          }))}
-        />
-        {dbMode === 'external' && (
-          <p className="rounded-lg border bg-muted/40 p-4 text-sm text-muted-foreground">
-            The agent won't run Postgres. Provide the DB connection in the secret store; the agent connects using those
-            creds.
-          </p>
-        )}
+      {renderWizardDatabaseFields({ managed: dbMode === 'managed' })}
+      <div className="flex justify-between pt-6">
+        <Button type="button" variant="outline" onClick={onBack} startAdornment={<ArrowLeft className="size-4" />}>
+          Back
+        </Button>
+        <Button type="button" onClick={advance} endAdornment={<ArrowRight className="size-4" />}>
+          Continue
+        </Button>
       </div>
-      <StepFooter onBack={onBack} onContinue={advance} />
     </Form>
   );
 };
 
-const AddonsStep: React.FC<StepProps> = ({ form, onBack, onContinue }) => {
-  const advance = useAdvance(form, ['acmeEmail'], onContinue);
-
-  return (
-    <Form form={form} resetOnSuccess={false}>
-      {renderAddonToggles()}
-      <StepFooter onBack={onBack} onContinue={advance} />
-    </Form>
-  );
-};
-
-interface SecretStoreStepProps {
+// The final managed step — submits the create call, then lands on the deployment view's setup flow.
+const EdgeStep: React.FC<{
   form: DeploymentForm;
   createMutation: ReturnType<typeof useCreateDeployment>;
   onBack: () => void;
-}
-
-const SecretStoreStep: React.FC<SecretStoreStepProps> = ({ form, createMutation, onBack }) => {
-  const authMethod = useWatch({ control: form.control, name: 'secretProvider.auth.method' }) as
-    | SecretAuthMethod
-    | undefined;
-  const authFields = authMethod ? (SECRET_AUTH_METHOD_FIELDS[authMethod] ?? []) : [];
+}> = ({ form, createMutation, onBack }) => {
+  const edgeMode = useWatch({ control: form.control, name: 'components.edge.mode' });
 
   return (
-    <Form form={form} mutation={createMutation} resetOnSuccess={false} transformSubmit={toAgentCreatePayload}>
-      {renderSecretStoreFields({ authFields })}
+    <Form form={form} mutation={createMutation} resetOnSuccess={false}>
+      {renderWizardEdgeFields({ managed: edgeMode === 'managed' })}
       <div className="flex justify-between pt-6">
         <Button type="button" variant="outline" onClick={onBack} startAdornment={<ArrowLeft className="size-4" />}>
           Back
@@ -330,14 +257,3 @@ const SecretStoreStep: React.FC<SecretStoreStepProps> = ({ form, createMutation,
     </Form>
   );
 };
-
-const StepFooter: React.FC<{ onBack: () => void; onContinue: () => void }> = ({ onBack, onContinue }) => (
-  <div className="flex justify-between pt-6">
-    <Button type="button" variant="outline" onClick={onBack} startAdornment={<ArrowLeft className="size-4" />}>
-      Back
-    </Button>
-    <Button type="button" onClick={onContinue} endAdornment={<ArrowRight className="size-4" />}>
-      Continue
-    </Button>
-  </div>
-);

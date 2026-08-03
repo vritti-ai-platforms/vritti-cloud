@@ -14,10 +14,37 @@ export class AgentCertificateDto {
   issuedAt: Date;
 }
 
-// One service's latest reported container state (from the most recent heartbeat)
-export class AgentContainerDto {
+// One reconcile condition from the most recent heartbeat
+export class AgentConditionDto {
+  @ApiProperty({ enum: ['Ready', 'Reconciling', 'Blocked', 'Degraded'], example: 'Ready' })
+  type: 'Ready' | 'Reconciling' | 'Blocked' | 'Degraded';
+
+  @ApiProperty({ enum: ['true', 'false', 'unknown'], example: 'true' })
+  status: 'true' | 'false' | 'unknown';
+
+  @ApiProperty({ example: 'InSync' })
+  reason: string;
+
+  @ApiProperty({ example: 'All services healthy and in sync.' })
+  message: string;
+
+  @ApiPropertyOptional({ enum: ['core', 'database', 'edge', 'gitea', 'secretStore'], example: 'edge' })
+  component?: 'core' | 'database' | 'edge' | 'gitea' | 'secretStore';
+
+  @ApiProperty({ description: 'ISO transition timestamp', example: '2026-07-31T12:00:00Z' })
+  since: string;
+}
+
+// One service's latest reported runtime state (from the most recent heartbeat), tagged by component
+export class AgentServiceStatusDto {
+  @ApiProperty({ example: 'core' })
+  component: string;
+
   @ApiProperty({ example: 'core-server' })
   service: string;
+
+  @ApiProperty({ example: 'vritti-apw1-core-server' })
+  name: string;
 
   @ApiProperty({ example: 'running' })
   state: string;
@@ -89,23 +116,23 @@ export class AgentStatusDto {
   @ApiPropertyOptional({ type: 'string', format: 'date-time', nullable: true })
   lastHeartbeatAt: Date | null;
 
-  @ApiPropertyOptional({ nullable: true, example: 'ready' })
-  lastPhase: string | null;
-
-  @ApiPropertyOptional({ nullable: true, example: 'reconciled 6 services' })
-  lastMessage: string | null;
-
   @ApiPropertyOptional({ nullable: true, example: 3 })
   lastGeneration: number | null;
 
   @ApiProperty({ description: 'Current desired-state generation the cloud has built', example: 3 })
   desiredGeneration: number;
 
-  @ApiProperty({ example: false })
-  giteaProvisioned: boolean;
-
   @ApiPropertyOptional({ nullable: true, description: 'Deployment public key (base64 raw 32-byte Ed25519, Keypair B)' })
   deploymentPubKey: string | null;
+
+  @ApiProperty({ type: [AgentConditionDto], description: 'Reconcile conditions from the last heartbeat' })
+  conditions: AgentConditionDto[];
+
+  @ApiProperty({ type: [AgentServiceStatusDto], description: 'Per-service runtime states from the last heartbeat' })
+  services: AgentServiceStatusDto[];
+
+  @ApiPropertyOptional({ type: AgentHostMetricsDto, nullable: true, description: 'Latest whole-VM resource usage' })
+  host: AgentHostMetricsDto | null;
 
   @ApiProperty({ type: [AgentCertificateDto], description: 'Certificates tracked for this deployment' })
   certificates: AgentCertificateDto[];
@@ -115,16 +142,7 @@ export class AgentStatusDto {
     nullable: true,
     description: 'Pending DNS-delegation CNAME the operator must add; null once the wildcard cert has issued',
   })
-  acmeDelegation: AgentAcmeDelegationDto | null;
-
-  @ApiProperty({
-    type: [AgentContainerDto],
-    description: 'Latest per-service container states from the last heartbeat',
-  })
-  containers: AgentContainerDto[];
-
-  @ApiPropertyOptional({ type: AgentHostMetricsDto, nullable: true, description: 'Latest whole-VM resource usage' })
-  host: AgentHostMetricsDto | null;
+  delegation: AgentAcmeDelegationDto | null;
 
   // Maps an agent row (may be absent) plus deployment desired-generation, public key, and tracked certs to the API shape
   static from(
@@ -140,20 +158,18 @@ export class AgentStatusDto {
     dto.status = agent?.status ?? null;
     dto.agentVersion = agent?.agentVersion ?? null;
     dto.lastHeartbeatAt = agent?.lastHeartbeatAt ?? null;
-    dto.lastPhase = agent?.lastPhase ?? null;
-    dto.lastMessage = agent?.lastMessage ?? null;
     dto.lastGeneration = agent?.lastGeneration ?? null;
     dto.desiredGeneration = desiredGeneration;
-    dto.giteaProvisioned = agent?.giteaProvisioned ?? false;
     dto.deploymentPubKey = deploymentPubKey;
+    dto.conditions = agent?.conditions ?? [];
+    dto.services = agent?.services ?? [];
+    dto.host = agent?.host ?? null;
     dto.certificates = certificates.map((cert) => ({
       host: cert.host,
       notAfter: cert.notAfter,
       issuedAt: cert.issuedAt,
     }));
-    dto.acmeDelegation = agent?.acmeDelegation ?? null;
-    dto.containers = agent?.containers ?? [];
-    dto.host = agent?.hostMetrics ?? null;
+    dto.delegation = agent?.delegation ?? null;
     return dto;
   }
 }

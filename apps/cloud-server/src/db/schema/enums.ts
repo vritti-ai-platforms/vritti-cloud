@@ -150,22 +150,14 @@ export const OrgMemberRoleValues = { Owner: 'Owner' as const, Admin: 'Admin' as 
 export const deploymentStatusEnum = cloudSchema.enum('DeploymentStatus', ['active', 'stopped', 'Provisioning']);
 // Tenancy of the deployment — shared = many orgs on one instance; dedicated = a single org owns it
 export const deploymentTenantTypeEnum = cloudSchema.enum('DeploymentTenantType', ['shared', 'dedicated']);
-export const deploymentManagementModeEnum = cloudSchema.enum('DeploymentManagementMode', ['manual', 'agent']);
-// DB provisioning mode — managed = agent runs its own Postgres container; external = agent connects to an existing DB
-export const deploymentDbModeEnum = cloudSchema.enum('DeploymentDbMode', ['managed', 'external']);
-// HTTP edge mode — managed = agent runs its own nginx+certbot edge; external = another proxy fronts core (nginx off)
-export const deploymentEdgeEnum = cloudSchema.enum('DeploymentEdge', ['managed', 'external']);
-// Where core-server answers — deployed = behind an edge that serves it on `api.<host>`; local = served directly on `url`
-export const deploymentTypeEnum = cloudSchema.enum('DeploymentType', ['deployed', 'local']);
-// Lifecycle of an agent enrolled against an agent-managed deployment
+// Who runs the stack — managed = Vritti's agent runs+reconciles+observes it; manual = customer self-hosts (cloud is licensing-only)
+export const deploymentManagementTypeEnum = cloudSchema.enum('DeploymentManagementType', ['managed', 'manual']);
+// Lifecycle of an agent enrolled against a managed deployment
 export const deploymentAgentStatusEnum = cloudSchema.enum('DeploymentAgentStatus', ['pending', 'enrolled', 'revoked']);
 
 export type DeploymentStatus = (typeof deploymentStatusEnum.enumValues)[number];
 export type DeploymentTenantType = (typeof deploymentTenantTypeEnum.enumValues)[number];
-export type DeploymentType = (typeof deploymentTypeEnum.enumValues)[number];
-export type DeploymentManagementMode = (typeof deploymentManagementModeEnum.enumValues)[number];
-export type DeploymentDbMode = (typeof deploymentDbModeEnum.enumValues)[number];
-export type DeploymentEdge = (typeof deploymentEdgeEnum.enumValues)[number];
+export type DeploymentManagementType = (typeof deploymentManagementTypeEnum.enumValues)[number];
 export type DeploymentAgentStatus = (typeof deploymentAgentStatusEnum.enumValues)[number];
 
 export const DeploymentStatusValues = {
@@ -179,24 +171,9 @@ export const DeploymentTenantTypeValues = {
   dedicated: 'dedicated' as const,
 };
 
-export const DeploymentTypeValues = {
-  deployed: 'deployed' as const,
-  local: 'local' as const,
-};
-
-export const DeploymentManagementModeValues = {
+export const DeploymentManagementTypeValues = {
+  managed: 'managed' as const,
   manual: 'manual' as const,
-  agent: 'agent' as const,
-};
-
-export const DeploymentDbModeValues = {
-  managed: 'managed' as const,
-  external: 'external' as const,
-};
-
-export const DeploymentEdgeValues = {
-  managed: 'managed' as const,
-  external: 'external' as const,
 };
 
 export const DeploymentAgentStatusValues = {

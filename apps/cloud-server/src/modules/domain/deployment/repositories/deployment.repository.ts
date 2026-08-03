@@ -95,7 +95,7 @@ export class DeploymentDomainRepository extends PrimaryBaseRepository<typeof dep
           eq(deployments.regionId, regionId),
           eq(deployments.cloudProviderId, cloudProviderId),
           eq(deployments.status, 'active'),
-          eq(deployments.managementMode, 'agent'),
+          eq(deployments.managementType, 'managed'),
         ),
       );
     return rows as DeploymentOptionDto[];

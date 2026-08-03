@@ -9,7 +9,7 @@ import { KeyRound, ShieldCheck } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import type { Deployment, DeploymentSigningKey } from '@/schemas/admin/deployments';
-import { SigningKeyReveal } from '../components/SigningKeyReveal';
+import { SigningKeyReveal } from '../../components/SigningKeyReveal';
 
 interface SigningKeyTabProps {
   deployment: Deployment;

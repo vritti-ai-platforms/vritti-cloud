@@ -1,40 +1,26 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Trim } from '@vritti/api-sdk/decorators';
 import { Type } from 'class-transformer';
 import {
-  IsArray,
-  IsBoolean,
-  IsEmail,
   IsEnum,
-  IsInt,
   IsObject,
   IsOptional,
   IsString,
   IsUrl,
   IsUUID,
-  Max,
   MaxLength,
-  Min,
   MinLength,
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
 import {
-  type DeploymentDbMode,
-  DeploymentDbModeValues,
-  type DeploymentEdge,
-  DeploymentEdgeValues,
-  type DeploymentManagementMode,
-  DeploymentManagementModeValues,
+  type DeploymentManagementType,
+  DeploymentManagementTypeValues,
   type DeploymentStatus,
   DeploymentStatusValues,
   type DeploymentTenantType,
   DeploymentTenantTypeValues,
-  type DeploymentType,
-  DeploymentTypeValues,
 } from '@/db/schema';
-import { DomainInputDto } from './domain-input.dto';
-import { SecretProviderInputDto } from './secret-provider-input.dto';
+import { ComponentsInputDto } from './components-input.dto';
 
 export class CreateDeploymentDto {
   @ApiProperty({ description: 'Display name of the deployment', example: 'US East Production' })
@@ -49,17 +35,20 @@ export class CreateDeploymentDto {
   @MaxLength(500)
   url: string;
 
-  @ApiProperty({ enum: DeploymentManagementModeValues, description: 'How the deployment is operated' })
-  @IsEnum(DeploymentManagementModeValues)
-  managementMode: DeploymentManagementMode;
+  @ApiProperty({
+    enum: DeploymentManagementTypeValues,
+    description: 'Who runs the stack — managed (agent) or manual (self-hosted)',
+  })
+  @IsEnum(DeploymentManagementTypeValues)
+  managementType: DeploymentManagementType;
 
-  @ApiPropertyOptional({ description: 'Region UUID — required for agent-managed deployments' })
-  @ValidateIf((o) => o.managementMode === DeploymentManagementModeValues.agent)
+  @ApiPropertyOptional({ description: 'Region UUID — required for managed deployments' })
+  @ValidateIf((o) => o.managementType === DeploymentManagementTypeValues.managed)
   @IsUUID()
   regionId?: string;
 
-  @ApiPropertyOptional({ description: 'Cloud provider UUID — required for agent-managed deployments' })
-  @ValidateIf((o) => o.managementMode === DeploymentManagementModeValues.agent)
+  @ApiPropertyOptional({ description: 'Cloud provider UUID — required for managed deployments' })
+  @ValidateIf((o) => o.managementType === DeploymentManagementTypeValues.managed)
   @IsUUID()
   cloudProviderId?: string;
 
@@ -70,67 +59,11 @@ export class CreateDeploymentDto {
 
   @ApiPropertyOptional({
     enum: DeploymentTenantTypeValues,
-    description: 'Deployment tenancy — defaults to dedicated for manual',
+    description: 'Deployment tenancy — defaults to dedicated',
   })
   @IsOptional()
   @IsEnum(DeploymentTenantTypeValues)
   tenantType?: DeploymentTenantType;
-
-  @ApiPropertyOptional({
-    enum: DeploymentTypeValues,
-    default: 'deployed',
-    description:
-      'Where core answers — deployed = an edge serves it on `api.<host>`; local = core is reached directly on the url',
-  })
-  @IsOptional()
-  @IsEnum(DeploymentTypeValues)
-  type?: DeploymentType;
-
-  @ApiPropertyOptional({
-    enum: DeploymentDbModeValues,
-    default: 'managed',
-    description:
-      'DB provisioning mode — managed = agent runs its own Postgres; external = agent connects to an existing DB',
-  })
-  @IsOptional()
-  @IsEnum(DeploymentDbModeValues)
-  mode?: DeploymentDbMode;
-
-  @ApiPropertyOptional({
-    enum: DeploymentEdgeValues,
-    default: 'managed',
-    description:
-      'HTTP edge mode — managed = agent runs its own nginx+certbot edge for domains; external = another proxy fronts core',
-  })
-  @IsOptional()
-  @IsEnum(DeploymentEdgeValues)
-  edge?: DeploymentEdge;
-
-  @ApiPropertyOptional({
-    default: false,
-    description: 'Enable the pgBackRest add-on — R2 credentials are supplied via the secret store',
-  })
-  @IsOptional()
-  @IsBoolean()
-  addonPgbackrest?: boolean;
-
-  @ApiPropertyOptional({
-    default: 4,
-    description: 'pgBackRest retention — number of full backups kept. Only used when pgBackRest is enabled.',
-  })
-  @IsOptional()
-  @IsInt()
-  @Min(1)
-  @Max(52)
-  backupRetention?: number;
-
-  @ApiPropertyOptional({
-    default: false,
-    description: 'Enable the Gitea add-on — admin credentials are supplied via the secret store',
-  })
-  @IsOptional()
-  @IsBoolean()
-  addonGitea?: boolean;
 
   @ApiProperty({ description: 'App version string this deployment runs', example: '1.0.0' })
   @IsString()
@@ -139,39 +72,20 @@ export class CreateDeploymentDto {
   version: string;
 
   @ApiPropertyOptional({
-    description: "Let's Encrypt registration email for the managed edge — agent/managed-edge deployments only",
-    example: 'ops@vrittiai.com',
-  })
-  @IsOptional()
-  @IsEmail()
-  @Trim()
-  acmeEmail?: string;
-
-  @ApiPropertyOptional({
-    type: [DomainInputDto],
-    description: 'Managed-edge hosts + upstreams — agent/managed-edge deployments only',
-  })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => DomainInputDto)
-  domains?: DomainInputDto[];
-
-  @ApiPropertyOptional({
-    type: SecretProviderInputDto,
-    description: 'Non-secret secret-store config pushed to the agent — agent-managed deployments only',
+    type: ComponentsInputDto,
+    description: 'Nested stack-component spec — managed deployments only; omit for manual',
   })
   @IsOptional()
   @IsObject()
   @ValidateNested()
-  @Type(() => SecretProviderInputDto)
-  secretProvider?: SecretProviderInputDto;
+  @Type(() => ComponentsInputDto)
+  components?: ComponentsInputDto;
 
   @ApiPropertyOptional({
     type: 'object',
     additionalProperties: { type: 'string' },
     description:
-      'Secret auth params (client secret, token, jwt, password, …); each is encrypted at rest and stored as secretProvider.<key> — write-only, never returned',
+      'Secret-store auth params (client secret, token, jwt, password, …); each is encrypted at rest and stored as secretStore.<key> — write-only, never returned',
     example: { clientSecret: 'st.…' },
   })
   @IsOptional()

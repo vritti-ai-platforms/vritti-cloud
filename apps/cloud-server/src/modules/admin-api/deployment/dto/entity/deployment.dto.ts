@@ -2,21 +2,14 @@ import type { DeploymentWithNames } from '@domain/deployment/repositories/deploy
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import type { Deployment } from '@/db/schema';
 import {
-  type DeploymentDbMode,
-  DeploymentDbModeValues,
-  type DeploymentEdge,
-  DeploymentEdgeValues,
-  type DeploymentManagementMode,
-  DeploymentManagementModeValues,
+  type DeploymentManagementType,
+  DeploymentManagementTypeValues,
   type DeploymentStatus,
   DeploymentStatusValues,
   type DeploymentTenantType,
   DeploymentTenantTypeValues,
-  type DeploymentType,
-  DeploymentTypeValues,
 } from '@/db/schema';
-import { DomainInputDto } from '../request/domain-input.dto';
-import { SecretProviderDto } from './secret-provider.dto';
+import { DeploymentSpecDto } from './deployment-spec.dto';
 
 export class DeploymentDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -41,44 +34,16 @@ export class DeploymentDto {
   tenantType: DeploymentTenantType;
 
   @ApiProperty({
-    enum: DeploymentTypeValues,
-    description: 'deployed = core sits behind an edge on `api.<host>`; local = core answers directly on the url',
+    enum: DeploymentManagementTypeValues,
+    description: 'managed = Vritti agent runs the stack; manual = customer self-hosts (cloud is licensing-only)',
   })
-  type: DeploymentType;
+  managementType: DeploymentManagementType;
 
-  @ApiProperty({ enum: DeploymentManagementModeValues })
-  managementMode: DeploymentManagementMode;
-
-  @ApiProperty({ enum: DeploymentDbModeValues })
-  mode: DeploymentDbMode;
-
-  @ApiProperty({ enum: DeploymentEdgeValues })
-  edge: DeploymentEdge;
-
-  @ApiProperty({ example: false, description: 'pgBackRest add-on enabled' })
-  addonPgbackrest: boolean;
-
-  @ApiProperty({ example: 4, description: 'pgBackRest retention — full backups kept (used when pgBackRest is on)' })
-  backupRetention: number;
-
-  @ApiProperty({ example: false, description: 'Gitea add-on enabled' })
-  addonGitea: boolean;
+  @ApiProperty({ type: DeploymentSpecDto, description: 'The typed stack-component spec (empty for manual)' })
+  spec: DeploymentSpecDto;
 
   @ApiPropertyOptional({ example: '1.0.0', nullable: true })
   version: string | null;
-
-  @ApiPropertyOptional({ example: 'ops@vrittiai.com', nullable: true })
-  acmeEmail: string | null;
-
-  @ApiProperty({ type: [DomainInputDto], description: 'Managed-edge hosts + upstreams' })
-  domains: Array<{ host: string; upstream: string }>;
-
-  @ApiPropertyOptional({
-    type: SecretProviderDto,
-    nullable: true,
-    description: 'Non-secret secret-store config for form prefill — the secret auth half is never returned',
-  })
-  secretProvider: SecretProviderDto | null;
 
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
@@ -130,17 +95,9 @@ export class DeploymentDto {
     dto.cloudProviderId = deployment.cloudProviderId;
     dto.status = deployment.status;
     dto.tenantType = deployment.tenantType;
-    dto.type = deployment.type;
-    dto.managementMode = deployment.managementMode;
-    dto.mode = deployment.mode;
-    dto.edge = deployment.edge;
-    dto.addonPgbackrest = deployment.addonPgbackrest;
-    dto.backupRetention = deployment.backupRetention;
-    dto.addonGitea = deployment.addonGitea;
+    dto.managementType = deployment.managementType;
+    dto.spec = DeploymentSpecDto.from(deployment.spec);
     dto.version = deployment.version;
-    dto.acmeEmail = deployment.acmeEmail;
-    dto.domains = deployment.domains ?? [];
-    dto.secretProvider = deployment.secretProvider ? SecretProviderDto.from(deployment.secretProvider) : null;
     dto.createdAt = deployment.createdAt;
     dto.updatedAt = deployment.updatedAt;
     dto.organizationCount = organizationCount;
