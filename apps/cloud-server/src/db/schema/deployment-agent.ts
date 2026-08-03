@@ -26,7 +26,13 @@ export const deploymentAgents = cloudSchema.table('deployment_agents', {
   lastMessage: text('last_message'),
   // Last-reported DNS delegation the operator must add before the wildcard cert issues; null once issued.
   // name/target = the challenge CNAME; zone/serverIp = the one-time acme-dns zone delegation (NS + glue A).
-  acmeDelegation: jsonb('acme_delegation').$type<{ name: string; target: string; zone: string; serverIp: string }>(),
+  acmeDelegation: jsonb('acme_delegation').$type<{
+    name: string;
+    target: string;
+    zone: string;
+    nameserver: string;
+    serverIp: string;
+  }>(),
   giteaProvisioned: boolean('gitea_provisioned').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),

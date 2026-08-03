@@ -425,16 +425,11 @@ const DnsDelegationStep: React.FC<DnsDelegationStepProps> = ({ agent, onBack, on
 
             <div className="space-y-2">
               <Typography variant="body2" intent="muted">
-                1. Zone delegation — one-time. Points the challenge zone at this deployment's DNS server so Let's
-                Encrypt can reach it.
+                1. Nameserver — one-time. A normal record that resolves this deployment's DNS server. Keep it unproxied
+                (DNS-only).
               </Typography>
               <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
-                <CopyField label="Name" value={delegation.zone} mono />
-                <DetailField label="Type" type="string" value="NS" mono />
-                <CopyField label="Value" value={`${delegation.zone}.`} mono />
-              </div>
-              <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
-                <CopyField label="Name" value={delegation.zone} mono />
+                <CopyField label="Name" value={delegation.nameserver} mono />
                 <DetailField label="Type" type="string" value="A" mono />
                 <CopyField label="Value" value={delegation.serverIp} mono />
               </div>
@@ -442,7 +437,19 @@ const DnsDelegationStep: React.FC<DnsDelegationStepProps> = ({ agent, onBack, on
 
             <div className="space-y-2">
               <Typography variant="body2" intent="muted">
-                2. Challenge record — lets ACME validate the wildcard.
+                2. Zone delegation — one-time. Delegates the challenge zone to the nameserver above so Let's Encrypt can
+                reach it.
+              </Typography>
+              <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
+                <CopyField label="Name" value={delegation.zone} mono />
+                <DetailField label="Type" type="string" value="NS" mono />
+                <CopyField label="Value" value={`${delegation.nameserver}.`} mono />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Typography variant="body2" intent="muted">
+                3. Challenge record — lets ACME validate the wildcard.
               </Typography>
               <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
                 <CopyField label="Name" value={delegation.name} mono />

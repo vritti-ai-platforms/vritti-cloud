@@ -234,8 +234,9 @@ export interface AgentStatus {
   deploymentPubKey: string | null;
   certificates: Certificate[];
   // Present while the wildcard cert is waiting on the operator's DNS; null once the cert is issued.
-  // name/target = the challenge CNAME; zone/serverIp = the one-time acme-dns zone delegation (NS + glue A).
-  acmeDelegation?: { name: string; target: string; zone: string; serverIp: string } | null;
+  // name/target = the challenge CNAME; zone/nameserver/serverIp = the one-time zone delegation
+  // (`zone NS nameserver` + `nameserver A serverIp`).
+  acmeDelegation?: { name: string; target: string; zone: string; nameserver: string; serverIp: string } | null;
 }
 
 // Create: an empty ACME email means "not set" — send undefined (omit from payload).

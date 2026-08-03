@@ -54,11 +54,18 @@ export class AcmeDelegationDto {
   @IsString()
   target: string;
 
-  @ApiProperty({ description: 'Zone-delegation NS record (name AND value)', example: 'acme.apw1.vrittiai.com' })
+  @ApiProperty({ description: 'NS record name (the delegated zone)', example: 'acme.apw1.vrittiai.com' })
   @IsString()
   zone: string;
 
-  @ApiProperty({ description: 'Glue A record for the zone nameserver — the VM public IP', example: '210.79.128.205' })
+  @ApiProperty({
+    description: 'NS record value AND the A record name (sibling nameserver)',
+    example: 'ns.apw1.vrittiai.com',
+  })
+  @IsString()
+  nameserver: string;
+
+  @ApiProperty({ description: 'A record value — the VM public IP', example: '210.79.128.205' })
   @IsString()
   serverIp: string;
 }
