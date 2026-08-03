@@ -13,7 +13,9 @@ onlyBuiltDependencies:
   - nx
   - unrs-resolver
 
-overrides:
-  '@vritti/api-sdk': link:../api-sdk
-  '@vritti/quantum-ui': link:../quantum-ui
+# Local-dev overrides — uncomment to build against unpublished ../api-sdk and ../quantum-ui source.
+# Keep commented on main so CI and installs resolve the pinned versions from the registry.
+# overrides:
+#   '@vritti/api-sdk': link:../api-sdk
+#   '@vritti/quantum-ui': link:../quantum-ui
 
