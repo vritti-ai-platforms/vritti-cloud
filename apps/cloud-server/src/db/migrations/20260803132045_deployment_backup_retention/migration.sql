@@ -1,0 +1,2 @@
+ALTER TABLE "cloud"."deployments" ADD COLUMN "backup_retention" integer DEFAULT 4 NOT NULL;--> statement-breakpoint
+ALTER TABLE "cloud"."deployments" ALTER COLUMN "type" SET DEFAULT 'deployed'::"cloud"."DeploymentType";

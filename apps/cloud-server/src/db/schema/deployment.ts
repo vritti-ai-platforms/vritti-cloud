@@ -60,8 +60,11 @@ export const deployments = cloudSchema.table('deployments', {
   edge: deploymentEdgeEnum('edge').notNull().default('managed'),
   // Where core answers — deployed = an edge serves it on `api.<host>`; local = core is reached directly on `url`
   type: deploymentTypeEnum('type').notNull().default('deployed'),
-  // pgBackRest add-on toggle — R2 credentials ride the secret store, only the on/off flag lives here
+  // pgBackRest add-on toggle — R2 credentials ride the secret store, only the on/off flag lives here.
+  // Only valid when mode='managed' (there's no agent-run Postgres to back up otherwise).
   addonPgbackrest: boolean('addon_pgbackrest').notNull().default(false),
+  // pgBackRest retention — number of full backups kept (repo*-retention-full). Only meaningful when pgBackRest is on.
+  backupRetention: integer('backup_retention').notNull().default(4),
   // Gitea add-on toggle — admin credentials ride the secret store, only the on/off flag lives here
   addonGitea: boolean('addon_gitea').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

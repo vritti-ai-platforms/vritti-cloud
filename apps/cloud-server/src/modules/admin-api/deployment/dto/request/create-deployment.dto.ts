@@ -6,12 +6,15 @@ import {
   IsBoolean,
   IsEmail,
   IsEnum,
+  IsInt,
   IsObject,
   IsOptional,
   IsString,
   IsUrl,
   IsUUID,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   ValidateIf,
   ValidateNested,
@@ -110,6 +113,16 @@ export class CreateDeploymentDto {
   @IsOptional()
   @IsBoolean()
   addonPgbackrest?: boolean;
+
+  @ApiPropertyOptional({
+    default: 4,
+    description: 'pgBackRest retention — number of full backups kept. Only used when pgBackRest is enabled.',
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(52)
+  backupRetention?: number;
 
   @ApiPropertyOptional({
     default: false,

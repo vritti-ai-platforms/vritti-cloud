@@ -38,7 +38,11 @@ export class DesiredStateDomainService {
     // Static web artifacts (core-web host + MF remotes) the managed edge serves off *.<base>
     dto.webBundles = this.resolveWebBundles();
     // Per-deployment add-on toggles; their runtime secrets (R2 creds, gitea admin) ride the secret store
-    dto.addOns = { pgBackRest: deployment.addonPgbackrest, gitea: deployment.addonGitea };
+    dto.addOns = {
+      pgBackRest: deployment.addonPgbackrest,
+      backupRetention: deployment.backupRetention,
+      gitea: deployment.addonGitea,
+    };
     dto.acmeEmail = this.resolveAcmeEmail(deployment);
     // Default OFF — a managed prod edge must opt IN to the untrusted Let's Encrypt staging CA
     dto.acmeStaging = this.configService.get<boolean>('ACME_STAGING') ?? false;

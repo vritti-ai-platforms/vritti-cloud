@@ -30,7 +30,7 @@ export function ApiSyncOrgFeatures() {
   return applyDecorators(
     ApiOperation({
       summary: "Sync the organization's features",
-      description: "Re-pushes the role templates and entitlement for this org (no catalog, no other orgs).",
+      description: 'Re-pushes the role templates and entitlement for this org (no catalog, no other orgs).',
     }),
     ApiParam({ name: 'id', description: 'Organization UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiResponse({ status: 200, description: 'Organization features synced successfully.', type: SuccessResponseDto }),

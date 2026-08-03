@@ -1,5 +1,5 @@
-import { DeploymentAgentDomainModule } from '@domain/deployment-agent/deployment-agent.module';
 import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
+import { DeploymentAgentDomainModule } from '@domain/deployment-agent/deployment-agent.module';
 import { OrganizationDomainModule } from '@domain/organization/organization.module';
 import { OrganizationMemberDomainModule } from '@domain/organization-member/organization-member.module';
 import { Module } from '@nestjs/common';

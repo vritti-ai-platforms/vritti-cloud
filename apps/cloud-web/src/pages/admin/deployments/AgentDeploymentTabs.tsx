@@ -1,19 +1,20 @@
 import { useDeleteDeployment } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
-import { Button } from '@vritti/quantum-ui/Button';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
-import { Dialog } from '@vritti/quantum-ui/Dialog';
-import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
+import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
-import { Server } from 'lucide-react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AgentStatus, Deployment } from '@/schemas/admin/deployments';
-import { EditDeploymentForm } from './forms/EditDeploymentForm';
 import { AgentTab } from './tabs/AgentTab';
 import { CatalogTab } from './tabs/CatalogTab';
+import { CoreStackTab } from './tabs/CoreStackTab';
+import { DatabaseTab } from './tabs/DatabaseTab';
+import { EdgeTab } from './tabs/EdgeTab';
+import { GiteaTab } from './tabs/GiteaTab';
 import { OverviewTab } from './tabs/OverviewTab';
+import { SecretStoreTab } from './tabs/SecretStoreTab';
 import { SigningKeyTab } from './tabs/SigningKeyTab';
 
 interface AgentDeploymentTabsProps {
@@ -24,7 +25,6 @@ interface AgentDeploymentTabsProps {
 
 export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deployment, agent, id }) => {
   const navigate = useNavigate();
-  const editDialog = useDialog();
   const confirm = useConfirm();
 
   const deleteMutation = useDeleteDeployment({
@@ -47,17 +47,17 @@ export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deploy
         title={deployment.name}
         titleSlot={<Badge variant="secondary">Managed</Badge>}
         description={deployment.tenantType}
-        actions={
-          <Button variant="outline" size="sm" onClick={editDialog.open}>
-            Edit
-          </Button>
-        }
       />
 
       <Tabs
         defaultValue="overview"
         tabs={[
           { value: 'overview', label: 'Overview', content: <OverviewTab deployment={deployment} /> },
+          { value: 'core-stack', label: 'Core Stack', content: <CoreStackTab deployment={deployment} /> },
+          { value: 'database', label: 'Database', content: <DatabaseTab deployment={deployment} /> },
+          { value: 'edge', label: 'Edge & TLS', content: <EdgeTab deployment={deployment} /> },
+          { value: 'gitea', label: 'Gitea', content: <GiteaTab deployment={deployment} /> },
+          { value: 'secret-store', label: 'Secret Store', content: <SecretStoreTab deployment={deployment} /> },
           { value: 'agent', label: 'Agent', content: <AgentTab deployment={deployment} agent={agent} /> },
           { value: 'signing-key', label: 'Signing Key', content: <SigningKeyTab deployment={deployment} /> },
           { value: 'catalog', label: 'Catalog', content: <CatalogTab deployment={deployment} /> },
@@ -72,14 +72,6 @@ export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deploy
         disabled={!!deployment.organizationCount}
         warning={`This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`}
         showWarning={!!deployment.organizationCount}
-      />
-
-      <Dialog
-        handle={editDialog}
-        icon={Server}
-        title="Edit Deployment"
-        description="Update the details for this deployment."
-        content={(close) => <EditDeploymentForm deployment={deployment} onSuccess={close} onCancel={close} />}
       />
     </div>
   );

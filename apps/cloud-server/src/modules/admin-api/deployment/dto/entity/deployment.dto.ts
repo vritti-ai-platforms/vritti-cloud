@@ -58,6 +58,9 @@ export class DeploymentDto {
   @ApiProperty({ example: false, description: 'pgBackRest add-on enabled' })
   addonPgbackrest: boolean;
 
+  @ApiProperty({ example: 4, description: 'pgBackRest retention — full backups kept (used when pgBackRest is on)' })
+  backupRetention: number;
+
   @ApiProperty({ example: false, description: 'Gitea add-on enabled' })
   addonGitea: boolean;
 
@@ -132,6 +135,7 @@ export class DeploymentDto {
     dto.mode = deployment.mode;
     dto.edge = deployment.edge;
     dto.addonPgbackrest = deployment.addonPgbackrest;
+    dto.backupRetention = deployment.backupRetention;
     dto.addonGitea = deployment.addonGitea;
     dto.version = deployment.version;
     dto.acmeEmail = deployment.acmeEmail;

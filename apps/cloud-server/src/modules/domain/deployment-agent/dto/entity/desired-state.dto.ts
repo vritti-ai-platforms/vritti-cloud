@@ -28,6 +28,11 @@ export class ImagesDto {
 // Optional stack features toggled per deployment (matches cloudapi.AddOns)
 export class AddOnsDto {
   @ApiProperty() pgBackRest: boolean;
+  @ApiProperty({
+    description: 'pgBackRest retention — full backups kept (only meaningful when pgBackRest is on)',
+    example: 4,
+  })
+  backupRetention: number;
   @ApiProperty() gitea: boolean;
 }
 

@@ -76,6 +76,7 @@ export class DeploymentDomainService {
       mode: dto.mode ?? DeploymentDbModeValues.managed,
       edge,
       addonPgbackrest: dto.addonPgbackrest ?? false,
+      backupRetention: dto.backupRetention ?? 4,
       addonGitea: dto.addonGitea ?? false,
       tenantType: dto.tenantType ?? DeploymentTenantTypeValues.dedicated,
       type: dto.type ?? DeploymentTypeValues.deployed,
@@ -109,11 +110,15 @@ export class DeploymentDomainService {
     if (edge === DeploymentEdgeValues.managed && !dto.acmeEmail) {
       errors.push({ field: 'acmeEmail', message: 'ACME email required' });
     }
+    // pgBackRest backs up the agent-run Postgres, so it's only valid with a managed database.
+    if (dto.addonPgbackrest && (dto.mode ?? DeploymentDbModeValues.managed) === DeploymentDbModeValues.external) {
+      errors.push({ field: 'addonPgbackrest', message: 'Requires a managed database' });
+    }
     if (errors.length === 0) return;
     throw new BadRequestException({
       label: 'Incomplete Agent Deployment',
       detail:
-        'Agent-managed deployments need a secret store, and a managed edge needs an ACME email to issue its wildcard certificate.',
+        'Agent-managed deployments need a secret store, a managed edge needs an ACME email for its wildcard certificate, and pgBackRest requires a managed database.',
       errors,
     });
   }

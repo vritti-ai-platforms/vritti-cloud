@@ -1,4 +1,4 @@
-import { z } from '@vritti/quantum-ui/zod';
+import { z, zodNumericField } from '@vritti/quantum-ui/zod';
 
 // Canonical deployment status values — must byte-match the backend DeploymentStatusValues enum
 // (apps/cloud-server/src/db/schema/enums.ts). Capital-P 'Provisioning' is intentional.
@@ -178,6 +178,7 @@ export interface Deployment {
   mode: DeploymentDbMode;
   edge: DeploymentEdgeMode;
   addonPgbackrest: boolean;
+  backupRetention: number;
   addonGitea: boolean;
   regionId: string;
   cloudProviderId: string;
@@ -344,6 +345,7 @@ export const createDeploymentSchema = z
     mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
     edge: z.enum(DEPLOYMENT_EDGE_VALUES).optional(),
     addonPgbackrest: z.boolean().optional(),
+    backupRetention: zodNumericField({ integer: true, min: 1, max: 52 }).optional(),
     addonGitea: z.boolean().optional(),
     regionId: z.string().uuid('Please select a region').optional().or(z.literal('')),
     cloudProviderId: z.string().uuid('Please select a cloud provider').optional().or(z.literal('')),
@@ -377,6 +379,14 @@ export const createDeploymentSchema = z
     } else {
       validateSecretProvider(data.secretProvider, data.secretProviderSecrets, ctx, true);
     }
+    // pgBackRest backs up the agent-run Postgres, so it only applies to a managed database.
+    if (data.addonPgbackrest && data.mode === 'external') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['addonPgbackrest'],
+        message: 'pgBackRest requires a managed database',
+      });
+    }
   });
 
 export const updateDeploymentSchema = z
@@ -386,6 +396,7 @@ export const updateDeploymentSchema = z
     mode: z.enum(DEPLOYMENT_DB_MODE_VALUES).optional(),
     edge: z.enum(DEPLOYMENT_EDGE_VALUES).optional(),
     addonPgbackrest: z.boolean().optional(),
+    backupRetention: zodNumericField({ integer: true, min: 1, max: 52 }).optional(),
     addonGitea: z.boolean().optional(),
     regionId: z.string().uuid().optional(),
     cloudProviderId: z.string().uuid().optional(),
@@ -400,6 +411,13 @@ export const updateDeploymentSchema = z
   .superRefine((data, ctx) => {
     if (data.secretProvider) {
       validateSecretProvider(data.secretProvider, data.secretProviderSecrets, ctx, false);
+    }
+    if (data.addonPgbackrest && data.mode === 'external') {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['addonPgbackrest'],
+        message: 'pgBackRest requires a managed database',
+      });
     }
   });
 
