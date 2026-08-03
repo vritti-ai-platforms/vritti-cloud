@@ -75,6 +75,29 @@ export function isFailingPhase(agent: AgentStatus): boolean {
   return /error|fail/i.test(agent.lastPhase ?? '');
 }
 
+// A managed edge terminates TLS itself, so it needs the operator's one-time DNS CNAME before it can
+// issue its wildcard cert. An external edge (BYO ingress/LB) needs no DNS-delegation step at all.
+export function needsDnsDelegation(deployment: Deployment): boolean {
+  return deployment.edge === 'managed';
+}
+
+// The wildcard cert is in place once the agent reports at least one certificate. This is the STABLE
+// signal to gate on — not agent.acmeDelegation, which is null both BEFORE the agent reaches ACME and
+// AFTER the cert issues, and only briefly present while awaiting the CNAME. Gating on the delegation
+// lets the DNS step be skipped (null at connect time) or falsely show "issued" (null before ACME).
+export function certIssued(agent: AgentStatus): boolean {
+  return (agent.certificates?.length ?? 0) > 0;
+}
+
+// The step to enter once the agent is connected: managed edges must clear DNS delegation (wildcard
+// cert issued) before provisioning; everything else goes straight to provision.
+export function stepAfterConnect(
+  deployment: Deployment,
+  agent: AgentStatus,
+): Extract<AgentStepId, 'dns-delegation' | 'provision'> {
+  return needsDnsDelegation(deployment) && !certIssued(agent) ? 'dns-delegation' : 'provision';
+}
+
 // Resume: for an agent deployment whose config is already persisted, re-enter the lifecycle half at
 // the first incomplete step.
 export function deriveAgentLifecycleStep(
@@ -85,9 +108,9 @@ export function deriveAgentLifecycleStep(
   // so it gates the lifecycle: no enrolling until the key is generated.
   if (!deployment.hasSigningKey) return 'signing-key';
   if (!agent.enrolled) return agent.status === 'pending' ? 'connect' : 'enroll';
-  // The wildcard cert waits on the operator's CNAME: while acmeDelegation is present the cert isn't
-  // issued yet, so hold at DNS delegation before provisioning.
-  if (agent.acmeDelegation) return 'dns-delegation';
+  // A managed edge must have its wildcard cert issued before the stack step is meaningful, so hold at
+  // DNS delegation until a certificate exists — this can't be skipped and never advances early.
+  if (needsDnsDelegation(deployment) && !certIssued(agent)) return 'dns-delegation';
   if (!isReconcileReady(agent)) return 'provision';
   return 'sync';
 }

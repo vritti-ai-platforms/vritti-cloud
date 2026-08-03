@@ -29,9 +29,12 @@ import { SigningKeyReveal } from './components/SigningKeyReveal';
 import {
   AGENT_WIZARD_STEPS,
   type AgentStepId,
+  certIssued,
   deriveAgentLifecycleStep,
   isFailingPhase,
   isReconcileReady,
+  needsDnsDelegation,
+  stepAfterConnect,
   stepNumber,
   toStepDefs,
 } from './wizardSteps';
@@ -67,11 +70,13 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
     if (confirmed) deleteMutation.mutate(deployment.id);
   };
 
-  // Live agent status — polls faster while provisioning so the reconcile gate updates promptly.
+  // Live agent status — polls faster while waiting on the wildcard cert or reconcile so the gates
+  // update promptly.
   const { data: agent } = useAgentStatus(deployment.id, {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!data) return 5000;
+      if (step === 'dns-delegation' && !certIssued(data)) return 5000;
       if (step === 'provision' && !isReconcileReady(data) && !isFailingPhase(data)) return 3000;
       return data.enrolled ? 15000 : 5000;
     },
@@ -98,15 +103,16 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
   });
 
   // Auto-advance from Connect only when the agent FIRST connects while the user waits on Connect — NOT
-  // on every render, so navigating Back to re-enroll doesn't bounce the user forward. Route through DNS
-  // delegation while the wildcard cert is still waiting on the operator's CNAME.
+  // on every render, so navigating Back to re-enroll doesn't bounce the user forward. A managed edge
+  // routes through DNS delegation until its wildcard cert is issued.
+  const nextFromConnect = stepAfterConnect(deployment, agent);
   const wasEnrolled = useRef(initialAgent.enrolled);
   useEffect(() => {
     if (step === 'connect' && agent.enrolled && !wasEnrolled.current) {
-      setStep(agent.acmeDelegation ? 'dns-delegation' : 'provision');
+      setStep(nextFromConnect);
     }
     wasEnrolled.current = agent.enrolled;
-  }, [step, agent.enrolled, agent.acmeDelegation]);
+  }, [step, agent.enrolled, nextFromConnect]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -301,7 +307,7 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
                 Back
               </Button>
               <Button
-                onClick={() => setStep(agent.acmeDelegation ? 'dns-delegation' : 'provision')}
+                onClick={() => setStep(nextFromConnect)}
                 disabled={!agent.enrolled}
                 endAdornment={<ArrowRight className="size-4" />}
               >
@@ -317,7 +323,11 @@ export const AgentSetupFlow: React.FC<AgentSetupFlowProps> = ({ deployment, agen
       )}
 
       {step === 'provision' && (
-        <ProvisionStep agent={agent} onBack={() => setStep('connect')} onContinue={() => setStep('sync')} />
+        <ProvisionStep
+          agent={agent}
+          onBack={() => setStep(needsDnsDelegation(deployment) ? 'dns-delegation' : 'connect')}
+          onContinue={() => setStep('sync')}
+        />
       )}
 
       {step === 'sync' && (
@@ -372,6 +382,7 @@ interface DnsDelegationStepProps {
 }
 
 const DnsDelegationStep: React.FC<DnsDelegationStepProps> = ({ agent, onBack, onContinue }) => {
+  const issued = certIssued(agent);
   const delegation = agent.acmeDelegation;
 
   return (
@@ -385,7 +396,28 @@ const DnsDelegationStep: React.FC<DnsDelegationStepProps> = ({ agent, onBack, on
           </Typography>
         </div>
 
-        {delegation ? (
+        {issued ? (
+          <>
+            <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4">
+              <CheckCircle2 className="size-5 shrink-0 text-success" />
+              <div className="space-y-1">
+                <p className="text-sm font-medium">Wildcard certificate issued</p>
+                <Typography variant="body2" intent="muted">
+                  The DNS record was verified and the wildcard certificate is in place. No further DNS changes are
+                  needed.
+                </Typography>
+              </div>
+            </div>
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={onBack} startAdornment={<ArrowLeft className="size-4" />}>
+                Back
+              </Button>
+              <Button onClick={onContinue} endAdornment={<ArrowRight className="size-4" />}>
+                Continue
+              </Button>
+            </div>
+          </>
+        ) : delegation ? (
           <>
             <Typography variant="body2" className="font-medium">
               Add this DNS record in your DNS (any provider):
@@ -413,22 +445,19 @@ const DnsDelegationStep: React.FC<DnsDelegationStepProps> = ({ agent, onBack, on
           </>
         ) : (
           <>
-            <div className="flex items-start gap-3 rounded-lg border bg-muted/40 p-4">
-              <CheckCircle2 className="size-5 shrink-0 text-success" />
+            <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-4">
+              <Spinner className="size-5 shrink-0 text-muted-foreground" />
               <div className="space-y-1">
-                <p className="text-sm font-medium">Wildcard certificate issued</p>
+                <p className="text-sm font-medium">Preparing the certificate request…</p>
                 <Typography variant="body2" intent="muted">
-                  The DNS record was verified and the wildcard certificate is in place. No further DNS changes are
-                  needed.
+                  The agent is starting its DNS service and registering with Let's Encrypt. The CNAME record to add will
+                  appear here shortly — keep the agent running on the VM.
                 </Typography>
               </div>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-start">
               <Button variant="outline" onClick={onBack} startAdornment={<ArrowLeft className="size-4" />}>
                 Back
-              </Button>
-              <Button onClick={onContinue} endAdornment={<ArrowRight className="size-4" />}>
-                Continue
               </Button>
             </div>
           </>
