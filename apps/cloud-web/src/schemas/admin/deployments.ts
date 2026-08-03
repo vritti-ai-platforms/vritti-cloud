@@ -233,8 +233,9 @@ export interface AgentStatus {
   giteaProvisioned: boolean;
   deploymentPubKey: string | null;
   certificates: Certificate[];
-  // Present while the wildcard cert is waiting on the operator's DNS CNAME; null once the cert is issued.
-  acmeDelegation?: { name: string; target: string } | null;
+  // Present while the wildcard cert is waiting on the operator's DNS; null once the cert is issued.
+  // name/target = the challenge CNAME; zone/serverIp = the one-time acme-dns zone delegation (NS + glue A).
+  acmeDelegation?: { name: string; target: string; zone: string; serverIp: string } | null;
 }
 
 // Create: an empty ACME email means "not set" — send undefined (omit from payload).

@@ -53,6 +53,14 @@ export class AcmeDelegationDto {
   @ApiProperty({ description: 'CNAME record value', example: '<id>.acme.apw1.vrittiai.com' })
   @IsString()
   target: string;
+
+  @ApiProperty({ description: 'Zone-delegation NS record (name AND value)', example: 'acme.apw1.vrittiai.com' })
+  @IsString()
+  zone: string;
+
+  @ApiProperty({ description: 'Glue A record for the zone nameserver — the VM public IP', example: '210.79.128.205' })
+  @IsString()
+  serverIp: string;
 }
 
 // Periodic heartbeat pushed by the agent (matches cloudapi.StatusReport)

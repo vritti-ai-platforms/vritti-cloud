@@ -85,7 +85,7 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
       phase: string;
       message: string | null;
       giteaProvisioned: boolean;
-      acmeDelegation: { name: string; target: string } | null;
+      acmeDelegation: { name: string; target: string; zone: string; serverIp: string } | null;
     },
   ): Promise<void> {
     await this.db

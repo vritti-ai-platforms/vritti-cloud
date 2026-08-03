@@ -14,13 +14,20 @@ export class AgentCertificateDto {
   issuedAt: Date;
 }
 
-// Pending DNS-delegation CNAME the operator must add before the wildcard cert can be issued
+// Pending DNS delegation the operator must add before the wildcard cert can be issued: the challenge
+// CNAME (name → target) plus the one-time acme-dns zone delegation (zone NS + serverIp glue A).
 export class AgentAcmeDelegationDto {
   @ApiProperty({ example: '_acme-challenge.apw1.vrittiai.com' })
   name: string;
 
   @ApiProperty({ example: '<id>.acme.apw1.vrittiai.com' })
   target: string;
+
+  @ApiProperty({ description: 'Zone-delegation NS record (name AND value)', example: 'acme.apw1.vrittiai.com' })
+  zone: string;
+
+  @ApiProperty({ description: 'Glue A record for the zone nameserver — the VM public IP', example: '210.79.128.205' })
+  serverIp: string;
 }
 
 // Agent status for the admin console / connect polling

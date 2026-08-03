@@ -391,8 +391,8 @@ const DnsDelegationStep: React.FC<DnsDelegationStepProps> = ({ agent, onBack, on
         <div className="space-y-1">
           <Typography variant="h6">DNS delegation</Typography>
           <Typography variant="body2" intent="muted">
-            The agent issues one wildcard certificate for this deployment and derives routing automatically. Add a
-            single CNAME record so ACME can validate and issue it.
+            The agent issues one wildcard certificate for this deployment and derives routing automatically. Add the DNS
+            records below so ACME can validate and issue it.
           </Typography>
         </div>
 
@@ -420,17 +420,43 @@ const DnsDelegationStep: React.FC<DnsDelegationStepProps> = ({ agent, onBack, on
         ) : delegation ? (
           <>
             <Typography variant="body2" className="font-medium">
-              Add this DNS record in your DNS (any provider):
+              Add these DNS records at your domain's DNS provider (any provider works):
             </Typography>
-            <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
-              <CopyField label="Name" value={delegation.name} mono />
-              <DetailField label="Type" type="string" value="CNAME" mono />
-              <CopyField label="Target" value={delegation.target} mono />
+
+            <div className="space-y-2">
+              <Typography variant="body2" intent="muted">
+                1. Zone delegation — one-time. Points the challenge zone at this deployment's DNS server so Let's
+                Encrypt can reach it.
+              </Typography>
+              <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
+                <CopyField label="Name" value={delegation.zone} mono />
+                <DetailField label="Type" type="string" value="NS" mono />
+                <CopyField label="Value" value={`${delegation.zone}.`} mono />
+              </div>
+              <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
+                <CopyField label="Name" value={delegation.zone} mono />
+                <DetailField label="Type" type="string" value="A" mono />
+                <CopyField label="Value" value={delegation.serverIp} mono />
+              </div>
             </div>
+
+            <div className="space-y-2">
+              <Typography variant="body2" intent="muted">
+                2. Challenge record — lets ACME validate the wildcard.
+              </Typography>
+              <div className="grid grid-cols-1 gap-4 rounded-lg border bg-muted/40 p-4 sm:grid-cols-3">
+                <CopyField label="Name" value={delegation.name} mono />
+                <DetailField label="Type" type="string" value="CNAME" mono />
+                <CopyField label="Target" value={`${delegation.target}.`} mono />
+              </div>
+            </div>
+
             <div className="flex items-center gap-3 rounded-lg border bg-muted/40 p-4">
               <Spinner className="size-5 shrink-0 text-muted-foreground" />
               <div className="space-y-1">
-                <p className="text-sm font-medium">Waiting for the record to propagate and the certificate to issue…</p>
+                <p className="text-sm font-medium">
+                  Waiting for the records to propagate and the certificate to issue…
+                </p>
                 <Typography variant="body2" intent="muted">
                   This page updates automatically once the wildcard certificate is issued. Propagation can take a few
                   minutes.
