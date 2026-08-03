@@ -211,6 +211,9 @@ export class DeploymentAgentDomainService {
       giteaProvisioned: dto.giteaProvisioned ?? false,
       // Null clears the stored delegation once the agent stops reporting it (wildcard issued)
       acmeDelegation: dto.acmeDelegation ?? null,
+      // Latest live snapshots — per-service states + whole-VM resource usage
+      containers: dto.containers ?? null,
+      hostMetrics: dto.host ?? null,
     });
     await this.recordCertificates(agent.deploymentId, dto.certificates);
     this.logger.log(`Recorded status for deployment ${agent.deploymentId} (phase ${dto.phase}, gen ${dto.generation})`);

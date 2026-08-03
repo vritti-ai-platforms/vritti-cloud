@@ -10,7 +10,6 @@ import {
   type Deployment,
   SECRET_AUTH_METHOD_FIELDS,
   SECRET_AUTH_METHODS,
-  type SecretAuthMethod,
   type UpdateDeploymentData,
   updateDeploymentSchema,
 } from '@/schemas/admin/deployments';
@@ -38,9 +37,7 @@ export const SecretStoreTab: React.FC<SecretStoreTabProps> = ({ deployment }) =>
     resolver: zodResolver(updateDeploymentSchema),
     defaultValues: buildDeploymentDefaults(deployment),
   });
-  const authMethod = useWatch({ control: form.control, name: 'secretProvider.auth.method' }) as
-    | SecretAuthMethod
-    | undefined;
+  const authMethod = useWatch({ control: form.control, name: 'secretProvider.auth.method' });
   const authFields = authMethod ? (SECRET_AUTH_METHOD_FIELDS[authMethod] ?? []) : [];
 
   const mutation = useUpdateDeployment({ onSuccess: () => setEditing(false) });

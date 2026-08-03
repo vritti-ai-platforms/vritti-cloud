@@ -14,6 +14,42 @@ export class AgentCertificateDto {
   issuedAt: Date;
 }
 
+// One service's latest reported container state (from the most recent heartbeat)
+export class AgentContainerDto {
+  @ApiProperty({ example: 'core-server' })
+  service: string;
+
+  @ApiProperty({ example: 'running' })
+  state: string;
+
+  @ApiProperty({ example: 'healthy' })
+  health: string;
+
+  @ApiProperty({ example: 1.5 })
+  cpuPercent: number;
+
+  @ApiProperty({ example: 134217728 })
+  memoryBytes: number;
+}
+
+// Whole-VM resource usage from the most recent heartbeat
+export class AgentHostMetricsDto {
+  @ApiProperty({ example: 12.4 })
+  cpuPercent: number;
+
+  @ApiProperty({ example: 16777216000 })
+  memTotalBytes: number;
+
+  @ApiProperty({ example: 8388608000 })
+  memUsedBytes: number;
+
+  @ApiProperty({ example: 53687091200 })
+  diskTotalBytes: number;
+
+  @ApiProperty({ example: 16106127360 })
+  diskUsedBytes: number;
+}
+
 // Pending DNS delegation the operator must add before the wildcard cert can be issued: the challenge
 // CNAME (name → target) plus the one-time zone delegation — `zone NS nameserver` + `nameserver A serverIp`.
 export class AgentAcmeDelegationDto {
@@ -81,6 +117,15 @@ export class AgentStatusDto {
   })
   acmeDelegation: AgentAcmeDelegationDto | null;
 
+  @ApiProperty({
+    type: [AgentContainerDto],
+    description: 'Latest per-service container states from the last heartbeat',
+  })
+  containers: AgentContainerDto[];
+
+  @ApiPropertyOptional({ type: AgentHostMetricsDto, nullable: true, description: 'Latest whole-VM resource usage' })
+  host: AgentHostMetricsDto | null;
+
   // Maps an agent row (may be absent) plus deployment desired-generation, public key, and tracked certs to the API shape
   static from(
     deploymentId: string,
@@ -107,6 +152,8 @@ export class AgentStatusDto {
       issuedAt: cert.issuedAt,
     }));
     dto.acmeDelegation = agent?.acmeDelegation ?? null;
+    dto.containers = agent?.containers ?? [];
+    dto.host = agent?.hostMetrics ?? null;
     return dto;
   }
 }

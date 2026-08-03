@@ -24,6 +24,28 @@ function titleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
+function gb(bytes: number) {
+  return (bytes / 1024 ** 3).toFixed(1);
+}
+
+function pctUsed(used: number, total: number) {
+  return total > 0 ? Math.round((used / total) * 100) : 0;
+}
+
+function stateVariant(state: string): 'success' | 'warning' | 'destructive' | 'secondary' {
+  if (state === 'running') return 'success';
+  if (state === 'restarting' || state === 'created' || state === 'paused') return 'warning';
+  if (state === 'exited' || state === 'dead') return 'destructive';
+  return 'secondary';
+}
+
+function healthVariant(health: string): 'success' | 'warning' | 'destructive' | 'secondary' {
+  if (health === 'healthy') return 'success';
+  if (health === 'starting') return 'warning';
+  if (health === 'unhealthy') return 'destructive';
+  return 'secondary';
+}
+
 const EXPIRY_WARNING_DAYS = 21;
 
 function daysUntil(iso: string) {
@@ -112,6 +134,72 @@ export const AgentTab: React.FC<AgentTabProps> = ({ deployment, agent }) => {
           />
           <DetailField label="ACME Email" type="string" value={deployment.acmeEmail} mono />
         </div>
+
+        {agent.host && (
+          <div className="space-y-3 border-t pt-6">
+            <Typography variant="body2" className="font-medium">
+              VM Resources
+            </Typography>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <DetailField label="CPU" type="string" value={`${Math.round(agent.host.cpuPercent)}%`} mono />
+              <DetailField
+                label="Memory"
+                type="string"
+                value={`${gb(agent.host.memUsedBytes)} / ${gb(agent.host.memTotalBytes)} GB (${pctUsed(agent.host.memUsedBytes, agent.host.memTotalBytes)}%)`}
+                mono
+              />
+              <DetailField
+                label="Disk"
+                type="string"
+                value={`${gb(agent.host.diskUsedBytes)} / ${gb(agent.host.diskTotalBytes)} GB (${pctUsed(agent.host.diskUsedBytes, agent.host.diskTotalBytes)}%)`}
+                mono
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="space-y-3 border-t pt-6">
+          <Typography variant="body2" className="font-medium">
+            Services
+          </Typography>
+          {agent.containers.length === 0 ? (
+            <Typography variant="body2" intent="muted">
+              No services reported yet
+            </Typography>
+          ) : (
+            <div className="overflow-hidden rounded-lg border">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b bg-muted/50 text-left">
+                    <th className="px-4 py-2 font-medium">Service</th>
+                    <th className="px-4 py-2 font-medium">State</th>
+                    <th className="px-4 py-2 font-medium">Health</th>
+                    <th className="px-4 py-2 font-medium">CPU</th>
+                    <th className="px-4 py-2 font-medium">Memory</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {agent.containers.map((c) => (
+                    <tr key={c.service} className="border-b last:border-0">
+                      <td className="px-4 py-2">
+                        <StringCell value={c.service} mono />
+                      </td>
+                      <td className="px-4 py-2">
+                        <Badge variant={stateVariant(c.state)}>{titleCase(c.state)}</Badge>
+                      </td>
+                      <td className="px-4 py-2">
+                        <Badge variant={healthVariant(c.health)}>{c.health ? titleCase(c.health) : '—'}</Badge>
+                      </td>
+                      <td className="px-4 py-2 font-mono">{c.cpuPercent.toFixed(1)}%</td>
+                      <td className="px-4 py-2 font-mono">{gb(c.memoryBytes)} GB</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
         {agent.acmeDelegation && (
           <div className="space-y-3 border-t pt-6">
             <div>

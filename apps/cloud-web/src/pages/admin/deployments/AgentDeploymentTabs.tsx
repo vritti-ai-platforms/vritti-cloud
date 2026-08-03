@@ -1,4 +1,4 @@
-import { useDeleteDeployment } from '@hooks/admin/deployments';
+import { useAgentStatus, useDeleteDeployment } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
@@ -7,6 +7,7 @@ import { Tabs } from '@vritti/quantum-ui/Tabs';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { AgentStatus, Deployment } from '@/schemas/admin/deployments';
+import { HostMetricsSummary } from './components/HostMetricsSummary';
 import { AgentTab } from './tabs/AgentTab';
 import { CatalogTab } from './tabs/CatalogTab';
 import { CoreStackTab } from './tabs/CoreStackTab';
@@ -23,9 +24,13 @@ interface AgentDeploymentTabsProps {
   id: string;
 }
 
-export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deployment, agent, id }) => {
+export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deployment, agent: initialAgent, id }) => {
   const navigate = useNavigate();
   const confirm = useConfirm();
+
+  // Live agent status for the header resource pills + the Agent tab; poll every 15s.
+  const { data: liveAgent } = useAgentStatus(deployment.id, { refetchInterval: 15000 });
+  const agent = liveAgent ?? initialAgent;
 
   const deleteMutation = useDeleteDeployment({
     onSuccess: () => navigate('/deployments'),
@@ -47,6 +52,7 @@ export const AgentDeploymentTabs: React.FC<AgentDeploymentTabsProps> = ({ deploy
         title={deployment.name}
         titleSlot={<Badge variant="secondary">Managed</Badge>}
         description={deployment.tenantType}
+        actions={<HostMetricsSummary host={agent.host} />}
       />
 
       <Tabs

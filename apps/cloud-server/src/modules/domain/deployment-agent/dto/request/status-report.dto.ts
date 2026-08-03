@@ -29,6 +29,29 @@ export class ContainerReportDto {
   memoryBytes: number;
 }
 
+// Whole-VM resource usage within a heartbeat (matches cloudapi.HostMetrics)
+export class HostMetricsDto {
+  @ApiProperty({ example: 12.4 })
+  @IsNumber()
+  cpuPercent: number;
+
+  @ApiProperty({ example: 16777216000 })
+  @IsNumber()
+  memTotalBytes: number;
+
+  @ApiProperty({ example: 8388608000 })
+  @IsNumber()
+  memUsedBytes: number;
+
+  @ApiProperty({ example: 53687091200 })
+  @IsNumber()
+  diskTotalBytes: number;
+
+  @ApiProperty({ example: 16106127360 })
+  @IsNumber()
+  diskUsedBytes: number;
+}
+
 // One managed-edge certificate the agent currently holds (matches cloudapi.CertificateReport)
 export class CertificateReportDto {
   @ApiProperty({ example: 'api.apw1.vrittiai.com' })
@@ -95,6 +118,12 @@ export class StatusReportDto {
   @ValidateNested({ each: true })
   @Type(() => ContainerReportDto)
   containers?: ContainerReportDto[];
+
+  @ApiPropertyOptional({ type: HostMetricsDto, description: 'Whole-VM resource usage' })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => HostMetricsDto)
+  host?: HostMetricsDto;
 
   @ApiPropertyOptional({ description: 'Whether the Gitea app user + PAT are provisioned' })
   @IsOptional()

@@ -221,6 +221,24 @@ export interface Certificate {
   issuedAt: string;
 }
 
+// Latest reported per-service container state (from the most recent heartbeat).
+export interface AgentContainer {
+  service: string;
+  state: string;
+  health: string;
+  cpuPercent: number;
+  memoryBytes: number;
+}
+
+// Latest reported whole-VM resource usage (from the most recent heartbeat).
+export interface HostMetrics {
+  cpuPercent: number;
+  memTotalBytes: number;
+  memUsedBytes: number;
+  diskTotalBytes: number;
+  diskUsedBytes: number;
+}
+
 export interface AgentStatus {
   deploymentId: string;
   enrolled: boolean;
@@ -238,6 +256,9 @@ export interface AgentStatus {
   // name/target = the challenge CNAME; zone/nameserver/serverIp = the one-time zone delegation
   // (`zone NS nameserver` + `nameserver A serverIp`).
   acmeDelegation?: { name: string; target: string; zone: string; nameserver: string; serverIp: string } | null;
+  // Latest heartbeat snapshots: per-service container states + whole-VM resource usage.
+  containers: AgentContainer[];
+  host: HostMetrics | null;
 }
 
 // Create: an empty ACME email means "not set" — send undefined (omit from payload).

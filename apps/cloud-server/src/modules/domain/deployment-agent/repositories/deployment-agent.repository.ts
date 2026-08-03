@@ -86,6 +86,16 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
       message: string | null;
       giteaProvisioned: boolean;
       acmeDelegation: { name: string; target: string; zone: string; nameserver: string; serverIp: string } | null;
+      containers:
+        | { service: string; name: string; state: string; health: string; cpuPercent: number; memoryBytes: number }[]
+        | null;
+      hostMetrics: {
+        cpuPercent: number;
+        memTotalBytes: number;
+        memUsedBytes: number;
+        diskTotalBytes: number;
+        diskUsedBytes: number;
+      } | null;
     },
   ): Promise<void> {
     await this.db
@@ -97,6 +107,8 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
         lastMessage: data.message,
         giteaProvisioned: data.giteaProvisioned,
         acmeDelegation: data.acmeDelegation,
+        containers: data.containers,
+        hostMetrics: data.hostMetrics,
       })
       .where(eq(deploymentAgents.id, id));
   }

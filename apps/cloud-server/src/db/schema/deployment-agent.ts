@@ -33,6 +33,19 @@ export const deploymentAgents = cloudSchema.table('deployment_agents', {
     nameserver: string;
     serverIp: string;
   }>(),
+  // Latest heartbeat snapshot of per-service container states (overwritten each heartbeat).
+  containers:
+    jsonb('containers').$type<
+      { service: string; name: string; state: string; health: string; cpuPercent: number; memoryBytes: number }[]
+    >(),
+  // Latest heartbeat snapshot of whole-VM resource usage (overwritten each heartbeat).
+  hostMetrics: jsonb('host_metrics').$type<{
+    cpuPercent: number;
+    memTotalBytes: number;
+    memUsedBytes: number;
+    diskTotalBytes: number;
+    diskUsedBytes: number;
+  }>(),
   giteaProvisioned: boolean('gitea_provisioned').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
