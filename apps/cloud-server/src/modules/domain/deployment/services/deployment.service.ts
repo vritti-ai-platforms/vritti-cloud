@@ -104,13 +104,16 @@ export class DeploymentDomainService {
     if (!dto.secretProvider) {
       errors.push({ field: 'secretProvider', message: 'Secret store required' });
     }
-    if (edge === DeploymentEdgeValues.managed && (dto.domains?.length ?? 0) === 0) {
-      errors.push({ field: 'domains', message: 'At least one domain required' });
+    // A managed edge issues a single *.<base> wildcard via Let's Encrypt (routing is derived from the
+    // base domain), so it needs an ACME registration email — not an operator-supplied domain list.
+    if (edge === DeploymentEdgeValues.managed && !dto.acmeEmail) {
+      errors.push({ field: 'acmeEmail', message: 'ACME email required' });
     }
     if (errors.length === 0) return;
     throw new BadRequestException({
       label: 'Incomplete Agent Deployment',
-      detail: 'Agent-managed deployments need a secret store, and a managed edge must serve at least one domain.',
+      detail:
+        'Agent-managed deployments need a secret store, and a managed edge needs an ACME email to issue its wildcard certificate.',
       errors,
     });
   }
