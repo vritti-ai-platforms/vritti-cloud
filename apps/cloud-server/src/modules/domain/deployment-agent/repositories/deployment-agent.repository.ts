@@ -80,7 +80,13 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
   // Records a heartbeat from the agent
   async recordHeartbeat(
     id: string,
-    data: { generation: number; phase: string; message: string | null; giteaProvisioned: boolean },
+    data: {
+      generation: number;
+      phase: string;
+      message: string | null;
+      giteaProvisioned: boolean;
+      acmeDelegation: { name: string; target: string } | null;
+    },
   ): Promise<void> {
     await this.db
       .update(deploymentAgents)
@@ -90,6 +96,7 @@ export class DeploymentAgentDomainRepository extends PrimaryBaseRepository<typeo
         lastPhase: data.phase,
         lastMessage: data.message,
         giteaProvisioned: data.giteaProvisioned,
+        acmeDelegation: data.acmeDelegation,
       })
       .where(eq(deploymentAgents.id, id));
   }

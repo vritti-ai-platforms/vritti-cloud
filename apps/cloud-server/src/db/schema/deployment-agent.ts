@@ -1,4 +1,4 @@
-import { boolean, integer, text, timestamp, unique, uuid } from '@vritti/api-sdk/drizzle-pg-core';
+import { boolean, integer, jsonb, text, timestamp, unique, uuid } from '@vritti/api-sdk/drizzle-pg-core';
 import { cloudSchema } from './cloud-schema';
 import { deployments } from './deployment';
 import { deploymentAgentStatusEnum } from './enums';
@@ -24,6 +24,8 @@ export const deploymentAgents = cloudSchema.table('deployment_agents', {
   lastGeneration: integer('last_generation'),
   lastPhase: text('last_phase'),
   lastMessage: text('last_message'),
+  // Last-reported one-time DNS-delegation CNAME the operator must add before the wildcard cert issues; null once issued
+  acmeDelegation: jsonb('acme_delegation').$type<{ name: string; target: string }>(),
   giteaProvisioned: boolean('gitea_provisioned').notNull().default(false),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),

@@ -1,5 +1,16 @@
 import type { StepDef } from '@vritti/quantum-ui/StepProgressIndicator';
-import { Blocks, Boxes, Database, FileSignature, KeyRound, Link2, RefreshCw, ServerCog, Settings2 } from 'lucide-react';
+import {
+  Blocks,
+  Boxes,
+  Database,
+  FileSignature,
+  Globe,
+  KeyRound,
+  Link2,
+  RefreshCw,
+  ServerCog,
+  Settings2,
+} from 'lucide-react';
 import type { ReactNode } from 'react';
 import type { AgentStatus, Deployment } from '@/schemas/admin/deployments';
 
@@ -11,6 +22,7 @@ export type AgentStepId =
   | 'signing-key'
   | 'enroll'
   | 'connect'
+  | 'dns-delegation'
   | 'provision'
   | 'sync';
 export type ManualStepId = 'general' | 'signing-key' | 'sync';
@@ -31,6 +43,7 @@ export const AGENT_WIZARD_STEPS: WizardStep<AgentStepId>[] = [
   { id: 'signing-key', label: 'Signing Key', icon: <FileSignature className="h-4 w-4" /> },
   { id: 'enroll', label: 'Enroll', icon: <ServerCog className="h-4 w-4" /> },
   { id: 'connect', label: 'Connect', icon: <Link2 className="h-4 w-4" /> },
+  { id: 'dns-delegation', label: 'DNS', icon: <Globe className="h-4 w-4" /> },
   { id: 'provision', label: 'Provision', icon: <Boxes className="h-4 w-4" /> },
   { id: 'sync', label: 'Sync', icon: <RefreshCw className="h-4 w-4" /> },
 ];
@@ -67,11 +80,14 @@ export function isFailingPhase(agent: AgentStatus): boolean {
 export function deriveAgentLifecycleStep(
   deployment: Deployment,
   agent: AgentStatus,
-): Extract<AgentStepId, 'signing-key' | 'enroll' | 'connect' | 'provision' | 'sync'> {
+): Extract<AgentStepId, 'signing-key' | 'enroll' | 'connect' | 'dns-delegation' | 'provision' | 'sync'> {
   // The license signing key (LICENSE_PUBLIC_KEY) must exist before the agent provisions core-server,
   // so it gates the lifecycle: no enrolling until the key is generated.
   if (!deployment.hasSigningKey) return 'signing-key';
   if (!agent.enrolled) return agent.status === 'pending' ? 'connect' : 'enroll';
+  // The wildcard cert waits on the operator's CNAME: while acmeDelegation is present the cert isn't
+  // issued yet, so hold at DNS delegation before provisioning.
+  if (agent.acmeDelegation) return 'dns-delegation';
   if (!isReconcileReady(agent)) return 'provision';
   return 'sync';
 }

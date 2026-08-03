@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."deployment_agents" ADD COLUMN "acme_delegation" jsonb;

@@ -14,6 +14,15 @@ export class AgentCertificateDto {
   issuedAt: Date;
 }
 
+// Pending DNS-delegation CNAME the operator must add before the wildcard cert can be issued
+export class AgentAcmeDelegationDto {
+  @ApiProperty({ example: '_acme-challenge.apw1.vrittiai.com' })
+  name: string;
+
+  @ApiProperty({ example: '<id>.acme.apw1.vrittiai.com' })
+  target: string;
+}
+
 // Agent status for the admin console / connect polling
 export class AgentStatusDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -52,6 +61,13 @@ export class AgentStatusDto {
   @ApiProperty({ type: [AgentCertificateDto], description: 'Certificates tracked for this deployment' })
   certificates: AgentCertificateDto[];
 
+  @ApiPropertyOptional({
+    type: AgentAcmeDelegationDto,
+    nullable: true,
+    description: 'Pending DNS-delegation CNAME the operator must add; null once the wildcard cert has issued',
+  })
+  acmeDelegation: AgentAcmeDelegationDto | null;
+
   // Maps an agent row (may be absent) plus deployment desired-generation, public key, and tracked certs to the API shape
   static from(
     deploymentId: string,
@@ -77,6 +93,7 @@ export class AgentStatusDto {
       notAfter: cert.notAfter,
       issuedAt: cert.issuedAt,
     }));
+    dto.acmeDelegation = agent?.acmeDelegation ?? null;
     return dto;
   }
 }

@@ -14,8 +14,8 @@ import { Typography } from '@vritti/quantum-ui/Typography';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import type React from 'react';
-import { useEffect, useState } from 'react';
-import { type FieldPath, type UseFormReturn, useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useState } from 'react';
+import { type FieldPath, type UseFormReturn, useForm, useWatch } from 'react-hook-form';
 import { useNavigate } from 'react-router-dom';
 import {
   assembleSecretProvider,
@@ -28,7 +28,7 @@ import {
   SECRET_AUTH_METHOD_FIELDS,
   type SecretAuthMethod,
 } from '@/schemas/admin/deployments';
-import { renderAddonToggles, renderEdgeFields, renderSecretStoreFields } from './components/configFields';
+import { renderAddonToggles, renderSecretStoreFields } from './components/configFields';
 import { AGENT_WIZARD_STEPS, MANUAL_WIZARD_STEPS, toStepDefs } from './wizardSteps';
 
 type DeploymentForm = UseFormReturn<CreateDeploymentData>;
@@ -58,7 +58,6 @@ function toManualCreatePayload(data: CreateDeploymentData): CreateDeploymentData
     url: data.url,
     managementMode: 'manual',
     version: data.version,
-    domains: [],
   };
 }
 
@@ -80,7 +79,6 @@ export const DeploymentWizard: React.FC = () => {
       type: 'deployed',
       version: '',
       acmeEmail: '',
-      domains: [{ host: '', upstream: '' }],
       secretProvider: DEFAULT_SECRET_PROVIDER,
       secretProviderSecrets: {},
     },
@@ -290,36 +288,11 @@ const DatabaseStep: React.FC<StepProps> = ({ form, onBack, onContinue }) => {
   );
 };
 
-// Keeps the domains array consistent with the edge choice: external edge has no domains, managed
-// edge always starts with one row so a host/upstream can be entered.
-function useEdgeDomainsSync(form: DeploymentForm) {
-  const edge = useWatch({ control: form.control, name: 'edge' });
-  const domains = useFieldArray({ control: form.control, name: 'domains' });
-
-  useEffect(() => {
-    const current = form.getValues('domains') ?? [];
-    if (edge === 'external') {
-      if (current.length > 0) domains.replace([]);
-    } else if (current.length === 0) {
-      domains.replace([{ host: '', upstream: '' }]);
-    }
-  }, [edge, form, domains.replace]);
-
-  return { edge, domains };
-}
-
 const AddonsStep: React.FC<StepProps> = ({ form, onBack, onContinue }) => {
-  const { edge, domains } = useEdgeDomainsSync(form);
-  const advance = useAdvance(form, ['edge', 'domains', 'acmeEmail'], onContinue);
+  const advance = useAdvance(form, ['acmeEmail'], onContinue);
 
   return (
     <Form form={form} resetOnSuccess={false}>
-      {renderEdgeFields({
-        isManaged: edge !== 'external',
-        domainFields: domains.fields,
-        onAddDomain: () => domains.append({ host: '', upstream: '' }),
-        onRemoveDomain: domains.remove,
-      })}
       {renderAddonToggles()}
       <StepFooter onBack={onBack} onContinue={advance} />
     </Form>

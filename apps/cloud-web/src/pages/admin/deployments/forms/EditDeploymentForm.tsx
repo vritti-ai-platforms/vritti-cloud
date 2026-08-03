@@ -9,8 +9,7 @@ import { VersionSelector } from '@vritti/quantum-ui/selects/version';
 import { TextField } from '@vritti/quantum-ui/TextField';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
-import { useEffect } from 'react';
-import { useFieldArray, useForm, useWatch } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import type { Deployment } from '@/schemas/admin/deployments';
 import {
   assembleSecretProvider,
@@ -24,7 +23,7 @@ import {
   type UpdateDeploymentData,
   updateDeploymentSchema,
 } from '@/schemas/admin/deployments';
-import { renderAddonToggles, renderEdgeFields, renderSecretStoreFields } from '../components/configFields';
+import { renderAddonToggles, renderSecretStoreFields } from '../components/configFields';
 
 interface EditDeploymentFormProps {
   deployment: Deployment;
@@ -51,28 +50,12 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
       status: deployment.status,
       version: deployment.version ?? '',
       acmeEmail: deployment.acmeEmail ?? '',
-      domains: deployment.domains,
       secretProvider: isManual ? undefined : (deployment.secretProvider ?? DEFAULT_SECRET_PROVIDER),
       secretProviderSecrets: {},
     },
   });
 
   const dbMode = useWatch({ control: form.control, name: 'mode' });
-  const edge = useWatch({ control: form.control, name: 'edge' });
-  const isManaged = edge !== 'external';
-
-  const domains = useFieldArray({ control: form.control, name: 'domains' });
-
-  // Keep the domains array consistent with the edge choice (external → none, managed → at least one).
-  useEffect(() => {
-    if (isManual) return;
-    const current = form.getValues('domains') ?? [];
-    if (edge === 'external') {
-      if (current.length > 0) domains.replace([]);
-    } else if (current.length === 0) {
-      domains.replace([{ host: '', upstream: '' }]);
-    }
-  }, [edge, isManual, form, domains.replace]);
 
   const authMethod = useWatch({ control: form.control, name: 'secretProvider.auth.method' }) as
     | SecretAuthMethod
@@ -116,12 +99,6 @@ export const EditDeploymentForm: React.FC<EditDeploymentFormProps> = ({ deployme
             </p>
           )}
 
-          {renderEdgeFields({
-            isManaged,
-            domainFields: domains.fields,
-            onAddDomain: () => domains.append({ host: '', upstream: '' }),
-            onRemoveDomain: domains.remove,
-          })}
           {renderAddonToggles()}
           {renderSecretStoreFields({ authFields, existing: !!deployment.secretProvider })}
         </>

@@ -2,13 +2,19 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Deployment } from '@/db/schema';
 import { DeploymentManagementModeValues } from '@/db/schema';
-import { DEFAULT_STACK_IMAGES, IMAGE_ENV_KEYS } from '../deployment-agent.constants';
+import {
+  DEFAULT_STACK_IMAGES,
+  DEFAULT_WEB_BUNDLES,
+  IMAGE_ENV_KEYS,
+  WEB_BUNDLES_ENV_KEY,
+} from '../deployment-agent.constants';
 import {
   DesiredStateDto,
   DesiredStateEdgeValues,
   DesiredStateModeValues,
   type ImagesDto,
   type SecretProviderDto,
+  type WebBundleDto,
 } from '../dto/entity/desired-state.dto';
 
 @Injectable()
@@ -26,12 +32,13 @@ export class DesiredStateDomainService {
     // managed = agent runs its own Postgres container; external = agent connects to an existing DB (creds from the secret store)
     dto.mode = deployment.mode === 'external' ? DesiredStateModeValues.external : DesiredStateModeValues.managed;
     dto.baseDomain = this.resolveBaseDomain(deployment.url);
-    // managed = agent runs its own nginx+certbot edge for `domains`; external = another proxy fronts core
+    // managed = agent runs its own nginx edge + wildcard cert (routing derived from baseDomain); external = another proxy fronts core
     dto.edge = deployment.edge === 'external' ? DesiredStateEdgeValues.external : DesiredStateEdgeValues.managed;
     dto.images = this.resolveImages();
+    // Static web artifacts (core-web host + MF remotes) the managed edge serves off *.<base>
+    dto.webBundles = this.resolveWebBundles();
     // Per-deployment add-on toggles; their runtime secrets (R2 creds, gitea admin) ride the secret store
     dto.addOns = { pgBackRest: deployment.addonPgbackrest, gitea: deployment.addonGitea };
-    dto.domains = deployment.domains ?? [];
     dto.acmeEmail = this.resolveAcmeEmail(deployment);
     // Default OFF — a managed prod edge must opt IN to the untrusted Let's Encrypt staging CA
     dto.acmeStaging = this.configService.get<boolean>('ACME_STAGING') ?? false;
@@ -43,15 +50,37 @@ export class DesiredStateDomainService {
     return dto;
   }
 
-  // Resolves the per-deployment ACME email (warns but does not fail when domains exist without one)
+  // Resolves the per-deployment ACME email (warns but does not fail when a managed edge lacks one —
+  // the agent cannot register the wildcard cert with Let's Encrypt without it)
   private resolveAcmeEmail(deployment: Deployment): string {
     const email = deployment.acmeEmail ?? '';
-    if (!email && (deployment.domains?.length ?? 0) > 0) {
+    if (!email && deployment.edge !== 'external') {
       this.logger.warn(
-        `Deployment ${deployment.id} has managed-edge domains but no acmeEmail — certbot cannot register with Let's Encrypt`,
+        `Deployment ${deployment.id} has a managed edge but no acmeEmail — the agent cannot register the wildcard cert with Let's Encrypt`,
       );
     }
     return email;
+  }
+
+  // Resolves the static web bundles the managed edge serves (core-web host + MF remotes), allowing a
+  // wholesale AGENT_WEB_BUNDLES env override (JSON array). A malformed override falls back to defaults.
+  private resolveWebBundles(): WebBundleDto[] {
+    const raw = this.configService.get<string>(WEB_BUNDLES_ENV_KEY);
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as WebBundleDto[];
+        if (
+          Array.isArray(parsed) &&
+          parsed.every((b) => typeof b?.artifact === 'string' && typeof b?.path === 'string')
+        ) {
+          return parsed;
+        }
+        this.logger.warn(`${WEB_BUNDLES_ENV_KEY} is not a valid WebBundle[] — using defaults`);
+      } catch {
+        this.logger.warn(`${WEB_BUNDLES_ENV_KEY} is not valid JSON — using defaults`);
+      }
+    }
+    return DEFAULT_WEB_BUNDLES.map((b) => ({ ...b }));
   }
 
   // Resolves the secret-store config (warns when an agent-managed deployment has none — the agent cannot source core/commerce env)

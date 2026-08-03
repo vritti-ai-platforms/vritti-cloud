@@ -7,18 +7,12 @@ export const DesiredStateModeValues = {
 };
 export type DesiredStateMode = (typeof DesiredStateModeValues)[keyof typeof DesiredStateModeValues];
 
-// HTTP edge mode: managed = agent runs nginx+certbot; external = another fronts core (matches cloudapi.EdgeMode)
+// HTTP edge mode: managed = agent runs nginx + wildcard cert; external = another fronts core (matches cloudapi.EdgeMode)
 export const DesiredStateEdgeValues = {
   managed: 'managed' as const,
   external: 'external' as const,
 };
 export type DesiredStateEdge = (typeof DesiredStateEdgeValues)[keyof typeof DesiredStateEdgeValues];
-
-// One host the managed edge serves + certs, with its upstream service:port (matches cloudapi.Domain)
-export class DomainDto {
-  @ApiProperty({ example: 'api.apw1.vrittiai.com' }) host: string;
-  @ApiProperty({ example: 'core-server:3002' }) upstream: string;
-}
 
 // Resolved, pinned image references for a deployment's stack (matches cloudapi.Images)
 export class ImagesDto {
@@ -35,6 +29,17 @@ export class ImagesDto {
 export class AddOnsDto {
   @ApiProperty() pgBackRest: boolean;
   @ApiProperty() gitea: boolean;
+}
+
+// One static web artifact the managed edge serves off the wildcard origin (matches cloudapi.WebBundle).
+// Path "" is the host SPA (core-web) at web root; a non-empty path is a module-federation remote
+// extracted to that subdir so core-web loads it same-origin at /<path>/mf-manifest.json.
+export class WebBundleDto {
+  @ApiProperty({ example: 'ghcr.io/vritti-ai-platforms/core-web:latest-main' })
+  artifact: string;
+
+  @ApiProperty({ example: 'commerce-mf', description: '"" = web root; else the MF subdir (prodPath)' })
+  path: string;
 }
 
 // Secret-store auth block — the secret half of the method rides sealedSecrets under secretProvider.* names (matches cloudapi.SecretProviderAuth)
@@ -86,9 +91,6 @@ export class DesiredStateDto {
   @ApiProperty({ enum: DesiredStateEdgeValues, example: 'managed' })
   edge: DesiredStateEdge;
 
-  @ApiProperty({ type: [DomainDto], description: 'Hosts the managed edge serves + issues certs for' })
-  domains: DomainDto[];
-
   @ApiProperty({ example: 'ops@vrittiai.com', description: "Let's Encrypt registration email (cloud-owned)" })
   acmeEmail: string;
 
@@ -100,6 +102,9 @@ export class DesiredStateDto {
 
   @ApiProperty({ type: AddOnsDto })
   addOns: AddOnsDto;
+
+  @ApiProperty({ type: [WebBundleDto], description: 'Static web artifacts the managed edge serves off *.<base>' })
+  webBundles: WebBundleDto[];
 
   @ApiProperty({ type: 'object', additionalProperties: { type: 'string' }, description: 'Plaintext non-secret config' })
   config: Record<string, string>;

@@ -44,6 +44,17 @@ export class CertificateReportDto {
   issuedAt: string;
 }
 
+// One-time DNS-delegation CNAME the operator must add before the wildcard cert can be issued (matches cloudapi.AcmeDelegation)
+export class AcmeDelegationDto {
+  @ApiProperty({ description: 'CNAME record name', example: '_acme-challenge.apw1.vrittiai.com' })
+  @IsString()
+  name: string;
+
+  @ApiProperty({ description: 'CNAME record value', example: '<id>.acme.apw1.vrittiai.com' })
+  @IsString()
+  target: string;
+}
+
 // Periodic heartbeat pushed by the agent (matches cloudapi.StatusReport)
 export class StatusReportDto {
   @ApiProperty({ description: 'Deployment this heartbeat is for', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -84,4 +95,15 @@ export class StatusReportDto {
   @ValidateNested({ each: true })
   @Type(() => CertificateReportDto)
   certificates?: CertificateReportDto[];
+
+  @ApiPropertyOptional({
+    type: AcmeDelegationDto,
+    nullable: true,
+    description:
+      'Pending DNS-delegation CNAME (present while the wildcard cert awaits the operator, absent once issued)',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AcmeDelegationDto)
+  acmeDelegation?: AcmeDelegationDto | null;
 }

@@ -112,39 +112,22 @@ export const AgentTab: React.FC<AgentTabProps> = ({ deployment, agent }) => {
           />
           <DetailField label="ACME Email" type="string" value={deployment.acmeEmail} mono />
         </div>
-        <div className="space-y-3 border-t pt-6">
-          <Typography variant="body2" className="font-medium">
-            Domains
-          </Typography>
-          {deployment.domains.length === 0 ? (
-            <Typography variant="body2" intent="muted">
-              No domains configured
-            </Typography>
-          ) : (
-            <div className="overflow-hidden rounded-lg border">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50 text-left">
-                    <th className="px-4 py-2 font-medium">Host</th>
-                    <th className="px-4 py-2 font-medium">Upstream</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deployment.domains.map((domain) => (
-                    <tr key={domain.host} className="border-b last:border-0">
-                      <td className="px-4 py-2">
-                        <StringCell value={domain.host} mono />
-                      </td>
-                      <td className="px-4 py-2">
-                        <StringCell value={domain.upstream} mono />
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+        {agent.acmeDelegation && (
+          <div className="space-y-3 border-t pt-6">
+            <div>
+              <Typography variant="body2" className="font-medium">
+                DNS Delegation
+              </Typography>
+              <Typography variant="body2" intent="muted">
+                Add this CNAME record so the agent can issue the wildcard certificate.
+              </Typography>
             </div>
-          )}
-        </div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <CopyField label="Name" value={agent.acmeDelegation.name} mono />
+              <CopyField label="Target (CNAME)" value={agent.acmeDelegation.target} mono />
+            </div>
+          </div>
+        )}
         {agent.deploymentPubKey && (
           <div className="border-t pt-6">
             <CopyField label="Deployment public key" value={agent.deploymentPubKey} mono />

@@ -61,11 +61,6 @@ export const DEPLOYMENT_TENANT_TYPE_OPTIONS: { value: DeploymentTenantType; labe
 
 type DeploymentManagementMode = 'manual' | 'agent';
 
-export interface Domain {
-  host: string;
-  upstream: string;
-}
-
 export const SECRET_AUTH_METHOD_VALUES = [
   'universal',
   'token',
@@ -191,7 +186,6 @@ export interface Deployment {
   type: DeploymentType;
   version: string | null;
   acmeEmail: string | null;
-  domains: Domain[];
   secretProvider: SecretProvider | null;
   regionName?: string;
   regionCode?: string;
@@ -239,6 +233,8 @@ export interface AgentStatus {
   giteaProvisioned: boolean;
   deploymentPubKey: string | null;
   certificates: Certificate[];
+  // Present while the wildcard cert is waiting on the operator's DNS CNAME; null once the cert is issued.
+  acmeDelegation?: { name: string; target: string } | null;
 }
 
 // Create: an empty ACME email means "not set" — send undefined (omit from payload).
@@ -255,13 +251,6 @@ const acmeEmailUpdateField = z
   .nullable()
   .or(z.literal('').transform(() => null))
   .optional();
-
-const domainsField = z.array(
-  z.object({
-    host: z.string().min(1, 'Host is required'),
-    upstream: z.string().min(1, 'Upstream is required'),
-  }),
-);
 
 export const secretProviderField = z.object({
   type: z.string(),
@@ -361,7 +350,6 @@ export const createDeploymentSchema = z
     status: z.enum(DEPLOYMENT_STATUS_VALUES).optional(),
     version: z.string().min(1, 'Version is required').max(50),
     acmeEmail: acmeEmailCreateField,
-    domains: domainsField,
     secretProvider: secretProviderField.optional(),
     secretProviderSecrets: secretProviderSecretsField.optional(),
   })
@@ -387,14 +375,6 @@ export const createDeploymentSchema = z
     } else {
       validateSecretProvider(data.secretProvider, data.secretProviderSecrets, ctx, true);
     }
-    // Managed edge terminates TLS for the configured hosts, so at least one domain is required.
-    if ((data.edge ?? 'managed') === 'managed' && data.domains.length === 0) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ['domains'],
-        message: 'Add at least one domain for a managed edge',
-      });
-    }
   });
 
 export const updateDeploymentSchema = z
@@ -412,7 +392,6 @@ export const updateDeploymentSchema = z
     status: z.enum(DEPLOYMENT_STATUS_VALUES).optional(),
     version: z.string().max(50).optional().or(z.literal('')),
     acmeEmail: acmeEmailUpdateField,
-    domains: domainsField.optional(),
     secretProvider: secretProviderField.optional(),
     secretProviderSecrets: secretProviderSecretsField.optional(),
   })
