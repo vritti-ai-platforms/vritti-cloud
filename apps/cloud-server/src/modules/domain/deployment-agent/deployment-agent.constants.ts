@@ -23,6 +23,7 @@ export const DEFAULT_STACK_IMAGES = {
 export const DEFAULT_WEB_BUNDLES: { artifact: string; path: string }[] = [
   { artifact: 'ghcr.io/vritti-ai-platforms/core-web:latest-main', path: '' },
   { artifact: 'ghcr.io/vritti-ai-platforms/commerce-mf:latest-main', path: 'commerce-mf' },
+  { artifact: 'ghcr.io/vritti-ai-platforms/gitea-mf:latest-main', path: 'gitea-mf' },
 ];
 
 // Env var overriding the web-bundle set wholesale (JSON array of { artifact, path }); falls back to DEFAULT_WEB_BUNDLES
