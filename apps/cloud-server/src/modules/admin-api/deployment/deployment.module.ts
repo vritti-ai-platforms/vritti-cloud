@@ -5,6 +5,9 @@ import { OrganizationDomainModule } from '@domain/organization/organization.modu
 import { OrganizationMemberDomainModule } from '@domain/organization-member/organization-member.module';
 import { Module } from '@nestjs/common';
 import { CoreServerModule } from '@/modules/core-server/core-server.module';
+import { DeploymentActivityController } from './activity/controllers/deployment-activity.controller';
+import { DeploymentActivitySseListener } from './activity/listeners/deployment-activity-sse.listener';
+import { DeploymentActivitySseService } from './activity/services/deployment-activity-sse.service';
 import { DeploymentAgentController } from './agent/controllers/deployment-agent.controller';
 import { DeploymentAgentSseListener } from './agent/listeners/deployment-agent-sse.listener';
 import { DeploymentAgentLogsService } from './agent/services/deployment-agent-logs.service';
@@ -22,7 +25,19 @@ import { OrganizationMemberController } from './organization/member/controllers/
     OrganizationMemberDomainModule,
     CoreServerModule,
   ],
-  controllers: [DeploymentController, DeploymentAgentController, OrganizationController, OrganizationMemberController],
-  providers: [DeploymentAgentSseService, DeploymentAgentSseListener, DeploymentAgentLogsService],
+  controllers: [
+    DeploymentController,
+    DeploymentAgentController,
+    DeploymentActivityController,
+    OrganizationController,
+    OrganizationMemberController,
+  ],
+  providers: [
+    DeploymentAgentSseService,
+    DeploymentAgentSseListener,
+    DeploymentAgentLogsService,
+    DeploymentActivitySseService,
+    DeploymentActivitySseListener,
+  ],
 })
 export class AdminDeploymentModule {}

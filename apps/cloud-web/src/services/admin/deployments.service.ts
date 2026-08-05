@@ -61,10 +61,10 @@ export function getAgentStatus(id: string): Promise<AgentStatus> {
   return axios.get<AgentStatus>(`admin-api/deployments/${id}/agent`).then((r) => r.data);
 }
 
-// Fetches a newest-first, cursor-paginated page of the deployment's reconcile event timeline
-export function getDeploymentEvents(id: string, cursor?: string): Promise<DeploymentEventsResponse> {
+// Fetches a newest-first, cursor-paginated page of the deployment's activity timeline
+export function getDeploymentActivity(id: string, cursor?: string): Promise<DeploymentEventsResponse> {
   return axios
-    .get<DeploymentEventsResponse>(`admin-api/deployments/${id}/agent/events`, {
+    .get<DeploymentEventsResponse>(`admin-api/deployments/${id}/activity`, {
       params: cursor ? { cursor } : undefined,
     })
     .then((r) => r.data);

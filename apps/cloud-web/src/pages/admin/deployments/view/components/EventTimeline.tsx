@@ -21,8 +21,8 @@ interface EventTimelineProps {
   description?: string;
 }
 
-// Presentational reconcile / licensing activity feed. The managed cockpit feeds it live events from the
-// AgentStreamProvider (SSE); the local overview feeds it from the events query. Replaces SSH-to-read-logs.
+// Presentational reconcile / licensing activity feed. The managed Activity tab feeds it live events from
+// useDeploymentActivity (SSE); the local overview feeds it from the same hook. Replaces SSH-to-read-logs.
 export const EventTimeline: React.FC<EventTimelineProps> = ({
   events,
   isLoading,

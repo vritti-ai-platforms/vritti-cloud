@@ -4,7 +4,6 @@ import { Injectable, Logger, type MessageEvent, OnModuleDestroy } from '@nestjs/
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { concat, finalize, from, type Observable, Subject } from 'rxjs';
 import type { AgentLiveStatusDto } from '../dto/entity/agent-live-status.dto';
-import type { DeploymentEventDto } from '../dto/entity/deployment-event.dto';
 
 // Per-deployment SSE fan-out for the admin cockpit — a pure relay of what the agent reports over Connect.
 // It never reads the DB: live status is streamed straight through; a small in-memory cache holds only the
@@ -66,11 +65,6 @@ export class DeploymentAgentSseService implements OnModuleDestroy {
   pushStatus(deploymentId: string, dto: AgentLiveStatusDto): void {
     this.lastStatus.set(deploymentId, dto);
     this.broadcast(deploymentId, statusMessage(dto));
-  }
-
-  // Relays a newly appended timeline event
-  pushEvent(deploymentId: string, dto: DeploymentEventDto): void {
-    this.broadcast(deploymentId, { type: 'agent-event', data: JSON.stringify(dto) });
   }
 
   // Relays an agent connectivity change; on going offline, drops the stale status cache (offline shows offline)

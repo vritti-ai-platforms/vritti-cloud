@@ -14,6 +14,7 @@ import type { Deployment } from '@/schemas/admin/deployments';
 import { HostMetricsSummary } from '../components/HostMetricsSummary';
 import { DeploymentCockpit } from './cockpit/DeploymentCockpit';
 import { EditDeploymentDetailsForm } from './EditDeploymentDetailsForm';
+import { ActivityTab } from './tabs/ActivityTab';
 import { AgentTab } from './tabs/AgentTab';
 import { CatalogTab } from './tabs/CatalogTab';
 import { OrganizationsTab } from './tabs/OrganizationsTab';
@@ -78,6 +79,7 @@ export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({ de
             label: 'Overview',
             content: <DeploymentCockpit deployment={deployment} agent={agent} deploymentSlug={deploymentSlug} />,
           },
+          { value: 'activity', label: 'Activity', content: <ActivityTab deploymentId={id} /> },
           { value: 'agent', label: 'Agent', content: <AgentTab deployment={deployment} agent={agent} /> },
           { value: 'signing-key', label: 'Signing Key', content: <SigningKeyTab deployment={deployment} /> },
           { value: 'catalog', label: 'Catalog', content: <CatalogTab deployment={deployment} /> },

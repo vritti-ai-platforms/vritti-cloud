@@ -1,32 +1,17 @@
 import { DeploymentAgentDomainService } from '@domain/deployment-agent/services/deployment-agent.service';
-import { DeploymentEventDomainService } from '@domain/deployment-event/services/deployment-event.service';
-import {
-  Controller,
-  Get,
-  HttpCode,
-  HttpStatus,
-  Logger,
-  type MessageEvent,
-  Param,
-  Post,
-  Query,
-  Sse,
-} from '@nestjs/common';
+import { Controller, Get, HttpCode, HttpStatus, Logger, type MessageEvent, Param, Post, Sse } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
 import { CreateResponseDto } from '@vritti/api-sdk/database';
 import type { Observable } from 'rxjs';
 import { SessionTypeValues } from '@/db/schema';
 import {
-  ApiGetAgentEvents,
   ApiGetAgentStatus,
   ApiIssueEnrollToken,
   ApiStreamAgent,
   ApiStreamAgentLogs,
 } from '../docs/deployment-agent.docs';
 import { AgentStatusDto } from '../dto/entity/agent-status.dto';
-import { DeploymentEventDto } from '../dto/entity/deployment-event.dto';
-import { DeploymentEventsResponseDto } from '../dto/response/deployment-events-response.dto';
 import { EnrollTokenDto } from '../dto/response/enroll-token.dto';
 import { DeploymentAgentLogsService } from '../services/deployment-agent-logs.service';
 import { DeploymentAgentSseService } from '../services/deployment-agent-sse.service';
@@ -40,7 +25,6 @@ export class DeploymentAgentController {
 
   constructor(
     private readonly agentService: DeploymentAgentDomainService,
-    private readonly eventService: DeploymentEventDomainService,
     private readonly sseService: DeploymentAgentSseService,
     private readonly logsService: DeploymentAgentLogsService,
   ) {}
@@ -83,17 +67,5 @@ export class DeploymentAgentController {
       status.deploymentPubKey,
       status.connected,
     );
-  }
-
-  // Returns a newest-first, cursor-paginated page of the deployment's event timeline
-  @Get('events')
-  @ApiGetAgentEvents()
-  async getAgentEvents(
-    @Param('id') id: string,
-    @Query('cursor') cursor?: string,
-  ): Promise<DeploymentEventsResponseDto> {
-    this.logger.log(`GET /admin-api/deployments/${id}/agent/events`);
-    const page = await this.eventService.listByDeployment(id, cursor);
-    return { result: page.events.map((event) => DeploymentEventDto.from(event)), nextCursor: page.nextCursor };
   }
 }

@@ -1,9 +1,7 @@
 import type React from 'react';
-import { useDeploymentTimeline } from '@/providers/AgentStreamProvider';
 import type { AgentStatus, Deployment } from '@/schemas/admin/deployments';
 import { ComponentGrid } from './ComponentGrid';
 import { ConditionsBanner } from './ConditionsBanner';
-import { EventTimeline } from './EventTimeline';
 import { HostGauges } from './HostGauges';
 
 interface DeploymentCockpitProps {
@@ -12,15 +10,14 @@ interface DeploymentCockpitProps {
   deploymentSlug: string;
 }
 
-// The managed deployment's Overview tab: reconcile banner + host gauges + component grid + event timeline.
+// The managed deployment's Overview tab: reconcile banner + host gauges + component grid. The event timeline
+// lives in its own Activity tab (ActivityTab / useDeploymentActivity).
 export const DeploymentCockpit: React.FC<DeploymentCockpitProps> = ({ deployment, agent, deploymentSlug }) => {
-  const { events, isLoading } = useDeploymentTimeline();
   return (
     <div className="flex flex-col gap-6">
       <ConditionsBanner agent={agent} />
       <HostGauges host={agent.host} />
       <ComponentGrid deployment={deployment} agent={agent} deploymentSlug={deploymentSlug} />
-      <EventTimeline events={events} isLoading={isLoading} />
     </div>
   );
 };

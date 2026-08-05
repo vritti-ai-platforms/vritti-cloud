@@ -179,7 +179,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
                         <span className="shrink-0 select-none text-muted-foreground/70">{formatTs(log.ts)}</span>
                       )}
                       <span className={cn('min-w-0 flex-1', log.stream === 'stderr' && 'text-destructive')}>
-                        {log.line}
+                        {stripAnsi(log.line)}
                       </span>
                     </div>
                   ))
@@ -227,6 +227,14 @@ const ToolbarToggle: React.FC<{
     {children}
   </button>
 );
+
+// Strips ANSI SGR/color escape codes — core-server colorizes its log output, and rendering the raw escapes
+// (`␛[32m … ␛[39m`) would show garbage. Our own stdout/stderr coloring is applied separately.
+// biome-ignore lint/suspicious/noControlCharactersInRegex: matching ANSI escape (ESC = U+001B) is the intent.
+const ANSI_PATTERN = /\[[0-9;]*m/g;
+function stripAnsi(value: string): string {
+  return value.replace(ANSI_PATTERN, '');
+}
 
 // Shortens the RFC3339 timestamp to a readable HH:MM:SS.mmm for the log gutter.
 function formatTs(ts: string): string {

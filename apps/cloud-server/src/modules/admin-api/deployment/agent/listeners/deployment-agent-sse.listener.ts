@@ -3,17 +3,15 @@ import {
   DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT,
 } from '@domain/deployment-agent/deployment-agent.constants';
 import type { AgentStatusChangedEvent } from '@domain/deployment-agent/services/deployment-agent.service';
-import { DEPLOYMENT_EVENT_APPENDED_EVENT } from '@domain/deployment-event/services/deployment-event.service';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import type { DeploymentEvent } from '@/db/schema';
 import { AgentLiveStatusDto } from '../dto/entity/agent-live-status.dto';
-import { DeploymentEventDto } from '../dto/entity/deployment-event.dto';
 import { DeploymentAgentSseService } from '../services/deployment-agent-sse.service';
 
-// Bridges the domain's status/event/connectivity emissions to the per-deployment SSE relay. The live status
+// Bridges the domain's status/connectivity emissions to the per-deployment agent SSE relay. The live status
 // is built straight from the agent's reported payload (no DB read); connectivity is relayed so the cockpit
 // flips to "offline" the instant the agent's stream drops. Skips work when no browser is watching.
+// (Timeline events have their own Activity SSE — see deployment-activity-sse.listener.ts.)
 @Injectable()
 export class DeploymentAgentSseListener {
   constructor(private readonly sse: DeploymentAgentSseService) {}
@@ -31,12 +29,5 @@ export class DeploymentAgentSseListener {
   handleConnectivityChanged(payload: { deploymentId: string; connected: boolean }): void {
     if (!this.sse.hasConnections(payload.deploymentId)) return;
     this.sse.pushConnectivity(payload.deploymentId, payload.connected);
-  }
-
-  // A timeline event was appended → relay it to watching browsers
-  @OnEvent(DEPLOYMENT_EVENT_APPENDED_EVENT)
-  handleEventAppended(event: DeploymentEvent): void {
-    if (!this.sse.hasConnections(event.deploymentId)) return;
-    this.sse.pushEvent(event.deploymentId, DeploymentEventDto.from(event));
   }
 }

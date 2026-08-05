@@ -1,7 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { AgentStatusDto } from '../dto/entity/agent-status.dto';
-import { DeploymentEventsResponseDto } from '../dto/response/deployment-events-response.dto';
 import { EnrollTokenDto } from '../dto/response/enroll-token.dto';
 
 export function ApiIssueEnrollToken() {
@@ -36,9 +35,9 @@ export function ApiGetAgentStatus() {
 export function ApiStreamAgent() {
   return applyDecorators(
     ApiOperation({
-      summary: 'Stream agent status + timeline (SSE)',
+      summary: 'Stream agent status + connectivity (SSE)',
       description:
-        'Server-Sent Events stream for the live cockpit. Emits an `agent-status` event (full agent status) on the initial connect and on every agent heartbeat/transition, and an `agent-event` event (one timeline entry) whenever a new event is appended. Replaces polling — authenticated via the admin session cookie (EventSource cannot send Authorization headers).',
+        'Server-Sent Events stream for the live cockpit. Emits an `agent-status` event (the live status the agent reports) on the initial connect and on every agent heartbeat/transition, and an `agent-connectivity` event whenever the agent goes online/offline. The activity timeline has its own stream (GET /activity/stream). Replaces polling — authenticated via the admin session cookie (EventSource cannot send Authorization headers).',
     }),
     ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
     ApiResponse({ status: 200, description: 'SSE stream of agent-status / agent-event messages.' }),
@@ -57,20 +56,5 @@ export function ApiStreamAgentLogs() {
     ApiParam({ name: 'target', description: 'Container key: "agent" or a service name', example: 'core-server' }),
     ApiResponse({ status: 200, description: 'SSE stream of log-line messages.' }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
-  );
-}
-
-export function ApiGetAgentEvents() {
-  return applyDecorators(
-    ApiOperation({
-      summary: 'Get the deployment event timeline',
-      description:
-        'Returns a newest-first, cursor-paginated page of the deployment event timeline (reconcile transitions, cert issuance, backups, errors). Pass the returned nextCursor to fetch the next (older) page.',
-    }),
-    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
-    ApiQuery({ name: 'cursor', required: false, description: 'Opaque cursor from a previous page' }),
-    ApiResponse({ status: 200, description: 'Event timeline page.', type: DeploymentEventsResponseDto }),
-    ApiResponse({ status: 401, description: 'Unauthorized.' }),
-    ApiResponse({ status: 404, description: 'Deployment not found.' }),
   );
 }
