@@ -1,54 +1,34 @@
-import { axios } from '@vritti/quantum-ui/axios';
+import { useSSE } from '@vritti/quantum-ui/hooks';
 import { useEffect, useRef, useState } from 'react';
 import type { LogLine } from '@/schemas/admin/deployments';
 
 const MAX_LINES = 2000;
 
-export interface LogEntry {
+// One accumulated log line — the reported LogLine plus a stable id for React keys.
+export interface LogEntry extends LogLine {
   id: number;
-  line: LogLine;
 }
 
-// Dedicated live-log SSE consumer for one container. Unlike the shared useSSE (which keeps only the last
-// event in state and can merge lines under burst), this opens its own EventSource and appends EVERY
-// `log-line` via a functional state update — so no lines are dropped even at high volume. Authenticated by
-// the admin session cookie (withCredentials); the server-side SSE guard reads it (EventSource can't set headers).
+// Streams one container's logs over SSE (useSSE handles the base URL, cookie auth, lifecycle) and
+// accumulates them. `logs` is ready to render directly; `setLogs` lets the caller clear/reset (e.g. on
+// Start or when switching target). Target is a PATH param: /admin-api/deployments/:id/agent/logs/:target.
 export function useAgentLogs(deploymentId: string, target: string, enabled: boolean) {
-  const [entries, setEntries] = useState<LogEntry[]>([]);
-  const [isConnected, setIsConnected] = useState(false);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
   const idRef = useRef(0);
 
+  const { eventType, data, isConnected } = useSSE<{ 'log-line': LogLine }>({
+    path: `/admin-api/deployments/${deploymentId}/agent/logs/${encodeURIComponent(target)}`,
+    events: ['log-line'],
+    enabled,
+  });
+
   useEffect(() => {
-    if (!enabled) {
-      setIsConnected(false);
-      return;
-    }
-    const base = (axios.defaults.baseURL ?? '').replace(/\/$/, '');
-    const url = `${base}/admin-api/deployments/${deploymentId}/agent/logs?target=${encodeURIComponent(target)}`;
-    const source = new EventSource(url, { withCredentials: true });
+    if (eventType !== 'log-line' || !data) return;
+    setLogs((prev) => {
+      const next = [...prev, { id: idRef.current++, ...(data as LogLine) }];
+      return next.length > MAX_LINES ? next.slice(-MAX_LINES) : next;
+    });
+  }, [eventType, data]);
 
-    source.onopen = () => setIsConnected(true);
-    source.onerror = () => setIsConnected(false);
-    const onLine = (event: MessageEvent) => {
-      try {
-        const line = JSON.parse(event.data) as LogLine;
-        setEntries((prev) => {
-          const next = [...prev, { id: idRef.current++, line }];
-          return next.length > MAX_LINES ? next.slice(-MAX_LINES) : next;
-        });
-      } catch {
-        // ignore malformed frames
-      }
-    };
-    source.addEventListener('log-line', onLine);
-
-    return () => {
-      source.removeEventListener('log-line', onLine);
-      source.close();
-      setIsConnected(false);
-    };
-  }, [deploymentId, target, enabled]);
-
-  const clear = () => setEntries([]);
-  return { entries, isConnected, clear };
+  return { logs, setLogs, isConnected };
 }

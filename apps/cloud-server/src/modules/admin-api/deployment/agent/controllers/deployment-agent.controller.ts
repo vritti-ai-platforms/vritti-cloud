@@ -54,11 +54,11 @@ export class DeploymentAgentController {
   }
 
   // Streams a container's live logs via SSE (target = "agent" or a service name); request-driven
-  @Sse('logs')
+  @Sse('logs/:target')
   @ApiStreamAgentLogs()
-  streamAgentLogs(@Param('id') id: string, @Query('target') target?: string): Observable<MessageEvent> {
-    this.logger.log(`SSE /admin-api/deployments/${id}/agent/logs?target=${target ?? 'agent'}`);
-    return this.logsService.stream(id, target || 'agent');
+  streamAgentLogs(@Param('id') id: string, @Param('target') target: string): Observable<MessageEvent> {
+    this.logger.log(`SSE /admin-api/deployments/${id}/agent/logs/${target}`);
+    return this.logsService.stream(id, target);
   }
 
   // Issues a one-time enroll token for the deployment's agent

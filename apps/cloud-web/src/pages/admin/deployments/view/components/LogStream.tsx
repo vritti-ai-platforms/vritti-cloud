@@ -22,9 +22,8 @@ interface LogStreamProps {
 }
 
 // Reusable live-log console. Press Start to tail a container ("agent" or a service); the server asks the
-// agent to tail it only while this is open, and streams lines over a DEDICATED SSE (useAgentLogs — appends
-// every line, no drops). Terminal-style view with a target switcher, follow-tail (pauses when you scroll
-// up), timestamps/wrap toggles, and a clear. One component, reused for the agent container and every service.
+// agent to tail it only while this is open. Log accumulation + SSE live in useAgentLogs; this component owns
+// the presentation — target switcher, follow-tail (pauses when you scroll up), timestamps/wrap toggles, clear.
 export const LogStream: React.FC<LogStreamProps> = ({
   deploymentId,
   targets,
@@ -39,22 +38,22 @@ export const LogStream: React.FC<LogStreamProps> = ({
   const [atBottom, setAtBottom] = useState(true);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const { entries, isConnected, clear } = useAgentLogs(deploymentId, target, streaming);
+  const { logs, setLogs, isConnected } = useAgentLogs(deploymentId, target, streaming);
 
   // Switching target stops the current tail and clears the view (the SSE closes → the agent stops tailing).
   const changeTarget = (next: string) => {
     setTarget(next);
     setStreaming(false);
-    clear();
+    setLogs([]);
     setAtBottom(true);
   };
 
   // Follow-tail: keep pinned to the newest line, but only while the user is already at the bottom.
-  // Re-runs on every new line (entries.length) — that's the point of depending on entries here.
+  // Re-runs on every new line (logs.length) — that's the point of depending on logs here.
   useEffect(() => {
     const el = scrollRef.current;
-    if (el && atBottom && entries.length > 0) el.scrollTop = el.scrollHeight;
-  }, [entries, atBottom]);
+    if (el && atBottom && logs.length > 0) el.scrollTop = el.scrollHeight;
+  }, [logs, atBottom]);
 
   const onScroll = useCallback(() => {
     const el = scrollRef.current;
@@ -72,7 +71,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
     if (streaming) {
       setStreaming(false);
     } else {
-      clear();
+      setLogs([]);
       setAtBottom(true);
       setStreaming(true);
     }
@@ -144,7 +143,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
               <div className="flex items-center gap-2 font-mono text-xs text-muted-foreground">
                 <span className="text-foreground">{target}</span>
                 <span>·</span>
-                <span>{entries.length} lines</span>
+                <span>{logs.length} lines</span>
               </div>
               <div className="flex items-center gap-0.5">
                 <ToolbarToggle active={showTimestamps} onClick={() => setShowTimestamps((v) => !v)} label="Timestamps">
@@ -153,7 +152,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
                 <ToolbarToggle active={wrap} onClick={() => setWrap((v) => !v)} label="Wrap">
                   <WrapText className="size-3.5" />
                 </ToolbarToggle>
-                <ToolbarToggle active={false} onClick={clear} label="Clear" disabled={entries.length === 0}>
+                <ToolbarToggle active={false} onClick={() => setLogs([])} label="Clear" disabled={logs.length === 0}>
                   <Trash2 className="size-3.5" />
                 </ToolbarToggle>
               </div>
@@ -169,25 +168,25 @@ export const LogStream: React.FC<LogStreamProps> = ({
                   wrap ? 'whitespace-pre-wrap break-all' : 'whitespace-pre',
                 )}
               >
-                {entries.length === 0 ? (
+                {logs.length === 0 ? (
                   <p className="text-muted-foreground">
                     {streaming ? 'Waiting for log output…' : 'Press Start stream to tail this container.'}
                   </p>
                 ) : (
-                  entries.map((entry) => (
-                    <div key={entry.id} className="group flex gap-2">
+                  logs.map((log) => (
+                    <div key={log.id} className="group flex gap-2">
                       {showTimestamps && (
-                        <span className="shrink-0 select-none text-muted-foreground/70">{formatTs(entry.line.ts)}</span>
+                        <span className="shrink-0 select-none text-muted-foreground/70">{formatTs(log.ts)}</span>
                       )}
-                      <span className={cn('min-w-0 flex-1', entry.line.stream === 'stderr' && 'text-destructive')}>
-                        {entry.line.line}
+                      <span className={cn('min-w-0 flex-1', log.stream === 'stderr' && 'text-destructive')}>
+                        {log.line}
                       </span>
                     </div>
                   ))
                 )}
               </div>
 
-              {!atBottom && entries.length > 0 && (
+              {!atBottom && logs.length > 0 && (
                 <Button
                   size="sm"
                   variant="secondary"
