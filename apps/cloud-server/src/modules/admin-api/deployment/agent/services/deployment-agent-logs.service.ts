@@ -11,7 +11,7 @@ import type { LogLineDto } from '../dto/entity/log-line.dto';
 
 // Request-driven live-log relay: a container is tailed by the agent only while at least one browser is
 // watching it. On the first viewer of a (deployment, target) it asks the agent to StartLogs; on the last it
-// asks it to StopLogs. Lines the agent streams up (via the Connect StreamLogs handler → an event) are fanned
+// asks it to StopLogs. Lines the agent pushes up (via the Connect PushLogs handler → an event) are fanned
 // out to viewers, with a small ring buffer so a late/second viewer gets recent context. Pure relay — no DB.
 @Injectable()
 export class DeploymentAgentLogsService implements OnModuleDestroy {
@@ -52,7 +52,7 @@ export class DeploymentAgentLogsService implements OnModuleDestroy {
     );
   }
 
-  // A line the agent tailed (relayed from the Connect StreamLogs handler) → buffer + fan out to viewers.
+  // A line the agent tailed (relayed from the Connect PushLogs handler) → buffer + fan out to viewers.
   @OnEvent(DEPLOYMENT_AGENT_LOG_LINE_EVENT)
   handleLogLine(payload: { deploymentId: string; target: string; stream: string; ts: string; line: string }): void {
     const key = logKey(payload.deploymentId, payload.target);

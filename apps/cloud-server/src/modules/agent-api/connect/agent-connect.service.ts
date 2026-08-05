@@ -23,11 +23,11 @@ import {
   AgentService,
   type EnrollRequest,
   type EnrollResponseSchema,
-  type LogLine,
+  type LogBatch,
+  type PushLogsAckSchema,
   type ReportAckSchema,
   type ServerMessageSchema,
   type StatusReport,
-  type StreamLogsAckSchema,
   type SubscribeRequest,
 } from '@/gen/agent/v1/agent_pb';
 import { createAgentAuthInterceptor } from './agent-auth.interceptor';
@@ -54,7 +54,7 @@ export class AgentConnectService {
       enroll: (req, ctx) => this.enroll(req, ctx),
       subscribe: (req, ctx) => this.subscribe(req, ctx),
       reportStatus: (req, ctx) => this.reportStatus(req, ctx),
-      streamLogs: (reqs, ctx) => this.streamLogs(reqs, ctx),
+      pushLogs: (req, ctx) => this.pushLogs(req, ctx),
     });
   }
 
@@ -212,31 +212,24 @@ export class AgentConnectService {
     }
   }
 
-  // StreamLogs — the agent's client-stream of tailed container log lines (started/stopped via commands on
+  // PushLogs — the agent's unary batch of tailed container log lines (started/stopped via commands on
   // the Subscribe stream). Each line is relayed to the logs SSE fan-out via an event, keyed by deployment.
-  private async streamLogs(
-    reqs: AsyncIterable<LogLine>,
-    ctx: HandlerContext,
-  ): Promise<MessageInitShape<typeof StreamLogsAckSchema>> {
+  private pushLogs(req: LogBatch, ctx: HandlerContext): MessageInitShape<typeof PushLogsAckSchema> {
     const agent = ctx.values.get(kAgent);
     if (!agent) {
       throw new ConnectError('Unauthenticated.', Code.Unauthenticated);
     }
     const deploymentId = agent.deploymentId;
-    try {
-      for await (const line of reqs) {
-        this.eventEmitter.emit(DEPLOYMENT_AGENT_LOG_LINE_EVENT, {
-          deploymentId,
-          target: line.target,
-          stream: line.stream,
-          ts: line.ts,
-          line: line.line,
-        });
-      }
-      return {};
-    } catch (err) {
-      throw toConnectError(err);
+    for (const line of req.lines) {
+      this.eventEmitter.emit(DEPLOYMENT_AGENT_LOG_LINE_EVENT, {
+        deploymentId,
+        target: line.target,
+        stream: line.stream,
+        ts: line.ts,
+        line: line.line,
+      });
     }
+    return {};
   }
 }
 

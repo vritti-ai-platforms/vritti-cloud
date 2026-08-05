@@ -27,7 +27,7 @@ export const AGENT_DISCONNECT_GRACE_MS = 6_000;
 // Live-log events. START/STOP (payload: { deploymentId, target, tailLines? }) are emitted by the logs SSE
 // relay on the first/last browser watching a container's logs; the Subscribe handler turns them into
 // StartLogs/StopLogs commands. LINE (payload: { deploymentId, target, stream, ts, line }) is emitted by the
-// agent's StreamLogs handler per tailed line; the logs relay fans it out to watching browsers.
+// agent's PushLogs handler per tailed line; the logs relay fans it out to watching browsers.
 export const DEPLOYMENT_AGENT_START_LOGS_EVENT = 'deployment.agent.start-logs';
 export const DEPLOYMENT_AGENT_STOP_LOGS_EVENT = 'deployment.agent.stop-logs';
 export const DEPLOYMENT_AGENT_LOG_LINE_EVENT = 'deployment.agent.log-line';

@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file agent/v1/agent.proto.
  */
 export const file_agent_v1_agent: GenFile = /*@__PURE__*/
-  fileDesc("ChRhZ2VudC92MS9hZ2VudC5wcm90bxIIYWdlbnQudjEihQEKDUVucm9sbFJlcXVlc3QSFQoNZGVwbG95bWVudF9pZBgBIAEoCRIUCgxlbnJvbGxfdG9rZW4YAiABKAkSFwoPc2lnbmluZ19wdWJfa2V5GAMgASgJEhcKD3NlYWxpbmdfcHViX2tleRgEIAEoCRIVCg1hZ2VudF92ZXJzaW9uGAUgASgJIm4KDkVucm9sbFJlc3BvbnNlEhgKEGFnZW50X2NyZWRlbnRpYWwYASABKAkSGgoSZGVwbG95bWVudF9wdWJfa2V5GAIgASgJEg0KBW5vbmNlGAMgASgJEhcKD25vbmNlX3NpZ25hdHVyZRgEIAEoCSJDChBTdWJzY3JpYmVSZXF1ZXN0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSGAoQa25vd25fZ2VuZXJhdGlvbhgCIAEoAyI8ChJTaWduZWREZXNpcmVkU3RhdGUSEwoLcGF5bG9hZF9iNjQYASABKAkSEQoJc2lnbmF0dXJlGAIgASgJIp4BCg1TZXJ2ZXJNZXNzYWdlEjUKDWRlc2lyZWRfc3RhdGUYASABKAsyHC5hZ2VudC52MS5TaWduZWREZXNpcmVkU3RhdGVIABIkCgdjb21tYW5kGAIgASgLMhEuYWdlbnQudjEuQ29tbWFuZEgAEikKCmtlZXBfYWxpdmUYAyABKAsyEy5hZ2VudC52MS5LZWVwQWxpdmVIAEIFCgNtc2ciHAoJS2VlcEFsaXZlEg8KB3VuaXhfdHMYASABKAMiyQEKB0NvbW1hbmQSLwoNZm9yY2VfcmVjaGVjaxgBIAEoCzIWLmFnZW50LnYxLkZvcmNlUmVjaGVja0gAEjEKDnJlcXVlc3Rfc3RhdHVzGAIgASgLMhcuYWdlbnQudjEuUmVxdWVzdFN0YXR1c0gAEikKCnN0YXJ0X2xvZ3MYAyABKAsyEy5hZ2VudC52MS5TdGFydExvZ3NIABInCglzdG9wX2xvZ3MYBCABKAsyEi5hZ2VudC52MS5TdG9wTG9nc0gAQgYKBGtpbmQiDgoMRm9yY2VSZWNoZWNrIg8KDVJlcXVlc3RTdGF0dXMiPgoJU3RhcnRMb2dzEg4KBnRhcmdldBgBIAEoCRISCgp0YWlsX2xpbmVzGAIgASgFEg0KBXNpbmNlGAMgASgJIhoKCFN0b3BMb2dzEg4KBnRhcmdldBgBIAEoCSK2AgoMU3RhdHVzUmVwb3J0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSEgoKZ2VuZXJhdGlvbhgCIAEoAxInCgpjb25kaXRpb25zGAMgAygLMhMuYWdlbnQudjEuQ29uZGl0aW9uEikKCHNlcnZpY2VzGAQgAygLMhcuYWdlbnQudjEuU2VydmljZVN0YXR1cxIjCgRob3N0GAUgASgLMhUuYWdlbnQudjEuSG9zdE1ldHJpY3MSKgoMY2VydGlmaWNhdGVzGAYgAygLMhQuYWdlbnQudjEuQ2VydFJlcG9ydBI1CgpkZWxlZ2F0aW9uGAcgASgLMiEuYWdlbnQudjEuQWNtZUNoYWxsZW5nZURlbGVnYXRpb24SHwoGZXZlbnRzGAggAygLMg8uYWdlbnQudjEuRXZlbnQiCwoJUmVwb3J0QWNrImwKCUNvbmRpdGlvbhIMCgR0eXBlGAEgASgJEg4KBnN0YXR1cxgCIAEoCRIOCgZyZWFzb24YAyABKAkSDwoHbWVzc2FnZRgEIAEoCRIRCgljb21wb25lbnQYBSABKAkSDQoFc2luY2UYBiABKAkiiwEKDVNlcnZpY2VTdGF0dXMSEQoJY29tcG9uZW50GAEgASgJEg8KB3NlcnZpY2UYAiABKAkSDAoEbmFtZRgDIAEoCRINCgVzdGF0ZRgEIAEoCRIOCgZoZWFsdGgYBSABKAkSEwoLY3B1X3BlcmNlbnQYBiABKAESFAoMbWVtb3J5X2J5dGVzGAcgASgEIoYBCgtIb3N0TWV0cmljcxITCgtjcHVfcGVyY2VudBgBIAEoARIXCg9tZW1fdG90YWxfYnl0ZXMYAiABKAQSFgoObWVtX3VzZWRfYnl0ZXMYAyABKAQSGAoQZGlza190b3RhbF9ieXRlcxgEIAEoBBIXCg9kaXNrX3VzZWRfYnl0ZXMYBSABKAQiQAoKQ2VydFJlcG9ydBIMCgRob3N0GAEgASgJEhEKCW5vdF9hZnRlchgCIAEoCRIRCglpc3N1ZWRfYXQYAyABKAkibAoXQWNtZUNoYWxsZW5nZURlbGVnYXRpb24SDAoEbmFtZRgBIAEoCRIOCgZ0YXJnZXQYAiABKAkSDAoEem9uZRgDIAEoCRISCgpuYW1lc2VydmVyGAQgASgJEhEKCXNlcnZlcl9pcBgFIAEoCSJKCgVFdmVudBINCgVsZXZlbBgBIAEoCRIRCgljb21wb25lbnQYAiABKAkSDgoGcmVhc29uGAMgASgJEg8KB21lc3NhZ2UYBCABKAkiQwoHTG9nTGluZRIOCgZ0YXJnZXQYASABKAkSDgoGc3RyZWFtGAIgASgJEgoKAnRzGAMgASgJEgwKBGxpbmUYBCABKAkiDwoNU3RyZWFtTG9nc0FjazKIAgoMQWdlbnRTZXJ2aWNlEjsKBkVucm9sbBIXLmFnZW50LnYxLkVucm9sbFJlcXVlc3QaGC5hZ2VudC52MS5FbnJvbGxSZXNwb25zZRJCCglTdWJzY3JpYmUSGi5hZ2VudC52MS5TdWJzY3JpYmVSZXF1ZXN0GhcuYWdlbnQudjEuU2VydmVyTWVzc2FnZTABEjsKDFJlcG9ydFN0YXR1cxIWLmFnZW50LnYxLlN0YXR1c1JlcG9ydBoTLmFnZW50LnYxLlJlcG9ydEFjaxI6CgpTdHJlYW1Mb2dzEhEuYWdlbnQudjEuTG9nTGluZRoXLmFnZW50LnYxLlN0cmVhbUxvZ3NBY2soAWIGcHJvdG8z");
+  fileDesc("ChRhZ2VudC92MS9hZ2VudC5wcm90bxIIYWdlbnQudjEihQEKDUVucm9sbFJlcXVlc3QSFQoNZGVwbG95bWVudF9pZBgBIAEoCRIUCgxlbnJvbGxfdG9rZW4YAiABKAkSFwoPc2lnbmluZ19wdWJfa2V5GAMgASgJEhcKD3NlYWxpbmdfcHViX2tleRgEIAEoCRIVCg1hZ2VudF92ZXJzaW9uGAUgASgJIm4KDkVucm9sbFJlc3BvbnNlEhgKEGFnZW50X2NyZWRlbnRpYWwYASABKAkSGgoSZGVwbG95bWVudF9wdWJfa2V5GAIgASgJEg0KBW5vbmNlGAMgASgJEhcKD25vbmNlX3NpZ25hdHVyZRgEIAEoCSJDChBTdWJzY3JpYmVSZXF1ZXN0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSGAoQa25vd25fZ2VuZXJhdGlvbhgCIAEoAyI8ChJTaWduZWREZXNpcmVkU3RhdGUSEwoLcGF5bG9hZF9iNjQYASABKAkSEQoJc2lnbmF0dXJlGAIgASgJIp4BCg1TZXJ2ZXJNZXNzYWdlEjUKDWRlc2lyZWRfc3RhdGUYASABKAsyHC5hZ2VudC52MS5TaWduZWREZXNpcmVkU3RhdGVIABIkCgdjb21tYW5kGAIgASgLMhEuYWdlbnQudjEuQ29tbWFuZEgAEikKCmtlZXBfYWxpdmUYAyABKAsyEy5hZ2VudC52MS5LZWVwQWxpdmVIAEIFCgNtc2ciHAoJS2VlcEFsaXZlEg8KB3VuaXhfdHMYASABKAMiyQEKB0NvbW1hbmQSLwoNZm9yY2VfcmVjaGVjaxgBIAEoCzIWLmFnZW50LnYxLkZvcmNlUmVjaGVja0gAEjEKDnJlcXVlc3Rfc3RhdHVzGAIgASgLMhcuYWdlbnQudjEuUmVxdWVzdFN0YXR1c0gAEikKCnN0YXJ0X2xvZ3MYAyABKAsyEy5hZ2VudC52MS5TdGFydExvZ3NIABInCglzdG9wX2xvZ3MYBCABKAsyEi5hZ2VudC52MS5TdG9wTG9nc0gAQgYKBGtpbmQiDgoMRm9yY2VSZWNoZWNrIg8KDVJlcXVlc3RTdGF0dXMiPgoJU3RhcnRMb2dzEg4KBnRhcmdldBgBIAEoCRISCgp0YWlsX2xpbmVzGAIgASgFEg0KBXNpbmNlGAMgASgJIhoKCFN0b3BMb2dzEg4KBnRhcmdldBgBIAEoCSK2AgoMU3RhdHVzUmVwb3J0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSEgoKZ2VuZXJhdGlvbhgCIAEoAxInCgpjb25kaXRpb25zGAMgAygLMhMuYWdlbnQudjEuQ29uZGl0aW9uEikKCHNlcnZpY2VzGAQgAygLMhcuYWdlbnQudjEuU2VydmljZVN0YXR1cxIjCgRob3N0GAUgASgLMhUuYWdlbnQudjEuSG9zdE1ldHJpY3MSKgoMY2VydGlmaWNhdGVzGAYgAygLMhQuYWdlbnQudjEuQ2VydFJlcG9ydBI1CgpkZWxlZ2F0aW9uGAcgASgLMiEuYWdlbnQudjEuQWNtZUNoYWxsZW5nZURlbGVnYXRpb24SHwoGZXZlbnRzGAggAygLMg8uYWdlbnQudjEuRXZlbnQiCwoJUmVwb3J0QWNrImwKCUNvbmRpdGlvbhIMCgR0eXBlGAEgASgJEg4KBnN0YXR1cxgCIAEoCRIOCgZyZWFzb24YAyABKAkSDwoHbWVzc2FnZRgEIAEoCRIRCgljb21wb25lbnQYBSABKAkSDQoFc2luY2UYBiABKAkiiwEKDVNlcnZpY2VTdGF0dXMSEQoJY29tcG9uZW50GAEgASgJEg8KB3NlcnZpY2UYAiABKAkSDAoEbmFtZRgDIAEoCRINCgVzdGF0ZRgEIAEoCRIOCgZoZWFsdGgYBSABKAkSEwoLY3B1X3BlcmNlbnQYBiABKAESFAoMbWVtb3J5X2J5dGVzGAcgASgEIoYBCgtIb3N0TWV0cmljcxITCgtjcHVfcGVyY2VudBgBIAEoARIXCg9tZW1fdG90YWxfYnl0ZXMYAiABKAQSFgoObWVtX3VzZWRfYnl0ZXMYAyABKAQSGAoQZGlza190b3RhbF9ieXRlcxgEIAEoBBIXCg9kaXNrX3VzZWRfYnl0ZXMYBSABKAQiQAoKQ2VydFJlcG9ydBIMCgRob3N0GAEgASgJEhEKCW5vdF9hZnRlchgCIAEoCRIRCglpc3N1ZWRfYXQYAyABKAkibAoXQWNtZUNoYWxsZW5nZURlbGVnYXRpb24SDAoEbmFtZRgBIAEoCRIOCgZ0YXJnZXQYAiABKAkSDAoEem9uZRgDIAEoCRISCgpuYW1lc2VydmVyGAQgASgJEhEKCXNlcnZlcl9pcBgFIAEoCSJKCgVFdmVudBINCgVsZXZlbBgBIAEoCRIRCgljb21wb25lbnQYAiABKAkSDgoGcmVhc29uGAMgASgJEg8KB21lc3NhZ2UYBCABKAkiQwoHTG9nTGluZRIOCgZ0YXJnZXQYASABKAkSDgoGc3RyZWFtGAIgASgJEgoKAnRzGAMgASgJEgwKBGxpbmUYBCABKAkiLAoITG9nQmF0Y2gSIAoFbGluZXMYASADKAsyES5hZ2VudC52MS5Mb2dMaW5lIg0KC1B1c2hMb2dzQWNrMoMCCgxBZ2VudFNlcnZpY2USOwoGRW5yb2xsEhcuYWdlbnQudjEuRW5yb2xsUmVxdWVzdBoYLmFnZW50LnYxLkVucm9sbFJlc3BvbnNlEkIKCVN1YnNjcmliZRIaLmFnZW50LnYxLlN1YnNjcmliZVJlcXVlc3QaFy5hZ2VudC52MS5TZXJ2ZXJNZXNzYWdlMAESOwoMUmVwb3J0U3RhdHVzEhYuYWdlbnQudjEuU3RhdHVzUmVwb3J0GhMuYWdlbnQudjEuUmVwb3J0QWNrEjUKCFB1c2hMb2dzEhIuYWdlbnQudjEuTG9nQmF0Y2gaFS5hZ2VudC52MS5QdXNoTG9nc0Fja2IGcHJvdG8z");
 
 /**
  * EnrollRequest presents the one-time token and the agent's fresh public keys.
@@ -305,7 +305,7 @@ export const RequestStatusSchema: GenMessage<RequestStatus> = /*@__PURE__*/
   messageDesc(file_agent_v1_agent, 8);
 
 /**
- * StartLogs asks the agent to tail one container and stream its lines up via StreamLogs. target is the
+ * StartLogs asks the agent to tail one container and push its lines up via PushLogs. target is the
  * container key: "agent" (the agent's own container) or a service name (core-server, postgres, nginx, ...).
  *
  * @generated from message agent.v1.StartLogs
@@ -709,7 +709,7 @@ export const EventSchema: GenMessage<Event> = /*@__PURE__*/
   messageDesc(file_agent_v1_agent, 18);
 
 /**
- * LogLine is one tailed container log line, streamed up while a browser is watching.
+ * LogLine is one tailed container log line, pushed up while a browser is watching.
  *
  * @generated from message agent.v1.LogLine
  */
@@ -749,19 +749,41 @@ export const LogLineSchema: GenMessage<LogLine> = /*@__PURE__*/
   messageDesc(file_agent_v1_agent, 19);
 
 /**
- * StreamLogsAck is the (empty) acknowledgement returned when the agent closes the log stream.
+ * LogBatch is a chunk of tailed lines the agent POSTs (unary) while a browser watches a container. Unary,
+ * not client-streaming, because Cloudflare buffers request bodies — a streamed upload never reaches the
+ * origin live. The agent flushes a batch every ~250ms or when it fills. Lines carry their own target, so a
+ * batch is nominally single-target but need not be.
  *
- * @generated from message agent.v1.StreamLogsAck
+ * @generated from message agent.v1.LogBatch
  */
-export type StreamLogsAck = Message<"agent.v1.StreamLogsAck"> & {
+export type LogBatch = Message<"agent.v1.LogBatch"> & {
+  /**
+   * @generated from field: repeated agent.v1.LogLine lines = 1;
+   */
+  lines: LogLine[];
 };
 
 /**
- * Describes the message agent.v1.StreamLogsAck.
- * Use `create(StreamLogsAckSchema)` to create a new message.
+ * Describes the message agent.v1.LogBatch.
+ * Use `create(LogBatchSchema)` to create a new message.
  */
-export const StreamLogsAckSchema: GenMessage<StreamLogsAck> = /*@__PURE__*/
+export const LogBatchSchema: GenMessage<LogBatch> = /*@__PURE__*/
   messageDesc(file_agent_v1_agent, 20);
+
+/**
+ * PushLogsAck is the (empty) acknowledgement for a pushed batch.
+ *
+ * @generated from message agent.v1.PushLogsAck
+ */
+export type PushLogsAck = Message<"agent.v1.PushLogsAck"> & {
+};
+
+/**
+ * Describes the message agent.v1.PushLogsAck.
+ * Use `create(PushLogsAckSchema)` to create a new message.
+ */
+export const PushLogsAckSchema: GenMessage<PushLogsAck> = /*@__PURE__*/
+  messageDesc(file_agent_v1_agent, 21);
 
 /**
  * AgentService is the single Connect service the agent talks to.
@@ -804,15 +826,17 @@ export const AgentService: GenService<{
     output: typeof ReportAckSchema;
   },
   /**
-   * StreamLogs is the request-driven live-log DATA channel: while a browser is watching a container, the
-   * agent tails it and streams lines up. Open only while tailing (started/stopped via a Subscribe Command).
+   * PushLogs is the request-driven live-log DATA channel: while a browser is watching a container, the
+   * agent tails it and POSTs batches of lines. Unary (NOT client-streaming) on purpose — Cloudflare buffers
+   * request bodies, so a streamed upload never reaches the origin live; a unary batch does. Started/stopped
+   * via a Subscribe Command; the agent flushes a batch every ~250ms or when it fills up.
    *
-   * @generated from rpc agent.v1.AgentService.StreamLogs
+   * @generated from rpc agent.v1.AgentService.PushLogs
    */
-  streamLogs: {
-    methodKind: "client_streaming";
-    input: typeof LogLineSchema;
-    output: typeof StreamLogsAckSchema;
+  pushLogs: {
+    methodKind: "unary";
+    input: typeof LogBatchSchema;
+    output: typeof PushLogsAckSchema;
   },
 }> = /*@__PURE__*/
   serviceDesc(file_agent_v1_agent, 0);
