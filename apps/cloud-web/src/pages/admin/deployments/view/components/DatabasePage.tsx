@@ -1,4 +1,4 @@
-import { useAgentStatus, useDeployment, useUpdateDeployment } from '@hooks/admin/deployments';
+import { useDeployment, useUpdateDeployment } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { DetailField } from '@vritti/quantum-ui/DetailField';
@@ -12,6 +12,7 @@ import { z, zodNumericField, zodResolver } from '@vritti/quantum-ui/zod';
 import { Activity, Database } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import {
   COMPONENT_MODE_OPTIONS,
   COMPONENT_MODE_VALUES,
@@ -19,6 +20,7 @@ import {
   servicesForComponent,
 } from '@/schemas/admin/deployments';
 import { EditableConfigCard } from '../../components/EditableConfigCard';
+import { LogStream } from './LogStream';
 import { ServicesTable } from './ServicesTable';
 
 const databaseFormSchema = z.object({
@@ -34,7 +36,7 @@ type DatabaseFormValues = z.infer<typeof databaseFormSchema>;
 export const DatabasePage = () => {
   const { id } = useSlugParams('deploymentSlug');
   const { data: deployment } = useDeployment(id);
-  const { data: agent } = useAgentStatus(id);
+  const agent = useDeploymentAgent();
   const [editing, setEditing] = useState(false);
 
   const database = deployment.spec.components.database;
@@ -76,6 +78,7 @@ export const DatabasePage = () => {
   });
 
   const services = servicesForComponent(agent.services, 'database');
+  const logTargets = services.map((s) => ({ value: s.service, label: s.service }));
 
   const view =
     database?.mode === 'managed' ? (
@@ -172,6 +175,16 @@ export const DatabasePage = () => {
           <ServicesTable services={services} />
         </CardContent>
       </Card>
+
+      {logTargets.length > 0 && (
+        <LogStream
+          deploymentId={id}
+          targets={logTargets}
+          connected={agent.connected}
+          title="Database logs"
+          description="Tail the Postgres container in real time."
+        />
+      )}
     </div>
   );
 };

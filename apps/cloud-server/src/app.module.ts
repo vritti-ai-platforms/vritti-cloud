@@ -120,7 +120,7 @@ import { ServicesModule } from './services/services.module';
     BusinessModule,
     DataTableModule.forRoot({ tableViews: schema.tableViews }),
     CloudDeploymentModule,
-    // Agent API module (top-level /agent, Ed25519 request auth)
+    // Agent API module — Connect service mounted on Fastify in main.ts (not Nest-routed), Ed25519 auth
     AgentModule,
     // Admin API modules
     AdminVersionModule,
@@ -140,7 +140,7 @@ import { ServicesModule } from './services/services.module';
       },
       {
         path: '',
-        children: [AuthModule, OnboardingModule, AccountModule, AgentModule],
+        children: [AuthModule, OnboardingModule, AccountModule],
       },
       {
         path: 'admin-api',

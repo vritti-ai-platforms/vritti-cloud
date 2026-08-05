@@ -299,6 +299,8 @@ export interface AcmeDelegation {
 
 export interface AgentStatus {
   deploymentId: string;
+  // Whether the agent currently has a live connection to cloud (drives the "agent offline" UI)
+  connected: boolean;
   enrolled: boolean;
   status: AgentEnrollmentStatus | null;
   agentVersion: string | null;
@@ -311,6 +313,14 @@ export interface AgentStatus {
   host: HostMetrics | null;
   certificates: Certificate[];
   delegation: AcmeDelegation | null;
+}
+
+// One tailed container log line streamed to the browser over the logs SSE stream.
+export interface LogLine {
+  target: string; // "agent" or a service name
+  stream: string; // stdout | stderr
+  ts: string;
+  line: string;
 }
 
 // A newest-first page of a deployment's event timeline plus the cursor for the next (older) page.

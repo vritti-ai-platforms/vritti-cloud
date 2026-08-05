@@ -4,6 +4,42 @@ export const ENROLL_TOKEN_TTL_MS = 60 * 60 * 1000;
 // Allowed clock skew (seconds) between the agent's X-Vritti-Timestamp and the server clock — replay window guard
 export const AGENT_TIMESTAMP_SKEW_SECONDS = 300;
 
+// Internal event fired (payload: deploymentId) whenever a deployment's desired-state may have changed — an
+// open agent Subscribe stream listens and immediately re-evaluates/pushes the signed desired-state.
+export const DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT = 'deployment.desired-state.changed';
+
+// Internal event fired (payload: { agent, report }) after the agent reports status — the admin SSE stream
+// listens and relays the just-reported status to any watching browser (live cockpit, no DB re-read).
+export const DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT = 'deployment.agent.status-changed';
+
+// Internal event fired (payload: { deploymentId, connected }) when the agent's Subscribe stream opens or
+// closes — the admin SSE stream relays it so the cockpit shows "agent offline" the moment it disconnects.
+export const DEPLOYMENT_AGENT_CONNECTIVITY_CHANGED_EVENT = 'deployment.agent.connectivity-changed';
+
+// Internal event fired (payload: deploymentId) to ask a connected agent to report its status NOW (no
+// reconcile) — emitted when a browser opens the cockpit so first paint is direct from the agent, not the DB.
+export const DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT = 'deployment.agent.request-status';
+
+// Grace window (ms) before a dropped Subscribe stream is reported as offline — absorbs the agent's brief
+// reconnect backoff so the cockpit doesn't flap "offline" on a routine reconnect.
+export const AGENT_DISCONNECT_GRACE_MS = 6_000;
+
+// Live-log events. START/STOP (payload: { deploymentId, target, tailLines? }) are emitted by the logs SSE
+// relay on the first/last browser watching a container's logs; the Subscribe handler turns them into
+// StartLogs/StopLogs commands. LINE (payload: { deploymentId, target, stream, ts, line }) is emitted by the
+// agent's StreamLogs handler per tailed line; the logs relay fans it out to watching browsers.
+export const DEPLOYMENT_AGENT_START_LOGS_EVENT = 'deployment.agent.start-logs';
+export const DEPLOYMENT_AGENT_STOP_LOGS_EVENT = 'deployment.agent.stop-logs';
+export const DEPLOYMENT_AGENT_LOG_LINE_EVENT = 'deployment.agent.log-line';
+
+// Initial backlog + ring-buffer size for a container's live log tail (lines).
+export const AGENT_LOG_TAIL_LINES = 500;
+
+// Keepalive/backstop cadence for the agent Subscribe stream. A frame is sent at least this often so
+// Cloudflare's ~100s idle timeout never closes an idle stream; it also re-evaluates the desired-state,
+// so a missed change event is still delivered within this window (belt-and-suspenders with the event).
+export const AGENT_SUBSCRIBE_KEEPALIVE_MS = 30_000;
+
 // Default pinned stack images for a managed deployment — overridable per key via AGENT_IMAGE_* env
 export const DEFAULT_STACK_IMAGES = {
   coreServer: 'ghcr.io/vritti-ai-platforms/core-server:latest-main',

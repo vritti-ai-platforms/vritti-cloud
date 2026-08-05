@@ -6,6 +6,9 @@ import { OrganizationMemberDomainModule } from '@domain/organization-member/orga
 import { Module } from '@nestjs/common';
 import { CoreServerModule } from '@/modules/core-server/core-server.module';
 import { DeploymentAgentController } from './agent/controllers/deployment-agent.controller';
+import { DeploymentAgentSseListener } from './agent/listeners/deployment-agent-sse.listener';
+import { DeploymentAgentLogsService } from './agent/services/deployment-agent-logs.service';
+import { DeploymentAgentSseService } from './agent/services/deployment-agent-sse.service';
 import { DeploymentController } from './controllers/deployment.controller';
 import { OrganizationController } from './organization/controllers/organization.controller';
 import { OrganizationMemberController } from './organization/member/controllers/organization-member.controller';
@@ -20,5 +23,6 @@ import { OrganizationMemberController } from './organization/member/controllers/
     CoreServerModule,
   ],
   controllers: [DeploymentController, DeploymentAgentController, OrganizationController, OrganizationMemberController],
+  providers: [DeploymentAgentSseService, DeploymentAgentSseListener, DeploymentAgentLogsService],
 })
 export class AdminDeploymentModule {}

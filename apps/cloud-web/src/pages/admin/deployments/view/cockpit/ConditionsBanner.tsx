@@ -39,8 +39,19 @@ interface ConditionsBannerProps {
 }
 
 // The cockpit's top-line reconcile status, driven by the agent's conditions. Blocked/Degraded surface
-// their message so operators no longer SSH in to read the reason.
+// their message so operators no longer SSH in to read the reason. When the agent isn't connected, live
+// status is unavailable — surface that first.
 export const ConditionsBanner: React.FC<ConditionsBannerProps> = ({ agent }) => {
+  if (!agent.connected) {
+    return (
+      <Alert
+        variant="destructive"
+        title="Agent offline"
+        description="The deployment agent isn't connected to cloud. Live status resumes when it reconnects."
+      />
+    );
+  }
+
   const condition = primaryCondition(agent);
   if (!condition) {
     return <Alert variant="info" title="Waiting for the agent" description="No reconcile status reported yet." />;

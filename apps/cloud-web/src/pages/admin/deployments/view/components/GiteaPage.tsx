@@ -1,4 +1,4 @@
-import { useAgentStatus, useDeployment, useUpdateDeployment } from '@hooks/admin/deployments';
+import { useDeployment, useUpdateDeployment } from '@hooks/admin/deployments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { DetailField } from '@vritti/quantum-ui/DetailField';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
@@ -6,7 +6,9 @@ import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { CompactSwitch } from '@vritti/quantum-ui/Switch';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { Activity, GitBranch } from 'lucide-react';
+import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import { servicesForComponent } from '@/schemas/admin/deployments';
+import { LogStream } from './LogStream';
 import { ServicesTable } from './ServicesTable';
 
 function giteaHost(url: string): string {
@@ -22,10 +24,11 @@ function giteaHost(url: string): string {
 export const GiteaPage = () => {
   const { id } = useSlugParams('deploymentSlug');
   const { data: deployment } = useDeployment(id);
-  const { data: agent } = useAgentStatus(id);
+  const agent = useDeploymentAgent();
 
   const enabled = !!deployment.spec.components.gitea?.enabled;
   const services = servicesForComponent(agent.services, 'gitea');
+  const logTargets = services.map((s) => ({ value: s.service, label: s.service }));
   const host = giteaHost(deployment.url);
 
   const mutation = useUpdateDeployment();
@@ -87,6 +90,16 @@ export const GiteaPage = () => {
             <ServicesTable services={services} emptyText="Provisioning — the gitea service will appear here shortly." />
           </CardContent>
         </Card>
+      )}
+
+      {enabled && logTargets.length > 0 && (
+        <LogStream
+          deploymentId={id}
+          targets={logTargets}
+          connected={agent.connected}
+          title="Gitea logs"
+          description="Tail the Gitea container in real time."
+        />
       )}
     </div>
   );

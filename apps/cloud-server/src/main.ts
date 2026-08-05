@@ -1,5 +1,6 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { fastifyConnectPlugin } from '@connectrpc/connect-fastify';
 import fastifyCookie from '@fastify/cookie';
 import fastifyCsrfProtection from '@fastify/csrf-protection';
 import fastifyMultipart from '@fastify/multipart';
@@ -14,6 +15,7 @@ import { CorrelationIdMiddleware, HttpLoggerInterceptor, LoggerService } from '@
 import type { ValidationError } from 'class-validator';
 import fastifyRawBody from 'fastify-raw-body';
 import { AppModule } from './app.module';
+import { AgentConnectService } from './modules/agent-api/connect/agent-connect.service';
 
 const ENV = {
   nodeEnv: process.env.NODE_ENV,
@@ -112,14 +114,24 @@ async function bootstrap() {
     secret: configService.getOrThrow<string>('COOKIE_SECRET'),
   });
 
-  // Register raw body plugin for webhook signature validation (rawBody needed for webhooks + agent Ed25519 verification)
+  // Register raw body plugin for webhook signature validation (rawBody needed for webhook HMAC checks).
+  // The agent no longer uses raw-body signatures — it talks Connect (agent.v1.AgentService), whose auth
+  // signs `<ts>.<deploymentId>` (see the Connect interceptor), not the request body.
   await app.register(fastifyRawBody, {
     field: 'rawBody',
     global: false,
     encoding: 'utf8',
     runFirst: true, // Run before other hooks
-    // Opt-in routes whose Ed25519 signature is verified over the exact raw body (GET is auto-skipped by the plugin)
-    routes: ['/agent/enroll', '/agent/deployments/:id/status'],
+    routes: [],
+  });
+
+  // Mount the agent Connect (gRPC-compatible) service on the existing Fastify instance — same port, behind
+  // proxied api.<base>. Server-streaming (Subscribe) rides HTTP/1.1, so it works through Cloudflare (which
+  // does not reliably proxy raw gRPC bidi). The auth interceptor verifies the agent's Ed25519 signature.
+  const agentConnect = app.get(AgentConnectService);
+  await app.register(fastifyConnectPlugin, {
+    routes: (router) => agentConnect.registerRoutes(router),
+    interceptors: [agentConnect.authInterceptor()],
   });
 
   // Register multipart support for file uploads

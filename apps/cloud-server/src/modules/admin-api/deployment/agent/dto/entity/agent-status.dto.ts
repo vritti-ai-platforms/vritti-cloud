@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import type { DeploymentAgent, DeploymentAgentStatus, DeploymentCertificate } from '@/db/schema';
+import type { DeploymentAgent, DeploymentAgentStatus } from '@/db/schema';
 import { DeploymentAgentStatusValues } from '@/db/schema';
 
 // One tracked certificate for the deployment (expiry surfaced to the admin console)
@@ -99,10 +99,15 @@ export class AgentAcmeDelegationDto {
   serverIp: string;
 }
 
-// Agent status for the admin console / connect polling
+// Seed agent status for the initial cockpit fetch: config + enrollment + live connectivity. The live
+// heartbeat fields (conditions/services/host/certificates/delegation/lastGeneration/lastHeartbeatAt) are
+// empty here and arrive over SSE — cloud does not store agent status, it relays it.
 export class AgentStatusDto {
   @ApiProperty({ example: '550e8400-e29b-41d4-a716-446655440000' })
   deploymentId: string;
+
+  @ApiProperty({ description: 'Whether the agent currently has a live connection to cloud', example: true })
+  connected: boolean;
 
   @ApiProperty({ description: 'Whether an agent has enrolled', example: true })
   enrolled: boolean;
@@ -144,32 +149,30 @@ export class AgentStatusDto {
   })
   delegation: AgentAcmeDelegationDto | null;
 
-  // Maps an agent row (may be absent) plus deployment desired-generation, public key, and tracked certs to the API shape
+  // Builds the seed from the deployment config + enrollment row + live connectivity. Live heartbeat fields
+  // start empty — the SSE stream fills them (and cloud never persisted them).
   static from(
     deploymentId: string,
     agent: DeploymentAgent | undefined,
     desiredGeneration: number,
     deploymentPubKey: string | null,
-    certificates: DeploymentCertificate[],
+    connected: boolean,
   ): AgentStatusDto {
     const dto = new AgentStatusDto();
     dto.deploymentId = deploymentId;
+    dto.connected = connected;
     dto.enrolled = agent?.status === 'enrolled';
     dto.status = agent?.status ?? null;
     dto.agentVersion = agent?.agentVersion ?? null;
-    dto.lastHeartbeatAt = agent?.lastHeartbeatAt ?? null;
-    dto.lastGeneration = agent?.lastGeneration ?? null;
+    dto.lastHeartbeatAt = null;
+    dto.lastGeneration = null;
     dto.desiredGeneration = desiredGeneration;
     dto.deploymentPubKey = deploymentPubKey;
-    dto.conditions = agent?.conditions ?? [];
-    dto.services = agent?.services ?? [];
-    dto.host = agent?.host ?? null;
-    dto.certificates = certificates.map((cert) => ({
-      host: cert.host,
-      notAfter: cert.notAfter,
-      issuedAt: cert.issuedAt,
-    }));
-    dto.delegation = agent?.delegation ?? null;
+    dto.conditions = [];
+    dto.services = [];
+    dto.host = null;
+    dto.certificates = [];
+    dto.delegation = null;
     return dto;
   }
 }

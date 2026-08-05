@@ -1,0 +1,10 @@
+# connect-es v2 codegen. A single plugin (@bufbuild/protoc-gen-es) emits both the message types and
+# the service descriptor — the server router (fastifyConnectPlugin) and any client are built from that
+# descriptor via connect-es v2 (no separate protoc-gen-connect-es). Output lands in src/gen/.
+# buf resolves the protoc-gen-es plugin from node_modules/.bin (pnpm puts it on PATH for the script).
+version: v2
+plugins:
+  - local: protoc-gen-es
+    out: src/gen
+    opt:
+      - target=ts

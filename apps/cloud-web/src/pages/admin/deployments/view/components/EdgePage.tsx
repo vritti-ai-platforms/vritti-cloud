@@ -1,4 +1,4 @@
-import { useAgentStatus, useDeployment, useUpdateDeployment } from '@hooks/admin/deployments';
+import { useDeployment, useUpdateDeployment } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { DateTimeCell, StringCell } from '@vritti/quantum-ui/DataTable';
@@ -12,6 +12,7 @@ import { z, zodResolver } from '@vritti/quantum-ui/zod';
 import { Activity, Lock, ScrollText } from 'lucide-react';
 import { useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
+import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import {
   COMPONENT_MODE_OPTIONS,
   COMPONENT_MODE_VALUES,
@@ -19,6 +20,7 @@ import {
   servicesForComponent,
 } from '@/schemas/admin/deployments';
 import { EditableConfigCard } from '../../components/EditableConfigCard';
+import { LogStream } from './LogStream';
 import { ServicesTable } from './ServicesTable';
 
 const EXPIRY_WARNING_DAYS = 21;
@@ -52,7 +54,7 @@ type EdgeFormValues = z.infer<typeof edgeFormSchema>;
 export const EdgePage = () => {
   const { id } = useSlugParams('deploymentSlug');
   const { data: deployment } = useDeployment(id);
-  const { data: agent } = useAgentStatus(id);
+  const agent = useDeploymentAgent();
   const [editing, setEditing] = useState(false);
 
   const edge = deployment.spec.components.edge;
@@ -81,6 +83,7 @@ export const EdgePage = () => {
   });
 
   const services = servicesForComponent(agent.services, 'edge');
+  const logTargets = services.map((s) => ({ value: s.service, label: s.service }));
 
   const view = (
     <div className="space-y-4">
@@ -229,6 +232,16 @@ export const EdgePage = () => {
           <ServicesTable services={services} />
         </CardContent>
       </Card>
+
+      {logTargets.length > 0 && (
+        <LogStream
+          deploymentId={id}
+          targets={logTargets}
+          connected={agent.connected}
+          title="Edge logs"
+          description="Tail the nginx / acme-dns containers in real time."
+        />
+      )}
     </div>
   );
 };

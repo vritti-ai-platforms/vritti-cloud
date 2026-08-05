@@ -3,12 +3,21 @@ import {
   createDecipheriv,
   createHash,
   createHmac,
+  createPrivateKey,
+  createPublicKey,
   randomBytes,
+  sign,
   timingSafeEqual,
+  verify,
 } from 'node:crypto';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import sodium from 'libsodium-wrappers';
+
+// Fixed 12-byte SPKI DER prefix that precedes a 32-byte raw Ed25519 public key
+const ED25519_SPKI_PREFIX = Buffer.from('302a300506032b6570032100', 'hex');
+const RAW_ED25519_PUBLIC_KEY_SIZE = 32;
 
 @Injectable()
 export class CryptoService {
@@ -124,5 +133,50 @@ export class CryptoService {
   private generateHexCode(): string {
     const hex = randomBytes(3).toString('hex').toUpperCase();
     return `VER${hex}`;
+  }
+
+  // ==========================================================================
+  // Ed25519 / anonymous-seal primitives (raw byte-level crypto; domain-neutral)
+  // ==========================================================================
+
+  // Converts a base64 SPKI-DER Ed25519 public key (api-sdk key format) to the raw 32-byte key, base64-std
+  ed25519SpkiToRaw(spkiDerBase64: string): string {
+    const der = Buffer.from(spkiDerBase64, 'base64');
+    return der.subarray(der.length - RAW_ED25519_PUBLIC_KEY_SIZE).toString('base64');
+  }
+
+  // Signs a message with a base64 pkcs8-DER Ed25519 private key, returning a base64-std detached signature (matches Go ed25519.Sign)
+  ed25519Sign(pkcs8DerBase64: string, message: string | Buffer): string {
+    const key = createPrivateKey({ key: Buffer.from(pkcs8DerBase64, 'base64'), format: 'der', type: 'pkcs8' });
+    const msg = typeof message === 'string' ? Buffer.from(message, 'utf8') : message;
+    return sign(null, msg, key).toString('base64');
+  }
+
+  // Verifies a base64-std detached signature over a message against a raw 32-byte Ed25519 public key (base64-std); malformed input ⇒ false
+  ed25519Verify(rawPubBase64: string, message: string | Buffer, signatureBase64: string): boolean {
+    try {
+      const rawPub = Buffer.from(rawPubBase64, 'base64');
+      if (rawPub.length !== RAW_ED25519_PUBLIC_KEY_SIZE) return false;
+      const der = Buffer.concat([ED25519_SPKI_PREFIX, rawPub]);
+      const key = createPublicKey({ key: der, format: 'der', type: 'spki' });
+      const msg = typeof message === 'string' ? Buffer.from(message, 'utf8') : message;
+      return verify(null, msg, key, Buffer.from(signatureBase64, 'base64'));
+    } catch {
+      return false;
+    }
+  }
+
+  // Generates a URL-safe random credential/token (used for bearer credentials and one-time tokens)
+  generateOpaqueToken(bytes = 32): string {
+    return randomBytes(bytes).toString('base64url');
+  }
+
+  // Seals a plaintext to a raw 32-byte X25519 public key (base64) via libsodium crypto_box_seal.
+  // Output = base64-std( ephemeralPub(32) || box ) — opened with nacl/box.OpenAnonymous on the recipient side.
+  async sealAnonymous(plaintext: string, recipientPubKeyB64: string): Promise<string> {
+    await sodium.ready;
+    const recipientPub = sodium.from_base64(recipientPubKeyB64, sodium.base64_variants.ORIGINAL);
+    const sealed = sodium.crypto_box_seal(Buffer.from(plaintext, 'utf8'), recipientPub);
+    return sodium.to_base64(sealed, sodium.base64_variants.ORIGINAL);
   }
 }

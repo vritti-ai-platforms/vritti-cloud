@@ -33,6 +33,38 @@ export function ApiGetAgentStatus() {
   );
 }
 
+export function ApiStreamAgent() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Stream agent status + timeline (SSE)',
+      description:
+        'Server-Sent Events stream for the live cockpit. Emits an `agent-status` event (full agent status) on the initial connect and on every agent heartbeat/transition, and an `agent-event` event (one timeline entry) whenever a new event is appended. Replaces polling — authenticated via the admin session cookie (EventSource cannot send Authorization headers).',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'SSE stream of agent-status / agent-event messages.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
+export function ApiStreamAgentLogs() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Stream a container’s live logs (SSE)',
+      description:
+        'Request-driven Server-Sent Events stream of a container’s logs. `target` is "agent" (the agent’s own container) or a service name (core-server, postgres, nginx, …). The agent tails the container only while at least one browser is watching; each `log-line` event carries { target, stream, ts, line }. Authenticated via the admin session cookie.',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiQuery({
+      name: 'target',
+      required: false,
+      description: 'Container key: "agent" or a service name',
+      example: 'core-server',
+    }),
+    ApiResponse({ status: 200, description: 'SSE stream of log-line messages.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+  );
+}
+
 export function ApiGetAgentEvents() {
   return applyDecorators(
     ApiOperation({

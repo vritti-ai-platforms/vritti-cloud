@@ -1,4 +1,4 @@
-import { useUpdateDeployment } from '@hooks/admin/deployments';
+import { useDeploymentEvents, useUpdateDeployment } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { CopyField } from '@vritti/quantum-ui/CopyField';
 import { DetailField } from '@vritti/quantum-ui/DetailField';
@@ -33,6 +33,8 @@ interface LocalOverviewTabProps {
 // The manual deployment's Overview tab: an editable connection card + the licensing activity timeline.
 export const LocalOverviewTab: React.FC<LocalOverviewTabProps> = ({ deployment }) => {
   const [editing, setEditing] = useState(false);
+  // Local deployments have no agent stream — the licensing timeline is a plain (one-shot) query.
+  const { data: events, isLoading: eventsLoading } = useDeploymentEvents(deployment.id);
 
   const form = useForm<UpdateDeploymentData>({
     resolver: zodResolver(updateDeploymentSchema),
@@ -88,7 +90,8 @@ export const LocalOverviewTab: React.FC<LocalOverviewTabProps> = ({ deployment }
       </EditableConfigCard>
 
       <EventTimeline
-        deploymentId={deployment.id}
+        events={events?.result ?? []}
+        isLoading={eventsLoading}
         title="Licensing activity"
         description="The only events cloud records for a self-hosted deployment."
       />

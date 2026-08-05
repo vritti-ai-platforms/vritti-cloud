@@ -1,3 +1,4 @@
+export { useAgentLogs } from './useAgentLogs';
 export { agentStatusQueryKey, useAgentStatus } from './useAgentStatus';
 export { useCreateDeployment } from './useCreateDeployment';
 export { useDeleteDeployment } from './useDeleteDeployment';

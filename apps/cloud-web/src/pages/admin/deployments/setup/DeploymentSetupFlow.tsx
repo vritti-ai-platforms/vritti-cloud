@@ -1,7 +1,6 @@
 import {
   agentStatusQueryKey,
   deploymentQueryKey,
-  useAgentStatus,
   useDeleteDeployment,
   useIssueEnrollToken,
   useRegenerateSigningKey,
@@ -16,15 +15,14 @@ import { StepProgressIndicator } from '@vritti/quantum-ui/StepProgressIndicator'
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { AgentStatus, Deployment, DeploymentSigningKey, EnrollToken } from '@/schemas/admin/deployments';
+import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
+import type { Deployment, DeploymentSigningKey, EnrollToken } from '@/schemas/admin/deployments';
 import {
-  certIssued,
   deriveManagedStep,
   isReady,
   MANAGED_SETUP_STEPS,
   type ManagedSetupStep,
   needsDns,
-  reconcileError,
   stepNumber,
   toStepDefs,
 } from './setupLifecycle';
@@ -38,15 +36,15 @@ import { SyncStep } from './steps/SyncStep';
 
 interface DeploymentSetupFlowProps {
   deployment: Deployment;
-  // Resolved once by the caller — drives the initial resume step; live updates come from the query below.
-  agent: AgentStatus;
 }
 
-export const DeploymentSetupFlow: React.FC<DeploymentSetupFlowProps> = ({ deployment, agent: initialAgent }) => {
+export const DeploymentSetupFlow: React.FC<DeploymentSetupFlowProps> = ({ deployment }) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const confirm = useConfirm();
-  const [step, setStep] = useState<ManagedSetupStep>(() => deriveManagedStep(deployment, initialAgent));
+  // Live agent status (AgentStreamProvider / SSE) — the setup gates advance the instant the agent reports.
+  const agent = useDeploymentAgent();
+  const [step, setStep] = useState<ManagedSetupStep>(() => deriveManagedStep(deployment, agent));
   const [enrollToken, setEnrollToken] = useState<EnrollToken | null>(null);
   const [signingKey, setSigningKey] = useState<DeploymentSigningKey | null>(null);
 
@@ -61,18 +59,6 @@ export const DeploymentSetupFlow: React.FC<DeploymentSetupFlowProps> = ({ deploy
     });
     if (confirmed) deleteMutation.mutate(deployment.id);
   };
-
-  // Live agent status — polls faster while waiting on the wildcard cert or reconcile so the gates update
-  // promptly.
-  const { data: agent } = useAgentStatus(deployment.id, {
-    refetchInterval: (query) => {
-      const data = query.state.data;
-      if (!data) return 5000;
-      if (step === 'dns' && !certIssued(data)) return 5000;
-      if (step === 'provision' && !isReady(data) && !reconcileError(data)) return 3000;
-      return data.enrolled ? 15000 : 5000;
-    },
-  });
 
   const invalidateAgent = () => queryClient.invalidateQueries({ queryKey: agentStatusQueryKey(deployment.id) });
   const invalidateDeployment = () => queryClient.invalidateQueries({ queryKey: deploymentQueryKey(deployment.id) });
@@ -97,7 +83,7 @@ export const DeploymentSetupFlow: React.FC<DeploymentSetupFlowProps> = ({ deploy
   // every render, so navigating Back to re-enroll doesn't bounce the user forward. A managed edge routes
   // through DNS delegation until its wildcard cert is issued.
   const nextFromConnect: ManagedSetupStep = needsDns(deployment, agent) ? 'dns' : 'provision';
-  const wasEnrolled = useRef(initialAgent.enrolled);
+  const wasEnrolled = useRef(agent.enrolled);
   useEffect(() => {
     if (step === 'connect' && agent.enrolled && !wasEnrolled.current) {
       setStep(nextFromConnect);

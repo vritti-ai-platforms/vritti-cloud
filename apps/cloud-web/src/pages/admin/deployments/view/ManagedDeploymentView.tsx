@@ -1,4 +1,4 @@
-import { useAgentStatus, useDeleteDeployment } from '@hooks/admin/deployments';
+import { useDeleteDeployment } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
@@ -9,7 +9,8 @@ import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { Server } from 'lucide-react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { AgentStatus, Deployment } from '@/schemas/admin/deployments';
+import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
+import type { Deployment } from '@/schemas/admin/deployments';
 import { HostMetricsSummary } from '../components/HostMetricsSummary';
 import { DeploymentCockpit } from './cockpit/DeploymentCockpit';
 import { EditDeploymentDetailsForm } from './EditDeploymentDetailsForm';
@@ -20,26 +21,19 @@ import { SigningKeyTab } from './tabs/SigningKeyTab';
 
 interface ManagedDeploymentViewProps {
   deployment: Deployment;
-  agent: AgentStatus;
   deploymentSlug: string;
   id: string;
 }
 
 // The ready managed deployment: a <Tabs> shell of control-plane surfaces. The four stack components are
 // full-page views drilled from the Overview cockpit, not tabs.
-export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({
-  deployment,
-  agent: initialAgent,
-  deploymentSlug,
-  id,
-}) => {
+export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({ deployment, deploymentSlug, id }) => {
   const navigate = useNavigate();
   const confirm = useConfirm();
   const editDialog = useDialog();
 
-  // Live agent status for the header resource pills + cockpit; poll every 15s.
-  const { data: liveAgent } = useAgentStatus(deployment.id, { refetchInterval: 15000 });
-  const agent = liveAgent ?? initialAgent;
+  // Live agent status for the header resource pills + cockpit — streamed via the AgentStreamProvider (SSE).
+  const agent = useDeploymentAgent();
 
   const deleteMutation = useDeleteDeployment({ onSuccess: () => navigate('/deployments') });
 
@@ -57,7 +51,14 @@ export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({
     <div className="flex flex-col gap-6">
       <PageHeader
         title={deployment.name}
-        titleSlot={<Badge variant="secondary">Managed</Badge>}
+        titleSlot={
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">Managed</Badge>
+            <Badge variant={agent.connected ? 'success' : 'destructive'}>
+              {agent.connected ? 'Online' : 'Offline'}
+            </Badge>
+          </div>
+        }
         description={deployment.tenantType}
         actions={
           <>

@@ -1,4 +1,6 @@
+import { DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT } from '@domain/deployment-agent/deployment-agent.constants';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { CreateResponseDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
@@ -36,7 +38,14 @@ export class DeploymentDomainService {
   constructor(
     private readonly deploymentRepository: DeploymentDomainRepository,
     private readonly cryptoService: CryptoService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
+
+  // Signals that a deployment's desired-state may have changed so any open agent Subscribe stream
+  // re-evaluates and pushes immediately (the stream also re-checks on its keepalive cadence as a backstop).
+  private notifyDesiredStateChanged(deploymentId: string): void {
+    this.eventEmitter.emit(DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT, deploymentId);
+  }
 
   // Returns paginated deployment options for the select component, with optional region and cloud provider filters
   findForSelect(query: DeploymentSelectQueryDto): Promise<SelectQueryResult> {
@@ -175,6 +184,8 @@ export class DeploymentDomainService {
     }
     const { privateKey, publicKey } = generateSigningKeyPair();
     await this.deploymentRepository.update(id, { signingKey: privateKey, signingPublicKey: publicKey });
+    // LICENSE_PUBLIC_KEY rides the desired-state config — the agent needs the new key pushed to it
+    this.notifyDesiredStateChanged(id);
     this.logger.log(`Regenerated signing key for deployment: ${existing.name} (${id})`);
     return {
       success: true,
@@ -217,6 +228,8 @@ export class DeploymentDomainService {
     this.validateSpec(managementType, spec);
     const deployment = await this.deploymentRepository.update(id, { ...columns, spec });
     await this.writeSecretProviderSecrets(id, secretProviderSecrets);
+    // Spec/version/secret-store changed — push the new desired-state to the agent instantly
+    this.notifyDesiredStateChanged(id);
     this.logger.log(`Updated deployment: ${deployment.name} (${deployment.id})`);
     return { success: true, message: `Deployment "${deployment.name}" updated successfully.` };
   }

@@ -9,6 +9,7 @@ import { Navigate, useNavigate } from 'react-router-dom';
 import { VersionScopeProvider } from '@/context/VersionScopeContext';
 import { OnboardingProvider } from '@/providers/OnboardingProvider';
 import './index.css';
+import { AgentStreamProvider } from '@/providers/AgentStreamProvider';
 import { ProfilePage } from './pages/account/profile/ProfilePage';
 import { SecurityPage } from './pages/account/security/SecurityPage';
 import { BillingCyclesPage } from './pages/admin/billing-cycles/BillingCyclesPage';
@@ -198,7 +199,9 @@ export const adminRoutes: RouteObject[] = [
         path: 'deployments/:deploymentSlug/core-stack',
         element: (
           <Suspense fallback={<ComponentPageSkeleton />}>
-            <CoreStackPage />
+            <AgentStreamProvider>
+              <CoreStackPage />
+            </AgentStreamProvider>
           </Suspense>
         ),
       },
@@ -206,7 +209,9 @@ export const adminRoutes: RouteObject[] = [
         path: 'deployments/:deploymentSlug/database',
         element: (
           <Suspense fallback={<ComponentPageSkeleton />}>
-            <DatabasePage />
+            <AgentStreamProvider>
+              <DatabasePage />
+            </AgentStreamProvider>
           </Suspense>
         ),
       },
@@ -214,7 +219,9 @@ export const adminRoutes: RouteObject[] = [
         path: 'deployments/:deploymentSlug/edge',
         element: (
           <Suspense fallback={<ComponentPageSkeleton />}>
-            <EdgePage />
+            <AgentStreamProvider>
+              <EdgePage />
+            </AgentStreamProvider>
           </Suspense>
         ),
       },
@@ -222,7 +229,9 @@ export const adminRoutes: RouteObject[] = [
         path: 'deployments/:deploymentSlug/gitea',
         element: (
           <Suspense fallback={<ComponentPageSkeleton />}>
-            <GiteaPage />
+            <AgentStreamProvider>
+              <GiteaPage />
+            </AgentStreamProvider>
           </Suspense>
         ),
       },

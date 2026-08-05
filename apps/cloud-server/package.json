@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "gen:proto": "buf generate",
     "check": "biome check --write .",
     "format": "biome format --write .",
     "start": "docker compose -f docker-compose.local.yml up -d && infisical run --path=/cloud-server -- nest start",
@@ -37,6 +38,9 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.997.0",
     "@aws-sdk/s3-request-presigner": "^3.997.0",
+    "@bufbuild/protobuf": "2.13.0",
+    "@connectrpc/connect": "2.1.2",
+    "@connectrpc/connect-fastify": "2.1.2",
     "@fastify/cookie": "^11.0.2",
     "@fastify/csrf-protection": "^7.1.0",
     "@fastify/multipart": "^9.4.0",
@@ -70,6 +74,8 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@bufbuild/buf": "1.72.0",
+    "@bufbuild/protoc-gen-es": "2.13.0",
     "@compodoc/compodoc": "^1.1.31",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",

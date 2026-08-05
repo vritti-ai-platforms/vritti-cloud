@@ -1,19 +1,22 @@
-import { useAgentStatus, useDeployment } from '@hooks/admin/deployments';
+import { useDeployment } from '@hooks/admin/deployments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Typography } from '@vritti/quantum-ui/Typography';
 import { Blocks } from 'lucide-react';
+import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import { servicesForComponent } from '@/schemas/admin/deployments';
+import { LogStream } from './LogStream';
 import { ServicesTable } from './ServicesTable';
 
 // Read-only view of the fixed core stack the agent runs, with live per-service health.
 export const CoreStackPage = () => {
   const { id } = useSlugParams('deploymentSlug');
   const { data: deployment } = useDeployment(id);
-  const { data: agent } = useAgentStatus(id);
+  const agent = useDeploymentAgent();
 
   const services = servicesForComponent(agent.services, 'core');
+  const logTargets = services.map((s) => ({ value: s.service, label: s.service }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -42,6 +45,16 @@ export const CoreStackPage = () => {
           </Typography>
         </CardContent>
       </Card>
+
+      {logTargets.length > 0 && (
+        <LogStream
+          deploymentId={id}
+          targets={logTargets}
+          connected={agent.connected}
+          title="Service logs"
+          description="Tail any core service’s container in real time."
+        />
+      )}
     </div>
   );
 };

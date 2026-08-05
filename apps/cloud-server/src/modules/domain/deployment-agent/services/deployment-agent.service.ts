@@ -2,26 +2,21 @@ import { createHash, timingSafeEqual } from 'node:crypto';
 import { DeploymentEventDomainService } from '@domain/deployment-event/services/deployment-event.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import { hashToken } from '@vritti/api-sdk/auth';
 import { CreateResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
-import { canonicalStringify, generateSigningKeyPair } from '@vritti/api-sdk/signing';
-import type { Condition, Deployment, DeploymentAgent, DeploymentCertificate, DeploymentSecret } from '@/db/schema';
+import { canonicalStringify } from '@vritti/api-sdk/signing';
+import type { Deployment, DeploymentAgent, DeploymentSecret } from '@/db/schema';
 import { DeploymentManagementTypeValues } from '@/db/schema';
 import { CryptoService } from '@/services';
-import {
-  generateOpaqueToken,
-  sealToAgent,
-  signEd25519B64,
-  spkiToRawEd25519PubB64,
-  verifyEd25519RawPubB64,
-} from '../agent-crypto.util';
-import { ENROLL_TOKEN_TTL_MS } from '../deployment-agent.constants';
+import { DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT, ENROLL_TOKEN_TTL_MS } from '../deployment-agent.constants';
 import type { EnrollRequestDto } from '../dto/request/enroll-request.dto';
-import type { CertificateReportDto, StatusEventDto, StatusReportDto } from '../dto/request/status-report.dto';
+import type { StatusEventDto, StatusReportDto } from '../dto/request/status-report.dto';
 import { DeploymentAgentDomainRepository } from '../repositories/deployment-agent.repository';
-import { DeploymentCertificateDomainRepository } from '../repositories/deployment-certificate.repository';
 import { DeploymentSecretDomainRepository } from '../repositories/deployment-secret.repository';
+import { AgentConnectivityService } from './agent-connectivity.service';
+import { AgentCryptoService } from './agent-crypto.service';
 import { DesiredStateDomainService } from './desired-state.service';
 
 // Context extracted from the signed agent request (signed message bytes + Ed25519 signature headers)
@@ -49,19 +44,27 @@ export interface EnrollResult {
   nonceSignature: string;
 }
 
-// Raw agent-status pieces (the controller shapes these into the admin AgentStatusDto)
+// Seed agent-status pieces for the initial cockpit fetch (config + enrollment + live connectivity). The
+// live heartbeat data (conditions/services/host/certs/delegation) is NOT here — it streams over SSE.
 export interface AgentStatusData {
   deploymentId: string;
   agent: DeploymentAgent | undefined;
   desiredGeneration: number;
   deploymentPubKey: string | null;
-  certificates: DeploymentCertificate[];
+  connected: boolean;
 }
 
 // Signed desired-state bytes + signature (the controller shapes these into the agent-api SignedDesiredStateDto)
 export interface SignedDesiredState {
   payloadB64: string;
   signature: string;
+}
+
+// Payload of DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT — the resolved agent row + the status it just reported.
+// Carries everything the admin SSE relay needs to push live status to the browser WITHOUT re-reading the DB.
+export interface AgentStatusChangedEvent {
+  agent: DeploymentAgent;
+  report: StatusReportDto;
 }
 
 @Injectable()
@@ -71,11 +74,13 @@ export class DeploymentAgentDomainService {
   constructor(
     private readonly agentRepository: DeploymentAgentDomainRepository,
     private readonly secretRepository: DeploymentSecretDomainRepository,
-    private readonly certificateRepository: DeploymentCertificateDomainRepository,
     private readonly desiredStateService: DesiredStateDomainService,
     private readonly eventService: DeploymentEventDomainService,
     private readonly configService: ConfigService,
     private readonly cryptoService: CryptoService,
+    private readonly agentCrypto: AgentCryptoService,
+    private readonly connectivity: AgentConnectivityService,
+    private readonly eventEmitter: EventEmitter2,
   ) {}
 
   // Issues a one-time enroll token for a managed deployment, ensuring Keypair B exists first (admin)
@@ -88,7 +93,7 @@ export class DeploymentAgentDomainService {
       });
     }
     const { rawPublicKeyB64 } = await this.ensureAgentKeypair(deployment);
-    const token = generateOpaqueToken();
+    const token = this.agentCrypto.generateToken();
     const expiresAt = new Date(Date.now() + ENROLL_TOKEN_TTL_MS);
     await this.agentRepository.replaceWithPending(deploymentId, hashToken(token), expiresAt);
     this.logger.log(`Issued enroll token for deployment ${deploymentId}`);
@@ -101,16 +106,22 @@ export class DeploymentAgentDomainService {
     };
   }
 
-  // Returns raw agent-status pieces for the admin console / connect polling (shaped by the controller)
+  // Seed for the initial cockpit fetch: deployment config + enrollment state + whether the agent is currently
+  // connected. Live status streams over SSE afterward, so this does NOT load heartbeat data.
   async getAgentStatus(deploymentId: string): Promise<AgentStatusData> {
     const deployment = await this.requireDeployment(deploymentId);
     const agent = await this.agentRepository.findByDeploymentId(deploymentId);
-    const certificates = await this.certificateRepository.findByDeploymentId(deploymentId);
     const deploymentPubKey = deployment.agentSigningPublicKey
-      ? spkiToRawEd25519PubB64(deployment.agentSigningPublicKey)
+      ? this.agentCrypto.toWirePublicKey(deployment.agentSigningPublicKey)
       : null;
-    this.logger.log(`Fetched agent status for deployment ${deploymentId}`);
-    return { deploymentId, agent, desiredGeneration: deployment.desiredGeneration, deploymentPubKey, certificates };
+    this.logger.log(`Fetched agent status seed for deployment ${deploymentId}`);
+    return {
+      deploymentId,
+      agent,
+      desiredGeneration: deployment.desiredGeneration,
+      deploymentPubKey,
+      connected: this.connectivity.isConnected(deploymentId),
+    };
   }
 
   // Completes the one-time enrollment handshake: trust-on-first-use signature + enroll token
@@ -119,7 +130,7 @@ export class DeploymentAgentDomainService {
     if (ctx.agentKeyB64 !== dto.signingPubKey || !ctx.signatureB64) {
       throw new UnauthorizedException('Enrollment signature key mismatch.');
     }
-    if (!verifyEd25519RawPubB64(dto.signingPubKey, ctx.rawBody, ctx.signatureB64)) {
+    if (!this.agentCrypto.verifyAgentSignature(dto.signingPubKey, ctx.rawBody, ctx.signatureB64)) {
       throw new UnauthorizedException('Enrollment request signature did not verify.');
     }
 
@@ -130,7 +141,7 @@ export class DeploymentAgentDomainService {
     }
 
     const { privateKey, rawPublicKeyB64 } = await this.ensureAgentKeypair(deployment);
-    const agentCredential = generateOpaqueToken();
+    const agentCredential = this.agentCrypto.generateToken();
     await this.agentRepository.markEnrolled(pending.id, {
       agentSigningPubKey: dto.signingPubKey,
       agentSealingPubKey: dto.sealingPubKey ?? null,
@@ -138,8 +149,8 @@ export class DeploymentAgentDomainService {
       agentCredentialHash: hashToken(agentCredential),
     });
 
-    const nonce = generateOpaqueToken();
-    const nonceSignature = signEd25519B64(privateKey, nonce);
+    const nonce = this.agentCrypto.generateToken();
+    const nonceSignature = this.agentCrypto.signWithDeploymentKey(privateKey, nonce);
     this.logger.log(`Enrolled agent for deployment ${dto.deploymentId} (version ${dto.agentVersion ?? 'unknown'})`);
     return { agentCredential, deploymentPubKey: rawPublicKeyB64, nonce, nonceSignature };
   }
@@ -159,7 +170,7 @@ export class DeploymentAgentDomainService {
     if (!this.credentialMatches(ctx.bearer, agent.agentCredentialHash)) {
       throw new UnauthorizedException('Invalid agent credential.');
     }
-    if (!verifyEd25519RawPubB64(ctx.agentKeyB64, ctx.rawBody, ctx.signatureB64)) {
+    if (!this.agentCrypto.verifyAgentSignature(ctx.agentKeyB64, ctx.rawBody, ctx.signatureB64)) {
       throw new UnauthorizedException('Agent request signature did not verify.');
     }
     return agent;
@@ -196,54 +207,27 @@ export class DeploymentAgentDomainService {
     payload.generation = generation;
 
     const payloadB64 = canonicalStringify(payload);
-    const signature = signEd25519B64(deployment.agentSigningKey, payloadB64);
+    const signature = this.agentCrypto.signWithDeploymentKey(deployment.agentSigningKey, payloadB64);
     return { payloadB64, signature };
   }
 
-  // Records an agent heartbeat (conditions/services/host/delegation), tracks certs, and appends timeline events
+  // Ingests an agent status report. Persists ONLY the append-only event timeline (the agent doesn't retain
+  // event history); live status — conditions, services, host CPU/mem/disk, certs, delegation — is NOT stored,
+  // it streams straight to the browser. Relays the just-reported status to any watching cockpit via SSE.
   async recordStatus(agent: DeploymentAgent, dto: StatusReportDto): Promise<void> {
     // The guard-resolved agent is authoritative — reject a body whose deploymentId disagrees
     if (dto.deploymentId !== agent.deploymentId) {
       throw new BadRequestException('Status report deploymentId does not match the authenticated agent.');
     }
-    // Snapshot the previously stored conditions before overwriting — the transition diff is against these
-    const previousConditions = agent.conditions ?? [];
-    await this.agentRepository.recordHeartbeat(agent.id, {
-      generation: dto.generation,
-      conditions: dto.conditions,
-      services: dto.services,
-      // Latest live snapshot — null clears whole-VM usage when the agent stops reporting it
-      host: dto.host ?? null,
-      // Null clears the stored delegation once the agent stops reporting it (wildcard issued)
-      delegation: dto.delegation ?? null,
-    });
-    await this.recordCertificates(agent.deploymentId, dto.certificates);
-    // A changed/new condition is a control-plane transition worth surfacing on the timeline
-    await this.recordConditionTransitions(agent.deploymentId, dto.generation, previousConditions, dto.conditions);
     // Notable transitions the agent explicitly asked us to record (issuing wildcard, backup complete, …)
     await this.recordReportedEvents(agent.deploymentId, dto.generation, dto.events);
+    // Relay the reported status straight to any watching browser via the admin SSE stream — built from this
+    // payload (agent row + report, both in memory), never a DB re-read. Live cockpit = direct from the agent.
+    this.eventEmitter.emit(DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT, {
+      agent,
+      report: dto,
+    } satisfies AgentStatusChangedEvent);
     this.logger.log(`Recorded status for deployment ${agent.deploymentId} (gen ${dto.generation})`);
-  }
-
-  // Appends a timeline event for each condition that is new or whose status/reason changed since the last heartbeat
-  private async recordConditionTransitions(
-    deploymentId: string,
-    generation: number,
-    previous: Condition[],
-    current: Condition[],
-  ): Promise<void> {
-    const previousByKey = new Map(previous.map((condition) => [this.conditionKey(condition), condition]));
-    for (const condition of current) {
-      const prior = previousByKey.get(this.conditionKey(condition));
-      if (prior && prior.status === condition.status && prior.reason === condition.reason) continue;
-      await this.eventService.append(deploymentId, {
-        generation,
-        level: this.conditionLevel(condition),
-        component: condition.component ?? null,
-        reason: condition.reason,
-        message: condition.message,
-      });
-    }
   }
 
   // Appends each agent-reported event, skipping runs of identical consecutive entries
@@ -268,45 +252,20 @@ export class DeploymentAgentDomainService {
     }
   }
 
-  // Stable identity of a condition for transition diffing — its type scoped to the component it targets
-  private conditionKey(condition: Pick<Condition, 'type' | 'component'>): string {
-    return `${condition.type}:${condition.component ?? ''}`;
-  }
-
-  // Maps a condition to an event severity — Degraded/errors are errors, Blocked is a warning, the rest informational
-  private conditionLevel(condition: Pick<Condition, 'type' | 'reason'>): 'info' | 'warn' | 'error' {
-    if (condition.type === 'Degraded' || /error/i.test(condition.reason)) return 'error';
-    if (condition.type === 'Blocked') return 'warn';
-    return 'info';
-  }
-
-  // Upserts each reported certificate by (deployment, host) — cloud-server is the system of record for expiry
-  private async recordCertificates(deploymentId: string, certificates?: CertificateReportDto[]): Promise<void> {
-    if (!certificates?.length) return;
-    for (const cert of certificates) {
-      await this.certificateRepository.upsertByHost(deploymentId, {
-        host: cert.host,
-        notAfter: new Date(cert.notAfter),
-        issuedAt: new Date(cert.issuedAt),
-      });
-    }
-    this.logger.log(`Tracked ${certificates.length} certificate(s) for deployment ${deploymentId}`);
-  }
-
   // Ensures Keypair B exists on the deployment, generating and persisting it lazily; returns the private + raw public key
   private async ensureAgentKeypair(deployment: Deployment): Promise<{ privateKey: string; rawPublicKeyB64: string }> {
     if (deployment.agentSigningKey && deployment.agentSigningPublicKey) {
       return {
         privateKey: deployment.agentSigningKey,
-        rawPublicKeyB64: spkiToRawEd25519PubB64(deployment.agentSigningPublicKey),
+        rawPublicKeyB64: this.agentCrypto.toWirePublicKey(deployment.agentSigningPublicKey),
       };
     }
-    const { privateKey, publicKey } = generateSigningKeyPair();
+    const { privateKey, publicKey } = this.agentCrypto.generateDeploymentKeypair();
     await this.agentRepository.setAgentSigningKey(deployment.id, privateKey, publicKey);
     deployment.agentSigningKey = privateKey;
     deployment.agentSigningPublicKey = publicKey;
     this.logger.log(`Generated agent signing keypair (Keypair B) for deployment ${deployment.id}`);
-    return { privateKey, rawPublicKeyB64: spkiToRawEd25519PubB64(publicKey) };
+    return { privateKey, rawPublicKeyB64: this.agentCrypto.toWirePublicKey(publicKey) };
   }
 
   // Deterministic per-secret fingerprint (name → updatedAt/createdAt ISO) — excludes the ciphertext so re-sealing never churns the hash
@@ -334,7 +293,7 @@ export class DeploymentAgentDomainService {
     const sealed: Record<string, string> = {};
     for (const secret of secrets) {
       const plaintext = this.cryptoService.decrypt(secret.encryptedValue);
-      sealed[secret.name] = await sealToAgent(plaintext, agent.agentSealingPubKey);
+      sealed[secret.name] = await this.agentCrypto.sealToAgent(plaintext, agent.agentSealingPubKey);
     }
     this.logger.log(`Sealed ${secrets.length} operator secret(s) for deployment ${deployment.id}`);
     return sealed;

@@ -3,6 +3,7 @@ packages:
   - e2e/*
 
 onlyBuiltDependencies:
+  - '@bufbuild/buf'
   - '@compodoc/compodoc'
   - '@nestjs/core'
   - '@scarf/scarf'

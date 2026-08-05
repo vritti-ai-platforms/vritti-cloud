@@ -1,0 +1,12 @@
+# buf module for the vendored agent<->cloud contract. proto/agent/v1/agent.proto is a byte-identical
+# copy of the source of truth in the vritti-application-agent repo — keep them in sync (the header in
+# agent.proto documents the invariants). Regenerate TS with `pnpm gen:proto`.
+version: v2
+modules:
+  - path: proto
+lint:
+  use:
+    - STANDARD
+breaking:
+  use:
+    - FILE

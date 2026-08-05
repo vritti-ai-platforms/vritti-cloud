@@ -1,4 +1,3 @@
-import { useDeploymentEvents } from '@hooks/admin/deployments';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { cn } from '@vritti/quantum-ui/cn';
 import { DateTimeCell } from '@vritti/quantum-ui/DataTable';
@@ -16,20 +15,20 @@ function markerClass(level: string): string {
 }
 
 interface EventTimelineProps {
-  deploymentId: string;
+  events: DeploymentEvent[];
+  isLoading: boolean;
   title?: string;
   description?: string;
 }
 
-// The reconcile / licensing activity feed — from useDeploymentEvents (polled). Replaces SSH-to-read-logs.
+// Presentational reconcile / licensing activity feed. The managed cockpit feeds it live events from the
+// AgentStreamProvider (SSE); the local overview feeds it from the events query. Replaces SSH-to-read-logs.
 export const EventTimeline: React.FC<EventTimelineProps> = ({
-  deploymentId,
+  events,
+  isLoading,
   title = 'Activity',
   description = 'Reconciliation events reported by the agent — no more SSH to read logs.',
 }) => {
-  const { data, isLoading } = useDeploymentEvents(deploymentId);
-  const events: DeploymentEvent[] = data?.result ?? [];
-
   return (
     <Card>
       <CardHeader>

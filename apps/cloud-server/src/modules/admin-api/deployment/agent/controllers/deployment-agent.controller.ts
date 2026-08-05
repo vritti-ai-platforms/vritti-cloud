@@ -1,15 +1,35 @@
 import { DeploymentAgentDomainService } from '@domain/deployment-agent/services/deployment-agent.service';
 import { DeploymentEventDomainService } from '@domain/deployment-event/services/deployment-event.service';
-import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Post, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  type MessageEvent,
+  Param,
+  Post,
+  Query,
+  Sse,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
 import { CreateResponseDto } from '@vritti/api-sdk/database';
+import type { Observable } from 'rxjs';
 import { SessionTypeValues } from '@/db/schema';
-import { ApiGetAgentEvents, ApiGetAgentStatus, ApiIssueEnrollToken } from '../docs/deployment-agent.docs';
+import {
+  ApiGetAgentEvents,
+  ApiGetAgentStatus,
+  ApiIssueEnrollToken,
+  ApiStreamAgent,
+  ApiStreamAgentLogs,
+} from '../docs/deployment-agent.docs';
 import { AgentStatusDto } from '../dto/entity/agent-status.dto';
 import { DeploymentEventDto } from '../dto/entity/deployment-event.dto';
 import { DeploymentEventsResponseDto } from '../dto/response/deployment-events-response.dto';
 import { EnrollTokenDto } from '../dto/response/enroll-token.dto';
+import { DeploymentAgentLogsService } from '../services/deployment-agent-logs.service';
+import { DeploymentAgentSseService } from '../services/deployment-agent-sse.service';
 
 @ApiTags('Admin - Deployment Agents')
 @ApiBearerAuth()
@@ -21,7 +41,25 @@ export class DeploymentAgentController {
   constructor(
     private readonly agentService: DeploymentAgentDomainService,
     private readonly eventService: DeploymentEventDomainService,
+    private readonly sseService: DeploymentAgentSseService,
+    private readonly logsService: DeploymentAgentLogsService,
   ) {}
+
+  // Streams live agent status + timeline + connectivity via SSE (authenticated by the admin session cookie)
+  @Sse('stream')
+  @ApiStreamAgent()
+  streamAgent(@Param('id') id: string): Observable<MessageEvent> {
+    this.logger.log(`SSE /admin-api/deployments/${id}/agent/stream`);
+    return this.sseService.stream(id);
+  }
+
+  // Streams a container's live logs via SSE (target = "agent" or a service name); request-driven
+  @Sse('logs')
+  @ApiStreamAgentLogs()
+  streamAgentLogs(@Param('id') id: string, @Query('target') target?: string): Observable<MessageEvent> {
+    this.logger.log(`SSE /admin-api/deployments/${id}/agent/logs?target=${target ?? 'agent'}`);
+    return this.logsService.stream(id, target || 'agent');
+  }
 
   // Issues a one-time enroll token for the deployment's agent
   @Post('enroll-token')
@@ -43,7 +81,7 @@ export class DeploymentAgentController {
       status.agent,
       status.desiredGeneration,
       status.deploymentPubKey,
-      status.certificates,
+      status.connected,
     );
   }
 

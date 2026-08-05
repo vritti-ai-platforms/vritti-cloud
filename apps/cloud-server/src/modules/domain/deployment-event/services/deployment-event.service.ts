@@ -1,10 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import type { DeploymentEvent } from '@/db/schema';
 import {
   DEPLOYMENT_EVENTS_PAGE_SIZE,
   type DeploymentEventCursor,
   DeploymentEventDomainRepository,
 } from '../repositories/deployment-event.repository';
+
+// Internal event fired (payload: the appended DeploymentEvent row) after a timeline entry is written —
+// the admin SSE stream listens and pushes the new event to any watching browser (live timeline, no poll).
+export const DEPLOYMENT_EVENT_APPENDED_EVENT = 'deployment.event.appended';
 
 // One event to append to a deployment's timeline
 export interface AppendEventInput {
@@ -25,7 +30,10 @@ export interface DeploymentEventPage {
 export class DeploymentEventDomainService {
   private readonly logger = new Logger(DeploymentEventDomainService.name);
 
-  constructor(private readonly eventRepository: DeploymentEventDomainRepository) {}
+  constructor(
+    private readonly eventRepository: DeploymentEventDomainRepository,
+    private readonly eventEmitter: EventEmitter2,
+  ) {}
 
   // Appends one event to the deployment's append-only timeline
   async append(deploymentId: string, input: AppendEventInput): Promise<DeploymentEvent> {
@@ -37,6 +45,8 @@ export class DeploymentEventDomainService {
       reason: input.reason,
       message: input.message,
     });
+    // Push the new timeline entry to any watching browser via the admin SSE stream (live timeline)
+    this.eventEmitter.emit(DEPLOYMENT_EVENT_APPENDED_EVENT, event);
     this.logger.log(`Appended ${input.level} event "${input.reason}" for deployment ${deploymentId}`);
     return event;
   }
