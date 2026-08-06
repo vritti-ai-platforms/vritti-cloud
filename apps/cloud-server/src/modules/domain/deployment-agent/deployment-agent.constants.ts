@@ -20,6 +20,11 @@ export const DEPLOYMENT_AGENT_CONNECTIVITY_CHANGED_EVENT = 'deployment.agent.con
 // reconcile) — emitted when a browser opens the cockpit so first paint is direct from the agent, not the DB.
 export const DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT = 'deployment.agent.request-status';
 
+// Internal event fired (payload: deploymentId) to ask a connected agent to reconcile NOW — clears its backoff
+// window and re-applies the desired state immediately. The Subscribe handler turns it into a ForceRecheck
+// command down the stream; the "Recheck now" admin action emits it (avoids waiting on the 5-min resync).
+export const DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT = 'deployment.agent.force-recheck';
+
 // Grace window (ms) before a dropped Subscribe stream is reported as offline — absorbs the agent's brief
 // reconnect backoff so the cockpit doesn't flap "offline" on a routine reconnect.
 export const AGENT_DISCONNECT_GRACE_MS = 6_000;

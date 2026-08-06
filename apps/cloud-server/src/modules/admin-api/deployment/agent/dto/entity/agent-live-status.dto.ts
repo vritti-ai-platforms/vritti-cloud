@@ -12,8 +12,8 @@ import {
 
 // The live subset of agent status the AGENT reports each heartbeat/transition, relayed STRAIGHT to the
 // browser over SSE (no DB round-trip). The browser merges it onto its initial fetch; the static fields it
-// omits (deploymentId, deploymentPubKey, desiredGeneration) don't change on a heartbeat and come from that
-// initial fetch. Built entirely from the reported StatusReport + the in-memory agent row — no re-read.
+// omits (deploymentId, desiredGeneration) don't change on a heartbeat and come from that initial fetch.
+// Built entirely from the reported StatusReport + the in-memory agent row — no re-read.
 export class AgentLiveStatusDto {
   @ApiPropertyOptional({ enum: DeploymentAgentStatusValues, nullable: true })
   status: DeploymentAgentStatus | null;

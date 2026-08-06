@@ -1,7 +1,23 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
+import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { AgentStatusDto } from '../dto/entity/agent-status.dto';
 import { EnrollTokenDto } from '../dto/response/enroll-token.dto';
+
+export function ApiForceRecheck() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Force the agent to reconcile now',
+      description:
+        'Pushes a ForceRecheck command down the agent’s open stream, clearing its backoff and re-applying the desired state immediately — instead of waiting for the periodic resync. Requires the agent to be online.',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'Recheck requested.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Agent is offline.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Deployment not found.' }),
+  );
+}
 
 export function ApiIssueEnrollToken() {
   return applyDecorators(

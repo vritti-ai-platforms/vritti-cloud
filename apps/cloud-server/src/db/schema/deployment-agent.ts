@@ -33,6 +33,7 @@ export type HostMetrics = {
   memUsedBytes: number;
   diskTotalBytes: number;
   diskUsedBytes: number;
+  diskBreakdown: { name: string; bytes: number }[];
 };
 
 // One-time DNS delegation the operator must add before the wildcard cert can issue (challenge CNAME + acme-dns zone delegation)

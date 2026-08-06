@@ -2,10 +2,11 @@ import { DeploymentAgentDomainService } from '@domain/deployment-agent/services/
 import { Controller, Get, HttpCode, HttpStatus, Logger, type MessageEvent, Param, Post, Sse } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
-import { CreateResponseDto } from '@vritti/api-sdk/database';
+import { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { Observable } from 'rxjs';
 import { SessionTypeValues } from '@/db/schema';
 import {
+  ApiForceRecheck,
   ApiGetAgentStatus,
   ApiIssueEnrollToken,
   ApiStreamAgent,
@@ -54,18 +55,21 @@ export class DeploymentAgentController {
     return this.agentService.issueEnrollToken(id);
   }
 
+  // Asks the connected agent to reconcile immediately (clears backoff), instead of waiting on the resync
+  @Post('recheck')
+  @HttpCode(HttpStatus.OK)
+  @ApiForceRecheck()
+  forceRecheck(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/deployments/${id}/agent/recheck`);
+    return this.agentService.forceRecheck(id);
+  }
+
   // Returns the deployment's agent status
   @Get()
   @ApiGetAgentStatus()
   async getAgentStatus(@Param('id') id: string): Promise<AgentStatusDto> {
     this.logger.log(`GET /admin-api/deployments/${id}/agent`);
     const status = await this.agentService.getAgentStatus(id);
-    return AgentStatusDto.from(
-      status.deploymentId,
-      status.agent,
-      status.desiredGeneration,
-      status.deploymentPubKey,
-      status.connected,
-    );
+    return AgentStatusDto.from(status.deploymentId, status.agent, status.desiredGeneration, status.connected);
   }
 }

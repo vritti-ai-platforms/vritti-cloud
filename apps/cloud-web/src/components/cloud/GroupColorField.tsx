@@ -1,6 +1,6 @@
 import { cn } from '@vritti/quantum-ui/cn';
 import { Ban } from 'lucide-react';
-import { GROUP_COLORS } from '@/pages/cloud/organization/structure/graph/group-colors';
+import { GROUP_COLORS } from '@vritti/quantum-ui/colors';
 
 interface GroupColorFieldProps {
   // name is consumed by the quantum <Form> to wire this field via Controller, then stripped

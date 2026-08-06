@@ -9,7 +9,7 @@ import type {
 } from '@/schemas/cloud/org-structure';
 import { bySortOrder } from '../shared/sort';
 import type { GroupBandData } from './GroupBandNode';
-import { groupColorVar } from './group-colors';
+import { groupColorVar } from '@vritti/quantum-ui/colors';
 import type { LEHeaderData } from './LEHeaderNode';
 import type { LEPanelData, PanelTone } from './LEPanelNode';
 import type { OrgNodeData } from './OrgNodeCard';

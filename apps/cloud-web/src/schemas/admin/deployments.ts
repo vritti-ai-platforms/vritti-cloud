@@ -233,7 +233,6 @@ export interface DeploymentSigningKey {
 export interface EnrollToken {
   token: string;
   expiresAt: string;
-  deploymentPubKey: string;
   cloudApiUrl: string;
 }
 
@@ -278,12 +277,18 @@ export interface DeploymentEvent {
 }
 
 // Latest reported whole-VM resource usage (from the most recent heartbeat).
+export interface DiskUsageEntry {
+  name: string;
+  bytes: number;
+}
+
 export interface HostMetrics {
   cpuPercent: number;
   memTotalBytes: number;
   memUsedBytes: number;
   diskTotalBytes: number;
   diskUsedBytes: number;
+  diskBreakdown: DiskUsageEntry[];
 }
 
 // Pending DNS delegation the operator must add before the wildcard cert can be issued. name/target =
@@ -307,7 +312,6 @@ export interface AgentStatus {
   lastHeartbeatAt: string | null;
   lastGeneration: number | null;
   desiredGeneration: number;
-  deploymentPubKey: string | null;
   conditions: Condition[];
   services: ServiceStatus[];
   host: HostMetrics | null;

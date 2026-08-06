@@ -66,6 +66,17 @@ export class ServiceStatusDto {
   memoryBytes: number;
 }
 
+// One labelled slice of the VM's used disk (matches cloudapi.DiskUsageEntry)
+export class DiskUsageEntryDto {
+  @ApiProperty({ example: 'docker-images' })
+  @IsString()
+  name: string;
+
+  @ApiProperty({ example: 3937000000 })
+  @IsNumber()
+  bytes: number;
+}
+
 // Whole-VM resource usage within a heartbeat (matches cloudapi.HostMetrics)
 export class HostMetricsDto {
   @ApiProperty({ example: 12.4 })
@@ -87,6 +98,12 @@ export class HostMetricsDto {
   @ApiProperty({ example: 16106127360 })
   @IsNumber()
   diskUsedBytes: number;
+
+  @ApiProperty({ type: [DiskUsageEntryDto], description: 'Per-category split of the used disk' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DiskUsageEntryDto)
+  diskBreakdown: DiskUsageEntryDto[];
 }
 
 // One managed-edge certificate the agent currently holds (matches cloudapi.CertificateReport)

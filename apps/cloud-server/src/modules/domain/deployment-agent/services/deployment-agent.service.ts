@@ -4,13 +4,17 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { hashToken } from '@vritti/api-sdk/auth';
-import { CreateResponseDto } from '@vritti/api-sdk/database';
+import { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import { canonicalStringify } from '@vritti/api-sdk/signing';
 import type { Deployment, DeploymentAgent, DeploymentSecret } from '@/db/schema';
 import { DeploymentManagementTypeValues } from '@/db/schema';
 import { CryptoService } from '@/services';
-import { DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT, ENROLL_TOKEN_TTL_MS } from '../deployment-agent.constants';
+import {
+  DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT,
+  DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT,
+  ENROLL_TOKEN_TTL_MS,
+} from '../deployment-agent.constants';
 import type { EnrollRequestDto } from '../dto/request/enroll-request.dto';
 import type { StatusEventDto, StatusReportDto } from '../dto/request/status-report.dto';
 import { DeploymentAgentDomainRepository } from '../repositories/deployment-agent.repository';
@@ -32,7 +36,6 @@ export interface AgentRequestContext {
 export interface EnrollTokenData {
   token: string;
   expiresAt: Date;
-  deploymentPubKey: string;
   cloudApiUrl: string;
 }
 
@@ -50,7 +53,6 @@ export interface AgentStatusData {
   deploymentId: string;
   agent: DeploymentAgent | undefined;
   desiredGeneration: number;
-  deploymentPubKey: string | null;
   connected: boolean;
 }
 
@@ -92,7 +94,8 @@ export class DeploymentAgentDomainService {
         detail: 'Enroll tokens can only be issued for managed deployments.',
       });
     }
-    const { rawPublicKeyB64 } = await this.ensureAgentKeypair(deployment);
+    // Ensure the deployment signing keypair (Keypair B) exists so cloud can sign desired-states for the agent.
+    await this.ensureAgentKeypair(deployment);
     const token = this.agentCrypto.generateToken();
     const expiresAt = new Date(Date.now() + ENROLL_TOKEN_TTL_MS);
     await this.agentRepository.replaceWithPending(deploymentId, hashToken(token), expiresAt);
@@ -102,7 +105,7 @@ export class DeploymentAgentDomainService {
     return {
       success: true,
       message: 'Enroll token issued. Copy it now — it is shown only once.',
-      data: { token, expiresAt, deploymentPubKey: rawPublicKeyB64, cloudApiUrl },
+      data: { token, expiresAt, cloudApiUrl },
     };
   }
 
@@ -111,17 +114,26 @@ export class DeploymentAgentDomainService {
   async getAgentStatus(deploymentId: string): Promise<AgentStatusData> {
     const deployment = await this.requireDeployment(deploymentId);
     const agent = await this.agentRepository.findByDeploymentId(deploymentId);
-    const deploymentPubKey = deployment.agentSigningPublicKey
-      ? this.agentCrypto.toWirePublicKey(deployment.agentSigningPublicKey)
-      : null;
     this.logger.log(`Fetched agent status seed for deployment ${deploymentId}`);
     return {
       deploymentId,
       agent,
       desiredGeneration: deployment.desiredGeneration,
-      deploymentPubKey,
       connected: this.connectivity.isConnected(deploymentId),
     };
+  }
+
+  // Asks the connected agent to reconcile immediately — clears its backoff window and re-applies the desired
+  // state now, instead of waiting on the 5-min resync. Pushed as a ForceRecheck command over the open Subscribe
+  // stream; only meaningful while the agent is connected.
+  async forceRecheck(deploymentId: string): Promise<SuccessResponseDto> {
+    await this.requireDeployment(deploymentId);
+    if (!this.connectivity.isConnected(deploymentId)) {
+      throw new BadRequestException('The agent is offline. It will reconcile on its own once it reconnects.');
+    }
+    this.eventEmitter.emit(DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT, deploymentId);
+    this.logger.log(`Requested force-recheck for deployment ${deploymentId}`);
+    return { success: true, message: 'Recheck requested — the agent is reconciling now.' };
   }
 
   // Completes the one-time enrollment handshake: trust-on-first-use signature + enroll token

@@ -2,6 +2,7 @@ import type { MessageInitShape } from '@bufbuild/protobuf';
 import { Code, ConnectError, type ConnectRouter, type HandlerContext, type Interceptor } from '@connectrpc/connect';
 import {
   AGENT_SUBSCRIBE_KEEPALIVE_MS,
+  DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT,
   DEPLOYMENT_AGENT_LOG_LINE_EVENT,
   DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT,
   DEPLOYMENT_AGENT_START_LOGS_EVENT,
@@ -141,6 +142,10 @@ export class AgentConnectService {
       if (id === deploymentId)
         push({ msg: { case: 'command', value: { kind: { case: 'requestStatus', value: {} } } } });
     };
+    const onForceRecheck = (id: string): void => {
+      if (id === deploymentId)
+        push({ msg: { case: 'command', value: { kind: { case: 'forceRecheck', value: {} } } } });
+    };
     const onStartLogs = (p: { deploymentId: string; target: string; tailLines?: number }): void => {
       if (p.deploymentId !== deploymentId) return;
       push({
@@ -164,6 +169,7 @@ export class AgentConnectService {
 
     this.eventEmitter.on(DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT, onChange);
     this.eventEmitter.on(DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT, onRequestStatus);
+    this.eventEmitter.on(DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT, onForceRecheck);
     this.eventEmitter.on(DEPLOYMENT_AGENT_START_LOGS_EVENT, onStartLogs);
     this.eventEmitter.on(DEPLOYMENT_AGENT_STOP_LOGS_EVENT, onStopLogs);
     ctx.signal.addEventListener('abort', onAbort, { once: true });
@@ -187,6 +193,7 @@ export class AgentConnectService {
       clearInterval(keepalive);
       this.eventEmitter.off(DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT, onChange);
       this.eventEmitter.off(DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT, onRequestStatus);
+      this.eventEmitter.off(DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT, onForceRecheck);
       this.eventEmitter.off(DEPLOYMENT_AGENT_START_LOGS_EVENT, onStartLogs);
       this.eventEmitter.off(DEPLOYMENT_AGENT_STOP_LOGS_EVENT, onStopLogs);
       ctx.signal.removeEventListener('abort', onAbort);
@@ -300,6 +307,7 @@ function toStatusReportDto(req: StatusReport): StatusReportDto {
           memUsedBytes: Number(req.host.memUsedBytes),
           diskTotalBytes: Number(req.host.diskTotalBytes),
           diskUsedBytes: Number(req.host.diskUsedBytes),
+          diskBreakdown: req.host.diskBreakdown.map((e) => ({ name: e.name, bytes: Number(e.bytes) })),
         }
       : null,
     certificates,

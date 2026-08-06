@@ -1,15 +1,25 @@
-import { agentStatusQueryKey, useIssueEnrollToken } from '@hooks/admin/deployments';
+import { agentStatusQueryKey, useForceRecheckAgent, useIssueEnrollToken } from '@hooks/admin/deployments';
 import { useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
-import { CopyField } from '@vritti/quantum-ui/CopyField';
 import { cn } from '@vritti/quantum-ui/cn';
 import { DateTimeCell } from '@vritti/quantum-ui/DataTable';
 import { DetailField } from '@vritti/quantum-ui/DetailField';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { Typography } from '@vritti/quantum-ui/Typography';
-import { Activity, KeyRound, type LucideIcon, Pencil, Radio, RefreshCw, Tag, Wifi, WifiOff } from 'lucide-react';
+import {
+  Activity,
+  KeyRound,
+  type LucideIcon,
+  Pencil,
+  Radio,
+  RefreshCw,
+  RotateCw,
+  Tag,
+  Wifi,
+  WifiOff,
+} from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { type AgentStatus, type Deployment, type EnrollToken, SECRET_AUTH_METHODS } from '@/schemas/admin/deployments';
@@ -74,6 +84,8 @@ export const AgentTab: React.FC<AgentTabProps> = ({ deployment, agent }) => {
     },
   });
 
+  const recheckMutation = useForceRecheckAgent();
+
   const handleRegenerate = async () => {
     const confirmed = await confirm({
       title: 'Regenerate enroll token?',
@@ -89,6 +101,25 @@ export const AgentTab: React.FC<AgentTabProps> = ({ deployment, agent }) => {
 
   return (
     <div className="flex flex-col gap-6">
+      {/* Runtime header + reconcile action */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="space-y-0.5">
+          <h3 className="text-sm font-medium">Runtime</h3>
+          <p className="text-xs text-muted-foreground">Live connection and reconciliation status.</p>
+        </div>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => recheckMutation.mutate(deployment.id)}
+          disabled={!agent.connected}
+          isLoading={recheckMutation.isPending}
+          loadingText="Rechecking..."
+          startAdornment={<RotateCw className="size-4" />}
+        >
+          Recheck now
+        </Button>
+      </div>
+
       {/* At-a-glance status strip */}
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <StatTile
@@ -142,8 +173,6 @@ export const AgentTab: React.FC<AgentTabProps> = ({ deployment, agent }) => {
             <DetailField label="Agent Version" type="string" value={agent.agentVersion} mono />
             <DetailField label="Last Heartbeat" type="dateTime" value={agent.lastHeartbeatAt} />
           </div>
-
-          {agent.deploymentPubKey && <CopyField label="Deployment public key" value={agent.deploymentPubKey} mono />}
 
           {enrollToken && (
             <div className="border-t pt-6">

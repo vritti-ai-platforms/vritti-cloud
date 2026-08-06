@@ -56,6 +56,13 @@ export function issueEnrollToken(id: string): Promise<CreateResponse<EnrollToken
   return axios.post<CreateResponse<EnrollToken>>(`admin-api/deployments/${id}/agent/enroll-token`).then((r) => r.data);
 }
 
+// Asks the connected agent to reconcile immediately (clears backoff) instead of waiting on the resync
+export function forceRecheckAgent(id: string): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(`admin-api/deployments/${id}/agent/recheck`, undefined, { showSuccessToast: false })
+    .then((r) => r.data);
+}
+
 // Fetches the live agent connection and reconciliation status for a deployment
 export function getAgentStatus(id: string): Promise<AgentStatus> {
   return axios.get<AgentStatus>(`admin-api/deployments/${id}/agent`).then((r) => r.data);

@@ -59,6 +59,15 @@ export class AgentServiceStatusDto {
   memoryBytes: number;
 }
 
+// One labelled slice of the VM's used disk in the breakdown
+export class AgentDiskUsageDto {
+  @ApiProperty({ example: 'docker-images' })
+  name: string;
+
+  @ApiProperty({ example: 3937000000 })
+  bytes: number;
+}
+
 // Whole-VM resource usage from the most recent heartbeat
 export class AgentHostMetricsDto {
   @ApiProperty({ example: 12.4 })
@@ -75,6 +84,9 @@ export class AgentHostMetricsDto {
 
   @ApiProperty({ example: 16106127360 })
   diskUsedBytes: number;
+
+  @ApiProperty({ type: [AgentDiskUsageDto], description: 'Per-category split of the used disk' })
+  diskBreakdown: AgentDiskUsageDto[];
 }
 
 // Pending DNS delegation the operator must add before the wildcard cert can be issued: the challenge
@@ -127,9 +139,6 @@ export class AgentStatusDto {
   @ApiProperty({ description: 'Current desired-state generation the cloud has built', example: 3 })
   desiredGeneration: number;
 
-  @ApiPropertyOptional({ nullable: true, description: 'Deployment public key (base64 raw 32-byte Ed25519, Keypair B)' })
-  deploymentPubKey: string | null;
-
   @ApiProperty({ type: [AgentConditionDto], description: 'Reconcile conditions from the last heartbeat' })
   conditions: AgentConditionDto[];
 
@@ -155,7 +164,6 @@ export class AgentStatusDto {
     deploymentId: string,
     agent: DeploymentAgent | undefined,
     desiredGeneration: number,
-    deploymentPubKey: string | null,
     connected: boolean,
   ): AgentStatusDto {
     const dto = new AgentStatusDto();
@@ -167,7 +175,6 @@ export class AgentStatusDto {
     dto.lastHeartbeatAt = null;
     dto.lastGeneration = null;
     dto.desiredGeneration = desiredGeneration;
-    dto.deploymentPubKey = deploymentPubKey;
     dto.conditions = [];
     dto.services = [];
     dto.host = null;

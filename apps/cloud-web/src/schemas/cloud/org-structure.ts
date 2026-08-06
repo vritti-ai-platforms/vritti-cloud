@@ -1,6 +1,6 @@
 import type { SiteType } from '@vritti/quantum-ui/types/catalog-resolver';
 import { z, zodCodeField } from '@vritti/quantum-ui/zod';
-import { GROUP_COLOR_KEYS } from '@/pages/cloud/organization/structure/graph/group-colors';
+import { GROUP_COLOR_KEYS } from '@vritti/quantum-ui/colors';
 
 export const TAX_REGIME_VALUES = ['GST', 'VAT', 'SALES_TAX', 'NONE'] as const;
 
