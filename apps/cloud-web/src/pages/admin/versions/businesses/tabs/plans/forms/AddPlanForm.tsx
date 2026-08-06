@@ -18,6 +18,8 @@ const addPlanFormSchema = z
     organizationId: z.string().optional(),
     // Blank = unlimited sites.
     maxSites: z.string().regex(/^\d+$/, 'Enter a whole number').optional().or(z.literal('')),
+    // Required — every plan declares a storage allowance.
+    storageLimitMb: z.string().min(1, 'Storage limit is required').regex(/^\d+$/, 'Enter a whole number of MB'),
   })
   .superRefine((data, ctx) => {
     if (data.isCustom && !data.organizationId) {
@@ -36,7 +38,7 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
   const { versionId, businessId } = useVersionContext();
   const form = useForm<AddPlanFormData>({
     resolver: zodResolver(addPlanFormSchema),
-    defaultValues: { name: '', code: '', isCustom: false, organizationId: '', maxSites: '' },
+    defaultValues: { name: '', code: '', isCustom: false, organizationId: '', maxSites: '', storageLimitMb: '' },
   });
 
   const isCustom = useWatch({ control: form.control, name: 'isCustom' });
@@ -54,6 +56,7 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
         isCustom: !!data.isCustom,
         ...(data.isCustom ? { organizationId: data.organizationId } : {}),
         maxSites: data.maxSites ? Number(data.maxSites) : undefined,
+        storageLimitMb: Number(data.storageLimitMb),
       })}
     >
       <TextField name="name" label="Plan Name" placeholder="e.g. Pro" />
@@ -74,6 +77,12 @@ export const AddPlanForm: React.FC<AddPlanFormProps> = ({ onSuccess, onCancel })
         label="Max Sites"
         placeholder="Blank = unlimited"
         description="Leave blank for unlimited sites"
+      />
+      <TextField
+        name="storageLimitMb"
+        label="Storage Limit (MB)"
+        placeholder="e.g. 5120"
+        description="Object storage allowance for organizations on this plan"
       />
       <DialogActions>
         <Button type="button" variant="outline" data-cancel>

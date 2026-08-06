@@ -20,6 +20,8 @@ export const plans = cloudSchema.table(
     // Custom plans are bespoke (attached to one org via organizations.plan_code) and hidden from the public plan selector
     isCustom: boolean('is_custom').notNull().default(false),
     maxSites: integer('max_sites'),
+    // Object-storage allowance for the org's blobs, in MiB — every plan declares one (unlike max_sites, there is no unlimited)
+    storageLimitMb: integer('storage_limit_mb').notNull().default(1024),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
   },

@@ -135,6 +135,7 @@ export class PlanDomainRepository extends PrimaryBaseRepository<typeof plans> {
           code: plans.code,
           content: plans.content,
           maxSites: plans.maxSites,
+          storageLimitMb: plans.storageLimitMb,
           createdAt: plans.createdAt,
           updatedAt: plans.updatedAt,
           isCustom: plans.isCustom,

@@ -44,6 +44,11 @@ export class CreatePlanDto {
   @Min(0)
   maxSites?: number;
 
+  @ApiProperty({ description: 'Object storage allowance for this plan, in MiB', example: 5120 })
+  @IsInt()
+  @Min(0)
+  storageLimitMb: number;
+
   @ApiPropertyOptional({ description: 'Rich content stored as Lexical JSON', nullable: true })
   @IsOptional()
   @IsString()

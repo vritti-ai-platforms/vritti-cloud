@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."plans" ADD COLUMN "storage_limit_mb" integer DEFAULT 1024 NOT NULL;

@@ -1,10 +1,13 @@
 import { Card, CardContent } from '@vritti/quantum-ui/Card';
-import { BadgeDollarSign, Briefcase, Building2, Globe } from 'lucide-react';
+import { BadgeDollarSign, Briefcase, Building2, Globe, HardDrive } from 'lucide-react';
 import type { Plan } from '@/schemas/admin/plans';
+
+// Renders a MiB allowance in the largest unit that stays readable
+const formatStorage = (mb: number): string => (mb >= 1024 ? `${+(mb / 1024).toFixed(1)} GB` : `${mb} MB`);
 
 // Stat cards — counts come from the plan API response
 export const PlanStats = ({ plan }: { plan: Plan }) => (
-  <div className="grid grid-cols-4 gap-4">
+  <div className="grid grid-cols-5 gap-4">
     <Card>
       <CardContent className="flex items-center gap-4 p-6">
         <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
@@ -46,6 +49,17 @@ export const PlanStats = ({ plan }: { plan: Plan }) => (
         <div>
           <p className="text-sm text-muted-foreground">Organizations</p>
           <p className="text-2xl font-semibold">{plan.orgCount}</p>
+        </div>
+      </CardContent>
+    </Card>
+    <Card>
+      <CardContent className="flex items-center gap-4 p-6">
+        <div className="flex items-center justify-center w-12 h-12 rounded-lg bg-primary/10">
+          <HardDrive className="h-6 w-6 text-primary" />
+        </div>
+        <div>
+          <p className="text-sm text-muted-foreground">Storage Limit</p>
+          <p className="text-2xl font-semibold">{formatStorage(plan.storageLimitMb)}</p>
         </div>
       </CardContent>
     </Card>

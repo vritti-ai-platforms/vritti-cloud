@@ -10,6 +10,8 @@ export interface Plan {
   priceCount: number;
   countryCount: number;
   orgCount: number;
+  maxSites: number | null;
+  storageLimitMb: number;
   isCustom: boolean;
   attachedOrgName: string | null;
   canDelete: boolean;
@@ -25,8 +27,10 @@ export const createPlanSchema = z.object({
   businessId: z.string().uuid().optional(),
   // Required when isCustom — the org this bespoke plan is attached to.
   organizationId: z.string().uuid().optional(),
-  // Blank = unlimited.
-  maxSites: z.number().int().nonnegative().optional(),
+  // Blank = unlimited; null clears an existing limit back to unlimited on update.
+  maxSites: z.number().int().nonnegative().nullable().optional(),
+  // Object storage allowance in MiB — required, there is no unlimited.
+  storageLimitMb: z.number().int().nonnegative(),
   content: z.string().optional(),
 });
 

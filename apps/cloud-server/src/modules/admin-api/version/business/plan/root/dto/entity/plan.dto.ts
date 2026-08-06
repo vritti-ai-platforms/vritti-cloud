@@ -20,6 +20,9 @@ export class PlanDto {
   @ApiPropertyOptional({ example: 50, nullable: true })
   maxSites: number | null;
 
+  @ApiProperty({ example: 5120, description: 'Object storage allowance for this plan, in MiB' })
+  storageLimitMb: number;
+
   @ApiProperty({ type: 'string', format: 'date-time' })
   createdAt: Date;
 
@@ -71,6 +74,7 @@ export class PlanDto {
     dto.isCustom = plan.isCustom;
     dto.attachedOrgName = counts.attachedOrgName ?? null;
     dto.maxSites = plan.maxSites ?? null;
+    dto.storageLimitMb = plan.storageLimitMb;
     dto.content = plan.content ?? null;
     dto.createdAt = plan.createdAt;
     dto.updatedAt = plan.updatedAt;

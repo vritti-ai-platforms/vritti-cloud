@@ -127,6 +127,7 @@ export class PlanDomainService {
       code: dto.code,
       content: dto.content,
       maxSites: dto.maxSites,
+      storageLimitMb: dto.storageLimitMb,
       isCustom: dto.isCustom ?? false,
     });
 
