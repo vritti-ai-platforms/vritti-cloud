@@ -230,5 +230,5 @@ export class StatusReportDto {
     example: 'local+offsite',
   })
   @IsString()
-  backupMode: string;
+  backupState: string;
 }

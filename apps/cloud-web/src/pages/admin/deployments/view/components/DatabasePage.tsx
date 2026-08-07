@@ -14,8 +14,8 @@ import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import {
-  BACKUP_MODE_LABELS,
-  BACKUP_MODE_VARIANTS,
+  BACKUP_STATE_LABELS,
+  BACKUP_STATE_VARIANTS,
   COMPONENT_MODE_OPTIONS,
   COMPONENT_MODE_VALUES,
   type ComponentMode,
@@ -98,10 +98,12 @@ export const DatabasePage = () => {
           />
           {database.backup && (
             <DetailField
-              label="Backup mode"
+              label="Backup State"
               type="string"
               value={
-                <Badge variant={BACKUP_MODE_VARIANTS[agent.backupMode]}>{BACKUP_MODE_LABELS[agent.backupMode]}</Badge>
+                <Badge variant={BACKUP_STATE_VARIANTS[agent.backupState]}>
+                  {BACKUP_STATE_LABELS[agent.backupState]}
+                </Badge>
               }
             />
           )}

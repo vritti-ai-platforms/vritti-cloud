@@ -327,6 +327,6 @@ function toStatusReportDto(req: StatusReport): StatusReportDto {
         }
       : null,
     events,
-    backupMode: req.backupMode,
+    backupState: req.backupState,
   };
 }

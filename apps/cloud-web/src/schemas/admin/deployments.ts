@@ -319,18 +319,18 @@ export interface AgentStatus {
   host: HostMetrics | null;
   certificates: Certificate[];
   delegation: AcmeDelegation | null;
-  backupMode: BackupMode;
+  backupState: BackupState;
 }
 
-export type BackupMode = 'off' | 'local' | 'local+offsite';
+export type BackupState = 'off' | 'local' | 'local+offsite';
 
-export const BACKUP_MODE_LABELS: Record<BackupMode, string> = {
+export const BACKUP_STATE_LABELS: Record<BackupState, string> = {
   off: 'Off',
   local: 'Local only',
   'local+offsite': 'Local + Offsite',
 };
 
-export const BACKUP_MODE_VARIANTS: Record<BackupMode, 'success' | 'warning' | 'secondary'> = {
+export const BACKUP_STATE_VARIANTS: Record<BackupState, 'success' | 'warning' | 'secondary'> = {
   off: 'secondary',
   local: 'warning',
   'local+offsite': 'success',
