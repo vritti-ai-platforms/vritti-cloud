@@ -1,5 +1,17 @@
+import { RestoreDatabaseDto } from '@domain/deployment-agent/dto/request/restore-database.dto';
 import { DeploymentAgentDomainService } from '@domain/deployment-agent/services/deployment-agent.service';
-import { Controller, Get, HttpCode, HttpStatus, Logger, type MessageEvent, Param, Post, Sse } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Logger,
+  type MessageEvent,
+  Param,
+  Post,
+  Sse,
+} from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession } from '@vritti/api-sdk/auth';
 import { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database';
@@ -10,6 +22,8 @@ import {
   ApiGetAgentStatus,
   ApiIssueEnrollToken,
   ApiRecreateService,
+  ApiRestoreDatabase,
+  ApiRunBackup,
   ApiStreamAgent,
   ApiStreamAgentLogs,
 } from '../docs/deployment-agent.docs';
@@ -72,6 +86,24 @@ export class DeploymentAgentController {
   recreateService(@Param('id') id: string, @Param('service') service: string): Promise<SuccessResponseDto> {
     this.logger.log(`POST /admin-api/deployments/${id}/agent/services/${service}/recreate`);
     return this.agentService.recreateService(id, service);
+  }
+
+  // Takes an on-demand pgBackRest backup of the managed database now (type = full | diff | incr)
+  @Post('backup/:type')
+  @HttpCode(HttpStatus.OK)
+  @ApiRunBackup()
+  runBackup(@Param('id') id: string, @Param('type') type: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/deployments/${id}/agent/backup/${type}`);
+    return this.agentService.runBackup(id, type);
+  }
+
+  // DESTRUCTIVE: restores the managed database to a point in time / a backup / the latest, then recovers
+  @Post('restore')
+  @HttpCode(HttpStatus.OK)
+  @ApiRestoreDatabase()
+  restoreDatabase(@Param('id') id: string, @Body() dto: RestoreDatabaseDto): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/deployments/${id}/agent/restore`);
+    return this.agentService.restoreDatabase(id, dto);
   }
 
   // Returns the deployment's agent status

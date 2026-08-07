@@ -14,14 +14,13 @@ import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import {
-  BACKUP_STATE_LABELS,
-  BACKUP_STATE_VARIANTS,
   COMPONENT_MODE_OPTIONS,
   COMPONENT_MODE_VALUES,
   type ComponentMode,
   servicesForComponent,
 } from '@/schemas/admin/deployments';
 import { EditableConfigCard } from '../../components/EditableConfigCard';
+import { BackupRestoreCard } from './BackupRestoreCard';
 import { LogStream } from './LogStream';
 import { ServicesTable } from './ServicesTable';
 
@@ -97,17 +96,6 @@ export const DatabasePage = () => {
             }
           />
           {database.backup && (
-            <DetailField
-              label="Backup State"
-              type="string"
-              value={
-                <Badge variant={BACKUP_STATE_VARIANTS[agent.backupState]}>
-                  {BACKUP_STATE_LABELS[agent.backupState]}
-                </Badge>
-              }
-            />
-          )}
-          {database.backup && (
             <DetailField label="Retention" type="string" value={`${database.backup.retention} full backups`} mono />
           )}
         </div>
@@ -171,6 +159,15 @@ export const DatabasePage = () => {
           </Typography>
         )}
       </EditableConfigCard>
+
+      {database?.mode === 'managed' && database.backup && (
+        <BackupRestoreCard
+          deploymentId={id}
+          backupState={agent.backupState}
+          backupInfo={agent.backupInfo}
+          connected={agent.connected}
+        />
+      )}
 
       <Card>
         <CardHeader>

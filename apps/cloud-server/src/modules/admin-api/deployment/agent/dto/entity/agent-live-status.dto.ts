@@ -4,6 +4,7 @@ import type { DeploymentAgent, DeploymentAgentStatus } from '@/db/schema';
 import { DeploymentAgentStatusValues } from '@/db/schema';
 import {
   AgentAcmeDelegationDto,
+  AgentBackupInfoDto,
   AgentCertificateDto,
   AgentConditionDto,
   AgentHostMetricsDto,
@@ -51,6 +52,9 @@ export class AgentLiveStatusDto {
   })
   backupState: string;
 
+  @ApiProperty({ type: AgentBackupInfoDto, description: 'pgBackRest backup inventory; backups is empty when off' })
+  backupInfo: AgentBackupInfoDto;
+
   // Maps the agent-reported StatusReport (+ the resolved agent row) to the live wire shape — no DB read
   static from(agent: DeploymentAgent, report: StatusReportDto): AgentLiveStatusDto {
     const dto = new AgentLiveStatusDto();
@@ -69,6 +73,7 @@ export class AgentLiveStatusDto {
     }));
     dto.delegation = report.delegation ?? null;
     dto.backupState = report.backupState;
+    dto.backupInfo = report.backupInfo ?? { backups: [] };
     return dto;
   }
 }

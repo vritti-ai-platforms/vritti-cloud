@@ -93,8 +93,9 @@ export const HostGauges: React.FC<HostGaugesProps> = ({ host }) => {
           <Gauge label="CPU" value={cpu} detail={`${cpu}%`} />
           <Gauge label="Memory" value={mem} detail={`${gb(host.memUsedBytes)} / ${gb(host.memTotalBytes)} GB`} />
 
-          {/* Disk — the bar itself is segmented by category (colors match the legend); the muted track shows
-              free space. Falls back to a single utilization fill for a not-yet-rolled agent. */}
+          {/* Disk — segmented by category, in the SAME largest-first order as the legend (both iterate `legend`),
+              so colors AND order line up. The muted track shows free space; falls back to a single utilization
+              fill for a not-yet-rolled agent. */}
           <div className="rounded-lg border p-4">
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>Disk</span>
@@ -103,17 +104,16 @@ export const HostGauges: React.FC<HostGaugesProps> = ({ host }) => {
               </span>
             </div>
             <div className="mt-2.5 flex h-1.5 overflow-hidden rounded-full bg-muted">
-              {breakdown.length > 0 ? (
-                DISK_CATEGORIES.map((c) => {
-                  const bytes = byKey.get(c.key) ?? 0;
-                  const width = host.diskTotalBytes > 0 ? (bytes / host.diskTotalBytes) * 100 : 0;
+              {legend.length > 0 ? (
+                legend.map((c) => {
+                  const width = host.diskTotalBytes > 0 ? (c.bytes / host.diskTotalBytes) * 100 : 0;
                   if (width <= 0) return null;
                   return (
                     <div
                       key={c.key}
                       className={cn('h-full', c.className)}
                       style={{ width: `${width}%` }}
-                      title={`${c.label} · ${humanBytes(bytes)}`}
+                      title={`${c.label} · ${humanBytes(c.bytes)}`}
                     />
                   );
                 })

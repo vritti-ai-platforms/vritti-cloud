@@ -83,6 +83,36 @@ export function ApiUpdateDeployment() {
   );
 }
 
+export function ApiStopDeployment() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Stop a managed deployment',
+      description:
+        'Takes the whole managed stack offline: the desired-state flips to stopped and the agent tears down every service container. The VM data (database, backups, Gitea) persists, so Start restores the same state. Persistent — the deployment stays offline across an agent restart or VM reboot until started.',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'Deployment is stopping.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Not a managed deployment, or not currently active.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Deployment not found.' }),
+  );
+}
+
+export function ApiStartDeployment() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Start a managed deployment',
+      description:
+        'Brings a stopped managed deployment back online: the desired-state flips to active and the agent reconciles the full stack back up from the persisted VM data.',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'Deployment is starting.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Not a managed deployment, or not currently stopped.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Deployment not found.' }),
+  );
+}
+
 export function ApiDeleteDeployment() {
   return applyDecorators(
     ApiOperation({ summary: 'Delete a deployment' }),

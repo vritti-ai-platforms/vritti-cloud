@@ -35,6 +35,37 @@ export function ApiRecreateService() {
   );
 }
 
+export function ApiRunBackup() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Take an on-demand database backup',
+      description:
+        'Pushes a RunBackup command down the agent’s open stream so it takes a pgBackRest backup of the managed database now, on top of the scheduled cadence. type is one of full | diff | incr. Requires the agent to be online with backups enabled.',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({ name: 'type', description: 'Backup type', enum: ['full', 'diff', 'incr'], example: 'incr' }),
+    ApiResponse({ status: 200, description: 'Backup requested.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Agent is offline or the backup type is invalid.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Deployment not found.' }),
+  );
+}
+
+export function ApiRestoreDatabase() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Restore the managed database (destructive)',
+      description:
+        'Pushes a RestoreDB command down the agent’s open stream. DESTRUCTIVE — the agent takes the stack offline, runs a delta pgBackRest restore, then brings it back up recovered to the target. Provide at most one selector in the body: targetTime (point-in-time) or setLabel (a specific backup); omit both to restore the latest backup. Requires the agent online with backups enabled.',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiResponse({ status: 200, description: 'Restore started.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Agent is offline, or both selectors were provided.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Deployment not found.' }),
+  );
+}
+
 export function ApiIssueEnrollToken() {
   return applyDecorators(
     ApiOperation({

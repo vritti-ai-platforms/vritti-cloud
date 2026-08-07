@@ -6,6 +6,8 @@ import {
   DEPLOYMENT_AGENT_LOG_LINE_EVENT,
   DEPLOYMENT_AGENT_RECREATE_EVENT,
   DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT,
+  DEPLOYMENT_AGENT_RESTORE_DB_EVENT,
+  DEPLOYMENT_AGENT_RUN_BACKUP_EVENT,
   DEPLOYMENT_AGENT_START_LOGS_EVENT,
   DEPLOYMENT_AGENT_STOP_LOGS_EVENT,
   DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT,
@@ -163,6 +165,19 @@ export class AgentConnectService {
       if (p.deploymentId !== deploymentId) return;
       push({ msg: { case: 'command', value: { kind: { case: 'recreate', value: { service: p.service } } } } });
     };
+    const onRunBackup = (p: { deploymentId: string; type: string }): void => {
+      if (p.deploymentId !== deploymentId) return;
+      push({ msg: { case: 'command', value: { kind: { case: 'runBackup', value: { type: p.type } } } } });
+    };
+    const onRestoreDb = (p: { deploymentId: string; targetTime?: string; setLabel?: string }): void => {
+      if (p.deploymentId !== deploymentId) return;
+      push({
+        msg: {
+          case: 'command',
+          value: { kind: { case: 'restoreDb', value: { targetTime: p.targetTime ?? '', setLabel: p.setLabel ?? '' } } },
+        },
+      });
+    };
     const keepalive = setInterval(() => {
       push({ msg: { case: 'keepAlive', value: { unixTs: BigInt(Math.floor(Date.now() / 1000)) } } });
     }, AGENT_SUBSCRIBE_KEEPALIVE_MS);
@@ -177,6 +192,8 @@ export class AgentConnectService {
     this.eventEmitter.on(DEPLOYMENT_AGENT_START_LOGS_EVENT, onStartLogs);
     this.eventEmitter.on(DEPLOYMENT_AGENT_STOP_LOGS_EVENT, onStopLogs);
     this.eventEmitter.on(DEPLOYMENT_AGENT_RECREATE_EVENT, onRecreate);
+    this.eventEmitter.on(DEPLOYMENT_AGENT_RUN_BACKUP_EVENT, onRunBackup);
+    this.eventEmitter.on(DEPLOYMENT_AGENT_RESTORE_DB_EVENT, onRestoreDb);
     ctx.signal.addEventListener('abort', onAbort, { once: true });
 
     try {
@@ -202,6 +219,8 @@ export class AgentConnectService {
       this.eventEmitter.off(DEPLOYMENT_AGENT_START_LOGS_EVENT, onStartLogs);
       this.eventEmitter.off(DEPLOYMENT_AGENT_STOP_LOGS_EVENT, onStopLogs);
       this.eventEmitter.off(DEPLOYMENT_AGENT_RECREATE_EVENT, onRecreate);
+      this.eventEmitter.off(DEPLOYMENT_AGENT_RUN_BACKUP_EVENT, onRunBackup);
+      this.eventEmitter.off(DEPLOYMENT_AGENT_RESTORE_DB_EVENT, onRestoreDb);
       ctx.signal.removeEventListener('abort', onAbort);
       this.connectivity.markDisconnected(deploymentId);
     }
@@ -328,5 +347,17 @@ function toStatusReportDto(req: StatusReport): StatusReportDto {
       : null,
     events,
     backupState: req.backupState,
+    backupInfo: req.backupInfo
+      ? {
+          backups: req.backupInfo.backups.map((b) => ({
+            label: b.label,
+            type: b.type,
+            startUnix: Number(b.startUnix),
+            stopUnix: Number(b.stopUnix),
+            sizeBytes: Number(b.sizeBytes),
+            repoBytes: Number(b.repoBytes),
+          })),
+        }
+      : undefined,
   };
 }

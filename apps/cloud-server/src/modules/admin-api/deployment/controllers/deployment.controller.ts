@@ -11,6 +11,8 @@ import {
   ApiFindAllDeployments,
   ApiFindDeploymentById,
   ApiRegenerateSigningKey,
+  ApiStartDeployment,
+  ApiStopDeployment,
   ApiSyncCatalog,
   ApiUpdateDeployment,
 } from '../docs/deployment.docs';
@@ -73,6 +75,24 @@ export class DeploymentController {
   syncCatalog(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`POST /admin-api/deployments/${id}/sync-catalog`);
     return this.catalogSyncService.syncCatalog(id);
+  }
+
+  // Takes a managed deployment offline (agent tears the stack down; data persists)
+  @Post(':id/stop')
+  @HttpCode(HttpStatus.OK)
+  @ApiStopDeployment()
+  stop(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/deployments/${id}/stop`);
+    return this.deploymentService.stop(id);
+  }
+
+  // Brings a stopped managed deployment back online
+  @Post(':id/start')
+  @HttpCode(HttpStatus.OK)
+  @ApiStartDeployment()
+  start(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/deployments/${id}/start`);
+    return this.deploymentService.start(id);
   }
 
   // Updates a deployment by ID

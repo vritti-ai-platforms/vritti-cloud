@@ -11,13 +11,17 @@ import type { Deployment, DeploymentAgent, DeploymentSecret } from '@/db/schema'
 import { DeploymentManagementTypeValues } from '@/db/schema';
 import { CryptoService } from '@/services';
 import {
+  BACKUP_TYPES,
   DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT,
   DEPLOYMENT_AGENT_RECREATE_EVENT,
+  DEPLOYMENT_AGENT_RESTORE_DB_EVENT,
+  DEPLOYMENT_AGENT_RUN_BACKUP_EVENT,
   DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT,
   ENROLL_TOKEN_TTL_MS,
   RECREATABLE_SERVICES,
 } from '../deployment-agent.constants';
 import type { EnrollRequestDto } from '../dto/request/enroll-request.dto';
+import type { RestoreDatabaseDto } from '../dto/request/restore-database.dto';
 import type { StatusEventDto, StatusReportDto } from '../dto/request/status-report.dto';
 import { DeploymentAgentDomainRepository } from '../repositories/deployment-agent.repository';
 import { DeploymentSecretDomainRepository } from '../repositories/deployment-secret.repository';
@@ -151,6 +155,49 @@ export class DeploymentAgentDomainService {
     this.eventEmitter.emit(DEPLOYMENT_AGENT_RECREATE_EVENT, { deploymentId, service });
     this.logger.log(`Requested recreate of ${service} for deployment ${deploymentId}`);
     return { success: true, message: `Recreation requested — ${service} will restart with the latest env.` };
+  }
+
+  // Takes an on-demand pgBackRest backup of the managed database now (on top of the schedule). Pushed as a
+  // RunBackup command over the open Subscribe stream; only meaningful while the agent is connected.
+  async runBackup(deploymentId: string, type: string): Promise<SuccessResponseDto> {
+    await this.requireDeployment(deploymentId);
+    if (!(BACKUP_TYPES as readonly string[]).includes(type)) {
+      throw new BadRequestException(`Backup type "${type}" is not supported.`);
+    }
+    if (!this.connectivity.isConnected(deploymentId)) {
+      throw new BadRequestException('The agent is offline. Take a backup once it reconnects.');
+    }
+    this.eventEmitter.emit(DEPLOYMENT_AGENT_RUN_BACKUP_EVENT, { deploymentId, type });
+    this.logger.log(`Requested ${type} backup for deployment ${deploymentId}`);
+    return { success: true, message: `Backup requested — a ${type} backup is running now.` };
+  }
+
+  // DESTRUCTIVE: restores the managed database to a point in time, a specific backup, or the latest. The agent
+  // takes the stack offline, restores, and brings it back up recovered. Pushed as a RestoreDB command over the
+  // open Subscribe stream; only meaningful while the agent is connected.
+  async restoreDatabase(deploymentId: string, dto: RestoreDatabaseDto): Promise<SuccessResponseDto> {
+    await this.requireDeployment(deploymentId);
+    if (dto.targetTime && dto.setLabel) {
+      throw new BadRequestException('Provide either a point-in-time target or a backup to restore, not both.');
+    }
+    if (!this.connectivity.isConnected(deploymentId)) {
+      throw new BadRequestException('The agent is offline. Restore once it reconnects.');
+    }
+    this.eventEmitter.emit(DEPLOYMENT_AGENT_RESTORE_DB_EVENT, {
+      deploymentId,
+      targetTime: dto.targetTime,
+      setLabel: dto.setLabel,
+    });
+    const target = dto.targetTime
+      ? `to ${dto.targetTime}`
+      : dto.setLabel
+        ? `to backup ${dto.setLabel}`
+        : 'to the latest backup';
+    this.logger.log(`Requested database restore ${target} for deployment ${deploymentId}`);
+    return {
+      success: true,
+      message: `Restore started ${target} — the deployment goes offline briefly, then recovers.`,
+    };
   }
 
   // Completes the one-time enrollment handshake: trust-on-first-use signature + enroll token

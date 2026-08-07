@@ -157,4 +157,10 @@ export class DesiredStateDto {
     description: 'name → base64 sealed ciphertext (agent decrypts)',
   })
   sealedSecrets: Record<string, string>;
+
+  @ApiProperty({
+    example: false,
+    description: 'Operator took the deployment offline: the agent tears the stack down and suspends self-heal',
+  })
+  stopped: boolean;
 }

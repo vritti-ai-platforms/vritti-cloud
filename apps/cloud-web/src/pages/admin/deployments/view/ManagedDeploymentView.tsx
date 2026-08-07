@@ -1,4 +1,4 @@
-import { useDeleteDeployment } from '@hooks/admin/deployments';
+import { useDeleteDeployment, useStartDeployment, useStopDeployment } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
@@ -6,12 +6,11 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
-import { Server } from 'lucide-react';
+import { Play, Power, Server } from 'lucide-react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import type { Deployment } from '@/schemas/admin/deployments';
-import { HostMetricsSummary } from '../components/HostMetricsSummary';
 import { DeploymentCockpit } from './cockpit/DeploymentCockpit';
 import { EditDeploymentDetailsForm } from './EditDeploymentDetailsForm';
 import { ActivityTab } from './tabs/ActivityTab';
@@ -37,6 +36,19 @@ export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({ de
   const agent = useDeploymentAgent();
 
   const deleteMutation = useDeleteDeployment({ onSuccess: () => navigate('/deployments') });
+  const stopMutation = useStopDeployment();
+  const startMutation = useStartDeployment();
+
+  const handleStop = async () => {
+    const confirmed = await confirm({
+      title: `Stop ${deployment.name}?`,
+      description:
+        'This takes the whole deployment offline — every service stops. The VM data is preserved, so you can start it again anytime.',
+      confirmLabel: 'Stop',
+      variant: 'destructive',
+    });
+    if (confirmed) stopMutation.mutate(id);
+  };
 
   const handleDelete = async () => {
     const confirmed = await confirm({
@@ -55,19 +67,45 @@ export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({ de
         titleSlot={
           <div className="flex items-center gap-2">
             <Badge variant="secondary">Managed</Badge>
-            <Badge variant={agent.connected ? 'success' : 'destructive'}>
-              {agent.connected ? 'Online' : 'Offline'}
-            </Badge>
+            {deployment.status === 'stopped' ? (
+              <Badge variant="warning">Stopped</Badge>
+            ) : deployment.status === 'Provisioning' ? (
+              <Badge variant="secondary">Provisioning</Badge>
+            ) : (
+              <Badge variant={agent.connected ? 'success' : 'destructive'}>
+                {agent.connected ? 'Online' : 'Offline'}
+              </Badge>
+            )}
           </div>
         }
         description={deployment.tenantType}
         actions={
-          <>
-            <HostMetricsSummary host={agent.host} />
+          <div className="flex items-center gap-2">
+            {deployment.status === 'active' && (
+              <Button
+                variant="outline"
+                size="sm"
+                startAdornment={<Power className="size-4" />}
+                onClick={handleStop}
+                disabled={stopMutation.isPending}
+              >
+                Stop
+              </Button>
+            )}
+            {deployment.status === 'stopped' && (
+              <Button
+                size="sm"
+                startAdornment={<Play className="size-4" />}
+                onClick={() => startMutation.mutate(id)}
+                disabled={startMutation.isPending}
+              >
+                Start
+              </Button>
+            )}
             <Button variant="outline" size="sm" onClick={editDialog.open}>
               Edit
             </Button>
-          </>
+          </div>
         }
       />
 

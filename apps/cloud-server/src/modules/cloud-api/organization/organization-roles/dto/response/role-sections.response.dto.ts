@@ -7,7 +7,11 @@ class RoleTemplateRowDto {
   @ApiProperty({ type: RoleTemplateResponseDto })
   template: RoleTemplateResponseDto;
 
-  @ApiPropertyOptional({ type: CoreRoleDto, nullable: true, description: 'The enabled default-role instance, if created' })
+  @ApiPropertyOptional({
+    type: CoreRoleDto,
+    nullable: true,
+    description: 'The enabled default-role instance, if created',
+  })
   role: CoreRoleDto | null;
 }
 

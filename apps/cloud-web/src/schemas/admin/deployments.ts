@@ -320,9 +320,33 @@ export interface AgentStatus {
   certificates: Certificate[];
   delegation: AcmeDelegation | null;
   backupState: BackupState;
+  backupInfo: BackupInfo;
 }
 
 export type BackupState = 'off' | 'local' | 'local+offsite';
+
+// The managed database's pgBackRest inventory; `backups` is empty when backups are off.
+export interface BackupInfo {
+  backups: BackupEntry[];
+}
+
+export type BackupType = 'full' | 'diff' | 'incr';
+
+// One pgBackRest backup set (unix-second timestamps, byte sizes).
+export interface BackupEntry {
+  label: string;
+  type: BackupType;
+  startUnix: number;
+  stopUnix: number;
+  sizeBytes: number;
+  repoBytes: number;
+}
+
+export const BACKUP_TYPE_LABELS: Record<BackupType, string> = {
+  full: 'Full',
+  diff: 'Differential',
+  incr: 'Incremental',
+};
 
 export const BACKUP_STATE_LABELS: Record<BackupState, string> = {
   off: 'Off',

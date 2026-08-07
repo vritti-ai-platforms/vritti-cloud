@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Deployment } from '@/db/schema';
-import { DeploymentManagementTypeValues } from '@/db/schema';
+import { DeploymentManagementTypeValues, DeploymentStatusValues } from '@/db/schema';
 import {
   DEFAULT_STACK_IMAGES,
   DEFAULT_WEB_BUNDLES,
@@ -33,6 +33,9 @@ export class DesiredStateDomainService {
     dto.acmeStaging = this.configService.get<boolean>('ACME_STAGING') ?? false;
     dto.config = this.buildConfig(deployment);
     dto.sealedSecrets = sealedSecrets;
+    // Lifecycle: a stopped deployment tells the agent to tear the stack down and suspend self-heal. Persistent
+    // (rides the deployment status), so the offline state survives an agent restart or a full VM reboot.
+    dto.stopped = deployment.status === DeploymentStatusValues.stopped;
     this.logger.log(`Built desired-state for deployment ${deployment.id} (base ${dto.baseDomain})`);
     return dto;
   }

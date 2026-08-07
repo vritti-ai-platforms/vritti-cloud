@@ -30,6 +30,17 @@ export const DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT = 'deployment.agent.force-rech
 // per-service "Recreate" admin action emits it.
 export const DEPLOYMENT_AGENT_RECREATE_EVENT = 'deployment.agent.recreate';
 
+// Internal event fired (payload: { deploymentId, type }) to take an on-demand pgBackRest backup now. The
+// Subscribe handler turns it into a RunBackup command down the stream; the "Backup now" admin action emits it.
+export const DEPLOYMENT_AGENT_RUN_BACKUP_EVENT = 'deployment.agent.run-backup';
+
+// Backup types the operator can trigger on demand (pgBackRest --type).
+export const BACKUP_TYPES = ['full', 'diff', 'incr'] as const;
+
+// Internal event fired (payload: { deploymentId, targetTime?, setLabel? }) to DESTRUCTIVELY restore the
+// managed database. The Subscribe handler turns it into a RestoreDB command down the stream.
+export const DEPLOYMENT_AGENT_RESTORE_DB_EVENT = 'deployment.agent.restore-db';
+
 // Services the agent can recreate on demand (must match the agent's spec names / reported service keys).
 export const RECREATABLE_SERVICES = [
   'postgres',

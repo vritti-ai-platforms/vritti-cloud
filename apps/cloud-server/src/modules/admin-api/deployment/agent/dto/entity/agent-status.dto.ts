@@ -111,6 +111,33 @@ export class AgentAcmeDelegationDto {
   serverIp: string;
 }
 
+// One pgBackRest backup set surfaced to the cockpit (from the agent's backup inventory)
+export class AgentBackupEntryDto {
+  @ApiProperty({ example: '20260731-120000F' })
+  label: string;
+
+  @ApiProperty({ enum: ['full', 'diff', 'incr'], example: 'full' })
+  type: string;
+
+  @ApiProperty({ description: 'Backup start (unix seconds)', example: 1769860800 })
+  startUnix: number;
+
+  @ApiProperty({ description: 'Backup stop (unix seconds)', example: 1769860860 })
+  stopUnix: number;
+
+  @ApiProperty({ description: 'Logical database size of the backup set (bytes)', example: 12582912 })
+  sizeBytes: number;
+
+  @ApiProperty({ description: 'Compressed bytes this backup added to the repository', example: 2097152 })
+  repoBytes: number;
+}
+
+// The managed database's pgBackRest inventory surfaced to the cockpit
+export class AgentBackupInfoDto {
+  @ApiProperty({ type: [AgentBackupEntryDto], description: 'Backup sets, ordered oldest→newest' })
+  backups: AgentBackupEntryDto[];
+}
+
 // Seed agent status for the initial cockpit fetch: config + enrollment + live connectivity. The live
 // heartbeat fields (conditions/services/host/certificates/delegation/lastGeneration/lastHeartbeatAt) are
 // empty here and arrive over SSE — cloud does not store agent status, it relays it.
@@ -164,6 +191,12 @@ export class AgentStatusDto {
   })
   backupState: string;
 
+  @ApiProperty({
+    type: AgentBackupInfoDto,
+    description: 'pgBackRest backup inventory; backups is empty when backups are off. Arrives live over SSE.',
+  })
+  backupInfo: AgentBackupInfoDto;
+
   // Builds the seed from the deployment config + enrollment row + live connectivity. Live heartbeat fields
   // start empty — the SSE stream fills them (and cloud never persisted them).
   static from(
@@ -187,6 +220,7 @@ export class AgentStatusDto {
     dto.certificates = [];
     dto.delegation = null;
     dto.backupState = 'off';
+    dto.backupInfo = { backups: [] };
     return dto;
   }
 }

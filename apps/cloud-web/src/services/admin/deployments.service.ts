@@ -70,6 +70,36 @@ export function recreateService({ id, service }: { id: string; service: string }
     .then((r) => r.data);
 }
 
+// Takes the whole managed deployment offline — the agent tears the stack down; the VM data persists
+export function stopDeployment(id: string): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>(`admin-api/deployments/${id}/stop`).then((r) => r.data);
+}
+
+// Brings a stopped managed deployment back online — the agent reconciles the full stack back up
+export function startDeployment(id: string): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>(`admin-api/deployments/${id}/start`).then((r) => r.data);
+}
+
+// Asks the connected agent to take an on-demand pgBackRest backup now (type = full | diff | incr)
+export function runBackup({ id, type }: { id: string; type: string }): Promise<SuccessResponse> {
+  return axios.post<SuccessResponse>(`admin-api/deployments/${id}/agent/backup/${type}`).then((r) => r.data);
+}
+
+// DESTRUCTIVE: restores the managed database to a point in time, a specific backup, or the latest
+export function restoreDatabase({
+  id,
+  targetTime,
+  setLabel,
+}: {
+  id: string;
+  targetTime?: string;
+  setLabel?: string;
+}): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(`admin-api/deployments/${id}/agent/restore`, { targetTime, setLabel })
+    .then((r) => r.data);
+}
+
 // Fetches the live agent connection and reconciliation status for a deployment
 export function getAgentStatus(id: string): Promise<AgentStatus> {
   return axios.get<AgentStatus>(`admin-api/deployments/${id}/agent`).then((r) => r.data);

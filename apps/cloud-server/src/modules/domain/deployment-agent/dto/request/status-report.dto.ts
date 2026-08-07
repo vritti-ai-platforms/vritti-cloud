@@ -167,6 +167,42 @@ export class StatusEventDto {
   message: string;
 }
 
+// One pgBackRest backup set the agent reports (matches cloudapi.BackupEntry)
+export class BackupEntryDto {
+  @ApiProperty({ description: 'pgBackRest backup label', example: '20260731-120000F' })
+  @IsString()
+  label: string;
+
+  @ApiProperty({ enum: ['full', 'diff', 'incr'], example: 'full' })
+  @IsString()
+  type: string;
+
+  @ApiProperty({ description: 'Backup start (unix seconds)', example: 1769860800 })
+  @IsNumber()
+  startUnix: number;
+
+  @ApiProperty({ description: 'Backup stop (unix seconds)', example: 1769860860 })
+  @IsNumber()
+  stopUnix: number;
+
+  @ApiProperty({ description: 'Logical database size of the backup set (bytes)', example: 12582912 })
+  @IsNumber()
+  sizeBytes: number;
+
+  @ApiProperty({ description: 'Compressed bytes this backup added to the repository', example: 2097152 })
+  @IsNumber()
+  repoBytes: number;
+}
+
+// The managed database's pgBackRest inventory (matches cloudapi.BackupInfo)
+export class BackupInfoDto {
+  @ApiProperty({ type: [BackupEntryDto], description: 'Backup sets, ordered oldest→newest' })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => BackupEntryDto)
+  backups: BackupEntryDto[];
+}
+
 // Periodic heartbeat pushed by the agent (matches cloudapi.StatusReport)
 export class StatusReportDto {
   @ApiProperty({ description: 'Deployment this heartbeat is for', example: '550e8400-e29b-41d4-a716-446655440000' })
@@ -231,4 +267,13 @@ export class StatusReportDto {
   })
   @IsString()
   backupState: string;
+
+  @ApiPropertyOptional({
+    type: BackupInfoDto,
+    description: 'pgBackRest backup inventory (present when backups are on), for the UI backup timeline',
+  })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => BackupInfoDto)
+  backupInfo?: BackupInfoDto;
 }

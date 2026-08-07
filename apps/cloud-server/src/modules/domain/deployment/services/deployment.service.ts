@@ -234,6 +234,55 @@ export class DeploymentDomainService {
     return { success: true, message: `Deployment "${deployment.name}" updated successfully.` };
   }
 
+  // Takes a managed deployment offline: flips status → stopped so the desired-state carries `stopped`, and the
+  // agent tears the stack down + suspends self-heal. Persistent — the data on the VM survives, so Start restores it.
+  async stop(id: string): Promise<SuccessResponseDto> {
+    const existing = await this.requireManaged(id);
+    if (existing.status === DeploymentStatusValues.stopped) {
+      return { success: true, message: `Deployment "${existing.name}" is already stopped.` };
+    }
+    if (existing.status !== DeploymentStatusValues.active) {
+      throw new BadRequestException('Only an active deployment can be stopped.');
+    }
+    await this.deploymentRepository.update(id, { status: DeploymentStatusValues.stopped });
+    this.notifyDesiredStateChanged(id);
+    this.logger.log(`Stopped deployment: ${existing.name} (${id})`);
+    return {
+      success: true,
+      message: `Deployment "${existing.name}" is stopping — all services are being taken offline.`,
+    };
+  }
+
+  // Brings a stopped deployment back online: flips status → active so the agent reconciles the full stack back up.
+  async start(id: string): Promise<SuccessResponseDto> {
+    const existing = await this.requireManaged(id);
+    if (existing.status === DeploymentStatusValues.active) {
+      return { success: true, message: `Deployment "${existing.name}" is already running.` };
+    }
+    if (existing.status !== DeploymentStatusValues.stopped) {
+      throw new BadRequestException('Only a stopped deployment can be started.');
+    }
+    await this.deploymentRepository.update(id, { status: DeploymentStatusValues.active });
+    this.notifyDesiredStateChanged(id);
+    this.logger.log(`Started deployment: ${existing.name} (${id})`);
+    return {
+      success: true,
+      message: `Deployment "${existing.name}" is starting — all services are coming back online.`,
+    };
+  }
+
+  // Loads a deployment and asserts it is agent-managed (stop/start only apply to a managed stack)
+  private async requireManaged(id: string) {
+    const existing = await this.deploymentRepository.findById(id);
+    if (!existing) {
+      throw new NotFoundException('Deployment not found.');
+    }
+    if (existing.managementType !== DeploymentManagementTypeValues.managed) {
+      throw new BadRequestException('Only managed deployments can be stopped or started.');
+    }
+    return existing;
+  }
+
   // Encrypts each secret-store auth param at rest and upserts it into deployment_secrets under the reserved prefix
   private async writeSecretProviderSecrets(deploymentId: string, secrets?: Record<string, string>): Promise<void> {
     if (!secrets) return;
