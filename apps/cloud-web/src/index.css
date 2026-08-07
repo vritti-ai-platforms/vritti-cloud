@@ -47,8 +47,9 @@
   user-select: none;
 }
 
-/* The group-* categorical palette (--group-* tokens + bg-group-*/text-group-* utilities) now ships from
- * @vritti/quantum-ui/index.css — see @vritti/quantum-ui/colors for the GROUP_COLOR_KEYS / groupColorVar helper. */
+
+
+@theme inline{}
 
 @layer base {
   * {
