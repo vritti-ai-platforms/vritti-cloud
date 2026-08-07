@@ -1,4 +1,5 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
+import { DeploymentDomainService } from '@domain/deployment/services/deployment.service';
 import { DeploymentEventDomainService } from '@domain/deployment-event/services/deployment-event.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -8,7 +9,7 @@ import { CreateResponseDto, SuccessResponseDto } from '@vritti/api-sdk/database'
 import { BadRequestException, NotFoundException, UnauthorizedException } from '@vritti/api-sdk/exceptions';
 import { canonicalStringify } from '@vritti/api-sdk/signing';
 import type { Deployment, DeploymentAgent, DeploymentSecret } from '@/db/schema';
-import { DeploymentManagementTypeValues } from '@/db/schema';
+import { DeploymentManagementTypeValues, DeploymentStatusValues } from '@/db/schema';
 import { CryptoService } from '@/services';
 import {
   BACKUP_TYPES,
@@ -89,6 +90,7 @@ export class DeploymentAgentDomainService {
     private readonly agentCrypto: AgentCryptoService,
     private readonly connectivity: AgentConnectivityService,
     private readonly eventEmitter: EventEmitter2,
+    private readonly deploymentService: DeploymentDomainService,
   ) {}
 
   // Issues a one-time enroll token for a managed deployment, ensuring Keypair B exists first (admin)
@@ -176,18 +178,27 @@ export class DeploymentAgentDomainService {
   // takes the stack offline, restores, and brings it back up recovered. Pushed as a RestoreDB command over the
   // open Subscribe stream; only meaningful while the agent is connected.
   async restoreDatabase(deploymentId: string, dto: RestoreDatabaseDto): Promise<SuccessResponseDto> {
-    await this.requireDeployment(deploymentId);
+    const deployment = await this.requireDeployment(deploymentId);
     if (dto.targetTime && dto.setLabel) {
       throw new BadRequestException('Provide either a point-in-time target or a backup to restore, not both.');
     }
     if (!this.connectivity.isConnected(deploymentId)) {
       throw new BadRequestException('The agent is offline. Restore once it reconnects.');
     }
+    // Restore only from a stopped deployment — a live restore over a running Postgres is refused by pgBackRest,
+    // and stopping first avoids yanking the stack out from under active users mid-operation.
+    if (deployment.status !== DeploymentStatusValues.stopped) {
+      throw new BadRequestException('Stop the deployment before restoring the database.');
+    }
+    // Push the RestoreDB command FIRST so the agent marks itself "restoring" before the auto-start below flips
+    // the desired-state to active — the agent holds that push until the restore finishes, then reconciles up.
     this.eventEmitter.emit(DEPLOYMENT_AGENT_RESTORE_DB_EVENT, {
       deploymentId,
       targetTime: dto.targetTime,
       setLabel: dto.setLabel,
     });
+    // Auto-start: flip the deployment back to active so it comes online recovered once the restore completes.
+    await this.deploymentService.start(deploymentId);
     const target = dto.targetTime
       ? `to ${dto.targetTime}`
       : dto.setLabel
@@ -196,7 +207,7 @@ export class DeploymentAgentDomainService {
     this.logger.log(`Requested database restore ${target} for deployment ${deploymentId}`);
     return {
       success: true,
-      message: `Restore started ${target} — the deployment goes offline briefly, then recovers.`,
+      message: `Restore started ${target} — the deployment will come back online when it completes.`,
     };
   }
 

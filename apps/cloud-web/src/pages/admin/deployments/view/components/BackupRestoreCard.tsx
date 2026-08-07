@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vrit
 import { DateTimePicker } from '@vritti/quantum-ui/DateTimePicker';
 import { DropdownMenu, type MenuItem } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useFormatters } from '@vritti/quantum-ui/hooks';
-import { Archive, ChevronDown, Clock, DatabaseBackup, History, Layers, RotateCcw } from 'lucide-react';
+import { Archive, ChevronDown, Clock, DatabaseBackup, History, Layers } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import {
@@ -16,8 +16,9 @@ import {
   type BackupInfo,
   type BackupState,
 } from '@/schemas/admin/deployments';
+import { BackupTimelineGraph } from './BackupTimelineGraph';
 
-// Human-readable bytes (B/KB/MB/GB/TB) for backup sizes.
+// Human-readable bytes (B/KB/MB/GB/TB) for the recovery-window size summary.
 function humanBytes(n: number): string {
   if (n <= 0) return '0 B';
   if (n < 1024) return `${n} B`;
@@ -33,40 +34,24 @@ function humanBytes(n: number): string {
 
 const isoOf = (unix: number) => new Date(unix * 1000).toISOString();
 
-// One full backup and the incrementals/differentials layered on top of it (a pgBackRest restore chain).
-interface BackupChain {
-  full: BackupEntry;
-  deltas: BackupEntry[];
-}
-
-// Groups the oldest→newest backup list into restore chains: each full starts a new chain; incr/diff attach
-// to the most recent full. A leading incr with no preceding full (shouldn't happen) starts its own chain.
-function toChains(backups: BackupEntry[]): BackupChain[] {
-  const chains: BackupChain[] = [];
-  for (const b of backups) {
-    if (b.type === 'full' || chains.length === 0) {
-      chains.push({ full: b, deltas: [] });
-    } else {
-      chains[chains.length - 1].deltas.push(b);
-    }
-  }
-  return chains;
-}
-
 interface BackupRestoreCardProps {
   deploymentId: string;
   backupState: BackupState;
   backupInfo: BackupInfo;
+  retention: number;
   connected: boolean;
+  stopped: boolean;
 }
 
-// The managed database's backup inventory: recovery window + point-in-time restore, a timeline of full-backup
-// chains with their incrementals (each restorable), and an on-demand "Backup now" action.
+// The managed database's backup inventory: recovery window + point-in-time restore, a git-style timeline graph
+// (branches per restore, full/incremental/now, auto vs manual, retention), and an on-demand "Backup now" action.
 export const BackupRestoreCard: React.FC<BackupRestoreCardProps> = ({
   deploymentId,
   backupState,
   backupInfo,
+  retention,
   connected,
+  stopped,
 }) => {
   const fmt = useFormatters();
   const confirm = useConfirm();
@@ -74,12 +59,13 @@ export const BackupRestoreCard: React.FC<BackupRestoreCardProps> = ({
   const restore = useRestoreDatabase();
 
   const backups = backupInfo.backups;
-  const chains = toChains(backups).reverse(); // newest chain first
   const earliest = backups.length > 0 ? backups[0].startUnix : 0;
   const repoTotal = backups.reduce((sum, b) => sum + b.repoBytes, 0);
   const [pitr, setPitr] = useState('');
   const busy = restore.isPending;
   const nowIso = new Date().toISOString();
+  // Restore is only allowed from a stopped deployment — pgBackRest refuses to restore over a running Postgres.
+  const restorable = stopped && connected && !busy;
 
   // Every restore path funnels through a destructive confirm; all data written after the target is lost.
   const confirmRestore = async (description: string, vars: { targetTime?: string; setLabel?: string }) => {
@@ -194,78 +180,29 @@ export const BackupRestoreCard: React.FC<BackupRestoreCardProps> = ({
                   variant="destructive"
                   size="sm"
                   startAdornment={<History className="size-4" />}
-                  disabled={!connected || !pitr || busy}
+                  disabled={!restorable || !pitr}
                   onClick={restoreToPitr}
                 >
                   Restore to time
                 </Button>
               </div>
+              {!stopped && (
+                <p className="text-xs text-muted-foreground">
+                  Restore is only available when the deployment is stopped — use Stop in the header first.
+                </p>
+              )}
             </div>
 
-            {/* Timeline: full-backup chains (newest first), each backup restorable */}
-            <div className="space-y-3">
-              {chains.map((chain) => (
-                <div key={chain.full.label} className="rounded-lg border">
-                  <BackupRow
-                    entry={chain.full}
-                    fmt={fmt}
-                    anchor
-                    onRestore={restoreToBackup}
-                    disabled={!connected || busy}
-                  />
-                  {chain.deltas
-                    .slice()
-                    .reverse()
-                    .map((delta) => (
-                      <BackupRow
-                        key={delta.label}
-                        entry={delta}
-                        fmt={fmt}
-                        onRestore={restoreToBackup}
-                        disabled={!connected || busy}
-                      />
-                    ))}
-                </div>
-              ))}
-            </div>
+            {/* Timeline graph: lanes per Postgres timeline, branches on restore, click a marker to restore */}
+            <BackupTimelineGraph
+              backups={backups}
+              retention={retention}
+              restorable={restorable}
+              onRestore={restoreToBackup}
+            />
           </>
         )}
       </CardContent>
     </Card>
   );
 };
-
-// One backup row inside a chain — the full is the anchor (emphasised); incrementals are indented under it.
-// Each row can be restored to (destructive, confirmed by the parent).
-const BackupRow: React.FC<{
-  entry: BackupEntry;
-  fmt: ReturnType<typeof useFormatters>;
-  onRestore: (entry: BackupEntry) => void;
-  disabled: boolean;
-  anchor?: boolean;
-}> = ({ entry, fmt, onRestore, disabled, anchor }) => (
-  <div className={`flex items-center justify-between gap-4 px-4 py-3 ${anchor ? '' : 'border-t pl-10'}`}>
-    <div className="flex items-center gap-3">
-      {anchor ? <Archive className="size-4 text-primary" /> : <Layers className="size-4 text-muted-foreground" />}
-      <div className="space-y-0.5">
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-sm">{entry.label}</span>
-          <Badge variant={anchor ? 'secondary' : 'outline'}>{BACKUP_TYPE_LABELS[entry.type]}</Badge>
-        </div>
-        <span className="text-xs text-muted-foreground">{fmt.dateTime(isoOf(entry.stopUnix)).primary}</span>
-      </div>
-    </div>
-    <div className="flex items-center gap-3">
-      <span className="font-mono text-xs tabular-nums text-muted-foreground">{humanBytes(entry.repoBytes)}</span>
-      <Button
-        variant="ghost"
-        size="sm"
-        startAdornment={<RotateCcw className="size-4" />}
-        disabled={disabled}
-        onClick={() => onRestore(entry)}
-      >
-        Restore
-      </Button>
-    </div>
-  </div>
-);

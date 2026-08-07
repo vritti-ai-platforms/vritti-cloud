@@ -332,6 +332,9 @@ export interface BackupInfo {
 
 export type BackupType = 'full' | 'diff' | 'incr';
 
+// How a backup was triggered — scheduled (ticker), manual ("Backup now"), or the initial full at enable.
+export type BackupTrigger = 'scheduled' | 'manual' | 'initial';
+
 // One pgBackRest backup set (unix-second timestamps, byte sizes).
 export interface BackupEntry {
   label: string;
@@ -340,6 +343,8 @@ export interface BackupEntry {
   stopUnix: number;
   sizeBytes: number;
   repoBytes: number;
+  timeline: number;
+  trigger: BackupTrigger;
 }
 
 export const BACKUP_TYPE_LABELS: Record<BackupType, string> = {

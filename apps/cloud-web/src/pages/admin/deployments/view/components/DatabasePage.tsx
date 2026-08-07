@@ -165,7 +165,9 @@ export const DatabasePage = () => {
           deploymentId={id}
           backupState={agent.backupState}
           backupInfo={agent.backupInfo}
+          retention={database.backup.retention}
           connected={agent.connected}
+          stopped={deployment.status === 'stopped'}
         />
       )}
 

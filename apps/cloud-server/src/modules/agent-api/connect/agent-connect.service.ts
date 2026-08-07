@@ -356,6 +356,8 @@ function toStatusReportDto(req: StatusReport): StatusReportDto {
             stopUnix: Number(b.stopUnix),
             sizeBytes: Number(b.sizeBytes),
             repoBytes: Number(b.repoBytes),
+            timeline: b.timeline,
+            trigger: b.trigger,
           })),
         }
       : undefined,

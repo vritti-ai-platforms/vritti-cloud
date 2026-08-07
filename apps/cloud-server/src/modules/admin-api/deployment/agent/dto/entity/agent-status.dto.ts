@@ -130,6 +130,12 @@ export class AgentBackupEntryDto {
 
   @ApiProperty({ description: 'Compressed bytes this backup added to the repository', example: 2097152 })
   repoBytes: number;
+
+  @ApiProperty({ description: 'Postgres timeline id (branches on each restore)', example: 1 })
+  timeline: number;
+
+  @ApiProperty({ enum: ['scheduled', 'manual', 'initial'], example: 'scheduled' })
+  trigger: string;
 }
 
 // The managed database's pgBackRest inventory surfaced to the cockpit
