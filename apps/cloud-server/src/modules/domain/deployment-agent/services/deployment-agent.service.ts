@@ -1,5 +1,4 @@
 import { createHash, timingSafeEqual } from 'node:crypto';
-import { DeploymentDomainService } from '@domain/deployment/services/deployment.service';
 import { DeploymentEventDomainService } from '@domain/deployment-event/services/deployment-event.service';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -18,6 +17,7 @@ import {
   DEPLOYMENT_AGENT_RESTORE_DB_EVENT,
   DEPLOYMENT_AGENT_RUN_BACKUP_EVENT,
   DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT,
+  DEPLOYMENT_RESTORE_AUTOSTART_EVENT,
   ENROLL_TOKEN_TTL_MS,
   RECREATABLE_SERVICES,
 } from '../deployment-agent.constants';
@@ -90,7 +90,6 @@ export class DeploymentAgentDomainService {
     private readonly agentCrypto: AgentCryptoService,
     private readonly connectivity: AgentConnectivityService,
     private readonly eventEmitter: EventEmitter2,
-    private readonly deploymentService: DeploymentDomainService,
   ) {}
 
   // Issues a one-time enroll token for a managed deployment, ensuring Keypair B exists first (admin)
@@ -101,6 +100,11 @@ export class DeploymentAgentDomainService {
         label: 'Not a Managed Deployment',
         detail: 'Enroll tokens can only be issued for managed deployments.',
       });
+    }
+    // A new token revokes the current enrollment, so refuse while an agent is live — it's only for (re)connecting
+    // a disconnected or replacement agent. This keeps a healthy agent from being kicked off by an accidental click.
+    if (this.connectivity.isConnected(deploymentId)) {
+      throw new BadRequestException('The agent is online — a new enroll token is only needed when it is disconnected.');
     }
     // Ensure the deployment signing keypair (Keypair B) exists so cloud can sign desired-states for the agent.
     await this.ensureAgentKeypair(deployment);
@@ -190,15 +194,16 @@ export class DeploymentAgentDomainService {
     if (deployment.status !== DeploymentStatusValues.stopped) {
       throw new BadRequestException('Stop the deployment before restoring the database.');
     }
-    // Push the RestoreDB command FIRST so the agent marks itself "restoring" before the auto-start below flips
-    // the desired-state to active — the agent holds that push until the restore finishes, then reconciles up.
+    // Push the RestoreDB command; the agent marks itself "restoring" so the auto-start below (flipping the
+    // deployment to active) is held by the agent until the restore finishes, then it reconciles up. Emit the
+    // command FIRST so it reaches the agent before the resulting "active" desired-state push.
     this.eventEmitter.emit(DEPLOYMENT_AGENT_RESTORE_DB_EVENT, {
       deploymentId,
       targetTime: dto.targetTime,
       setLabel: dto.setLabel,
     });
-    // Auto-start: flip the deployment back to active so it comes online recovered once the restore completes.
-    await this.deploymentService.start(deploymentId);
+    // Auto-start is a deployment-status concern (owned by the deployment domain) — hand it off via an event.
+    this.eventEmitter.emit(DEPLOYMENT_RESTORE_AUTOSTART_EVENT, deploymentId);
     const target = dto.targetTime
       ? `to ${dto.targetTime}`
       : dto.setLabel

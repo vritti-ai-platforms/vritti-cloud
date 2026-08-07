@@ -1,6 +1,9 @@
-import { DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT } from '@domain/deployment-agent/deployment-agent.constants';
+import {
+  DEPLOYMENT_DESIRED_STATE_CHANGED_EVENT,
+  DEPLOYMENT_RESTORE_AUTOSTART_EVENT,
+} from '@domain/deployment-agent/deployment-agent.constants';
 import { Injectable, Logger } from '@nestjs/common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
+import { EventEmitter2, OnEvent } from '@nestjs/event-emitter';
 import { CreateResponseDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import { BadRequestException, ConflictException, NotFoundException } from '@vritti/api-sdk/exceptions';
 import { generateSigningKeyPair } from '@vritti/api-sdk/signing';
@@ -269,6 +272,17 @@ export class DeploymentDomainService {
       success: true,
       message: `Deployment "${existing.name}" is starting — all services are coming back online.`,
     };
+  }
+
+  // Auto-start after a database restore: the agent-domain restore flow hands off the status change here (it owns
+  // deployment status). Fire-and-forget — a restore always ends with the deployment back online.
+  @OnEvent(DEPLOYMENT_RESTORE_AUTOSTART_EVENT)
+  async onRestoreAutoStart(deploymentId: string): Promise<void> {
+    try {
+      await this.start(deploymentId);
+    } catch (error) {
+      this.logger.warn(`Auto-start after restore failed for deployment ${deploymentId}: ${error}`);
+    }
   }
 
   // Loads a deployment and asserts it is agent-managed (stop/start only apply to a managed stack)

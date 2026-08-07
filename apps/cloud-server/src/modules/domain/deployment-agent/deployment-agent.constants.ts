@@ -41,6 +41,11 @@ export const BACKUP_TYPES = ['full', 'diff', 'incr'] as const;
 // managed database. The Subscribe handler turns it into a RestoreDB command down the stream.
 export const DEPLOYMENT_AGENT_RESTORE_DB_EVENT = 'deployment.agent.restore-db';
 
+// Internal event fired (payload: deploymentId) right AFTER the restore command, to auto-start the deployment so
+// it comes back online recovered. Handled by the deployment domain (which owns status) — emitted second so the
+// RestoreDB command reaches the agent before the resulting "active" desired-state push.
+export const DEPLOYMENT_RESTORE_AUTOSTART_EVENT = 'deployment.restore.autostart';
+
 // Services the agent can recreate on demand (must match the agent's spec names / reported service keys).
 export const RECREATABLE_SERVICES = [
   'postgres',

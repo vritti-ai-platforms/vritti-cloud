@@ -86,12 +86,15 @@ export const AgentTab: React.FC<AgentTabProps> = ({ deployment, agent }) => {
 
   const recheckMutation = useForceRecheckAgent();
 
-  const handleRegenerate = async () => {
+  // Issuing a token revokes any prior enrollment, so it's only offered when the agent is disconnected — to
+  // (re)connect a fresh or replacement agent. The deployment's config, secrets and signing key are already in
+  // place, so the new agent reconciles straight into it (no setup wizard).
+  const handleEnrollToken = async () => {
     const confirmed = await confirm({
-      title: 'Regenerate enroll token?',
+      title: 'Generate enroll token?',
       description:
-        'Issues a new one-time enroll token so you can reconnect an agent. Any previously issued token that was not yet used stops working.',
-      confirmLabel: 'Regenerate',
+        'Issues a one-time enroll token to connect an agent to this deployment. Deploy a new agent with it and it reconciles into the existing config — no setup wizard. Any previously issued, unused token stops working.',
+      confirmLabel: 'Generate',
     });
     if (confirmed) enrollMutation.mutate(deployment.id);
   };
@@ -180,20 +183,23 @@ export const AgentTab: React.FC<AgentTabProps> = ({ deployment, agent }) => {
             </div>
           )}
         </CardContent>
-        <CardFooter className="justify-between gap-4 border-t">
-          <Typography variant="body2" intent="muted">
-            Regenerate an enroll token to reconnect or replace the agent on this deployment.
-          </Typography>
-          <Button
-            variant="outline"
-            onClick={handleRegenerate}
-            isLoading={enrollMutation.isPending}
-            loadingText="Generating..."
-            startAdornment={<RefreshCw className="size-4" />}
-          >
-            Regenerate Enroll Token
-          </Button>
-        </CardFooter>
+        {!agent.connected && (
+          <CardFooter className="justify-between gap-4 border-t">
+            <Typography variant="body2" intent="muted">
+              The agent isn't connected. Generate an enroll token to connect a new or replacement agent — it reconnects
+              into this deployment's existing config.
+            </Typography>
+            <Button
+              variant="outline"
+              onClick={handleEnrollToken}
+              isLoading={enrollMutation.isPending}
+              loadingText="Generating..."
+              startAdornment={<RefreshCw className="size-4" />}
+            >
+              Generate Enroll Token
+            </Button>
+          </CardFooter>
+        )}
       </Card>
 
       {/* Secret store */}

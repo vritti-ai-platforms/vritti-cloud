@@ -1,7 +1,7 @@
 import { useDeployment } from '@hooks/admin/deployments';
 import { useSlugParams } from '@vritti/quantum-ui/hooks';
 import { useParams } from 'react-router-dom';
-import { AgentStreamProvider, useDeploymentAgent } from '@/providers/AgentStreamProvider';
+import { AgentStreamProvider } from '@/providers/AgentStreamProvider';
 import type { Deployment } from '@/schemas/admin/deployments';
 import { DeploymentSetupFlow } from './setup/DeploymentSetupFlow';
 import { LocalSetupFlow } from './setup/LocalSetupFlow';
@@ -19,9 +19,7 @@ const ManagedContent = ({
   deploymentSlug: string;
   id: string;
 }) => {
-  const agent = useDeploymentAgent();
-
-  if (!managedSetupComplete(deployment, agent)) {
+  if (!managedSetupComplete(deployment)) {
     return <DeploymentSetupFlow deployment={deployment} />;
   }
   return <ManagedDeploymentView deployment={deployment} deploymentSlug={deploymentSlug} id={id} />;

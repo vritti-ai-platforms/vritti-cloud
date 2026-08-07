@@ -85,10 +85,12 @@ export function secretStoreConfigured(deployment: Deployment): boolean {
   return !!deployment.spec.components.secretStore;
 }
 
-// Setup is complete once the agent is enrolled, its secret store is configured, and the signed catalog
-// has been pushed to core.
-export function managedSetupComplete(deployment: Deployment, agent: AgentStatus): boolean {
-  return agent.enrolled && secretStoreConfigured(deployment) && deployment.catalogSynced;
+// Setup is complete once the deployment's DURABLE state is in place: a secret store is configured and the
+// signed catalog has been pushed to core (which only happens after the agent fully provisioned once). This
+// intentionally does NOT depend on live enrollment — a disconnected or replaced agent stays in the cockpit
+// (re-enrolled inline from the Agent tab), instead of falling back to the first-run setup wizard.
+export function managedSetupComplete(deployment: Deployment): boolean {
+  return secretStoreConfigured(deployment) && deployment.catalogSynced;
 }
 
 export function localSetupComplete(deployment: Deployment): boolean {
