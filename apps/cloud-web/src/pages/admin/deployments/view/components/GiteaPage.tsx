@@ -87,7 +87,7 @@ export const GiteaPage = () => {
             </div>
           </CardHeader>
           <CardContent>
-            <ServicesTable services={services} emptyText="Provisioning — the gitea service will appear here shortly." />
+            <ServicesTable services={services} deploymentId={id} connected={agent.connected} emptyText="Provisioning — the gitea service will appear here shortly." />
           </CardContent>
         </Card>
       )}

@@ -9,6 +9,7 @@ import {
   ApiForceRecheck,
   ApiGetAgentStatus,
   ApiIssueEnrollToken,
+  ApiRecreateService,
   ApiStreamAgent,
   ApiStreamAgentLogs,
 } from '../docs/deployment-agent.docs';
@@ -62,6 +63,15 @@ export class DeploymentAgentController {
   forceRecheck(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`POST /admin-api/deployments/${id}/agent/recheck`);
     return this.agentService.forceRecheck(id);
+  }
+
+  // Recreates one service's container on the connected agent so it picks up the latest env/secrets
+  @Post('services/:service/recreate')
+  @HttpCode(HttpStatus.OK)
+  @ApiRecreateService()
+  recreateService(@Param('id') id: string, @Param('service') service: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/deployments/${id}/agent/services/${service}/recreate`);
+    return this.agentService.recreateService(id, service);
   }
 
   // Returns the deployment's agent status

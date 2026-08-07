@@ -222,4 +222,13 @@ export class StatusReportDto {
   @ValidateNested({ each: true })
   @Type(() => StatusEventDto)
   events?: StatusEventDto[];
+
+  @ApiProperty({
+    enum: ['off', 'local', 'local+offsite'],
+    description:
+      'Managed-DB backup topology: "off" (backups disabled), "local" (repo1 only), or "local+offsite" (repo1 + encrypted S3 repo2).',
+    example: 'local+offsite',
+  })
+  @IsString()
+  backupMode: string;
 }

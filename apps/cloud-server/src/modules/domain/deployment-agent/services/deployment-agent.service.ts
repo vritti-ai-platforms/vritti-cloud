@@ -12,8 +12,10 @@ import { DeploymentManagementTypeValues } from '@/db/schema';
 import { CryptoService } from '@/services';
 import {
   DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT,
+  DEPLOYMENT_AGENT_RECREATE_EVENT,
   DEPLOYMENT_AGENT_STATUS_CHANGED_EVENT,
   ENROLL_TOKEN_TTL_MS,
+  RECREATABLE_SERVICES,
 } from '../deployment-agent.constants';
 import type { EnrollRequestDto } from '../dto/request/enroll-request.dto';
 import type { StatusEventDto, StatusReportDto } from '../dto/request/status-report.dto';
@@ -134,6 +136,21 @@ export class DeploymentAgentDomainService {
     this.eventEmitter.emit(DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT, deploymentId);
     this.logger.log(`Requested force-recheck for deployment ${deploymentId}`);
     return { success: true, message: 'Recheck requested — the agent is reconciling now.' };
+  }
+
+  // Recreates one service's container on the connected agent so it picks up the latest env/secrets (env is
+  // baked in at container creation). Pushed as a Recreate command over the open Subscribe stream.
+  async recreateService(deploymentId: string, service: string): Promise<SuccessResponseDto> {
+    await this.requireDeployment(deploymentId);
+    if (!(RECREATABLE_SERVICES as readonly string[]).includes(service)) {
+      throw new BadRequestException(`Service "${service}" cannot be recreated.`);
+    }
+    if (!this.connectivity.isConnected(deploymentId)) {
+      throw new BadRequestException('The agent is offline. Recreate the service once it reconnects.');
+    }
+    this.eventEmitter.emit(DEPLOYMENT_AGENT_RECREATE_EVENT, { deploymentId, service });
+    this.logger.log(`Requested recreate of ${service} for deployment ${deploymentId}`);
+    return { success: true, message: `Recreation requested — ${service} will restart with the latest env.` };
   }
 
   // Completes the one-time enrollment handshake: trust-on-first-use signature + enroll token

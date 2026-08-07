@@ -14,6 +14,8 @@ import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { useDeploymentAgent } from '@/providers/AgentStreamProvider';
 import {
+  BACKUP_MODE_LABELS,
+  BACKUP_MODE_VARIANTS,
   COMPONENT_MODE_OPTIONS,
   COMPONENT_MODE_VALUES,
   type ComponentMode,
@@ -95,6 +97,15 @@ export const DatabasePage = () => {
             }
           />
           {database.backup && (
+            <DetailField
+              label="Backup mode"
+              type="string"
+              value={
+                <Badge variant={BACKUP_MODE_VARIANTS[agent.backupMode]}>{BACKUP_MODE_LABELS[agent.backupMode]}</Badge>
+              }
+            />
+          )}
+          {database.backup && (
             <DetailField label="Retention" type="string" value={`${database.backup.retention} full backups`} mono />
           )}
         </div>
@@ -172,7 +183,7 @@ export const DatabasePage = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <ServicesTable services={services} />
+          <ServicesTable services={services} deploymentId={id} connected={agent.connected} />
         </CardContent>
       </Card>
 

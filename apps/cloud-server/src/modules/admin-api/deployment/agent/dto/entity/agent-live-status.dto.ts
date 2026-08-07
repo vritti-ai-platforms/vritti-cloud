@@ -45,6 +45,12 @@ export class AgentLiveStatusDto {
   @ApiPropertyOptional({ type: AgentAcmeDelegationDto, nullable: true, description: 'Pending DNS delegation' })
   delegation: AgentAcmeDelegationDto | null;
 
+  @ApiProperty({
+    enum: ['off', 'local', 'local+offsite'],
+    description: 'Managed-DB backups: "off", "local" (repo1 only), or "local+offsite" (repo1 + encrypted S3 repo2)',
+  })
+  backupMode: string;
+
   // Maps the agent-reported StatusReport (+ the resolved agent row) to the live wire shape — no DB read
   static from(agent: DeploymentAgent, report: StatusReportDto): AgentLiveStatusDto {
     const dto = new AgentLiveStatusDto();
@@ -62,6 +68,7 @@ export class AgentLiveStatusDto {
       issuedAt: new Date(cert.issuedAt),
     }));
     dto.delegation = report.delegation ?? null;
+    dto.backupMode = report.backupMode;
     return dto;
   }
 }

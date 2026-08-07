@@ -38,7 +38,7 @@ export const CoreStackPage = () => {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <ServicesTable services={services} />
+          <ServicesTable services={services} deploymentId={id} connected={agent.connected} />
           <Typography variant="body2" intent="muted">
             This is the fixed stack — the Database, Edge &amp; TLS, and Gitea components decide which optional pieces
             are added.

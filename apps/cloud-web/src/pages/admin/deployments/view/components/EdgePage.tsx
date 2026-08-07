@@ -229,7 +229,7 @@ export const EdgePage = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <ServicesTable services={services} />
+          <ServicesTable services={services} deploymentId={id} connected={agent.connected} />
         </CardContent>
       </Card>
 

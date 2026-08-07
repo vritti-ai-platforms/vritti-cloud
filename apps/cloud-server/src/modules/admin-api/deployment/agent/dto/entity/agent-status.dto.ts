@@ -158,6 +158,12 @@ export class AgentStatusDto {
   })
   delegation: AgentAcmeDelegationDto | null;
 
+  @ApiProperty({
+    enum: ['off', 'local', 'local+offsite'],
+    description: 'Managed-DB backups: "off", "local" (repo1 only), or "local+offsite" (repo1 + encrypted S3 repo2)',
+  })
+  backupMode: string;
+
   // Builds the seed from the deployment config + enrollment row + live connectivity. Live heartbeat fields
   // start empty — the SSE stream fills them (and cloud never persisted them).
   static from(
@@ -180,6 +186,7 @@ export class AgentStatusDto {
     dto.host = null;
     dto.certificates = [];
     dto.delegation = null;
+    dto.backupMode = 'off';
     return dto;
   }
 }

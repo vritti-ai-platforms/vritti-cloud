@@ -1,8 +1,11 @@
+import { useRecreateService } from '@hooks/admin/deployments';
 import { Badge } from '@vritti/quantum-ui/Badge';
-import { StringCell } from '@vritti/quantum-ui/DataTable';
+import { RowActions, StringCell } from '@vritti/quantum-ui/DataTable';
+import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { Typography } from '@vritti/quantum-ui/Typography';
+import { RotateCw } from 'lucide-react';
 import type React from 'react';
-import type { ServiceStatus } from '@/schemas/admin/deployments';
+import { RECREATABLE_SERVICES, type ServiceStatus } from '@/schemas/admin/deployments';
 
 function titleCase(value: string) {
   return value.charAt(0).toUpperCase() + value.slice(1);
@@ -28,11 +31,32 @@ function healthVariant(health: string): 'success' | 'warning' | 'destructive' | 
 
 interface ServicesTableProps {
   services: ServiceStatus[];
+  deploymentId: string;
+  connected: boolean;
   emptyText?: string;
 }
 
 // Shared live health table fed by the agent's reported services (already filtered by component).
-export const ServicesTable: React.FC<ServicesTableProps> = ({ services, emptyText = 'No services reported yet' }) => {
+export const ServicesTable: React.FC<ServicesTableProps> = ({
+  services,
+  deploymentId,
+  connected,
+  emptyText = 'No services reported yet',
+}) => {
+  const confirm = useConfirm();
+  const recreate = useRecreateService();
+
+  const handleRecreate = async (service: string) => {
+    const confirmed = await confirm({
+      title: `Recreate ${service}?`,
+      description:
+        'The container is recreated with the latest env from Infisical. Expect brief downtime for this service.',
+      confirmLabel: 'Recreate',
+      variant: 'destructive',
+    });
+    if (confirmed) recreate.mutate({ id: deploymentId, service });
+  };
+
   if (services.length === 0) {
     return (
       <Typography variant="body2" intent="muted">
@@ -51,6 +75,7 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({ services, emptyTex
             <th className="px-4 py-2 font-medium">Health</th>
             <th className="px-4 py-2 font-medium">CPU</th>
             <th className="px-4 py-2 font-medium">Memory</th>
+            <th className="px-4 py-2" />
           </tr>
         </thead>
         <tbody>
@@ -69,6 +94,20 @@ export const ServicesTable: React.FC<ServicesTableProps> = ({ services, emptyTex
               </td>
               <td className="px-4 py-2 font-mono">{service.cpuPercent.toFixed(1)}%</td>
               <td className="px-4 py-2 font-mono">{gb(service.memoryBytes)} GB</td>
+              <td className="px-4 py-2 text-right">
+                <RowActions
+                  actions={[
+                    {
+                      id: 'recreate',
+                      icon: RotateCw,
+                      label: 'Recreate',
+                      hidden: !RECREATABLE_SERVICES.includes(service.service),
+                      disabled: !connected || recreate.isPending,
+                      onClick: () => handleRecreate(service.service),
+                    },
+                  ]}
+                />
+              </td>
             </tr>
           ))}
         </tbody>

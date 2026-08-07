@@ -4,6 +4,7 @@ import {
   AGENT_SUBSCRIBE_KEEPALIVE_MS,
   DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT,
   DEPLOYMENT_AGENT_LOG_LINE_EVENT,
+  DEPLOYMENT_AGENT_RECREATE_EVENT,
   DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT,
   DEPLOYMENT_AGENT_START_LOGS_EVENT,
   DEPLOYMENT_AGENT_STOP_LOGS_EVENT,
@@ -143,8 +144,7 @@ export class AgentConnectService {
         push({ msg: { case: 'command', value: { kind: { case: 'requestStatus', value: {} } } } });
     };
     const onForceRecheck = (id: string): void => {
-      if (id === deploymentId)
-        push({ msg: { case: 'command', value: { kind: { case: 'forceRecheck', value: {} } } } });
+      if (id === deploymentId) push({ msg: { case: 'command', value: { kind: { case: 'forceRecheck', value: {} } } } });
     };
     const onStartLogs = (p: { deploymentId: string; target: string; tailLines?: number }): void => {
       if (p.deploymentId !== deploymentId) return;
@@ -159,6 +159,10 @@ export class AgentConnectService {
       if (p.deploymentId !== deploymentId) return;
       push({ msg: { case: 'command', value: { kind: { case: 'stopLogs', value: { target: p.target } } } } });
     };
+    const onRecreate = (p: { deploymentId: string; service: string }): void => {
+      if (p.deploymentId !== deploymentId) return;
+      push({ msg: { case: 'command', value: { kind: { case: 'recreate', value: { service: p.service } } } } });
+    };
     const keepalive = setInterval(() => {
       push({ msg: { case: 'keepAlive', value: { unixTs: BigInt(Math.floor(Date.now() / 1000)) } } });
     }, AGENT_SUBSCRIBE_KEEPALIVE_MS);
@@ -172,6 +176,7 @@ export class AgentConnectService {
     this.eventEmitter.on(DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT, onForceRecheck);
     this.eventEmitter.on(DEPLOYMENT_AGENT_START_LOGS_EVENT, onStartLogs);
     this.eventEmitter.on(DEPLOYMENT_AGENT_STOP_LOGS_EVENT, onStopLogs);
+    this.eventEmitter.on(DEPLOYMENT_AGENT_RECREATE_EVENT, onRecreate);
     ctx.signal.addEventListener('abort', onAbort, { once: true });
 
     try {
@@ -196,6 +201,7 @@ export class AgentConnectService {
       this.eventEmitter.off(DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT, onForceRecheck);
       this.eventEmitter.off(DEPLOYMENT_AGENT_START_LOGS_EVENT, onStartLogs);
       this.eventEmitter.off(DEPLOYMENT_AGENT_STOP_LOGS_EVENT, onStopLogs);
+      this.eventEmitter.off(DEPLOYMENT_AGENT_RECREATE_EVENT, onRecreate);
       ctx.signal.removeEventListener('abort', onAbort);
       this.connectivity.markDisconnected(deploymentId);
     }
@@ -321,5 +327,6 @@ function toStatusReportDto(req: StatusReport): StatusReportDto {
         }
       : null,
     events,
+    backupMode: req.backupMode,
   };
 }

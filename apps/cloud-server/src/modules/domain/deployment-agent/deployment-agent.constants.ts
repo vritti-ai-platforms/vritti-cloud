@@ -25,6 +25,22 @@ export const DEPLOYMENT_AGENT_REQUEST_STATUS_EVENT = 'deployment.agent.request-s
 // command down the stream; the "Recheck now" admin action emits it (avoids waiting on the 5-min resync).
 export const DEPLOYMENT_AGENT_FORCE_RECHECK_EVENT = 'deployment.agent.force-recheck';
 
+// Internal event fired (payload: { deploymentId, service }) to recreate ONE service's container so it picks up
+// the latest env/secrets. The Subscribe handler turns it into a Recreate command down the stream; the
+// per-service "Recreate" admin action emits it.
+export const DEPLOYMENT_AGENT_RECREATE_EVENT = 'deployment.agent.recreate';
+
+// Services the agent can recreate on demand (must match the agent's spec names / reported service keys).
+export const RECREATABLE_SERVICES = [
+  'postgres',
+  'redis',
+  'nats',
+  'commerce-service',
+  'core-server',
+  'gitea',
+  'nginx',
+] as const;
+
 // Grace window (ms) before a dropped Subscribe stream is reported as offline — absorbs the agent's brief
 // reconnect backoff so the cockpit doesn't flap "offline" on a routine reconnect.
 export const AGENT_DISCONNECT_GRACE_MS = 6_000;

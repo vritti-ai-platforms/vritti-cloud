@@ -265,6 +265,8 @@ export interface ServiceStatus {
   memoryBytes: number;
 }
 
+export const RECREATABLE_SERVICES = ['postgres', 'redis', 'nats', 'commerce-service', 'core-server', 'gitea', 'nginx'];
+
 // One append-only timeline event surfaced from the agent's reconcile transitions.
 export interface DeploymentEvent {
   id: string;
@@ -317,7 +319,22 @@ export interface AgentStatus {
   host: HostMetrics | null;
   certificates: Certificate[];
   delegation: AcmeDelegation | null;
+  backupMode: BackupMode;
 }
+
+export type BackupMode = 'off' | 'local' | 'local+offsite';
+
+export const BACKUP_MODE_LABELS: Record<BackupMode, string> = {
+  off: 'Off',
+  local: 'Local only',
+  'local+offsite': 'Local + Offsite',
+};
+
+export const BACKUP_MODE_VARIANTS: Record<BackupMode, 'success' | 'warning' | 'secondary'> = {
+  off: 'secondary',
+  local: 'warning',
+  'local+offsite': 'success',
+};
 
 // One tailed container log line streamed to the browser over the logs SSE stream.
 export interface LogLine {

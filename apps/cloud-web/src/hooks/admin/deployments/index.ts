@@ -7,6 +7,7 @@ export { deploymentActivityQueryKey, useDeploymentActivity } from './useDeployme
 export { useDeployments } from './useDeployments';
 export { useForceRecheckAgent } from './useForceRecheckAgent';
 export { useIssueEnrollToken } from './useIssueEnrollToken';
+export { useRecreateService } from './useRecreateService';
 export { useRegenerateSigningKey } from './useRegenerateSigningKey';
 export { useSyncDeploymentCatalog } from './useSyncDeploymentCatalog';
 export { useUpdateDeployment } from './useUpdateDeployment';

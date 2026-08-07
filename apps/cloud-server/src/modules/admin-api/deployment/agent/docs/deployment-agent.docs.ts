@@ -19,6 +19,22 @@ export function ApiForceRecheck() {
   );
 }
 
+export function ApiRecreateService() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Recreate one service’s container',
+      description:
+        'Pushes a Recreate command down the agent’s open stream so the named service’s container is rebuilt, picking up the latest env/secrets from Infisical. Requires the agent to be online.',
+    }),
+    ApiParam({ name: 'id', description: 'Deployment UUID', example: '550e8400-e29b-41d4-a716-446655440000' }),
+    ApiParam({ name: 'service', description: 'Service key', example: 'core-server' }),
+    ApiResponse({ status: 200, description: 'Recreate requested.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Agent is offline or the service is not recreatable.' }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
+    ApiResponse({ status: 404, description: 'Deployment not found.' }),
+  );
+}
+
 export function ApiIssueEnrollToken() {
   return applyDecorators(
     ApiOperation({

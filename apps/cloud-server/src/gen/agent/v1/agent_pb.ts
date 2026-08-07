@@ -25,7 +25,7 @@ import type { Message } from "@bufbuild/protobuf";
  * Describes the file agent/v1/agent.proto.
  */
 export const file_agent_v1_agent: GenFile = /*@__PURE__*/
-  fileDesc("ChRhZ2VudC92MS9hZ2VudC5wcm90bxIIYWdlbnQudjEihQEKDUVucm9sbFJlcXVlc3QSFQoNZGVwbG95bWVudF9pZBgBIAEoCRIUCgxlbnJvbGxfdG9rZW4YAiABKAkSFwoPc2lnbmluZ19wdWJfa2V5GAMgASgJEhcKD3NlYWxpbmdfcHViX2tleRgEIAEoCRIVCg1hZ2VudF92ZXJzaW9uGAUgASgJIm4KDkVucm9sbFJlc3BvbnNlEhgKEGFnZW50X2NyZWRlbnRpYWwYASABKAkSGgoSZGVwbG95bWVudF9wdWJfa2V5GAIgASgJEg0KBW5vbmNlGAMgASgJEhcKD25vbmNlX3NpZ25hdHVyZRgEIAEoCSJDChBTdWJzY3JpYmVSZXF1ZXN0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSGAoQa25vd25fZ2VuZXJhdGlvbhgCIAEoAyI8ChJTaWduZWREZXNpcmVkU3RhdGUSEwoLcGF5bG9hZF9iNjQYASABKAkSEQoJc2lnbmF0dXJlGAIgASgJIp4BCg1TZXJ2ZXJNZXNzYWdlEjUKDWRlc2lyZWRfc3RhdGUYASABKAsyHC5hZ2VudC52MS5TaWduZWREZXNpcmVkU3RhdGVIABIkCgdjb21tYW5kGAIgASgLMhEuYWdlbnQudjEuQ29tbWFuZEgAEikKCmtlZXBfYWxpdmUYAyABKAsyEy5hZ2VudC52MS5LZWVwQWxpdmVIAEIFCgNtc2ciHAoJS2VlcEFsaXZlEg8KB3VuaXhfdHMYASABKAMiyQEKB0NvbW1hbmQSLwoNZm9yY2VfcmVjaGVjaxgBIAEoCzIWLmFnZW50LnYxLkZvcmNlUmVjaGVja0gAEjEKDnJlcXVlc3Rfc3RhdHVzGAIgASgLMhcuYWdlbnQudjEuUmVxdWVzdFN0YXR1c0gAEikKCnN0YXJ0X2xvZ3MYAyABKAsyEy5hZ2VudC52MS5TdGFydExvZ3NIABInCglzdG9wX2xvZ3MYBCABKAsyEi5hZ2VudC52MS5TdG9wTG9nc0gAQgYKBGtpbmQiDgoMRm9yY2VSZWNoZWNrIg8KDVJlcXVlc3RTdGF0dXMiPgoJU3RhcnRMb2dzEg4KBnRhcmdldBgBIAEoCRISCgp0YWlsX2xpbmVzGAIgASgFEg0KBXNpbmNlGAMgASgJIhoKCFN0b3BMb2dzEg4KBnRhcmdldBgBIAEoCSK2AgoMU3RhdHVzUmVwb3J0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSEgoKZ2VuZXJhdGlvbhgCIAEoAxInCgpjb25kaXRpb25zGAMgAygLMhMuYWdlbnQudjEuQ29uZGl0aW9uEikKCHNlcnZpY2VzGAQgAygLMhcuYWdlbnQudjEuU2VydmljZVN0YXR1cxIjCgRob3N0GAUgASgLMhUuYWdlbnQudjEuSG9zdE1ldHJpY3MSKgoMY2VydGlmaWNhdGVzGAYgAygLMhQuYWdlbnQudjEuQ2VydFJlcG9ydBI1CgpkZWxlZ2F0aW9uGAcgASgLMiEuYWdlbnQudjEuQWNtZUNoYWxsZW5nZURlbGVnYXRpb24SHwoGZXZlbnRzGAggAygLMg8uYWdlbnQudjEuRXZlbnQiCwoJUmVwb3J0QWNrImwKCUNvbmRpdGlvbhIMCgR0eXBlGAEgASgJEg4KBnN0YXR1cxgCIAEoCRIOCgZyZWFzb24YAyABKAkSDwoHbWVzc2FnZRgEIAEoCRIRCgljb21wb25lbnQYBSABKAkSDQoFc2luY2UYBiABKAkiiwEKDVNlcnZpY2VTdGF0dXMSEQoJY29tcG9uZW50GAEgASgJEg8KB3NlcnZpY2UYAiABKAkSDAoEbmFtZRgDIAEoCRINCgVzdGF0ZRgEIAEoCRIOCgZoZWFsdGgYBSABKAkSEwoLY3B1X3BlcmNlbnQYBiABKAESFAoMbWVtb3J5X2J5dGVzGAcgASgEIrgBCgtIb3N0TWV0cmljcxITCgtjcHVfcGVyY2VudBgBIAEoARIXCg9tZW1fdG90YWxfYnl0ZXMYAiABKAQSFgoObWVtX3VzZWRfYnl0ZXMYAyABKAQSGAoQZGlza190b3RhbF9ieXRlcxgEIAEoBBIXCg9kaXNrX3VzZWRfYnl0ZXMYBSABKAQSMAoOZGlza19icmVha2Rvd24YBiADKAsyGC5hZ2VudC52MS5EaXNrVXNhZ2VFbnRyeSItCg5EaXNrVXNhZ2VFbnRyeRIMCgRuYW1lGAEgASgJEg0KBWJ5dGVzGAIgASgEIkAKCkNlcnRSZXBvcnQSDAoEaG9zdBgBIAEoCRIRCglub3RfYWZ0ZXIYAiABKAkSEQoJaXNzdWVkX2F0GAMgASgJImwKF0FjbWVDaGFsbGVuZ2VEZWxlZ2F0aW9uEgwKBG5hbWUYASABKAkSDgoGdGFyZ2V0GAIgASgJEgwKBHpvbmUYAyABKAkSEgoKbmFtZXNlcnZlchgEIAEoCRIRCglzZXJ2ZXJfaXAYBSABKAkiSgoFRXZlbnQSDQoFbGV2ZWwYASABKAkSEQoJY29tcG9uZW50GAIgASgJEg4KBnJlYXNvbhgDIAEoCRIPCgdtZXNzYWdlGAQgASgJIkMKB0xvZ0xpbmUSDgoGdGFyZ2V0GAEgASgJEg4KBnN0cmVhbRgCIAEoCRIKCgJ0cxgDIAEoCRIMCgRsaW5lGAQgASgJIiwKCExvZ0JhdGNoEiAKBWxpbmVzGAEgAygLMhEuYWdlbnQudjEuTG9nTGluZSINCgtQdXNoTG9nc0FjazKDAgoMQWdlbnRTZXJ2aWNlEjsKBkVucm9sbBIXLmFnZW50LnYxLkVucm9sbFJlcXVlc3QaGC5hZ2VudC52MS5FbnJvbGxSZXNwb25zZRJCCglTdWJzY3JpYmUSGi5hZ2VudC52MS5TdWJzY3JpYmVSZXF1ZXN0GhcuYWdlbnQudjEuU2VydmVyTWVzc2FnZTABEjsKDFJlcG9ydFN0YXR1cxIWLmFnZW50LnYxLlN0YXR1c1JlcG9ydBoTLmFnZW50LnYxLlJlcG9ydEFjaxI1CghQdXNoTG9ncxISLmFnZW50LnYxLkxvZ0JhdGNoGhUuYWdlbnQudjEuUHVzaExvZ3NBY2tiBnByb3RvMw");
+  fileDesc("ChRhZ2VudC92MS9hZ2VudC5wcm90bxIIYWdlbnQudjEihQEKDUVucm9sbFJlcXVlc3QSFQoNZGVwbG95bWVudF9pZBgBIAEoCRIUCgxlbnJvbGxfdG9rZW4YAiABKAkSFwoPc2lnbmluZ19wdWJfa2V5GAMgASgJEhcKD3NlYWxpbmdfcHViX2tleRgEIAEoCRIVCg1hZ2VudF92ZXJzaW9uGAUgASgJIm4KDkVucm9sbFJlc3BvbnNlEhgKEGFnZW50X2NyZWRlbnRpYWwYASABKAkSGgoSZGVwbG95bWVudF9wdWJfa2V5GAIgASgJEg0KBW5vbmNlGAMgASgJEhcKD25vbmNlX3NpZ25hdHVyZRgEIAEoCSJDChBTdWJzY3JpYmVSZXF1ZXN0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSGAoQa25vd25fZ2VuZXJhdGlvbhgCIAEoAyI8ChJTaWduZWREZXNpcmVkU3RhdGUSEwoLcGF5bG9hZF9iNjQYASABKAkSEQoJc2lnbmF0dXJlGAIgASgJIp4BCg1TZXJ2ZXJNZXNzYWdlEjUKDWRlc2lyZWRfc3RhdGUYASABKAsyHC5hZ2VudC52MS5TaWduZWREZXNpcmVkU3RhdGVIABIkCgdjb21tYW5kGAIgASgLMhEuYWdlbnQudjEuQ29tbWFuZEgAEikKCmtlZXBfYWxpdmUYAyABKAsyEy5hZ2VudC52MS5LZWVwQWxpdmVIAEIFCgNtc2ciHAoJS2VlcEFsaXZlEg8KB3VuaXhfdHMYASABKAMi8QEKB0NvbW1hbmQSLwoNZm9yY2VfcmVjaGVjaxgBIAEoCzIWLmFnZW50LnYxLkZvcmNlUmVjaGVja0gAEjEKDnJlcXVlc3Rfc3RhdHVzGAIgASgLMhcuYWdlbnQudjEuUmVxdWVzdFN0YXR1c0gAEikKCnN0YXJ0X2xvZ3MYAyABKAsyEy5hZ2VudC52MS5TdGFydExvZ3NIABInCglzdG9wX2xvZ3MYBCABKAsyEi5hZ2VudC52MS5TdG9wTG9nc0gAEiYKCHJlY3JlYXRlGAUgASgLMhIuYWdlbnQudjEuUmVjcmVhdGVIAEIGCgRraW5kIg4KDEZvcmNlUmVjaGVjayIPCg1SZXF1ZXN0U3RhdHVzIj4KCVN0YXJ0TG9ncxIOCgZ0YXJnZXQYASABKAkSEgoKdGFpbF9saW5lcxgCIAEoBRINCgVzaW5jZRgDIAEoCSIaCghTdG9wTG9ncxIOCgZ0YXJnZXQYASABKAkiGwoIUmVjcmVhdGUSDwoHc2VydmljZRgBIAEoCSLLAgoMU3RhdHVzUmVwb3J0EhUKDWRlcGxveW1lbnRfaWQYASABKAkSEgoKZ2VuZXJhdGlvbhgCIAEoAxInCgpjb25kaXRpb25zGAMgAygLMhMuYWdlbnQudjEuQ29uZGl0aW9uEikKCHNlcnZpY2VzGAQgAygLMhcuYWdlbnQudjEuU2VydmljZVN0YXR1cxIjCgRob3N0GAUgASgLMhUuYWdlbnQudjEuSG9zdE1ldHJpY3MSKgoMY2VydGlmaWNhdGVzGAYgAygLMhQuYWdlbnQudjEuQ2VydFJlcG9ydBI1CgpkZWxlZ2F0aW9uGAcgASgLMiEuYWdlbnQudjEuQWNtZUNoYWxsZW5nZURlbGVnYXRpb24SHwoGZXZlbnRzGAggAygLMg8uYWdlbnQudjEuRXZlbnQSEwoLYmFja3VwX21vZGUYCSABKAkiCwoJUmVwb3J0QWNrImwKCUNvbmRpdGlvbhIMCgR0eXBlGAEgASgJEg4KBnN0YXR1cxgCIAEoCRIOCgZyZWFzb24YAyABKAkSDwoHbWVzc2FnZRgEIAEoCRIRCgljb21wb25lbnQYBSABKAkSDQoFc2luY2UYBiABKAkiiwEKDVNlcnZpY2VTdGF0dXMSEQoJY29tcG9uZW50GAEgASgJEg8KB3NlcnZpY2UYAiABKAkSDAoEbmFtZRgDIAEoCRINCgVzdGF0ZRgEIAEoCRIOCgZoZWFsdGgYBSABKAkSEwoLY3B1X3BlcmNlbnQYBiABKAESFAoMbWVtb3J5X2J5dGVzGAcgASgEIrgBCgtIb3N0TWV0cmljcxITCgtjcHVfcGVyY2VudBgBIAEoARIXCg9tZW1fdG90YWxfYnl0ZXMYAiABKAQSFgoObWVtX3VzZWRfYnl0ZXMYAyABKAQSGAoQZGlza190b3RhbF9ieXRlcxgEIAEoBBIXCg9kaXNrX3VzZWRfYnl0ZXMYBSABKAQSMAoOZGlza19icmVha2Rvd24YBiADKAsyGC5hZ2VudC52MS5EaXNrVXNhZ2VFbnRyeSItCg5EaXNrVXNhZ2VFbnRyeRIMCgRuYW1lGAEgASgJEg0KBWJ5dGVzGAIgASgEIkAKCkNlcnRSZXBvcnQSDAoEaG9zdBgBIAEoCRIRCglub3RfYWZ0ZXIYAiABKAkSEQoJaXNzdWVkX2F0GAMgASgJImwKF0FjbWVDaGFsbGVuZ2VEZWxlZ2F0aW9uEgwKBG5hbWUYASABKAkSDgoGdGFyZ2V0GAIgASgJEgwKBHpvbmUYAyABKAkSEgoKbmFtZXNlcnZlchgEIAEoCRIRCglzZXJ2ZXJfaXAYBSABKAkiSgoFRXZlbnQSDQoFbGV2ZWwYASABKAkSEQoJY29tcG9uZW50GAIgASgJEg4KBnJlYXNvbhgDIAEoCRIPCgdtZXNzYWdlGAQgASgJIkMKB0xvZ0xpbmUSDgoGdGFyZ2V0GAEgASgJEg4KBnN0cmVhbRgCIAEoCRIKCgJ0cxgDIAEoCRIMCgRsaW5lGAQgASgJIiwKCExvZ0JhdGNoEiAKBWxpbmVzGAEgAygLMhEuYWdlbnQudjEuTG9nTGluZSINCgtQdXNoTG9nc0FjazKDAgoMQWdlbnRTZXJ2aWNlEjsKBkVucm9sbBIXLmFnZW50LnYxLkVucm9sbFJlcXVlc3QaGC5hZ2VudC52MS5FbnJvbGxSZXNwb25zZRJCCglTdWJzY3JpYmUSGi5hZ2VudC52MS5TdWJzY3JpYmVSZXF1ZXN0GhcuYWdlbnQudjEuU2VydmVyTWVzc2FnZTABEjsKDFJlcG9ydFN0YXR1cxIWLmFnZW50LnYxLlN0YXR1c1JlcG9ydBoTLmFnZW50LnYxLlJlcG9ydEFjaxI1CghQdXNoTG9ncxISLmFnZW50LnYxLkxvZ0JhdGNoGhUuYWdlbnQudjEuUHVzaExvZ3NBY2tiBnByb3RvMw");
 
 /**
  * EnrollRequest presents the one-time token and the agent's fresh public keys.
@@ -263,6 +263,14 @@ export type Command = Message<"agent.v1.Command"> & {
      */
     value: StopLogs;
     case: "stopLogs";
+  } | {
+    /**
+     * recreate one service's container so it picks up the latest env/secrets
+     *
+     * @generated from field: agent.v1.Recreate recreate = 5;
+     */
+    value: Recreate;
+    case: "recreate";
   } | { case: undefined; value?: undefined };
 };
 
@@ -358,6 +366,27 @@ export const StopLogsSchema: GenMessage<StopLogs> = /*@__PURE__*/
   messageDesc(file_agent_v1_agent, 10);
 
 /**
+ * Recreate asks the agent to recreate one service's container so it picks up the latest env/secrets
+ * (env is baked in at container creation). service is the logical key: core-server, redis, commerce-service,
+ * gitea, postgres, nats, nginx, ...
+ *
+ * @generated from message agent.v1.Recreate
+ */
+export type Recreate = Message<"agent.v1.Recreate"> & {
+  /**
+   * @generated from field: string service = 1;
+   */
+  service: string;
+};
+
+/**
+ * Describes the message agent.v1.Recreate.
+ * Use `create(RecreateSchema)` to create a new message.
+ */
+export const RecreateSchema: GenMessage<Recreate> = /*@__PURE__*/
+  messageDesc(file_agent_v1_agent, 11);
+
+/**
  * StatusReport is the periodic heartbeat the agent pushes to cloud.
  *
  * @generated from message agent.v1.StatusReport
@@ -416,6 +445,13 @@ export type StatusReport = Message<"agent.v1.StatusReport"> & {
    * @generated from field: repeated agent.v1.Event events = 8;
    */
   events: Event[];
+
+  /**
+   * managed-DB backups: "off" | "local" | "local+offsite"
+   *
+   * @generated from field: string backup_mode = 9;
+   */
+  backupMode: string;
 };
 
 /**
@@ -423,7 +459,7 @@ export type StatusReport = Message<"agent.v1.StatusReport"> & {
  * Use `create(StatusReportSchema)` to create a new message.
  */
 export const StatusReportSchema: GenMessage<StatusReport> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 11);
+  messageDesc(file_agent_v1_agent, 12);
 
 /**
  * ReportAck is the (empty) heartbeat acknowledgement.
@@ -438,7 +474,7 @@ export type ReportAck = Message<"agent.v1.ReportAck"> & {
  * Use `create(ReportAckSchema)` to create a new message.
  */
 export const ReportAckSchema: GenMessage<ReportAck> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 12);
+  messageDesc(file_agent_v1_agent, 13);
 
 /**
  * Condition is one reconcile-condition (Kubernetes-style status).
@@ -492,7 +528,7 @@ export type Condition = Message<"agent.v1.Condition"> & {
  * Use `create(ConditionSchema)` to create a new message.
  */
 export const ConditionSchema: GenMessage<Condition> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 13);
+  messageDesc(file_agent_v1_agent, 14);
 
 /**
  * ServiceStatus is a single service's runtime status, tagged with its component.
@@ -543,7 +579,7 @@ export type ServiceStatus = Message<"agent.v1.ServiceStatus"> & {
  * Use `create(ServiceStatusSchema)` to create a new message.
  */
 export const ServiceStatusSchema: GenMessage<ServiceStatus> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 14);
+  messageDesc(file_agent_v1_agent, 15);
 
 /**
  * HostMetrics is the VM's resource usage at heartbeat time (whole-VM, not per-container).
@@ -590,7 +626,7 @@ export type HostMetrics = Message<"agent.v1.HostMetrics"> & {
  * Use `create(HostMetricsSchema)` to create a new message.
  */
 export const HostMetricsSchema: GenMessage<HostMetrics> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 15);
+  messageDesc(file_agent_v1_agent, 16);
 
 /**
  * DiskUsageEntry is one labelled slice of the VM's on-disk usage.
@@ -616,7 +652,7 @@ export type DiskUsageEntry = Message<"agent.v1.DiskUsageEntry"> & {
  * Use `create(DiskUsageEntrySchema)` to create a new message.
  */
 export const DiskUsageEntrySchema: GenMessage<DiskUsageEntry> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 16);
+  messageDesc(file_agent_v1_agent, 17);
 
 /**
  * CertReport is the state of one obtained certificate, reported back to cloud (system of record).
@@ -649,7 +685,7 @@ export type CertReport = Message<"agent.v1.CertReport"> & {
  * Use `create(CertReportSchema)` to create a new message.
  */
 export const CertReportSchema: GenMessage<CertReport> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 17);
+  messageDesc(file_agent_v1_agent, 18);
 
 /**
  * AcmeChallengeDelegation is the DNS the operator must add so the agent's acme-dns can answer the
@@ -700,7 +736,7 @@ export type AcmeChallengeDelegation = Message<"agent.v1.AcmeChallengeDelegation"
  * Use `create(AcmeChallengeDelegationSchema)` to create a new message.
  */
 export const AcmeChallengeDelegationSchema: GenMessage<AcmeChallengeDelegation> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 18);
+  messageDesc(file_agent_v1_agent, 19);
 
 /**
  * Event is one notable transition the agent asks cloud to record on the deployment timeline.
@@ -740,7 +776,7 @@ export type Event = Message<"agent.v1.Event"> & {
  * Use `create(EventSchema)` to create a new message.
  */
 export const EventSchema: GenMessage<Event> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 19);
+  messageDesc(file_agent_v1_agent, 20);
 
 /**
  * LogLine is one tailed container log line, pushed up while a browser is watching.
@@ -780,7 +816,7 @@ export type LogLine = Message<"agent.v1.LogLine"> & {
  * Use `create(LogLineSchema)` to create a new message.
  */
 export const LogLineSchema: GenMessage<LogLine> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 20);
+  messageDesc(file_agent_v1_agent, 21);
 
 /**
  * LogBatch is a chunk of tailed lines the agent POSTs (unary) while a browser watches a container. Unary,
@@ -802,7 +838,7 @@ export type LogBatch = Message<"agent.v1.LogBatch"> & {
  * Use `create(LogBatchSchema)` to create a new message.
  */
 export const LogBatchSchema: GenMessage<LogBatch> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 21);
+  messageDesc(file_agent_v1_agent, 22);
 
 /**
  * PushLogsAck is the (empty) acknowledgement for a pushed batch.
@@ -817,7 +853,7 @@ export type PushLogsAck = Message<"agent.v1.PushLogsAck"> & {
  * Use `create(PushLogsAckSchema)` to create a new message.
  */
 export const PushLogsAckSchema: GenMessage<PushLogsAck> = /*@__PURE__*/
-  messageDesc(file_agent_v1_agent, 22);
+  messageDesc(file_agent_v1_agent, 23);
 
 /**
  * AgentService is the single Connect service the agent talks to.

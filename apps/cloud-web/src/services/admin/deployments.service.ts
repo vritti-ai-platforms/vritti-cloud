@@ -63,6 +63,13 @@ export function forceRecheckAgent(id: string): Promise<SuccessResponse> {
     .then((r) => r.data);
 }
 
+// Recreates one service's container on the connected agent so it picks up the latest env from Infisical
+export function recreateService({ id, service }: { id: string; service: string }): Promise<SuccessResponse> {
+  return axios
+    .post<SuccessResponse>(`admin-api/deployments/${id}/agent/services/${service}/recreate`)
+    .then((r) => r.data);
+}
+
 // Fetches the live agent connection and reconciliation status for a deployment
 export function getAgentStatus(id: string): Promise<AgentStatus> {
   return axios.get<AgentStatus>(`admin-api/deployments/${id}/agent`).then((r) => r.data);
