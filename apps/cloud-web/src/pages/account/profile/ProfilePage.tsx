@@ -43,6 +43,9 @@ export const ProfilePage: React.FC = () => {
       locale: profile?.locale || 'en',
       timezone: profile?.timezone || 'UTC',
     },
+    // `values` resets the form whenever the profile query refetches — keep fields the user
+    // has actually touched, so a pending profilePicture selection survives an invalidation
+    resetOptions: { keepDirtyValues: true },
   });
 
   const handleCancel = () => {

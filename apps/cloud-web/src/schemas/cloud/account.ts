@@ -8,7 +8,10 @@ export const profileSchema = z.object({
   phone: zodPhoneField({ required: 'Please enter a valid phone number' }),
   locale: z.string(),
   timezone: z.string(),
-  profilePicture: z.any().optional(),
+  profilePicture: z
+    .instanceof(File)
+    .refine((f) => f.size <= 2 * 1024 * 1024, 'File must be under 2MB')
+    .optional(),
 });
 
 export type ProfileFormData = z.infer<typeof profileSchema>;

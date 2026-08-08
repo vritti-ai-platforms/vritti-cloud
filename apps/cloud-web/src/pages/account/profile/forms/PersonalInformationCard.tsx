@@ -1,5 +1,4 @@
 import type { UseMutationResult } from '@tanstack/react-query';
-import { Avatar, AvatarFallback, AvatarImage } from '@vritti/quantum-ui/Avatar';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { FieldGroup, Form } from '@vritti/quantum-ui/Form';
@@ -30,10 +29,6 @@ export const PersonalInformationCard: React.FC<PersonalInformationCardProps> = (
   onChangePhone,
   profile,
 }) => {
-  const displayName = form.watch('displayName') || '';
-  const fullName = form.watch('fullName') || '';
-  const initials = (displayName || fullName || 'U').substring(0, 2).toUpperCase();
-
   return (
     <Form
       id="profile-form"
@@ -58,23 +53,14 @@ export const PersonalInformationCard: React.FC<PersonalInformationCardProps> = (
         </CardHeader>
         <CardContent>
           <div className="flex items-start gap-8">
-            {isEditing ? (
-              <UploadFile
-                accept="image/png,image/jpeg,image/gif"
-                anchor="avatar"
-                placeholder="Click or drag to upload photo"
-                hint="PNG, JPG or GIF. Max size 2MB."
-                value={form.watch('profilePicture') as File | undefined}
-                onChange={(file) => form.setValue('profilePicture', file as File)}
-              />
-            ) : (
-              <Avatar className="h-20 w-20 shadow-[0px_0px_0px_4px_white,0px_12px_24px_4px_rgba(10,29,54,0.08),0px_4px_6px_-0.75px_rgba(10,29,54,0.08)]">
-                {profile.profilePictureUrl && (
-                  <AvatarImage src={profile.profilePictureUrl ?? ''} alt={displayName || fullName || 'User'} />
-                )}
-                <AvatarFallback className="text-lg">{initials}</AvatarFallback>
-              </Avatar>
-            )}
+            <UploadFile
+              name="profilePicture"
+              accept="image/png,image/jpeg,image/gif"
+              anchor="avatar"
+              previewUrl={profile.profilePictureUrl ?? undefined}
+              disabled={!isEditing}
+            />
+
             <div className="flex flex-col gap-1 pt-2">
               <Typography variant="body2" intent="muted">
                 PNG, JPG or GIF. Max size 2MB.
