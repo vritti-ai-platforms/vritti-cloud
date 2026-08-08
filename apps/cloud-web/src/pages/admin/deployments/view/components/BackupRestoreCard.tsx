@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vrit
 import { DateTimePicker } from '@vritti/quantum-ui/DateTimePicker';
 import { DropdownMenu, type MenuItem } from '@vritti/quantum-ui/DropdownMenu';
 import { useConfirm, useFormatters } from '@vritti/quantum-ui/hooks';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Archive, ChevronDown, Clock, DatabaseBackup, History, Layers } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
@@ -144,33 +145,44 @@ export const BackupRestoreCard: React.FC<BackupRestoreCardProps> = ({
           />
         </div>
       </CardHeader>
-      <CardContent className="space-y-5">
+      <CardContent className="space-y-6">
         {backups.length === 0 ? (
-          <div className="rounded-lg border border-dashed p-6 text-center">
+          <div className="rounded-lg border border-dashed p-8 text-center">
             <p className="text-sm text-muted-foreground">
               No backups yet — the agent takes the first full backup on its next reconcile.
             </p>
           </div>
         ) : (
           <>
-            {/* Recovery window + point-in-time restore: any instant from the oldest backup up to now */}
-            <div className="space-y-3 rounded-lg border p-4">
-              <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
-                <div className="flex items-center gap-2">
-                  <Clock className="size-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">Recovery window</span>
-                  <span className="text-sm font-medium">{fmt.dateTime(isoOf(earliest)).primary} → now</span>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {backups.length} backup{backups.length === 1 ? '' : 's'} ·{' '}
-                  <span className="font-mono tabular-nums text-foreground">{humanBytes(repoTotal)}</span> on disk
-                </div>
+            {/* Recovery window — the span the timeline below covers */}
+            <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-1.5 text-sm">
+              <div className="flex items-center gap-2">
+                <Clock className="size-4 text-muted-foreground" />
+                <span className="text-muted-foreground">Recovery window</span>
+                <span className="font-medium">{fmt.dateTime(isoOf(earliest)).primary} → now</span>
               </div>
-              <div className="flex flex-wrap items-end gap-3 border-t pt-3">
+              <div className="text-muted-foreground">
+                {pluralize('backup', backups.length, true)} ·{' '}
+                <span className="font-mono tabular-nums text-foreground">{humanBytes(repoTotal)}</span> on disk ·
+                keeping last <span className="text-foreground">{retention}</span> fulls
+              </div>
+            </div>
+
+            {/* Timeline graph — the hero: lanes per Postgres timeline, branches on restore, click to restore */}
+            <BackupTimelineGraph
+              backups={backups}
+              retention={retention}
+              restorable={restorable}
+              onRestore={restoreToBackup}
+            />
+
+            {/* Point-in-time restore — the destructive action, set apart from the read-only timeline above */}
+            <div className="space-y-2 border-t pt-5">
+              <div className="flex flex-wrap items-end gap-3">
                 <DateTimePicker
                   label="Restore to a point in time"
                   placeholder="Pick a date and time"
-                  className="w-64"
+                  className="w-72"
                   value={pitr || undefined}
                   minDateTime={isoOf(earliest)}
                   maxDateTime={nowIso}
@@ -192,14 +204,6 @@ export const BackupRestoreCard: React.FC<BackupRestoreCardProps> = ({
                 </p>
               )}
             </div>
-
-            {/* Timeline graph: lanes per Postgres timeline, branches on restore, click a marker to restore */}
-            <BackupTimelineGraph
-              backups={backups}
-              retention={retention}
-              restorable={restorable}
-              onRestore={restoreToBackup}
-            />
           </>
         )}
       </CardContent>

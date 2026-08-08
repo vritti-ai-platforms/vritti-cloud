@@ -57,7 +57,7 @@ export const DeploymentWizard: React.FC = () => {
   const createMutation = useCreateDeployment({
     onSuccess: (response) => {
       const deployment = response.data;
-      navigate(`/deployments/${buildSlug(deployment.name, deployment.id)}`);
+      navigate(`/deployments/dep-${buildSlug(deployment.name, deployment.id)}`);
     },
   });
 

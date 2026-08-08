@@ -11,6 +11,13 @@ const protocol = useHttps ? 'https' : 'http';
 const devHost = process.env.DEV_HOST ?? 'cloud.local.vrittiai.com';
 const defaultApiHost = `${protocol}://local.vrittiai.com:3000`;
 
+// Cloudflare Access service token — only needed when the dev proxy targets the Access-gated
+// admin. host. Injected from Infisical (shared/cloud-web). When both are present the proxy adds
+// the CF-Access headers so requests pass Access instead of getting the 302 login redirect;
+// when absent (local-backend dev) no headers are added.
+const cfAccessClientId = process.env.ADMIN_CF_ACCESS_CLIENT_ID;
+const cfAccessClientSecret = process.env.ADMIN_CF_ACCESS_CLIENT_SECRET;
+
 export default defineConfig({
   output: {
     assetPrefix: '/',
@@ -60,14 +67,21 @@ export default defineConfig({
             const rawHost = (req.headers.host ?? req.headers[':authority'] ?? '') as string;
             const host = rawHost.split(':')[0];
             if (host) proxyReq.setHeader('x-forwarded-host', host);
+            // Pass Cloudflare Access when targeting the Access-gated admin. host.
+            if (cfAccessClientId && cfAccessClientSecret) {
+              proxyReq.setHeader('CF-Access-Client-Id', cfAccessClientId);
+              proxyReq.setHeader('CF-Access-Client-Secret', cfAccessClientSecret);
+            }
           },
-          proxyRes: (proxyRes, req, res) => {
+          proxyRes: (proxyRes, req) => {
+            // SSE hints only. Do NOT pump chunks manually — http-proxy-middleware already pipes
+            // proxyRes -> res, so a manual res.write() double-writes every chunk. For large,
+            // multi-chunk frames (the authenticated auth-state payload arriving fragmented via
+            // Cloudflare) the two writers interleave and inject bytes mid-JSON, producing
+            // "Bad control character in string literal". The default pipe streams SSE fine.
             if (req.headers.accept === 'text/event-stream') {
               proxyRes.headers['cache-control'] = 'no-cache';
               proxyRes.headers['x-accel-buffering'] = 'no';
-              proxyRes.on('data', (chunk) => {
-                res.write(chunk);
-              });
             }
           },
         },

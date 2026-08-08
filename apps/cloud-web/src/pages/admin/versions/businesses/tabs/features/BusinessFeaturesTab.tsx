@@ -11,6 +11,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { AppFilter } from '@vritti/quantum-ui/selects/app';
 import { Blocks, Eye, KeyRound, Pencil, Plus, Trash2 } from 'lucide-react';
@@ -161,7 +162,7 @@ export const BusinessFeaturesTab = () => {
   // Prompts then removes all selected features from this business in a single request
   async function handleBulkRemove(featureIds: string[]) {
     const confirmed = await confirm({
-      title: `Remove ${featureIds.length} feature${featureIds.length === 1 ? '' : 's'}?`,
+      title: `Remove ${pluralize('feature', featureIds.length, true)}?`,
       description:
         'The selected features will be removed from this business’s apps. This does not delete the features.',
       confirmLabel: 'Remove',

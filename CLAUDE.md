@@ -68,6 +68,7 @@ See `.claude/rules/` for detailed pattern documentation:
 - `frontend-file-structure.md` — File/folder organization
 - `value-formatting.md` — DetailField / DataTable cells / useFormatters for dates, currency, numbers
 - `money-handling.md` — money as `bigint` minor units + `{currency,value}` wire shape; never `Number(majorToMinor(...))`
+- `pluralize.md` — use `pluralize` from `@vritti/quantum-ui/pluralize`; never hand-roll `${n === 1 ? '' : 's'}`
 - `comment-style.md` — Comment style rules
 - `export-conventions.md` — Export patterns
 - `apps/cloud-server/.claude/rules/backend-service-responses.md` — create() returns entity DTO, update/delete returns SuccessResponseDto

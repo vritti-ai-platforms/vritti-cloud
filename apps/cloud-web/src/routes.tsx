@@ -189,59 +189,65 @@ export const adminRoutes: RouteObject[] = [
       },
       {
         path: 'deployments/:deploymentSlug',
-        element: (
-          <Suspense fallback={<DeploymentViewPageSkeleton />}>
-            <DeploymentViewPage />
-          </Suspense>
-        ),
-      },
-      {
-        path: 'deployments/:deploymentSlug/core-stack',
-        element: (
-          <Suspense fallback={<ComponentPageSkeleton />}>
-            <AgentStreamProvider>
-              <CoreStackPage />
-            </AgentStreamProvider>
-          </Suspense>
-        ),
-      },
-      {
-        path: 'deployments/:deploymentSlug/database',
-        element: (
-          <Suspense fallback={<ComponentPageSkeleton />}>
-            <AgentStreamProvider>
-              <DatabasePage />
-            </AgentStreamProvider>
-          </Suspense>
-        ),
-      },
-      {
-        path: 'deployments/:deploymentSlug/edge',
-        element: (
-          <Suspense fallback={<ComponentPageSkeleton />}>
-            <AgentStreamProvider>
-              <EdgePage />
-            </AgentStreamProvider>
-          </Suspense>
-        ),
-      },
-      {
-        path: 'deployments/:deploymentSlug/gitea',
-        element: (
-          <Suspense fallback={<ComponentPageSkeleton />}>
-            <AgentStreamProvider>
-              <GiteaPage />
-            </AgentStreamProvider>
-          </Suspense>
-        ),
-      },
-      {
-        path: 'deployments/:deploymentSlug/organizations/:orgSlug',
-        element: (
-          <Suspense fallback={<OrganizationViewPageSkeleton />}>
-            <AdminOrganizationViewPage />
-          </Suspense>
-        ),
+        children: [
+          { index: true, element: <Navigate to="overview" replace /> },
+          {
+            path: ':deploymentTab',
+            element: (
+              <Suspense fallback={<DeploymentViewPageSkeleton />}>
+                <DeploymentViewPage />
+              </Suspense>
+            ),
+          },
+          {
+            path: 'overview/core-stack',
+            element: (
+              <Suspense fallback={<ComponentPageSkeleton />}>
+                <AgentStreamProvider>
+                  <CoreStackPage />
+                </AgentStreamProvider>
+              </Suspense>
+            ),
+          },
+          {
+            path: 'overview/database',
+            element: (
+              <Suspense fallback={<ComponentPageSkeleton />}>
+                <AgentStreamProvider>
+                  <DatabasePage />
+                </AgentStreamProvider>
+              </Suspense>
+            ),
+          },
+          {
+            path: 'overview/edge',
+            element: (
+              <Suspense fallback={<ComponentPageSkeleton />}>
+                <AgentStreamProvider>
+                  <EdgePage />
+                </AgentStreamProvider>
+              </Suspense>
+            ),
+          },
+          {
+            path: 'overview/gitea',
+            element: (
+              <Suspense fallback={<ComponentPageSkeleton />}>
+                <AgentStreamProvider>
+                  <GiteaPage />
+                </AgentStreamProvider>
+              </Suspense>
+            ),
+          },
+          {
+            path: 'organizations/:orgSlug',
+            element: (
+              <Suspense fallback={<OrganizationViewPageSkeleton />}>
+                <AdminOrganizationViewPage />
+              </Suspense>
+            ),
+          },
+        ],
       },
     ],
   },

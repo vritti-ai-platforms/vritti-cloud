@@ -3,6 +3,7 @@ import { Badge } from '@vritti/quantum-ui/Badge';
 import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { useConfirm } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { Info } from 'lucide-react';
 import type React from 'react';
@@ -55,6 +56,7 @@ export const LocalDeploymentView: React.FC<LocalDeploymentViewProps> = ({ deploy
       </div>
 
       <Tabs
+        routeParam="deploymentTab"
         defaultValue="overview"
         tabs={[
           { value: 'overview', label: 'Overview', content: <LocalOverviewTab deployment={deployment} /> },
@@ -74,7 +76,7 @@ export const LocalDeploymentView: React.FC<LocalDeploymentViewProps> = ({ deploy
         buttonText="Delete Deployment"
         onClick={handleDelete}
         disabled={!!deployment.organizationCount}
-        warning={`This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`}
+        warning={`This deployment is used by ${pluralize('organization', deployment.organizationCount, true)}. Remove all associated organizations before deleting.`}
         showWarning={!!deployment.organizationCount}
       />
     </div>

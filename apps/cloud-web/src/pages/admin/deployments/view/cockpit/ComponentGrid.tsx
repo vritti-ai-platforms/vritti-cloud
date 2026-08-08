@@ -1,4 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Blocks, Database, GitBranch, Lock } from 'lucide-react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +19,7 @@ interface ComponentGridProps {
 export const ComponentGrid: React.FC<ComponentGridProps> = ({ deployment, agent, deploymentSlug }) => {
   const navigate = useNavigate();
   const components = deployment.spec.components;
-  const go = (segment: string) => navigate(`/deployments/${deploymentSlug}/${segment}`);
+  const go = (segment: string) => navigate(`/deployments/${deploymentSlug}/overview/${segment}`);
 
   const coreServices = servicesForComponent(agent.services, 'core');
   const dbServices = servicesForComponent(agent.services, 'database');
@@ -31,6 +32,17 @@ export const ComponentGrid: React.FC<ComponentGridProps> = ({ deployment, agent,
   const cert = agent.certificates[0];
   const certDays = cert ? Math.ceil((new Date(cert.notAfter).getTime() - Date.now()) / 86_400_000) : null;
   const giteaEnabled = !!components.gitea?.enabled;
+
+  const databaseFact = () => {
+    if (!dbManaged) return 'Connected via secret store';
+    return backupsOn ? 'pgBackRest enabled' : 'pgBackRest available to enable';
+  };
+
+  const edgeFact = () => {
+    if (!edgeManaged) return 'TLS handled outside the agent';
+    if (certDays == null) return 'Awaiting wildcard certificate';
+    return `${pluralize('service', edgeServices.length, true)} · cert valid ${certDays}d`;
+  };
 
   return (
     <Card>
@@ -51,7 +63,7 @@ export const ComponentGrid: React.FC<ComponentGridProps> = ({ deployment, agent,
             icon={Blocks}
             name="Core stack"
             subtitle="core-server · commerce · nats · redis · web"
-            fact={`${coreServices.length} service${coreServices.length === 1 ? '' : 's'} running`}
+            fact={`${pluralize('service', coreServices.length, true)} running`}
             enabled
             health={rollupHealth(coreServices)}
             onClick={() => go('core-stack')}
@@ -60,13 +72,7 @@ export const ComponentGrid: React.FC<ComponentGridProps> = ({ deployment, agent,
             icon={Database}
             name="Database"
             subtitle={`${dbManaged ? 'Managed' : 'External'} · backups ${backupsOn ? 'on' : 'off'}`}
-            fact={
-              dbManaged
-                ? backupsOn
-                  ? 'pgBackRest enabled'
-                  : 'pgBackRest available to enable'
-                : 'Connected via secret store'
-            }
+            fact={databaseFact()}
             enabled
             health={rollupHealth(dbServices)}
             onClick={() => go('database')}
@@ -75,13 +81,7 @@ export const ComponentGrid: React.FC<ComponentGridProps> = ({ deployment, agent,
             icon={Lock}
             name="Edge & TLS"
             subtitle={edgeManaged ? 'Managed · nginx + ACME' : 'External proxy'}
-            fact={
-              edgeManaged
-                ? certDays != null
-                  ? `${edgeServices.length} service${edgeServices.length === 1 ? '' : 's'} · cert valid ${certDays}d`
-                  : 'Awaiting wildcard certificate'
-                : 'TLS handled outside the agent'
-            }
+            fact={edgeFact()}
             enabled
             health={rollupHealth(edgeServices)}
             onClick={() => go('edge')}

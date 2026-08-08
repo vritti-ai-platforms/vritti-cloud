@@ -1,6 +1,7 @@
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { cn } from '@vritti/quantum-ui/cn';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Handle, type Node, type NodeProps, Position } from '@vritti/quantum-ui/react-flow';
 import { Network, Pencil, Plus, Settings, Trash2 } from 'lucide-react';
 import { useStructureActions } from '../StructureActionsContext';
@@ -21,9 +22,9 @@ export const SiteGroupNodeCard = ({ data }: NodeProps<Node<SiteGroupNodeData>>) 
   const hasDependents = data.childCount > 0 || data.siteCount > 0;
   const membership =
     data.siteCount > 0
-      ? `${data.siteCount} site${data.siteCount === 1 ? '' : 's'}${data.leCount > 1 ? ` · ${data.leCount} LEs` : ''}`
+      ? `${pluralize('site', data.siteCount, true)}${data.leCount > 1 ? ` · ${data.leCount} LEs` : ''}`
       : data.childCount > 0
-        ? `${data.childCount} sub-group${data.childCount === 1 ? '' : 's'}`
+        ? `${pluralize('sub-group', data.childCount, true)}`
         : 'No members yet';
 
   return (

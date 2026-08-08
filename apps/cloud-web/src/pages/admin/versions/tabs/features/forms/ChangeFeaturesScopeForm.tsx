@@ -2,6 +2,7 @@ import { useChangeFeaturesScope } from '@hooks/admin/versions/features';
 import { Button } from '@vritti/quantum-ui/Button';
 import { DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Form } from '@vritti/quantum-ui/Form';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Select } from '@vritti/quantum-ui/Select';
 import { zodResolver } from '@vritti/quantum-ui/zod';
 import type React from 'react';
@@ -42,7 +43,7 @@ export const ChangeFeaturesScopeForm: React.FC<ChangeFeaturesScopeFormProps> = (
           Cancel
         </Button>
         <Button type="submit" loadingText="Updating...">
-          Change scope of {featureIds.length} {featureIds.length === 1 ? 'feature' : 'features'}
+          Change scope of {pluralize('feature', featureIds.length, true)}
         </Button>
       </DialogActions>
     </Form>

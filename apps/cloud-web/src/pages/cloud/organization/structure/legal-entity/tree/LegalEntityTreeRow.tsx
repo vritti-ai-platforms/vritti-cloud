@@ -1,6 +1,7 @@
 import { cn } from '@vritti/quantum-ui/cn';
 import { useSortable } from '@vritti/quantum-ui/dnd-kit/sortable';
 import { CSS } from '@vritti/quantum-ui/dnd-kit/utilities';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { countryFlag } from '@vritti/quantum-ui/selects/iso-country';
 import { ChevronRight, GripVertical } from 'lucide-react';
 import type { CSSProperties } from 'react';
@@ -111,7 +112,7 @@ export const LegalEntityTreeRow = ({
           )}
           {childCount > 0 && (
             <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
-              {childCount} sub{childCount === 1 ? '' : 's'}
+              {pluralize('sub', childCount, true)}
             </span>
           )}
         </div>

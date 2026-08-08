@@ -8,6 +8,7 @@ import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { useConfirm, useDialog, useSlugParams, useTheme } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { DollarSign, Globe, Layers, Link2, Link2Off, Server, ServerOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { EditRegionForm } from './forms/EditRegionForm';
@@ -150,9 +151,7 @@ export const RegionViewPage = () => {
                             {provider.code}
                           </Badge>
                           {!!provider.deploymentCount && (
-                            <Badge variant="secondary">
-                              {provider.deploymentCount} deployment{provider.deploymentCount !== 1 ? 's' : ''}
-                            </Badge>
+                            <Badge variant="secondary">{pluralize('deployment', provider.deploymentCount, true)}</Badge>
                           )}
                         </div>
                       </div>

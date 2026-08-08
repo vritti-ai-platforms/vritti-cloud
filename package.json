@@ -7,6 +7,8 @@
     "dev": "nx run-many --target=dev --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
     "dev:prod": "nx run-many --target=dev:prod --projects=vritti-cloud-server,vritti-cloud-web --parallel --output-style=stream",
     "dev:vm": "nx run vritti-cloud-server:dev & nx run vritti-cloud-web:dev:vm",
+    "dev:web": "nx run vritti-cloud-web:dev",
+    "dev:web:prod": "nx run vritti-cloud-web:dev:prod",
     "build": "nx run-many --target=build --all",
     "lint": "nx run-many --target=lint --all",
     "test": "nx run-many --target=test --all",

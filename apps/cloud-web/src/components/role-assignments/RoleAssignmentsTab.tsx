@@ -7,6 +7,7 @@ import { Dialog, DialogActions } from '@vritti/quantum-ui/Dialog';
 import { Empty } from '@vritti/quantum-ui/Empty';
 import { Form } from '@vritti/quantum-ui/Form';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Select } from '@vritti/quantum-ui/Select';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { RoleSelector } from '@vritti/quantum-ui/selects/role';
@@ -59,9 +60,7 @@ export const RoleAssignmentsTab = ({ target }: RoleAssignmentsTabProps) => {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-4 pt-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          {assignments.length} assignment{assignments.length !== 1 ? 's' : ''}
-        </p>
+        <p className="text-sm text-muted-foreground">{pluralize('assignment', assignments.length, true)}</p>
         <Button
           startAdornment={<UserPlus className="size-4" />}
           size="sm"

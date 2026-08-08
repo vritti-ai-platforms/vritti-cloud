@@ -1,4 +1,5 @@
 import { Button } from '@vritti/quantum-ui/Button';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Handle, type Node, type NodeProps, Position } from '@vritti/quantum-ui/react-flow';
 import { Building2, Landmark, Settings } from 'lucide-react';
 import { useStructureActions } from '../StructureActionsContext';
@@ -45,9 +46,8 @@ export const OrgNodeCard = ({ data }: NodeProps<Node<OrgNodeData>>) => {
 
       <div className="relative mt-3 flex items-center gap-1.5 text-xs text-primary-foreground/80">
         <Landmark className="size-3" />
-        {data.legalEntityCount} legal {data.legalEntityCount === 1 ? 'entity' : 'entities'} · {data.siteCount}{' '}
-        {data.siteCount === 1 ? 'site' : 'sites'} · {data.siteGroupCount}{' '}
-        {data.siteGroupCount === 1 ? 'site group' : 'site groups'}
+        {data.legalEntityCount} legal {pluralize('entity', data.legalEntityCount)} · {data.siteCount}{' '}
+        {pluralize('site', data.siteCount)} · {data.siteGroupCount} {pluralize('site group', data.siteGroupCount)}
       </div>
 
       <Handle type="source" position={Position.Bottom} className="opacity-0! w-1! h-1! min-w-0! min-h-0! border-0!" />

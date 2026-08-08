@@ -1,5 +1,6 @@
 import { Button } from '@vritti/quantum-ui/Button';
 import { cn } from '@vritti/quantum-ui/cn';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import type { Node, NodeProps } from '@vritti/quantum-ui/react-flow';
 import { countryFlag } from '@vritti/quantum-ui/selects/iso-country';
 import { Settings } from 'lucide-react';
@@ -35,7 +36,7 @@ export const LEHeaderNode = ({ data }: NodeProps<Node<LEHeaderData>>) => {
     `${countryFlag(le.country)} ${le.country}`,
     le.currencyCode,
     REGIME_LABELS[le.taxRegime] ?? le.taxRegime,
-    `${data.registrationCount} registration${data.registrationCount === 1 ? '' : 's'}`,
+    `${pluralize('registration', data.registrationCount, true)}`,
   ].join(' · ');
 
   return (

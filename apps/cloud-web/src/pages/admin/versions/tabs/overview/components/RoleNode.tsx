@@ -1,3 +1,4 @@
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import type { SnapshotApp, SnapshotFeature, SnapshotRoleTemplate } from '@vritti/quantum-ui/types/catalog-resolver';
 import { snapshotFeatureKey } from '@vritti/quantum-ui/types/catalog-resolver';
 import { ChevronDown, ChevronRight, Layers, Shield, Zap } from 'lucide-react';
@@ -39,7 +40,7 @@ export const RoleNode: React.FC<RoleNodeProps> = ({ role, featureByCode, feature
         <div className="min-w-0">
           <span className="text-sm font-semibold block truncate">{role.name}</span>
           <span className="text-xs text-muted-foreground">
-            {roleApps.length} {roleApps.length === 1 ? 'app' : 'apps'} · {totalPerms} permissions
+            {pluralize('app', roleApps.length, true)} · {pluralize('permission', totalPerms, true)}
           </span>
         </div>
         {open ? (

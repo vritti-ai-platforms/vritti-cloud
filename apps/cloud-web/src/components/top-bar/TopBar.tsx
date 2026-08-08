@@ -4,6 +4,7 @@ import { Button } from '@vritti/quantum-ui/Button';
 import { Bell, ChevronRight, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { BusinessSwitcher } from './business-switcher';
+import { DeploymentSwitcher } from './deployment-switcher';
 import { FeatureSwitcher } from './feature-switcher';
 import { OrganizationSwitcher } from './organization-switcher';
 import { RoleTemplateSwitcher } from './role-template-switcher';
@@ -23,6 +24,8 @@ const FEATURE_SLUG_PREFIX = 'feat-';
 const BUSINESS_SLUG_PREFIX = 'biz-';
 // Role template slugs use the `rt-` prefix (e.g., rt-admin~uuid) — `role-` collides with `role-templates` route
 const ROLE_SLUG_PREFIX = 'rt-';
+// Deployment slugs use the `dep-` prefix (e.g., dep-prod-cluster~uuid)
+const DEPLOYMENT_SLUG_PREFIX = 'dep-';
 
 export const TopBar = () => {
   const { pathname } = useLocation();
@@ -51,6 +54,17 @@ export const TopBar = () => {
                     <OrganizationSwitcher
                       currentOrgId={segment.id ?? segment.raw}
                       currentOrgName={segment.slug ? segment.label : undefined}
+                    />
+                  );
+                }
+
+                // Any segment with dep- prefix = deployment slug (under /deployments/)
+                if (segment.raw.startsWith(DEPLOYMENT_SLUG_PREFIX)) {
+                  return (
+                    <DeploymentSwitcher
+                      key={segment.raw}
+                      currentDeploymentId={segment.id ?? segment.raw}
+                      currentDeploymentName={segment.slug ? segment.label : undefined}
                     />
                   );
                 }

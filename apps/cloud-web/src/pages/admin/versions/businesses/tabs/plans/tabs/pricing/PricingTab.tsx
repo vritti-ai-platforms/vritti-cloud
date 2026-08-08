@@ -6,6 +6,7 @@ import { Card } from '@vritti/quantum-ui/Card';
 import { RowActions } from '@vritti/quantum-ui/DataTable';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog, useFormatters } from '@vritti/quantum-ui/hooks';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Skeleton } from '@vritti/quantum-ui/Skeleton';
 import { DollarSign, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useVersionContext } from '@/context/VersionScopeContext';
@@ -125,9 +126,7 @@ const PriceCardView = ({ card }: { card: PriceCard }) => {
         </span>
         <div className="flex min-w-0 flex-col">
           <span className="truncate text-sm font-semibold leading-tight">{card.countryName}</span>
-          <span className="text-xs text-muted-foreground">
-            {cycleCount} {cycleCount === 1 ? 'cycle' : 'cycles'} priced
-          </span>
+          <span className="text-xs text-muted-foreground">{pluralize('cycle', cycleCount, true)} priced</span>
         </div>
         <Badge variant="secondary" className="ml-auto font-mono text-xs tracking-wide">
           {card.currencyCode}

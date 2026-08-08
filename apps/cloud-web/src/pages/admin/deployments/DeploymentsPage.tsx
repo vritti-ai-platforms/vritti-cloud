@@ -26,7 +26,7 @@ export const DeploymentsPage = () => {
   const navigate = useNavigate();
   const { data: response, isLoading } = useDeployments();
 
-  const goToDeployment = (d: Deployment) => navigate(`/deployments/${buildSlug(d.name, d.id)}`);
+  const goToDeployment = (d: Deployment) => navigate(`/deployments/dep-${buildSlug(d.name, d.id)}`);
 
   const { table } = useDataTable({
     columns: getColumns({

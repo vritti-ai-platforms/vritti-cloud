@@ -2,6 +2,7 @@ import { useAgentLogs } from '@hooks/admin/deployments';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
 import { cn } from '@vritti/quantum-ui/cn';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { ArrowDownToLine, Clock, Play, PowerOff, ScrollText, Square, Terminal, Trash2, WrapText } from 'lucide-react';
 import type React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -152,7 +153,7 @@ export const LogStream: React.FC<LogStreamProps> = ({
               <div className="ml-auto flex items-center gap-3">
                 <StatusPill live={live} streaming={streaming} />
                 <span className="hidden font-mono text-xs tabular-nums text-muted-foreground/70 sm:inline">
-                  {logs.length} {logs.length === 1 ? 'line' : 'lines'}
+                  {pluralize('line', logs.length, true)}
                 </span>
               </div>
             </div>

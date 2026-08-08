@@ -1,5 +1,6 @@
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { buildDependsMap, filterGrantedByDeps } from '@vritti/quantum-ui/permission-deps';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { CompactSwitch } from '@vritti/quantum-ui/Switch';
 import { Shield } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
@@ -111,7 +112,7 @@ export const RoleGrantMatrix: React.FC<RoleGrantMatrixProps> = ({ apps, value = 
             key={app.id}
             icon={app.icon}
             name={app.name}
-            countLabel={`${granted}/${total} feature${total === 1 ? '' : 's'} granted`}
+            countLabel={`${granted}/${total} ${pluralize('feature', total)} granted`}
             columns={columns}
             expanded={expanded.has(app.id)}
             onToggleExpanded={() => toggleApp(app.id)}

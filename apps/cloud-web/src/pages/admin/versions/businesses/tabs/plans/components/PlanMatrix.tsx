@@ -1,5 +1,6 @@
 import { Checkbox } from '@vritti/quantum-ui/Checkbox';
 import { buildDependsMap, filterGrantedByDeps } from '@vritti/quantum-ui/permission-deps';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { CompactSwitch } from '@vritti/quantum-ui/Switch';
 import { Lock } from 'lucide-react';
 import { DynamicIcon, type IconName } from 'lucide-react/dynamic';
@@ -120,7 +121,7 @@ export const PlanMatrix: React.FC<PlanMatrixProps> = ({ apps, value = [], onChan
                 key={cardKey}
                 icon={app.icon}
                 name={app.name}
-                countLabel={`${unlocked}/${total} feature${total === 1 ? '' : 's'} unlocked`}
+                countLabel={`${unlocked}/${total} ${pluralize('feature', total)} unlocked`}
                 columns={columns}
                 expanded={expanded.has(cardKey)}
                 onToggleExpanded={() => toggleApp(cardKey)}

@@ -7,6 +7,7 @@ import { type ColumnDef, DataTable, getSelectionColumn, RowActions, useDataTable
 
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useDialog } from '@vritti/quantum-ui/hooks';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { BusinessFilter } from '@vritti/quantum-ui/selects/business';
 import { buildSlug } from '@vritti/quantum-ui/slug';
 import { Blocks, Eye, Layers, Plus } from 'lucide-react';
@@ -137,7 +138,7 @@ export const FeaturesTab = () => {
         handle={scopeDialog}
         icon={Layers}
         title="Change Feature Scope"
-        description={`Set the scope for ${scopeFeatureIds.length} selected ${scopeFeatureIds.length === 1 ? 'feature' : 'features'}. Grants on role templates of a different scope will be removed.`}
+        description={`Set the scope for ${scopeFeatureIds.length} selected ${pluralize('feature', scopeFeatureIds.length)}. Grants on role templates of a different scope will be removed.`}
         content={(close) => (
           <ChangeFeaturesScopeForm
             featureIds={scopeFeatureIds}

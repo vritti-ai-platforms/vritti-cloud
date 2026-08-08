@@ -5,6 +5,7 @@ import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { Dialog } from '@vritti/quantum-ui/Dialog';
 import { useConfirm, useDialog } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
+import { pluralize } from '@vritti/quantum-ui/pluralize';
 import { Tabs } from '@vritti/quantum-ui/Tabs';
 import { Play, Power, Server } from 'lucide-react';
 import type React from 'react';
@@ -110,6 +111,7 @@ export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({ de
       />
 
       <Tabs
+        routeParam="deploymentTab"
         defaultValue="overview"
         tabs={[
           {
@@ -135,7 +137,7 @@ export const ManagedDeploymentView: React.FC<ManagedDeploymentViewProps> = ({ de
         buttonText="Delete Deployment"
         onClick={handleDelete}
         disabled={!!deployment.organizationCount}
-        warning={`This deployment is used by ${deployment.organizationCount} organization${deployment.organizationCount !== 1 ? 's' : ''}. Remove all associated organizations before deleting.`}
+        warning={`This deployment is used by ${pluralize('organization', deployment.organizationCount, true)}. Remove all associated organizations before deleting.`}
         showWarning={!!deployment.organizationCount}
       />
 
