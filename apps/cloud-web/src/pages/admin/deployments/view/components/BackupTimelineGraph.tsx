@@ -43,6 +43,26 @@ const axisDate = (unix: number) =>
 const axisTime = (unix: number) =>
   new Date(unix * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
 
+// Builds a proper time axis: minor gridline ticks (10-minute resolution, coarsened only if the span is large
+// enough that 10-min marks would be unreadable) + labeled major ticks, both aligned to round LOCAL wall-clock
+// boundaries (so the labels read 02:00, 02:10, … not 01:39). Times align to local midnight, not UTC.
+function buildTimeScale(t0: number, t1: number): { minors: number[]; majors: number[] } {
+  const span = Math.max(60, t1 - t0);
+  const MINORS = [600, 1800, 3600, 7200, 21600, 43200, 86400]; // 10m,30m,1h,2h,6h,12h,1d
+  const minor = MINORS.find((m) => span / m <= 150) ?? MINORS[MINORS.length - 1];
+  const MAJORS = [600, 1800, 3600, 7200, 10800, 21600, 43200, 86400, 172800, 604800];
+  const major = MAJORS.find((m) => m >= span / 6 && m % minor === 0) ?? MAJORS[MAJORS.length - 1];
+  const d0 = new Date(t0 * 1000);
+  const midnight = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate()).getTime() / 1000;
+  const minors: number[] = [];
+  const majors: number[] = [];
+  for (let t = midnight + Math.ceil((t0 - midnight) / minor) * minor; t <= t1; t += minor) {
+    if ((t - midnight) % major === 0) majors.push(t);
+    else minors.push(t);
+  }
+  return { minors, majors };
+}
+
 interface BackupTimelineGraphProps {
   backups: BackupEntry[];
   retention: number;
@@ -105,33 +125,39 @@ export const BackupTimelineGraph: React.FC<BackupTimelineGraphProps> = ({
 
   const height = TOP + (timelines.length - 1) * LANE_GAP + 76;
   const axisY = TOP + (timelines.length - 1) * LANE_GAP + 34;
-  const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => t0 + f * (t1 - t0));
+  const scale = buildTimeScale(t0, t1);
 
   return (
     <div className="space-y-3">
       <svg viewBox={`0 0 ${VW} ${height}`} width="100%" role="img" aria-label="Backup timeline graph">
-        {/* date axis */}
+        {/* time axis: baseline + minor gridline ticks + labeled major ticks at round local times + now */}
         <line x1={PAD_X - 6} y1={axisY} x2={VW - PAD_X + 6} y2={axisY} stroke={AXIS} />
-        {ticks.map((t, i) =>
-          i === ticks.length - 1 ? (
-            <g key={t}>
-              <line x1={x(t)} y1={axisY} x2={x(t)} y2={axisY + 4} stroke={AXIS} />
-              <text x={x(t)} y={axisY + 16} fill={LABEL} fontSize={10} textAnchor="middle">
-                now
-              </text>
+        {scale.minors.map((t) => (
+          <line key={`min-${t}`} x1={x(t)} y1={axisY} x2={x(t)} y2={axisY + 3} stroke={AXIS} />
+        ))}
+        {scale.majors.map((t, i) => {
+          const showLabel = x(t1) - x(t) > 42; // don't collide with the "now" label
+          const showDate = i === 0 || axisDate(t) !== axisDate(scale.majors[i - 1]);
+          return (
+            <g key={`maj-${t}`}>
+              <line x1={x(t)} y1={axisY} x2={x(t)} y2={axisY + 6} stroke={AXIS} />
+              {showLabel && (
+                <text x={x(t)} y={axisY + 16} fill={LABEL} fontSize={10} textAnchor="middle">
+                  <tspan x={x(t)}>{axisTime(t)}</tspan>
+                  {showDate && (
+                    <tspan x={x(t)} dy="11">
+                      {axisDate(t)}
+                    </tspan>
+                  )}
+                </text>
+              )}
             </g>
-          ) : (
-            <g key={t}>
-              <line x1={x(t)} y1={axisY} x2={x(t)} y2={axisY + 4} stroke={AXIS} />
-              <text x={x(t)} y={axisY + 15} fill={LABEL} fontSize={10} textAnchor="middle">
-                <tspan x={x(t)}>{axisDate(t)}</tspan>
-                <tspan x={x(t)} dy="11">
-                  {axisTime(t)}
-                </tspan>
-              </text>
-            </g>
-          ),
-        )}
+          );
+        })}
+        <line x1={x(t1)} y1={axisY} x2={x(t1)} y2={axisY + 6} stroke={NOW_COLOR} />
+        <text x={x(t1)} y={axisY + 16} fill={NOW_COLOR} fontSize={10} fontWeight={600} textAnchor="middle">
+          now
+        </text>
 
         {/* lane baselines + labels */}
         {laneSpans.map((l) => (
