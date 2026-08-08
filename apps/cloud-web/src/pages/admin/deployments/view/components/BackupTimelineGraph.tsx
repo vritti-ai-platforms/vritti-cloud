@@ -37,6 +37,12 @@ function humanBytes(n: number): string {
 
 const isoOf = (unix: number) => new Date(unix * 1000).toISOString();
 
+// Compact axis-tick labels (the recovery window can span hours, so the time matters as much as the date).
+const axisDate = (unix: number) =>
+  new Date(unix * 1000).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+const axisTime = (unix: number) =>
+  new Date(unix * 1000).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+
 interface BackupTimelineGraphProps {
   backups: BackupEntry[];
   retention: number;
@@ -97,7 +103,7 @@ export const BackupTimelineGraph: React.FC<BackupTimelineGraphProps> = ({
     return { tl, start, end, y: laneY(tl) };
   });
 
-  const height = TOP + (timelines.length - 1) * LANE_GAP + 66;
+  const height = TOP + (timelines.length - 1) * LANE_GAP + 76;
   const axisY = TOP + (timelines.length - 1) * LANE_GAP + 34;
   const ticks = [0, 0.25, 0.5, 0.75, 1].map((f) => t0 + f * (t1 - t0));
 
@@ -106,14 +112,26 @@ export const BackupTimelineGraph: React.FC<BackupTimelineGraphProps> = ({
       <svg viewBox={`0 0 ${VW} ${height}`} width="100%" role="img" aria-label="Backup timeline graph">
         {/* date axis */}
         <line x1={PAD_X - 6} y1={axisY} x2={VW - PAD_X + 6} y2={axisY} stroke={AXIS} />
-        {ticks.map((t, i) => (
-          <g key={t}>
-            <line x1={x(t)} y1={axisY} x2={x(t)} y2={axisY + 4} stroke={AXIS} />
-            <text x={x(t)} y={axisY + 16} fill={LABEL} fontSize={10} textAnchor="middle">
-              {i === ticks.length - 1 ? 'now' : fmt.date(isoOf(t)).primary}
-            </text>
-          </g>
-        ))}
+        {ticks.map((t, i) =>
+          i === ticks.length - 1 ? (
+            <g key={t}>
+              <line x1={x(t)} y1={axisY} x2={x(t)} y2={axisY + 4} stroke={AXIS} />
+              <text x={x(t)} y={axisY + 16} fill={LABEL} fontSize={10} textAnchor="middle">
+                now
+              </text>
+            </g>
+          ) : (
+            <g key={t}>
+              <line x1={x(t)} y1={axisY} x2={x(t)} y2={axisY + 4} stroke={AXIS} />
+              <text x={x(t)} y={axisY + 15} fill={LABEL} fontSize={10} textAnchor="middle">
+                <tspan x={x(t)}>{axisDate(t)}</tspan>
+                <tspan x={x(t)} dy="11">
+                  {axisTime(t)}
+                </tspan>
+              </text>
+            </g>
+          ),
+        )}
 
         {/* lane baselines + labels */}
         {laneSpans.map((l) => (
