@@ -5,7 +5,7 @@ import {
   PrimaryDatabaseService,
   type SelectQueryResult,
 } from '@vritti/api-sdk/database';
-import { eq } from '@vritti/api-sdk/drizzle-orm';
+import { eq, isNotNull } from '@vritti/api-sdk/drizzle-orm';
 import type { Organization } from '@/db/schema';
 import { organizationMembers, organizations, plans } from '@/db/schema';
 
@@ -26,6 +26,11 @@ export class CloudOrganizationDomainRepository extends PrimaryBaseRepository<typ
   }
 
   // Returns all organizations hosted on a deployment
+  // Orgs the quota sweep has anything to check — one with no provisioned storage has no buckets to measure
+  async findAllProvisioned(): Promise<Organization[]> {
+    return this.db.select().from(organizations).where(isNotNull(organizations.storage));
+  }
+
   async findByDeploymentId(deploymentId: string): Promise<Organization[]> {
     return this.model.findMany({ where: { deploymentId } });
   }

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrimaryBaseRepository, PrimaryDatabaseService } from '@vritti/api-sdk/database';
 import { and, asc, count, countDistinct, eq, inArray, type SQL } from '@vritti/api-sdk/drizzle-orm';
 import type { Plan } from '@/db/schema';
-import { businesses, organizations, planPrices, plans } from '@/db/schema';
+import { businesses, organizations, planPrices, plans, versions } from '@/db/schema';
 
 export type PlanRow = Plan & { priceCount: number; businessName: string; countryCount: number };
 
@@ -20,6 +20,24 @@ export class PlanDomainRepository extends PrimaryBaseRepository<typeof plans> {
   // Finds a plan by version + business + code (the version-scoped unique identity)
   async findByVersionBusinessCode(versionId: string, businessId: string, code: string): Promise<Plan | undefined> {
     return this.model.findFirst({ where: { versionId, businessId, code } });
+  }
+
+  // Resolves the plan an org is actually on, from the identifiers the org row carries: its deployment's version
+  // string plus the business and plan codes. Reads the live plan row, not the snapshot, so a limit change applies on
+  // the next quota run instead of waiting for the version to be re-snapshotted and republished.
+  async findByVersionStringAndCodes(
+    version: string,
+    businessCode: string,
+    planCode: string,
+  ): Promise<Plan | undefined> {
+    const rows = await this.db
+      .select({ plan: plans })
+      .from(plans)
+      .innerJoin(versions, eq(versions.id, plans.versionId))
+      .innerJoin(businesses, eq(businesses.id, plans.businessId))
+      .where(and(eq(versions.version, version), eq(businesses.code, businessCode), eq(plans.code, planCode)))
+      .limit(1);
+    return rows[0]?.plan;
   }
 
   // Returns the org's id, business (resolved code → id), and name for attaching a custom plan

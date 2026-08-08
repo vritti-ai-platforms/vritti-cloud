@@ -1,3 +1,4 @@
+import { StorageQuotaService } from '@domain/media/storage/storage-quota.service';
 import {
   Body,
   Controller,
@@ -21,6 +22,7 @@ import {
   ApiCreateOrganization,
   ApiGetMyOrgs,
   ApiGetOrganization,
+  ApiGetOrganizationStorage,
   ApiUpdateOrganization,
   ApiValidateTaxId,
 } from '../docs/organization.docs';
@@ -29,6 +31,7 @@ import { CheckSubdomainDto } from '../dto/request/check-subdomain.dto';
 import { GetMyOrgsDto } from '../dto/request/get-my-orgs.dto';
 import { ValidateTaxIdDto } from '../dto/request/validate-tax-id.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
+import { OrgStorageUsageResponseDto } from '../dto/response/org-storage-usage-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
 import { SubdomainAvailabilityResponseDto } from '../dto/response/subdomain-availability-response.dto';
 import { TaxIdValidationResponseDto } from '../dto/response/tax-id-validation-response.dto';
@@ -40,7 +43,10 @@ import { OrganizationService } from '../services/organization.service';
 export class OrganizationController {
   private readonly logger = new Logger(OrganizationController.name);
 
-  constructor(private readonly organizationService: OrganizationService) {}
+  constructor(
+    private readonly organizationService: OrganizationService,
+    private readonly storageQuotaService: StorageQuotaService,
+  ) {}
 
   // Checks whether a subdomain is available for use
   @Get('check-subdomain')
@@ -82,6 +88,14 @@ export class OrganizationController {
   async findById(@UserId() userId: string, @Param('id') id: string): Promise<OrgListItemDto> {
     this.logger.log(`GET /organizations/${id}`);
     return this.organizationService.findById(userId, id);
+  }
+
+  // Live storage usage for the org, read from the provider on each request
+  @Get(':id/storage')
+  @ApiGetOrganizationStorage()
+  async getStorageUsage(@Param('id') id: string): Promise<OrgStorageUsageResponseDto> {
+    this.logger.log(`GET /organizations/${id}/storage`);
+    return this.storageQuotaService.getUsage(id);
   }
 
   // Updates organization details for the authenticated user

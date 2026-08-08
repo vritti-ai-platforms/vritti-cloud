@@ -1,5 +1,6 @@
 import type { SiteFeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 import { jsonb, timestamp, uniqueIndex, uuid, varchar } from '@vritti/api-sdk/drizzle-pg-core';
+import type { OrgStorageTracking } from '@vritti/api-sdk/storage';
 import { businesses } from './business';
 import { cloudSchema } from './cloud-schema';
 import { countries } from './country';
@@ -29,6 +30,10 @@ export const organizations = cloudSchema.table('organizations', {
     .references(() => deployments.id, { onDelete: 'restrict' }),
   // Per-site deny-list of locked permissions within the plan, keyed by core site id (see SiteFeatureLocks); a site absent here (or a null column) inherits the full plan
   siteLocks: jsonb('site_locks').$type<Record<string, SiteFeatureLocks>>(),
+  // Buckets recorded at provisioning time. Cloud is the side that names these, and both the quota sweep and the
+  // usage display need them without asking core; they are never recomputed from the subdomain, which can change.
+  // Usage is deliberately absent — it is read live from the provider, so there is no cached figure to go stale.
+  storage: jsonb('storage').$type<OrgStorageTracking>(),
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).$onUpdate(() => new Date()),
 });

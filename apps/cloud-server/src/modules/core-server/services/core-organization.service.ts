@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { FeatureLocks } from '@vritti/api-sdk/catalog-resolver';
 import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import type { OrgEntitlement, SignedDocument } from '@vritti/api-sdk/license';
+import type { OrgStorage } from '@vritti/api-sdk/storage';
 import { CoreHttpService } from './core-http.service';
 
 // Proxies organization creation to core-server
@@ -45,7 +46,7 @@ export class CoreOrganizationService {
   async createOrganization(
     url: string,
     signingKey: string,
-    data: { name: string; subdomain: string; size: string; logoUrl?: string },
+    data: { name: string; subdomain: string; size: string; logoUrl?: string; storage?: OrgStorage },
   ): Promise<{ id: string }> {
     const result = await this.http.post<{ id: string }>(url, signingKey, '/organizations/internal', data);
     this.logger.log(`Created organization in core: ${data.subdomain} (${result.id})`);

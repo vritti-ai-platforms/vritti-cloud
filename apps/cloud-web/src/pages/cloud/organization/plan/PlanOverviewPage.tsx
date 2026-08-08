@@ -15,6 +15,7 @@ import { useParams } from 'react-router-dom';
 import { MatrixCard, type MatrixColumn, MatrixRow, PermissionMatrixSkeleton } from '@/components/permission-matrix';
 import { SCOPE_SECTION_ORDER } from '@/schemas/admin/features';
 import { MATRIX_PLATFORMS, PLATFORM_LABEL } from '@/schemas/cloud/site-matrix';
+import { StorageUsageCard } from './components/StorageUsageCard';
 
 // Per-scope presentation — label, lucide icon, and design-token color pair (no hardcoded colors)
 const SCOPE_META: Record<
@@ -61,6 +62,8 @@ export const PlanOverviewPage = () => {
             : 'What your plan includes'
         }
       />
+
+      <StorageUsageCard orgId={orgId} />
 
       {isLoading ? (
         <PermissionMatrixSkeleton />

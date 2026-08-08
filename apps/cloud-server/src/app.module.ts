@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { RouterModule } from '@nestjs/core';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AuthConfigModule, type TokenExpiryString } from '@vritti/api-sdk/auth';
 import { DataTableModule } from '@vritti/api-sdk/data-table';
 import { DatabaseModule, type DatabaseModuleOptions } from '@vritti/api-sdk/database';
@@ -108,6 +109,7 @@ import { ServicesModule } from './services/services.module';
     // Email module (global, provides EmailService)
     EmailModule,
     // Root module (health + CSRF controllers)
+    ScheduleModule.forRoot(),
     RootModule,
     // Cloud API modules
 

@@ -1,5 +1,17 @@
 import { plainToInstance, Transform } from 'class-transformer';
-import { IsBoolean, IsEmail, IsEnum, IsNumber, IsString, Max, Min, MinLength, validateSync } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsEnum,
+  IsIn,
+  IsNumber,
+  IsString,
+  Max,
+  Min,
+  MinLength,
+  ValidateIf,
+  validateSync,
+} from 'class-validator';
 
 enum Environment {
   Development = 'development',
@@ -171,24 +183,43 @@ class EnvironmentVariables {
   @IsString()
   SMS_WEBHOOK_SECRET: string;
 
-  // Cloudflare R2 (S3-compatible storage)
+  // Cloudflare R2 (S3-compatible storage) — required only while MEDIA_STORAGE_PROVIDER is 'r2'
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
   @IsString()
-  R2_ACCOUNT_ID: string;
+  R2_ACCOUNT_ID?: string;
 
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
   @IsString()
-  R2_ACCESS_KEY_ID: string;
+  R2_ACCESS_KEY_ID?: string;
 
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
   @IsString()
-  R2_SECRET_ACCESS_KEY: string;
+  R2_SECRET_ACCESS_KEY?: string;
 
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
   @IsString()
-  R2_BUCKET_NAME: string;
+  R2_BUCKET_NAME?: string;
 
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
   @IsString()
-  R2_PUBLIC_BUCKET: string;
+  R2_PUBLIC_BUCKET?: string;
 
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
   @IsString()
-  R2_PUBLIC_URL: string;
+  R2_PUBLIC_URL?: string;
+
+  // Tenant storage provisioning — creates each org's buckets and mints the credential scoped to them. Required, not
+  // optional: org creation now fails without storage, so a missing credential should stop the server at boot rather
+  // than surface as a failed signup.
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
+  @IsString()
+  R2_ADMIN_TOKEN?: string;
+
+  // Carries both API Tokens:Edit (mints each org's scoped credential) and Account Analytics:Read (reads bucket
+  // usage). Kept apart from R2_ADMIN_TOKEN, which is the only one that can delete a bucket.
+  @ValidateIf((o: EnvironmentVariables) => o.MEDIA_STORAGE_PROVIDER === 'r2')
+  @IsString()
+  CLOUDFLARE_TOKEN?: string;
 
   // Media upload
   @IsNumber()
@@ -203,7 +234,9 @@ class EnvironmentVariables {
   @Min(1)
   MEDIA_SIGNED_URL_EXPIRY: number;
 
-  @IsString()
+  // Constrained, not a free string: the storage key block above is validated by matching on this value, so a typo
+  // would match no branch and silently skip every storage key instead of failing at startup
+  @IsIn(['r2'])
   MEDIA_STORAGE_PROVIDER: string;
 
   // OAuth — Google

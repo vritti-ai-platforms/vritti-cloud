@@ -7,13 +7,19 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@vritti/quantum-ui/Badge';
 import { Button } from '@vritti/quantum-ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@vritti/quantum-ui/Card';
+import { DangerZone } from '@vritti/quantum-ui/DangerZone';
 import { type ColumnDef, DataTable, DateCell, useDataTable } from '@vritti/quantum-ui/DataTable';
-import { useSlugParams } from '@vritti/quantum-ui/hooks';
+import { useConfirm, useSlugParams } from '@vritti/quantum-ui/hooks';
 import { PageHeader } from '@vritti/quantum-ui/PageHeader';
 import type { AxiosError } from 'axios';
-import { Building2, Cloud, Factory, MapPin, RefreshCw, Server, Users } from 'lucide-react';
+import { Building2, Cloud, Factory, KeyRound, MapPin, RefreshCw, Server, Users } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { AdminOrganizationMember } from '@/schemas/admin/organizations';
-import { syncOrgFeatures } from '@/services/admin/deployments/organizations.service';
+import {
+  deleteAdminOrganization,
+  rotateOrgStorage,
+  syncOrgFeatures,
+} from '@/services/admin/deployments/organizations.service';
 
 const MEMBERS_TABLE_SLUG = 'organization-members';
 
@@ -22,10 +28,32 @@ export const OrganizationViewPage = () => {
   const { id } = useSlugParams('orgSlug');
   const queryClient = useQueryClient();
   const { data: org } = useOrganization(deploymentId, id);
+  const confirm = useConfirm();
+  const navigate = useNavigate();
 
   const syncMutation = useMutation<unknown, AxiosError>({
     mutationFn: () => syncOrgFeatures(deploymentId, id),
   });
+  const rotateStorageMutation = useMutation<unknown, AxiosError>({
+    mutationFn: () => rotateOrgStorage(deploymentId, id),
+  });
+  const deleteMutation = useMutation<unknown, AxiosError>({
+    mutationFn: () => deleteAdminOrganization(deploymentId, id),
+    onSuccess: () => navigate('..', { relative: 'path' }),
+  });
+
+  // Spelled out rather than a generic warning: this removes tenant files that cannot be recovered afterwards
+  const handleDelete = async () => {
+    const confirmed = await confirm({
+      title: `Delete ${org.name}?`,
+      description:
+        `${org.name}, all of its data, and every file it has stored will be permanently removed. ` +
+        'This cannot be undone.',
+      confirmLabel: 'Delete',
+      variant: 'destructive',
+    });
+    if (confirmed) deleteMutation.mutate();
+  };
   const { data: membersResponse, isLoading: membersLoading } = useOrganizationMembers(deploymentId, id);
 
   const { table } = useDataTable({
@@ -44,16 +72,28 @@ export const OrganizationViewPage = () => {
       <PageHeader
         title={org.name}
         actions={
-          <Button
-            variant="outline"
-            size="sm"
-            startAdornment={<RefreshCw className="size-4" />}
-            onClick={() => syncMutation.mutate()}
-            isLoading={syncMutation.isPending}
-            loadingText="Syncing..."
-          >
-            Sync Features
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              startAdornment={<RefreshCw className="size-4" />}
+              onClick={() => syncMutation.mutate()}
+              isLoading={syncMutation.isPending}
+              loadingText="Syncing..."
+            >
+              Sync Features
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              startAdornment={<KeyRound className="size-4" />}
+              onClick={() => rotateStorageMutation.mutate()}
+              isLoading={rotateStorageMutation.isPending}
+              loadingText="Rotating..."
+            >
+              Rotate Storage Key
+            </Button>
+          </div>
         }
         description={`${org.subdomain}.${org.deploymentUrl.replace(/^https?:\/\//, '')}`}
       />
@@ -156,6 +196,13 @@ export const OrganizationViewPage = () => {
           title: 'No members found',
           description: 'This organization has no members yet.',
         }}
+      />
+
+      <DangerZone
+        title="Delete this organization"
+        description="Removes the organization and every file it has stored. Its buckets and storage credential are deleted from Cloudflare. This cannot be undone."
+        buttonText="Delete Organization"
+        onClick={handleDelete}
       />
     </div>
   );

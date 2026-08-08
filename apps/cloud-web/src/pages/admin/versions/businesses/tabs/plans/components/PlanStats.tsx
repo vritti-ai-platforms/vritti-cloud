@@ -2,8 +2,8 @@ import { Card, CardContent } from '@vritti/quantum-ui/Card';
 import { BadgeDollarSign, Briefcase, Building2, Globe, HardDrive } from 'lucide-react';
 import type { Plan } from '@/schemas/admin/plans';
 
-// Renders a MiB allowance in the largest unit that stays readable
-const formatStorage = (mb: number): string => (mb >= 1024 ? `${+(mb / 1024).toFixed(1)} GB` : `${mb} MB`);
+// Decimal, matching how the limit is enforced (storageLimitMb * 1000 * 1000) and how providers bill
+const formatStorage = (mb: number): string => (mb >= 1000 ? `${+(mb / 1000).toFixed(1)} GB` : `${mb} MB`);
 
 // Stat cards — counts come from the plan API response
 export const PlanStats = ({ plan }: { plan: Plan }) => (

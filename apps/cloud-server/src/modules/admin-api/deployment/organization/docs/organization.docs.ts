@@ -38,3 +38,32 @@ export function ApiSyncOrgFeatures() {
     ApiResponse({ status: 404, description: 'Organization not found.' }),
   );
 }
+
+export function ApiRotateOrgStorage() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Rotate storage credential',
+      description:
+        "Mints a fresh key scoped to the organization's existing buckets, hands it to core, then revokes the old " +
+        'one. Object storage stays reachable throughout — nothing is revoked until the replacement is in place.',
+    }),
+    ApiParam({ name: 'id', type: String, description: 'Organization ID' }),
+    ApiResponse({ status: 200, description: 'Credential rotated.', type: SuccessResponseDto }),
+    ApiResponse({ status: 400, description: 'Organization has no provisioned storage.' }),
+    ApiResponse({ status: 404, description: 'Organization not found.' }),
+  );
+}
+
+export function ApiDeleteOrganization() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Delete an organization',
+      description:
+        'Removes the organization from core and cloud, empties and deletes its buckets, and revokes its storage ' +
+        'credential. Irreversible.',
+    }),
+    ApiParam({ name: 'id', type: String, description: 'Organization ID' }),
+    ApiResponse({ status: 200, description: 'Organization deleted.', type: SuccessResponseDto }),
+    ApiResponse({ status: 404, description: 'Organization not found.' }),
+  );
+}

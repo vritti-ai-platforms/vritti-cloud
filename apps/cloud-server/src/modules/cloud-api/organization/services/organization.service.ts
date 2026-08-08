@@ -4,8 +4,10 @@ import { CloudOrganizationMemberDomainRepository } from '@domain/cloud-organizat
 import { CountryDomainRepository } from '@domain/country/repositories/country.repository';
 import { DeploymentDomainRepository } from '@domain/deployment/repositories/deployment.repository';
 import { MediaDomainService } from '@domain/media/services/media.service';
+import { OrgStorageProvisioningService } from '@domain/media/storage/org-storage-provisioning.service';
+import { OrganizationDomainService } from '@domain/organization/services/organization.service';
 import { PlanDomainRepository } from '@domain/plan/repositories/plan.repository';
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { type SelectOptionsQueryDto, type SelectQueryResult, SuccessResponseDto } from '@vritti/api-sdk/database';
 import {
   BadRequestException,
@@ -13,10 +15,11 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@vritti/api-sdk/exceptions';
+import type { OrgStorage } from '@vritti/api-sdk/storage';
 import { plainToInstance } from 'class-transformer';
 import { validate } from 'class-validator';
 import type { FastifyRequest } from 'fastify';
-import { OrgMemberRoleValues } from '@/db/schema';
+import { type Organization, OrgMemberRoleValues } from '@/db/schema';
 import { coreBaseUrl } from '@/modules/core-server/core-url.util';
 import { CoreVersionRepository } from '@/modules/core-server/repositories/core-version.repository';
 import { CatalogSyncService } from '@/modules/core-server/services/catalog-sync.service';
@@ -47,6 +50,8 @@ export class OrganizationService {
     private readonly planRepository: PlanDomainRepository,
     private readonly businessRepository: BusinessDomainRepository,
     private readonly catalogSyncService: CatalogSyncService,
+    private readonly organizationDomainService: OrganizationDomainService,
+    private readonly orgStorageProvisioningService: OrgStorageProvisioningService,
   ) {}
 
   // Checks if a subdomain is available; throws ConflictException if already taken
@@ -114,6 +119,12 @@ export class OrganizationService {
       const url = await this.mediaService.uploadPublic(file, key);
       logoUrl = `${url}?v=${Date.now()}`;
     }
+    // Provision the org's storage before core exists — bucket names come from the subdomain, which is already known,
+    // so this rides the create payload instead of needing a write-back. Fatal by design: an org with no buckets and
+    // no credential cannot accept a single upload, and running before both inserts means a failure leaves nothing
+    // half-created. Provisioning errors propagate as-is, carrying Cloudflare's own code and message.
+    const storage: OrgStorage = await this.orgStorageProvisioningService.provisionOrg(dto.subdomain);
+
     // Create the organization in core-server first to get the nexus org ID
     const nexusOrg: { id: string } = await this.coreOrganizationService.createOrganization(
       coreBaseUrl(deployment),
@@ -123,6 +134,7 @@ export class OrganizationService {
         subdomain: dto.subdomain,
         size: dto.size,
         logoUrl,
+        storage,
       },
     );
 
@@ -144,6 +156,8 @@ export class OrganizationService {
         businessCode: business.code,
         taxIdCountry,
         orgIdentifier: nexusOrg.id,
+        // Kept cloud-side too: the quota sweep and usage display measure these without having to ask core
+        storage: { bucket: storage.bucket, publicBucket: storage.publicBucket, accessKeyId: storage.accessKeyId },
       });
       await this.orgMemberRepository.create({
         organizationId: createdOrg.id,
@@ -251,22 +265,9 @@ export class OrganizationService {
     const member = await this.orgMemberRepository.findByOrgAndUser(orgId, userId);
     if (!member) throw new ForbiddenException('You do not have access to this organization.');
 
-    // Delete from core-server first
-    if (org.orgIdentifier) {
-      const deployment = await this.deploymentRepository.findById(org.deploymentId);
-      if (deployment) {
-        await this.coreOrganizationService.deleteOrganization(
-          coreBaseUrl(deployment),
-          requireSigningKey(deployment),
-          org.orgIdentifier,
-        );
-      }
-    }
-
-    await this.orgRepository.delete(orgId);
-
-    this.logger.log(`Deleted organization: ${org.subdomain} (${orgId}) by user: ${userId}`);
-    return { success: true, message: 'Organization deleted successfully.' };
+    // Membership is the only thing this layer adds — the teardown itself is shared with the admin path, which is
+    // authorized differently and must not diverge in what it removes
+    return this.organizationDomainService.deleteOrganization(orgId);
   }
 
   // Updates an organization's details (name, size) and optionally replaces the logo

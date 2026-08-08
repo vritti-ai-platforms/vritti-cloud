@@ -24,6 +24,16 @@ export function syncOrgFeatures(deploymentId: string, orgId: string): Promise<vo
   return axios.post(`${base(deploymentId)}/${orgId}/sync-features`).then(() => undefined);
 }
 
+// Replaces the org's storage credential; its buckets and their contents are untouched
+export function rotateOrgStorage(deploymentId: string, orgId: string): Promise<void> {
+  return axios.post(`${base(deploymentId)}/${orgId}/rotate-storage`).then(() => undefined);
+}
+
+// Removes the org from core and cloud, deletes its buckets, and revokes its storage credential
+export function deleteAdminOrganization(deploymentId: string, orgId: string): Promise<void> {
+  return axios.delete(`${base(deploymentId)}/${orgId}`).then(() => undefined);
+}
+
 // Fetches organization members for the data table — server applies filter/sort state
 export function getOrganizationMembers(deploymentId: string, id: string): Promise<OrganizationMembersResponse> {
   return axios.get<OrganizationMembersResponse>(`${base(deploymentId)}/${id}/members`).then((r) => r.data);

@@ -4,6 +4,7 @@ import type { Readable } from 'node:stream';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { BadRequestException, NotFoundException } from '@vritti/api-sdk/exceptions';
+import { StorageFactory } from '@vritti/api-sdk/storage';
 import type { FastifyRequest } from 'fastify';
 import { type Media, MediaStatusValues } from '@/db/schema';
 import { MediaDto } from '@/modules/cloud-api/media/dto/entity/media.dto';
@@ -12,7 +13,6 @@ import type { UploadQueryDto } from '@/modules/cloud-api/media/dto/request/uploa
 import type { BatchUploadResponseDto } from '@/modules/cloud-api/media/dto/response/batch-upload-response.dto';
 import type { PresignedUrlResponseDto } from '@/modules/cloud-api/media/dto/response/presigned-url-response.dto';
 import { MediaDomainRepository } from '../repositories/media.repository';
-import { StorageFactory } from '../storage/storage.factory';
 
 const DEFAULT_ALLOWED_MIME_TYPES = [
   'image/jpeg',
@@ -38,22 +38,28 @@ interface FilePayload {
 @Injectable()
 export class MediaDomainService {
   private readonly logger = new Logger(MediaDomainService.name);
-  private readonly defaultBucket: string;
   private readonly maxFileSize: number;
   private readonly maxBatchSize: number;
   private readonly signedUrlExpiry: number;
   private readonly defaultProvider: string;
+  private cachedDefaultBucket: string | null = null;
 
   constructor(
     private readonly mediaRepository: MediaDomainRepository,
     private readonly storageFactory: StorageFactory,
     private readonly configService: ConfigService,
   ) {
-    this.defaultBucket = this.configService.getOrThrow<string>('R2_BUCKET_NAME');
     this.maxFileSize = this.configService.getOrThrow<number>('MEDIA_MAX_FILE_SIZE_MB') * 1024 * 1024;
     this.maxBatchSize = this.configService.getOrThrow<number>('MEDIA_MAX_BATCH_SIZE');
     this.signedUrlExpiry = this.configService.getOrThrow<number>('MEDIA_SIGNED_URL_EXPIRY');
     this.defaultProvider = this.configService.getOrThrow<string>('MEDIA_STORAGE_PROVIDER');
+  }
+
+  // R2_BUCKET_NAME is only required while R2 is the selected provider, so it is read on first use rather than in the
+  // constructor — otherwise a deployment backed by another provider would fail to boot on a key it never needs
+  private get defaultBucket(): string {
+    this.cachedDefaultBucket ??= this.configService.getOrThrow<string>('R2_BUCKET_NAME');
+    return this.cachedDefaultBucket;
   }
 
   // Uploads a file to the public bucket and returns the permanent public URL

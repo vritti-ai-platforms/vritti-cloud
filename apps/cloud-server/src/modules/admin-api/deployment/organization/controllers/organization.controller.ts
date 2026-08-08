@@ -1,10 +1,16 @@
 import { OrganizationDomainService } from '@domain/organization/services/organization.service';
-import { Controller, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
+import { Controller, Delete, Get, HttpCode, HttpStatus, Logger, Param, Post } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { RequireSession, UserId } from '@vritti/api-sdk/auth';
 import type { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { SessionTypeValues } from '@/db/schema';
-import { ApiFindForTableOrganizations, ApiFindOrganizationById, ApiSyncOrgFeatures } from '../docs/organization.docs';
+import {
+  ApiDeleteOrganization,
+  ApiFindForTableOrganizations,
+  ApiFindOrganizationById,
+  ApiRotateOrgStorage,
+  ApiSyncOrgFeatures,
+} from '../docs/organization.docs';
 import { OrganizationDetailDto } from '../dto/entity/organization-detail.dto';
 import { OrganizationTableResponseDto } from '../dto/response/organizations-response.dto';
 
@@ -43,5 +49,24 @@ export class OrganizationController {
   syncFeatures(@Param('id') id: string): Promise<SuccessResponseDto> {
     this.logger.log(`POST /admin-api/organizations/${id}/sync-features`);
     return this.organizationService.syncFeatures(id);
+  }
+
+  // Replaces this org's storage credential, leaving its buckets and their contents untouched
+  @Post(':id/rotate-storage')
+  @HttpCode(HttpStatus.OK)
+  @ApiRotateOrgStorage()
+  rotateStorage(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`POST /admin-api/organizations/${id}/rotate-storage`);
+    return this.organizationService.rotateStorageCredential(id);
+  }
+
+  // Removes the org everywhere — core rows, cloud row, buckets and credential. No membership check: this is the
+  // operator path, whereas the member-facing delete requires belonging to the org.
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  @ApiDeleteOrganization()
+  delete(@Param('id') id: string): Promise<SuccessResponseDto> {
+    this.logger.log(`DELETE /admin-api/organizations/${id}`);
+    return this.organizationService.deleteOrganization(id);
   }
 }

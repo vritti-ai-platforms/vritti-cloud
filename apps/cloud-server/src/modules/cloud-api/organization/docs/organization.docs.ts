@@ -4,6 +4,7 @@ import { SuccessResponseDto } from '@vritti/api-sdk/database';
 import { OrgListItemDto } from '../dto/entity/organization.dto';
 import { ValidateTaxIdDto } from '../dto/request/validate-tax-id.dto';
 import { CreateOrganizationResponseDto } from '../dto/response/create-organization-response.dto';
+import { OrgStorageUsageResponseDto } from '../dto/response/org-storage-usage-response.dto';
 import { PaginatedOrgsResponseDto } from '../dto/response/paginated-orgs-response.dto';
 import { SubdomainAvailabilityResponseDto } from '../dto/response/subdomain-availability-response.dto';
 import { TaxIdValidationResponseDto } from '../dto/response/tax-id-validation-response.dto';
@@ -89,6 +90,19 @@ export function ApiGetOrganization() {
     ApiResponse({ status: 200, description: 'Organization details retrieved.', type: OrgListItemDto }),
     ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 403, description: 'User does not have access to this organization.' }),
+    ApiResponse({ status: 404, description: 'Organization not found.' }),
+  );
+}
+
+export function ApiGetOrganizationStorage() {
+  return applyDecorators(
+    ApiOperation({
+      summary: 'Get live storage usage',
+      description: 'Reads the org’s bucket usage from the storage provider on request — no cached figure.',
+    }),
+    ApiParam({ name: 'id', type: String, description: 'Organization ID' }),
+    ApiResponse({ status: 200, description: 'Storage usage retrieved.', type: OrgStorageUsageResponseDto }),
+    ApiResponse({ status: 401, description: 'Unauthorized.' }),
     ApiResponse({ status: 404, description: 'Organization not found.' }),
   );
 }

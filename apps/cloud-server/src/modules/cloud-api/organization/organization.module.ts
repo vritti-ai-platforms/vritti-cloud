@@ -3,6 +3,7 @@ import { CloudOrganizationDomainModule } from '@domain/cloud-organization/cloud-
 import { CountryDomainModule } from '@domain/country/country.module';
 import { DeploymentDomainModule } from '@domain/deployment/deployment.module';
 import { MediaDomainModule } from '@domain/media/media.module';
+import { OrganizationDomainModule } from '@domain/organization/organization.module';
 import { PlanDomainModule } from '@domain/plan/plan.module';
 import { VersionDomainModule } from '@domain/version/version.module';
 import { Module } from '@nestjs/common';
@@ -36,6 +37,7 @@ import { OrganizationUsersService } from './services/organization-users.service'
     PlanDomainModule,
     MediaDomainModule,
     CloudOrganizationDomainModule,
+    OrganizationDomainModule,
     CountryDomainModule,
     BusinessDomainModule,
   ],

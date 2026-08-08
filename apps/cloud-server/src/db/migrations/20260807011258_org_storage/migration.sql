@@ -1,0 +1,1 @@
+ALTER TABLE "cloud"."organizations" ADD COLUMN "storage" jsonb;
